@@ -8,8 +8,8 @@ namespace mjolnir
 template<typename T>
 struct scalar_type_of{};
 
-template<typename T>
-struct scalar_type_of<std::array<T>> {typedef T type;};
+template<typename T, std::size_t N>
+struct scalar_type_of<std::array<T, N>> {typedef T type;};
 
 template<typename T, std::size_t N>
 struct scalar_type_of<T[N]> {typedef T type;};
