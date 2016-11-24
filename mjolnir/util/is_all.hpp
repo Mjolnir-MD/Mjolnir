@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_IS_ALL
 #define MJOLNIR_IS_ALL
+#include <type_traits>
 
 namespace mjolnir
 {
