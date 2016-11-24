@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_VECTOR
 #define MJOLNIR_VECTOR
 #include "Matrix.hpp"
-#include <mjolnir/detail/scalar_type_of.hpp>
+#include <mjolnir/util/scalar_type_of.hpp>
 #include <boost/math/quaternion.hpp>
 #include <cmath>
 
