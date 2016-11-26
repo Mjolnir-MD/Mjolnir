@@ -3,6 +3,7 @@
 #include "Particle.hpp"
 #include "LocalPotentialBase.hpp"
 #include <mjolnir/math/fast_inv_sqrt.hpp>
+#include <cmath>
 
 namespace mjolnir
 {
@@ -38,9 +39,10 @@ inline void
 BondLengthInteraction<traitsT>::calc_force(particle_type& p1, particle_type& p2,
         const potential_type& pot)
 {
-    const real_type f = -1 * pot.derivative(length(p1.position - p2.position));
     const coordinate_type dpos = p2.position - p1.position;
-    const coordinate_type force = dpos * (fast_inv_sqrt(length_sq(dpos)) * f);
+    const real_type lensq = length_sq(dpos);
+    const real_type f = -1 * pot.derivative(std::sqrt(lensq));
+    const coordinate_type force = dpos * (fast_inv_sqrt(lensq) * f);
     p1.force -= force;
     p2.force += force;
     return;
