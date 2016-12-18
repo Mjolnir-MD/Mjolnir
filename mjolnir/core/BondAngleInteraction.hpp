@@ -29,8 +29,8 @@ class BondAngleInteraction
                const potential_type& pot) const;
 
     real_type
-    calc_energy(particle_type& p1, particle_type& p2, particle_type& p3,
-                const potential_type& pot) const;
+    calc_energy(const particle_type& p1, const particle_type& p2,
+                const particle_type& p3, const potential_type& pot) const;
 };
 
 // \frac{\partial\theta}{\partial\r_pre} 
@@ -40,8 +40,8 @@ class BondAngleInteraction
 template<typename traitsT>
 void
 BondAngleInteraction<traitsT>::calc_force(
-        particle_type& p1, particle_type& p2, particle_type& p3,
-        const potential_type& pot) const
+    particle_type& p1, particle_type& p2, particle_type& p3,
+    const potential_type& pot) const
 {
     const coordinate_type r_ij         = p1.position - p2.position;
     const real_type       inv_len_r_ij = fast_inv_square(length_sq(r_ij));
@@ -78,8 +78,8 @@ BondAngleInteraction<traitsT>::calc_force(
 template<typename traitsT>
 typename BondAngleInteraction<traitsT>::real_type
 BondAngleInteraction<traitsT>::calc_energy(
-        particle_type& p1, particle_type& p2, particle_type& p3,
-        const potential_type& pot) const
+    const particle_type& p1, const particle_type& p2, const particle_type& p3,
+    const potential_type& pot) const
 {
     const coordinate_type v_2to1 = p1.position - p2.position;
     const coordinate_type v_2to3 = p3.position - p2.position;
