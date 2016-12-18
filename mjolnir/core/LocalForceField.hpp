@@ -3,6 +3,7 @@
 #include "BondLengthInteraction.hpp"
 #include "BondAngleInteraction.hpp"
 #include "DihedralAngleInteraction.hpp"
+#include "LocalPotentialBase.hpp"
 #include "ParticleContainer.hpp"
 #include <utility>
 #include <vector>
@@ -36,7 +37,7 @@ class LocalForceField
     LocalForceField() = default;
     ~LocalForceField() = default;
 
-    void      calc_force(const particle_container_type& pcon);
+    void      calc_force(particle_container_type& pcon);
     real_type calc_energy(const particle_container_type& pcon);
 
   private:
@@ -50,17 +51,20 @@ class LocalForceField
 };
 
 template<typename traitsT>
-void LocalForceField<traitsT>::calc_force(const particle_container_type& pcon)
+void LocalForceField<traitsT>::calc_force(particle_container_type& pcon)
 {
-    for(auto iter = bond_potentials.cbegin(); iter != bond_potentials.cend(); ++iter)
+    for(auto iter = bond_potentials.cbegin();
+            iter != bond_potentials.cend(); ++iter)
         bond.calc_force(pcon.at(iter->first[0]), pcon.at(iter->first[1]),
                         *(iter->second));
 
-    for(auto iter = angle_potentials.cbegin(); iter != angle_potentials.cend(); ++iter)
+    for(auto iter = angle_potentials.cbegin();
+            iter != angle_potentials.cend(); ++iter)
         angle.calc_force(pcon.at(iter->first[0]), pcon.at(iter->first[1]),
                          pcon.at(iter->first[2]), *(iter->second));
 
-    for(auto iter = dihd_potentials.cbegin(); iter != dihd_potentials.cend(); ++iter)
+    for(auto iter = dihd_potentials.cbegin();
+            iter != dihd_potentials.cend(); ++iter)
         dihd.calc_force(pcon.at(iter->first[0]), pcon.at(iter->first[1]),
                         pcon.at(iter->first[2]), pcon.at(iter->first[3]),
                         *(iter->second));
@@ -73,19 +77,25 @@ typename LocalForceField<traitsT>::real_type
 LocalForceField<traitsT>::calc_energy(const particle_container_type& pcon)
 {
     real_type energy = 0.0;
-    for(auto iter = bond_potentials.cbegin(); iter != bond_potentials.cend(); ++iter)
-        energy += bond.calc_energy(pcon.at(iter->first[0]), pcon.at(iter->first[1]),
-                                   *(iter->second));
 
-    for(auto iter = angle_potentials.cbegin(); iter != angle_potentials.cend(); ++iter)
-        energy += angle.calc_energy(pcon.at(iter->first[0]), pcon.at(iter->first[1]),
-                                    pcon.at(iter->first[2]), *(iter->second));
+    for(auto iter = bond_potentials.cbegin();
+            iter != bond_potentials.cend(); ++iter)
+        energy += bond.calc_energy(
+                pcon.at(iter->first[0]), pcon.at(iter->first[1]),
+                *(iter->second));
 
-    for(auto iter = dihd_potentials.cbegin(); iter != dihd_potentials.cend(); ++iter)
-        energy += dihd.calc_energy(pcon.at(iter->first[0]), pcon.at(iter->first[1]),
-                                   pcon.at(iter->first[2]), pcon.at(iter->first[3]),
-                                   *(iter->second));
+    for(auto iter = angle_potentials.cbegin();
+            iter != angle_potentials.cend(); ++iter)
+        energy += angle.calc_energy(
+                pcon.at(iter->first[0]), pcon.at(iter->first[1]),
+                pcon.at(iter->first[2]), *(iter->second));
 
+    for(auto iter = dihd_potentials.cbegin();
+            iter != dihd_potentials.cend(); ++iter)
+        energy += dihd.calc_energy(
+                pcon.at(iter->first[0]), pcon.at(iter->first[1]),
+                pcon.at(iter->first[2]), pcon.at(iter->first[3]),
+                *(iter->second));
     return energy;
 }
 
