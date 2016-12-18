@@ -46,13 +46,14 @@ VelocityVerlet<traitsT>::step(const time_type time,
         get<0>(iter)->velocity += halfdt_ * (*get<1>(iter));
     }
 
-    // calc force(t+dt)
-    ff(pcon);
+    // calc f(t+dt)
+    ff.calc_force(pcon);
 
     // calc a(t+dt) and v(t+dt)
     for(auto iter = make_zip(pcon.begin(), acceleration_.begin());
             iter != make_zip(pcon.end(), acceleration_.end()); ++iter)
     {
+        // consider cash 1/m
         const coordinate_type acc = *get<0>(iter)->force / *get<0>(iter)->mass;
         *get<1>(iter) = acc;
         get<0>(iter)->velocity += halfdt_ * acc;
