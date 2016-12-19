@@ -1,8 +1,7 @@
 #ifndef MJOLNIR_GLOBAL_FORCE_FIELD
 #define MJOLNIR_GLOBAL_FORCE_FIELD
-#include "PotentialBase.hpp"
-#include "LengthInteraction.hpp"
-#include <utility>
+#include "GlobalDistanceInteraction.hpp"
+#include "GlobalPotentialBase.hpp"
 #include <vector>
 #include <array>
 #include <memory>
@@ -18,43 +17,42 @@ class GlobalForceField
     typedef typename traits_type::time_type time_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
-    typedef PotentialBase<traitsT, 2> potential_type;
-    typedef LengthInteraction<traitsT> length_interaction_type;
+    typedef GlobalPotentialBase<traitsT> potential_type;
     typedef std::unique_ptr<potential_type> potential_ptr;
+    typedef GlobalDistanceInteraction<traitsT> distance_interaction_type;
 
   public:
     GlobalForceField() = default;
     ~GlobalForceField() = default;
 
-    void emplace(std::size_t i, std::size_t j, potential_ptr&& pot)
+    void emplace(potential_ptr&& pot)
     {
-        potentials_.emplace_back({{i, j}}, std::forward(pot));
+        potentials_.emplace_back(std::forward(pot));
     }
 
-    void calc_force(ParticleContainer& pcon);
-    real_type calc_force(const ParticleContainer& pcon);
+    void calc_force(ParticleContainer<traitsT>& pcon);
+    real_type calc_force(const ParticleContainer<traitsT>& pcon);
 
   private:
-    length_interaction_type length_interaction_;
-    std::vector<std::pair<std::array<std::size_t, 2>, potential_ptr>> potentials_;
+    distance_interaction_type distance_interaction_;
+    std::vector<potential_ptr> potentials_;
 };
 
 template<typename traitsT>
-void GlobalForceField<traitsT>::calc_force(ParticleContainer& pcon)
+void GlobalForceField<traitsT>::calc_force(ParticleContainer<traitsT>& pcon)
 {
     for(auto iter = potentials_.cbegin(); iter != potentials_.cend(); ++iter)
-        length_interaction.calc_force(
-            pcon.at(iter->first[0]), pcon.at(iter->first[1]), *iter->second);
+        distance_interaction_.calc_force(pcon, *iter);
     return;
 }
 
 template<typename traitsT>
-real_type GlobalForceField<traitsT>::calc_force(const ParticleContainer& pcon)
+typename GlobalForceField<traitsT>::real_type
+GlobalForceField<traitsT>::calc_force(const ParticleContainer<traitsT>& pcon)
 {
     real_type energy = 0.;
     for(auto iter = potentials_.cbegin(); iter != potentials_.cend(); ++iter)
-        energy += length_interaction.calc_energy(
-            pcon.at(iter->first[0]), pcon.at(iter->first[1]), *iter->second);
+        energy += distance_interaction_.calc_energy(pcon, *iter);
     return energy;
 }
 
