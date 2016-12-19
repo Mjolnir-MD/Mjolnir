@@ -1,10 +1,11 @@
 #ifndef MJOLNIR_GLOBAL_POTENTIAL_BASE
 #define MJOLNIR_GLOBAL_POTENTIAL_BASE
+#include "ParticleContainer.hpp"
 
 namespace mjolnir
 {
 
-template<typename traitsT, typename valueT>
+template<typename traitsT>
 class GlobalPotentialBase
 {
   public:
@@ -13,10 +14,11 @@ class GlobalPotentialBase
 
     virtual ~GlobalPotentialBase(){};
 
-    virtual real_type
-    potential(const valueT val1, const valueT va2, const real_type dist) = 0;
-    virtual real_type
-    derivative(const valueT val1, const valueT va2, const real_type dist) = 0;
+    real_type
+    potential(const std::size_t i, const std::size_t j, const real_type r) = 0;
+    real_type
+    derivative(const std::size_t i, const std::size_t j, const real_type r) = 0;
+
 };
 
 
