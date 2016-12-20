@@ -2,6 +2,8 @@
 #define MJOLNIR_VELOCITY_VERLET_INTEGRATOR
 #include "ParticleContainer.hpp"
 #include "ForceField.hpp"
+#include <mjolnir/util/zip_iterator.hpp>
+#include <mjolnir/util/make_zip.hpp>
 
 namespace mjolnir
 {
@@ -22,7 +24,8 @@ class VelocityVerlet
     {}
     ~VelocityVerlet() = default;
 
-    time_type step(ParticleContainer<traitsT>& pcon, ForceField<traitsT>& ff);
+    time_type step(const time_type time, ParticleContainer<traitsT>& pcon,
+                   ForceField<traitsT>& ff);
 
   private:
     time_type dt_;      //!< dt
@@ -59,7 +62,7 @@ VelocityVerlet<traitsT>::step(const time_type time,
         get<0>(iter)->velocity += halfdt_ * acc;
     }
 
-    return time + dt;
+    return time + dt_;
 }
 
 
