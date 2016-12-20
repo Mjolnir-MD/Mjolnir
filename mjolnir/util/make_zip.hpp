@@ -1,8 +1,9 @@
-#ifndef AMIME_MAKE_ZIP_ITERATOR
-#define AMIME_MAKE_ZIP_ITERATOR
-#include <amime/util/zip_iterator.hpp>
+#ifndef MJOLNIR_MAKE_ZIP_ITERATOR
+#define MJOLNIR_MAKE_ZIP_ITERATOR
+#include "zip_iterator.hpp"
+#include <iterator>
 
-namespace amime
+namespace mjolnir
 {
 
 template<typename ... T_args>
@@ -35,5 +36,5 @@ inline zip_iterator<T_args...> make_zip_end(T_args& ... args)
     return zip_iterator<T_args...>(std::end(args)...);
 }
 
-}// amime
-#endif /* AMIME_MAKE_ZIP_ITERATOR */
+}// mjolnir
+#endif /* MJOLNIR_MAKE_ZIP_ITERATOR */
