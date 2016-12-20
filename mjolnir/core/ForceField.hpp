@@ -36,7 +36,7 @@ class ForceField
   private:
 
     LocalForceField<traits_type>  local_;
-    GlocalForceField<traits_type> global_;
+    GlobalForceField<traits_type> global_;
 };
 
 template<typename traitsT>
@@ -49,7 +49,7 @@ inline void ForceField<traitsT>::calc_force(ParticleContainer<traitsT>& pcon)
 
 template<typename traitsT>
 inline typename ForceField<traitsT>::energy_type
-ForceField<traitsT>::calc_force(const ParticleContainer<traitsT>& pcon)
+ForceField<traitsT>::calc_energy(const ParticleContainer<traitsT>& pcon)
 {
     return this->local_.calc_energy(pcon) + this->global_.calc_energy(pcon);
 }
