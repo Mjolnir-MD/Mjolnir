@@ -5,7 +5,6 @@
 #include <vector>
 #include <array>
 #include <memory>
-#include <iostream>
 
 namespace mjolnir
 {
