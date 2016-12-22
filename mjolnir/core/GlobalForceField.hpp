@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <memory>
+#include <iostream>
 
 namespace mjolnir
 {
@@ -35,7 +36,7 @@ class GlobalForceField
     }
 
     void calc_force(ParticleContainer<traitsT>& pcon);
-    real_type calc_force(const ParticleContainer<traitsT>& pcon);
+    real_type calc_energy(const ParticleContainer<traitsT>& pcon) const;
 
   private:
     distance_interaction_type distance_interaction_;
@@ -52,11 +53,14 @@ void GlobalForceField<traitsT>::calc_force(ParticleContainer<traitsT>& pcon)
 
 template<typename traitsT>
 typename GlobalForceField<traitsT>::real_type
-GlobalForceField<traitsT>::calc_force(const ParticleContainer<traitsT>& pcon)
+GlobalForceField<traitsT>::calc_energy(
+        const ParticleContainer<traitsT>& pcon) const
 {
     real_type energy = 0.;
     for(auto iter = potentials_.cbegin(); iter != potentials_.cend(); ++iter)
+    {
         energy += distance_interaction_.calc_energy(pcon, **iter);
+    }
     return energy;
 }
 

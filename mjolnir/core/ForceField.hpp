@@ -31,7 +31,7 @@ class ForceField
     ForceField& operator=(ForceField&&)      = default;
 
     void        calc_force(ParticleContainer<traitsT>& pcon);
-    energy_type calc_energy(const ParticleContainer<traitsT>& pcon);
+    energy_type calc_energy(const ParticleContainer<traitsT>& pcon) const;
 
   private:
 
@@ -49,7 +49,7 @@ inline void ForceField<traitsT>::calc_force(ParticleContainer<traitsT>& pcon)
 
 template<typename traitsT>
 inline typename ForceField<traitsT>::energy_type
-ForceField<traitsT>::calc_energy(const ParticleContainer<traitsT>& pcon)
+ForceField<traitsT>::calc_energy(const ParticleContainer<traitsT>& pcon) const
 {
     return this->local_.calc_energy(pcon) + this->global_.calc_energy(pcon);
 }

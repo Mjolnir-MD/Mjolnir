@@ -31,7 +31,7 @@ class BondLengthInteraction
 
     real_type
     calc_energy(const particle_type& p1, const particle_type& p2,
-                const potential_type& pot);
+                const potential_type& pot) const;
 };
 
 template<typename traitsT>
@@ -52,7 +52,7 @@ template<typename traitsT>
 inline typename BondLengthInteraction<traitsT>::real_type
 BondLengthInteraction<traitsT>::calc_energy(
         const particle_type& p1, const particle_type& p2,
-        const potential_type& pot)
+        const potential_type& pot) const
 {
     return pot.potential(length(p1.position - p2.position));
 }

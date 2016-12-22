@@ -45,7 +45,7 @@ class LocalForceField
             potential_ptr&& pot);
 
     void      calc_force(particle_container_type& pcon);
-    real_type calc_energy(const particle_container_type& pcon);
+    real_type calc_energy(const particle_container_type& pcon) const;
 
   private:
 
@@ -154,7 +154,7 @@ void LocalForceField<traitsT>::calc_force(particle_container_type& pcon)
 
 template<typename traitsT>
 typename LocalForceField<traitsT>::real_type
-LocalForceField<traitsT>::calc_energy(const particle_container_type& pcon)
+LocalForceField<traitsT>::calc_energy(const particle_container_type& pcon) const
 {
     real_type energy = 0.0;
 
@@ -173,7 +173,7 @@ LocalForceField<traitsT>::calc_energy(const particle_container_type& pcon)
             iter != dihd_potentials.cend(); ++iter)
         energy += dihd.calc_energy(
                 pcon.at(iter->i), pcon.at(iter->j), pcon.at(iter->k),
-                pcon.at(iter->l), *(iter->second));
+                pcon.at(iter->l), *(iter->pot));
     return energy;
 }
 
