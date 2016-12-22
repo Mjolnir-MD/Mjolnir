@@ -25,11 +25,22 @@ class LennardJonesPotential: public GlobalPotentialBase<traitsT>
     LennardJonesPotential() = default;
     ~LennardJonesPotential() = default;
 
+    void emplace(const parameter_type& radius);
+    void emplace(parameter_type&& radius);
+
+    void set_radii(const std::vector<parameter_type>& radii);
+    void set_radii(std::vector<parameter_type>&& radii);
+
+    parameter_type&       operator[](const std::size_t i)       {return radii_[i];}
+    parameter_type const& operator[](const std::size_t i) const {return radii_[i];}
+    parameter_type&       at(const std::size_t i)       {return radii_.at(i);}
+    parameter_type const& at(const std::size_t i) const {return radii_.at(i);}
+
     real_type potential(const std::size_t i, const std::size_t j,
-                        const real_type r) const override;
+                        const real_type r) override;
 
     real_type derivative(const std::size_t i, const std::size_t j,
-                         const real_type r) const override;
+                         const real_type r) override;
 
   private:
 
@@ -39,7 +50,7 @@ class LennardJonesPotential: public GlobalPotentialBase<traitsT>
 template<typename traitsT>
 inline typename LennardJonesPotential<traitsT>::real_type
 LennardJonesPotential<traitsT>::potential(
-        const std::size_t i, const std::size_t j, const real_type r) const
+        const std::size_t i, const std::size_t j, const real_type r)
 {
     const real_type r_sq   = r * r;
     const real_type sigma  = 0.5 * (radii_[i].first + radii_[j].first);
@@ -53,7 +64,7 @@ LennardJonesPotential<traitsT>::potential(
 template<typename traitsT>
 inline typename LennardJonesPotential<traitsT>::real_type
 LennardJonesPotential<traitsT>::derivative(
-        const std::size_t i, const std::size_t j, const real_type r) const
+        const std::size_t i, const std::size_t j, const real_type r)
 {
     const real_type r_sq   = r * r;
     const real_type r_inv  = 1. / r;
