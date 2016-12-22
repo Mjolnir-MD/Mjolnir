@@ -14,10 +14,10 @@ class GlobalPotentialBase
 
     virtual ~GlobalPotentialBase(){};
 
-    virtual real_type
-    potential(const std::size_t i, const std::size_t j, const real_type r) = 0;
-    virtual real_type
-    derivative(const std::size_t i, const std::size_t j, const real_type r) = 0;
+    virtual real_type potential(
+        const std::size_t i, const std::size_t j, const real_type r) const = 0;
+    virtual real_type derivative(
+        const std::size_t i, const std::size_t j, const real_type r) const = 0;
 
 };
 
