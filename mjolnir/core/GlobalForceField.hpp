@@ -24,10 +24,14 @@ class GlobalForceField
   public:
     GlobalForceField() = default;
     ~GlobalForceField() = default;
+    GlobalForceField(const GlobalForceField&) = delete;
+    GlobalForceField(GlobalForceField&&) = default;
+    GlobalForceField& operator=(const GlobalForceField&) = delete;
+    GlobalForceField& operator=(GlobalForceField&&) = default;
 
     void emplace(potential_ptr&& pot)
     {
-        potentials_.emplace_back(std::forward(pot));
+        potentials_.emplace_back(std::forward<potential_ptr>(pot));
     }
 
     void calc_force(ParticleContainer<traitsT>& pcon);
@@ -41,8 +45,8 @@ class GlobalForceField
 template<typename traitsT>
 void GlobalForceField<traitsT>::calc_force(ParticleContainer<traitsT>& pcon)
 {
-    for(auto iter = potentials_.cbegin(); iter != potentials_.cend(); ++iter)
-        distance_interaction_.calc_force(pcon, *iter);
+    for(auto iter = potentials_.begin(); iter != potentials_.end(); ++iter)
+        distance_interaction_.calc_force(pcon, **iter);
     return;
 }
 
@@ -52,7 +56,7 @@ GlobalForceField<traitsT>::calc_force(const ParticleContainer<traitsT>& pcon)
 {
     real_type energy = 0.;
     for(auto iter = potentials_.cbegin(); iter != potentials_.cend(); ++iter)
-        energy += distance_interaction_.calc_energy(pcon, *iter);
+        energy += distance_interaction_.calc_energy(pcon, **iter);
     return energy;
 }
 

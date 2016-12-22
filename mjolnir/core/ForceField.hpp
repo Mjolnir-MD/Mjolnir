@@ -18,17 +18,17 @@ class ForceField
 
   public:
 
-    ForceField(const LocalForceField<traitsT>& local, 
-               const GlobalForceField<traitsT>& global)
-    : local_(local), global_(global)
-    {}
-
     ForceField(LocalForceField<traitsT>&& local,
                GlobalForceField<traitsT>&& global)
-    : local_(std::forward(local)), global_(std::forward(global))
+    : local_(std::forward<LocalForceField<traitsT>>(local)),
+      global_(std::forward<GlobalForceField<traitsT>>(global))
     {}
-
     ~ForceField() = default;
+
+    ForceField(const ForceField&) = delete;
+    ForceField(ForceField&&)      = default;
+    ForceField& operator=(const ForceField&) = delete;
+    ForceField& operator=(ForceField&&)      = default;
 
     void        calc_force(ParticleContainer<traitsT>& pcon);
     energy_type calc_energy(const ParticleContainer<traitsT>& pcon);
