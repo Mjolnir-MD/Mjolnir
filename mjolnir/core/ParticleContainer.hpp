@@ -23,6 +23,8 @@ class ParticleContainer
     {}
     ~ParticleContainer() = default;
 
+    std::size_t size() const {return particles_.size();}
+
     particle_type &      operator[](std::size_t i)       {return particles_[i];}
     particle_type const& operator[](std::size_t i) const {return particles_[i];}
     particle_type &      at(std::size_t i)       {return particles_.at(i);}
