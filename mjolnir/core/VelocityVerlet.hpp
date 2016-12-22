@@ -59,6 +59,7 @@ VelocityVerlet<traitsT>::step(const time_type time,
         const coordinate_type acc = get<0>(iter)->force / (get<0>(iter)->mass);
         *get<1>(iter) = acc;
         get<0>(iter)->velocity += halfdt_ * acc;
+        get<0>(iter)->force = coordinate_type(0., 0., 0.);
     }
 
     return time + dt_;
