@@ -44,11 +44,11 @@ BondAngleInteraction<traitsT>::calc_force(
     const potential_type& pot) const
 {
     const coordinate_type r_ij         = p1.position - p2.position;
-    const real_type       inv_len_r_ij = fast_inv_square(length_sq(r_ij));
+    const real_type       inv_len_r_ij = fast_inv_sqrt(length_sq(r_ij));
     const coordinate_type r_ij_reg     = r_ij * inv_len_r_ij;
 
     const coordinate_type r_kj         = p3.position - p2.position;
-    const real_type       inv_len_r_kj = fast_inv_square(length_sq(r_kj));
+    const real_type       inv_len_r_kj = fast_inv_sqrt(length_sq(r_kj));
     const coordinate_type r_kj_reg     = r_kj * inv_len_r_kj;
 
     const real_type dot_ijk = dot_product(r_ij_reg, r_kj_reg);
