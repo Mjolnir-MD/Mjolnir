@@ -84,9 +84,9 @@ BondAngleInteraction<traitsT>::calc_energy(
     const coordinate_type v_2to1 = p1.position - p2.position;
     const coordinate_type v_2to3 = p3.position - p2.position;
 
-    const real_type lensq_v21 = len_square(v_2to1);
-    const real_type lensq_v23 = len_square(v_2to3);
-    const real_type dot_v21_v23 = dot_prod(v_2to1, v_2to3);
+    const real_type lensq_v21 = length_sq(v_2to1);
+    const real_type lensq_v23 = length_sq(v_2to3);
+    const real_type dot_v21_v23 = dot_product(v_2to1, v_2to3);
 
     const real_type dot_ijk = dot_v21_v23 * fast_inv_sqrt(lensq_v21 * lensq_v23);
     const real_type cos_theta =
