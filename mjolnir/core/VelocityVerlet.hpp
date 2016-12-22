@@ -1,7 +1,6 @@
 #ifndef MJOLNIR_VELOCITY_VERLET_INTEGRATOR
 #define MJOLNIR_VELOCITY_VERLET_INTEGRATOR
-#include "ParticleContainer.hpp"
-#include "ForceField.hpp"
+#include "Integrator.hpp"
 #include <mjolnir/util/zip_iterator.hpp>
 #include <mjolnir/util/make_zip.hpp>
 
@@ -9,7 +8,7 @@ namespace mjolnir
 {
 
 template<typename traitsT>
-class VelocityVerlet
+class VelocityVerlet : public Integrator<traitsT>
 {
   public:
     typedef traitsT traits_type;
@@ -22,10 +21,10 @@ class VelocityVerlet
         : dt_(dt), halfdt_(dt * 0.5), halfdt2_(dt * dt * 0.5),
           acceleration_(number_of_particles)
     {}
-    ~VelocityVerlet() = default;
+    ~VelocityVerlet() override = default;
 
     time_type step(const time_type time, ParticleContainer<traitsT>& pcon,
-                   ForceField<traitsT>& ff);
+                   ForceField<traitsT>& ff) override;
 
   private:
     time_type dt_;      //!< dt
@@ -57,7 +56,7 @@ VelocityVerlet<traitsT>::step(const time_type time,
             iter != make_zip(pcon.end(), acceleration_.end()); ++iter)
     {
         // consider cash 1/m
-        const coordinate_type acc = *get<0>(iter)->force / *get<0>(iter)->mass;
+        const coordinate_type acc = get<0>(iter)->force / (get<0>(iter)->mass);
         *get<1>(iter) = acc;
         get<0>(iter)->velocity += halfdt_ * acc;
     }
@@ -65,7 +64,5 @@ VelocityVerlet<traitsT>::step(const time_type time,
     return time + dt_;
 }
 
-
 } // mjolnir
-
 #endif /* MJOLNIR_VELOCITY_VERLET_INTEGRATOR */
