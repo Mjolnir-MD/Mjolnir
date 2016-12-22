@@ -37,10 +37,10 @@ class LennardJonesPotential: public GlobalPotentialBase<traitsT>
     parameter_type const& at(const std::size_t i) const {return radii_.at(i);}
 
     real_type potential(const std::size_t i, const std::size_t j,
-                        const real_type r) override;
+                        const real_type r) const override;
 
     real_type derivative(const std::size_t i, const std::size_t j,
-                         const real_type r) override;
+                         const real_type r) const override;
 
   private:
 
@@ -48,15 +48,48 @@ class LennardJonesPotential: public GlobalPotentialBase<traitsT>
 };
 
 template<typename traitsT>
+inline void
+LennardJonesPotential<traitsT>::emplace(const parameter_type& radius)
+{
+    radii_.push_back(radius);
+    return ;
+}
+
+template<typename traitsT>
+inline void
+LennardJonesPotential<traitsT>::emplace(parameter_type&& radius)
+{
+    radii_.emplace_back(std::forward<parameter_type>(radius));
+    return ;
+}
+
+template<typename traitsT>
+inline void
+LennardJonesPotential<traitsT>::set_radii(const std::vector<parameter_type>& radii)
+{
+    radii_ = radii;
+    return ;
+}
+
+template<typename traitsT>
+inline void
+LennardJonesPotential<traitsT>::set_radii(std::vector<parameter_type>&& radii)
+{
+    radii_ = std::forward<std::vector<parameter_type>>(radii);
+    return ;
+}
+
+template<typename traitsT>
 inline typename LennardJonesPotential<traitsT>::real_type
 LennardJonesPotential<traitsT>::potential(
-        const std::size_t i, const std::size_t j, const real_type r)
+        const std::size_t i, const std::size_t j, const real_type r) const
 {
-    const real_type r_sq   = r * r;
-    const real_type sigma  = 0.5 * (radii_[i].first + radii_[j].first);
-    const real_type epsilon = std::sqrt(radii_[i].second * radii_[i].second);
-    const real_type sigma6_inv = 1. / std::pow(sigma, 6);
-    const real_type r6s6   = r_sq * r_sq * r_sq * sigma6_inv;
+    const real_type sigma   = 0.5 * (radii_[i].first + radii_[j].first);
+    const real_type epsilon = std::sqrt(radii_[i].second * radii_[j].second);
+
+    const real_type r1s1   = sigma / r;
+    const real_type r3s3   = r1s1 * r1s1 * r1s1;
+    const real_type r6s6   = r3s3 * r3s3;
     const real_type r12s12 = r6s6 * r6s6;
     return 4. * epsilon * (r12s12 - r6s6);
 }
@@ -64,17 +97,16 @@ LennardJonesPotential<traitsT>::potential(
 template<typename traitsT>
 inline typename LennardJonesPotential<traitsT>::real_type
 LennardJonesPotential<traitsT>::derivative(
-        const std::size_t i, const std::size_t j, const real_type r)
+        const std::size_t i, const std::size_t j, const real_type r) const
 {
-    const real_type r_sq   = r * r;
-    const real_type r_inv  = 1. / r;
-    const real_type sigma  = 0.5 * (radii_[i].first + radii_[j].first);
-    const real_type epsilon = std::sqrt(radii_[i].second * radii_[i].second);
-    const real_type sigma6_inv = 1. / std::pow(sigma, 6);
-    const real_type r6s6   = r_sq * r_sq * r_sq * sigma6_inv;
-    const real_type r12s12 = r6s6 * r6s6;
+    const real_type sigma   = 0.5 * (radii_[i].first + radii_[j].first);
+    const real_type epsilon = std::sqrt(radii_[i].second * radii_[j].second);
 
-    return 24. * epsilon * r_inv * (r6s6 - 2 * r12s12);
+    const real_type r1s1   = sigma / r;
+    const real_type r3s3   = r1s1 * r1s1 * r1s1;
+    const real_type r6s6   = r3s3 * r3s3;
+    const real_type r12s12 = r6s6 * r6s6;
+    return 24. * epsilon * (r6s6 - 2 * r12s12) / r;
 }
 
 } // mjolnir
