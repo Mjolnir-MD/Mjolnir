@@ -14,9 +14,9 @@ class GlobalPotentialBase
 
     virtual ~GlobalPotentialBase(){};
 
-    real_type
+    virtual real_type
     potential(const std::size_t i, const std::size_t j, const real_type r) = 0;
-    real_type
+    virtual real_type
     derivative(const std::size_t i, const std::size_t j, const real_type r) = 0;
 
 };
