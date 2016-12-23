@@ -1,13 +1,12 @@
 #ifndef MJOLNIR_GLOBAL_DISTANCE_INTEARACTION
 #define MJOLNIR_GLOBAL_DISTANCE_INTEARACTION
-#include "ParticleContainer.hpp" 
-#include "GlobalPotentialBase.hpp"
+#include "GlobalInteractionBase.hpp" 
 
 namespace mjolnir
 {
 
 template<typename traitsT>
-class GlobalDistanceInteraction
+class GlobalDistanceInteraction : public GlobalInteractionBase<traitsT>
 {
   public:
 
@@ -23,11 +22,11 @@ class GlobalDistanceInteraction
     ~GlobalDistanceInteraction() = default;
 
     void
-    calc_force(particle_container_type& pcon, potential_type& pot);
+    calc_force(particle_container_type& pcon, potential_type& pot) override;
 
     real_type
     calc_energy(const particle_container_type& pcon,
-                const potential_type& pot) const;
+                const potential_type& pot) const override;
 
   private:
     // CellList
