@@ -1,6 +1,6 @@
 set(TEST_NAMES
     test_matrix
-#     test_vector test_matrix_vector
+    test_fast_inv_sqrt
     )
 
 include_directories(${PROJECT_SOURCE_DIR})
