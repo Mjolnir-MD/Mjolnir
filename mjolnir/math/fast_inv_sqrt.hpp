@@ -20,9 +20,10 @@ inline double fast_inv_sqrt(double x)
 inline float fast_inv_sqrt(float x)
 {
     const float xhalf = 0.5f * x;
-    int i = *(reinterpret_cast<int*>(&x));
+    std::int32_t i = *(reinterpret_cast<std::int32_t*>(&x));
     i = 0x5f3759df - (i >> 1);
     x = *(reinterpret_cast<float*>(&i));
+    x *= (1.5f - xhalf * x * x);
     return x * (1.5f - xhalf * x * x);
 }
  
