@@ -1,6 +1,8 @@
 #ifndef MJOLNIR_GLOBAL_DISTANCE_INTEARACTION
 #define MJOLNIR_GLOBAL_DISTANCE_INTEARACTION
 #include "GlobalInteractionBase.hpp" 
+#include "SpatialPartition.hpp" 
+#include <memory>
 
 namespace mjolnir
 {
@@ -16,9 +18,13 @@ class GlobalDistanceInteraction : public GlobalInteractionBase<traitsT>
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef ParticleContainer<traits_type> particle_container_type;
     typedef GlobalPotentialBase<traits_type> potential_type;
+    typedef SpatialPartition<traits_type> spartial_partitioning_type;
 
   public:
     GlobalDistanceInteraction() = default;
+    GlobalDistanceInteraction(std::unique_ptr<spatial_partitioning_type>&& sp)
+        : spartial_partition_(std::forward<spatial_partitioning_type>(sp))
+    {}
     ~GlobalDistanceInteraction() = default;
 
     void
@@ -28,8 +34,13 @@ class GlobalDistanceInteraction : public GlobalInteractionBase<traitsT>
     calc_energy(const particle_container_type& pcon,
                 const potential_type& pot) const override;
 
+    void set_spartial_partition(std::unique_ptr<spatial_partitioning_type>&& sp)
+    {
+        spartial_partition_ = std::forward<spartial_partitioning_type>(sp);
+    }
+
   private:
-    // CellList
+    std::unique_ptr<spatial_partitioning_type> spatrial_partition_;
 };
 
 template<typename traitsT>
@@ -37,15 +48,19 @@ inline void
 GlobalDistanceInteraction<traitsT>::calc_force(
         particle_container_type& pcon, potential_type& pot)
 {
-    for(std::size_t i=0; i<pcon.size()-1; ++i)
+    spatrial_partition->update(pcon);
+    for(std::size_t i=0; i<pcon.size(); ++i)
     {
-        for(std::size_t j=i+1; j<pcon.size(); ++j)
+        typename spartial_partitioning_type::index_list const& partners =
+            spartial_partition_->partners(i);
+        for(auto iter = partners.cbegin(); iter != partners.cend(); ++iter)
         {
+            const std::size_t j = *iter;
+            // consider periodic boundary case
             const coordinate_type rij = pcon[j].position - pcon[i].position;
             const real_type       l   = length(rij);
             const coordinate_type f   = rij * (pot.derivative(i, j, l) / l);
             pcon[i].force += f;
-            pcon[j].force -= f;
         }
     }
     return ;
@@ -57,15 +72,19 @@ GlobalDistanceInteraction<traitsT>::calc_energy(
         const particle_container_type& pcon, const potential_type& pot) const
 {
     real_type e = 0.0;
-    for(std::size_t i=0; i<pcon.size()-1; ++i)
+    for(std::size_t i=0; i<pcon.size(); ++i)
     {
-        for(std::size_t j=i+1; j<pcon.size(); ++j)
+        typename spartial_partitioning_type::index_list const& partners =
+            spartial_partition_->partners(i);
+        for(auto iter = partners.cbegin(); iter != partners.cend(); ++iter)
         {
-            const real_type l = length(pcon[j].position - pcon[i].position);
+            const std::size_t j = *iter;
+            const coordinate_type rij = pcon[j].position - pcon[i].position;
+            const real_type l = length(rij);
             e += pot.potential(i, j, l);
         }
     }
-    return e;
+    return e * 0.5; // double count factor: responsible for spatrial_partition?
 }
 
 } // mjolnir
