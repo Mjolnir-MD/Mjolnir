@@ -16,6 +16,8 @@ class ParticleContainer
     typedef std::vector<particle_type> container_type;
     typedef typename container_type::iterator iterator;
     typedef typename container_type::const_iterator const_iterator;
+    typedef std::size_t size_type;
+    typedef std::size_t index_type;
 
   public:
     ParticleContainer(std::size_t number_of_particles)
