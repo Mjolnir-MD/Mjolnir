@@ -3,7 +3,6 @@ set(TEST_NAMES
     test_fast_inv_sqrt
     )
 
-include_directories(${PROJECT_SOURCE_DIR})
 add_definitions("-O3 -std=c++11")
 
 set(test_library_dependencies)
