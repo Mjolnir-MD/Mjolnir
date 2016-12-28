@@ -3,6 +3,7 @@
 #include "GlobalPotentialBase.hpp"
 #include <mjolnir/math/Vector.hpp>
 #include <mjolnir/math/fast_inv_sqrt.hpp>
+#include <algorithm>
 #include <cmath>
 
 namespace mjolnir
@@ -20,6 +21,9 @@ class LennardJonesPotential: public GlobalPotentialBase<traitsT>
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef std::pair<real_type, real_type> parameter_type;
+
+    // rc = 2.5 * sigma
+    constexpr static real_type cutoff_ratio = 2.5;
 
   public:
     LennardJonesPotential() = default;
@@ -41,6 +45,8 @@ class LennardJonesPotential: public GlobalPotentialBase<traitsT>
 
     real_type derivative(const std::size_t i, const std::size_t j,
                          const real_type r) const override;
+
+    real_type max_cutoff_length() const;
 
   private:
 
@@ -85,6 +91,8 @@ LennardJonesPotential<traitsT>::potential(
         const std::size_t i, const std::size_t j, const real_type r) const
 {
     const real_type sigma   = 0.5 * (radii_[i].first + radii_[j].first);
+    if(sigma * cutoff_ratio < r) return 0;
+
     const real_type epsilon = std::sqrt(radii_[i].second * radii_[j].second);
 
     const real_type r1s1   = sigma / r;
@@ -100,6 +108,8 @@ LennardJonesPotential<traitsT>::derivative(
         const std::size_t i, const std::size_t j, const real_type r) const
 {
     const real_type sigma   = 0.5 * (radii_[i].first + radii_[j].first);
+    if(sigma * cutoff_ratio < r) return 0;
+
     const real_type epsilon = std::sqrt(radii_[i].second * radii_[j].second);
 
     const real_type r1s1   = sigma / r;
@@ -107,6 +117,17 @@ LennardJonesPotential<traitsT>::derivative(
     const real_type r6s6   = r3s3 * r3s3;
     const real_type r12s12 = r6s6 * r6s6;
     return 24. * epsilon * (r6s6 - 2 * r12s12) / r;
+}
+
+
+template<typename traitsT>
+inline typename LennardJonesPotential<traitsT>::real_type
+LennardJonesPotential<traitsT>::max_cutoff_length() const
+{
+    const real_type max_sigma = std::max_element(radii_.cbegin(), radii_.cend(),
+            [](const parameter_type& lhs, const parameter_type& rhs)
+            {return lhs.first < rhs.first;})->first;
+    return max_sigma * cutoff_ratio;
 }
 
 } // mjolnir
