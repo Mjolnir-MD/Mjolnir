@@ -71,7 +71,6 @@ void VerletList<traitsT>::make(const particle_container_type& pcon)
             if(r2 < rc2)
             {
                 list_.at(i).push_back(j);
-//                 list_.at(j).push_back(i);
             }
         }
     }
