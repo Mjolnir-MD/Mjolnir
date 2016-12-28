@@ -23,7 +23,7 @@ class SpatialPartition
     virtual ~SpatialPartition() noexcept = default;
 
     virtual bool valid() const noexcept = 0;
-    virtual void make(const particle_container_type pcon) = 0;
+    virtual void make(const particle_container_type& pcon) = 0;
     virtual void update(const particle_container_type& pcon) = 0;
     virtual void update(const particle_container_type& pcon, const time_type dt) = 0;
 
