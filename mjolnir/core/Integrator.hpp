@@ -16,6 +16,8 @@ class Integrator
 
     virtual ~Integrator() = default;
 
+    virtual void initialize(const ParticleContainer<traitsT>& pcon) = 0;
+
     virtual time_type
     step(const time_type time, ParticleContainer<traitsT>& pcon,
          ForceField<traitsT>& ff) = 0;

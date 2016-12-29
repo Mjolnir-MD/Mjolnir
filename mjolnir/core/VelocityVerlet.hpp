@@ -23,6 +23,7 @@ class VelocityVerlet : public Integrator<traitsT>
     {}
     ~VelocityVerlet() override = default;
 
+    void initialize(const ParticleContainer<traitsT>& pcon) override;
     time_type step(const time_type time, ParticleContainer<traitsT>& pcon,
                    ForceField<traitsT>& ff) override;
 
@@ -33,6 +34,17 @@ class VelocityVerlet : public Integrator<traitsT>
     std::vector<coordinate_type> acceleration_;
 };
 
+template<typename traitsT>
+void VelocityVerlet<traitsT>::initialize(const ParticleContainer<traitsT>& pcon)
+{
+    for(auto iter = make_zip(pcon.cbegin(), acceleration_.begin());
+            iter != make_zip(pcon.cend(), acceleration_.end()); ++iter)
+    {
+        *get<1>(iter) = get<0>(iter)->force / get<0>(iter)->mass;
+    }
+    return;
+}
+
 // at the initial step, acceleration_ must be initialized
 template<typename traitsT>
 typename VelocityVerlet<traitsT>::time_type
@@ -40,8 +52,8 @@ VelocityVerlet<traitsT>::step(const time_type time,
         ParticleContainer<traitsT>& pcon, ForceField<traitsT>& ff)
 {
     // calc r(t+dt)
-    for(auto iter = make_zip(pcon.begin(), acceleration_.begin());
-            iter != make_zip(pcon.end(), acceleration_.end()); ++iter)
+    for(auto iter = make_zip(pcon.begin(), acceleration_.cbegin());
+            iter != make_zip(pcon.end(), acceleration_.cend()); ++iter)
     {
         get<0>(iter)->position += dt_ * (get<0>(iter)->velocity) +
                                   halfdt2_ * (*get<1>(iter));

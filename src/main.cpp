@@ -69,6 +69,7 @@ int main()
     // create velocity verlet time integration method
     auto integr = mjolnir::make_unique<mjolnir::VelocityVerlet<traits>>(
             dt, num_particle);
+    integr->initialize(pcon); // simulator is responsible for this...?
 
     // create simulator with particle_container, forcefield, time_integrator
     mjolnir::Simulator<traits> sim(
