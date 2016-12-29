@@ -91,8 +91,8 @@ Observer<traitsT>::calc_kinetic_energy(const ParticleContainer<traitsT>& pcon) c
 {
     real_type k = 0.0;
     for(auto iter = pcon.cbegin(); iter != pcon.cend(); ++iter)
-        k += length_sq(iter->velocity) * iter->mass * 0.5;
-    return k;
+        k += length_sq(iter->velocity) * iter->mass;
+    return k * 0.5;
 }
 
 
