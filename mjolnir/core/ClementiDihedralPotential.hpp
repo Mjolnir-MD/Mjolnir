@@ -23,14 +23,14 @@ class ClementiDihedralPotential : public LocalPotentialBase<traitsT>
 
     real_type potential(const real_type val) const override
     {
-        const dphi = val - native_val_;
+        const real_type dphi = val - native_val_;
         return k1_ * (1. - cos(dphi)) + k3_ * (1. - cos(3. * dphi));
     }
 
     real_type derivative(const real_type val) const override
     {
-        const dphi = val - native_val_;
-        return k1_ * sin(dphi) + k3_ * sin(3. * dphi);
+        const real_type dphi = val - native_val_;
+        return k1_ * sin(dphi) + 3. * k3_ * sin(3. * dphi);
     }
 
   private:
