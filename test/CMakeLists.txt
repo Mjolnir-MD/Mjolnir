@@ -2,6 +2,7 @@ set(TEST_NAMES
     test_matrix
     test_fast_inv_sqrt
     test_lennard_jones_potential
+    test_excluded_volume_potential
     test_harmonic_potential
     test_clementi_dihedral_potential
     test_go1012_potential
