@@ -4,6 +4,7 @@
 #include "RandomNumberGenerator.hpp"
 #include <mjolnir/util/zip_iterator.hpp>
 #include <mjolnir/util/make_zip.hpp>
+#include <memory>
 
 namespace mjolnir
 {
@@ -22,7 +23,7 @@ class UnderdampedLangevin : public Integrator<traitsT>
     UnderdampedLangevin(const time_type dt, const std::size_t number_of_particles,
             const real_type temperature, const real_type kB,
             std::vector<real_type>&& friction_constant,
-            RandomNumberGenerator<traits_type>& rng)
+            const std::shared_ptr<RandomNumberGenerator<traits_type>>& rng)
         : dt_(dt), halfdt_(dt * 0.5), halfdt2_(dt * dt * 0.5), rng_(rng),
           temperature_(temperature), kB_(kB),
           gamma_(std::forward<std::vector<real_type>>(friction_constant)),
@@ -44,7 +45,7 @@ class UnderdampedLangevin : public Integrator<traitsT>
     time_type halfdt2_; //!< dt^2/2
     real_type kB_;
     real_type temperature_;
-    RandomNumberGenerator<traits_type>& rng_;
+    std::shared_ptr<RandomNumberGenerator<traits_type>> rng_;
     std::vector<real_type> gamma_;
     std::vector<coordinate_type> noise_;
     std::vector<coordinate_type> acceleration_;
@@ -63,7 +64,7 @@ void UnderdampedLangevin<traitsT>::initialize(
         *get<3>(iter) = get<0>(iter)->force / get<0>(iter)->mass;
 
         // set random force
-        *get<2>(iter) = rng_.underdamped_langevin(
+        *get<2>(iter) = rng_->underdamped_langevin(
                 get<0>(iter)->mass, *get<1>(iter), dt_, temperature_, kB_);
     }
 
@@ -107,7 +108,7 @@ UnderdampedLangevin<traitsT>::step(const time_type time,
         const coordinate_type acc = get<0>(iter)->force / (get<0>(iter)->mass);
         *get<3>(iter) = acc;
 
-        const coordinate_type noise = rng_.underdamped_langevin(
+        const coordinate_type noise = rng_->underdamped_langevin(
                 get<0>(iter)->mass, *get<1>(iter), dt_, temperature_, kB_);
         *get<2>(iter) = noise;
 
