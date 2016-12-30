@@ -22,6 +22,9 @@ class ExcludedVolumePotential : public GlobalPotentialBase<traitsT>
     ExcludedVolumePotential() = default;
     ~ExcludedVolumePotential() override = default;
 
+    real_type  epsilon() const {return epsilon_;}
+    real_type& epsilon()       {return epsilon_;}
+
     void emplace(const parameter_type& radius);
     void emplace(parameter_type&& radius);
 
@@ -80,8 +83,9 @@ ExcludedVolumePotential<traitsT>::set_radii(std::vector<parameter_type>&& radii)
 }
 
 
-template<typename T>
-inline typename T::real_type ExcludedVolumePotential<T>::potential(
+template<typename traitsT>
+inline typename ExcludedVolumePotential<traitsT>::real_type
+ExcludedVolumePotential<traitsT>::potential(
         const std::size_t i, const std::size_t j, const real_type r) const
 {
     const real_type d = radii_[i] + radii_[j];
@@ -92,8 +96,9 @@ inline typename T::real_type ExcludedVolumePotential<T>::potential(
     return epsilon_ * dr12;
 }
  
-template<typename T>
-inline typename T::real_type ExcludedVolumePotential<T>::derivative(
+template<typename traitsT>
+inline typename ExcludedVolumePotential<traitsT>::real_type
+ExcludedVolumePotential<traitsT>::derivative(
         const std::size_t i, const std::size_t j, const real_type r) const
 {
     const real_type d = radii_[i] + radii_[j];
@@ -103,6 +108,16 @@ inline typename T::real_type ExcludedVolumePotential<T>::derivative(
     const real_type dr6 = dr3 * dr3;
     const real_type dr12 = dr6 * dr6;
     return -12 * epsilon_ * dr12 * rinv;
+}
+
+
+template<typename traitsT>
+inline typename ExcludedVolumePotential<traitsT>::real_type
+ExcludedVolumePotential<traitsT>::max_cutoff_length() const
+{
+    const real_type max_sigma =
+        *(std::max_element(radii_.cbegin(), radii_.cend()));
+    return max_sigma * cutoff_ratio;
 }
 
 } // mjolnir
