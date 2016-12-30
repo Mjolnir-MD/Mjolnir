@@ -35,6 +35,10 @@ class LennardJonesPotential: public GlobalPotentialBase<traitsT>
     void set_radii(const std::vector<parameter_type>& radii);
     void set_radii(std::vector<parameter_type>&& radii);
 
+    std::size_t size() const {return radii_.size();}
+    void resize(const std::size_t i){radii_.resize(i);}
+    void reserve(const std::size_t i){radii_.reserve(i);}
+    void clear(){radii_.clear();}
     parameter_type&       operator[](const std::size_t i)       {return radii_[i];}
     parameter_type const& operator[](const std::size_t i) const {return radii_[i];}
     parameter_type&       at(const std::size_t i)       {return radii_.at(i);}
