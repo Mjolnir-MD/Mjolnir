@@ -27,6 +27,12 @@ class LennardJonesPotential: public GlobalPotentialBase<traitsT>
 
   public:
     LennardJonesPotential() = default;
+    LennardJonesPotential(const std::vector<parameter_type>& radii)
+        : radii_(radii)
+    {}
+    LennardJonesPotential(std::vector<parameter_type>&& radii)
+        : radii_(std::forward<std::vector<parameter_type>>(radii))
+    {}
     ~LennardJonesPotential() = default;
 
     void emplace(const parameter_type& radius);

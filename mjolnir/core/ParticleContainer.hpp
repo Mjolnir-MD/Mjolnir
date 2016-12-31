@@ -23,6 +23,12 @@ class ParticleContainer
     ParticleContainer(std::size_t number_of_particles)
         : particles_(number_of_particles)
     {}
+    ParticleContainer(const std::vector<Particles>& parts)
+        : particles_(parts)
+    {}
+    ParticleContainer(std::vector<Particles>&& parts)
+        : particles_(std::forward<std::vector<Particles>>(parts))
+    {}
     ~ParticleContainer() = default;
 
     std::size_t size() const {return particles_.size();}

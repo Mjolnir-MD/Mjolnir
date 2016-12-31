@@ -20,6 +20,15 @@ class ExcludedVolumePotential : public GlobalPotentialBase<traitsT>
 
   public:
     ExcludedVolumePotential() = default;
+    ExcludedVolumePotential(
+            const real_type eps, const std::vector<parameter_type>& params)
+        : epsilon_(eps), radii_(params)
+    {}
+    ExcludedVolumePotential(
+            real_type&& eps, std::vector<parameter_type>&& params)
+        : epsilon_(std::forward<real_type>(eps)),
+          radii_(std::forward<std::vector<parameter_type>>(params))
+    {}
     ~ExcludedVolumePotential() override = default;
 
     real_type  epsilon() const {return epsilon_;}
