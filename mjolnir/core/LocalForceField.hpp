@@ -57,7 +57,7 @@ class LocalForceField
     {
         bond_potential_type() = default;
         bond_potential_type(std::size_t i_, std::size_t j_, potential_ptr&& pot_)
-           : i(i_), j(j_), pot(std::forward(pot_))
+           : i(i_), j(j_), pot(std::forward<potential_ptr>(pot_))
         {}
         ~bond_potential_type() = default;
         bond_potential_type(const bond_potential_type&) = delete;
@@ -74,7 +74,7 @@ class LocalForceField
         angle_potential_type() = default;
         angle_potential_type(std::size_t i_, std::size_t j_, std::size_t k_,
                              potential_ptr&& pot_)
-           : i(i_), j(j_), k(k_), pot(std::forward(pot_))
+           : i(i_), j(j_), k(k_), pot(std::forward<potential_ptr>(pot_))
         {}
         ~angle_potential_type() = default;
         angle_potential_type(const angle_potential_type&) = delete;
@@ -91,7 +91,7 @@ class LocalForceField
         dihd_potential_type() = default;
         dihd_potential_type(std::size_t i_, std::size_t j_, std::size_t k_,
                             std::size_t l_, potential_ptr&& pot_)
-           : i(i_), j(j_), k(k_), l(l_), pot(std::forward(pot_))
+           : i(i_), j(j_), k(k_), l(l_), pot(std::forward<potential_ptr>(pot_))
         {}
         ~dihd_potential_type() = default;
         dihd_potential_type(const dihd_potential_type&) = delete;
@@ -112,7 +112,7 @@ template<typename traitsT>
 void LocalForceField<traitsT>::emplace_bond(
         std::size_t i, std::size_t j, potential_ptr&& pot)
 {
-    bond_potentials.emplace_back(i, j, std::forward(pot));
+    bond_potentials.emplace_back(i, j, std::forward<potential_ptr>(pot));
     return ;
 }
 
@@ -120,7 +120,7 @@ template<typename traitsT>
 void LocalForceField<traitsT>::emplace_angle(
         std::size_t i, std::size_t j, std::size_t k, potential_ptr&& pot)
 {
-    angle_potentials.emplace_back(i, j, k, std::forward(pot));
+    angle_potentials.emplace_back(i, j, k, std::forward<potential_ptr>(pot));
     return ;
 }
 
@@ -128,7 +128,7 @@ template<typename traitsT>
 void LocalForceField<traitsT>::emplace_dihedral(
         std::size_t i, std::size_t j, std::size_t k, std::size_t l, potential_ptr&& pot)
 {
-    dihd_potentials.emplace_back(i, j, k, l, std::forward(pot));
+    dihd_potentials.emplace_back(i, j, k, l, std::forward<potential_ptr>(pot));
     return ;
 }
 
