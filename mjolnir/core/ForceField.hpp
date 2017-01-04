@@ -30,6 +30,7 @@ class ForceField
     ForceField& operator=(const ForceField&) = delete;
     ForceField& operator=(ForceField&&)      = default;
 
+    void initialize(const ParticleContainer<traitsT>& pcon);
     void        calc_force(ParticleContainer<traitsT>& pcon);
     energy_type calc_energy(const ParticleContainer<traitsT>& pcon) const;
 
@@ -38,6 +39,13 @@ class ForceField
     LocalForceField<traits_type>  local_;
     GlobalForceField<traits_type> global_;
 };
+template<typename traitsT>
+inline void
+ForceField<traitsT>::initialize(const ParticleContainer<traitsT>& pcon)
+{
+    global_.initialize(pcon);
+    return;
+}
 
 template<typename traitsT>
 inline void ForceField<traitsT>::calc_force(ParticleContainer<traitsT>& pcon)

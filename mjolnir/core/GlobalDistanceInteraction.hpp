@@ -40,6 +40,8 @@ class GlobalDistanceInteraction : public GlobalInteractionBase<traitsT>
         spatial_partition_ = std::forward<spatial_partitioning_type>(sp);
     }
 
+    void initialize(const particle_container_type& pcon);
+
   private:
     std::unique_ptr<spatial_partitioning_type> spatial_partition_;
 };
@@ -85,6 +87,14 @@ GlobalDistanceInteraction<traitsT>::calc_energy(
         }
     }
     return e;
+}
+
+template<typename traitsT>
+inline void GlobalDistanceInteraction<traitsT>::initialize(
+        const particle_container_type& pcon)
+{
+    this->spatial_partition_->update(pcon);
+    return ;
 }
 
 } // mjolnir

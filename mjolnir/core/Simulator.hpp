@@ -21,6 +21,7 @@ class Simulator
     {}
     ~Simulator() = default;
 
+    void initialize();
     void step();
     void step_until(const time_type t);
     real_type calc_energy() const;
@@ -40,6 +41,14 @@ class Simulator
     ForceField<traitsT>                  ff_;
     std::unique_ptr<Integrator<traitsT>> integrator_;
 };
+
+template<typename traitsT>
+inline void Simulator<traitsT>::initialize()
+{
+    this->integrator_->initialize(this->pcon_);
+    this->ff_.initialize(this->pcon_);
+    return;
+}
 
 template<typename traitsT>
 inline void Simulator<traitsT>::step()
