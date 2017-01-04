@@ -56,7 +56,7 @@ class LennardJonesPotential: public GlobalPotentialBase<traitsT>
     real_type derivative(const std::size_t i, const std::size_t j,
                          const real_type r) const override;
 
-    real_type max_cutoff_length() const;
+    real_type max_cutoff_length() const override;
 
   private:
 

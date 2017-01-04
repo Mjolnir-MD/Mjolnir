@@ -19,6 +19,7 @@ class GlobalPotentialBase
     virtual real_type derivative(
         const std::size_t i, const std::size_t j, const real_type r) const = 0;
 
+    virtual real_type max_cutoff_length() const = 0;
 };
 
 
