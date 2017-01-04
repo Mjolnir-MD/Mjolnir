@@ -45,8 +45,8 @@ class VerletList : public SpatialPartition<traitsT>
     real_type &      mergin()       {return this->mergin_;}
 
     void add_except(const index_type i, const index_type j);
-    void set_except(const list_type& ex){except_ = ex;}
-    void set_except(list_type&& ex){except_ = std::forward<list_type>(ex);}
+    void set_except(const except_list_type& ex){except_ = ex;}
+    void set_except(except_list_type&& ex){except_ = std::forward<except_list_type>(ex);}
 
     index_list const& partners(const std::size_t i) const override {return list_.at(i);}
     index_list &      partners(const std::size_t i)       override {return list_.at(i);}

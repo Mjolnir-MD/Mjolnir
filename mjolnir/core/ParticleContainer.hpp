@@ -23,11 +23,11 @@ class ParticleContainer
     ParticleContainer(std::size_t number_of_particles)
         : particles_(number_of_particles)
     {}
-    ParticleContainer(const std::vector<Particles>& parts)
+    ParticleContainer(const container_type& parts)
         : particles_(parts)
     {}
-    ParticleContainer(std::vector<Particles>&& parts)
-        : particles_(std::forward<std::vector<Particles>>(parts))
+    ParticleContainer(container_type&& parts)
+        : particles_(std::forward<container_type>(parts))
     {}
     ~ParticleContainer() = default;
 
