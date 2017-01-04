@@ -40,7 +40,7 @@ class GlobalDistanceInteraction : public GlobalInteractionBase<traitsT>
         spatial_partition_ = std::forward<spatial_partitioning_type>(sp);
     }
 
-    void initialize(const particle_container_type& pcon);
+    void initialize(const particle_container_type& pcon, const time_type dt) override;
 
   private:
     std::unique_ptr<spatial_partitioning_type> spatial_partition_;
@@ -91,9 +91,9 @@ GlobalDistanceInteraction<traitsT>::calc_energy(
 
 template<typename traitsT>
 inline void GlobalDistanceInteraction<traitsT>::initialize(
-        const particle_container_type& pcon)
+        const particle_container_type& pcon, const time_type dt)
 {
-    this->spatial_partition_->update(pcon);
+    this->spatial_partition_->update(pcon, dt);
     return ;
 }
 

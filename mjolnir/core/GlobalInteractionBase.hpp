@@ -27,6 +27,9 @@ class GlobalInteractionBase
     virtual real_type
     calc_energy(const particle_container_type& pcon,
                 const potential_type& pot) const = 0;
+
+    virtual void initialize(
+            const particle_container_type& pcon, const time_type dt) = 0;
 };
 
 } // mjolnir

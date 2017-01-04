@@ -46,7 +46,7 @@ template<typename traitsT>
 inline void Simulator<traitsT>::initialize()
 {
     this->integrator_->initialize(this->pcon_);
-    this->ff_.initialize(this->pcon_);
+    this->ff_.initialize(this->pcon_, integrator->delta_t());
     return;
 }
 

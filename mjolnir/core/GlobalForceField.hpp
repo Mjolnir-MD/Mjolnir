@@ -40,7 +40,7 @@ class GlobalForceField
     void      calc_force(ParticleContainer<traitsT>& pcon);
     real_type calc_energy(const ParticleContainer<traitsT>& pcon) const;
 
-    void initialize(const ParticleContainer<traitsT>& pcon);
+    void initialize(const ParticleContainer<traitsT>& pcon, const time_type dt);
 
   private:
 
@@ -65,10 +65,11 @@ class GlobalForceField
 };
 
 template<typename traitsT>
-void GlobalForceField<traitsT>::initialize(const ParticleContainer<traitsT>& pcon)
+void GlobalForceField<traitsT>::initialize(
+        const ParticleContainer<traitsT>& pcon, const time_type dt)
 {
     for(auto iter = potnetials_.begin(); iter != potnetials_.end(); ++iter)
-        iter->interaction->initialize(pcon);
+        iter->interaction->initialize(pcon, dt);
     return;
 }
 
