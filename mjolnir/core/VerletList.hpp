@@ -45,8 +45,8 @@ class VerletList : public SpatialPartition<traitsT>
     real_type &      mergin()       {return this->mergin_;}
 
     void add_except(const index_type i, const index_type j);
-    void set_except(const list_type& ex){excepts_ = ex;}
-    void set_except(list_type&& ex){excepts_ = std::forward<list_type>(ex);}
+    void set_except(const list_type& ex){except_ = ex;}
+    void set_except(list_type&& ex){except_ = std::forward<list_type>(ex);}
 
     index_list const& partners(const std::size_t i) const override {return list_.at(i);}
     index_list &      partners(const std::size_t i)       override {return list_.at(i);}
@@ -68,10 +68,10 @@ VerletList<traitsT>::add_except(const index_type i, const index_type j)
     const index_type acc = std::min(i, j);
     const index_type dnr = std::max(i, j);
 
-    if(this->excepts_.size() < acc)
-        this->excepts_.resize(acc);
+    if(this->except_.size() < acc)
+        this->except_.resize(acc);
 
-    this->excepts_.at(acc).push_back(dnr);
+    this->except_.at(acc).push_back(dnr);
     return ;
 }
 
@@ -84,7 +84,7 @@ void VerletList<traitsT>::make(const particle_container_type& pcon)
 
     const real_type rc = (cutoff_ + mergin_);
     const real_type rc2 = rc * rc;
-    if(excepts_.empty())
+    if(except_.empty())
     {
         for(std::size_t i=0; i<pcon.size()-1; ++i)
         {
@@ -107,7 +107,7 @@ void VerletList<traitsT>::make(const particle_container_type& pcon)
         {
             const coordinate_type ri = pcon[i].position;
 
-            if(excepts_.at(i).empty())
+            if(except_.at(i).empty())
             {
                 for(std::size_t j=i+1; j<pcon.size(); ++j)
                 {
@@ -121,9 +121,9 @@ void VerletList<traitsT>::make(const particle_container_type& pcon)
             }
             else
             {
-                list_.at(i).reserve(pcon.size() - i - 1 - excepts_.at(i).size());
-                const auto cbeg = excepts_.at(i).cbegin();
-                const auto cend = excepts_.at(i).cend();
+                list_.at(i).reserve(pcon.size() - i - 1 - except_.at(i).size());
+                const auto cbeg = except_.at(i).cbegin();
+                const auto cend = except_.at(i).cend();
                 for(std::size_t j=i+1; j<pcon.size(); ++j)
                 {
                     if(std::find(cbeg, cend, j) != cend)
