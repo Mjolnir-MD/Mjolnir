@@ -68,8 +68,8 @@ template<typename traitsT>
 void GlobalForceField<traitsT>::initialize(
         const ParticleContainer<traitsT>& pcon, const time_type dt)
 {
-    for(auto iter = potnetials_.begin(); iter != potnetials_.end(); ++iter)
-        iter->interaction->initialize(pcon, dt);
+    for(auto iter = potentials_.begin(); iter != potentials_.end(); ++iter)
+        iter->interaction_->initialize(pcon, dt);
     return;
 }
 
