@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
 #define MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
 #include "GlobalPotentialBase.hpp"
+#include <algorithm>
 #include <cmath>
 
 namespace mjolnir
