@@ -27,6 +27,9 @@ class VelocityVerlet : public Integrator<traitsT>
     time_type step(const time_type time, ParticleContainer<traitsT>& pcon,
                    ForceField<traitsT>& ff) override;
 
+    time_type& delta_t()       override {return dt_;}
+    time_type  delta_t() const override {return dt_;}
+
   private:
     time_type dt_;      //!< dt
     time_type halfdt_;  //!< dt/2

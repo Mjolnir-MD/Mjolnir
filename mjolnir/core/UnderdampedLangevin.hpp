@@ -39,6 +39,9 @@ class UnderdampedLangevin : public Integrator<traitsT>
     real_type  T() const {return temperature_;}
     real_type& T()       {return temperature_;}
 
+    time_type  delta_t() const override {return dt_;}
+    time_type& delta_t()       override {return dt_;}
+
   private:
     time_type dt_;      //!< dt
     time_type halfdt_;  //!< dt/2

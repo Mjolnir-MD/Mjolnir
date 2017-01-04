@@ -21,6 +21,9 @@ class Integrator
     virtual time_type
     step(const time_type time, ParticleContainer<traitsT>& pcon,
          ForceField<traitsT>& ff) = 0;
+
+    virtual time_type& delta_t()       = 0;
+    virtual time_type  delta_t() const = 0;
 };
 
 } // mjolnir
