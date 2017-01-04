@@ -25,12 +25,15 @@ class VerletList : public SpatialPartition<traitsT>
   public:
 
     VerletList() = default;
+    VerletList(const real_type cutoff, const real_type mergin)
+        : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.)
+    {}
     VerletList(const real_type cutoff, const real_type mergin, const time_type dt)
         : dt_(dt), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.)
     {}
     ~VerletList() = default;
 
-    bool valid() const noexcept override {return current_mergin_ >= 0.;}
+    bool valid() const noexcept override {return current_mergin_ >= 0. || dt_ == 0.;}
 
     void make  (const particle_container_type& pcon) override;
     void update(const particle_container_type& pcon) override;
@@ -158,16 +161,8 @@ template<typename traitsT>
 void VerletList<traitsT>::update(const particle_container_type& pcon,
         const time_type dt)
 {
-    real_type max_speed = 0.;
-    for(auto iter = pcon.cbegin(); iter != pcon.cend(); ++iter)
-        max_speed = std::max(max_speed, length_sq(iter->velocity));
-
-    const real_type reduction = std::sqrt(max_speed) * dt * 2;
-
-    this->current_mergin_ -= reduction;
-    if(this->current_mergin_ < 0.)
-        this->make(pcon);
-
+    this->dt_ = dt;
+    this->update(pcon);
     return ;
 }
 
