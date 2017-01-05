@@ -66,7 +66,7 @@ DihedralAngleInteraction<traitsT>::calc_force(
     const real_type phi = std::copysign(std::acos(cos_phi), dot_product(r_ij, n));
 
     // -dV / dphi
-    const real_type coef = pot.derivative(phi);
+    const real_type coef = -pot.derivative(phi);
 
     const coordinate_type Fi = ( coef * r_kj_len / m_lensq) * m;
     const coordinate_type Fl = (-coef * r_kj_len / n_lensq) * n;

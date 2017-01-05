@@ -3,6 +3,7 @@
 #include "Particle.hpp"
 #include "LocalPotentialBase.hpp"
 #include "constants.hpp"
+#include <mjolnir/math/fast_inv_sqrt.hpp>
 #include <cmath>
 
 namespace mjolnir
@@ -57,7 +58,7 @@ BondAngleInteraction<traitsT>::calc_force(
 
     const real_type theta = std::acos(cos_theta);
 
-    const real_type coef = pot.derivative(theta);
+    const real_type coef = -pot.derivative(theta);
 
     const real_type sin_theta = std::sin(theta);
     const real_type coef_inv_sin = (sin_theta > constants<traits_type>::tolerance)
