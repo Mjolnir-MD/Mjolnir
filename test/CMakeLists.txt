@@ -6,6 +6,9 @@ set(TEST_NAMES
     test_harmonic_potential
     test_clementi_dihedral_potential
     test_go1012_potential
+    test_bond_length_interaction
+    test_bond_angle_interaction
+    test_dihedral_angle_interaction
     )
 
 add_definitions("-O3 -std=c++11")
