@@ -27,7 +27,6 @@ int main(int argc, char** argv)
     auto pcon   = mjolnir::read_particles<traits>(sim);
     auto rng    = mjolnir::read_random_number_generator<traits>(sim);
     auto integr = mjolnir::read_time_integrator<traits>(sim, rng);
-    integr->initialize(pcon);
     const std::size_t total_step = toml::get<toml::Integer>(sim.at("total_step"));
     const std::size_t save_step  = toml::get<toml::Integer>(sim.at("save_step"));
 
