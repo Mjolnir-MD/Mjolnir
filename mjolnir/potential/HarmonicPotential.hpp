@@ -5,9 +5,9 @@
 namespace mjolnir
 {
 
-/*! @brief harmonic potential & derivative                              *
- * V(r)  = K * (r - r0)^2                                               *
- * dV/dphi = 2 * K * (r - r0)                                           */
+/*! @brief harmonic potential *
+ *  V(r) = K * (r - r0)^2     *
+ * dV/dr = 2 * K * (r - r0)   */
 template<typename traitsT>
 class HarmonicPotential : public LocalPotentialBase<traitsT>
 {
