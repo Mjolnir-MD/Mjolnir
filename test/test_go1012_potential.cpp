@@ -7,7 +7,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/core/Go1012ContactPotential.hpp>
+#include <mjolnir/potential/Go1012ContactPotential.hpp>
 #include <mjolnir/core/DefaultTraits.hpp>
 #include <mjolnir/util/make_unique.hpp>
 

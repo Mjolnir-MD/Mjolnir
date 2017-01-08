@@ -8,7 +8,7 @@
 #endif
 
 #include <mjolnir/core/DihedralAngleInteraction.hpp>
-#include <mjolnir/core/HarmonicPotential.hpp>
+#include <mjolnir/potential/HarmonicPotential.hpp>
 #include <mjolnir/core/DefaultTraits.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
@@ -16,7 +16,7 @@ typedef mjolnir::DefaultTraits traits;
 typedef traits::real_type real_type;
 typedef traits::coordinate_type coordinate_type;
 typedef mjolnir::Particle<coordinate_type> particle_type;
-constexpr static traits::real_type tolerance = 1e-7;
+constexpr static traits::real_type tolerance = 1e-5;
 
 traits::coordinate_type zero_vec()
 {

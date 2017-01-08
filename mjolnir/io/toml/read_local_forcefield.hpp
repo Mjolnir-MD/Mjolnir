@@ -3,10 +3,10 @@
 #include <mjolnir/core/BondLengthInteraction.hpp>
 #include <mjolnir/core/BondAngleInteraction.hpp>
 #include <mjolnir/core/DihedralAngleInteraction.hpp>
-#include <mjolnir/core/HarmonicPotential.hpp>
-#include <mjolnir/core/ClementiDihedralPotential.hpp>
-#include <mjolnir/core/Go1012ContactPotential.hpp>
 #include <mjolnir/core/LocalForceField.hpp>
+#include <mjolnir/potential/HarmonicPotential.hpp>
+#include <mjolnir/potential/ClementiDihedralPotential.hpp>
+#include <mjolnir/potential/Go1012ContactPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 #include <toml/toml.hpp>

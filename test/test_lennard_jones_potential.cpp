@@ -7,7 +7,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/core/LennardJonesPotential.hpp>
+#include <mjolnir/potential/LennardJonesPotential.hpp>
 #include <mjolnir/core/DefaultTraits.hpp>
 #include <mjolnir/util/make_unique.hpp>
 

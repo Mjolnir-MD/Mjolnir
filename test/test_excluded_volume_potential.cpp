@@ -7,7 +7,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/core/ExcludedVolumePotential.hpp>
+#include <mjolnir/potential/ExcludedVolumePotential.hpp>
 #include <mjolnir/core/DefaultTraits.hpp>
 #include <mjolnir/util/make_unique.hpp>
 

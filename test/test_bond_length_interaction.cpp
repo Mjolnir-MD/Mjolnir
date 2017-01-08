@@ -8,7 +8,7 @@
 #endif
 
 #include <mjolnir/core/BondLengthInteraction.hpp>
-#include <mjolnir/core/HarmonicPotential.hpp>
+#include <mjolnir/potential/HarmonicPotential.hpp>
 #include <mjolnir/core/DefaultTraits.hpp>
 #include <mjolnir/util/make_unique.hpp>
 

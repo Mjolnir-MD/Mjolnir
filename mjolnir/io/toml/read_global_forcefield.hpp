@@ -1,9 +1,9 @@
 #ifndef MJOLNIR_IO_TOML_READ_GLOBAL_FORCEFIELD
 #define MJOLNIR_IO_TOML_READ_GLOBAL_FORCEFIELD
 #include <mjolnir/core/GlobalDistanceInteraction.hpp>
-#include <mjolnir/core/ExcludedVolumePotential.hpp>
-#include <mjolnir/core/LennardJonesPotential.hpp>
 #include <mjolnir/core/VerletList.hpp>
+#include <mjolnir/potential/ExcludedVolumePotential.hpp>
+#include <mjolnir/potential/LennardJonesPotential.hpp>
 #include <mjolnir/util/zip_iterator.hpp>
 #include <mjolnir/util/make_zip.hpp>
 #include <mjolnir/util/make_unique.hpp>

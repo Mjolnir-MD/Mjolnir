@@ -8,7 +8,7 @@
 #endif
 
 #include <mjolnir/core/BondAngleInteraction.hpp>
-#include <mjolnir/core/HarmonicPotential.hpp>
+#include <mjolnir/potential/HarmonicPotential.hpp>
 #include <mjolnir/core/DefaultTraits.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
@@ -69,8 +69,16 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
 
         const real_type force_strength1 = length(p1.force);
         const real_type force_strength3 = length(p3.force);
-        BOOST_CHECK_CLOSE_FRACTION(coef, force_strength1, tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(coef, force_strength3, tolerance);
+        if(i == 1200) // most stable point
+        {
+            BOOST_CHECK_SMALL(coef, tolerance);
+            BOOST_CHECK_SMALL(coef, tolerance);
+        }
+        else
+        {
+            BOOST_CHECK_CLOSE_FRACTION(coef, force_strength1, tolerance);
+            BOOST_CHECK_CLOSE_FRACTION(coef, force_strength3, tolerance);
+        }
 
         // force applied to center particle is equal to sum of others
         const coordinate_type sum = p1.force + p2.force + p3.force;
