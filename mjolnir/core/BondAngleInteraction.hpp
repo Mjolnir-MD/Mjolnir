@@ -99,4 +99,4 @@ BondAngleInteraction<traitsT>::calc_energy(
 
 }// mjolnir
 
-#endif /* MJOLNIR_HARMONIC_ANGL_INTERACTION */
+#endif /* MJOLNIR_BOND_ANGL_INTERACTION */

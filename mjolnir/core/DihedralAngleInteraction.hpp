@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_DIHEDRAL_ANGLE_POTENTIAL
-#define MJOLNIR_DIHEDRAL_ANGLE_POTENTIAL
+#ifndef MJOLNIR_DIHEDRAL_ANGLE_INTERACTION
+#define MJOLNIR_DIHEDRAL_ANGLE_INTERACTION
 #include "Particle.hpp"
 #include "LocalPotentialBase.hpp"
 #include <mjolnir/math/fast_inv_sqrt.hpp>
@@ -109,4 +109,4 @@ DihedralAngleInteraction<traitsT>::calc_energy(
 }
 
 }// mjolnir
-#endif /* MJOLNIR_DIHEDRAL_ANGLE_POTENTIAL */
+#endif /* MJOLNIR_DIHEDRAL_ANGLE_INTERACTION */
