@@ -5,6 +5,9 @@
 namespace mjolnir
 {
 
+/*! @brief Go contact 10-12 potential *
+ *  V(r) = epsilon * (5 * (r0/r)^12 - 6 * (r0/r)^10)  *
+ * dV/dr = 60 * epsilon * ((r0/r)^10 - (r0/r)^12) / r */
 template<typename traitsT>
 class Go1012ContactPotential : public LocalPotentialBase<traitsT>
 {

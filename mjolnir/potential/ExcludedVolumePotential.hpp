@@ -7,6 +7,9 @@
 namespace mjolnir
 {
 
+/*! @brief excluded volume potential        *
+ *  V(r) = epsilon * (sigma/r)^12           *
+ * dV/dr = -12 * epsilon * (sigma/r)^12 / r */
 template<typename traitsT>
 class ExcludedVolumePotential : public GlobalPotentialBase<traitsT>
 {

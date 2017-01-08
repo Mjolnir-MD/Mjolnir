@@ -6,6 +6,9 @@
 namespace mjolnir
 {
 
+/*! @brief Clementi-Go dihedral modified-triple-cosine potential *
+ *  V(phi) = k1 * (1-cos(phi-phi0)) + k3 * (1-cos(3(phi-phi0)))  *
+ * dV/dphi = k1 * sin(phi-phi0)     + k3 * 3 * sin(3(phi-phi0))  */
 template<typename traitsT>
 class ClementiDihedralPotential : public LocalPotentialBase<traitsT>
 {
