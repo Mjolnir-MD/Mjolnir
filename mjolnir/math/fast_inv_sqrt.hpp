@@ -14,6 +14,7 @@ inline double fast_inv_sqrt(double x)
     x *= (1.5 - xhalf * x * x);
     x *= (1.5 - xhalf * x * x);
     x *= (1.5 - xhalf * x * x);
+    x *= (1.5 - xhalf * x * x);
     return x;
 }
 
