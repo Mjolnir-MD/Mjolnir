@@ -77,8 +77,17 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
 
         const real_type force_strength1 = length(p1.force);
         const real_type force_strength3 = length(p4.force);
-        BOOST_CHECK_CLOSE_FRACTION(coef, force_strength1, tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(coef, force_strength3, tolerance);
+        if(i == 1200)
+        {
+            BOOST_CHECK_SMALL(coef, tolerance);
+            BOOST_CHECK_SMALL(force_strength1, tolerance);
+            BOOST_CHECK_SMALL(force_strength3, tolerance);
+        }
+        else
+        {
+            BOOST_CHECK_CLOSE_FRACTION(coef, force_strength1, tolerance);
+            BOOST_CHECK_CLOSE_FRACTION(coef, force_strength3, tolerance);
+        }
 
         // force applied to center particle is equal to sum of others
         const coordinate_type sum = p1.force + p2.force + p3.force + p4.force;
