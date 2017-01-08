@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_QUARTIC_POTENTIAL
 #define MJOLNIR_QUARTIC_POTENTIAL
-#include "LocalPotentialBase.hpp"
+#include <mjolnir/core/LocalPotentialBase.hpp>
 
 namespace mjolnir
 {

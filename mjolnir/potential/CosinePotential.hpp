@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_COSINE_POTENTIAL
 #define MJOLNIR_COSINE_POTENTIAL
-#include "LocalPotentialBase.hpp"
+#include <mjolnir/potential/LocalPotentialBase.hpp>
 #include <cmath>
 
 namespace mjolnir

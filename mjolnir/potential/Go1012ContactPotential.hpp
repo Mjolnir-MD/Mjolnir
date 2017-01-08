@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_GO_10_12_CONTACT_POTENTIAL
 #define MJOLNIR_GO_10_12_CONTACT_POTENTIAL
-#include "LocalPotentialBase.hpp"
+#include <mjolnir/core/LocalPotentialBase.hpp>
 
 namespace mjolnir
 {

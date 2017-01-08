@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_HARMONIC_POTENTIAL
 #define MJOLNIR_HARMONIC_POTENTIAL
-#include "LocalPotentialBase.hpp"
+#include <mjolnir/core/LocalPotentialBase.hpp>
 
 namespace mjolnir
 {

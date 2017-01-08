@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_GAUSSIAN_POTENTIAL
 #define MJOLNIR_GAUSSIAN_POTENTIAL
-#include "LocalPotentialBase.hpp"
+#include <mjolnir/core/LocalPotentialBase.hpp>
 
 namespace mjolnir
 {

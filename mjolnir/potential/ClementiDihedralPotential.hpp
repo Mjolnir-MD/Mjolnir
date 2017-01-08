@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_CLEMENTI_DIHEDRAL_POTENTIAL
 #define MJOLNIR_CLEMENTI_DIHEDRAL_POTENTIAL
-#include "LocalPotentialBase.hpp"
+#include <mjolnir/core/LocalPotentialBase.hpp>
 #include <cmath>
 
 namespace mjolnir
