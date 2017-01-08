@@ -6,10 +6,8 @@ namespace mjolnir
 {
 
 /*! @brief harmonic potential & derivative                              *
- * designed for local force field. so it has its own parameters.        *
- * DO NOT USE THIS FOR GLOBAL FORCE FIELD! this may occupy your memory. *
- * V(phi)  = K * (value - native_value)^2                               *
- * dV/dphi = 2 * K * (value - native_value)                             */
+ * V(r)  = K * (r - r0)^2                                               *
+ * dV/dphi = 2 * K * (r - r0)                                           */
 template<typename traitsT>
 class HarmonicPotential : public LocalPotentialBase<traitsT>
 {
@@ -19,26 +17,26 @@ class HarmonicPotential : public LocalPotentialBase<traitsT>
     typedef typename traits_type::coordinate_type coordinate_type;
 
   public:
-    HarmonicPotential(const real_type k, const real_type native_val)
-        : k_(k), native_val_(native_val)
+    HarmonicPotential(const real_type k, const real_type r0)
+        : k_(k), r0_(r0)
     {}
     ~HarmonicPotential() override = default;
 
-    real_type potential(const real_type val) const override
+    real_type potential(const real_type r) const override
     {
-        const real_type dval = val - this->native_val_;
-        return this->k_ * dval * dval;
+        const real_type dr = r - r0_;
+        return this->k_ * dr * dr;
     }
 
-    real_type derivative(const real_type val) const override
+    real_type derivative(const real_type r) const override
     {
-        return  2 * this->k_ * (val - this->native_val_);
+        return  2 * this->k_ * (r - r0_);
     }
 
   private:
 
-    const real_type k_;          //!< spring coefficient
-    const real_type native_val_; //!< most stable length
+    const real_type k_;
+    const real_type r0_;
 };
 
 }
