@@ -24,7 +24,7 @@ class Matrix
     template<typename ... T_args, class = typename std::enable_if<
         (sizeof...(T_args) == number_of_element) &&
         is_all<std::is_convertible, realT, T_args...>::value>::type>
-    Matrix(T_args ... args) : values_{{args...}}{}
+    Matrix(T_args ... args) : values_{{static_cast<real_type>(args)...}}{}
 
     Matrix(const Matrix& mat) = default;
     Matrix& operator=(const Matrix& mat) = default;
