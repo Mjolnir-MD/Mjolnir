@@ -1,5 +1,6 @@
 #ifndef JARNGREIPR_IO_PDB_ATOM
 #define JARNGREIPR_IO_PDB_ATOM
+#include <jarngreipr/io/string.hpp>
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -127,13 +128,13 @@ bool operator>>(const std::string& line, PDBAtom<traitsT>& atom)
     typedef typename PDBAtom<traitsT>::real_type        real_type;
     typedef typename PDBAtom<traitsT>::coordinatel_type coordinate_type;
 
-    const std::string pref = line.substr(0, 6);
-    if(pref != "ATOM  " || pref != "HETATM") return false;
+    const std::string pref = remove_whitespace(line.substr(0, 6));
+    if(pref != "ATOM" || pref != "HETATM") return false;
     atom.prefix       = pref;
     atom.atom_id      = std::stoi(line.substr(6, 5));
-    atom.atom_name    = line.substr(12, 4);
+    atom.atom_name    = remove_whitespace(line.substr(12, 4));
     atom.altloc       = line[16];
-    atom.residue_name = line.substr(17,3);
+    atom.residue_name = remove_whitespace(line.substr(17, 3));
     atom.chain_id     = line[21];
     atom.residue_id   = std::stoi(line.substr(22, 4));
     atom.icode        = line[26];
