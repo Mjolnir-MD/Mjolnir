@@ -3,6 +3,7 @@
 #include "Particle.hpp"
 #include "LocalPotentialBase.hpp"
 #include <mjolnir/math/fast_inv_sqrt.hpp>
+#include <limits>
 #include <cmath>
 
 namespace mjolnir
@@ -35,21 +36,24 @@ class BondLengthInteraction
 };
 
 template<typename traitsT>
-inline void
+void
 BondLengthInteraction<traitsT>::calc_force(particle_type& p1, particle_type& p2,
         const potential_type& pot)
 {
     const coordinate_type dpos = p2.position - p1.position;
-    const real_type lensq = length_sq(dpos);
-    const real_type f = -1 * pot.derivative(std::sqrt(lensq));
-    const coordinate_type force = dpos * (fast_inv_sqrt(lensq) * f);
+    const real_type len = length(dpos);
+    const real_type f = -1 * pot.derivative(len);
+
+    if(std::abs(f) < std::numeric_limits<real_type>::epsilon()) return;
+
+    const coordinate_type force = dpos * (f / len);
     p1.force -= force;
     p2.force += force;
     return;
 }
 
 template<typename traitsT>
-inline typename BondLengthInteraction<traitsT>::real_type
+typename BondLengthInteraction<traitsT>::real_type
 BondLengthInteraction<traitsT>::calc_energy(
         const particle_type& p1, const particle_type& p2,
         const potential_type& pot) const
