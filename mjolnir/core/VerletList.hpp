@@ -48,8 +48,8 @@ class VerletList : public SpatialPartition<traitsT>
     void set_except(const except_list_type& ex){except_ = ex;}
     void set_except(except_list_type&& ex){except_ = std::forward<except_list_type>(ex);}
 
-    index_list const& partners(const std::size_t i) const override {return list_.at(i);}
-    index_list &      partners(const std::size_t i)       override {return list_.at(i);}
+    index_list const& partners(const std::size_t i) const override {return list_[i];}
+    index_list &      partners(const std::size_t i)       override {return list_[i];}
 
   private:
 
@@ -121,7 +121,6 @@ void VerletList<traitsT>::make(const particle_container_type& pcon)
             }
             else
             {
-                list_.at(i).reserve(pcon.size() - i - 1 - except_.at(i).size());
                 const auto cbeg = except_.at(i).cbegin();
                 const auto cend = except_.at(i).cend();
                 for(std::size_t j=i+1; j<pcon.size(); ++j)
