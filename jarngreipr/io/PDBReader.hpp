@@ -3,6 +3,7 @@
 #include "PDBChain.hpp"
 #include <fstream>
 #include <sstream>
+#include <limits>
 
 namespace jarngreipr
 {
@@ -14,9 +15,9 @@ class PDBReader
 
     typedef traitsT traits_type;
     typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinatel_type coordinate_type;
+    typedef typename traits_type::coordinate_type coordinate_type;
     typedef PDBAtom<traits_type>    atom_type;
-    typedef PDBResidue<traits_type> resiude_type;
+    typedef PDBResidue<traits_type> residue_type;
     typedef PDBChain<traits_type>   chain_type;
 
    public:
@@ -100,7 +101,8 @@ PDBReader<traitsT>::read(std::basic_istream<char>& ifs) const
         if(line.substr(0, 3) == "END") break; // which is better ENDMDL or END?
 
         atom_type atom;
-        if(line >> atom) atoms.emplace_back(std::move(atom));
+        if(line >> atom)
+            atoms.push_back(atom);
     }
     return atoms;
 }

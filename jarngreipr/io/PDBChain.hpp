@@ -12,7 +12,7 @@ class PDBChain
 
     typedef traitsT traits_type;
     typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinatel_type coordinate_type;
+    typedef typename traits_type::coordinate_type coordinate_type;
     typedef PDBResidue<traits_type> residue_type;
     typedef typename residue_type::int_type int_type;
     typedef std::vector<residue_type> container_type;
@@ -36,10 +36,10 @@ class PDBChain
     void emplace_back(residue_type&& res);
     void clear(){return residues_.clear();}
 
-    residue_type const& at(index_type i) const {return residues_.at(i);}
-    residue_type &      at(index_type i)       {return residues_.at(i);}
-    residue_type const& operator[](index_type i) const {return residues_[i];}
-    residue_type &      operator[](index_type i)       {return residues_[i];}
+    residue_type const& at(std::size_t i) const {return residues_.at(i);}
+    residue_type &      at(std::size_t i)       {return residues_.at(i);}
+    residue_type const& operator[](std::size_t i) const {return residues_[i];}
+    residue_type &      operator[](std::size_t i)       {return residues_[i];}
 
     residue_type const& front() const {return residues_.front();}
     residue_type &      front()       {return residues_.front();}

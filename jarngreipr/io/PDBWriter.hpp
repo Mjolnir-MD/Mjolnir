@@ -13,7 +13,7 @@ class PDBWriter
 
     typedef traitsT traits_type;
     typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinatel_type coordinate_type;
+    typedef typename traits_type::coordinate_type coordinate_type;
     typedef PDBAtom<traits_type>    atom_type;
     typedef PDBResidue<traits_type> resiude_type;
     typedef PDBChain<traits_type>   chain_type;

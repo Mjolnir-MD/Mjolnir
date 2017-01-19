@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_IO_PDB_ATOM
 #define JARNGREIPR_IO_PDB_ATOM
-#include <jarngreipr/io/string.hpp>
+#include <jarngreipr/util/string.hpp>
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -14,7 +14,7 @@ struct PDBAtom
 {
     typedef traitsT traits_type;
     typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinatel_type coordinate_type;
+    typedef typename traits_type::coordinate_type coordinate_type;
     typedef std::int64_t int_type;
 
     char            altloc;
@@ -33,7 +33,7 @@ struct PDBAtom
 
     explicit PDBAtom(const coordinate_type& pos);
     PDBAtom(const int_type aid, const coordinate_type& pos);
-    PDBAtom(const int_type aid, const std::string& atomname,
+    PDBAtom(const int_type aid, const int_type resid, const std::string& atomname,
             const std::string& resname, const std::string& chainid,
             const coordinate_type& pos);
 
@@ -126,10 +126,10 @@ template<typename traitsT>
 bool operator>>(const std::string& line, PDBAtom<traitsT>& atom)
 {
     typedef typename PDBAtom<traitsT>::real_type        real_type;
-    typedef typename PDBAtom<traitsT>::coordinatel_type coordinate_type;
+    typedef typename PDBAtom<traitsT>::coordinate_type coordinate_type;
 
     const std::string pref = remove_whitespace(line.substr(0, 6));
-    if(pref != "ATOM" || pref != "HETATM") return false;
+    if(pref != "ATOM" && pref != "HETATM") return false;
     atom.prefix       = pref;
     atom.atom_id      = std::stoi(line.substr(6, 5));
     atom.atom_name    = remove_whitespace(line.substr(12, 4));

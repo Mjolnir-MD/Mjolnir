@@ -13,7 +13,7 @@ class PDBResidue
   public:
     typedef traitsT traits_type;
     typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinatel_type coordinate_type;
+    typedef typename traits_type::coordinate_type coordinate_type;
     typedef PDBAtom<traits_type> atom_type;
     typedef typename atom_type::int_type int_type;
     typedef std::vector<atom_type> container_type;
