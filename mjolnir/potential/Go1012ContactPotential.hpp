@@ -25,6 +25,8 @@ class Go1012ContactPotential : public LocalPotentialBase<traitsT>
     real_type potential(const real_type r) const override
     {
         const real_type rd   = this->r0_ / r;
+        if(rd < 0.4) return 0.0;
+
         const real_type rd2  = rd  * rd;
         const real_type rd4  = rd2 * rd2;
         const real_type rd8  = rd4 * rd4;
@@ -38,6 +40,8 @@ class Go1012ContactPotential : public LocalPotentialBase<traitsT>
     {
         const real_type invr = 1. / r;
         const real_type rd   = this->r0_ * invr;
+        if(rd < 0.4) return 0.0;
+
         const real_type rd2  = rd  * rd;
         const real_type rd4  = rd2 * rd2;
         const real_type rd8  = rd4 * rd4;

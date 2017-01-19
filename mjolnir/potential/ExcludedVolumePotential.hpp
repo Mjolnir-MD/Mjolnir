@@ -108,6 +108,7 @@ ExcludedVolumePotential<traitsT>::potential(
 {
     const real_type d = radii_[i] + radii_[j];
     const real_type d_r = d / r;
+    if(d_r < 0.4) return 0.0;
     const real_type dr3 = d_r * d_r * d_r;
     const real_type dr6 = dr3 * dr3;
     const real_type dr12 = dr6 * dr6;
@@ -122,6 +123,7 @@ ExcludedVolumePotential<traitsT>::derivative(
     const real_type d = radii_[i] + radii_[j];
     const real_type rinv = 1. / r;
     const real_type d_r = d * rinv;
+    if(d_r < 0.4) return 0.0;
     const real_type dr3 = d_r * d_r * d_r;
     const real_type dr6 = dr3 * dr3;
     const real_type dr12 = dr6 * dr6;
