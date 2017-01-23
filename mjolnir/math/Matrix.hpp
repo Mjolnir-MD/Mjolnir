@@ -16,6 +16,9 @@ class Matrix
     constexpr static std::size_t dim_row = Row;
     constexpr static std::size_t dim_col = Col;
     constexpr static std::size_t number_of_element = Row * Col;
+    using container      = std::array<real_type, number_of_element>;
+    using iterator       = typename container::iterator;
+    using const_iterator = typename container::const_iterator;
 
   public:
     Matrix() : values_{{}}{}
@@ -44,17 +47,21 @@ class Matrix
     scalar_type  operator[](const std::size_t i) const {return values_[i];}
     scalar_type& operator[](const std::size_t i)       {return values_[i];}
 
+    iterator begin() {return values_.begin();}
+    iterator end()   {return values_.end();}
+    const_iterator cbegin() const {return values_.cbegin();}
+    const_iterator cend()   const {return values_.cend();}
+
   private:
-    std::array<real_type, number_of_element> values_;
+    container values_;
 };
 
 template<typename realT, std::size_t R, std::size_t C>
 Matrix<realT, R, C>&
 Matrix<realT, R, C>::operator+=(const Matrix<realT, R, C>& mat)
 {
-    for(std::size_t i=0; i<R; ++i)
-        for(std::size_t j=0; j<C; ++j)
-            (*this)(i, j) += mat(i, j);
+    for(std::size_t i=0; i<R*C; ++i)
+        (*this)[i] += mat[i];
     return *this;
 }
 
@@ -62,9 +69,8 @@ template<typename realT, std::size_t R, std::size_t C>
 Matrix<realT, R, C>&
 Matrix<realT, R, C>::operator-=(const Matrix<realT, R, C>& mat)
 {
-    for(std::size_t i=0; i<R; ++i)
-        for(std::size_t j=0; j<C; ++j)
-            (*this)(i, j) -= mat(i, j);
+    for(std::size_t i=0; i<R*C; ++i)
+        (*this)[i] -= mat[i];
     return *this;
 }
 
@@ -72,9 +78,8 @@ template<typename realT, std::size_t R, std::size_t C>
 Matrix<realT, R, C>&
 Matrix<realT, R, C>::operator*=(const scalar_type& s)
 {
-    for(std::size_t i=0; i<R; ++i)
-        for(std::size_t j=0; j<C; ++j)
-            (*this)(i, j) *= s;
+    for(std::size_t i=0; i<R*C; ++i)
+        (*this)[i] *= s;
     return *this;
 }
 
@@ -82,9 +87,8 @@ template<typename realT, std::size_t R, std::size_t C>
 Matrix<realT, R, C>&
 Matrix<realT, R, C>::operator/=(const scalar_type& s)
 {
-    for(std::size_t i=0; i<R; ++i)
-        for(std::size_t j=0; j<C; ++j)
-            (*this)(i, j) /= s;
+    for(std::size_t i=0; i<R*C; ++i)
+        (*this)[i] /= s;
     return *this;
 }
 
@@ -93,9 +97,8 @@ Matrix<realT, R, C>
 operator+(const Matrix<realT, R, C>& lhs, const Matrix<realT, R, C>& rhs)
 {
     Matrix<realT, R, C> retval;
-    for(std::size_t i=0; i<R; ++i)
-        for(std::size_t j=0; j<C; ++j)
-            retval(i, j) = lhs(i, j) + rhs(i, j);
+    for(std::size_t i=0; i<R*C; ++i)
+        retval[i] = lhs[i] + rhs[i];
     return retval;
 }
 
@@ -104,9 +107,8 @@ Matrix<realT, R, C>
 operator-(const Matrix<realT, R, C>& lhs, const Matrix<realT, R, C>& rhs)
 {
     Matrix<realT, R, C> retval;
-    for(std::size_t i=0; i<R; ++i)
-        for(std::size_t j=0; j<C; ++j)
-            retval(i, j) = lhs(i, j) - rhs(i, j);
+    for(std::size_t i=0; i<R*C; ++i)
+        retval[i] = lhs[i] - rhs[i];
     return retval;
 }
 
@@ -115,9 +117,8 @@ Matrix<realT, R, C>
 operator*(const Matrix<realT, R, C>& lhs, const realT rhs)
 {
     Matrix<realT, R, C> retval;
-    for(std::size_t i=0; i<R; ++i)
-        for(std::size_t j=0; j<C; ++j)
-            retval(i, j) = lhs(i, j) * rhs;
+    for(std::size_t i=0; i<R*C; ++i)
+        retval[i] = lhs[i] * rhs;
     return retval;
 }
 
@@ -126,9 +127,8 @@ Matrix<realT, R, C>
 operator*(const realT lhs, const Matrix<realT, R, C>& rhs)
 {
     Matrix<realT, R, C> retval;
-    for(std::size_t i=0; i<R; ++i)
-        for(std::size_t j=0; j<C; ++j)
-            retval(i, j) = rhs(i, j) * lhs;
+    for(std::size_t i=0; i<R*C; ++i)
+        retval[i] = lhs * rhs[i];
     return retval;
 }
 
@@ -137,9 +137,8 @@ Matrix<realT, R, C>
 operator/(const Matrix<realT, R, C>& lhs, const realT rhs)
 {
     Matrix<realT, R, C> retval;
-    for(std::size_t i=0; i<R; ++i)
-        for(std::size_t j=0; j<C; ++j)
-            retval(i, j) = lhs(i, j) / rhs;
+    for(std::size_t i=0; i<R*C; ++i)
+        retval[i] = lhs[i] / rhs;
     return retval;
 }
 
