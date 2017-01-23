@@ -74,7 +74,7 @@ read_global_interaction(const std::string& name,
 
         typename traitsT::real_type mergin = 1.0;
         try{mergin = toml::get<toml::Float>(potent.at("mergin"));}
-        catch(toml::except& except){mergin = 1.0;}
+        catch(toml::exception& except){mergin = 1.0;}
 
         auto space = make_unique<VerletList<traitsT>>(cutoff, cutoff * mergin);
 
