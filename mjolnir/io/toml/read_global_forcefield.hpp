@@ -72,7 +72,11 @@ read_global_interaction(const std::string& name,
     {
         const typename traitsT::real_type cutoff = pot->max_cutoff_length();
 
-        auto space = make_unique<VerletList<traitsT>>(cutoff, cutoff * 0.5);
+        typename traitsT::real_type mergin = 1.0;
+        try{mergin = toml::get<toml::Float>(potent.at("mergin"));}
+        catch(toml::except& except){mergin = 1.0;}
+
+        auto space = make_unique<VerletList<traitsT>>(cutoff, cutoff * mergin);
 
         std::vector<std::vector<std::size_t>> excepts;
         auto elist = toml::get<toml::Array<toml::Array<toml::Integer>>>(
