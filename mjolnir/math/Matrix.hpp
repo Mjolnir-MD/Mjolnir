@@ -192,6 +192,18 @@ Matrix<realT, C, R> transpose(const Matrix<realT, R, C>& mat)
     return retval;
 }
 
+template<typename charT, typename traits,
+         typename realT, std::size_t R, std::size_t C>
+std::basic_ostream<charT, traits>&
+operator<<(std::basic_ostream<charT, traits>& os, const Matrix<realT, R, C>& m)
+{
+    os << "(";
+    for(std::size_t i=0; i<R*C; ++i)
+        os << m[i] << " ";
+    os << ")";
+    return os;
+}
+
 // for 3*3 only ...
 template<typename realT>
 inline realT determinant(const Matrix<realT, 3, 3>& mat)
