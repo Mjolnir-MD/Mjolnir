@@ -2,7 +2,7 @@
 #define MJOLNIR_IO_TOML_READ_GLOBAL_FORCEFIELD
 #include <mjolnir/core/GlobalDistanceInteraction.hpp>
 #include <mjolnir/core/VerletList.hpp>
-// #include <mjolnir/core/UnlimitedGridCellList.hpp>
+#include <mjolnir/core/UnlimitedGridCellList.hpp>
 #include <mjolnir/potential/ExcludedVolumePotential.hpp>
 #include <mjolnir/potential/LennardJonesPotential.hpp>
 #include <mjolnir/util/zip_iterator.hpp>
@@ -97,9 +97,9 @@ read_global_interaction(const std::string& name,
         catch(std::exception& except){mergin = 1.0;}
         MJOLNIR_LOG_INFO("mergin rate", mergin);
 
-        auto space = make_unique<VerletList<traitsT>>(cutoff, cutoff * mergin);
-//         auto space = make_unique<UnlimitedGridCellList<traitsT>>(
-//                 cutoff, cutoff * mergin);
+//         auto space = make_unique<VerletList<traitsT>>(cutoff, cutoff * mergin);
+        auto space = make_unique<UnlimitedGridCellList<traitsT>>(
+                cutoff, cutoff * mergin);
         MJOLNIR_LOG_DEBUG("space partitioning class created.");
 
         std::vector<std::vector<std::size_t>> excepts;
