@@ -1,0 +1,3 @@
+[submodule "extlib/toml"]
+	path = extlib/toml
+	url = https://github.com/ToruNiina/TOMLParser.git
