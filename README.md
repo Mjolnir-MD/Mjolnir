@@ -1,6 +1,7 @@
 Mjolnir
 ====
 
+[![Build Status](https://travis-ci.org/ToruNiina/Mjolnir.svg?branch=master)](https://travis-ci.org/ToruNiina/Mjolnir)
 ![spec](https://img.shields.io/badge/spec-unstable-orange.svg)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
