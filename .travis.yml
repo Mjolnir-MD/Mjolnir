@@ -1,5 +1,5 @@
-os:
-- linux
+dist: trusty
+language: cpp
 
 matrix:
   include:
@@ -21,9 +21,13 @@ matrix:
             - clang-3.7
       env: COMPILER=clang++-3.7
 
-install:
+before_install:
 - sudo apt-get -qq update;
 - sudo apt-get -qq install libboost1.48-all-dev;
 
 script:
-- cmake .; make; make test;
+- mkdir build
+- cd build
+- cmake ..
+- make
+- make test
