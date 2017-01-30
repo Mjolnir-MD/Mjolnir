@@ -40,8 +40,6 @@ read_particles(const toml::Table& tab)
                 get<0>(iter)->at("velocity"));
         const auto acc = toml::get<toml::Array<toml::Float>>(
                 get<0>(iter)->at("acceleration"));
-        MJOLNIR_LOG_DEBUG("mass", mass, "position", pos, "velocity", vel,
-                          "acceleration", acc, "from TOML file");
 
         const typename traitsT::coordinate_type
             position(pos.at(0), pos.at(1), pos.at(2));
