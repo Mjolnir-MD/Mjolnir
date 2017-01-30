@@ -1,0 +1,30 @@
+language: cpp
+os:
+- linux
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+
+
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          packages:
+            - g++-5
+      env: COMPILER=g++-5
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-precise-3.7
+            - llvm-toolchain-precise
+          packages:
+            - clang-3.7
+      env: COMPILER=clang++-3.7
+
+script:
+- cmake .; make; make test;
