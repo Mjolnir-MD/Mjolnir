@@ -23,7 +23,7 @@ matrix:
 
 install:
 - sudo apt-get -qq update;
-- sudo apt-get -qq install libboost1.48-all-dev;
+- sudo apt-get -qq install libboost-all-dev;
 
 script:
 - mkdir build
