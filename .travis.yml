@@ -24,6 +24,8 @@ matrix:
 install:
 - sudo apt-get -qq update;
 - sudo apt-get -qq install libboost-all-dev;
+- git submodule init
+- git submodule update
 
 script:
 - mkdir build
