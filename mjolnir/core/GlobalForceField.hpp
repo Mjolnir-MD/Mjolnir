@@ -2,6 +2,7 @@
 #define MJOLNIR_GLOBAL_FORCE_FIELD
 #include "GlobalInteractionBase.hpp"
 #include "GlobalPotentialBase.hpp"
+#include <mjolnir/util/logger.hpp>
 #include <vector>
 #include <array>
 #include <memory>
@@ -62,7 +63,14 @@ class GlobalForceField
     };
 
     std::vector<global_potential_type> potentials_;
+
+    static
+    Logger& logger_;
 };
+
+template<typename traitsT>
+Logger& GlobalForceField<traitsT>::logger_ =
+    LoggerManager<char>::get_logger("GlobalForceField");
 
 template<typename traitsT>
 void GlobalForceField<traitsT>::initialize(
@@ -77,7 +85,10 @@ template<typename traitsT>
 void GlobalForceField<traitsT>::calc_force(ParticleContainer<traitsT>& pcon)
 {
     for(auto iter = potentials_.begin(); iter != potentials_.end(); ++iter)
+    {
         iter->interaction_->calc_force(pcon, *(iter->potential_));
+        MJOLNIR_LOG_DEBUG("calculate force");
+    }
     return;
 }
 
@@ -90,6 +101,7 @@ GlobalForceField<traitsT>::calc_energy(
     for(auto iter = potentials_.cbegin(); iter != potentials_.cend(); ++iter)
     {
         energy += iter->interaction_->calc_energy(pcon, *(iter->potential_));
+        MJOLNIR_LOG_DEBUG("calculate energy", energy);
     }
     return energy;
 }
