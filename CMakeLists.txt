@@ -4,5 +4,14 @@ project(mjolnir)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
+option(DEBUG "dump debug information" OFF)
+
+if(DEBUG)
+    add_definitions(-DMJOLNIR_DEBUG)
+else(DEBUG)
+    add_definitions(-DMJOLNIR_NO_DEBUG)
+endif(DEBUG)
+
+
 add_subdirectory(src)
 add_subdirectory(test)
