@@ -21,7 +21,7 @@ matrix:
             - clang-3.7
       env: COMPILER=clang++-3.7
 
-before_install:
+install:
 - sudo apt-get -qq update;
 - sudo apt-get -qq install libboost1.48-all-dev;
 
