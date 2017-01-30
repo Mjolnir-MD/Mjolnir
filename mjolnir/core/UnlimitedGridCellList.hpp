@@ -15,8 +15,9 @@ struct hash<std::tuple<int, int, int>>
     typedef std::tuple<int, int, int> argument_type;
     std::size_t operator()(argument_type const& val) const
     {
-        const hash<int> h;
-        return h(std::get<0>(val)) ^ h(std::get<1>(val)) ^ h(std::get<2>(val));
+        return hash<int>()(std::get<0>(val)) ^
+               hash<int>()(std::get<1>(val)) ^
+               hash<int>()(std::get<2>(val));
     }
 };
 
