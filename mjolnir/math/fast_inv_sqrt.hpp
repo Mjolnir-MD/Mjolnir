@@ -2,9 +2,47 @@
 #define MJOLNIR_FAST_INV_SQRT
 #include <cstdint>
 
+#ifdef HAVE_SSE
+#include <xmmintrin.h>
+
 namespace mjolnir
 {
- 
+
+inline float fast_inv_sqrt(float x)
+{
+    float r;
+    _mm_store_ss(&r, _mm_rsqrt_ss(_mm_load_ss(&x)));
+    return r * (3.0f - x * r * r) * 0.5f;
+}
+
+inline double fast_inv_sqrt(double x)
+{
+    const double xhalf = 0.5 * x;
+    float f = static_cast<float>(x);
+    _mm_store_ss(&f, _mm_rsqrt_ss(_mm_load_ss(&f)));
+    double r = static_cast<double>(f);
+    r *= (1.5 - xhalf * r * r);
+    r *= (1.5 - xhalf * r * r);
+    return r * (1.5 - xhalf * r * r);
+}
+
+} // mjolnir
+
+#else // cpu do not have SSE operation
+
+namespace mjolnir
+{
+
+inline float fast_inv_sqrt(float x)
+{
+    const float xhalf = 0.5f * x;
+    std::int32_t i = *(reinterpret_cast<std::int32_t*>(&x));
+    i = 0x5f3759df - (i >> 1);
+    x = *(reinterpret_cast<float*>(&i));
+    x *= (1.5f - xhalf * x * x);
+    return x * (1.5f - xhalf * x * x);
+}
+
 inline double fast_inv_sqrt(double x)
 {
     const double xhalf = 0.5 * x;
@@ -18,17 +56,7 @@ inline double fast_inv_sqrt(double x)
     return x;
 }
 
-inline float fast_inv_sqrt(float x)
-{
-    const float xhalf = 0.5f * x;
-    std::int32_t i = *(reinterpret_cast<std::int32_t*>(&x));
-    i = 0x5f3759df - (i >> 1);
-    x = *(reinterpret_cast<float*>(&i));
-    x *= (1.5f - xhalf * x * x);
-    return x * (1.5f - xhalf * x * x);
-}
- 
- 
 }// mjolnir
 
+#endif // HAVE_SSE
 #endif /* MJOLNIR_FAST_INV_SQRT */
