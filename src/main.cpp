@@ -44,6 +44,7 @@ int main(int argc, char** argv)
     // run md
     std::cerr << "start running simulation" << std::endl;
     simulator.initialize();
+    const auto start = std::chrono::system_clock::now();
     for(std::size_t i=0; i<total_step; ++i)
     {
         if(i % save_step == 0)
@@ -57,6 +58,10 @@ int main(int argc, char** argv)
     // output last state
     obs.output_coordinate(simulator);
     obs.output_energy(simulator);
+    const auto stop = std::chrono::system_clock::now();
+    std::cout << "elapsed time: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                      stop - start).count() << " [msec]" << std::endl;
 
     return 0;
 }

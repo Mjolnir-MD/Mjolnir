@@ -26,7 +26,6 @@ BOOST_AUTO_TEST_CASE(fast_inv_sqrt_double)
         const double x = uni(mt);
         const double x2 = x * x;
         const double x_inv = 1. / x;
-
         BOOST_CHECK_CLOSE_FRACTION(x_inv, mjolnir::fast_inv_sqrt(x2), 1e-10);
     }
 }
@@ -53,7 +52,7 @@ BOOST_AUTO_TEST_CASE(speed_check_double)
     const auto faster_end = std::chrono::system_clock::now();
     const auto faster_duration = faster_end - faster_start;
 
-//     BOOST_CHECK(faster_duration < normal_duration);
+    BOOST_CHECK(faster_duration < normal_duration);
 }
 
 BOOST_AUTO_TEST_CASE(fast_inv_sqrt_float)
@@ -65,7 +64,6 @@ BOOST_AUTO_TEST_CASE(fast_inv_sqrt_float)
         const float x = uni(mt);
         const float x2 = x * x;
         const float x_inv = 1. / x;
-
         BOOST_CHECK_CLOSE_FRACTION(x_inv, mjolnir::fast_inv_sqrt(x2), 1e-5);
     }
 }
@@ -92,6 +90,6 @@ BOOST_AUTO_TEST_CASE(speed_check_float)
     const auto faster_end = std::chrono::system_clock::now();
     const auto faster_duration = faster_end - faster_start;
 
-//     BOOST_CHECK(faster_duration < normal_duration);
+    BOOST_CHECK(faster_duration < normal_duration);
 
 }

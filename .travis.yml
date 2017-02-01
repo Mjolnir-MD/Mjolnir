@@ -1,0 +1,35 @@
+dist: trusty
+language: cpp
+
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env: COMPILER=g++-5
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+          packages:
+            - clang-3.7
+      env: COMPILER=clang++-3.7
+
+install:
+- sudo apt-get -qq update;
+- sudo apt-get -qq install libboost-all-dev;
+- git submodule init
+- git submodule update
+
+script:
+- mkdir build
+- cd build
+- cmake ..
+- make
+- make test
