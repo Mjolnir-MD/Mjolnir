@@ -1,5 +1,5 @@
 Mjolnir
-====
+==========
 
 [![Build Status](https://travis-ci.org/ToruNiina/Mjolnir.svg?branch=master)](https://travis-ci.org/ToruNiina/Mjolnir)
 ![spec](https://img.shields.io/badge/spec-unstable-orange.svg)
@@ -7,22 +7,37 @@ Mjolnir
 
 Molecular Dynamics Simulation Software written in c++11.
 
-## build
+Build
+----------
 
-Mjolnir depends on [TOMLParser](https://github.com/ToruNiina/TOMLParser).
-Before build, please Download the library and add include path.
+__Mjolnir__ depends on [TOMLParser](https://github.com/ToruNiina/TOMLParser).
 
 ```sh
-$ mkdir build
+$ git submodule init   # (if you've just cloned this repo)
+$ git submodule update # (ditto)
+$ mkdir build          # (ditto)
 $ cd build
 $ cmake ..
 $ make
 ```
 
-## testing
+Testing
+----------
 
-After build, you can run test codes. 
+After build, you can run test codes.
 
 ```sh
 $ make test
 ```
+
+## Author
+
+* Toru Niina
+
+## Licensing terms
+
+This product is licensed under the terms of the [MIT License](LICENSE).
+
+- Copyright (c) 2016- Toru Niina
+
+All rights reserved.
