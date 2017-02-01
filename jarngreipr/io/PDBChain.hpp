@@ -51,6 +51,9 @@ class PDBChain
     const_iterator cbegin() const {return residues_.cbegin();}
     const_iterator cend()   const {return residues_.cend();}
 
+    container_type&       residues()       {return residues_;}
+    container_type const& residues() const {return residues_;}
+
   private:
 
     container_type residues_;

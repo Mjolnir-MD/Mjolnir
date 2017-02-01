@@ -53,6 +53,9 @@ class PDBResidue
     const_iterator cbegin() const {return atoms_.cbegin();}
     const_iterator cend()   const {return atoms_.cend();}
 
+    container_type&       atoms()       {return atoms_;}
+    container_type const& atoms() const {return atoms_;}
+
   private:
     container_type atoms_;
 };
