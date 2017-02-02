@@ -20,17 +20,17 @@ class Bead
 
   public:
 
-    Beads() = default;
-    explicit Beads(const container_type& atoms) : atoms_(atoms){}
-    explicit Beads(const std::string& name) : name_(name){}
-    Beads(const container_type& atoms, const std::string& name)
+    Bead() = default;
+    explicit Bead(const container_type& atoms) : atoms_(atoms){}
+    explicit Bead(const std::string& name) : name_(name){}
+    Bead(const container_type& atoms, const std::string& name)
         : atoms_(atoms), name_(name){}
-    ~Beads() = default;
+    ~Bead() = default;
 
     virtual coordinate_type position(const std::size_t i) const = 0;
 
-    residue_type const& atoms() const {return atoms_;}
-    residue_type &      atoms()       {return atoms_;}
+    container_type const& atoms() const {return atoms_;}
+    container_type &      atoms()       {return atoms_;}
 
     std::string const& name() const {return name_;}
     std::string &      name()       {return name_;}
