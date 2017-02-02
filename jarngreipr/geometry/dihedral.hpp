@@ -26,7 +26,7 @@ typename scalar_type_of<coordT>::type dihedral_angle(
                          ? cos_RS : std::copysign(1.0, cos_RS);
     const auto phi = std::copysign(std::acos(cos_phi), mjolnir::dot_product(r_ij, n));
 
-    return cos_phi;
+    return phi;
 }
 
 
