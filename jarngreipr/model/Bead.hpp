@@ -25,7 +25,7 @@ class Bead
     explicit Beads(const std::string& name) : name_(name){}
     Beads(const container_type& atoms, const std::string& name)
         : atoms_(atoms), name_(name){}
-    ~CarbonAlpha() = default;
+    ~Beads() = default;
 
     virtual coordinate_type position(const std::size_t i) const = 0;
 
