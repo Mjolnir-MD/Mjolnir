@@ -15,7 +15,8 @@ class Model
     typedef PDBChain<traits_type> chain_type;
     typedef std::vector<chain_type> chain_container_type;
     typedef Bead<traits_type> bead_type;
-    typedef std::vector<bead_type> bead_container_type;
+    typedef std::unique_ptr<bead_type> bead_ptr;
+    typedef std::vector<bead_ptr> bead_container_type;
 
     template<std::size_t N>
     using interaction_type = std::pair<std::array<std::size_t, N>, real_type>;
