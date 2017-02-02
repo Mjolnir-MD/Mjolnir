@@ -6,7 +6,7 @@ namespace jarngreipr
 {
 
 template<typename coordT>
-typename scalar_type_of<coordT>::type dihedral_angle(
+typename mjolnir::scalar_type_of<coordT>::type dihedral_angle(
         const coordT& p1, const coordT& p2, const coordT& p3, const coordT& p4)
 {
     const auto r_ij = p1 - p2;
