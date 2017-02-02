@@ -19,15 +19,22 @@ class CarbonAlpha : public Bead<traitsT>
     typedef typename base_type::coordinate_type coordinate_type;
     typedef typename base_type::container_type container_type;
     typedef typename base_type::atom_type atom_type;
+    typedef PDBResidue<traitsT> residue_type;
 
   public:
 
     CarbonAlpha() = default;
     CarbonAlpha(const residue_type& residue) : base_type(residue.atoms()){}
     CarbonAlpha(const container_type& atoms) : base_type(atoms){}
+    CarbonAlpha(const residue_type& residue, const std::string& name)
+        : base_type(residue.atoms(), name)
+    {}
+    CarbonAlpha(const container_type& atoms, const std::string& name)
+        : base_type(atoms, name)
+    {}
     ~CarbonAlpha() = default;
 
-    coordinate_type position(const std::size_t i = 0) const override;
+    coordinate_type position(const std::size_t i) const override;
 };
 
 template<typename traitsT>
@@ -37,14 +44,14 @@ CarbonAlpha<traitsT>::position(const std::size_t i) const
     auto finder = [](const atom_type& a){return a.atom_name == "CA";};
 
     const std::size_t num_ca =
-        std::count_if(atoms_.cbegin(), atoms_.cend(), finder);
+        std::count_if(this->atoms_.cbegin(), this->atoms_.cend(), finder);
     if(num_ca == 0)
         throw std::runtime_error("Ca: no c-alpha atom in this residue");
     else if(num_ca <= i)
         throw std::out_of_range(std::string("Ca: ") + std::to_string(i) +
                                 std::string("-th Calpha does not exists"));
 
-    const auto ca = std::find_if(atoms_.cbegin(), atoms_.cend(), finder);
+    const auto ca = std::find_if(this->atoms_.cbegin(), this->atoms_.cend(), finder);
     return ca->position;
 }
 
