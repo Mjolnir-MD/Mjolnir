@@ -1,18 +1,20 @@
 #ifndef MJOLNIR_GLOBAL_DISTANCE_INTEARACTION
 #define MJOLNIR_GLOBAL_DISTANCE_INTEARACTION
-#include "GlobalInteractionBase.hpp" 
-#include "SpatialPartition.hpp" 
+#include "GlobalInteractionBase.hpp"
+#include "SpatialPartition.hpp"
+#include "BoundaryCondition.hpp"
 #include <memory>
 
 namespace mjolnir
 {
 
-template<typename traitsT>
+template<typename traitsT, typename boundaryT = UnlimitedBoundary<traitsT>>
 class GlobalDistanceInteraction : public GlobalInteractionBase<traitsT>
 {
   public:
 
     typedef traitsT traits_type;
+    typedef boundaryT boundary_type;
     typedef typename traits_type::time_type time_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
@@ -26,6 +28,14 @@ class GlobalDistanceInteraction : public GlobalInteractionBase<traitsT>
         : spatial_partition_(
                 std::forward<std::unique_ptr<spatial_partitioning_type>>(sp))
     {}
+
+    GlobalDistanceInteraction(std::unique_ptr<spatial_partitioning_type>&& sp,
+                              const coordinate_type& system_size)
+        : spatial_partition_(
+                std::forward<std::unique_ptr<spatial_partitioning_type>>(sp)),
+          boundary(system_size)
+    {}
+
     ~GlobalDistanceInteraction() = default;
 
     void
@@ -44,10 +54,11 @@ class GlobalDistanceInteraction : public GlobalInteractionBase<traitsT>
 
   private:
     std::unique_ptr<spatial_partitioning_type> spatial_partition_;
+    boundary_type boundary;
 };
 
-template<typename traitsT>
-void GlobalDistanceInteraction<traitsT>::calc_force(
+template<typename traitsT, typename boundaryT>
+void GlobalDistanceInteraction<traitsT, boundaryT>::calc_force(
         particle_container_type& pcon, potential_type& pot)
 {
     spatial_partition_->update(pcon);
@@ -58,7 +69,9 @@ void GlobalDistanceInteraction<traitsT>::calc_force(
         for(auto iter = partners.cbegin(); iter != partners.cend(); ++iter)
         {
             const std::size_t j = *iter;
-            const coordinate_type rij = pcon[j].position - pcon[i].position;
+            // XXX: for short-range force
+            const coordinate_type rij =
+                boundary(pcon[j].position - pcon[i].position);
             const real_type       l   = length(rij);
             const coordinate_type f   = rij * (pot.derivative(i, j, l) / l);
             pcon[i].force += f;
@@ -68,9 +81,9 @@ void GlobalDistanceInteraction<traitsT>::calc_force(
     return ;
 }
 
-template<typename traitsT>
-typename GlobalDistanceInteraction<traitsT>::real_type
-GlobalDistanceInteraction<traitsT>::calc_energy(
+template<typename traitsT, typename boundaryT>
+typename GlobalDistanceInteraction<traitsT, boundaryT>::real_type
+GlobalDistanceInteraction<traitsT, boundaryT>::calc_energy(
         const particle_container_type& pcon, const potential_type& pot) const
 {
     real_type e = 0.0;
@@ -81,7 +94,9 @@ GlobalDistanceInteraction<traitsT>::calc_energy(
         for(auto iter = partners.cbegin(); iter != partners.cend(); ++iter)
         {
             const std::size_t j = *iter;
-            const coordinate_type rij = pcon[j].position - pcon[i].position;
+            // XXX: for short-range force
+            const coordinate_type rij =
+                boundary(pcon[j].position - pcon[i].position);
             const real_type l = length(rij);
             e += pot.potential(i, j, l);
         }
@@ -89,8 +104,8 @@ GlobalDistanceInteraction<traitsT>::calc_energy(
     return e;
 }
 
-template<typename traitsT>
-inline void GlobalDistanceInteraction<traitsT>::initialize(
+template<typename traitsT, typename boundaryT>
+inline void GlobalDistanceInteraction<traitsT, boundaryT>::initialize(
         const particle_container_type& pcon, const time_type dt)
 {
     this->spatial_partition_->update(pcon, dt);
