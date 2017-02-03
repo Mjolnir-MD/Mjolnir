@@ -1,6 +1,9 @@
 #ifndef JARNGREIPR_MODEL
 #define JARNGREIPR_MODEL
 #include "Bead.hpp"
+#include <utility>
+#include <memory>
+#include <array>
 
 namespace jarngreipr
 {
