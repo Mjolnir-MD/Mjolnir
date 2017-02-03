@@ -14,6 +14,8 @@ template<typename traitsT>
 ParticleContainer<traitsT>
 read_particles(const toml::Table& tab)
 {
+    typedef typename traitsT::coordinate_type coordT;
+
     MJOLNIR_SET_LOGGER("read_toml_file");
     MJOLNIR_LOG_DEBUG("read_particles CALLED");
 
@@ -33,24 +35,15 @@ read_particles(const toml::Table& tab)
     for(auto iter = make_zip(particles.cbegin(), pcon.begin());
             iter != make_zip(particles.cend(), pcon.end()); ++iter)
     {
-        const auto mass = toml::get<toml::Float>(get<0>(iter)->at("mass"));
-        const auto pos = toml::get<toml::Array<toml::Float>>(
-                get<0>(iter)->at("position"));
-        const auto vel = toml::get<toml::Array<toml::Float>>(
-                get<0>(iter)->at("velocity"));
-        const auto acc = toml::get<toml::Array<toml::Float>>(
-                get<0>(iter)->at("acceleration"));
+        const auto p = get<0>(iter);
+        const auto mass = toml::get<toml::Float>(p->at("mass"));
+        const auto pos  = toml::get<toml::Array<toml::Float>>(p->at("position"));
+        const auto vel  = toml::get<toml::Array<toml::Float>>(p->at("velocity"));
 
-        const typename traitsT::coordinate_type
-            position(pos.at(0), pos.at(1), pos.at(2));
-        const typename traitsT::coordinate_type
-            velocity(vel.at(0), vel.at(1), vel.at(2));
-        const typename traitsT::coordinate_type
-            acceleration(acc.at(0), acc.at(1), acc.at(2));
-        MJOLNIR_LOG_INFO("mass", mass, "position", position,
-                         "velocity", velocity, "acceleration", acceleration);
-
-        *get<1>(iter) = make_particle(mass, position, velocity, acceleration);
+        get<1>(iter)->mass     = mass;
+        get<1>(iter)->position = coordT(pos.at(0), pos.at(1), pos.at(2));
+        get<1>(iter)->velocity = coordT(vel.at(0), vel.at(1), vel.at(2));
+        get<1>(iter)->force    = coordT(0., 0., 0.);
     }
     MJOLNIR_LOG_DEBUG("read_particles RETURNED");
     return pcon;
