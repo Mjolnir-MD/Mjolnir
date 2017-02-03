@@ -54,6 +54,15 @@ class ClementiGo : public Model<traitsT>
     exception_list_type &      exception()       {return exception_;}
     exception_list_type const& exception() const {return exception_;}
 
+    // enum
+//     void output(std::ostream& os, const std::string& pot_name) const;
+
+    void output_bond(std::ostream& os) const;
+    void output_go(std::ostream& os) const;
+    void output_angle(std::ostream& os) const;
+    void output_dihedral(std::ostream& os) const;
+    void output_exception(std::ostream& os) const;
+
   private:
 
     real_type
@@ -62,7 +71,6 @@ class ClementiGo : public Model<traitsT>
     real_type
     min_distance_heavy_atom(
             const residue_type& lhs, const residue_type& rhs) const;
-
   private:
 
     real_type contact_threshold_;
@@ -184,6 +192,110 @@ void ClementiGo<traitsT>::make(const chain_container_type& chains)
     return;
 }
 
+
+template<typename traitsT>
+void ClementiGo<traitsT>::output_bond(std::ostream& os) const
+{
+    os << "[forcefield]" << std::endl;
+    os << "[[localforcefield]]" << std::endl;
+    os << "interaction = \"BondLength\"" << std::endl;
+    os << "potential = \"Harmonic\"" << std::endl;
+
+    os << "# params{{{" << std::endl;
+    os << "parameters = [" << std::endl;
+    for(auto iter = this->bond_length_.cbegin();
+            iter != this->bond_length_.cend(); ++iter)
+    {
+        os << "{indices = [" << iter->first[0] << ", " << iter->first[1]
+           << "], r0 = " << iter->second << ", k = 100.0}," << std::endl;
+    }
+    os << "]" << std::endl;
+    os << "# }}}" << std::endl;
+
+    return;
+}
+
+template<typename traitsT>
+void ClementiGo<traitsT>::output_go(std::ostream& os) const
+{
+    os << "[[localforcefield]]" << std::endl;
+    os << "interaction = \"BondLength\"" << std::endl;
+    os << "potential = \"Go1012Contact\"" << std::endl;
+    os << "# params{{{" << std::endl;
+    os << "parameters = [" << std::endl;
+    for(auto iter = go_contact_.cbegin();
+            iter != go_contact_.cend(); ++iter)
+    {
+        os << "{indices = [" << iter->first[0] << ", " << iter->first[1]
+           << "], r0 = " << iter->second << ", k = 0.3}," << std::endl;
+    }
+    os << "]" << std::endl;
+    os << "# }}}" << std::endl;
+
+    return;
+}
+
+template<typename traitsT>
+void ClementiGo<traitsT>::output_angle(std::ostream& os) const
+{
+    os << "[[localforcefield]]" << std::endl;
+    os << "interaction = \"BondAngle\"" << std::endl;
+    os << "potential = \"Harmonic\"" << std::endl;
+    os << "# params{{{" << std::endl;
+    os << "parameters = [" << std::endl;
+    for(auto iter = bond_angle_.cbegin();
+            iter != bond_angle_.cend(); ++iter)
+    {
+        os << "{indices = ["
+           << iter->first[0] << ", " << iter->first[1] << ", " << iter->first[2]
+           << "], r0 = " << iter->second << ", k = 20.0}," << std::endl;
+    }
+    os << "]" << std::endl;
+    os << "# }}}" << std::endl;
+
+    return;
+}
+
+template<typename traitsT>
+void ClementiGo<traitsT>::output_dihedral(std::ostream& os) const
+{
+    os << "[[localforcefield]]" << std::endl;
+    os << "interaction = \"DihedralAngle\"" << std::endl;
+    os << "potential = \"ClementiDihedral\"" << std::endl;
+    os << "# params{{{" << std::endl;
+    os << "parameters = [" << std::endl;
+    for(auto iter = dihedral_angle_.cbegin();
+            iter != dihedral_angle_.cend(); ++iter)
+    {
+        os << "{indices = ["
+           << iter->first[0] << ", " << iter->first[1] << ", "
+           << iter->first[2] << ", " << iter->first[3]
+           << "], phi0 = " << iter->second << ", k1 = 1.0, k3 = 0.5}," << std::endl;
+    }
+    os << "]" << std::endl;
+    os << "# }}}" << std::endl;
+    return;
+}
+
+template<typename traitsT>
+void ClementiGo<traitsT>::output_exception(std::ostream& os) const
+{
+    std::cout << "# excepts{{{" << std::endl;
+    std::cout << "excepts = [" << std::endl;
+    for(auto iter = this->exception_.cbegin();
+            iter != this->exception_.cend(); ++iter)
+    {
+        std::cout << "[";
+        for(auto jter = iter->cbegin(); jter != iter->cend(); ++jter)
+        {
+            std::cout << *jter << ",";
+        }
+        std::cout << "]," << std::endl;
+    }
+    std::cout << "]" << std::endl;
+    std::cout << "# }}}" << std::endl;
+    return;
+}
 
 template<typename traitsT>
 typename ClementiGo<traitsT>::real_type
