@@ -17,6 +17,7 @@ class ClementiGo : public Model<traitsT>
 {
   public:
 
+    typedef traitsT traits_type;
     typedef Model<traitsT> base_type;
     typedef typename base_type::real_type            real_type;
     typedef typename base_type::coordinate_type      coordinate_type;
@@ -24,6 +25,7 @@ class ClementiGo : public Model<traitsT>
     typedef typename base_type::bead_container_type  bead_container_type;
     typedef typename base_type::chain_type           chain_type;
     typedef typename base_type::chain_container_type chain_container_type;
+    typedef PDBResidue<traits_type>                  residue_type;
     typedef std::vector<std::size_t>                 index_list_type;
     typedef std::vector<index_list_type>             exception_list_type;
 
@@ -41,16 +43,25 @@ class ClementiGo : public Model<traitsT>
     real_type& contact_threshold()       {return contact_threshold_;}
     real_type  contact_threshold() const {return contact_threshold_;}
 
-    std::vector<interaction_type<2>>&       bonds()            {return bond_length_;}
-    std::vector<interaction_type<2>> const& bonds()      const {return bond_length_;}
-    std::vector<interaction_type<2>>&       contacts()         {return go_contact_;}
-    std::vector<interaction_type<2>> const& contacts()   const {return go_contact_;}
-    std::vector<interaction_type<3>>&       angles()           {return bond_angle_;}
-    std::vector<interaction_type<3>> const& angles()     const {return bond_angle_;}
-    std::vector<interaction_type<4>>&       dihedrals()        {return dihedral_angle_;}
-    std::vector<interaction_type<4>> const& dihedrals()  const {return dihedral_angle_;}
+    std::vector<interaction_type<2>>&       bonds()           {return bond_length_;}
+    std::vector<interaction_type<2>> const& bonds()     const {return bond_length_;}
+    std::vector<interaction_type<2>>&       contacts()        {return go_contact_;}
+    std::vector<interaction_type<2>> const& contacts()  const {return go_contact_;}
+    std::vector<interaction_type<3>>&       angles()          {return bond_angle_;}
+    std::vector<interaction_type<3>> const& angles()    const {return bond_angle_;}
+    std::vector<interaction_type<4>>&       dihedrals()       {return dihedral_angle_;}
+    std::vector<interaction_type<4>> const& dihedrals() const {return dihedral_angle_;}
     exception_list_type &      exception()       {return exception_;}
     exception_list_type const& exception() const {return exception_;}
+
+  private:
+
+    real_type
+    min_distance_heavy_atom_sq(
+            const residue_type& lhs, const residue_type& rhs) const;
+    real_type
+    min_distance_heavy_atom(
+            const residue_type& lhs, const residue_type& rhs) const;
 
   private:
 
@@ -84,7 +95,7 @@ void ClementiGo<traitsT>::make(const chain_container_type& chains)
              std::size_t j = i+4;
              for(auto jter = iter + 4; jter != chain->cend(); ++jter)
              {
-                if(min_distance_sq(*iter, *jter) < threshold2)
+                if(min_distance_heavy_atom_sq(*iter, *jter) < threshold2)
                 {
                     const auto dist = distance(this->beads_.at(i)->position(0),
                                                this->beads_.at(j)->position(0));
@@ -153,7 +164,7 @@ void ClementiGo<traitsT>::make(const chain_container_type& chains)
                 std::size_t j = j_begin;
                 for(auto rhs = jter->cbegin(); rhs != jter->cend(); ++rhs)
                 {
-                    if(min_distance_sq(*lhs, *rhs) < threshold2)
+                    if(min_distance_heavy_atom_sq(*lhs, *rhs) < threshold2)
                     {
                         const auto dist = distance(this->beads_.at(i)->position(0),
                                                    this->beads_.at(j)->position(0));
@@ -170,9 +181,37 @@ void ClementiGo<traitsT>::make(const chain_container_type& chains)
         }
         i_begin += iter->size();
     }
-
-
     return;
+}
+
+
+template<typename traitsT>
+typename ClementiGo<traitsT>::real_type
+ClementiGo<traitsT>::min_distance_heavy_atom_sq(
+        const residue_type& lhs, const residue_type& rhs) const
+{
+    real_type min_dist_sq = std::numeric_limits<real_type>::max();
+    for(auto iter = lhs.cbegin(); iter != lhs.cend(); ++iter)
+    {
+        if(iter->atom_name.front() == 'H')
+            continue;
+        for(auto jter = rhs.cbegin(); jter != rhs.cend(); ++jter)
+        {
+            if(jter->atom_name.front() == 'H')
+                continue;
+            const auto dist_sq = distance_sq(iter->position, jter->position);
+            if(min_dist_sq > dist_sq) min_dist_sq = dist_sq;
+        }
+    }
+    return min_dist_sq;
+}
+
+template<typename traitsT>
+typename ClementiGo<traitsT>::real_type
+ClementiGo<traitsT>::min_distance_heavy_atom(
+        const residue_type& lhs, const residue_type& rhs) const
+{
+    return std::sqrt(min_distance_heavy_atom(lhs, rhs));
 }
 
 }//jarngreipr
