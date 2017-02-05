@@ -11,8 +11,6 @@ matrix:
           packages:
             - g++-5
       env: COMPILER=g++-5
-      env: CXX=g++-5
-      env: CC=gcc-5
     - compiler: clang
       addons:
         apt:
@@ -22,12 +20,12 @@ matrix:
           packages:
             - clang-3.7
       env: COMPILER=clang++-3.7
-      env: CXX=clang++-3.7
-      env: CC=clang-3.7
 
 install:
 - sudo apt-get -qq update;
 - sudo apt-get -qq install libboost-all-dev;
+- if [ "$CXX" = "g++" ]; then export CXX="g++-5"; fi
+- if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.7"; fi
 - git submodule init
 - git submodule update
 
