@@ -70,20 +70,14 @@ class UnlimitedGridCellList : public SpatialPartition<traitsT>
 
     void make  (const particle_container_type& pcon) override;
     void update(const particle_container_type& pcon) override;
-    void update(const particle_container_type& pcon, const time_type dt) override;
-
-    void add_except(const index_type i, const index_type j);
-    void set_except(const except_list_type& ex){except_ = ex;}
-    void set_except(except_list_type&& ex);
+    void update(const particle_container_type& pcon,
+                const time_type dt) override;
 
     real_type const& cutoff() const {return this->cutoff_;}
     real_type const& mergin() const {return this->mergin_;}
 
     void set_cutoff(const real_type c);
     void set_mergin(const real_type m);
-
-    index_list const& partners(const std::size_t i) const override;
-    index_list &      partners(const std::size_t i)       override;
 
   private:
 
@@ -99,9 +93,6 @@ class UnlimitedGridCellList : public SpatialPartition<traitsT>
     real_type current_mergin_;
     real_type inv_cell_size_;
 
-    verlet_list_type list_;
-    except_list_type except_;
-
     cell_list_type   cell_list_;
 
     static Logger& logger_;
@@ -110,13 +101,6 @@ class UnlimitedGridCellList : public SpatialPartition<traitsT>
 template<typename traitsT>
 Logger& UnlimitedGridCellList<traitsT>::logger_ =
         LoggerManager<char>::get_logger("UnlimitedGridCellList");
-
-template<typename traitsT>
-inline void UnlimitedGridCellList<traitsT>::set_except(except_list_type&& ex)
-{
-    except_ = std::forward<except_list_type>(ex);
-    return;
-}
 
 template<typename traitsT>
 inline void UnlimitedGridCellList<traitsT>::set_cutoff(const real_type c)
@@ -139,8 +123,9 @@ void UnlimitedGridCellList<traitsT>::make(const particle_container_type& pcon)
 {
     MJOLNIR_LOG_DEBUG("UnlimitedGridCellList<traitsT>::make CALLED");
 
-    list_.clear();
-    list_.resize(pcon.size());
+    this->list_.clear();
+    this->list_.resize(pcon.size());
+
     cell_list_.clear();
     MJOLNIR_LOG_DEBUG("cell_list and verlet_list are cleared");
 
@@ -201,80 +186,35 @@ void UnlimitedGridCellList<traitsT>::make(const particle_container_type& pcon)
     const real_type r_c = cutoff_ + mergin_;
     const real_type r_c2 = r_c * r_c;
 
-    MJOLNIR_LOG_DEBUG("except list size", except_.size());
+    MJOLNIR_LOG_DEBUG("except list size", this->except_.size());
 
-    if(except_.empty())
+    MJOLNIR_LOG_DEBUG("exception list is not empty.");
+    MJOLNIR_LOG_DEBUG("lookup particles and also except list.");
+    for(std::size_t i=0; i<pcon.size(); ++i)
     {
-        MJOLNIR_LOG_DEBUG("exception list is empty. lookup all the particles");
-        for(std::size_t i=0; i<pcon.size(); ++i)
+        const coordinate_type ri = pcon[i].position;
+        const index_list& clist = cell_list_.at(index(ri));
+
+        MJOLNIR_LOG_DEBUG("particle position", pcon[i].position);
+        MJOLNIR_LOG_DEBUG("making verlet list for index", i);
+        MJOLNIR_LOG_DEBUG("except list for ", i, "-th value has",
+                          this->except_.at(i).size(), "particles");
+
+        const auto cbeg = this->except_.at(i).cbegin();
+        const auto cend = this->except_.at(i).cend();
+        for(std::size_t j=0; j != clist.size(); ++j)
         {
-            const coordinate_type ri = pcon.at(i).position;
-            const index_list& clist = cell_list_.at(index(ri));
-            for(std::size_t j=0; j != clist.size(); ++j)
+            MJOLNIR_LOG_DEBUG("looking", j, "-th particle in the cell.",
+                              "its index is", clist.at(j));
+
+            std::size_t k = clist.at(j);
+            if(k <= i || std::find(cbeg, cend, clist.at(j)) != cend)
+                continue;
+
+            if(length_sq(pcon.at(k).position - ri) < r_c2)
             {
-                if(clist.at(j) == i) continue;
-                const coordinate_type rij = pcon.at(clist.at(j)).position - ri;
-                const real_type r2 = length_sq(rij);
-                if(r2 < r_c2)
-                    list_.at(i).push_back(j);
-            }
-        }
-    }
-    else
-    {
-        MJOLNIR_LOG_DEBUG("exception list is not empty.");
-        MJOLNIR_LOG_DEBUG("lookup particles and also except list.");
-        for(std::size_t i=0; i<pcon.size(); ++i)
-        {
-            const coordinate_type ri = pcon[i].position;
-            const index_list& clist = cell_list_.at(index(ri));
-
-            MJOLNIR_LOG_DEBUG("particle position", pcon[i].position);
-            if(except_.at(i).empty())
-            {
-                MJOLNIR_LOG_DEBUG("except list for ", i, "-th value is empty.");
-                for(std::size_t j=0; j != clist.size(); ++j)
-                {
-                    std::size_t k = clist.at(j);
-                    if(k == i) continue;
-                    const coordinate_type rij = pcon.at(k).position - ri;
-                    const real_type r2 = length_sq(rij);
-                    auto& verlet_list = list_.at(i);
-                    if(r2 < r_c2 && i < k &&
-                       std::find(verlet_list.cbegin(), verlet_list.cend(), k)
-                           == verlet_list.cend())
-                        verlet_list.push_back(k);
-                }
-            }
-            else
-            {
-                MJOLNIR_LOG_DEBUG("making verlet list for index", i);
-                MJOLNIR_LOG_DEBUG("except list for ", i, "-th value has",
-                                  except_.at(i).size(), "particles");
-
-                const auto cbeg = except_.at(i).cbegin();
-                const auto cend = except_.at(i).cend();
-                for(std::size_t j=0; j != clist.size(); ++j)
-                {
-                    MJOLNIR_LOG_DEBUG("looking", j, "-th particle in the cell.",
-                                      "its index is", clist.at(j));
-
-                    std::size_t k = clist.at(j);
-                    if(k <= i || std::find(cbeg, cend, clist.at(j)) != cend)
-                        continue;
-
-                    const coordinate_type rij = pcon.at(k).position - ri;
-                    const real_type r2 = length_sq(rij);
-                    MJOLNIR_LOG_DEBUG("it is not in the except list.",
-                                      " calculate distance^2", r2);
-
-                    auto& verlet_list = list_.at(i);
-                    if(r2 < r_c2)
-                    {
-                        MJOLNIR_LOG_DEBUG("add index", k, "to verlet list");
-                        verlet_list.push_back(k);
-                    }
-                }
+                MJOLNIR_LOG_DEBUG("add index", k, "to verlet list");
+                this->list_.at(i).push_back(k);
             }
         }
     }
@@ -282,25 +222,6 @@ void UnlimitedGridCellList<traitsT>::make(const particle_container_type& pcon)
 
     MJOLNIR_LOG_DEBUG("UnlimitedGridCellList::make() RETURNED");
     return ;
-}
-
-
-template<typename traitsT>
-inline typename UnlimitedGridCellList<traitsT>::cell_index_type
-UnlimitedGridCellList<traitsT>::index(const position_type& pos) const
-{
-    return std::make_tuple(static_cast<int>(std::floor(pos[0]*inv_cell_size_)),
-                           static_cast<int>(std::floor(pos[1]*inv_cell_size_)),
-                           static_cast<int>(std::floor(pos[2]*inv_cell_size_)));
-}
-
-template<typename traitsT>
-inline typename UnlimitedGridCellList<traitsT>::cell_index_type
-UnlimitedGridCellList<traitsT>::add(
-        const int x, const int y, const int z, const cell_index_type& idx) const
-{
-    return std::make_tuple(std::get<0>(idx) + x, std::get<1>(idx) + y,
-                           std::get<2>(idx) + z);
 }
 
 template<typename traitsT>
@@ -327,17 +248,21 @@ inline void UnlimitedGridCellList<traitsT>::update(
 }
 
 template<typename traitsT>
-inline typename UnlimitedGridCellList<traitsT>::index_list const&
-UnlimitedGridCellList<traitsT>::partners(const std::size_t i) const
+inline typename UnlimitedGridCellList<traitsT>::cell_index_type
+UnlimitedGridCellList<traitsT>::index(const position_type& pos) const
 {
-    return list_.at(i);
+    return std::make_tuple(static_cast<int>(std::floor(pos[0]*inv_cell_size_)),
+                           static_cast<int>(std::floor(pos[1]*inv_cell_size_)),
+                           static_cast<int>(std::floor(pos[2]*inv_cell_size_)));
 }
 
 template<typename traitsT>
-inline typename UnlimitedGridCellList<traitsT>::index_list&
-UnlimitedGridCellList<traitsT>::partners(const std::size_t i)
+inline typename UnlimitedGridCellList<traitsT>::cell_index_type
+UnlimitedGridCellList<traitsT>::add(
+        const int x, const int y, const int z, const cell_index_type& idx) const
 {
-    return list_.at(i);
+    return std::make_tuple(std::get<0>(idx) + x, std::get<1>(idx) + y,
+                           std::get<2>(idx) + z);
 }
 
 } // mjolnir

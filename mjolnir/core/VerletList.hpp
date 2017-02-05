@@ -19,8 +19,6 @@ class VerletList : public SpatialPartition<traitsT>
     typedef typename base_type::particle_container_type particle_container_type;
     typedef typename base_type::index_type index_type;
     typedef typename base_type::index_list index_list;
-    typedef std::vector<index_list> verlet_list_type;
-    typedef std::vector<index_list> except_list_type;
 
   public:
 
@@ -28,28 +26,27 @@ class VerletList : public SpatialPartition<traitsT>
     VerletList(const real_type cutoff, const real_type mergin)
         : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.)
     {}
-    VerletList(const real_type cutoff, const real_type mergin, const time_type dt)
+    VerletList(const real_type cutoff, const real_type mergin,
+               const time_type dt)
         : dt_(dt), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.)
     {}
     ~VerletList() = default;
 
-    bool valid() const noexcept override {return current_mergin_ >= 0. || dt_ == 0.;}
+    bool valid() const noexcept override
+    {
+        return current_mergin_ >= 0. || dt_ == 0.;
+    }
 
     void make  (const particle_container_type& pcon) override;
     void update(const particle_container_type& pcon) override;
-    void update(const particle_container_type& pcon, const time_type dt) override;
+    void update(const particle_container_type& pcon,
+                const time_type dt) override;
 
-    real_type const& cutoff() const {return this->cutoff_;}
-    real_type &      cutoff()       {return this->cutoff_;}
-    real_type const& mergin() const {return this->mergin_;}
-    real_type &      mergin()       {return this->mergin_;}
+    real_type cutoff() const {return this->cutoff_;}
+    real_type mergin() const {return this->mergin_;}
 
-    void add_except(const index_type i, const index_type j);
-    void set_except(const except_list_type& ex){except_ = ex;}
-    void set_except(except_list_type&& ex){except_ = std::forward<except_list_type>(ex);}
-
-    index_list const& partners(const std::size_t i) const override {return list_[i];}
-    index_list &      partners(const std::size_t i)       override {return list_[i];}
+    void set_cutoff(const real_type c){return this->cutoff_ = c;}
+    void set_mergin(const real_type m){return this->mergin_ = m;}
 
   private:
 
@@ -57,84 +54,28 @@ class VerletList : public SpatialPartition<traitsT>
     real_type        cutoff_;
     real_type        mergin_;
     real_type        current_mergin_;
-    verlet_list_type list_;
-    except_list_type except_;
 };
-
-template<typename traitsT>
-inline void
-VerletList<traitsT>::add_except(const index_type i, const index_type j)
-{
-    const index_type acc = std::min(i, j);
-    const index_type dnr = std::max(i, j);
-
-    if(this->except_.size() < acc)
-        this->except_.resize(acc);
-
-    this->except_.at(acc).push_back(dnr);
-    return ;
-}
 
 
 template<typename traitsT>
 void VerletList<traitsT>::make(const particle_container_type& pcon)
 {
-    list_.clear();
-    list_.resize(pcon.size());
+    this->list_.clear();
+    this->list_.resize(pcon.size());
 
     const real_type rc = (cutoff_ + mergin_);
     const real_type rc2 = rc * rc;
-    if(except_.empty())
+    for(std::size_t i=0; i<pcon.size()-1; ++i)
     {
-        for(std::size_t i=0; i<pcon.size()-1; ++i)
-        {
-            const coordinate_type ri = pcon[i].position;
+        const coordinate_type& ri = pcon[i].position;
 
-            for(std::size_t j=i+1; j<pcon.size(); ++j)
-            {
-                const coordinate_type rij = pcon[j].position - ri;
-                const real_type r2 = length_sq(rij);
-                if(r2 < rc2)
-                {
-                    list_.at(i).push_back(j);
-                }
-            }
-        }
-    }
-    else
-    {
-        for(std::size_t i=0; i<pcon.size()-1; ++i)
+        const auto cbeg = this->except_.at(i).cbegin();
+        const auto cend = this->except_.at(i).cend();
+        for(std::size_t j=i+1; j<pcon.size(); ++j)
         {
-            const coordinate_type ri = pcon[i].position;
-
-            if(except_.at(i).empty())
-            {
-                for(std::size_t j=i+1; j<pcon.size(); ++j)
-                {
-                    const coordinate_type rij = pcon[j].position - ri;
-                    const real_type r2 = length_sq(rij);
-                    if(r2 < rc2)
-                    {
-                        list_.at(i).push_back(j);
-                    }
-                }
-            }
-            else
-            {
-                const auto cbeg = except_.at(i).cbegin();
-                const auto cend = except_.at(i).cend();
-                for(std::size_t j=i+1; j<pcon.size(); ++j)
-                {
-                    if(std::find(cbeg, cend, j) != cend)
-                        continue;
-                    const coordinate_type rij = pcon[j].position - ri;
-                    const real_type r2 = length_sq(rij);
-                    if(r2 < rc2)
-                    {
-                        list_.at(i).push_back(j);
-                    } 
-                }
-            }
+            if((std::find(cbeg, cend, j) == cend) &&
+               (length_sq(pcon[j].position - ri) < rc2))
+                this->list_.at(i).push_back(j);
         }
     }
     this->current_mergin_ = mergin_;
