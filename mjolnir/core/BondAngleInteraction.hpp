@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_BOND_ANGLE_INTERACTION
 #define MJOLNIR_BOND_ANGLE_INTERACTION
-#include "Particle.hpp"
-#include "LocalPotentialBase.hpp"
+#include "LocalInteractionBase.hpp"
+#include "BoundaryCondition.hpp"
 #include "constants.hpp"
 #include <mjolnir/math/fast_inv_sqrt.hpp>
 #include <cmath>
