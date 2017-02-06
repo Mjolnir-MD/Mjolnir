@@ -40,6 +40,9 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
 
     particle_type p1 = mjolnir::make_particle(1., zero_vec(), zero_vec(), zero_vec());
     particle_type p2 = mjolnir::make_particle(1., zero_vec(), zero_vec(), zero_vec());
+    std::array<particle_type*, 2> ps;
+    ps[0] = &p1;
+    ps[1] = &p2;
 
     const real_type dr = 1e-3;
     real_type dist = 1e0;
@@ -56,7 +59,7 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
         const real_type deriv = potential->derivative(dist);// dV/dr: f=-dV/dr
         const real_type coef  = std::abs(deriv);
 
-        inter.calc_force(p1, p2, *potential);
+        inter.calc_force(ps, *potential);
 
         const real_type force_strength1 = mjolnir::length(p1.force);
         const real_type force_strength2 = mjolnir::length(p2.force);

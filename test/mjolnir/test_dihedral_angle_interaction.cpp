@@ -44,6 +44,12 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
     particle_type p1 = mjolnir::make_particle(1., pos1, zero_vec(), zero_vec());
     particle_type p2 = mjolnir::make_particle(1., pos2, zero_vec(), zero_vec());
     particle_type p3 = mjolnir::make_particle(1., pos3, zero_vec(), zero_vec());
+    particle_type p4 = mjolnir::make_particle(1., zero_vec(), zero_vec(), zero_vec());
+    std::array<particle_type*, 4> ps;
+    ps[0] = &p1;
+    ps[1] = &p2;
+    ps[2] = &p3;
+    ps[3] = &p4;
 
     const real_type dtheta = M_PI / 1800.0;
     for(int i = -1800; i < 1800; ++i)
@@ -59,15 +65,16 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
         p1.force = zero_vec();
         p2.force = zero_vec();
         p3.force = zero_vec();
+        p4.force = zero_vec();
 
         const real_type theta = i * dtheta;
         const coordinate_type pos4(std::cos(theta), -std::sin(theta), 0e0);
-        particle_type p4 = mjolnir::make_particle(1., pos4, zero_vec(), zero_vec());
+        p4.position = pos4;
 
         const real_type deriv = potential->derivative(theta);
         const real_type coef = std::abs(deriv);
 
-        inter.calc_force(p1, p2, p3, p4, *potential);
+        inter.calc_force(ps, *potential);
 
         // magnitude
         // if radius == 1e0, then force strength is equal to dV.
