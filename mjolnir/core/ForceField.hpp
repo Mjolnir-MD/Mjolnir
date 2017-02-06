@@ -43,7 +43,7 @@ template<typename traitsT>
 inline void ForceField<traitsT>::initialize(
         const ParticleContainer<traitsT>& pcon, const time_type dt)
 {
-    local_.initialize(pcon, dt);
+//     local_.initialize(pcon, dt);
     global_.initialize(pcon, dt);
     return;
 }

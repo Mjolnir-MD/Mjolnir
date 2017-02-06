@@ -35,8 +35,8 @@ int main(int argc, char** argv)
     const std::string ene_name = filename + ".ene";
     mjolnir::Observer<traits> obs(trajname, ene_name);
 
-//     auto forcefield = toml::get<toml::Table>(input.at("forcefield"));
-    mjolnir::ForceField<traits> ff = mjolnir::read_force_field<traits>(input);
+    mjolnir::ForceField<traits> ff =
+        mjolnir::read_force_field<traits>(input, pcon);
 
     mjolnir::Simulator<traits> simulator(
             std::move(pcon), std::move(ff), std::move(integr));
