@@ -30,24 +30,25 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT, 4>
     ~DihedralAngleInteraction() = default;
 
     void
-    calc_force(particle_ptrs ps,
-               const potential_type& pot) const override;
+    calc_force(particle_type& p1, particle_type& p2, particle_type& p3,
+               particle_type& p4, const potential_type& pot) const override;
 
     real_type
-    calc_energy(const particle_ptrs ps,
+    calc_energy(const particle_type& p1, const particle_type& p2,
+                const particle_type& p3, const particle_type& p4,
                 const potential_type& pot) const override;
-
   private:
     boundaryT boundary;
 };
 
 template<typename traitsT, typename boundaryT>
 void DihedralAngleInteraction<traitsT, boundaryT>::calc_force(
-    particle_ptrs ps, const potential_type& pot) const
+    particle_type& p1, particle_type& p2, particle_type& p3, particle_type& p4,
+    const potential_type& pot) const
 {
-    const coordinate_type r_ij = boundary(ps[0]->position - ps[1]->position);
-    const coordinate_type r_kj = boundary(ps[2]->position - ps[1]->position);
-    const coordinate_type r_lk = boundary(ps[3]->position - ps[2]->position);
+    const coordinate_type r_ij = boundary(p1.position - p2.position);
+    const coordinate_type r_kj = boundary(p3.position - p2.position);
+    const coordinate_type r_lk = boundary(p4.position - p3.position);
     const coordinate_type r_kl = -1e0 * r_lk;
 
     const real_type r_kj_lensq     = length_sq(r_kj);
@@ -81,21 +82,23 @@ void DihedralAngleInteraction<traitsT, boundaryT>::calc_force(
     const real_type coef_ijk = dot_product(r_ij, r_kj) * r_kj_lensq_inv;
     const real_type coef_jkl = dot_product(r_kl, r_kj) * r_kj_lensq_inv;
 
-    ps[0]->force += Fi;
-    ps[1]->force += (coef_ijk - 1e0) * Fi - coef_jkl * Fl;
-    ps[2]->force += (coef_jkl - 1e0) * Fl - coef_ijk * Fi;
-    ps[3]->force += Fl;
+    p1.force += Fi;
+    p2.force += (coef_ijk - 1e0) * Fi - coef_jkl * Fl;
+    p3.force += (coef_jkl - 1e0) * Fl - coef_ijk * Fi;
+    p4.force += Fl;
     return;
 }
 
 template<typename traitsT, typename boundaryT>
 typename DihedralAngleInteraction<traitsT, boundaryT>::real_type
 DihedralAngleInteraction<traitsT, boundaryT>::calc_energy(
-        const particle_ptrs ps, const potential_type& pot) const
+        const particle_type& p1, const particle_type& p2,
+        const particle_type& p3, const particle_type& p4,
+        const potential_type& pot) const
 {
-    const coordinate_type r_ij = boundary(ps[0]->position - ps[1]->position);
-    const coordinate_type r_kj = boundary(ps[2]->position - ps[1]->position);
-    const coordinate_type r_lk = boundary(ps[3]->position - ps[2]->position);
+    const coordinate_type r_ij = boundary(p1.position - p2.position);
+    const coordinate_type r_kj = boundary(p3.position - p2.position);
+    const coordinate_type r_lk = boundary(p4.position - p3.position);
     const real_type r_kj_lensq_inv = 1. / length_sq(r_kj);
 
     const coordinate_type n = cross_product(r_kj, -1e0 * r_lk);

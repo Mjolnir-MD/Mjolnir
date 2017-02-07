@@ -31,11 +31,11 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT, 2>
     ~BondLengthInteraction() override = default;
 
     void
-    calc_force(particle_ptrs ps,
+    calc_force(particle_type& p1, particle_type& p2,
                const potential_type& pot) const override;
 
     real_type
-    calc_energy(const particle_ptrs ps,
+    calc_energy(const particle_type& p1, const particle_type& p2,
                 const potential_type& pot) const override;
 
   private:
@@ -45,26 +45,27 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT, 2>
 
 template<typename traitsT, typename boundaryT>
 void BondLengthInteraction<traitsT, boundaryT>::calc_force(
-        particle_ptrs ps, const potential_type& pot) const
+        particle_type& p1, particle_type& p2, const potential_type& pot) const
 {
-    const coordinate_type dpos = boundary(ps[1]->position - ps[0]->position);
+    const coordinate_type dpos = boundary(p2.position - p1.position);
     const real_type len = length(dpos);
     const real_type f = -1 * pot.derivative(len);
 
     if(std::abs(f) < std::numeric_limits<real_type>::epsilon()) return;
 
     const coordinate_type force = dpos * (f / len);
-    ps[0]->force -= force;
-    ps[1]->force += force;
+    p1.force -= force;
+    p2.force += force;
     return;
 }
 
 template<typename traitsT, typename boundaryT>
 typename BondLengthInteraction<traitsT, boundaryT>::real_type
 BondLengthInteraction<traitsT, boundaryT>::calc_energy(
-        const particle_ptrs ps, const potential_type& pot) const
+        const particle_type& p1, const particle_type& p2,
+        const potential_type& pot) const
 {
-    return pot.potential(length(boundary(ps[0]->position - ps[1]->position)));
+    return pot.potential(length(boundary(p1.position - p2.position)));
 }
 
 } // mjolnir

@@ -19,7 +19,6 @@ class BondAngleInteraction : public LocalInteractionBase<traitsT, 3>
     typedef typename base_type::real_type           real_type;
     typedef typename base_type::coordinate_type     coordinate_type;
     typedef typename base_type::particle_type       particle_type;
-    typedef typename base_type::particle_ptrs       particle_ptrs;
     typedef LocalPotentialBase<traits_type>         potential_type;
 
   public:
@@ -29,10 +28,12 @@ class BondAngleInteraction : public LocalInteractionBase<traitsT, 3>
     ~BondAngleInteraction() = default;
 
     void
-    calc_force(particle_ptrs ps, const potential_type& pot) const override;
+    calc_force(particle_type& p1, particle_type& p2, particle_type& p3,
+               const potential_type& pot) const override;
 
     real_type
-    calc_energy(const particle_ptrs ps, const potential_type& pot) const override;
+    calc_energy(const particle_type& p1, const particle_type& p2,
+                const particle_type& p3, const potential_type& pot) const override;
 
   private:
     boundaryT boundary;
@@ -44,13 +45,14 @@ class BondAngleInteraction : public LocalInteractionBase<traitsT, 3>
 //    + \frac{r_pre  - r_mid}{|r_pre  - r_mid|}\cos\theta)
 template<typename traitsT, typename boundaryT>
 void BondAngleInteraction<traitsT, boundaryT>::calc_force(
-    particle_ptrs ps, const potential_type& pot) const
+        particle_type& p1, particle_type& p2, particle_type& p3,
+        const potential_type& pot) const
 {
-    const coordinate_type r_ij = boundary(ps[0]->position - ps[1]->position);
+    const coordinate_type r_ij = boundary(p1.position - p2.position);
     const real_type       inv_len_r_ij = fast_inv_sqrt(length_sq(r_ij));
     const coordinate_type r_ij_reg     = r_ij * inv_len_r_ij;
 
-    const coordinate_type r_kj = boundary(ps[2]->position - ps[1]->position);
+    const coordinate_type r_kj = boundary(p3.position - p2.position);
     const real_type       inv_len_r_kj = fast_inv_sqrt(length_sq(r_kj));
     const coordinate_type r_kj_reg     = r_kj * inv_len_r_kj;
 
@@ -72,19 +74,20 @@ void BondAngleInteraction<traitsT, boundaryT>::calc_force(
     const coordinate_type Fk =
         (coef_inv_sin * inv_len_r_kj) * (cos_theta * r_kj_reg - r_ij_reg);
 
-    ps[0]->force += Fi;
-    ps[1]->force -= (Fi + Fk);
-    ps[2]->force += Fk;
+    p1.force += Fi;
+    p2.force -= (Fi + Fk);
+    p3.force += Fk;
     return;
 }
 
 template<typename traitsT, typename boundaryT>
 typename BondAngleInteraction<traitsT, boundaryT>::real_type
 BondAngleInteraction<traitsT, boundaryT>::calc_energy(
-    const particle_ptrs ps, const potential_type& pot) const
+    const particle_type& p1, const particle_type& p2, const particle_type& p3,
+    const potential_type& pot) const
 {
-    const coordinate_type v_2to1 = boundary(ps[0]->position - ps[1]->position);
-    const coordinate_type v_2to3 = boundary(ps[2]->position - ps[1]->position);
+    const coordinate_type v_2to1 = boundary(p1.position - p2.position);
+    const coordinate_type v_2to3 = boundary(p3.position - p2.position);
 
     const real_type lensq_v21 = length_sq(v_2to1);
     const real_type lensq_v23 = length_sq(v_2to3);
