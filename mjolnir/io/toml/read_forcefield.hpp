@@ -23,7 +23,10 @@ read_force_field(const toml::Table& tab)
         LocalForceField<traitsT> tmp = read_local_force_field<traitsT>(lff);
         local = std::move(tmp);
     }
-    catch(std::exception& except){}
+    catch(std::exception& except)
+    {
+        MJOLNIR_LOG_ERROR("exception thrown:", except.what());
+    }
 
     GlobalForceField<traitsT> global;
     try
@@ -33,8 +36,10 @@ read_force_field(const toml::Table& tab)
         GlobalForceField<traitsT> tmp = read_global_force_field<traitsT>(gff);
         global = std::move(tmp);
     }
-    catch(std::exception& except){}
-
+    catch(std::exception& except)
+    {
+        MJOLNIR_LOG_ERROR("exception thrown:", except.what());
+    }
     ForceField<traitsT> ff(std::move(local), std::move(global));
     MJOLNIR_LOG_DEBUG("read_force_field RETURNED");
     return ff;
