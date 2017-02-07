@@ -16,7 +16,7 @@ int main(int argc, char** argv)
     if(!ifs.good())
     {
         std::cerr << "file open error: " << argv[1] << std::endl;
-        return 0;
+        return 1;
     }
 
     // read input file
@@ -35,16 +35,16 @@ int main(int argc, char** argv)
     const std::string ene_name = filename + ".ene";
     mjolnir::Observer<traits> obs(trajname, ene_name);
 
-    mjolnir::ForceField<traits> ff =
-        mjolnir::read_force_field<traits>(input, pcon);
+    mjolnir::ForceField<traits> ff = mjolnir::read_force_field<traits>(input);
 
-    mjolnir::Simulator<traits> simulator(
-            std::move(pcon), std::move(ff), std::move(integr));
+    mjolnir::Simulator<traits> simulator(std::move(pcon), std::move(ff),
+                                         std::move(integr));
 
     // run md
-    std::cerr << "start running simulation" << std::endl;
     simulator.initialize();
     const auto start = std::chrono::system_clock::now();
+
+    std::cerr << "start running simulation" << std::endl;
     for(std::size_t i=0; i<total_step; ++i)
     {
         if(i % save_step == 0)
