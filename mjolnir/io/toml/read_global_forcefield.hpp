@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_IO_TOML_READ_GLOBAL_FORCEFIELD
 #define MJOLNIR_IO_TOML_READ_GLOBAL_FORCEFIELD
 #include <mjolnir/core/GlobalDistanceInteraction.hpp>
+#include <mjolnir/core/GlobalForceField.hpp>
 #include <mjolnir/core/VerletList.hpp>
 #include <mjolnir/core/UnlimitedGridCellList.hpp>
 #include <mjolnir/potential/ExcludedVolumePotential.hpp>
