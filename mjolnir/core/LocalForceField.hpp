@@ -32,10 +32,20 @@ class LocalForceField
         typedef LocalInteractionBase<traitsT, N>         interaction_type;
         typedef std::unique_ptr<interaction_type>        interaction_ptr;
         typedef typename interaction_type::particle_ptrs particle_ptrs;
+        typedef std::pair<particle_ptrs, potential_ptr>  potential_index_pair;
+        typedef std::vector<potential_index_pair>        potential_array;
 
+        local_forcefield_type(interaction_ptr&& i, potential_array&& ps)
+            : interaction(std::forward<interaction_ptr>(i)),
+              potentials(std::forward<potential_array>(ps))
+        {}
         interaction_ptr interaction;
-        std::vector<std::pair<particle_ptrs, potential_ptr>> potentials;
+        potential_array potentials;
     };
+
+    typedef local_forcefield_type<2> forcefield_2body;
+    typedef local_forcefield_type<3> forcefield_3body;
+    typedef local_forcefield_type<4> forcefield_4body;
 
   public:
 
@@ -57,15 +67,15 @@ class LocalForceField
 //     void emplace_dihedral(std::size_t i, std::size_t j, std::size_t k,
 //                           std::size_t l, potential_ptr&& pot);
 
-    local_forcefield_type<2>& body2_at(std::size_t i){return body2.at(i);}
-    local_forcefield_type<3>& body3_at(std::size_t i){return body3.at(i);}
-    local_forcefield_type<4>& body4_at(std::size_t i){return body4.at(i);}
+    std::vector<local_forcefield_type<2>>& body2(){return body2_;}
+    std::vector<local_forcefield_type<3>>& body3(){return body3_;}
+    std::vector<local_forcefield_type<4>>& body4(){return body4_;}
 
   private:
 
-    std::vector<local_forcefield_type<2>> body2;
-    std::vector<local_forcefield_type<3>> body3;
-    std::vector<local_forcefield_type<4>> body4;
+    std::vector<local_forcefield_type<2>> body2_;
+    std::vector<local_forcefield_type<3>> body3_;
+    std::vector<local_forcefield_type<4>> body4_;
 };
 
 // template<typename traitsT>
@@ -99,25 +109,25 @@ class LocalForceField
 template<typename traitsT>
 void LocalForceField<traitsT>::calc_force(particle_container_type& pcon)
 {
-    for(auto ff = body2.cbegin(); ff != body2.cend(); ++ff)
+    for(auto ff = body2_.cbegin(); ff != body2_.cend(); ++ff)
     {
         for(auto iter = ff->potentials.cbegin();
                 iter != ff->potentials.cend(); ++iter)
-            ff->interaction.calc_force(iter->first, *(iter->second));
+            ff->interaction->calc_force(iter->first, *(iter->second));
     }
 
-    for(auto ff = body3.cbegin(); ff != body3.cend(); ++ff)
+    for(auto ff = body3_.cbegin(); ff != body3_.cend(); ++ff)
     {
         for(auto iter = ff->potentials.cbegin();
                 iter != ff->potentials.cend(); ++iter)
-            ff->interaction.calc_force(iter->first, *(iter->second));
+            ff->interaction->calc_force(iter->first, *(iter->second));
     }
 
-    for(auto ff = body4.cbegin(); ff != body4.cend(); ++ff)
+    for(auto ff = body4_.cbegin(); ff != body4_.cend(); ++ff)
     {
         for(auto iter = ff->potentials.cbegin();
                 iter != ff->potentials.cend(); ++iter)
-            ff->interaction.calc_force(iter->first, *(iter->second));
+            ff->interaction->calc_force(iter->first, *(iter->second));
     }
     return;
 }
@@ -128,25 +138,25 @@ LocalForceField<traitsT>::calc_energy(const particle_container_type& pcon) const
 {
     real_type energy = 0.0;
 
-    for(auto ff = body2.cbegin(); ff != body2.cend(); ++ff)
+    for(auto ff = body2_.cbegin(); ff != body2_.cend(); ++ff)
     {
         for(auto iter = ff->potentials.cbegin();
                 iter != ff->potentials.cend(); ++iter)
-            energy += ff->interaction.calc_energy(iter->first, *(iter->second));
+            energy += ff->interaction->calc_energy(iter->first, *(iter->second));
     }
 
-    for(auto ff = body3.cbegin(); ff != body3.cend(); ++ff)
+    for(auto ff = body3_.cbegin(); ff != body3_.cend(); ++ff)
     {
         for(auto iter = ff->potentials.cbegin();
                 iter != ff->potentials.cend(); ++iter)
-            energy += ff->interaction.calc_energy(iter->first, *(iter->second));
+            energy += ff->interaction->calc_energy(iter->first, *(iter->second));
     }
 
-    for(auto ff = body4.cbegin(); ff != body4.cend(); ++ff)
+    for(auto ff = body4_.cbegin(); ff != body4_.cend(); ++ff)
     {
         for(auto iter = ff->potentials.cbegin();
                 iter != ff->potentials.cend(); ++iter)
-            energy += ff->interaction.calc_energy(iter->first, *(iter->second));
+            energy += ff->interaction->calc_energy(iter->first, *(iter->second));
     }
     return energy;
 }
