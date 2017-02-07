@@ -21,7 +21,6 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT, 2>
     typedef typename base_type::real_type        real_type;
     typedef typename base_type::coordinate_type  coordinate_type;
     typedef typename base_type::particle_type    particle_type;
-    typedef typename base_type::particle_ptrs    particle_ptrs;
     typedef LocalPotentialBase<traits_type>      potential_type;
 
   public:
