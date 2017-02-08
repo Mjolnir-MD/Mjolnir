@@ -95,6 +95,15 @@ read_time_integrator(const toml::Table& sim,
         toml::get<toml::String>(sim.at("boundary"));
     MJOLNIR_LOG_INFO("boundary condition", boundary);
 
+    if(boundary == "Periodic")
+    {
+        const auto lower = toml::get<toml::Array<toml::Float>>(sim.at("lower"));
+        const auto upper = toml::get<toml::Array<toml::Float>>(sim.at("upper"));
+        const typename traitsT::coordinate_type low(lower.at(0), lower.at(1), lower.at(2));
+        const typename traitsT::coordinate_type upp(upper.at(0), upper.at(1), upper.at(2));
+        PeriodicBoundaryXYZ<traitsT>::set_system(low, upp);
+    }
+
     if(integral == "Underdamped Langevin")
     {
         return read_underdamped_langevin<traitsT>(sim, boundary, rng);
