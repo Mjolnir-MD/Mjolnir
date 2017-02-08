@@ -3,15 +3,17 @@
 #include <vector>
 #include <unordered_map>
 #include "SpatialPartition.hpp"
+#include "BoundaryCondition.hpp"
 
 namespace mjolnir
 {
 
-template<typename traitsT>
+template<typename traitsT, typename boundaryT = UnlimitedBoundary<traitsT>>
 class VerletList : public SpatialPartition<traitsT>
 {
   public:
 
+    typedef boundaryT boundary_type;
     typedef SpatialPartition<traitsT> base_type;
     typedef typename base_type::time_type time_type;
     typedef typename base_type::real_type real_type;
@@ -57,8 +59,8 @@ class VerletList : public SpatialPartition<traitsT>
 };
 
 
-template<typename traitsT>
-void VerletList<traitsT>::make(const particle_container_type& pcon)
+template<typename traitsT, typename boundaryT>
+void VerletList<traitsT, boundaryT>::make(const particle_container_type& pcon)
 {
     this->list_.clear();
     this->list_.resize(pcon.size());
@@ -74,7 +76,8 @@ void VerletList<traitsT>::make(const particle_container_type& pcon)
         for(std::size_t j=i+1; j<pcon.size(); ++j)
         {
             if((std::find(cbeg, cend, j) == cend) &&
-               (length_sq(pcon[j].position - ri) < rc2))
+               (length_sq(boundary_type::adjust_direction(pcon[j].position - ri))
+                < rc2))
                 this->list_.at(i).push_back(j);
         }
     }
@@ -82,8 +85,8 @@ void VerletList<traitsT>::make(const particle_container_type& pcon)
     return ;
 }
 
-template<typename traitsT>
-void VerletList<traitsT>::update(const particle_container_type& pcon)
+template<typename traitsT, typename boundaryT>
+void VerletList<traitsT, boundaryT>::update(const particle_container_type& pcon)
 {
     real_type max_speed = 0.;
     for(auto iter = pcon.cbegin(); iter != pcon.cend(); ++iter)
@@ -97,8 +100,8 @@ void VerletList<traitsT>::update(const particle_container_type& pcon)
 }
 
 
-template<typename traitsT>
-void VerletList<traitsT>::update(const particle_container_type& pcon,
+template<typename traitsT, typename boundaryT>
+void VerletList<traitsT, boundaryT>::update(const particle_container_type& pcon,
         const time_type dt)
 {
     this->dt_ = dt;

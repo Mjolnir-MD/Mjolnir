@@ -6,11 +6,12 @@
 namespace mjolnir
 {
 
-template<typename traitsT>
+template<typename traitsT, typename boundaryT = UnlimitedBoundary<traitsT>>
 class NaivePairCalculation : public SpatialPartition<traitsT>
 {
   public:
 
+    typedef boundaryT boundary_type;
     typedef SpatialPartition<traitsT> base_type;
     typedef typename base_type::time_type time_type;
     typedef typename base_type::real_type real_type;
@@ -38,8 +39,9 @@ class NaivePairCalculation : public SpatialPartition<traitsT>
                 const time_type dt) override;
 };
 
-template<typename traitsT>
-void NaivePairCalculation<traitsT>::make(const particle_container_type& pcon)
+template<typename traitsT, typename boundaryT>
+void NaivePairCalculation<traitsT, boundaryT>::make(
+        const particle_container_type& pcon)
 {
     this->list_.clear();
     this->list_.resize(pcon.size());
@@ -55,16 +57,17 @@ void NaivePairCalculation<traitsT>::make(const particle_container_type& pcon)
     return;
 }
 
-template<typename traitsT>
-void NaivePairCalculation<traitsT>::update(const particle_container_type& pcon)
+template<typename traitsT, typename boundaryT>
+void NaivePairCalculation<traitsT, boundaryT>::update(
+        const particle_container_type& pcon)
 {
     this->make(pcon);
     return ;
 }
 
-template<typename traitsT>
-void NaivePairCalculation<traitsT>::update(const particle_container_type& pcon,
-        const time_type dt)
+template<typename traitsT, typename boundaryT>
+void NaivePairCalculation<traitsT, boundaryT>::update(
+        const particle_container_type& pcon, const time_type dt)
 {
     this->make(pcon);
     return ;

@@ -26,11 +26,12 @@ struct hash<std::tuple<int, int, int>>
 namespace mjolnir
 {
 
-template<typename traitsT>
+template<typename traitsT, typename boundaryT = UnlimitedBoundary<traitsT>>
 class UnlimitedGridCellList : public SpatialPartition<traitsT>
 {
   public:
 
+    typedef boundaryT boundary_type;
     typedef SpatialPartition<traitsT> base_type;
     typedef typename base_type::time_type time_type;
     typedef typename base_type::real_type real_type;
@@ -98,28 +99,31 @@ class UnlimitedGridCellList : public SpatialPartition<traitsT>
     static Logger& logger_;
 };
 
-template<typename traitsT>
-Logger& UnlimitedGridCellList<traitsT>::logger_ =
+template<typename traitsT, typename boundaryT>
+Logger& UnlimitedGridCellList<traitsT, boundaryT>::logger_ =
         LoggerManager<char>::get_logger("UnlimitedGridCellList");
 
-template<typename traitsT>
-inline void UnlimitedGridCellList<traitsT>::set_cutoff(const real_type c)
+template<typename traitsT, typename boundaryT>
+inline void
+UnlimitedGridCellList<traitsT, boundaryT>::set_cutoff(const real_type c)
 {
     this->cutoff_ = c;
     this->inv_cell_size_ = 1. / (cutoff_ + mergin_ + mesh_epsilon);
     return;
 }
 
-template<typename traitsT>
-inline void UnlimitedGridCellList<traitsT>::set_mergin(const real_type m)
+template<typename traitsT, typename boundaryT>
+inline void
+UnlimitedGridCellList<traitsT, boundaryT>::set_mergin(const real_type m)
 {
     this->mergin_ = m;
     this->inv_cell_size_ = 1. / (cutoff_ + mergin_ + mesh_epsilon);
     return;
 }
 
-template<typename traitsT>
-void UnlimitedGridCellList<traitsT>::make(const particle_container_type& pcon)
+template<typename traitsT, typename boundaryT>
+void UnlimitedGridCellList<traitsT, boundaryT>::make(
+        const particle_container_type& pcon)
 {
     MJOLNIR_LOG_DEBUG("UnlimitedGridCellList<traitsT>::make CALLED");
 
@@ -211,7 +215,8 @@ void UnlimitedGridCellList<traitsT>::make(const particle_container_type& pcon)
             if(k <= i || std::find(cbeg, cend, clist.at(j)) != cend)
                 continue;
 
-            if(length_sq(pcon.at(k).position - ri) < r_c2)
+            if(length_sq(boundary_type::adjust_direction(pcon.at(k).position - ri))
+                    < r_c2)
             {
                 MJOLNIR_LOG_DEBUG("add index", k, "to verlet list");
                 this->list_.at(i).push_back(k);
@@ -224,8 +229,9 @@ void UnlimitedGridCellList<traitsT>::make(const particle_container_type& pcon)
     return ;
 }
 
-template<typename traitsT>
-void UnlimitedGridCellList<traitsT>::update(const particle_container_type& pcon)
+template<typename traitsT, typename boundaryT>
+void UnlimitedGridCellList<traitsT, boundaryT>::update(
+        const particle_container_type& pcon)
 {
     real_type max_speed = 0.;
     for(auto iter = pcon.cbegin(); iter != pcon.cend(); ++iter)
@@ -238,8 +244,8 @@ void UnlimitedGridCellList<traitsT>::update(const particle_container_type& pcon)
     return ;
 }
 
-template<typename traitsT>
-inline void UnlimitedGridCellList<traitsT>::update(
+template<typename traitsT, typename boundaryT>
+inline void UnlimitedGridCellList<traitsT, boundaryT>::update(
         const particle_container_type& pcon, const time_type dt)
 {
     this->dt_ = dt;
@@ -247,18 +253,18 @@ inline void UnlimitedGridCellList<traitsT>::update(
     return ;
 }
 
-template<typename traitsT>
-inline typename UnlimitedGridCellList<traitsT>::cell_index_type
-UnlimitedGridCellList<traitsT>::index(const position_type& pos) const
+template<typename traitsT, typename boundaryT>
+inline typename UnlimitedGridCellList<traitsT, boundaryT>::cell_index_type
+UnlimitedGridCellList<traitsT, boundaryT>::index(const position_type& pos) const
 {
     return std::make_tuple(static_cast<int>(std::floor(pos[0]*inv_cell_size_)),
                            static_cast<int>(std::floor(pos[1]*inv_cell_size_)),
                            static_cast<int>(std::floor(pos[2]*inv_cell_size_)));
 }
 
-template<typename traitsT>
-inline typename UnlimitedGridCellList<traitsT>::cell_index_type
-UnlimitedGridCellList<traitsT>::add(
+template<typename traitsT, typename boundaryT>
+inline typename UnlimitedGridCellList<traitsT, boundaryT>::cell_index_type
+UnlimitedGridCellList<traitsT, boundaryT>::add(
         const int x, const int y, const int z, const cell_index_type& idx) const
 {
     return std::make_tuple(std::get<0>(idx) + x, std::get<1>(idx) + y,
