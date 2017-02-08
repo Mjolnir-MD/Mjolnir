@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_BOUNDARY_CONDITION
 #define MJOLNIR_BOUNDARY_CONDITION
+#include <cassert>
 
 namespace mjolnir
 {
@@ -12,38 +13,39 @@ struct UnlimitedBoundary
     typedef typename traits_type::coordinate_type coordinate_type;
 
     UnlimitedBoundary() = default;
-    UnlimitedBoundary(const coordinate_type&){}
     ~UnlimitedBoundary() = default;
 
-    coordinate_type
-    operator()(coordinate_type dr) const {return dr;}
+    static coordinate_type
+    adjust_direction(coordinate_type dr) {return dr;}
+    static coordinate_type
+    adjust_absolute(coordinate_type r) {return r;}
 };
 
 template<typename traitsT>
 struct PeriodicBoundaryXYZ
 {
+  public:
     typedef traitsT traits_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
+  public:
     PeriodicBoundaryXYZ() = default;
     ~PeriodicBoundaryXYZ() = default;
 
-    PeriodicBoundaryXYZ(const coordinate_type& sys_size)
-        : sys_size_(sys_size),
-          sys_size_half_pos(0.5 * sys_size), sys_size_half_neg(-0.5 * sys_size)
-    {}
-
-    void set_system_size(const coordinate_type& sys_size)
+    static void
+    set_system(const coordinate_type& lower, const coordinate_type upper)
     {
-        this->sys_size_         = sys_size;
-        this->sys_size_half_pos = 0.5 * sys_size;
-        this->sys_size_half_neg = -0.5 * sys_size;
+        lower_            = lower;
+        upper_            = upper;
+        sys_size_         = upper_ - lower_;
+        sys_size_half_pos =  0.5 * sys_size_;
+        sys_size_half_neg = -0.5 * sys_size_;
         return;
     }
 
-    coordinate_type
-    operator()(coordinate_type dr) const
+    static coordinate_type
+    adjust_direction(coordinate_type dr)
     {
              if(dr[0] < sys_size_half_neg[0]) dr[0] += sys_size_[0];
         else if(dr[0] > sys_size_half_pos[0]) dr[0] -= sys_size_[0];
@@ -54,12 +56,42 @@ struct PeriodicBoundaryXYZ
         return dr;
     }
 
+    coordinate_type
+    adjust_absolute(coordinate_type pos)
+    {
+             if(pos[0] < lower_[0]) pos[0] += sys_size_[0];
+        else if(pos[0] > upper_[0]) pos[0] -= sys_size_[0];
+             if(pos[1] < lower_[1]) pos[1] += sys_size_[1];
+        else if(pos[1] > upper_[1]) pos[1] -= sys_size_[1];
+             if(pos[2] < lower_[2]) pos[2] += sys_size_[2];
+        else if(pos[2] > upper_[2]) pos[2] -= sys_size_[2];
+        return pos;
+    }
+
   private:
-    coordinate_type sys_size_;
-    coordinate_type sys_size_half_pos;
-    coordinate_type sys_size_half_neg;
+
+    static coordinate_type lower_;
+    static coordinate_type upper_;
+    static coordinate_type sys_size_;
+    static coordinate_type sys_size_half_pos;
+    static coordinate_type sys_size_half_neg;
 };
 
+template<typename traitsT>
+typename PeriodicBoundaryXYZ<traitsT>::coordinate_type
+PeriodicBoundaryXYZ<traitsT>::lower_;
+template<typename traitsT>
+typename PeriodicBoundaryXYZ<traitsT>::coordinate_type
+PeriodicBoundaryXYZ<traitsT>::upper_;
+template<typename traitsT>
+typename PeriodicBoundaryXYZ<traitsT>::coordinate_type
+PeriodicBoundaryXYZ<traitsT>::sys_size_;
+template<typename traitsT>
+typename PeriodicBoundaryXYZ<traitsT>::coordinate_type
+PeriodicBoundaryXYZ<traitsT>::sys_size_half_pos;
+template<typename traitsT>
+typename PeriodicBoundaryXYZ<traitsT>::coordinate_type
+PeriodicBoundaryXYZ<traitsT>::sys_size_half_neg;
 
 
 }//mjolnir
