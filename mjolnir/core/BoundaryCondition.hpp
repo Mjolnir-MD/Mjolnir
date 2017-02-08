@@ -36,23 +36,30 @@ struct PeriodicBoundaryXYZ
     static void
     set_system(const coordinate_type& lower, const coordinate_type upper)
     {
-        lower_            = lower;
-        upper_            = upper;
-        sys_size_         = upper_ - lower_;
-        sys_size_half_pos =  0.5 * sys_size_;
-        sys_size_half_neg = -0.5 * sys_size_;
+        lower_         = lower;
+        upper_         = upper;
+        sys_size_      = upper_ - lower_;
+        sys_size_half_ = 0.5 * sys_size_;
+
+        assert(sys_size_[0] > 0.0);
+        assert(sys_size_[1] > 0.0);
+        assert(sys_size_[2] > 0.0);
+
+        assert(sys_size_half_[0] > 0.0);
+        assert(sys_size_half_[1] > 0.0);
+        assert(sys_size_half_[2] > 0.0);
         return;
     }
 
     static coordinate_type
     adjust_direction(coordinate_type dr)
     {
-             if(dr[0] < sys_size_half_neg[0]) dr[0] += sys_size_[0];
-        else if(dr[0] > sys_size_half_pos[0]) dr[0] -= sys_size_[0];
-             if(dr[1] < sys_size_half_neg[1]) dr[1] += sys_size_[1];
-        else if(dr[1] > sys_size_half_pos[1]) dr[1] -= sys_size_[1];
-             if(dr[2] < sys_size_half_neg[2]) dr[2] += sys_size_[2];
-        else if(dr[2] > sys_size_half_pos[2]) dr[2] -= sys_size_[2];
+             if(dr[0] < -sys_size_half_[0]) dr[0] += sys_size_[0];
+        else if(dr[0] >  sys_size_half_[0]) dr[0] -= sys_size_[0];
+             if(dr[1] < -sys_size_half_[1]) dr[1] += sys_size_[1];
+        else if(dr[1] >  sys_size_half_[1]) dr[1] -= sys_size_[1];
+             if(dr[2] < -sys_size_half_[2]) dr[2] += sys_size_[2];
+        else if(dr[2] >  sys_size_half_[2]) dr[2] -= sys_size_[2];
         return dr;
     }
 
@@ -73,8 +80,7 @@ struct PeriodicBoundaryXYZ
     static coordinate_type lower_;
     static coordinate_type upper_;
     static coordinate_type sys_size_;
-    static coordinate_type sys_size_half_pos;
-    static coordinate_type sys_size_half_neg;
+    static coordinate_type sys_size_half_;
 };
 
 template<typename traitsT>
@@ -88,10 +94,7 @@ typename PeriodicBoundaryXYZ<traitsT>::coordinate_type
 PeriodicBoundaryXYZ<traitsT>::sys_size_;
 template<typename traitsT>
 typename PeriodicBoundaryXYZ<traitsT>::coordinate_type
-PeriodicBoundaryXYZ<traitsT>::sys_size_half_pos;
-template<typename traitsT>
-typename PeriodicBoundaryXYZ<traitsT>::coordinate_type
-PeriodicBoundaryXYZ<traitsT>::sys_size_half_neg;
+PeriodicBoundaryXYZ<traitsT>::sys_size_half_;
 
 
 }//mjolnir
