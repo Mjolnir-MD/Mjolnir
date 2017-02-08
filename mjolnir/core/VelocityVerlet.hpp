@@ -1,17 +1,19 @@
 #ifndef MJOLNIR_VELOCITY_VERLET_INTEGRATOR
 #define MJOLNIR_VELOCITY_VERLET_INTEGRATOR
 #include "Integrator.hpp"
+#include "BoundaryCondition.hpp"
 #include <mjolnir/util/zip_iterator.hpp>
 #include <mjolnir/util/make_zip.hpp>
 
 namespace mjolnir
 {
 
-template<typename traitsT>
+template<typename traitsT, typename boundaryT = UnlimitedBoundary<traitsT>>
 class VelocityVerlet : public Integrator<traitsT>
 {
   public:
     typedef traitsT traits_type;
+    typedef boundaryT boundary_type;
     typedef typename traits_type::time_type time_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
@@ -37,8 +39,9 @@ class VelocityVerlet : public Integrator<traitsT>
     std::vector<coordinate_type> acceleration_;
 };
 
-template<typename traitsT>
-void VelocityVerlet<traitsT>::initialize(const ParticleContainer<traitsT>& pcon)
+template<typename traitsT, typename boundaryT>
+void VelocityVerlet<traitsT, boundaryT>::initialize(
+        const ParticleContainer<traitsT>& pcon)
 {
     for(auto iter = make_zip(pcon.cbegin(), acceleration_.begin());
             iter != make_zip(pcon.cend(), acceleration_.end()); ++iter)
@@ -49,17 +52,18 @@ void VelocityVerlet<traitsT>::initialize(const ParticleContainer<traitsT>& pcon)
 }
 
 // at the initial step, acceleration_ must be initialized
-template<typename traitsT>
-typename VelocityVerlet<traitsT>::time_type
-VelocityVerlet<traitsT>::step(const time_type time,
+template<typename traitsT, typename boundaryT>
+typename VelocityVerlet<traitsT, boundaryT>::time_type
+VelocityVerlet<traitsT, boundaryT>::step(const time_type time,
         ParticleContainer<traitsT>& pcon, ForceField<traitsT>& ff)
 {
     // calc r(t+dt)
     for(auto iter = make_zip(pcon.begin(), acceleration_.cbegin());
             iter != make_zip(pcon.end(), acceleration_.cend()); ++iter)
     {
-        get<0>(iter)->position += dt_ * (get<0>(iter)->velocity) +
-                                  halfdt2_ * (*get<1>(iter));
+        get<0>(iter)->position = boundary_type::adjust_absolute(
+            get<0>(iter)->position + dt_ * (get<0>(iter)->velocity) +
+            halfdt2_ * (*get<1>(iter)));
         get<0>(iter)->velocity += halfdt_ * (*get<1>(iter));
     }
 

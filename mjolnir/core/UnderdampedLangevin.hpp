@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_UNDERDAMPED_LANGEVIN_INTEGRATOR
 #define MJOLNIR_UNDERDAMPED_LANGEVIN_INTEGRATOR
 #include "Integrator.hpp"
+#include "BoundaryCondition.hpp"
 #include "RandomNumberGenerator.hpp"
 #include <mjolnir/util/zip_iterator.hpp>
 #include <mjolnir/util/make_zip.hpp>
@@ -9,11 +10,12 @@
 namespace mjolnir
 {
 
-template<typename traitsT>
+template<typename traitsT, typename boundaryT = UnlimitedBoundary<traitsT>>
 class UnderdampedLangevin : public Integrator<traitsT>
 {
   public:
-    typedef traitsT traits_type;
+    typedef traitsT   traits_type;
+    typedef boundaryT boundary_type;
     typedef typename traits_type::time_type time_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
@@ -54,8 +56,8 @@ class UnderdampedLangevin : public Integrator<traitsT>
     std::vector<coordinate_type> acceleration_;
 };
 
-template<typename traitsT>
-void UnderdampedLangevin<traitsT>::initialize(
+template<typename traitsT, typename boundaryT>
+void UnderdampedLangevin<traitsT, boundaryT>::initialize(
         const ParticleContainer<traitsT>& pcon)
 {
     for(auto iter = make_zip(pcon.cbegin(),  gamma_.cbegin(),
@@ -75,9 +77,9 @@ void UnderdampedLangevin<traitsT>::initialize(
 }
 
 // at the initial step, acceleration_ and noise_ must be initialized
-template<typename traitsT>
-typename UnderdampedLangevin<traitsT>::time_type
-UnderdampedLangevin<traitsT>::step(const time_type time,
+template<typename traitsT, typename boundaryT>
+typename UnderdampedLangevin<traitsT, boundaryT>::time_type
+UnderdampedLangevin<traitsT, boundaryT>::step(const time_type time,
         ParticleContainer<traitsT>& pcon, ForceField<traitsT>& ff)
 {
     // calc r(t+dt)
@@ -91,8 +93,10 @@ UnderdampedLangevin<traitsT>::step(const time_type time,
 
         const coordinate_type noisy_force = ((*get<2>(iter)) + (*get<3>(iter)));
 
-        get<0>(iter)->position +=
-            (dt_ * o_hgdt) * (get<0>(iter)->velocity) + halfdt2_ * noisy_force;
+        get<0>(iter)->position = boundary_type::adjust_absolute(
+                get<0>(iter)->position +
+                (dt_ * o_hgdt) * (get<0>(iter)->velocity) +
+                halfdt2_ * noisy_force);
 
         get<0>(iter)->velocity *= o_hgdt * (o_hgdt * o_hgdt + hgdt);
         get<0>(iter)->velocity += (halfdt_ * o_hgdt) * noisy_force;
