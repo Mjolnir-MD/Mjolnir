@@ -15,6 +15,7 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT, 4>
   public:
 
     typedef traitsT traits_type;
+    typedef boundaryT boundary_type;
     typedef LocalInteractionBase<traits_type, 4> base_type;
     typedef typename base_type::time_type        time_type;
     typedef typename base_type::real_type        real_type;
@@ -25,7 +26,6 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT, 4>
   public:
 
     DihedralAngleInteraction() = default;
-    DihedralAngleInteraction(const boundaryT& b): boundary(b){};
     ~DihedralAngleInteraction() = default;
 
     void
@@ -36,8 +36,6 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT, 4>
     calc_energy(const particle_type& p1, const particle_type& p2,
                 const particle_type& p3, const particle_type& p4,
                 const potential_type& pot) const override;
-  private:
-    boundaryT boundary;
 };
 
 template<typename traitsT, typename boundaryT>
@@ -45,9 +43,12 @@ void DihedralAngleInteraction<traitsT, boundaryT>::calc_force(
     particle_type& p1, particle_type& p2, particle_type& p3, particle_type& p4,
     const potential_type& pot) const
 {
-    const coordinate_type r_ij = boundary(p1.position - p2.position);
-    const coordinate_type r_kj = boundary(p3.position - p2.position);
-    const coordinate_type r_lk = boundary(p4.position - p3.position);
+    const coordinate_type r_ij =
+        boundary_type::adjust_direction(p1.position - p2.position);
+    const coordinate_type r_kj =
+        boundary_type::adjust_direction(p3.position - p2.position);
+    const coordinate_type r_lk =
+        boundary_type::adjust_direction(p4.position - p3.position);
     const coordinate_type r_kl = -1e0 * r_lk;
 
     const real_type r_kj_lensq     = length_sq(r_kj);
@@ -95,9 +96,12 @@ DihedralAngleInteraction<traitsT, boundaryT>::calc_energy(
         const particle_type& p3, const particle_type& p4,
         const potential_type& pot) const
 {
-    const coordinate_type r_ij = boundary(p1.position - p2.position);
-    const coordinate_type r_kj = boundary(p3.position - p2.position);
-    const coordinate_type r_lk = boundary(p4.position - p3.position);
+    const coordinate_type r_ij =
+        boundary_type::adjust_direction(p1.position - p2.position);
+    const coordinate_type r_kj =
+        boundary_type::adjust_direction(p3.position - p2.position);
+    const coordinate_type r_lk =
+        boundary_type::adjust_direction(p4.position - p3.position);
     const real_type r_kj_lensq_inv = 1. / length_sq(r_kj);
 
     const coordinate_type n = cross_product(r_kj, -1e0 * r_lk);

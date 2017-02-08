@@ -24,19 +24,12 @@ class GlobalDistanceInteraction : public GlobalInteractionBase<traitsT>
 
   public:
     GlobalDistanceInteraction() = default;
+    ~GlobalDistanceInteraction() = default;
+
     GlobalDistanceInteraction(std::unique_ptr<spatial_partitioning_type>&& sp)
         : spatial_partition_(
                 std::forward<std::unique_ptr<spatial_partitioning_type>>(sp))
     {}
-
-    GlobalDistanceInteraction(std::unique_ptr<spatial_partitioning_type>&& sp,
-                              const coordinate_type& system_size)
-        : spatial_partition_(
-                std::forward<std::unique_ptr<spatial_partitioning_type>>(sp)),
-          boundary(system_size)
-    {}
-
-    ~GlobalDistanceInteraction() = default;
 
     void
     calc_force(particle_container_type& pcon, potential_type& pot) override;
@@ -54,7 +47,6 @@ class GlobalDistanceInteraction : public GlobalInteractionBase<traitsT>
 
   private:
     std::unique_ptr<spatial_partitioning_type> spatial_partition_;
-    boundary_type boundary;
 };
 
 template<typename traitsT, typename boundaryT>
@@ -71,7 +63,7 @@ void GlobalDistanceInteraction<traitsT, boundaryT>::calc_force(
             const std::size_t j = *iter;
             // XXX: for short-range force
             const coordinate_type rij =
-                boundary(pcon[j].position - pcon[i].position);
+                boundary_type::adjust_direction(pcon[j].position - pcon[i].position);
             const real_type       l   = length(rij);
             const coordinate_type f   = rij * (pot.derivative(i, j, l) / l);
             pcon[i].force += f;
@@ -96,7 +88,7 @@ GlobalDistanceInteraction<traitsT, boundaryT>::calc_energy(
             const std::size_t j = *iter;
             // XXX: for short-range force
             const coordinate_type rij =
-                boundary(pcon[j].position - pcon[i].position);
+                boundary_type::adjust_direction(pcon[j].position - pcon[i].position);
             const real_type l = length(rij);
             e += pot.potential(i, j, l);
         }

@@ -16,6 +16,7 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT, 2>
   public:
 
     typedef traitsT traits_type;
+    typedef boundaryT boundary_type;
     typedef LocalInteractionBase<traits_type, 2> base_type;
     typedef typename base_type::time_type        time_type;
     typedef typename base_type::real_type        real_type;
@@ -26,7 +27,6 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT, 2>
   public:
 
     BondLengthInteraction() = default;
-    BondLengthInteraction(const boundaryT& b): boundary(b){};
     ~BondLengthInteraction() override = default;
 
     void
@@ -36,17 +36,14 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT, 2>
     real_type
     calc_energy(const particle_type& p1, const particle_type& p2,
                 const potential_type& pot) const override;
-
-  private:
-
-    boundaryT boundary;
 };
 
 template<typename traitsT, typename boundaryT>
 void BondLengthInteraction<traitsT, boundaryT>::calc_force(
         particle_type& p1, particle_type& p2, const potential_type& pot) const
 {
-    const coordinate_type dpos = boundary(p2.position - p1.position);
+    const coordinate_type dpos =
+        boundary_type::adjust_direction(p2.position - p1.position);
     const real_type len = length(dpos);
     const real_type f = -1 * pot.derivative(len);
 
@@ -64,7 +61,8 @@ BondLengthInteraction<traitsT, boundaryT>::calc_energy(
         const particle_type& p1, const particle_type& p2,
         const potential_type& pot) const
 {
-    return pot.potential(length(boundary(p1.position - p2.position)));
+    return pot.potential(length(
+                boundary_type::adjust_direction(p1.position - p2.position)));
 }
 
 } // mjolnir
