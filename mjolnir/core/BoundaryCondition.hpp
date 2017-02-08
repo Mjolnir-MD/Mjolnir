@@ -56,7 +56,7 @@ struct PeriodicBoundaryXYZ
         return dr;
     }
 
-    coordinate_type
+    static coordinate_type
     adjust_absolute(coordinate_type pos)
     {
              if(pos[0] < lower_[0]) pos[0] += sys_size_[0];
