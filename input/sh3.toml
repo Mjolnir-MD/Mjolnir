@@ -1,8 +1,14 @@
 [simulator]
 file_name          = "sh3"
 time_integration   = "Underdamped Langevin"
+boundary           = "Unlimited"
+# boundary           = "Periodic"
+# lower              = [ 0.0, -25.0, -30.0]
+# upper              = [50.0,  25.0,  20.0]
 delta_t            = 0.4
 total_step         = 50_000
+# delta_t            = 0.1
+# total_step         = 500_000
 save_step          = 100
 temperature        = 300.0
 kB                 = 1.986231313e-3
@@ -132,7 +138,8 @@ friction_constant = [
 [[localforcefield]]
 interaction = "BondLength"
 potential = "Harmonic"
-boundary = "Unlimited"
+boundary  = "Unlimited"
+# boundary = "Periodic"
 # params{{{
 parameters = [
 {indices = [0, 1], r0 = 3.822321e+00, k = 100.0},
@@ -195,7 +202,8 @@ parameters = [
 [[localforcefield]]
 interaction = "BondLength"
 potential = "Go1012Contact"
-boundary = "Unlimited"
+boundary  = "Unlimited"
+# boundary = "Periodic"
 # params{{{
 parameters = [
 {indices = [0, 22], r0 = 7.264378e+00, k = 0.3},
@@ -418,7 +426,8 @@ parameters = [
 [[localforcefield]]
 interaction = "BondAngle"
 potential = "Harmonic"
-boundary = "Unlimited"
+boundary  = "Unlimited"
+# boundary = "Periodic"
 # params{{{
 parameters = [
 {indices = [0, 1, 2], r0 = 2.294968e+00, k = 20.0},
@@ -480,7 +489,8 @@ parameters = [
 [[localforcefield]]
 interaction = "DihedralAngle"
 potential = "ClementiDihedral"
-boundary = "Unlimited"
+boundary  = "Unlimited"
+# boundary = "Periodic"
 # params{{{
 parameters = [
 {indices = [0, 1, 2, 3], phi0 = -2.208936e+00, k1 = 1.0, k3 = 0.5},
@@ -541,7 +551,8 @@ parameters = [
 [[globalforcefield]]
 interaction = "Global"
 potential = "ExcludedVolume"
-boundary = "Unlimited"
+boundary  = "Unlimited"
+# boundary = "Periodic"
 epsilon = 0.6
 # params{{{
 parameters = [
