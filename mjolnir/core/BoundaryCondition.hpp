@@ -75,6 +75,10 @@ struct PeriodicBoundaryXYZ
         return pos;
     }
 
+    static coordinate_type const& lower_bound() {return lower_;}
+    static coordinate_type const& upper_bound() {return upper_;}
+    static coordinate_type const& system_size() {return sys_size_;}
+
   private:
 
     static coordinate_type lower_;
