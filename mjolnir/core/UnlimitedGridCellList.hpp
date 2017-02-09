@@ -1,5 +1,7 @@
 #ifndef MJOLNIR_UNLIMITED_GRID_CELL_LIST
 #define MJOLNIR_UNLIMITED_GRID_CELL_LIST
+#include "BoundaryCondition.hpp"
+#include "SpatialPartition.hpp"
 #include <mjolnir/util/logger.hpp>
 #include <functional>
 #include <unordered_map>
