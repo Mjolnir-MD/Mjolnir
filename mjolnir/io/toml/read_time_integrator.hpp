@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_TOML_READ_INTEGRATOR
 #define MJOLNIR_TOML_READ_INTEGRATOR
-#include <mjolnir/core/VelocityVerlet.hpp>
+#include <mjolnir/core/NVENewtonian.hpp>
 #include <mjolnir/core/UnderdampedLangevin.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -69,10 +69,10 @@ read_nve_newtonian(const toml::Table& sim, const std::string boundary)
     MJOLNIR_LOG_DEBUG("read_time_integrator RETURNED");
 
     if(boundary == "Unlimited")
-        return make_unique<VelocityVerlet<traitsT>>(delta_t, num_particles);
+        return make_unique<NVENewtonian<traitsT>>(delta_t, num_particles);
     else if(boundary == "Periodic")
         return make_unique<
-            VelocityVerlet<traitsT, PeriodicBoundaryXYZ<traitsT>>>(
+            NVENewtonian<traitsT, PeriodicBoundaryXYZ<traitsT>>>(
                 delta_t, num_particles);
     else
         throw std::runtime_error("unknown boundary condition: " + boundary);

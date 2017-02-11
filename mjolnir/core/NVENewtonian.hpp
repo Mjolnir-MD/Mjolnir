@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_VELOCITY_VERLET_INTEGRATOR
-#define MJOLNIR_VELOCITY_VERLET_INTEGRATOR
+#ifndef MJOLNIR_NVE_NEWTONIAN_INTEGRATOR
+#define MJOLNIR_NVE_NEWTONIAN_INTEGRATOR
 #include "Integrator.hpp"
 #include "BoundaryCondition.hpp"
 #include <mjolnir/util/zip_iterator.hpp>
@@ -9,7 +9,7 @@ namespace mjolnir
 {
 
 template<typename traitsT, typename boundaryT = UnlimitedBoundary<traitsT>>
-class VelocityVerlet : public Integrator<traitsT>
+class NVENewtonian : public Integrator<traitsT>
 {
   public:
     typedef traitsT traits_type;
@@ -19,11 +19,11 @@ class VelocityVerlet : public Integrator<traitsT>
 
   public:
 
-    VelocityVerlet(const time_type dt, const std::size_t number_of_particles)
+    NVENewtonian(const time_type dt, const std::size_t number_of_particles)
         : dt_(dt), halfdt_(dt * 0.5), halfdt2_(dt * dt * 0.5),
           acceleration_(number_of_particles)
     {}
-    ~VelocityVerlet() override = default;
+    ~NVENewtonian() override = default;
 
     void initialize(const ParticleContainer<traitsT>& pcon) override;
     time_type step(const time_type time, ParticleContainer<traitsT>& pcon,
@@ -40,7 +40,7 @@ class VelocityVerlet : public Integrator<traitsT>
 };
 
 template<typename traitsT, typename boundaryT>
-void VelocityVerlet<traitsT, boundaryT>::initialize(
+void NVENewtonian<traitsT, boundaryT>::initialize(
         const ParticleContainer<traitsT>& pcon)
 {
     for(auto iter = make_zip(pcon.cbegin(), acceleration_.begin());
@@ -53,8 +53,8 @@ void VelocityVerlet<traitsT, boundaryT>::initialize(
 
 // at the initial step, acceleration_ must be initialized
 template<typename traitsT, typename boundaryT>
-typename VelocityVerlet<traitsT, boundaryT>::time_type
-VelocityVerlet<traitsT, boundaryT>::step(const time_type time,
+typename NVENewtonian<traitsT, boundaryT>::time_type
+NVENewtonian<traitsT, boundaryT>::step(const time_type time,
         ParticleContainer<traitsT>& pcon, ForceField<traitsT>& ff)
 {
     // calc r(t+dt)
