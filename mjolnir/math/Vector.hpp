@@ -1,8 +1,9 @@
 #ifndef MJOLNIR_VECTOR
 #define MJOLNIR_VECTOR
 #include "Matrix.hpp"
+#include "quaternion.hpp"
+#include "fast_inv_sqrt.hpp"
 #include <mjolnir/util/scalar_type_of.hpp>
-#include <boost/math/quaternion.hpp>
 #include <cmath>
 
 namespace mjolnir
@@ -56,19 +57,19 @@ coordT
 rotate(const typename scalar_type_of<coordT>::type angle,
        const coordT& axis, const coordT& target)
 {
-    using namespace boost::math;
-    using quat = quaternion<typename scalar_type_of<coordT>::type>;
+    typedef typename scalar_type_of<coordT>::type real_type;
 
-    const typename scalar_type_of<coordT>::type sin_normalize = 
-        sin(angle * 0.5) / length(axis);
+    const real_type half_angle = angle * 0.5;
+    const real_type sin_normalize =
+        std::sin(half_angle) * fast_inv_sqrt(length_sq(axis));
 
-    const quat Q(cos(angle * 0.5), axis[0] * sin_normalize, 
-                                   axis[1] * sin_normalize,
-                                   axis[2] * sin_normalize);
-    const quat P(0e0, target[0], target[1], target[2]);
-    const quat S(Q * P * conj(Q));
+    const quaternion<real_type> Q(std::cos(half_angle),
+            axis[0] * sin_normalize, axis[1] * sin_normalize,
+            axis[2] * sin_normalize);
+    const quaternion<real_type> P(0e0, target[0], target[1], target[2]);
+    const quaternion<real_type> S(Q * P * conj(Q));
 
-    return coordT(S.R_component_2(), S.R_component_3(), S.R_component_4());
+    return coordT(S[1], S[2], S[3]);
 }
 
 }
