@@ -156,6 +156,7 @@ BOOST_AUTO_TEST_CASE(test_vector_rotation)
         BOOST_CHECK_CLOSE_FRACTION(length(rot), 1., tolerance);
         BOOST_CHECK_CLOSE_FRACTION(rot[0], std::cos(theta), tolerance);
         BOOST_CHECK_CLOSE_FRACTION(rot[1], std::sin(theta), tolerance);
+        BOOST_CHECK_SMALL(rot[2], tolerance);
     }
 }
 
