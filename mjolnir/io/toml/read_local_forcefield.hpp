@@ -31,8 +31,9 @@ read_local_force_field(const toml::Array<toml::Table>& lffs)
             toml::get<toml::String>(iter->at("interaction"));
         MJOLNIR_LOG_INFO("interaction name", interaction);
 
-        const std::string boundary =
-            toml::get<toml::String>(iter->at("boundary"));
+        std::string boundary("Unlimited");
+        try{toml::get<toml::String>(iter->at("boundary"));}
+        catch(std::out_of_range& except){;}
         MJOLNIR_LOG_INFO("boundary name", boundary);
 
         if(interaction == "BondLength")
