@@ -55,6 +55,7 @@ int main(int argc, char **argv)
 
     // particles
 
+    std::cout << "number_of_particle = " << clementigo.beads().size() << std::endl;
     std::vector<double> fric_consts;
     std::cout << "# particles {{{" << std::endl;
     std::cout << "particles = [" << std::endl;
