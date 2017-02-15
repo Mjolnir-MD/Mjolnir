@@ -25,13 +25,13 @@ class physics
 };
 
 template<typename traitsT>
-physics<traitsT>::real_type physics<traitsT>::kB = 1.986231313e-3;
+typename physics<traitsT>::real_type physics<traitsT>::kB = 1.986231313e-3;
 template<typename traitsT>
-physics<traitsT>::real_type physics<traitsT>::NA = 6.0221417930e23;
+typename physics<traitsT>::real_type physics<traitsT>::NA = 6.0221417930e23;
 template<typename traitsT>
-physics<traitsT>::real_type physics<traitsT>::e = 1.60217648740e-19;
+typename physics<traitsT>::real_type physics<traitsT>::e = 1.60217648740e-19;
 template<typename traitsT>
-physics<traitsT>::real_type physics<traitsT>::vacumm_permittivity = 8.854187817e-12;
+typename physics<traitsT>::real_type physics<traitsT>::vacuum_permittivity = 8.854187817e-12;
 
 }//mjolnir
 #endif /* MJOLNIR_CONSTANTS */
