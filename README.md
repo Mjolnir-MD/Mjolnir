@@ -20,6 +20,8 @@ Flexible, well-organized, and modern molecular dynamics simulation code.
 
 ## Build
 
+Testing code depends on Boost.unittest framework. please install boost.unittest.
+
 `g++-5` and `clang++-3.7` on `Ubuntu 14.04 Trusty Tahr` are tested on __Travis CI__.
 
 ```sh
