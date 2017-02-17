@@ -141,7 +141,7 @@ void PeriodicGridCellList<traitsT, boundaryT>::make(
         for(std::size_t j=0; j<cell.first.size(); ++j)
         {
             MJOLNIR_LOG_DEBUG("looking", j, "-th particle in the cell.",
-                              "its index is", clist.at(j));
+                              "its index is", cell.first.at(j));
             const std::size_t k = cell.first.at(j);
             if(k <= i || std::find(cbeg, cend, k) != cend)
                 continue;
@@ -160,7 +160,7 @@ void PeriodicGridCellList<traitsT, boundaryT>::make(
             for(std::size_t j=0; j<(*iter)->size(); ++j)
             {
                 MJOLNIR_LOG_DEBUG("looking", j, "-th particle in the cell.",
-                                  "its index is", clist.at(j));
+                                  "its index is", (*iter)->at(j));
                 const std::size_t k = (*iter)->at(j);
                 if(k <= i || std::find(cbeg, cend, k) != cend)
                     continue;
