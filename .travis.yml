@@ -32,6 +32,6 @@ install:
 script:
 - mkdir build
 - cd build
-- cmake -DCMAKE_CXX_COMPILER=clang++-3.7 ..
+- cmake -DCMAKE_CXX_COMPILER=$COMPILER ..
 - make
 - make test
