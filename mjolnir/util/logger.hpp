@@ -127,27 +127,41 @@ class LoggerManager
     typedef basic_logger<charT, char_traits, alloc>      logger_type;
     typedef std::unique_ptr<logger_type>                 resource_type;
     typedef std::map<string_type, resource_type>         container_type;
+    constexpr static const char* debug_file = "mjolnir_debug.log";
+    constexpr static const char* info_file  = "mjolnir_info.log";
 
   public:
     static logger_type& get_logger(const string_type& name)
     {
+        if(dirty)
+        {
+            std::ofstream dbg(debug_file);
+            std::ofstream info(info_file);
+            dbg.close();
+            info.close();
+            dirty = false;
+        }
         if(loggers_.count(name) == 0)
         {
             resource_type newlogger = make_unique<logger_type>(name);
-            newlogger->set_output(logger_type::Level::Debug, "mjolnir_debug.log");
-            newlogger->set_output(logger_type::Level::Info, "mjolnir_info.log");
+            newlogger->set_output(logger_type::Level::Debug, debug_file);
+            newlogger->set_output(logger_type::Level::Info,  info_file);
             loggers_.emplace(name, std::move(newlogger));
         }
         return *(loggers_.at(name));
     }
 
   private:
+    static bool dirty;
     static container_type loggers_;
 };
 
 template<typename charT, typename traits, typename alloc>
 typename LoggerManager<charT, traits, alloc>::container_type
 LoggerManager<charT, traits, alloc>::loggers_;
+
+template<typename charT, typename traits, typename alloc>
+bool LoggerManager<charT, traits, alloc>::dirty = true;
 
 typedef basic_logger<char>     Logger;
 typedef basic_logger<wchar_t>  wLogger;
