@@ -1,21 +1,28 @@
 #ifndef MJOLNIR_UTIL_LOGGER
 #define MJOLNIR_UTIL_LOGGER
 #include "make_unique.hpp"
-#include <string>
-#include <fstream>
-#include <iostream>
 #include <map>
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <chrono>
+#include <ctime>
 
 namespace mjolnir
 {
 
-template<typename charT, typename char_traits = std::char_traits<charT>>
+template<typename charT, typename traits = std::char_traits<charT>,
+         typename alloc = std::allocator<charT>>
 class basic_logger
 {
   public:
-    typedef std::basic_string<charT, char_traits> string_type;
-    typedef std::basic_ostream<charT, char_traits> ostream_type;
-    typedef std::basic_fstream<charT, char_traits> fstream_type;
+    typedef std::basic_string<charT, traits, alloc>        string_type;
+    typedef std::basic_ostream<charT, traits>              ostream_type;
+    typedef std::basic_fstream<charT, traits>              fstream_type;
+    typedef std::basic_ostringstream<charT, traits, alloc> ostringstream_type;
+    constexpr static std::size_t name_length = 25;
 
     enum class Level
     {
@@ -27,8 +34,9 @@ class basic_logger
 
   public:
 
-    explicit basic_logger(const string_type& name): name_(name){}
-    basic_logger(basic_logger&& l) = default;
+    explicit basic_logger(const string_type& name)
+        : name_(name.size() <= name_length ? name : name.substr(0, name_length))
+    {}
     ~basic_logger() = default;
 
     template<typename ... T_args>
@@ -42,18 +50,18 @@ class basic_logger
                 throw std::runtime_error(
                         "file open erorr: " + output_.at(level));
 
-            log_(ofs, to_string(level), name_, std::forward<T_args>(args)...);
+            log_(ofs, level, std::forward<T_args>(args)...);
             ofs.close();
             return;
         }
         else
-        {// TODO wchar, u16char, u32char
-            return log_(std::cerr, to_string(level), name_,
-                        std::forward<T_args>(args)...);
+        {
+            log_(std::cerr, level, std::forward<T_args>(args)...);
+            return;
         }
     }
 
-    void set_output(Level lev, string_type&& fname)
+    void set_output(Level lev, std::string&& fname)
     {
         output_[lev] = std::forward<string_type>(fname);
         return;
@@ -61,66 +69,85 @@ class basic_logger
 
   private:
 
-    template<typename T, typename ... T_args>
-    void log_(ostream_type& os, T&& arg1, T_args&& ...args) const
+    template<typename ... T_args>
+    void log_(ostream_type& os, const Level& level, T_args&& ...args) const
     {
-        os << std::forward<T>(arg1) << " ";
-        log_(os, args...);
+        std::time_t t = std::chrono::system_clock::to_time_t(
+                std::chrono::system_clock::now());
+        std::tm tm = *std::localtime(&t);
+
+        os << to_string(level);
+        os << std::put_time(&tm, "%c %Z") << "| ";
+        os << std::setw(name_length) << std::left << name_;
+        string_type mes = gen_message(std::forward<T_args>(args)...);
+        os << mes << std::endl;
         return;
     }
 
-    template<typename T>
-    void log_(ostream_type& os, T&& arg1) const
+    template<typename T, typename ...T_args>
+    string_type gen_message(T&& arg1, T_args&& ...args) const
     {
-        os << std::forward<T>(arg1) << std::endl;
-        return;
+        ostringstream_type oss;
+        oss << " " << arg1;
+        return oss.str() + gen_message(std::forward<T_args>(args)...);
+    }
+
+    template<typename T>
+    string_type gen_message(T&& arg1) const
+    {
+        ostringstream_type oss;
+        oss << " " << arg1;
+        return oss.str();
     }
 
     string_type to_string(Level l) const
     {
         switch(l)
         {
-            case Level::Debug: return "Log-Debug:";
-            case Level::Info:  return "Log-Info:";
-            case Level::Warn:  return "Log-Warn:";
-            case Level::Error: return "Log-Error:";
-            default:           return "Log-Unknown";
+            case Level::Debug: return "[Debug  ]";
+            case Level::Info:  return "[Info   ]";
+            case Level::Warn:  return "[Warning]";
+            case Level::Error: return "[Error  ]";
+            default:           return "[Unknown]";
         }
     }
 
   private:
 
-    string_type name_;
-    std::map<Level, string_type> output_;
-
+    const string_type name_;
+    std::map<Level, std::string> output_;
 };
 
-template<typename charT, typename char_traits = std::char_traits<charT>>
+template<typename charT, typename char_traits = std::char_traits<charT>,
+         typename alloc = std::allocator<charT>>
 class LoggerManager
 {
   public:
-    typedef std::basic_string<charT, char_traits> string_type;
+    typedef std::basic_string<charT, char_traits, alloc> string_type;
+    typedef basic_logger<charT, char_traits, alloc>      logger_type;
+    typedef std::unique_ptr<logger_type>                 resource_type;
+    typedef std::map<string_type, resource_type>         container_type;
 
   public:
-    static
-    basic_logger<charT, char_traits>& get_logger(const string_type& name)
+    static logger_type& get_logger(const string_type& name)
     {
         if(loggers_.count(name) == 0)
-            loggers_.emplace(
-                    name, make_unique<basic_logger<charT, char_traits>>(name));
-        return *(loggers_[name]);
+        {
+            resource_type newlogger = make_unique<logger_type>(name);
+            newlogger->set_output(logger_type::Level::Debug, "mjolnir_debug.log");
+            newlogger->set_output(logger_type::Level::Info, "mjolnir_info.log");
+            loggers_.emplace(name, std::move(newlogger));
+        }
+        return *(loggers_.at(name));
     }
 
   private:
-    static
-    std::map<string_type,
-             std::unique_ptr<basic_logger<charT, char_traits>>> loggers_;
+    static container_type loggers_;
 };
 
-template<typename charT, typename traits>
-std::map<std::basic_string<charT, traits>,
-         std::unique_ptr<basic_logger<charT, traits>>>
-LoggerManager<charT, traits>::loggers_;
+template<typename charT, typename traits, typename alloc>
+typename LoggerManager<charT, traits, alloc>::container_type
+LoggerManager<charT, traits, alloc>::loggers_;
 
 typedef basic_logger<char>     Logger;
 typedef basic_logger<wchar_t>  wLogger;
