@@ -27,6 +27,7 @@ class basic_logger
     enum class Level
     {
         Debug,
+        Time,
         Info,
         Warn,
         Error,
@@ -104,6 +105,7 @@ class basic_logger
         switch(l)
         {
             case Level::Debug: return "[Debug  ]";
+            case Level::Time:  return "[Time   ]";
             case Level::Info:  return "[Info   ]";
             case Level::Warn:  return "[Warning]";
             case Level::Error: return "[Error  ]";
@@ -169,6 +171,72 @@ LoggerManager<charT, traits, alloc>::loggers_;
 
 template<typename charT, typename traits, typename alloc>
 bool LoggerManager<charT, traits, alloc>::dirty = true;
+
+// duration_as_string {{{
+template<typename durationT>
+struct duration_as_string;
+
+template<>
+struct duration_as_string<std::chrono::nanoseconds>
+{
+    static std::string invoke(){return "[nsec]";}
+};
+
+template<>
+struct duration_as_string<std::chrono::microseconds>
+{
+    static std::string invoke(){return "[usec]";}
+};
+
+template<>
+struct duration_as_string<std::chrono::milliseconds>
+{
+    static std::string invoke(){return "[msec]";}
+};
+
+template<>
+struct duration_as_string<std::chrono::seconds>
+{
+    static std::string invoke(){return "[sec ]";}
+};
+
+template<>
+struct duration_as_string<std::chrono::minutes>
+{
+    static std::string invoke(){return "[min ]";}
+};
+
+template<>
+struct duration_as_string<std::chrono::hours>
+{
+    static std::string invoke(){return "[hour]";}
+};
+// }}}
+
+template<typename durationT,
+         typename charT = char, typename traits = std::char_traits<charT>,
+         typename alloc = std::allocator<charT>>
+struct stopwatch
+{
+    typedef duration_as_string<durationT> as_string;
+    typedef basic_logger<charT, traits, alloc> logger_type;
+
+    stopwatch(const std::string& name, logger_type& logger)
+        : start(std::chrono::system_clock::now()), name_(name), logger_(logger)
+    {}
+    ~stopwatch()
+    {
+        const auto stop = std::chrono::system_clock::now();
+        const auto dur = std::chrono::duration_cast<durationT>(stop - start);
+        logger_.log(logger_type::Time, name_, dur.count(), as_string::invoke());
+    }
+
+  private:
+
+    const std::chrono::system_clock::time_point start;
+    const std::string name_;
+    logger_type& logger_;
+};
 
 typedef basic_logger<char>     Logger;
 typedef basic_logger<wchar_t>  wLogger;
