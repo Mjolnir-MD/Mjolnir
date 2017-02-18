@@ -76,8 +76,7 @@ class basic_logger
                 std::chrono::system_clock::now());
         std::tm tm = *std::localtime(&t);
 
-        os << to_string(level);
-        os << std::put_time(&tm, "%c %Z") << "| ";
+        os << to_string(level) << '|' << to_str(tm) << "| ";
         os << std::setw(name_length) << std::left << name_;
         string_type mes = gen_message(std::forward<T_args>(args)...);
         os << mes << std::endl;
@@ -110,6 +109,14 @@ class basic_logger
             case Level::Error: return "[Error  ]";
             default:           return "[Unknown]";
         }
+    }
+
+    string_type to_str(const std::tm& t) const
+    {
+        ostringstream_type oss;
+        oss << t.tm_year+1900 << '/' << t.tm_mon+1 << '/' << t.tm_mday << ' ';
+        oss << t.tm_hour << ':' << t.tm_min << ':' << t.tm_sec;
+        return oss.str();
     }
 
   private:
