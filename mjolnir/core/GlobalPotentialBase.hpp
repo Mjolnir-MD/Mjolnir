@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_GLOBAL_POTENTIAL_BASE
 #define MJOLNIR_GLOBAL_POTENTIAL_BASE
 #include "ParticleContainer.hpp"
+#include <string>
 
 namespace mjolnir
 {
@@ -20,6 +21,8 @@ class GlobalPotentialBase
         const std::size_t i, const std::size_t j, const real_type r) const = 0;
 
     virtual real_type max_cutoff_length() const = 0;
+
+    virtual void reset_parameter(const std::string&, const real_type) = 0;
 };
 
 

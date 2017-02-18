@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_LOCAL_POTENTIAL_BASE
 #define MJOLNIR_LOCAL_POTENTIAL_BASE
+#include <string>
 
 namespace mjolnir
 {
@@ -17,6 +18,8 @@ class LocalPotentialBase
 
     virtual real_type potential(const real_type value) const = 0;
     virtual real_type derivative(const real_type value) const = 0;
+
+    virtual void reset_parameter(const std::string&, const real_type) = 0;
 };
 
 }// mjolnir
