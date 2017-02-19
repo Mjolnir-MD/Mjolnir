@@ -64,6 +64,8 @@ class LocalForceField
     void emplace_3body(interaction_ptr<3>&& i, potential_array<3>&& ps);
     void emplace_4body(interaction_ptr<4>&& i, potential_array<4>&& ps);
 
+    void reset_parameter(const std::string&, const real_type);
+
   private:
 
     std::vector<interaction_potential_pair<2>> body2_;
@@ -171,6 +173,35 @@ LocalForceField<traitsT>::calc_energy(const particle_container_type& pcon) const
     }
     return energy;
 }
+
+
+template<typename traitsT>
+void LocalForceField<traitsT>::reset_parameter(
+        const std::string& name, const real_type val)
+{
+    for(auto ff = body2_.begin(); ff != body2_.end(); ++ff)
+    {
+        auto& potentials = ff->potentials;
+        for(auto iter = potentials.begin(); iter != potentials.end(); ++iter)
+            iter->second->reset_parameter(name, val);
+    }
+
+    for(auto ff = body3_.cbegin(); ff != body3_.cend(); ++ff)
+    {
+        auto& potentials = ff->potentials;
+        for(auto iter = potentials.begin(); iter != potentials.end(); ++iter)
+            iter->second->reset_parameter(name, val);
+    }
+
+    for(auto ff = body4_.cbegin(); ff != body4_.cend(); ++ff)
+    {
+        auto& potentials = ff->potentials;
+        for(auto iter = potentials.begin(); iter != potentials.end(); ++iter)
+            iter->second->reset_parameter(name, val);
+    }
+    return;
+}
+
 
 } // mjolnir
 #endif /* MJOLNIR_LOCAL_FORCE_FIELD */

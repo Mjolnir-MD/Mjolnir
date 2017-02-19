@@ -12,6 +12,7 @@ class ForceField
 {
   public:
     typedef traitsT traits_type;
+    typedef typename traits_type::real_type real_type;
     typedef typename traits_type::time_type time_type;
     typedef typename traits_type::energy_type energy_type;
     typedef typename traits_type::coordinate_type coordinate_type;
@@ -33,6 +34,8 @@ class ForceField
     void initialize(const ParticleContainer<traitsT>& pcon, const time_type dt);
     void        calc_force(ParticleContainer<traitsT>& pcon);
     energy_type calc_energy(const ParticleContainer<traitsT>& pcon) const;
+
+    void reset_parameter(const std::string& name, const real_type val);
 
   private:
 
@@ -62,6 +65,16 @@ ForceField<traitsT>::calc_energy(const ParticleContainer<traitsT>& pcon) const
 {
     return this->local_.calc_energy(pcon) + this->global_.calc_energy(pcon);
 }
+
+template<typename traitsT>
+inline void ForceField<traitsT>::reset_parameter(
+        const std::string& name, const real_type val)
+{
+    local_.reset_parameter(name, val);
+    global_.reset_parameter(name, val);
+    return;
+}
+
 
 } // mjolnir
 #endif /* MJOLNIR_FORCE_FIELD */

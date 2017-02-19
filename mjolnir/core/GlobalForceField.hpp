@@ -42,6 +42,7 @@ class GlobalForceField
     real_type calc_energy(const ParticleContainer<traitsT>& pcon) const;
 
     void initialize(const ParticleContainer<traitsT>& pcon, const time_type dt);
+    void reset_parameter(const std::string&, const real_type);
 
   private:
 
@@ -105,6 +106,18 @@ GlobalForceField<traitsT>::calc_energy(
     }
     return energy;
 }
+
+template<typename traitsT>
+void GlobalForceField<traitsT>::reset_parameter(
+        const std::string& name, const real_type val)
+{
+    for(auto iter = potentials_.begin(); iter != potentials_.end(); ++iter)
+    {
+        iter->potential_->reset_parameter(name, val);
+    }
+    return;
+}
+
 
 } // mjolnir
 
