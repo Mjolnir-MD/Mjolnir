@@ -33,6 +33,8 @@ class HarmonicPotential : public LocalPotentialBase<traitsT>
         return  2 * this->k_ * (r - r0_);
     }
 
+    void reset_parameter(const std::string&, const real_type) override {return;}
+
   private:
 
     const real_type k_;

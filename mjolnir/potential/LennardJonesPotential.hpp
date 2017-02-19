@@ -58,6 +58,8 @@ class LennardJonesPotential: public GlobalPotentialBase<traitsT>
 
     real_type max_cutoff_length() const override;
 
+    void reset_parameter(const std::string&, const real_type) override {return;}
+
   private:
 
     std::vector<parameter_type> radii_;

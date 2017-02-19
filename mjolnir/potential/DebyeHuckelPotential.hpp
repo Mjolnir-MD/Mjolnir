@@ -55,6 +55,8 @@ class DebyeHuckelPotential : public GlobalPotentialBase<traitsT>
 
     real_type max_cutoff_length() const override;
 
+    void reset_parameter(const std::string&, const real_type) override;
+
   private:
 
     void calc_parameters();
@@ -97,14 +99,14 @@ DebyeHuckelPotential<traitsT>::max_cutoff_length() const
 }
 
 template<typename traitsT>
-void DebyeHuckelPotential<traitsT>::set_charge(const container_type& charges)
+void DebyeHuckelPotential<traitsT>::set_charges(const container_type& charges)
 {
     this->charges_ = charges;
     return;
 }
 
 template<typename traitsT>
-void DebyeHuckelPotential<traitsT>::set_charge(container_type&& charges)
+void DebyeHuckelPotential<traitsT>::set_charges(container_type&& charges)
 {
     this->charges_ = std::forward<container_type>(charges);
     return;
@@ -149,6 +151,18 @@ DebyeHuckelPotential<traitsT>::calc_dielectric_water(
     return (249.4 - 0.788 * T + 7.2e-4 * T * T) *
            (1. - 2.551 * c + 5.151e-2 * c * c - 6.889e-3 * c * c * c);
 }
+
+template<typename traitsT>
+void DebyeHuckelPotential<traitsT>::reset_parameter(
+        const std::string& name, const real_type val)
+{
+    if(name == "temperature")
+        this->set_temperature(val);
+    else if(name == "ionic_strength")
+        this->set_ionic_strength(val);
+    return;
+}
+
 
 } // mjolnir
 #endif /* MJOLNIR_DEBYE_HUCKEL_POTENTIAL */

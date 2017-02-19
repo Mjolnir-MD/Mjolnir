@@ -36,6 +36,8 @@ class ClementiDihedralPotential : public LocalPotentialBase<traitsT>
         return k1_ * std::sin(dphi) + 3. * k3_ * std::sin(3. * dphi);
     }
 
+    void reset_parameter(const std::string&, const real_type) override {return;}
+
   private:
 
     const real_type k1_;

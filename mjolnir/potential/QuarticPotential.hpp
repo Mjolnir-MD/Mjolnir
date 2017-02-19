@@ -36,9 +36,12 @@ class QuarticPotential : public LocalPotentialBase<traitsT>
         return  2 * this->k1_ * dr + 4 * this->k2_ * dr * dr * dr;
     }
 
+    void reset_parameter(const std::string&, const real_type) override {return;}
+
   private:
 
-    const real_type k_;          //!< spring coefficient
+    const real_type k1_;
+    const real_type k2_;
     const real_type native_val_; //!< most stable length
 };
 
