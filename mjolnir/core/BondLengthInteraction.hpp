@@ -44,6 +44,11 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT, 2>
     real_type
     calc_energy(const particle_type& p1, const particle_type& p2) const override;
 
+    void
+    reset_parameter(const std::string& name, const real_type val) override
+    {
+        potential.reset_parameter(name, val);
+    }
   private:
     potential_type potential;
 };

@@ -29,6 +29,9 @@ class LocalInteractionBase<traitsT, 2>
 
     virtual real_type
     calc_energy(const particle_type& p1, const particle_type& p2) const = 0;
+
+    virtual void
+    reset_parameter(const std::string&, const real_type) = 0;
 };
 
 template<typename traitsT>
@@ -52,6 +55,9 @@ class LocalInteractionBase<traitsT, 3>
     virtual real_type
     calc_energy(const particle_type& p1, const particle_type& p2,
                 const particle_type& p3) const = 0;
+
+    virtual void
+    reset_parameter(const std::string&, const real_type) = 0;
 };
 
 template<typename traitsT>
@@ -76,6 +82,9 @@ class LocalInteractionBase<traitsT, 4>
     virtual real_type
     calc_energy(const particle_type& p1, const particle_type& p2,
                 const particle_type& p3, const particle_type& p4) const = 0;
+
+    virtual void
+    reset_parameter(const std::string&, const real_type) = 0;
 };
 
 } // mjolnir

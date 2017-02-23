@@ -42,6 +42,12 @@ class BondAngleInteraction : public LocalInteractionBase<traitsT, 3>
     calc_energy(const particle_type& p1, const particle_type& p2,
                 const particle_type& p3) const override;
 
+    void
+    reset_parameter(const std::string& name, const real_type val) override
+    {
+        potential.reset_parameter(name, val);
+    }
+
   private:
     potential_type potential;
 };

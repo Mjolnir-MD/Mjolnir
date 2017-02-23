@@ -42,6 +42,13 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT, 4>
     real_type
     calc_energy(const particle_type& p1, const particle_type& p2,
                 const particle_type& p3, const particle_type& p4) const override;
+
+    void
+    reset_parameter(const std::string& name, const real_type val) override
+    {
+        return potential.reset_parameter(name, val);
+    }
+
   private:
     potential_type potential;
 };
