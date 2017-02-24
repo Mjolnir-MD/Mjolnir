@@ -33,9 +33,8 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
 {
     const real_type k(1e0);
     const real_type native(M_PI * 2.0 / 3.0); // 120 degree
-    std::unique_ptr<mjolnir::LocalPotentialBase<traits>> potential =
-        mjolnir::make_unique<mjolnir::HarmonicPotential<traits>>(k, native);
-    mjolnir::BondAngleInteraction<traits> inter;
+    mjolnir::HarmonicPotential<traits> potential(k, native);
+    mjolnir::BondAngleInteraction<traits, mjolnir::HarmonicPotential<traits>> inter(potential);
 
     const coordinate_type pos1(1., 0., 0.);
     const coordinate_type pos2(0., 0., 0.);
@@ -59,10 +58,10 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
         const coordinate_type pos3(std::cos(theta), std::sin(theta), 0e0);
         p3.position = pos3;
 
-        const real_type deriv = potential->derivative(theta);
+        const real_type deriv = potential.derivative(theta);
         const real_type coef = std::abs(deriv);
 
-        inter.calc_force(p1, p2, p3, *potential);
+        inter.calc_force(p1, p2, p3);
 
         // magnitude
         // if radius == 1e0, then force strength is equal to dV/dtheta.

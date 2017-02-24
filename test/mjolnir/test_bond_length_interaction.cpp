@@ -34,9 +34,8 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
 
     const real_type k(100.);
     const real_type native(2.0);
-    std::unique_ptr<mjolnir::LocalPotentialBase<traits>> potential =
-        mjolnir::make_unique<mjolnir::HarmonicPotential<traits>>(k, native);
-    mjolnir::BondLengthInteraction<traits> inter;
+    mjolnir::HarmonicPotential<traits> potential(k, native);
+    mjolnir::BondLengthInteraction<traits, mjolnir::HarmonicPotential<traits>> inter(potential);
 
     particle_type p1 = mjolnir::make_particle(1., zero_vec(), zero_vec(), zero_vec());
     particle_type p2 = mjolnir::make_particle(1., zero_vec(), zero_vec(), zero_vec());
@@ -53,10 +52,10 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
 
         p2.position[0] = dist;
 
-        const real_type deriv = potential->derivative(dist);// dV/dr: f=-dV/dr
+        const real_type deriv = potential.derivative(dist);// dV/dr: f=-dV/dr
         const real_type coef  = std::abs(deriv);
 
-        inter.calc_force(p1, p2, *potential);
+        inter.calc_force(p1, p2);
 
         const real_type force_strength1 = mjolnir::length(p1.force);
         const real_type force_strength2 = mjolnir::length(p2.force);

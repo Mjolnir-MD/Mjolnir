@@ -33,9 +33,8 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
 {
     const real_type k(1e0);
     const real_type native(M_PI * 2.0 / 3.0);
-    std::unique_ptr<mjolnir::LocalPotentialBase<traits>> potential =
-        mjolnir::make_unique<mjolnir::HarmonicPotential<traits>>(k, native);
-    mjolnir::DihedralAngleInteraction<traits> inter;
+    mjolnir::HarmonicPotential<traits> potential(k, native);
+    mjolnir::DihedralAngleInteraction<traits, mjolnir::HarmonicPotential<traits>> inter(potential);
 
     const coordinate_type pos1(1e0, 0e0, 1e0);
     const coordinate_type pos2(0e0, 0e0, 1e0);
@@ -66,10 +65,10 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
         const coordinate_type pos4(std::cos(theta), -std::sin(theta), 0e0);
         p4.position = pos4;
 
-        const real_type deriv = potential->derivative(theta);
+        const real_type deriv = potential.derivative(theta);
         const real_type coef = std::abs(deriv);
 
-        inter.calc_force(p1, p2, p3, p4, *potential);
+        inter.calc_force(p1, p2, p3, p4);
 
         // magnitude
         // if radius == 1e0, then force strength is equal to dV.
