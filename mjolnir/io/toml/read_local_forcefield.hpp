@@ -33,7 +33,10 @@ read_local_force_field(const toml::Array<toml::Table>& lffs)
 
         std::string boundary("Unlimited");
         try{toml::get<toml::String>(iter->at("boundary"));}
-        catch(std::out_of_range& except){;}
+        catch(std::out_of_range& except)
+        {
+            MJOLNIR_LOG_WARN("boundary setting not found. UnlimitedBoundary is used.");
+        }
         MJOLNIR_LOG_INFO("boundary name", boundary);
 
         if(interaction == "BondLength")
