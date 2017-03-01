@@ -19,17 +19,13 @@ read_local_force_field(const toml::Array<toml::Table>& lffs)
     LocalForceField<traitsT> lff;
     for(auto iter = lffs.cbegin(); iter != lffs.cend(); ++iter)
     {
-        const std::string potential =
-            toml::get<toml::String>(iter->at("potential"));
-        MJOLNIR_LOG_INFO("potential name", potential);
-
-        const toml::Array<toml::Table> params =
-            toml::get<toml::Array<toml::Table>>(iter->at("parameters"));
-        MJOLNIR_LOG_INFO("parameter table size", params.size());
-
         const std::string interaction =
             toml::get<toml::String>(iter->at("interaction"));
         MJOLNIR_LOG_INFO("interaction name", interaction);
+
+        const std::string potential =
+            toml::get<toml::String>(iter->at("potential"));
+        MJOLNIR_LOG_INFO("potential name", potential);
 
         std::string boundary("Unlimited");
         try{toml::get<toml::String>(iter->at("boundary"));}
@@ -40,55 +36,12 @@ read_local_force_field(const toml::Array<toml::Table>& lffs)
         }
         MJOLNIR_LOG_INFO("boundary name", boundary);
 
-        if(interaction == "BondLength")
-        {
-            for(auto para = params.cbegin(); para != params.cend(); ++para)
-            {
-                auto indices = toml::get<toml::Array<toml::Integer>>(
-                        para->at("indices"));
-                std::array<std::size_t, 2> idxs;
-                idxs[0] = indices.at(0);
-                idxs[1] = indices.at(1);
+        const toml::Array<toml::Table> params =
+            toml::get<toml::Array<toml::Table>>(iter->at("parameters"));
+        MJOLNIR_LOG_INFO("parameter table size", params.size());
 
-                lff.emplace_2body(read_2body_interaction<traitsT>(
-                            interaction, boundary, potential, *para),
-                        std::move(idxs));
-            }
-        }
-        else if(interaction == "BondAngle")
-        {
-            for(auto para = params.cbegin(); para != params.cend(); ++para)
-            {
-                auto indices = toml::get<toml::Array<toml::Integer>>(
-                        para->at("indices"));
-                std::array<std::size_t, 3> idxs;
-                idxs[0] = indices.at(0);
-                idxs[1] = indices.at(1);
-                idxs[2] = indices.at(2);
-
-                lff.emplace_3body(read_3body_interaction<traitsT>(
-                            interaction, boundary, potential, *para),
-                        std::move(idxs));
-            }
-        }
-        else if(interaction == "DihedralAngle")
-        {
-            for(auto para = params.cbegin(); para != params.cend(); ++para)
-            {
-                auto indices = toml::get<toml::Array<toml::Integer>>(
-                        para->at("indices"));
-                std::array<std::size_t, 4> idxs;
-                idxs[0] = indices.at(0);
-                idxs[1] = indices.at(1);
-                idxs[2] = indices.at(2);
-                idxs[3] = indices.at(3);
-                lff.emplace_4body(read_4body_interaction<traitsT>(
-                            interaction, boundary, potential, *para),
-                        std::move(idxs));
-            }
-        }
-        else
-            throw std::runtime_error("unknown interaction: " + interaction);
+        lff.emplace(read_local_interaction<traitsT>(
+                    interaction, potential, boundary, params));
     }
     MJOLNIR_LOG_DEBUG("read_local_force_field RETUENED");
     return lff;
