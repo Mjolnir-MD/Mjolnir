@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_GLOBAL_INTEARACTION_BASE
 #define MJOLNIR_GLOBAL_INTEARACTION_BASE
-#include "ParticleContainer.hpp" 
+#include "ParticleContainer.hpp"
 #include "GlobalPotentialBase.hpp"
 
 namespace mjolnir
@@ -16,20 +16,21 @@ class GlobalInteractionBase
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef ParticleContainer<traits_type> particle_container_type;
-    typedef GlobalPotentialBase<traits_type> potential_type;
 
   public:
     virtual ~GlobalInteractionBase() = default;
 
     virtual void
-    calc_force(particle_container_type& pcon, potential_type& pot) = 0;
+    calc_force(particle_container_type& pcon) = 0;
 
     virtual real_type
-    calc_energy(const particle_container_type& pcon,
-                const potential_type& pot) const = 0;
+    calc_energy(const particle_container_type& pcon) const = 0;
 
     virtual void initialize(
             const particle_container_type& pcon, const time_type dt) = 0;
+
+    virtual void reset_parameter(
+            const std::string& name, const real_type value) = 0;
 };
 
 } // mjolnir
