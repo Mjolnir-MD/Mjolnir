@@ -31,34 +31,43 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
     typedef traits::real_type real_type;
     typedef traits::coordinate_type coordinate_type;
     typedef mjolnir::Particle<coordinate_type> particle_type;
+    typedef mjolnir::ParticleContainer<traits> particle_container_type;
+    typedef mjolnir::HarmonicPotential<traits> harmonic_type;
+    typedef mjolnir::BondLengthInteraction<traits, harmonic_type> bond_length_type;
 
     const real_type k(100.);
     const real_type native(2.0);
-    mjolnir::HarmonicPotential<traits> potential(k, native);
-    mjolnir::BondLengthInteraction<traits, mjolnir::HarmonicPotential<traits>> inter(potential);
 
-    particle_type p1 = mjolnir::make_particle(1., zero_vec(), zero_vec(), zero_vec());
-    particle_type p2 = mjolnir::make_particle(1., zero_vec(), zero_vec(), zero_vec());
+    typename bond_length_type::container_type potentials;
+    std::array<std::size_t, 2> indices{{0,1}};
+    harmonic_type potential(k, native);
+    potentials.emplace_back(std::move(indices), std::move(potential));
+
+    bond_length_type inter(std::move(potentials));
+
+    particle_container_type pcon(2);
+    pcon[0] = mjolnir::make_particle(1., zero_vec(), zero_vec(), zero_vec());
+    pcon[1] = mjolnir::make_particle(1., zero_vec(), zero_vec(), zero_vec());
 
     const real_type dr = 1e-3;
     real_type dist = 1e0;
     for(int i = 0; i < 2000; ++i)
     {
-        p1.position = zero_vec();
-        p2.position = zero_vec();
+        pcon[0].position = zero_vec();
+        pcon[1].position = zero_vec();
 
-        p1.force = zero_vec();
-        p2.force = zero_vec();
+        pcon[0].force = zero_vec();
+        pcon[1].force = zero_vec();
 
-        p2.position[0] = dist;
+        pcon[1].position[0] = dist;
 
         const real_type deriv = potential.derivative(dist);// dV/dr: f=-dV/dr
         const real_type coef  = std::abs(deriv);
 
-        inter.calc_force(p1, p2);
+        inter.calc_force(pcon);
 
-        const real_type force_strength1 = mjolnir::length(p1.force);
-        const real_type force_strength2 = mjolnir::length(p2.force);
+        const real_type force_strength1 = mjolnir::length(pcon[0].force);
+        const real_type force_strength2 = mjolnir::length(pcon[1].force);
 
         BOOST_CHECK_CLOSE_FRACTION(coef, force_strength1, tolerance);
         BOOST_CHECK_CLOSE_FRACTION(coef, force_strength2, tolerance);
@@ -72,11 +81,11 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
         else if(i < 1000) // repulsive
         {
             const real_type dir1 =
-                mjolnir::dot_product(normalize(p1.force),
-                                     normalize(p1.position - p2.position));
+                mjolnir::dot_product(normalize(pcon[0].force),
+                                     normalize(pcon[0].position - pcon[1].position));
             const real_type dir2 =
-                mjolnir::dot_product(normalize(p2.force),
-                                     normalize(p2.position - p1.position));
+                mjolnir::dot_product(normalize(pcon[1].force),
+                                     normalize(pcon[1].position - pcon[0].position));
 
             BOOST_CHECK_CLOSE_FRACTION(dir1, 1e0, tolerance);
             BOOST_CHECK_CLOSE_FRACTION(dir2, 1e0, tolerance);
@@ -84,17 +93,17 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
         else if(i > 1000) // attractive
         {
             const real_type dir1 =
-                mjolnir::dot_product(normalize(p1.force),
-                                     normalize(p2.position - p1.position));
+                mjolnir::dot_product(normalize(pcon[0].force),
+                                     normalize(pcon[1].position - pcon[0].position));
             const real_type dir2 =
-                mjolnir::dot_product(normalize(p2.force),
-                                     normalize(p1.position - p2.position));
+                mjolnir::dot_product(normalize(pcon[1].force),
+                                     normalize(pcon[0].position - pcon[1].position));
 
             BOOST_CHECK_CLOSE_FRACTION(dir1, 1e0, tolerance);
             BOOST_CHECK_CLOSE_FRACTION(dir2, 1e0, tolerance);
         }
 
-        BOOST_CHECK_SMALL(length(p1.force + p2.force), tolerance);
+        BOOST_CHECK_SMALL(length(pcon[0].force + pcon[1].force), tolerance);
 
         dist += dr;
     }
