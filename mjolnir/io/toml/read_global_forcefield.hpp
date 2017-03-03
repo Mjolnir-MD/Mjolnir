@@ -27,17 +27,16 @@ read_global_force_field(const toml::Array<toml::Table>& gffs)
             toml::get<toml::String>(iter->at("potential"));
         MJOLNIR_LOG_INFO("potential name read", potential);
 
-        std::unique_ptr<GlobalPotentialBase<traitsT>> pot =
-            read_global_potential<traitsT>(potential, *iter);
-
         const std::string interaction =
             toml::get<toml::String>(iter->at("interaction"));
         MJOLNIR_LOG_INFO("interaction name read", interaction);
 
-        std::unique_ptr<GlobalInteractionBase<traitsT>> inter =
-            read_global_interaction<traitsT>(interaction, pot, *iter);
+        const std::string boundary =
+            toml::get<toml::String>(iter->at("boundary"));
+        MJOLNIR_LOG_INFO("boundary name read", boundary);
 
-        gff.emplace(std::move(inter), std::move(pot));
+        gff.emplace(read_global_interaction<traitsT>(
+                        interaction, potential, boundary, *iter));
     }
     MJOLNIR_LOG_DEBUG("read_global_force_field RETURNED");
     return gff;

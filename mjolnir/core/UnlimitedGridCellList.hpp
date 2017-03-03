@@ -76,8 +76,8 @@ class UnlimitedGridCellList : public SpatialPartition<traitsT>
     void update(const particle_container_type& pcon,
                 const time_type dt) override;
 
-    real_type const& cutoff() const {return this->cutoff_;}
-    real_type const& mergin() const {return this->mergin_;}
+    real_type cutoff() const {return this->cutoff_;}
+    real_type mergin() const {return this->mergin_;}
 
     void set_cutoff(const real_type c);
     void set_mergin(const real_type m);

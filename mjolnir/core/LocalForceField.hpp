@@ -1,10 +1,6 @@
 #ifndef MJOLNIR_LOCAL_FORCE_FIELD
 #define MJOLNIR_LOCAL_FORCE_FIELD
-#include "BondLengthInteraction.hpp"
-#include "BondAngleInteraction.hpp"
-#include "DihedralAngleInteraction.hpp"
-#include "LocalPotentialBase.hpp"
-#include "ParticleContainer.hpp"
+#include "LocalInteractionBase.hpp"
 #include <utility>
 #include <vector>
 #include <array>
@@ -23,30 +19,9 @@ class LocalForceField
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef Particle<coordinate_type>             particle_type;
     typedef ParticleContainer<traits_type>        particle_container_type;
-    typedef LocalPotentialBase<traits_type>       potential_base;
-    typedef std::unique_ptr<potential_base>       potential_ptr;
-
-    template<std::size_t N>
-    struct interaction_potential_pair
-    {
-        typedef LocalInteractionBase<traitsT, N>         interaction_type;
-        typedef std::unique_ptr<interaction_type>        interaction_ptr;
-        typedef std::array<std::size_t, N>               index_list;
-        typedef std::pair<index_list, potential_ptr>     potential_index_pair;
-        typedef std::vector<potential_index_pair>        potential_array;
-
-        interaction_potential_pair(interaction_ptr&& i, potential_array&& ps)
-            : interaction(std::forward<interaction_ptr>(i)),
-              potentials(std::forward<potential_array>(ps))
-        {}
-        interaction_ptr interaction;
-        potential_array potentials;
-    };
-
-    template<std::size_t N>
-    using interaction_ptr = typename interaction_potential_pair<N>::interaction_ptr;
-    template<std::size_t N>
-    using potential_array = typename interaction_potential_pair<N>::potential_array;
+    typedef LocalInteractionBase<traitsT>         interaction_type;
+    typedef std::unique_ptr<interaction_type>     interaction_ptr;
+    typedef std::vector<interaction_ptr>          container_type;
 
   public:
 
@@ -57,83 +32,31 @@ class LocalForceField
     LocalForceField& operator=(LocalForceField const&) = delete;
     LocalForceField& operator=(LocalForceField&&)      = default;
 
+    void emplace(interaction_ptr&& interaction);
+
     void      calc_force(particle_container_type& pcon);
     real_type calc_energy(const particle_container_type& pcon) const;
-
-    void emplace_2body(interaction_ptr<2>&& i, potential_array<2>&& ps);
-    void emplace_3body(interaction_ptr<3>&& i, potential_array<3>&& ps);
-    void emplace_4body(interaction_ptr<4>&& i, potential_array<4>&& ps);
 
     void reset_parameter(const std::string&, const real_type);
 
   private:
 
-    std::vector<interaction_potential_pair<2>> body2_;
-    std::vector<interaction_potential_pair<3>> body3_;
-    std::vector<interaction_potential_pair<4>> body4_;
+    container_type interactions_;
 };
 
 template<typename traitsT>
-inline void LocalForceField<traitsT>::emplace_2body(
-        interaction_ptr<2>&& i, potential_array<2>&& ps)
+inline void LocalForceField<traitsT>::emplace(
+        interaction_ptr&& interaction)
 {
-    body2_.emplace_back(std::forward<interaction_ptr<2>>(i),
-                        std::forward<potential_array<2>>(ps));
-    return;
-}
-
-template<typename traitsT>
-inline void LocalForceField<traitsT>::emplace_3body(
-        interaction_ptr<3>&& i, potential_array<3>&& ps)
-{
-    body3_.emplace_back(std::forward<interaction_ptr<3>>(i),
-                        std::forward<potential_array<3>>(ps));
-    return;
-}
-
-template<typename traitsT>
-inline void LocalForceField<traitsT>::emplace_4body(
-        interaction_ptr<4>&& i, potential_array<4>&& ps)
-{
-    body4_.emplace_back(std::forward<interaction_ptr<4>>(i),
-                        std::forward<potential_array<4>>(ps));
+    interactions_.emplace_back(std::forward<interaction_ptr>(interaction));
     return;
 }
 
 template<typename traitsT>
 void LocalForceField<traitsT>::calc_force(particle_container_type& pcon)
 {
-    for(auto ff = body2_.cbegin(); ff != body2_.cend(); ++ff)
-    {
-        const auto& interaction = ff->interaction;
-        const auto& potentials  = ff->potentials;
-        for(auto iter = potentials.cbegin(); iter != potentials.cend(); ++iter)
-        {
-            interaction->calc_force(pcon[iter->first[0]], pcon[iter->first[1]],
-                                    *(iter->second));
-        }
-    }
-
-    for(auto ff = body3_.cbegin(); ff != body3_.cend(); ++ff)
-    {
-        const auto& interaction = ff->interaction;
-        const auto& potentials  = ff->potentials;
-        for(auto iter = potentials.cbegin(); iter != potentials.cend(); ++iter)
-        {
-            interaction->calc_force(pcon[iter->first[0]], pcon[iter->first[1]],
-                                    pcon[iter->first[2]], *(iter->second));
-        }
-    }
-
-    for(auto ff = body4_.cbegin(); ff != body4_.cend(); ++ff)
-    {
-        const auto& interaction = ff->interaction;
-        const auto& potentials  = ff->potentials;
-        for(auto iter = potentials.cbegin(); iter != potentials.cend(); ++iter)
-            interaction->calc_force(pcon[iter->first[0]], pcon[iter->first[1]],
-                                    pcon[iter->first[2]], pcon[iter->first[3]],
-                                    *(iter->second));
-    }
+    for(auto iter = interactions_.cbegin(); iter != interactions_.cend(); ++iter)
+        (*iter)->calc_force(pcon);
     return;
 }
 
@@ -142,66 +65,19 @@ typename LocalForceField<traitsT>::real_type
 LocalForceField<traitsT>::calc_energy(const particle_container_type& pcon) const
 {
     real_type energy = 0.0;
-
-    for(auto ff = body2_.cbegin(); ff != body2_.cend(); ++ff)
-    {
-        const auto& interaction = ff->interaction;
-        const auto& potentials  = ff->potentials;
-        for(auto iter = potentials.cbegin(); iter != potentials.cend(); ++iter)
-            energy += interaction->calc_energy(
-                pcon[iter->first[0]], pcon[iter->first[1]], *(iter->second));
-    }
-
-    for(auto ff = body3_.cbegin(); ff != body3_.cend(); ++ff)
-    {
-        const auto& interaction = ff->interaction;
-        const auto& potentials  = ff->potentials;
-        for(auto iter = potentials.cbegin(); iter != potentials.cend(); ++iter)
-            energy += interaction->calc_energy(
-                pcon[iter->first[0]], pcon[iter->first[1]], pcon[iter->first[2]],
-                *(iter->second));
-    }
-
-    for(auto ff = body4_.cbegin(); ff != body4_.cend(); ++ff)
-    {
-        const auto& interaction = ff->interaction;
-        const auto& potentials  = ff->potentials;
-        for(auto iter = potentials.cbegin(); iter != potentials.cend(); ++iter)
-            energy += interaction->calc_energy(
-                pcon[iter->first[0]], pcon[iter->first[1]], pcon[iter->first[2]],
-                pcon[iter->first[3]], *(iter->second));
-    }
+    for(auto iter = interactions_.cbegin(); iter != interactions_.cend(); ++iter)
+        energy += (*iter)->calc_energy(pcon);
     return energy;
 }
-
 
 template<typename traitsT>
 void LocalForceField<traitsT>::reset_parameter(
         const std::string& name, const real_type val)
 {
-    for(auto ff = body2_.begin(); ff != body2_.end(); ++ff)
-    {
-        auto& potentials = ff->potentials;
-        for(auto iter = potentials.begin(); iter != potentials.end(); ++iter)
-            iter->second->reset_parameter(name, val);
-    }
-
-    for(auto ff = body3_.cbegin(); ff != body3_.cend(); ++ff)
-    {
-        auto& potentials = ff->potentials;
-        for(auto iter = potentials.begin(); iter != potentials.end(); ++iter)
-            iter->second->reset_parameter(name, val);
-    }
-
-    for(auto ff = body4_.cbegin(); ff != body4_.cend(); ++ff)
-    {
-        auto& potentials = ff->potentials;
-        for(auto iter = potentials.begin(); iter != potentials.end(); ++iter)
-            iter->second->reset_parameter(name, val);
-    }
+    for(auto iter = interactions_.begin(); iter != interactions_.end(); ++iter)
+        (*iter)->reset_parameter(name, val);
     return;
 }
-
 
 } // mjolnir
 #endif /* MJOLNIR_LOCAL_FORCE_FIELD */

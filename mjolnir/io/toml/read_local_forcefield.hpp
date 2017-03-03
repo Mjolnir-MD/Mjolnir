@@ -19,46 +19,29 @@ read_local_force_field(const toml::Array<toml::Table>& lffs)
     LocalForceField<traitsT> lff;
     for(auto iter = lffs.cbegin(); iter != lffs.cend(); ++iter)
     {
-        const std::string potential =
-            toml::get<toml::String>(iter->at("potential"));
-        MJOLNIR_LOG_INFO("potential name", potential);
-
-        const toml::Array<toml::Table> params =
-            toml::get<toml::Array<toml::Table>>(iter->at("parameters"));
-        MJOLNIR_LOG_INFO("parameter table size", params.size());
-
         const std::string interaction =
             toml::get<toml::String>(iter->at("interaction"));
         MJOLNIR_LOG_INFO("interaction name", interaction);
+
+        const std::string potential =
+            toml::get<toml::String>(iter->at("potential"));
+        MJOLNIR_LOG_INFO("potential name", potential);
 
         std::string boundary("Unlimited");
         try{toml::get<toml::String>(iter->at("boundary"));}
         catch(std::out_of_range& except)
         {
-            MJOLNIR_LOG_WARN("boundary setting not found. UnlimitedBoundary is used.");
+            MJOLNIR_LOG_WARN("boundary setting not found.",
+                             "UnlimitedBoundary is used.");
         }
         MJOLNIR_LOG_INFO("boundary name", boundary);
 
-        if(interaction == "BondLength")
-        {
-            lff.emplace_2body(
-                read_2body_interaction<traitsT>(interaction, boundary),
-                read_local_potential_array<traitsT, 2>(potential, params));
-        }
-        else if(interaction == "BondAngle")
-        {
-            lff.emplace_3body(
-                read_3body_interaction<traitsT>(interaction, boundary),
-                read_local_potential_array<traitsT, 3>(potential, params));
-        }
-        else if(interaction == "DihedralAngle")
-        {
-            lff.emplace_4body(
-                read_4body_interaction<traitsT>(interaction, boundary),
-                read_local_potential_array<traitsT, 4>(potential, params));
-        }
-        else
-            throw std::runtime_error("unknown interaction: " + interaction);
+        const toml::Array<toml::Table> params =
+            toml::get<toml::Array<toml::Table>>(iter->at("parameters"));
+        MJOLNIR_LOG_INFO("parameter table size", params.size());
+
+        lff.emplace(read_local_interaction<traitsT>(
+                    interaction, potential, boundary, params));
     }
     MJOLNIR_LOG_DEBUG("read_local_force_field RETUENED");
     return lff;
