@@ -1,6 +1,5 @@
 #ifndef MJOLNIR_DEBYE_HUCKEL_POTENTIAL
 #define MJOLNIR_DEBYE_HUCKEL_POTENTIAL
-#include <mjolnir/core/GlobalPotentialBase.hpp>
 #include <mjolnir/core/constants.hpp>
 #include <vector>
 #include <cmath>
@@ -9,7 +8,7 @@ namespace mjolnir
 {
 
 template<typename traitsT>
-class DebyeHuckelPotential : public GlobalPotentialBase<traitsT>
+class DebyeHuckelPotential
 {
   public:
     typedef traitsT traits_type;
@@ -29,7 +28,7 @@ class DebyeHuckelPotential : public GlobalPotentialBase<traitsT>
     {
         calc_parameters();
     }
-    ~DebyeHuckelPotential() override = default;
+    ~DebyeHuckelPotential() = default;
 
     void set_charges(const container_type& charges);
     void set_charges(container_type&& charges);
@@ -48,14 +47,14 @@ class DebyeHuckelPotential : public GlobalPotentialBase<traitsT>
     real_type const& at(const std::size_t i) const {return charges_.at(i);}
 
     real_type potential(const std::size_t i, const std::size_t j,
-                        const real_type r) const override;
+                        const real_type r) const;
 
     real_type derivative(const std::size_t i, const std::size_t j,
-                         const real_type r) const override;
+                         const real_type r) const;
 
-    real_type max_cutoff_length() const override;
+    real_type max_cutoff_length() const;
 
-    void reset_parameter(const std::string&, const real_type) override;
+    void reset_parameter(const std::string&, const real_type);
 
   private:
 

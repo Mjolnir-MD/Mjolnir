@@ -1,6 +1,5 @@
 #ifndef MJOLNIR_COSINE_POTENTIAL
 #define MJOLNIR_COSINE_POTENTIAL
-#include <mjolnir/core/LocalPotentialBase.hpp>
 #include <cmath>
 
 namespace mjolnir
@@ -10,7 +9,7 @@ namespace mjolnir
  *  V(phi) = k * (1 - cos(phi - phi0))                    *
  * dV(phi) = k * sin(phi - phi0))                         */
 template<typename traitsT>
-class CosinePotential : public LocalPotentialBase<traitsT>
+class CosinePotential
 {
   public:
     typedef traitsT traits_type;
@@ -21,14 +20,14 @@ class CosinePotential : public LocalPotentialBase<traitsT>
     CosinePotential(const real_type k, const real_type phi0)
         : k_(k), phi0_(phi0)
     {}
-    ~CosinePotential() override = default;
+    ~CosinePotential() = default;
 
-    real_type potential(const real_type phi) const override
+    real_type potential(const real_type phi) const
     {
         return this->k_ *(1 - std::cos(phi - phi0_));
     }
 
-    real_type derivative(const real_type phi) const override
+    real_type derivative(const real_type phi) const
     {
         return this->k_ * std::sin(phi - phi0_);
     }

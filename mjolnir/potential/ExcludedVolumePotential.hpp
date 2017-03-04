@@ -1,6 +1,5 @@
 #ifndef MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
 #define MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
-#include <mjolnir/core/GlobalPotentialBase.hpp>
 #include <algorithm>
 #include <cmath>
 
@@ -11,7 +10,7 @@ namespace mjolnir
  *  V(r) = epsilon * (sigma/r)^12           *
  * dV/dr = -12 * epsilon * (sigma/r)^12 / r */
 template<typename traitsT>
-class ExcludedVolumePotential : public GlobalPotentialBase<traitsT>
+class ExcludedVolumePotential
 {
   public:
     typedef traitsT traits_type;
@@ -33,7 +32,7 @@ class ExcludedVolumePotential : public GlobalPotentialBase<traitsT>
         : epsilon_(std::forward<real_type>(eps)),
           radii_(std::forward<std::vector<parameter_type>>(params))
     {}
-    ~ExcludedVolumePotential() override = default;
+    ~ExcludedVolumePotential() = default;
 
     real_type  epsilon() const {return epsilon_;}
     real_type& epsilon()       {return epsilon_;}
@@ -55,14 +54,14 @@ class ExcludedVolumePotential : public GlobalPotentialBase<traitsT>
     parameter_type const& at(const std::size_t i) const {return radii_.at(i);}
 
     real_type potential(const std::size_t i, const std::size_t j,
-                        const real_type r) const override;
+                        const real_type r) const;
 
     real_type derivative(const std::size_t i, const std::size_t j,
-                         const real_type r) const override;
+                         const real_type r) const;
     
-    real_type max_cutoff_length() const override;
+    real_type max_cutoff_length() const;
 
-    void reset_parameter(const std::string&, const real_type) override;
+    void reset_parameter(const std::string&, const real_type);
 
   private:
 

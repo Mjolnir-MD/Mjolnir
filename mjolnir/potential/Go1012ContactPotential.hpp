@@ -1,6 +1,5 @@
 #ifndef MJOLNIR_GO_10_12_CONTACT_POTENTIAL
 #define MJOLNIR_GO_10_12_CONTACT_POTENTIAL
-#include <mjolnir/core/LocalPotentialBase.hpp>
 
 namespace mjolnir
 {
@@ -9,7 +8,7 @@ namespace mjolnir
  *  V(r) = epsilon * (5 * (r0/r)^12 - 6 * (r0/r)^10)  *
  * dV/dr = 60 * epsilon * ((r0/r)^10 - (r0/r)^12) / r */
 template<typename traitsT>
-class Go1012ContactPotential : public LocalPotentialBase<traitsT>
+class Go1012ContactPotential
 {
   public:
     typedef traitsT traits_type;
@@ -20,9 +19,9 @@ class Go1012ContactPotential : public LocalPotentialBase<traitsT>
     Go1012ContactPotential(const real_type e, const real_type r0)
         : epsilon_(e), r0_(r0)
     {}
-    ~Go1012ContactPotential() override = default;
+    ~Go1012ContactPotential() = default;
 
-    real_type potential(const real_type r) const override
+    real_type potential(const real_type r) const
     {
         const real_type rd   = this->r0_ / r;
         if(rd < 0.4) return 0.0;
@@ -36,7 +35,7 @@ class Go1012ContactPotential : public LocalPotentialBase<traitsT>
         return this->epsilon_ * (5. * rd12 - 6. * rd10);
     }
 
-    real_type derivative(const real_type r) const override
+    real_type derivative(const real_type r) const
     {
         const real_type invr = 1. / r;
         const real_type rd   = this->r0_ * invr;
@@ -50,7 +49,7 @@ class Go1012ContactPotential : public LocalPotentialBase<traitsT>
         return this->epsilon_ * 60. * (rd10 - rd12) * invr;
     }
 
-    void reset_parameter(const std::string&, const real_type) override {return;}
+    void reset_parameter(const std::string&, const real_type){return;}
 
   private:
 

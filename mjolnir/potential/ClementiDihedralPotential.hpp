@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_CLEMENTI_DIHEDRAL_POTENTIAL
 #define MJOLNIR_CLEMENTI_DIHEDRAL_POTENTIAL
-#include <mjolnir/core/LocalPotentialBase.hpp>
+#include <string>
 #include <cmath>
 
 namespace mjolnir
@@ -10,7 +10,7 @@ namespace mjolnir
  *  V(phi) = k1 * (1-cos(phi-phi0)) + k3 * (1-cos(3(phi-phi0)))  *
  * dV/dphi = k1 * sin(phi-phi0)     + k3 * 3 * sin(3(phi-phi0))  */
 template<typename traitsT>
-class ClementiDihedralPotential : public LocalPotentialBase<traitsT>
+class ClementiDihedralPotential
 {
   public:
     typedef traitsT traits_type;
@@ -22,21 +22,21 @@ class ClementiDihedralPotential : public LocalPotentialBase<traitsT>
             const real_type k1, const real_type k3, const real_type native_val)
         : k1_(k1), k3_(k3), native_val_(native_val)
     {}
-    ~ClementiDihedralPotential() override = default;
+    ~ClementiDihedralPotential() = default;
 
-    real_type potential(const real_type val) const override
+    real_type potential(const real_type val) const
     {
         const real_type dphi = val - native_val_;
         return k1_ * (1. - std::cos(dphi)) + k3_ * (1. - std::cos(3. * dphi));
     }
 
-    real_type derivative(const real_type val) const override
+    real_type derivative(const real_type val) const
     {
         const real_type dphi = val - native_val_;
         return k1_ * std::sin(dphi) + 3. * k3_ * std::sin(3. * dphi);
     }
 
-    void reset_parameter(const std::string&, const real_type) override {return;}
+    void reset_parameter(const std::string&, const real_type) {return;}
 
   private:
 
@@ -45,7 +45,5 @@ class ClementiDihedralPotential : public LocalPotentialBase<traitsT>
     const real_type native_val_;
 };
 
-}
-
-
+} // mjolnir
 #endif /* MJOLNIR_CLEMENTI_DIHEDRAL_POTENTIAL */

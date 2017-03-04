@@ -1,8 +1,7 @@
 #ifndef MJOLNIR_LENNARD_JONES_POTENTIAL
 #define MJOLNIR_LENNARD_JONES_POTENTIAL
-#include <mjolnir/core/GlobalPotentialBase.hpp>
-#include <mjolnir/math/Vector.hpp>
 #include <mjolnir/math/fast_inv_sqrt.hpp>
+#include <vector>
 #include <algorithm>
 #include <cmath>
 
@@ -14,7 +13,7 @@ namespace mjolnir
  * V(r)  =  4. * epsilon * ((r/sigma)^12 - (r/sigma)^6))                   *
  * dV/dr = 24. * epsilon / r * ((r/sigma)^6 - 2 * (r/sigma)^12)            */
 template<typename traitsT>
-class LennardJonesPotential: public GlobalPotentialBase<traitsT>
+class LennardJonesPotential
 {
   public:
     typedef traitsT traits_type;
@@ -51,14 +50,14 @@ class LennardJonesPotential: public GlobalPotentialBase<traitsT>
     parameter_type const& at(const std::size_t i) const {return radii_.at(i);}
 
     real_type potential(const std::size_t i, const std::size_t j,
-                        const real_type r) const override;
+                        const real_type r) const;
 
     real_type derivative(const std::size_t i, const std::size_t j,
-                         const real_type r) const override;
+                         const real_type r) const;
 
-    real_type max_cutoff_length() const override;
+    real_type max_cutoff_length() const;
 
-    void reset_parameter(const std::string&, const real_type) override {return;}
+    void reset_parameter(const std::string&, const real_type){return;}
 
   private:
 

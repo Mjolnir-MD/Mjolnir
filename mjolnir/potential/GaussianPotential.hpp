@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_GAUSSIAN_POTENTIAL
 #define MJOLNIR_GAUSSIAN_POTENTIAL
-#include <mjolnir/core/LocalPotentialBase.hpp>
+#include <cmath>
 
 namespace mjolnir
 {
@@ -9,7 +9,7 @@ namespace mjolnir
  * V(r)  = epsilon * exp(-(r-r0)^2 / 2W^2)                   *
  * dV/dr = epsilon * (-(r-r0) / W^2) * exp(-(r-r0)^2 / 2W^2) */
 template<typename traitsT>
-class GaussianPotential : public LocalPotentialBase<traitsT>
+class GaussianPotential
 {
   public:
     typedef traitsT traits_type;
@@ -21,18 +21,18 @@ class GaussianPotential : public LocalPotentialBase<traitsT>
                       const real_type native_val)
         : epsilon_(e), inv_w2_(-1./(w*w)), native_val_(native_val)
     {}
-    ~GaussianPotential() override = default;
+    ~GaussianPotential() = default;
 
-    real_type potential(const real_type val) const override
+    real_type potential(const real_type val) const
     {
         const real_type dval = val - this->native_val_;
-        return epsilon_ * std::exp(inv_w2 * dval * dval);
+        return epsilon_ * std::exp(inv_w2_ * dval * dval);
     }
 
-    real_type derivative(const real_type val) const override
+    real_type derivative(const real_type val) const
     {
         const real_type dval = val - this->native_val_;
-        return inv_w2 * dval * epsilon_ * std::exp(inv_w2 * dval * dval);
+        return inv_w2_ * dval * epsilon_ * std::exp(inv_w2_ * dval * dval);
     }
 
   private:
