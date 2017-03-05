@@ -1,22 +1,22 @@
 #ifndef MJOLNIR_GLOBAL_DISTANCE_INTEARACTION
 #define MJOLNIR_GLOBAL_DISTANCE_INTEARACTION
-#include "GlobalInteractionBase.hpp"
-#include "SpatialPartition.hpp"
-#include "BoundaryCondition.hpp"
-#include <memory>
-#include <megingjord/interaction/GlobalDistanceInteraction.hpp>
+#include <mjolnir/core/GlobalDistanceInteraction.hpp>
+#include <mjolnir/potential/ExcludedVolumeInteraction.hpp>
 
 namespace mjolnir
 {
 
-template<typename traitsT, typename potentialT, typename partitionT,
+// specialization for excluded volume potential
+template<typename traitsT, typename partitionT,
          typename boundaryT = UnlimitedBoundary<traitsT>>
-class GlobalDistanceInteraction : public GlobalInteractionBase<traitsT>
+class GlobalDistanceInteraction<traitsT, ExcludedVolumeInteraction<traitsT>,
+                                partitionT, boundaryT>
+    : public GlobalInteractionBase<traitsT>
 {
   public:
 
     typedef traitsT    traits_type;
-    typedef potentialT potential_type;
+    typedef ExcludedVolumeInteraction<traitsT> potential_type;
     typedef partitionT spatial_partition_type;
     typedef boundaryT  boundary_type;
     typedef GlobalInteractionBase<traitsT> base_type;
@@ -48,6 +48,7 @@ class GlobalDistanceInteraction : public GlobalInteractionBase<traitsT>
     reset_parameter(const std::string& name, const real_type val) override;
 
   private:
+    real_type              cutoff2_;
     potential_type         potential_;
     spatial_partition_type spatial_partition_;
 };
@@ -57,6 +58,7 @@ void GlobalDistanceInteraction<traitsT, potT, spaceT, boundaryT>::calc_force(
         particle_container_type& pcon)
 {
     spatial_partition_.update(pcon);
+    const real_type coef = 12 * potential_.epsilon();
     for(std::size_t i=0; i<pcon.size(); ++i)
     {
         typename spatial_partition_type::index_list const& partners =
@@ -66,8 +68,17 @@ void GlobalDistanceInteraction<traitsT, potT, spaceT, boundaryT>::calc_force(
             const std::size_t j = *iter;
             const coordinate_type rij = boundary_type::adjust_direction(
                     pcon[j].position - pcon[i].position);
-            const real_type       l = length(rij);
-            const coordinate_type f = rij * (potential_.derivative(i, j, l) / l);
+            const real_type r2 = length_sq(rij);
+            if(cutoff2_ < r2) continue;
+
+            const real_type sgm  = potential_[i] + potential_[j];
+            const real_type invr = fast_inv_sqrt(r2);
+            const real_type sr   = sgm * invr;
+            const real_type sr2  = sr  * sr;
+            const real_type sr6  = sr2 * sr2 * sr2;
+            const real_type sr12 = sr6 * sr6;
+
+            const coordinate_type f = (coef * sr12 * invr * invr) * rij;
             pcon[i].force += f;
             pcon[j].force -= f;
         }
@@ -81,6 +92,7 @@ GlobalDistanceInteraction<traitsT, potT, spaceT, boundaryT>::calc_energy(
         const particle_container_type& pcon) const
 {
     real_type e = 0.0;
+    const real_type eps = potential_.epsilon();
     for(std::size_t i=0; i<pcon.size(); ++i)
     {
         typename spatial_partition_type::index_list const& partners =
@@ -90,8 +102,14 @@ GlobalDistanceInteraction<traitsT, potT, spaceT, boundaryT>::calc_energy(
             const std::size_t j = *iter;
             const coordinate_type rij = boundary_type::adjust_direction(
                     pcon[j].position - pcon[i].position);
-            const real_type l = length(rij);
-            e += potential_.potential(i, j, l);
+            const real_type sgm  = potential_[i] + potential_[j];
+
+            const real_type r2   = length_sq(rij)
+            const real_type sr   = sgm * fast_inv_sqrt(r2);
+            const real_type sr3  = sr * sr * sr;
+            const real_type sr12 = sr3 * sr3 * sr3 * sr3;
+
+            e += eps * sr12;
         }
     }
     return e;
@@ -101,6 +119,8 @@ template<typename traitsT, typename potT, typename spaceT, typename boundaryT>
 void GlobalDistanceInteraction<traitsT, potT, spaceT, boundaryT>::initialize(
         const particle_container_type& pcon, const time_type dt)
 {
+    const auto rc = potential_.max_cutoff_length();
+    cutoff2_ = rc * rc;
     this->spatial_partition_.update(pcon, dt);
     return ;
 }
