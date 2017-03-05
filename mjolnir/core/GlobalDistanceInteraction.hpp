@@ -4,7 +4,6 @@
 #include "SpatialPartition.hpp"
 #include "BoundaryCondition.hpp"
 #include <memory>
-#include <megingjord/interaction/GlobalDistanceInteraction.hpp>
 
 namespace mjolnir
 {
