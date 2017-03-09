@@ -57,24 +57,28 @@ void GlobalDistanceInteraction<traitsT, ExcludedVolumePotential<traitsT>,
      spaceT, boundaryT>::calc_force(particle_container_type& pcon)
 {
     spatial_partition_.update(pcon);
-    const real_type coef = 12 * potential_.epsilon();
+    const real_type coef = -12 * potential_.epsilon();
     for(std::size_t i=0; i<pcon.size(); ++i)
     {
+        const coordinate_type ri = pcon[i].position;
+        const real_type si = potential_[i];
+
         typename spatial_partition_type::index_list const& partners =
             spatial_partition_.partners(i);
         for(auto iter = partners.cbegin(); iter != partners.cend(); ++iter)
         {
             const std::size_t j = *iter;
             const coordinate_type rij = boundary_type::adjust_direction(
-                    pcon[j].position - pcon[i].position);
+                    pcon[j].position - ri);
             const real_type r2 = length_sq(rij);
             if(cutoff2_ < r2) continue;
 
-            const real_type sgm  = potential_[i] + potential_[j];
+            const real_type sgm  = si + potential_[j];
             const real_type invr = fast_inv_sqrt(r2);
             const real_type sr   = sgm * invr;
-            const real_type sr2  = sr  * sr;
-            const real_type sr6  = sr2 * sr2 * sr2;
+            if(sr < 0.4) continue;
+            const real_type sr3  = sr  * sr * sr;
+            const real_type sr6  = sr3 * sr3;
             const real_type sr12 = sr6 * sr6;
 
             const coordinate_type f = (coef * sr12 * invr * invr) * rij;
