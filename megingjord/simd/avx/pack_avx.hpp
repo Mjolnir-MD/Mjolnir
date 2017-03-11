@@ -34,6 +34,22 @@ struct pack<double, 4>
     constexpr static std::size_t align_byte = 32;
 };
 
+struct avx_traits
+{
+    template<typename T> struct pack_trait{};
+    constexpr static std::size_t align_byte = 32;
+};
+
+template<>
+struct avx_traits::pack_trait<double>
+{
+    typedef pack<double, 4> type;
+};
+template<>
+struct avx_traits::pack_trait<float>
+{
+    typedef pack<float, 8> type;
+};
 
 } // simd
 } // megingjord
