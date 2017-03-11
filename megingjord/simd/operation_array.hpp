@@ -12,7 +12,7 @@ namespace megingjord
 namespace simd
 {
 
-template<typename T, std::size_t N, std::size_t S>
+template<typename T, std::size_t N, typename S>
 inline packed_array<T, N, S>
 operator+(const packed_array<T, N, S>& lhs, const packed_array<T, N, S>& rhs)
 {
@@ -23,7 +23,7 @@ operator+(const packed_array<T, N, S>& lhs, const packed_array<T, N, S>& rhs)
     return retval;
 }
 
-template<typename T, std::size_t N, std::size_t S>
+template<typename T, std::size_t N, typename S>
 inline packed_array<T, N, S>
 operator-(const packed_array<T, N, S>& lhs, const packed_array<T, N, S>& rhs)
 {
@@ -34,7 +34,7 @@ operator-(const packed_array<T, N, S>& lhs, const packed_array<T, N, S>& rhs)
     return retval;
 }
 
-template<typename T, std::size_t N, std::size_t S>
+template<typename T, std::size_t N, typename S>
 inline packed_array<T, N, S>
 operator*(const packed_array<T, N, S>& lhs, const packed_array<T, N, S>& rhs)
 {
@@ -45,7 +45,7 @@ operator*(const packed_array<T, N, S>& lhs, const packed_array<T, N, S>& rhs)
     return retval;
 }
 
-template<typename T, std::size_t N, std::size_t S>
+template<typename T, std::size_t N, typename S>
 inline packed_array<T, N, S>
 operator/(const packed_array<T, N, S>& lhs, const packed_array<T, N, S>& rhs)
 {
@@ -56,7 +56,7 @@ operator/(const packed_array<T, N, S>& lhs, const packed_array<T, N, S>& rhs)
     return retval;
 }
 
-template<typename T, std::size_t N, std::size_t S>
+template<typename T, std::size_t N, typename S>
 inline packed_array<T, N, S> rcp(const packed_array<T, N, S>& lhs)
 {
     packed_array<T, N, S> retval;
@@ -66,7 +66,7 @@ inline packed_array<T, N, S> rcp(const packed_array<T, N, S>& lhs)
     return retval;
 }
 
-template<typename T, std::size_t N, std::size_t S>
+template<typename T, std::size_t N, typename S>
 inline packed_array<T, N, S> rsqrt(const packed_array<T, N, S>& lhs)
 {
     packed_array<T, N, S> retval;
@@ -76,7 +76,7 @@ inline packed_array<T, N, S> rsqrt(const packed_array<T, N, S>& lhs)
     return retval;
 }
 
-template<typename T, std::size_t N, std::size_t S>
+template<typename T, std::size_t N, typename S>
 inline packed_array<T, N, S> sqrt(const packed_array<T, N, S>& lhs)
 {
     packed_array<T, N, S> retval;
@@ -86,7 +86,7 @@ inline packed_array<T, N, S> sqrt(const packed_array<T, N, S>& lhs)
     return retval;
 }
 
-template<typename T, std::size_t N, std::size_t S>
+template<typename T, std::size_t N, typename S>
 inline packed_array<T, N, S> floor(const packed_array<T, N, S>& lhs)
 {
     packed_array<T, N, S> retval;
@@ -96,7 +96,7 @@ inline packed_array<T, N, S> floor(const packed_array<T, N, S>& lhs)
     return retval;
 }
 
-template<typename T, std::size_t N, std::size_t S>
+template<typename T, std::size_t N, typename S>
 inline packed_array<T, N, S> ceil(const packed_array<T, N, S>& lhs)
 {
     packed_array<T, N, S> retval;
@@ -106,7 +106,7 @@ inline packed_array<T, N, S> ceil(const packed_array<T, N, S>& lhs)
     return retval;
 }
 
-template<typename T, std::size_t N, std::size_t S>
+template<typename T, std::size_t N, typename S>
 inline packed_array<T, N, S>
 fmadd(const packed_array<T, N, S>& a, const packed_array<T, N, S>& b,
       const packed_array<T, N, S>& c)
@@ -118,7 +118,7 @@ fmadd(const packed_array<T, N, S>& a, const packed_array<T, N, S>& b,
     return retval;
 }
 
-template<typename T, std::size_t N, std::size_t S>
+template<typename T, std::size_t N, typename S>
 inline packed_array<T, N, S>
 fmsub(const packed_array<T, N, S>& a, const packed_array<T, N, S>& b,
       const packed_array<T, N, S>& c)
@@ -130,7 +130,7 @@ fmsub(const packed_array<T, N, S>& a, const packed_array<T, N, S>& b,
     return retval;
 }
 
-template<typename T, std::size_t N, std::size_t S>
+template<typename T, std::size_t N, typename S>
 inline packed_array<T, N, S>
 fnmadd(const packed_array<T, N, S>& a, const packed_array<T, N, S>& b,
        const packed_array<T, N, S>& c)
@@ -142,7 +142,7 @@ fnmadd(const packed_array<T, N, S>& a, const packed_array<T, N, S>& b,
     return retval;
 }
 
-template<typename T, std::size_t N, std::size_t S>
+template<typename T, std::size_t N, typename S>
 inline packed_array<T, N, S>
 fnmsub(const packed_array<T, N, S>& a, const packed_array<T, N, S>& b,
        const packed_array<T, N, S>& c)
@@ -157,40 +157,19 @@ fnmsub(const packed_array<T, N, S>& a, const packed_array<T, N, S>& b,
 // TODO: load(?), store, set(?), broadcast
 
 
-template<typename T, std::size_t N, std::size_t S>
+template<typename T, std::size_t N, typename S>
 inline typename packed_array<T, N, S>::aligned_array_type
 store(const packed_array<T, N, S>& pa)
 {
-    if(packed_array<T, N, S>::filled) //TODO do this at compile time
+    typename packed_array<T, N, S>::aligned_array_type retval;
+    T* ptr = retval.data();
+    for(std::size_t i=0; i<pa.size(); ++i)
     {
-        typename packed_array<T, N, S>::aligned_array_type retval;
-        T* ptr = retval.data();
-        for(std::size_t i=0; i<packed_array<T, N, S>::packed_size; ++i)
-        {
-            store_impl<typename packed_array<T, N, S>::packed_type>::invoke(
-                    ptr, pa[i]);
-            ptr += packed_array<T, N, S>::pack_size;
-        }
-        return retval;
+        store_impl<typename packed_array<T, N, S>::packed_type>::invoke(
+                ptr, pa[i]);
+        ptr += packed_array<T, N, S>::pack_size;
     }
-    else
-    {
-        typename packed_array<T, N, S>::filled_array_type tmp;
-        typename packed_array<T, N, S>::aligned_array_type retval;
-        T* ptr = tmp.data();
-        for(std::size_t i=0; i<packed_array<T, N, S>::packed_size-1; ++i)
-        {
-            store_impl<typename packed_array<T, N, S>::packed_type>::invoke(
-                    ptr, pa[i]);
-            ptr += packed_array<T, N, S>::pack_size;
-        }
-
-        for(std::size_t i=0; i<N; ++i)
-        {
-            retval[i] = tmp[i];
-        }
-        return retval;
-    }
+    return retval;
 }
 
 

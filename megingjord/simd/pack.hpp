@@ -9,30 +9,31 @@ namespace simd
 {
 
 template<typename, std::size_t> struct pack;
-template<typename, std::size_t, std::size_t> struct packed_array;
+template<typename, std::size_t, typename> struct packed_array;
 
 template<typename> struct is_simd : public std::false_type{};
+
 template<typename> struct single_type_of;
 template<typename T, std::size_t N>
 struct single_type_of<pack<T, N>>
 {
     typedef T type;
 };
-template<typename T, std::size_t N, std::size_t A>
-struct single_type_of<aligned_array<T, N, A>>
+template<typename T, std::size_t N, std::size_t align>
+struct single_type_of<aligned_array<T, N, align>>
 {
     typedef T type;
 };
-template<typename T, std::size_t N, std::size_t A>
-struct single_type_of<packed_array<T, N, A>>
+template<typename T, std::size_t N, typename trait>
+struct single_type_of<packed_array<T, N, trait>>
 {
     typedef T type;
 };
 
-template<typename> struct set_impl;       // from register to register
-template<typename> struct load_impl;      // from memory to simd-register(full)
-template<typename> struct broadcast_impl; // from memory to simd-register(fewer)
-template<typename> struct store_impl;     // from simd-register to memory
+template<typename> struct set_impl;
+template<typename> struct load_impl;
+template<typename> struct broadcast_impl;
+template<typename> struct store_impl;
 
 template<typename T> struct add_impl
 {
@@ -119,6 +120,7 @@ template<typename T> struct fnmsub_impl
 #include <immintrin.h>
 #include "avx/pack_avx.hpp"
 #include "avx/functor_avx.hpp"
+#define MEGINGJORD_DEFAULT_SIMD avx_traits
 #endif
 
 #include "operation_pack.hpp"

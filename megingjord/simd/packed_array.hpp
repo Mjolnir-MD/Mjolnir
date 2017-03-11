@@ -12,21 +12,25 @@ namespace megingjord
 namespace simd
 {
 
-template<typename T, std::size_t N, std::size_t P>
+template<typename T, std::size_t N, typename simd_traits = MEGINGJORD_DEFAULT_SIMD>
 struct packed_array
 {
     static_assert(N != 0, "packed_array must have size");
-//     static_assert(is_pow_2(P), "pack size must be a power of 2");
-    constexpr static std::size_t pack_size = P;
-    constexpr static bool filled = N % pack_size == 0;
-    constexpr static std::size_t packed_size =
-        (filled) ? (N / pack_size) : (N / pack_size)+1;
-    constexpr static std::size_t max_size_ = pack_size * packed_size;
 
     typedef T value_type;
-    typedef pack<T, pack_size>                              pack_type;
-    typedef typename pack_type::type                        packed_type;
-    typedef std::array<packed_type, packed_size>            container_type;
+    typedef typename simd_traits::template pack_trait<value_type>::type pack_type;
+    typedef typename pack_type::type packed_type;
+
+    constexpr static std::size_t pack_size   = pack_type::size;
+    constexpr static std::size_t align_byte  = pack_type::align_byte;
+    constexpr static bool        filled      = (N % pack_size == 0);
+    constexpr static std::size_t container_size = filled ?
+                                         (N / pack_size) : (N / pack_size)+1;
+    constexpr static std::size_t filled_size = container_size * pack_size;
+
+    typedef aligned_array<value_type, filled_size, align_byte> aligned_array_type;
+
+    typedef std::array<packed_type, container_size>         container_type;
     typedef typename container_type::pointer                pointer;
     typedef typename container_type::const_pointer          const_pointer;
     typedef typename container_type::reference              reference;
@@ -37,8 +41,6 @@ struct packed_array
     typedef typename container_type::difference_type        difference_type;
     typedef typename container_type::reverse_iterator       reverse_iterator;
     typedef typename container_type::const_reverse_iterator const_reverse_iterator;
-    typedef aligned_array<T, N, pack_type::align_byte>      aligned_array_type;
-    typedef aligned_array<T, max_size_, pack_type::align_byte> filled_array_type;
 
     container_type values;
 
@@ -53,8 +55,8 @@ struct packed_array
     packed_array& operator=(const aligned_array_type& xs);
     packed_array(const value_type x);
 
-    constexpr size_type size()     const noexcept {return packed_size;}
-    constexpr size_type max_size() const noexcept {return max_size_;}
+    constexpr size_type size()     const noexcept {return container_size;}
+    constexpr size_type max_size() const noexcept {return container_size;}
     constexpr bool      empty()    const noexcept {return false;}
 
     reference       operator[](const size_type i)       noexcept {return values[i];}
@@ -84,97 +86,35 @@ struct packed_array
     const_reverse_iterator crend()   const noexcept {return values.crend();}
 };
 
-template<typename T, std::size_t N, std::size_t P>
-packed_array<T, N, P>::packed_array(const aligned_array_type& xs)
+template<typename T, std::size_t N, typename S>
+packed_array<T, N, S>::packed_array(const aligned_array_type& xs)
 {
-    if(filled) //TODO: do this at compile time
+    const T* ptr = xs.data();
+    for(std::size_t i=0; i<container_size; ++i)
     {
-        const T* ptr = xs.data();
-        for(std::size_t i=0; i<packed_size; ++i)
-        {
-            values[i] = load_impl<packed_type>::invoke(ptr);
-            ptr += pack_size;
-        }
-    }
-    else
-    {
-        const T* ptr = xs.data();
-        for(std::size_t i=0; i<packed_size-1; ++i)
-        {
-            values[i] = load_impl<packed_type>::invoke(ptr);
-            ptr += pack_size;
-        }
-        std::size_t rest_size = N - (packed_size-1) * pack_size;
-        typename pack_type::array_type ar;
-        for(std::size_t i=0; i<pack_size; ++i)
-        {
-            if(i < rest_size)
-                ar[i] = xs[(packed_size-1) * pack_size + i];
-            else
-                ar[i] = 0;
-        }
-        values[packed_size-1] = load(ar);
+        values[i] = load_impl<packed_type>::invoke(ptr);
+        ptr += pack_size;
     }
 }
 
-template<typename T, std::size_t N, std::size_t P>
-packed_array<T, N, P>&
-packed_array<T, N, P>::operator=(const aligned_array_type& xs)
+template<typename T, std::size_t N, typename S>
+packed_array<T, N, S>&
+packed_array<T, N, S>::operator=(const aligned_array_type& xs)
 {
-    if(filled) //TODO: do this at compile time
+    const T* ptr = xs.data();
+    for(std::size_t i=0; i<container_size; ++i)
     {
-        const T* ptr = xs.data();
-        for(std::size_t i=0; i<packed_size; ++i)
-        {
-            values[i] = load_impl<packed_type>::invoke(ptr);
-            ptr += pack_size;
-        }
+        values[i] = load_impl<packed_type>::invoke(ptr);
+        ptr += pack_size;
     }
-    else
-    {
-        const T* ptr = xs.data();
-        for(std::size_t i=0; i<packed_size-1; ++i)
-        {
-            values[i] = load_impl<packed_type>::invoke(ptr);
-            ptr += pack_size;
-        }
-        std::size_t rest_size = N - (packed_size-1) * pack_size;
-        typename pack_type::array_type ar;
-        for(std::size_t i=0; i<pack_size; ++i)
-        {
-            if(i < rest_size)
-                ar[i] = xs[(packed_size-1) * pack_size + i];
-            else
-                ar[i] = 0;
-        }
-        values[packed_size-1] = load(ar);
-    }
+    return *this;
 }
 
-template<typename T, std::size_t N, std::size_t P>
-packed_array<T, N, P>::packed_array(const value_type x)
+template<typename T, std::size_t N, typename S>
+packed_array<T, N, S>::packed_array(const value_type x)
 {
-    if(filled) //TODO: do this at compile time
-    {
-        for(std::size_t i=0; i<packed_size; ++i)
-            values[i] = set(x);
-    }
-    else
-    {
-        for(std::size_t i=0; i<packed_size-1; ++i)
-            values[i] = set(x);
-
-        std::size_t rest_size = N - (packed_size-1) * pack_size;
-        typename pack_type::array_type ar;
-        for(std::size_t i=0; i<pack_size; ++i)
-        {
-            if(i < rest_size)
-                ar[i] = x;
-            else
-                ar[i] = 0;
-        }
-        values[packed_size-1] = load(ar);
-    }
+    for(std::size_t i=0; i<container_size; ++i)
+        values[i] = set(x);
 }
 
 } // simd
