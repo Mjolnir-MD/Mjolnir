@@ -86,7 +86,7 @@ BondLengthInteraction<traitsT, potentialT, boundaryT>::calc_energy(
 }
 
 template<typename traitsT, typename potentialT, typename boundaryT>
-void BondLengthInteraction<traitsT, potentialT, boundaryT>::calc_force(
+inline void BondLengthInteraction<traitsT, potentialT, boundaryT>::calc_force(
         particle_type& p1, particle_type& p2, const potential_type& pot) const
 {
     const coordinate_type dpos =
@@ -103,7 +103,7 @@ void BondLengthInteraction<traitsT, potentialT, boundaryT>::calc_force(
 }
 
 template<typename traitsT, typename potentialT, typename boundaryT>
-typename BondLengthInteraction<traitsT, potentialT, boundaryT>::real_type
+inline typename BondLengthInteraction<traitsT, potentialT, boundaryT>::real_type
 BondLengthInteraction<traitsT, potentialT, boundaryT>::calc_energy(
         const particle_type& p1, const particle_type& p2,
         const potential_type& pot) const

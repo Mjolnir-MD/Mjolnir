@@ -90,7 +90,7 @@ BondAngleInteraction<traitsT, potentialT, boundaryT>::calc_energy(
 //   (- \frac{r_post - r_mid}{|r_post - r_mid|}
 //    + \frac{r_pre  - r_mid}{|r_pre  - r_mid|}\cos\theta)
 template<typename traitsT, typename potentialT, typename boundaryT>
-void BondAngleInteraction<traitsT, potentialT, boundaryT>::calc_force(
+inline void BondAngleInteraction<traitsT, potentialT, boundaryT>::calc_force(
         particle_type& p1, particle_type& p2, particle_type& p3,
         const potential_type& potential) const
 {
@@ -129,7 +129,7 @@ void BondAngleInteraction<traitsT, potentialT, boundaryT>::calc_force(
 }
 
 template<typename traitsT, typename potentialT, typename boundaryT>
-typename BondAngleInteraction<traitsT, potentialT, boundaryT>::real_type
+inline typename BondAngleInteraction<traitsT, potentialT, boundaryT>::real_type
 BondAngleInteraction<traitsT, potentialT, boundaryT>::calc_energy(
     const particle_type& p1, const particle_type& p2, const particle_type& p3,
     const potential_type& potential) const

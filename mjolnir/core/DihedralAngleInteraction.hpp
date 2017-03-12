@@ -89,7 +89,7 @@ DihedralAngleInteraction<traitsT, potentialT, boundaryT>::calc_energy(
 
 
 template<typename traitsT, typename potentialT, typename boundaryT>
-void DihedralAngleInteraction<traitsT, potentialT, boundaryT>::calc_force(
+inline void DihedralAngleInteraction<traitsT, potentialT, boundaryT>::calc_force(
     particle_type& p1, particle_type& p2, particle_type& p3, particle_type& p4,
     const potential_type& potential) const
 {
@@ -140,7 +140,7 @@ void DihedralAngleInteraction<traitsT, potentialT, boundaryT>::calc_force(
 }
 
 template<typename traitsT, typename potentialT, typename boundaryT>
-typename DihedralAngleInteraction<traitsT, potentialT, boundaryT>::real_type
+inline typename DihedralAngleInteraction<traitsT, potentialT, boundaryT>::real_type
 DihedralAngleInteraction<traitsT, potentialT, boundaryT>::calc_energy(
         const particle_type& p1, const particle_type& p2,
         const particle_type& p3, const particle_type& p4,
