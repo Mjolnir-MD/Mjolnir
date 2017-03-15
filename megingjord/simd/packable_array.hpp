@@ -17,6 +17,9 @@ template<typename T, std::size_t N, typename simd_traits = MEGINGJORD_DEFAULT_SI
 struct packable_array
 {
     static_assert(N != 0, "packable_array must have size");
+    static_assert(is_packable<T>::value, "packable_array contains only packable type");
+
+    typedef packable_array<T, N, simd_traits> self_type;
 
     typedef T value_type;
     typedef typename simd_traits::template pack_trait<value_type>::type pack_type;
@@ -26,9 +29,9 @@ struct packable_array
     constexpr static std::size_t pack_size   = pack_type::size;
     constexpr static std::size_t align_byte  = pack_type::align_byte;
     constexpr static bool        filled      = (actual_size % pack_size == 0);
-    constexpr static std::size_t container_size =
+    constexpr static std::size_t number_of_packs =
         filled ? (actual_size / pack_size) : (actual_size / pack_size) + 1;
-    constexpr static std::size_t filled_size = container_size * pack_size;
+    constexpr static std::size_t filled_size = number_of_packs * pack_size;
 
     typedef aligned_array<value_type, filled_size, align_byte> container_type;
     typedef typename container_type::pointer                pointer;
@@ -54,7 +57,7 @@ struct packable_array
     packable_array(std::initializer_list<value_type> init);
 
     constexpr size_type size()     const noexcept {return actual_size;}
-    constexpr size_type max_size() const noexcept {return container_size;}
+    constexpr size_type max_size() const noexcept {return filled_size;}
     constexpr bool      empty()    const noexcept {return false;}
     void fill(const value_type& v){values.fill(v);}
 
