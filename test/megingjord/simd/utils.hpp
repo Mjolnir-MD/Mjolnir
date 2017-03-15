@@ -6,6 +6,7 @@
 #endif
 
 #include <random>
+#include <array>
 
 constexpr static unsigned int seed = 32479327;
 constexpr static std::size_t N = 10000;
