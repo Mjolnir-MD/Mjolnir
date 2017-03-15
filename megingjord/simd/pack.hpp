@@ -33,10 +33,32 @@ struct single_type_of<packed_array<T, N, trait>>
     typedef T type;
 };
 
-template<typename> struct set_impl;
-template<typename> struct load_impl;
-template<typename> struct broadcast_impl;
-template<typename> struct store_impl;
+template<typename T> struct set_impl
+{
+    constexpr static inline
+    T invoke(T x){return x;}
+};
+
+template<typename T> struct load_impl
+{
+    constexpr static inline
+    T invoke(const T *x){return *x;}
+};
+
+template<typename T> struct broadcast_impl
+{
+    constexpr static inline
+    T invoke(const T *x){return *x;}
+};
+
+template<typename T> struct store_impl
+{
+    constexpr static inline
+    T invoke(T x){return x;}
+
+    static inline
+    void invoke(T* dst, T x){*dst = x;}
+};
 
 template<typename T> struct add_impl
 {
@@ -124,6 +146,11 @@ template<typename T> struct fnmsub_impl
 #include "avx/pack_avx.hpp"
 #include "avx/functor_avx.hpp"
 #define MEGINGJORD_DEFAULT_SIMD avx_traits
+#endif
+
+#ifndef MJOLNIR_HAVE_AVX
+#include "plain/pack_plain.hpp"
+#define MEGINGJORD_DEFAULT_SIMD plain_traits
 #endif
 
 #include "packable_array.hpp"
