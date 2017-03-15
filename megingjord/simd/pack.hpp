@@ -123,8 +123,8 @@ template<typename T> struct fnmsub_impl
 #define MEGINGJORD_DEFAULT_SIMD avx_traits
 #endif
 
+#include "packable_array.hpp"
 #include "operation_pack.hpp"
-#include "packed_array.hpp"
 #include "operation_array.hpp"
 
 #endif /* MEGINGJORD_SIMD_PACK */
