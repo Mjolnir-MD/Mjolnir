@@ -1,6 +1,7 @@
 #ifndef MEGINGJORD_ALIGNED_ARRAY
 #define MEGINGJORD_ALIGNED_ARRAY
 #include <stdexcept>
+#include <algorithm>
 #include <cstddef>
 
 namespace megingjord
@@ -29,6 +30,8 @@ struct aligned_array
     constexpr size_type size()     const noexcept {return N;}
     constexpr size_type max_size() const noexcept {return N;}
     constexpr bool      empty()    const noexcept {return false;}
+
+    void fill(const value_type& u){std::fill_n(begin(),size(),u);}
 
     reference       operator[](const size_type n)       noexcept;
     const_reference operator[](const size_type n) const noexcept;

@@ -32,5 +32,23 @@ if(FOUND_SSE)
     endif(SSE_COMPILE_SUCCESS)
 endif(FOUND_SSE)
 
+check_include_file_cxx(immintrin.h FOUND_AVX_INTRINSIC)
+if(FOUND_AVX_INTRINSIC)
+    set(CMAKE_REQUIRED_DEFINITIONS -mavx)
+    check_cxx_source_compiles(
+    "#include <immintrin.h>
+     int main(){
+         double r=1.;
+         double xs[4];
+         _mm256_storeu_pd(xs, _mm256_add_pd(_mm256_set1_pd(r), _mm256_set1_pd(r)));
+         return 0;
+     }" AVX_COMPILE_SUCCESS)
+
+    if(AVX_COMPILE_SUCCESS)
+        add_definitions(-DMJOLNIR_HAVE_AVX)
+        add_definitions(-mmmx -msse -mavx)
+    endif(AVX_COMPILE_SUCCESS)
+endif(FOUND_AVX_INTRINSIC)
+
 add_subdirectory(src)
 add_subdirectory(test)
