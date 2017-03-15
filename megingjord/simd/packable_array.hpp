@@ -5,7 +5,8 @@
 #error "DO NOT use this header alone"
 #endif
 
-#include <meginrjord/util/aligned_array.hpp>
+#include <megingjord/util/aligned_array.hpp>
+#include <megingjord/util/stride_iterator.hpp>
 
 namespace megingjord
 {
@@ -45,6 +46,9 @@ struct packable_array
     typedef typename container_type::reverse_iterator       reverse_iterator;
     typedef typename container_type::const_reverse_iterator const_reverse_iterator;
 
+    typedef stride_iterator<pointer,       self_type, pack_size> packed_iterator;
+    typedef stride_iterator<const_pointer, self_type, pack_size> const_packed_iterator;
+
     container_type values;
 
     packable_array()  = default;
@@ -66,12 +70,20 @@ struct packable_array
     reference       at(const size_type i)       {return values.at(i);}
     const_reference at(const size_type i) const {return values.at(i);}
 
+    pointer       ptr(const difference_type d)       {return values.data()+d;}
+    const_pointer ptr(const difference_type d) const {return values.data()+d;}
+
     reference       front()       noexcept {return values.front();}
     const_reference front() const noexcept {return values.front();}
     reference       back()        noexcept {return values.back();}
     const_reference back()  const noexcept {return values.back();}
     pointer         data()        noexcept {return values.data();}
     const_pointer   data()  const noexcept {return values.data();}
+
+    packed_iterator       pbegin() noexcept;
+    packed_iterator       pend()   noexcept;
+    const_packed_iterator cpbegin() const noexcept;
+    const_packed_iterator cpend()   const noexcept;
 
     iterator       begin()        noexcept {return values.begin();}
     iterator       end()          noexcept {return values.end();}
@@ -99,6 +111,34 @@ packable_array<T, N, S>::packable_array(std::initializer_list<value_type> init)
     {
         *v = std::move(*iter); ++v;
     }
+}
+
+template<typename T, std::size_t N, typename S>
+inline typename packable_array<T, N, S>::packed_iterator
+packable_array<T, N, S>::pbegin() noexcept
+{
+    return packed_iterator(this->begin());
+}
+
+template<typename T, std::size_t N, typename S>
+inline typename packable_array<T, N, S>::packed_iterator
+packable_array<T, N, S>::pend() noexcept
+{
+    return packed_iterator(this->end());
+}
+
+template<typename T, std::size_t N, typename S>
+inline typename packable_array<T, N, S>::const_packed_iterator
+packable_array<T, N, S>::cpbegin() const noexcept
+{
+    return const_packed_iterator(this->cbegin());
+}
+
+template<typename T, std::size_t N, typename S>
+inline typename packable_array<T, N, S>::const_packed_iterator
+packable_array<T, N, S>::cpend() const noexcept
+{
+    return const_packed_iterator(this->cend());
 }
 
 } // simd
