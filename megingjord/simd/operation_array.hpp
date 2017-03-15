@@ -5,7 +5,8 @@
 #error "DO NOT USE this header alone"
 #endif
 
-#include <immintrin.h>
+#include "operation_pack.hpp"
+#include "packable_array.hpp"
 
 namespace megingjord
 {
@@ -13,172 +14,325 @@ namespace simd
 {
 
 template<typename T, std::size_t N, typename S>
-inline packed_array<T, N, S>
-operator+(const packed_array<T, N, S>& lhs, const packed_array<T, N, S>& rhs)
+inline packable_array<T, N, S>
+operator+(const packable_array<T, N, S>& lhs, const packable_array<T, N, S>& rhs)
 {
-    packed_array<T, N, S> retval;
-    for(std::size_t i=0; i<N; ++i)
-        retval[i] = add_impl<typename packed_array<T, N, S>::packed_type
-            >::invoke(lhs[i], rhs[i]);
-    return retval;
-}
+    typedef typename packable_array<T, N, S>::packed_type packed_type;
+    packable_array<T, N, S> retval;
 
-template<typename T, std::size_t N, typename S>
-inline packed_array<T, N, S>
-operator-(const packed_array<T, N, S>& lhs, const packed_array<T, N, S>& rhs)
-{
-    packed_array<T, N, S> retval;
-    for(std::size_t i=0; i<N; ++i)
-        retval[i] = sub_impl<typename packed_array<T, N, S>::packed_type
-            >::invoke(lhs[i], rhs[i]);
-    return retval;
-}
+    auto liter = lhs.cpbegin();
+    auto riter = rhs.cpbegin();
+    auto iter  = retval.pbegin();
 
-template<typename T, std::size_t N, typename S>
-inline packed_array<T, N, S>
-operator*(const packed_array<T, N, S>& lhs, const packed_array<T, N, S>& rhs)
-{
-    packed_array<T, N, S> retval;
-    for(std::size_t i=0; i<N; ++i)
-        retval[i] = mul_impl<typename packed_array<T, N, S>::packed_type
-            >::invoke(lhs[i], rhs[i]);
-    return retval;
-}
-
-template<typename T, std::size_t N, typename S>
-inline packed_array<T, N, S>
-operator/(const packed_array<T, N, S>& lhs, const packed_array<T, N, S>& rhs)
-{
-    packed_array<T, N, S> retval;
-    for(std::size_t i=0; i<N; ++i)
-        retval[i] = div_impl<typename packed_array<T, N, S>::packed_type
-            >::invoke(lhs[i], rhs[i]);
-    return retval;
-}
-
-template<typename T, std::size_t N, typename S>
-inline packed_array<T, N, S> rcp(const packed_array<T, N, S>& lhs)
-{
-    packed_array<T, N, S> retval;
-    for(std::size_t i=0; i<N; ++i)
-        retval[i] = rcp_impl<typename packed_array<T, N, S>::packed_type
-            >::invoke(lhs[i]);
-    return retval;
-}
-
-template<typename T, std::size_t N, typename S>
-inline packed_array<T, N, S> rsqrt(const packed_array<T, N, S>& lhs)
-{
-    packed_array<T, N, S> retval;
-    for(std::size_t i=0; i<N; ++i)
-        retval[i] = rsqrt_impl<typename packed_array<T, N, S>::packed_type
-            >::invoke(lhs[i]);
-    return retval;
-}
-
-template<typename T, std::size_t N, typename S>
-inline packed_array<T, N, S> sqrt(const packed_array<T, N, S>& lhs)
-{
-    packed_array<T, N, S> retval;
-    for(std::size_t i=0; i<N; ++i)
-        retval[i] = sqrt_impl<typename packed_array<T, N, S>::packed_type
-            >::invoke(lhs[i]);
-    return retval;
-}
-
-template<typename T, std::size_t N, typename S>
-inline packed_array<T, N, S> floor(const packed_array<T, N, S>& lhs)
-{
-    packed_array<T, N, S> retval;
-    for(std::size_t i=0; i<N; ++i)
-        retval[i] = floor_impl<typename packed_array<T, N, S>::packed_type
-            >::invoke(lhs[i]);
-    return retval;
-}
-
-template<typename T, std::size_t N, typename S>
-inline packed_array<T, N, S> ceil(const packed_array<T, N, S>& lhs)
-{
-    packed_array<T, N, S> retval;
-    for(std::size_t i=0; i<N; ++i)
-        retval[i] = ceil_impl<typename packed_array<T, N, S>::packed_type
-            >::invoke(lhs[i]);
-    return retval;
-}
-
-template<typename T, std::size_t N, typename S>
-inline packed_array<T, N, S>
-fmadd(const packed_array<T, N, S>& a, const packed_array<T, N, S>& b,
-      const packed_array<T, N, S>& c)
-{
-    packed_array<T, N, S> retval;
-    for(std::size_t i=0; i<N; ++i)
-        retval[i] = fmadd_impl<typename packed_array<T, N, S>::packed_type
-            >::invoke(a[i], b[i], c[i]);
-    return retval;
-}
-
-template<typename T, std::size_t N, typename S>
-inline packed_array<T, N, S>
-fmsub(const packed_array<T, N, S>& a, const packed_array<T, N, S>& b,
-      const packed_array<T, N, S>& c)
-{
-    packed_array<T, N, S> retval;
-    for(std::size_t i=0; i<N; ++i)
-        retval[i] = fmsub_impl<typename packed_array<T, N, S>::packed_type
-            >::invoke(a[i], b[i], c[i]);
-    return retval;
-}
-
-template<typename T, std::size_t N, typename S>
-inline packed_array<T, N, S>
-fnmadd(const packed_array<T, N, S>& a, const packed_array<T, N, S>& b,
-       const packed_array<T, N, S>& c)
-{
-    packed_array<T, N, S> retval;
-    for(std::size_t i=0; i<N; ++i)
-        retval[i] = fnmadd_impl<typename packed_array<T, N, S>::packed_type
-            >::invoke(a[i], b[i], c[i]);
-    return retval;
-}
-
-template<typename T, std::size_t N, typename S>
-inline packed_array<T, N, S>
-fnmsub(const packed_array<T, N, S>& a, const packed_array<T, N, S>& b,
-       const packed_array<T, N, S>& c)
-{
-    packed_array<T, N, S> retval;
-    for(std::size_t i=0; i<N; ++i)
-        retval[i] = fnmsub_impl<typename packed_array<T, N, S>::packed_type
-            >::invoke(a[i], b[i], c[i]);
-    return retval;
-}
-
-// TODO: load(?), store, set(?), broadcast
-
-
-template<typename T, std::size_t N, typename S>
-inline typename packed_array<T, N, S>::aligned_array_type
-store(const packed_array<T, N, S>& pa)
-{
-    typename packed_array<T, N, S>::aligned_array_type retval;
-    T* ptr = retval.data();
-    for(std::size_t i=0; i<pa.size(); ++i)
+    for(std::size_t i=0; i<packable_array<T, N, S>::number_of_pack; ++i)
     {
-        store_impl<typename packed_array<T, N, S>::packed_type>::invoke(
-                ptr, pa[i]);
-        ptr += packed_array<T, N, S>::pack_size;
+        store_impl<packed_type>::invoke(iter.raw(),
+            add_impl<packed_type>::invoke(
+                load_impl<packed_type>::invoke(liter.raw()),
+                load_impl<packed_type>::invoke(riter.raw()))
+            );
+        ++liter; ++riter; ++iter;
     }
     return retval;
 }
 
 
+template<typename T, std::size_t N, typename S>
+inline packable_array<T, N, S>
+operator-(const packable_array<T, N, S>& lhs, const packable_array<T, N, S>& rhs)
+{
+    typedef typename packable_array<T, N, S>::packed_type packed_type;
+    packable_array<T, N, S> retval;
 
+    auto liter = lhs.cpbegin();
+    auto riter = rhs.cpbegin();
+    auto iter  = retval.pbegin();
 
+    for(std::size_t i=0; i<packable_array<T, N, S>::number_of_pack; ++i)
+    {
+        store_impl<packed_type>::invoke(iter.raw(),
+            sub_impl<packed_type>::invoke(
+                load_impl<packed_type>::invoke(liter.raw()),
+                load_impl<packed_type>::invoke(riter.raw()))
+            );
+        ++liter; ++riter; ++iter;
+    }
+    return retval;
+}
 
+template<typename T, std::size_t N, typename S>
+inline packable_array<T, N, S>
+operator*(const packable_array<T, N, S>& lhs, const packable_array<T, N, S>& rhs)
+{
+    typedef typename packable_array<T, N, S>::packed_type packed_type;
+    packable_array<T, N, S> retval;
 
+    auto liter = lhs.cpbegin();
+    auto riter = rhs.cpbegin();
+    auto iter  = retval.pbegin();
 
+    for(std::size_t i=0; i<packable_array<T, N, S>::number_of_pack; ++i)
+    {
+        store_impl<packed_type>::invoke(iter.raw(),
+            mul_impl<packed_type>::invoke(
+                load_impl<packed_type>::invoke(liter.raw()),
+                load_impl<packed_type>::invoke(riter.raw()))
+            );
+        ++liter; ++riter; ++iter;
+    }
+    return retval;
+}
 
+template<typename T, std::size_t N, typename S>
+inline packable_array<T, N, S>
+operator*(const packable_array<T, N, S>& lhs, const T rhs)
+{
+    typedef typename packable_array<T, N, S>::packed_type packed_type;
+    packable_array<T, N, S> retval;
+    auto liter = lhs.cpbegin();
+    auto iter  = retval.pbegin();
+
+    for(std::size_t i=0; i<packable_array<T, N, S>::number_of_pack; ++i)
+    {
+        store_impl<packed_type>::invoke(iter.raw(),
+            mul_impl<packed_type>::invoke(
+                load_impl<packed_type>::invoke(liter.raw()),
+                set_impl<packed_type>::invoke(rhs))
+            );
+        ++liter; ++iter;
+    }
+    return retval;
+}
+
+template<typename T, std::size_t N, typename S>
+inline packable_array<T, N, S>
+operator*(const T lhs, const packable_array<T, N, S>& rhs)
+{
+    typedef typename packable_array<T, N, S>::packed_type packed_type;
+    packable_array<T, N, S> retval;
+    auto riter = rhs.cpbegin();
+    auto iter  = retval.pbegin();
+
+    for(std::size_t i=0; i<packable_array<T, N, S>::number_of_pack; ++i)
+    {
+        store_impl<packed_type>::invoke(iter.raw(),
+            mul_impl<packed_type>::invoke(
+                set_impl<packed_type>::invoke(lhs),
+                load_impl<packed_type>::invoke(riter.raw()))
+            );
+        ++riter; ++iter;
+    }
+    return retval;
+}
+
+template<typename T, std::size_t N, typename S>
+inline packable_array<T, N, S>
+operator/(const packable_array<T, N, S>& lhs, const packable_array<T, N, S>& rhs)
+{
+    typedef typename packable_array<T, N, S>::packed_type packed_type;
+    packable_array<T, N, S> retval;
+
+    auto liter = lhs.cpbegin();
+    auto riter = rhs.cpbegin();
+    auto iter  = retval.pbegin();
+
+    for(std::size_t i=0; i<packable_array<T, N, S>::number_of_pack; ++i)
+    {
+        store_impl<packed_type>::invoke(iter.raw(),
+            div_impl<packed_type>::invoke(
+                load_impl<packed_type>::invoke(liter.raw()),
+                load_impl<packed_type>::invoke(riter.raw()))
+            );
+        ++liter; ++riter; ++iter;
+    }
+    return retval;
+}
+
+template<typename T, std::size_t N, typename S>
+inline packable_array<T, N, S>
+operator/(const packable_array<T, N, S>& lhs, const T rhs)
+{
+    typedef typename packable_array<T, N, S>::packed_type packed_type;
+    packable_array<T, N, S> retval;
+    auto liter = lhs.cpbegin();
+    auto iter  = retval.pbegin();
+
+    for(std::size_t i=0; i<packable_array<T, N, S>::number_of_pack; ++i)
+    {
+        store_impl<packed_type>::invoke(iter.raw(),
+            div_impl<packed_type>::invoke(
+                load_impl<packed_type>::invoke(liter.raw()),
+                set_impl<packed_type>::invoke(rhs))
+            );
+        ++liter; ++iter;
+    }
+    return retval;
+}
+
+template<typename T, std::size_t N, typename S>
+inline packable_array<T, N, S>
+operator/(const T lhs, const packable_array<T, N, S>& rhs)
+{
+    typedef typename packable_array<T, N, S>::packed_type packed_type;
+    packable_array<T, N, S> retval;
+    auto riter = rhs.cpbegin();
+    auto iter  = retval.pbegin();
+
+    for(std::size_t i=0; i<packable_array<T, N, S>::number_of_pack; ++i)
+    {
+        store_impl<packed_type>::invoke(iter.raw(),
+            div_impl<packed_type>::invoke(
+                set_impl<packed_type>::invoke(lhs),
+                load_impl<packed_type>::invoke(riter.raw()))
+            );
+        ++riter; ++iter;
+    }
+    return retval;
+}
+
+template<typename T, std::size_t N, typename S>
+inline packable_array<T, N, S> floor(const packable_array<T, N, S>& lhs)
+{
+    typedef typename packable_array<T, N, S>::packed_type packed_type;
+    packable_array<T, N, S> retval;
+    auto liter = lhs.cpbegin();
+    auto iter  = retval.pbegin();
+
+    for(std::size_t i=0; i<packable_array<T, N, S>::number_of_pack; ++i)
+    {
+        store_impl<packed_type>::invoke(iter.raw(),
+            floor_impl<packed_type>::invoke(
+                load_impl<packed_type>::invoke(liter.raw()))
+            );
+        ++liter; ++iter;
+    }
+    return retval;
+}
+
+template<typename T, std::size_t N, typename S>
+inline packable_array<T, N, S> ceil(const packable_array<T, N, S>& lhs)
+{
+    typedef typename packable_array<T, N, S>::packed_type packed_type;
+    packable_array<T, N, S> retval;
+    auto liter = lhs.cpbegin();
+    auto iter  = retval.pbegin();
+
+    for(std::size_t i=0; i<packable_array<T, N, S>::number_of_pack; ++i)
+    {
+        store_impl<packed_type>::invoke(iter.raw(),
+            ceil_impl<packed_type>::invoke(
+                load_impl<packed_type>::invoke(liter.raw()))
+            );
+        ++liter; ++iter;
+    }
+    return retval;
+}
+
+template<typename T, std::size_t N, typename S>
+inline packable_array<T, N, S>
+fmadd(const packable_array<T, N, S>& a, const packable_array<T, N, S>& b,
+      const packable_array<T, N, S>& c)
+{
+    typedef typename packable_array<T, N, S>::packed_type packed_type;
+    packable_array<T, N, S> retval;
+    auto aiter = a.cpbegin();
+    auto biter = b.cpbegin();
+    auto citer = c.cpbegin();
+    auto iter  = retval.pbegin();
+
+    for(std::size_t i=0; i<packable_array<T, N, S>::number_of_pack; ++i)
+    {
+        store_impl<packed_type>::invoke(iter.raw(),
+            fmadd_impl<packed_type>::invoke(
+                load_impl<packed_type>::invoke(aiter.raw()),
+                load_impl<packed_type>::invoke(biter.raw()),
+                load_impl<packed_type>::invoke(citer.raw()),
+                );
+            );
+        ++aiter; ++biter; ++citer; ++iter;
+    }
+    return retval;
+}
+
+template<typename T, std::size_t N, typename S>
+inline packable_array<T, N, S>
+fmsub(const packable_array<T, N, S>& a, const packable_array<T, N, S>& b,
+      const packable_array<T, N, S>& c)
+{
+    typedef typename packable_array<T, N, S>::packed_type packed_type;
+    packable_array<T, N, S> retval;
+    auto aiter = a.cpbegin();
+    auto biter = b.cpbegin();
+    auto citer = c.cpbegin();
+    auto iter  = retval.pbegin();
+
+    for(std::size_t i=0; i<packable_array<T, N, S>::number_of_pack; ++i)
+    {
+        store_impl<packed_type>::invoke(iter.raw(),
+            fmsub_impl<packed_type>::invoke(
+                load_impl<packed_type>::invoke(aiter.raw()),
+                load_impl<packed_type>::invoke(biter.raw()),
+                load_impl<packed_type>::invoke(citer.raw()),
+                );
+            );
+        ++aiter; ++biter; ++citer; ++iter;
+    }
+    return retval;
+}
+
+template<typename T, std::size_t N, typename S>
+inline packable_array<T, N, S>
+fnmadd(const packable_array<T, N, S>& a, const packable_array<T, N, S>& b,
+       const packable_array<T, N, S>& c)
+{
+    typedef typename packable_array<T, N, S>::packed_type packed_type;
+    packable_array<T, N, S> retval;
+    auto aiter = a.cpbegin();
+    auto biter = b.cpbegin();
+    auto citer = c.cpbegin();
+    auto iter  = retval.pbegin();
+
+    for(std::size_t i=0; i<packable_array<T, N, S>::number_of_pack; ++i)
+    {
+        store_impl<packed_type>::invoke(iter.raw(),
+            fnmadd_impl<packed_type>::invoke(
+                load_impl<packed_type>::invoke(aiter.raw()),
+                load_impl<packed_type>::invoke(biter.raw()),
+                load_impl<packed_type>::invoke(citer.raw()),
+                );
+            );
+        ++aiter; ++biter; ++citer; ++iter;
+    }
+    return retval;
+}
+
+template<typename T, std::size_t N, typename S>
+inline packable_array<T, N, S>
+fnmsub(const packable_array<T, N, S>& a, const packable_array<T, N, S>& b,
+       const packable_array<T, N, S>& c)
+{
+    typedef typename packable_array<T, N, S>::packed_type packed_type;
+    packable_array<T, N, S> retval;
+    auto aiter = a.cpbegin();
+    auto biter = b.cpbegin();
+    auto citer = c.cpbegin();
+    auto iter  = retval.pbegin();
+
+    for(std::size_t i=0; i<packable_array<T, N, S>::number_of_pack; ++i)
+    {
+        store_impl<packed_type>::invoke(iter.raw(),
+            fnmsub_impl<packed_type>::invoke(
+                load_impl<packed_type>::invoke(aiter.raw()),
+                load_impl<packed_type>::invoke(biter.raw()),
+                load_impl<packed_type>::invoke(citer.raw()),
+                );
+            );
+        ++aiter; ++biter; ++citer; ++iter;
+    }
+    return retval;
+}
+
+// rcp, rsqrt, sqrt ?
 
 } // simd
 } // megingjord
