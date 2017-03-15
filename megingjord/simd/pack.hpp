@@ -12,6 +12,9 @@ template<typename, std::size_t> struct pack;
 template<typename, std::size_t, typename> struct packed_array;
 
 template<typename> struct is_simd : public std::false_type{};
+template<typename> struct is_packable : public std::false_type{};
+template<> struct is_packable<float>  : public std::true_type{};
+template<> struct is_packable<double> : public std::true_type{};
 
 template<typename> struct single_type_of;
 template<typename T, std::size_t N>
