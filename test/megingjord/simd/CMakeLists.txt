@@ -1,5 +1,6 @@
 set(TEST_NAMES
-    test_add
+    test_simd_add
+    test_simd_sub
     )
 
 add_definitions("-mavx -O3 -std=c++11")
