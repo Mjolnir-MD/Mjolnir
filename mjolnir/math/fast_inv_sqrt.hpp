@@ -2,7 +2,7 @@
 #define MJOLNIR_FAST_INV_SQRT
 #include <cstdint>
 
-#ifdef HAVE_SSE
+#ifdef MJOLNIR_HAVE_SSE
 #include <xmmintrin.h>
 
 namespace mjolnir

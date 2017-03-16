@@ -16,8 +16,8 @@ endif(DEBUG)
 include(CheckIncludeFileCXX)
 include(CheckCXXSourceCompiles)
 
-check_include_file_cxx(xmmintrin.h FOUND_SSE)
-if(FOUND_SSE)
+check_include_file_cxx(xmmintrin.h FOUND_SSE_INTRINSIC)
+if(FOUND_SSE_INTRINSIC)
     check_cxx_source_compiles(
     "#include <xmmintrin.h>
      int main(){
@@ -27,10 +27,10 @@ if(FOUND_SSE)
      }" SSE_COMPILE_SUCCESS)
 
     if(SSE_COMPILE_SUCCESS)
-        add_definitions(-DHAVE_SSE)
+        add_definitions(-DMJOLNIR_HAVE_SSE)
         add_definitions(-mmmx -msse)
     endif(SSE_COMPILE_SUCCESS)
-endif(FOUND_SSE)
+endif(FOUND_SSE_INTRINSIC)
 
 check_include_file_cxx(immintrin.h FOUND_AVX_INTRINSIC)
 if(FOUND_AVX_INTRINSIC)
@@ -46,9 +46,23 @@ if(FOUND_AVX_INTRINSIC)
 
     if(AVX_COMPILE_SUCCESS)
         add_definitions(-DMJOLNIR_HAVE_AVX)
-        add_definitions(-mmmx -msse -mavx)
+        add_definitions(-mavx)
     endif(AVX_COMPILE_SUCCESS)
+
+    set(CMAKE_REQUIRED_DEFINITIONS -mavx2)
+    check_cxx_source_compiles(
+    "#include <immintrin.h>
+     int main(){
+         __m256i x = _mm256_add_epi32(_mm256_set1_epi32(1), _mm256_set1_epi32(2));
+         return 0;
+     }" AVX2_COMPILE_SUCCESS)
+
+    if(AVX2_COMPILE_SUCCESS)
+        add_definitions(-DMJOLNIR_HAVE_AVX2)
+        add_definitions(-mavx2)
+    endif(AVX2_COMPILE_SUCCESS)
 endif(FOUND_AVX_INTRINSIC)
+
 
 add_subdirectory(src)
 add_subdirectory(test)
