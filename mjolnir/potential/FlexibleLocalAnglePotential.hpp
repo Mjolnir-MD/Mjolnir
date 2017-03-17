@@ -20,8 +20,7 @@ class FlexibleLocalAnglePotential
   public:
     FlexibleLocalAnglePotential(const real_type k,
             const std::array<real_type, 10>& term1,
-            const std::array<real_type, 10>& term2,
-            )
+            const std::array<real_type, 10>& term2)
         : min_theta(thetas[0]), max_theta(thetas[9]),
             k_(k), term1_(term1), term2_(term2),
     {
