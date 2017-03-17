@@ -58,6 +58,21 @@ read_local_interaction_boundary(const std::string& interaction,
         return read_local_interaction_boundary_potential<traitsT, boundaryT,
             Go1012ContactPotential<traitsT>>(interaction, parameters);
     }
+    else if(potential == "AICG_2_plus")
+    {
+        return read_local_interaction_boundary_potential<traitsT, boundaryT,
+            GaussianPotential<traitsT>>(interaction, parameters);
+    }
+    else if(potential == "FlexibleLocalAngle")
+    {
+        return read_local_interaction_boundary_potential<traitsT, boundaryT,
+            FlexibleLocalAnglePotential<traitsT>>(interaction, parameters);
+    }
+    else if(potential == "FlexibleLocalDihedral")
+    {
+        return read_local_interaction_boundary_potential<traitsT, boundaryT,
+            FlexibleLocalDihedralPotential<traitsT>>(interaction, parameters);
+    }
     else
         throw std::runtime_error("unknown potential: " + potential);
 }
