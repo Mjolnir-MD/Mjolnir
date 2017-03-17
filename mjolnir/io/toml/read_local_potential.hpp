@@ -4,6 +4,9 @@
 #include <mjolnir/potential/HarmonicPotential.hpp>
 #include <mjolnir/potential/ClementiDihedralPotential.hpp>
 #include <mjolnir/potential/Go1012ContactPotential.hpp>
+#include <mjolnir/potential/FlexibleLocalAnglePotential.hpp>
+#include <mjolnir/potential/FlexibleLocalDihedralPotential.hpp>
+#include <mjolnir/potential/GaussianPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <toml/toml.hpp>
@@ -118,8 +121,8 @@ struct read_local_potential_impl<traitsT, FlexibleLocalAnglePotential<traitsT>>
 
         MJOLNIR_LOG_INFO("k", k);
 
-        std::array<real_type, 10> term1;
-        std::array<real_type, 10> term2;
+        std::array<typename traitsT::real_type, 10> term1;
+        std::array<typename traitsT::real_type, 10> term2;
         const auto t1 = toml::get<toml::Array<toml::Float>>(param.at("term1"));
         const auto t2 = toml::get<toml::Array<toml::Float>>(param.at("term2"));
         if(t1.size() != 10 or t2.size() != 10)
@@ -141,14 +144,14 @@ struct read_local_potential_impl<traitsT,
     invoke(const toml::Table& param)
     {
         MJOLNIR_SET_LOGGER("read_toml_file");
-        MJOLNIR_LOG_INFO("read flp-angle potential");
+        MJOLNIR_LOG_INFO("read flp-dihedral potential");
 
         const typename traitsT::real_type k =
             toml::get<toml::Float>(param.at("k"));
 
         MJOLNIR_LOG_INFO("k", k);
 
-        std::array<real_type, 7> term;
+        std::array<typename traitsT::real_type, 7> term;
         const auto t = toml::get<toml::Array<toml::Float>>(param.at("term"));
         if(t.size() != 7)
             throw std::invalid_argument("invalid FLP angle term size");
@@ -167,7 +170,7 @@ struct read_local_potential_impl<traitsT,
     invoke(const toml::Table& param)
     {
         MJOLNIR_SET_LOGGER("read_toml_file");
-        MJOLNIR_LOG_INFO("read flp-angle potential");
+        MJOLNIR_LOG_INFO("read gaussian potential");
 
         const typename traitsT::real_type e =
             toml::get<toml::Float>(param.at("epsilon"));
