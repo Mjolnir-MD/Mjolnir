@@ -19,7 +19,7 @@ class GaussianPotential
   public:
     GaussianPotential(const real_type e, const real_type w,
                       const real_type native_val)
-        : epsilon_(e), inv_w2_(-1./(w*w)), native_val_(native_val)
+        : epsilon_(e), inv_w2_(-1./(2*w*w)), native_val_(native_val)
     {}
     ~GaussianPotential() = default;
 
@@ -32,7 +32,7 @@ class GaussianPotential
     real_type derivative(const real_type val) const
     {
         const real_type dval = val - this->native_val_;
-        return inv_w2_ * dval * epsilon_ * std::exp(inv_w2_ * dval * dval);
+        return 2*inv_w2_ * dval * epsilon_ * std::exp(inv_w2_ * dval * dval);
     }
 
     void reset_parameter(const std::string&, const real_type){return;}
