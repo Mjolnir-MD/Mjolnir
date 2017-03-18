@@ -4,7 +4,7 @@
 #include <array>
 #include <algorithm>
 #include <limits>
-#include <iostream>
+#include <cmath>
 
 namespace mjolnir
 {
@@ -26,7 +26,7 @@ class FlexibleLocalDihedralPotential
             const std::array<real_type, 7>& term)
         : k_(k), term_(term)
     {
-        real_type phi = -M_PI;
+        real_type phi = -constants<traits_type>::pi;
         this->min_energy = std::numeric_limits<real_type>::max();
         while(phi < constants<traitsT>::pi)
         {
