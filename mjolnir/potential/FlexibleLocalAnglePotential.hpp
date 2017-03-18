@@ -3,7 +3,7 @@
 #include <array>
 #include <algorithm>
 #include <cassert>
-#include <iostream>
+#include <cmath>
 
 namespace mjolnir
 {
