@@ -40,10 +40,6 @@ BOOST_AUTO_TEST_CASE(FlexibleLocalAngle_derivative)
         const real_type dpot = (pot1 - pot2) / (2 * h);
         const real_type deri = flpa.derivative(x);
 
-        std::cerr << "i = " << i << ", x = " << x << std::endl;
-        std::cerr << "pot1 = " << pot1 << ", pot2 = " << pot2 << std::endl;
-        std::cerr << "dpot = " << dpot << ", deri = " << deri << std::endl;
-
         BOOST_CHECK_CLOSE_FRACTION(dpot, deri, h);
         x += dx;
     }
