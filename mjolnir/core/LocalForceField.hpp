@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_LOCAL_FORCE_FIELD
 #define MJOLNIR_LOCAL_FORCE_FIELD
 #include "LocalInteractionBase.hpp"
+#include <mjolnir/util/logger.hpp>
 #include <utility>
 #include <vector>
 #include <array>
@@ -42,7 +43,13 @@ class LocalForceField
   private:
 
     container_type interactions_;
+    static
+    Logger& logger_;
 };
+
+template<typename traitsT>
+Logger& LocalForceField<traitsT>::logger_ =
+    LoggerManager<char>::get_logger("LocalForceField");
 
 template<typename traitsT>
 inline void LocalForceField<traitsT>::emplace(
@@ -66,7 +73,11 @@ LocalForceField<traitsT>::calc_energy(const particle_container_type& pcon) const
 {
     real_type energy = 0.0;
     for(auto iter = interactions_.cbegin(); iter != interactions_.cend(); ++iter)
-        energy += (*iter)->calc_energy(pcon);
+    {
+        const real_type e = (*iter)->calc_energy(pcon);
+        MJOLNIR_LOG_DEBUG("calculate energy", e);
+        energy += e;
+    }
     return energy;
 }
 
