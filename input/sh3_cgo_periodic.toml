@@ -1,5 +1,5 @@
 [simulator]
-file_name          = "sh3_ul_exv"
+file_name          = "sh3_clementi_go_periodic"
 time_integration   = "Underdamped Langevin"
 boundary           = "Periodic"
 lower              = [ 0.0, -25.0, -30.0]
@@ -421,8 +421,7 @@ parameters = [
 [[localforcefield]]
 interaction = "BondAngle"
 potential = "Harmonic"
-boundary  = "Unlimited"
-# boundary = "Periodic"
+boundary = "Periodic"
 # params{{{
 parameters = [
 {indices = [0, 1, 2], r0 = 2.294968e+00, k = 20.0},
