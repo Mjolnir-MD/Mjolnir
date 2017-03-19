@@ -24,8 +24,8 @@ class PeriodicGridCellList : public SpatialPartition<traitsT>
     typedef typename base_type::index_type index_type;
     typedef typename base_type::index_list index_list;
     typedef std::array<int, 3>          cell_index_type;
-    typedef std::array<index_list*, 26> neighbor_cell_ptr;
-    typedef std::pair<index_list, neighbor_cell_ptr> unit_cell_type;
+    typedef std::array<std::size_t, 26> neighbor_cell_idx;
+    typedef std::pair<index_list, neighbor_cell_idx> unit_cell_type;
     typedef std::vector<index_list> verlet_list_type;
     typedef std::vector<index_list> except_list_type;
     typedef std::vector<unit_cell_type> cell_list_type;
@@ -63,8 +63,8 @@ class PeriodicGridCellList : public SpatialPartition<traitsT>
     void update(const particle_container_type& pcon,
                 const time_type dt) override;
 
-    real_type const& cutoff() const {return this->cutoff_;}
-    real_type const& mergin() const {return this->mergin_;}
+    real_type cutoff() const {return this->cutoff_;}
+    real_type mergin() const {return this->mergin_;}
 
     void set_cutoff(const real_type c);
     void set_mergin(const real_type m);
@@ -102,7 +102,8 @@ void PeriodicGridCellList<traitsT, boundaryT>::make(
 {
     MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::make CALLED");
 
-    this->list_.clear();
+    for(auto iter = this->list_.begin(); iter != this->list_.end(); ++iter)
+        iter->clear();
     this->list_.resize(pcon.size());
 
     for(auto iter = cell_list_.begin(); iter != cell_list_.end(); ++iter)
@@ -113,7 +114,8 @@ void PeriodicGridCellList<traitsT, boundaryT>::make(
     std::size_t idx = 0;
     for(auto iter = pcon.cbegin(); iter != pcon.cend(); ++iter)
     {
-        cell_list_[index(iter->position - boundary_type::lower_bound())].first.push_back(idx);
+        cell_list_.at(index(
+            iter->position - boundary_type::lower_bound())).first.push_back(idx);
         ++idx;
     }
     MJOLNIR_LOG_DEBUG("cell list is updated");
@@ -155,13 +157,19 @@ void PeriodicGridCellList<traitsT, boundaryT>::make(
         }
 
         // see neighbor cells
+
         for(auto iter = cell.second.cbegin(); iter != cell.second.cend(); ++iter)
         {
-            for(std::size_t j=0; j<(*iter)->size(); ++j)
+            MJOLNIR_LOG_DEBUG("see neighboring cell at", std::distance(
+                              cell.second.cbegin(), iter));
+            MJOLNIR_LOG_DEBUG("neighboring cell index", *iter);
+
+            const unit_cell_type& neighbor = cell_list_.at(*iter);
+            for(std::size_t j=0; j < neighbor.first.size(); ++j)
             {
                 MJOLNIR_LOG_DEBUG("looking", j, "-th particle in the cell.",
-                                  "its index is", (*iter)->at(j));
-                const std::size_t k = (*iter)->at(j);
+                                  "its index is", neighbor.first.at(j));
+                const std::size_t k = neighbor.first.at(j);
                 if(k <= i || std::find(cbeg, cend, k) != cend)
                     continue;
 
@@ -174,6 +182,12 @@ void PeriodicGridCellList<traitsT, boundaryT>::make(
             }
         }
     }
+
+    for(auto iter = this->list_.begin(); iter != this->list_.end(); ++iter)
+    {
+        std::sort(iter->begin(), iter->end());
+    }
+
     this->current_mergin_ = mergin_;
 
     MJOLNIR_LOG_DEBUG("PeriodicGridCellList::make() RETURNED");
@@ -238,7 +252,7 @@ template<typename traitsT, typename boundaryT>
 inline std::size_t
 PeriodicGridCellList<traitsT, boundaryT>::index(cell_index_type idx) const
 {
-    return idx[0] + dim_x_ * idx[1] + dim_x_ * dim_y_ * idx[2];
+    return idx[0] + this->dim_x_ * idx[1] + this->dim_x_ * this->dim_y_ * idx[2];
 }
 
 
@@ -247,9 +261,9 @@ inline typename PeriodicGridCellList<traitsT, boundaryT>::cell_index_type
 PeriodicGridCellList<traitsT, boundaryT>::add(
         const int x, const int y, const int z, const cell_index_type& idx) const
 {
-    int ret_x = (idx[0] + x);
-    int ret_y = (idx[1] + y);
-    int ret_z = (idx[2] + z);
+    int ret_x = (idx[0] + x) % this->dim_x_;
+    int ret_y = (idx[1] + y) % this->dim_y_;
+    int ret_z = (idx[2] + z) % this->dim_z_;
     if(ret_x < 0) ret_x += dim_x_; else if(ret_x >= dim_x_) ret_x -= dim_x_;
     if(ret_y < 0) ret_y += dim_y_; else if(ret_y >= dim_y_) ret_y -= dim_y_;
     if(ret_z < 0) ret_z += dim_z_; else if(ret_z >= dim_z_) ret_z -= dim_z_;
@@ -270,32 +284,32 @@ void PeriodicGridCellList<traitsT, boundaryT>::initialize()
     {
         const cell_index_type idx{{x, y, z}};
         auto& cell = this->cell_list_[index(idx)];
-        cell.second[ 0] = &(cell_list_.at(index(add( 1,  0,  0, idx))).first);
-        cell.second[ 1] = &(cell_list_.at(index(add( 0,  1,  0, idx))).first);
-        cell.second[ 2] = &(cell_list_.at(index(add( 0,  0,  1, idx))).first);
-        cell.second[ 3] = &(cell_list_.at(index(add(-1,  0,  0, idx))).first);
-        cell.second[ 4] = &(cell_list_.at(index(add( 0, -1,  0, idx))).first);
-        cell.second[ 5] = &(cell_list_.at(index(add( 0,  0, -1, idx))).first);
-        cell.second[ 6] = &(cell_list_.at(index(add( 1,  1,  0, idx))).first);
-        cell.second[ 7] = &(cell_list_.at(index(add( 0,  1,  1, idx))).first);
-        cell.second[ 8] = &(cell_list_.at(index(add( 1,  0,  1, idx))).first);
-        cell.second[ 9] = &(cell_list_.at(index(add(-1, -1,  0, idx))).first);
-        cell.second[10] = &(cell_list_.at(index(add( 0, -1, -1, idx))).first);
-        cell.second[11] = &(cell_list_.at(index(add(-1,  0, -1, idx))).first);
-        cell.second[12] = &(cell_list_.at(index(add( 1, -1,  0, idx))).first);
-        cell.second[13] = &(cell_list_.at(index(add( 0,  1, -1, idx))).first);
-        cell.second[14] = &(cell_list_.at(index(add(-1,  0,  1, idx))).first);
-        cell.second[15] = &(cell_list_.at(index(add(-1,  1,  0, idx))).first);
-        cell.second[16] = &(cell_list_.at(index(add( 0, -1,  1, idx))).first);
-        cell.second[17] = &(cell_list_.at(index(add( 1,  0, -1, idx))).first);
-        cell.second[18] = &(cell_list_.at(index(add(-1,  1,  1, idx))).first);
-        cell.second[19] = &(cell_list_.at(index(add( 1, -1,  1, idx))).first);
-        cell.second[20] = &(cell_list_.at(index(add( 1,  1, -1, idx))).first);
-        cell.second[21] = &(cell_list_.at(index(add(-1, -1,  1, idx))).first);
-        cell.second[22] = &(cell_list_.at(index(add( 1, -1, -1, idx))).first);
-        cell.second[23] = &(cell_list_.at(index(add(-1,  1, -1, idx))).first);
-        cell.second[24] = &(cell_list_.at(index(add( 1,  1,  1, idx))).first);
-        cell.second[25] = &(cell_list_.at(index(add(-1, -1, -1, idx))).first);
+        cell.second[ 0] = index(add( 1,  0,  0, idx));
+        cell.second[ 1] = index(add( 0,  1,  0, idx));
+        cell.second[ 2] = index(add( 0,  0,  1, idx));
+        cell.second[ 3] = index(add(-1,  0,  0, idx));
+        cell.second[ 4] = index(add( 0, -1,  0, idx));
+        cell.second[ 5] = index(add( 0,  0, -1, idx));
+        cell.second[ 6] = index(add( 1,  1,  0, idx));
+        cell.second[ 7] = index(add( 0,  1,  1, idx));
+        cell.second[ 8] = index(add( 1,  0,  1, idx));
+        cell.second[ 9] = index(add(-1, -1,  0, idx));
+        cell.second[10] = index(add( 0, -1, -1, idx));
+        cell.second[11] = index(add(-1,  0, -1, idx));
+        cell.second[12] = index(add( 1, -1,  0, idx));
+        cell.second[13] = index(add( 0,  1, -1, idx));
+        cell.second[14] = index(add(-1,  0,  1, idx));
+        cell.second[15] = index(add(-1,  1,  0, idx));
+        cell.second[16] = index(add( 0, -1,  1, idx));
+        cell.second[17] = index(add( 1,  0, -1, idx));
+        cell.second[18] = index(add(-1,  1,  1, idx));
+        cell.second[19] = index(add( 1, -1,  1, idx));
+        cell.second[20] = index(add( 1,  1, -1, idx));
+        cell.second[21] = index(add(-1, -1,  1, idx));
+        cell.second[22] = index(add( 1, -1, -1, idx));
+        cell.second[23] = index(add(-1,  1, -1, idx));
+        cell.second[24] = index(add( 1,  1,  1, idx));
+        cell.second[25] = index(add(-1, -1, -1, idx));
     }
     return;
 }
