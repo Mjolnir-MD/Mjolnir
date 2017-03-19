@@ -35,3 +35,7 @@ script:
 - cmake -DCMAKE_CXX_COMPILER=$COMPILER ..
 - make
 - make test
+- ./src/mjolnir ../input/sh3_cgo_unlimited.toml
+- ./src/mjolnir ../input/sh3_cgo_periodic.toml
+- ./src/mjolnir ../input/sh3_AICG2+.toml
+- ./src/mjolnir ../input/sh3_AICG2+_periodic.toml
