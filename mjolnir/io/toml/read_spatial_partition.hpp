@@ -48,7 +48,7 @@ struct read_spatial_partition_impl<traitsT,
 
             excepts.emplace_back(l);
         }
-        auto retval = VerletList<traitsT>(cutoff, cutoff * mergin);
+        auto retval = VerletList<traitsT, boundaryT>(cutoff, cutoff * mergin);
         retval.set_except(excepts);
         return retval;
     }
