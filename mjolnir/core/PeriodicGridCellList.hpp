@@ -5,6 +5,7 @@
 #include <mjolnir/util/logger.hpp>
 #include <vector>
 #include <cmath>
+#include <cassert>
 
 namespace mjolnir
 {
@@ -312,7 +313,7 @@ void PeriodicGridCellList<traitsT, boundaryT>::initialize()
         cell.second[25] = index(add(-1, -1, -1, idx));
 
         auto self = std::find(cell.second.cbegin(), cell.second.cend(), index(idx));
-        assert(self == cell.second.end())
+        assert(self == cell.second.end());
         auto uniq = std::unique(cell.second.begin(), cell.second.end());
         assert(uniq == cell.second.end());
     }
