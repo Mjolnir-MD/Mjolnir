@@ -261,9 +261,9 @@ inline typename PeriodicGridCellList<traitsT, boundaryT>::cell_index_type
 PeriodicGridCellList<traitsT, boundaryT>::add(
         const int x, const int y, const int z, const cell_index_type& idx) const
 {
-    int ret_x = (idx[0] + x) % this->dim_x_;
-    int ret_y = (idx[1] + y) % this->dim_y_;
-    int ret_z = (idx[2] + z) % this->dim_z_;
+    int ret_x = (idx[0] + x);
+    int ret_y = (idx[1] + y);
+    int ret_z = (idx[2] + z);
     if(ret_x < 0) ret_x += dim_x_; else if(ret_x >= dim_x_) ret_x -= dim_x_;
     if(ret_y < 0) ret_y += dim_y_; else if(ret_y >= dim_y_) ret_y -= dim_y_;
     if(ret_z < 0) ret_z += dim_z_; else if(ret_z >= dim_z_) ret_z -= dim_z_;
@@ -310,6 +310,11 @@ void PeriodicGridCellList<traitsT, boundaryT>::initialize()
         cell.second[23] = index(add(-1,  1, -1, idx));
         cell.second[24] = index(add( 1,  1,  1, idx));
         cell.second[25] = index(add(-1, -1, -1, idx));
+
+        auto self = std::find(cell.second.cbegin(), cell.second.cend(), index(idx));
+        assert(self == cell.second.end())
+        auto uniq = std::unique(cell.second.begin(), cell.second.end());
+        assert(uniq == cell.second.end());
     }
     return;
 }
