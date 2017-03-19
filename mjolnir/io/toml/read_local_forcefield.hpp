@@ -28,7 +28,7 @@ read_local_force_field(const toml::Array<toml::Table>& lffs)
         MJOLNIR_LOG_INFO("potential name", potential);
 
         std::string boundary("Unlimited");
-        try{toml::get<toml::String>(iter->at("boundary"));}
+        try{boundary = toml::get<toml::String>(iter->at("boundary"));}
         catch(std::out_of_range& except)
         {
             MJOLNIR_LOG_WARN("boundary setting not found.",
