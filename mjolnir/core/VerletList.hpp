@@ -56,8 +56,13 @@ class VerletList : public SpatialPartition<traitsT>
     real_type        cutoff_;
     real_type        mergin_;
     real_type        current_mergin_;
+
+    static Logger& logger_;
 };
 
+template<typename traitsT, typename boundaryT>
+Logger& VerletList<traitsT, boundaryT>::logger_ =
+        LoggerManager<char>::get_logger("VerletList");
 
 template<typename traitsT, typename boundaryT>
 void VerletList<traitsT, boundaryT>::make(const particle_container_type& pcon)
@@ -81,6 +86,7 @@ void VerletList<traitsT, boundaryT>::make(const particle_container_type& pcon)
                 this->list_.at(i).push_back(j);
         }
     }
+
     this->current_mergin_ = mergin_;
     return ;
 }
