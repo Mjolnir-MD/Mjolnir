@@ -10,7 +10,7 @@ namespace mjolnir
     class GlobalExternalInteraction : public GlobalInteractionBase<traitsT>
     {
     public:
-
+    
       using traits_type = traitsT;
       using potential_type = potentialT;
       using spartial_partition_type = partitionT;
@@ -20,7 +20,7 @@ namespace mjolnir
       using real_type = base_type::real_type;
       using coordinate_type = base_type::coordinate_type;
       using particle_container_type = base_type::particle_container_type;
-      
+    
     public:
       GlobalExternalInteraction()  = default;
       ~GlobalExternalInteraction() = default;
@@ -45,8 +45,16 @@ namespace mjolnir
       potential_type potential_;
       spatial_partition_type spatial_partition_;
     };
-  //TODO この先に関数の実装を書く
   
-}
+  //TODO この先に関数の実装を書く
+  template<typename traitT, typename potT, typename spaceT, typename boundaryT>
+  void GlobalExternalInteraction<traitsT, potT, spaceT, boundaryT>::calc_force
+  (particle_container_type& pcon)
+  {
+    spartial_partition_.update(pcon);//その時の系の状態に応じてpconを作りなおしている（要確認）
+    typename spatial_partition_type::index_list const& partners =
+      spatial_partition_.partners()//Prob ここで必要のない引数を指定してしまうことになりそう
+    
+  }
 
 #endif /* MJOLNIR_GLOBAL_EXTERNAL_INTERACTION */
