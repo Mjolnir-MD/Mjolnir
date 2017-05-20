@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_MD_SIMULATOR
 #define MJOLNIR_MD_SIMULATOR
-#include "Integrator.hpp"
+#include "SimulatorBase.hpp"
+#include "System.hpp"
 
 namespace mjolnir
 {
@@ -11,14 +12,15 @@ class MDSimulator final : public SimulatorBase
   public:
     typedef traitsT     traits_type;
     typedef integratorT integrator_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::time_type time_type;
+    typedef System<traits_type>     system_type;
+    typedef ForceField<traits_type> forcefield_type;
+    typedef typename traits_type::real_type       real_type;
+    typedef typename traits_type::coordinate_type coordinate_type;
 
-    MDSimulator(ParticleContainer<traitsT>&& pcon, ForceField<traitsT>&& ff,
+    MDSimulator(System<traitsT>&& sys, ForceField<traitsT>&& ff,
                 integrator_type&& integr)
-        : time_(0), pcon_(std::forward<ParticleContainer<traitsT>>(pcon)),
-          ff_(std::forward<ForceField<traitsT>>(ff)),
-          integrator_(std::forward<std::unique_ptr<Integrator<traitsT>>>(integr))
+        : time_(0), system_(std::move(sys)), ff_(std::move(ff)),
+          integrator_(std::move(integr))
     {}
     ~MDSimulator() override = default;
 
@@ -26,23 +28,22 @@ class MDSimulator final : public SimulatorBase
     void step()       override;
     void finalize()   override {return;}
 
-    void step_until(const time_type t);
     real_type calc_energy() const;
 
-    ParticleContainer<traitsT>&       particles()       {return pcon_;}
-    ParticleContainer<traitsT> const& particles() const {return pcon_;}
+    system_type&       particles()       {return system_;}
+    system_type const& particles() const {return system_;}
 
     ForceField<traitsT>&       forcefields()       {return ff_;}
     ForceField<traitsT> const& forcefields() const {return ff_;}
 
-    time_type& time()       {return time_;}
-    time_type  time() const {return time_;}
+    real_type& time()       {return time_;}
+    real_type  time() const {return time_;}
 
   protected:
-    time_type time_;
-    ParticleContainer<traitsT> pcon_;
-    ForceField<traitsT>        ff_;
-    integrator_type            integrator_;
+    real_type       time_;
+    system_type     system_;
+    forcefield_type ff_;
+    integrator_type integrator_;
 };
 
 template<typename traitsT>
@@ -58,16 +59,6 @@ inline void MDSimulator<traitsT>::step()
 {
     this->time_ = integrator_->step(this->time_, pcon_, ff_);
     return;
-}
-
-template<typename traitsT>
-inline void MDSimulator<traitsT>::step_until(const time_type t)
-{
-    while(this->time_ < t)
-    {
-        this->time_ = integrator_->step(this->time_, pcon_, ff_);
-    }
-    return ;
 }
 
 template<typename traitsT>
