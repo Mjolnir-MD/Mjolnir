@@ -9,13 +9,13 @@ template<typename realT, typename coordT>
 struct UnlimitedBoundary
 {
     typedef realT  real_type;
-    typedef coordT coordiante_type;
+    typedef coordT coord_type;
 
     UnlimitedBoundary() = default;
     ~UnlimitedBoundary() = default;
 
-    coordinate_type adjust_direction(coordinate_type dr) const {return dr;}
-    coordinate_type adjust_position (coordinate_type r ) const {return r;}
+    coord_type adjust_direction(coord_type dr) const noexcept {return dr;}
+    coord_type adjust_position (coord_type r ) const noexcept {return r;}
 };
 
 template<typename realT, typename coordT>
@@ -32,7 +32,7 @@ struct CubicPeriodicBoundary
     : lower(lw), upper(up), system_size(up-lw), system_size_half(0.5*(up-lw))
     {}
 
-    coordinate_type adjust_direction(coordinate_type dr) const
+    coordinate_type adjust_direction(coordinate_type dr) const noexcept
     {
              if(dr[0] < -system_size_half[0]) dr[0] += system_size[0];
         else if(dr[0] >  system_size_half[0]) dr[0] -= system_size[0];
@@ -43,7 +43,7 @@ struct CubicPeriodicBoundary
         return dr;
     }
 
-    coordinate_type adjust_position(coordinate_type pos) const
+    coordinate_type adjust_position(coordinate_type pos) const noexcept
     {
              if(pos[0] < lower[0]) pos[0] += system_size_[0];
         else if(pos[0] > upper[0]) pos[0] -= system_size_[0];
