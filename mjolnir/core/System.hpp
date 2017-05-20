@@ -20,15 +20,6 @@ class System
 
     System()  = default;
     System(std::size_t num_particle) : particles_(num_particle){}
-    System(std::size_t num_particle, real_type T)
-    : particles_(num_particle), temperature_(T)
-    {}
-    System(std::size_t num_particle, real_type T, real_type P)
-    : particles_(num_particle), temperature_(T), pressure_(P)
-    {}
-    System(std::size_t num_particle, real_type T, real_type P, real_type I)
-    : particles_(num_particle), temperature_(T), pressure_(P), ionic_strength_(I)
-    {}
     ~System() = default;
 
     std::size_t size() const noexcept {return particles_.size();}
