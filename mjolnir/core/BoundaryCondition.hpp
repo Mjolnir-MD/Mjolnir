@@ -5,12 +5,11 @@
 namespace mjolnir
 {
 
-template<typename traitsT>
+template<typename realT, typename coordT>
 struct UnlimitedBoundary
 {
-    typedef traitsT traits_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
+    typedef realT  real_type;
+    typedef coordT coordiante_type;
 
     UnlimitedBoundary() = default;
     ~UnlimitedBoundary() = default;
@@ -19,13 +18,12 @@ struct UnlimitedBoundary
     coordinate_type adjust_position (coordinate_type r ) const {return r;}
 };
 
-template<typename traitsT>
+template<typename realT, typename coordT>
 struct CubicPeriodicBoundary
 {
   public:
-    typedef traitsT traits_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
+    typedef realT  real_type;
+    typedef coordT coordiante_type;
 
   public:
     CubicPeriodicBoundary() = default;
