@@ -5,13 +5,13 @@
 namespace mjolnir
 {
 
-template<typename realT, typename boundaryT>
+template<typename realT, template<typename, typename> class boundaryT>
 struct SimulatorTraitsBase
 {
-    typedef realT                real_type;
-    typedef Vector<real_type, 3> coordinate_type;
-    typedef coordinate_type      position_type;
-    typedef boundaryT            boundary_type;
+    typedef realT                                 real_type;
+    typedef Vector<real_type, 3>                  coordinate_type;
+    typedef coordinate_type                       position_type;
+    typedef boundaryT<real_type, coordinate_type> boundary_type;
 };
 
 } // mjolnir
