@@ -1,28 +1,31 @@
-#ifndef MJOLNIR_SIMULATOR
-#define MJOLNIR_SIMULATOR
+#ifndef MJOLNIR_MD_SIMULATOR
+#define MJOLNIR_MD_SIMULATOR
 #include "Integrator.hpp"
 
 namespace mjolnir
 {
 
-template<typename traitsT>
-class Simulator
+template<typename traitsT, typename integratorT>
+class MDSimulator final : public SimulatorBase
 {
   public:
-    typedef typename traitsT::real_type real_type;
-    typedef typename traitsT::time_type time_type;
+    typedef traitsT     traits_type;
+    typedef integratorT integrator_type;
+    typedef typename traits_type::real_type real_type;
+    typedef typename traits_type::time_type time_type;
 
-    Simulator(ParticleContainer<traitsT>&& pcon,
-              ForceField<traitsT>&& ff,
-              std::unique_ptr<Integrator<traitsT>>&& integr)
+    MDSimulator(ParticleContainer<traitsT>&& pcon, ForceField<traitsT>&& ff,
+                integrator_type&& integr)
         : time_(0), pcon_(std::forward<ParticleContainer<traitsT>>(pcon)),
           ff_(std::forward<ForceField<traitsT>>(ff)),
           integrator_(std::forward<std::unique_ptr<Integrator<traitsT>>>(integr))
     {}
-    ~Simulator() = default;
+    ~MDSimulator() override = default;
 
-    void initialize();
-    void step();
+    void initialize() override;
+    void step()       override;
+    void finalize()   override {return;}
+
     void step_until(const time_type t);
     real_type calc_energy() const;
 
@@ -37,13 +40,13 @@ class Simulator
 
   protected:
     time_type time_;
-    ParticleContainer<traitsT>           pcon_;
-    ForceField<traitsT>                  ff_;
-    std::unique_ptr<Integrator<traitsT>> integrator_;
+    ParticleContainer<traitsT> pcon_;
+    ForceField<traitsT>        ff_;
+    integrator_type            integrator_;
 };
 
 template<typename traitsT>
-inline void Simulator<traitsT>::initialize()
+inline void MDSimulator<traitsT>::initialize()
 {
     this->integrator_->initialize(this->pcon_);
     this->ff_.initialize(this->pcon_, integrator_->delta_t());
@@ -51,14 +54,14 @@ inline void Simulator<traitsT>::initialize()
 }
 
 template<typename traitsT>
-inline void Simulator<traitsT>::step()
+inline void MDSimulator<traitsT>::step()
 {
     this->time_ = integrator_->step(this->time_, pcon_, ff_);
     return;
 }
 
 template<typename traitsT>
-inline void Simulator<traitsT>::step_until(const time_type t)
+inline void MDSimulator<traitsT>::step_until(const time_type t)
 {
     while(this->time_ < t)
     {
@@ -68,12 +71,12 @@ inline void Simulator<traitsT>::step_until(const time_type t)
 }
 
 template<typename traitsT>
-inline typename Simulator<traitsT>::real_type
-Simulator<traitsT>::calc_energy() const
+inline typename MDSimulator<traitsT>::real_type
+MDSimulator<traitsT>::calc_energy() const
 {
     return this->ff_.calc_energy(this->pcon_);
 }
 
 
 } // mjolnir
-#endif /* MJOLNIR_SIMULATOR */
+#endif /* MJOLNIR_MD_SIMULATOR */
