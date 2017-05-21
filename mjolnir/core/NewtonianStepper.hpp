@@ -1,42 +1,45 @@
 #ifndef MJOLNIR_NVE_NEWTONIAN_INTEGRATOR
 #define MJOLNIR_NVE_NEWTONIAN_INTEGRATOR
-#include "Integrator.hpp"
-#include "BoundaryCondition.hpp"
+#include "System.hpp"
 #include <mjolnir/util/zip_iterator.hpp>
 #include <mjolnir/util/make_zip.hpp>
 
 namespace mjolnir
 {
 
-template<typename traitsT, typename boundaryT = UnlimitedBoundary<traitsT>>
-class NVENewtonian : public Integrator<traitsT>
+template<typename traitsT>
+class NewtonianStepper
 {
   public:
     typedef traitsT traits_type;
-    typedef boundaryT boundary_type;
-    typedef typename traits_type::time_type time_type;
-    typedef typename traits_type::real_type real_type;
+    typedef typename traits_type::boundary_type   boundary_type;
+    typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
+    typedef System<traitsT> system_type;
+    typedef ForceField<traitsT> forcefield_type;
 
   public:
 
-    NVENewtonian(const time_type dt, const std::size_t number_of_particles)
+    NewtonianStepper(const time_type dt, const std::size_t number_of_particles)
         : dt_(dt), halfdt_(dt * 0.5), halfdt2_(dt * dt * 0.5),
           acceleration_(number_of_particles)
     {}
-    ~NVENewtonian() override = default;
+    ~NewtonianStepper() = default;
 
-    void initialize(const ParticleContainer<traitsT>& pcon) override;
-    time_type step(const time_type time, ParticleContainer<traitsT>& pcon,
-                   ForceField<traitsT>& ff) override;
+    void initialize(const system_type& sys);
 
-    time_type& delta_t()       override {return dt_;}
-    time_type  delta_t() const override {return dt_;}
+    real_type step(const time_type time, system_type& sys, forcefield_type& ff);
+
+    real_type delta_t() const {return dt_;}
+    void set_delta_t(const real_type dt)
+    {
+        dt_ = dt; halfdt_ = dt * 0.5; halfdt2_ = halfdt_ * dt_;
+    }
 
   private:
 
-    void adjust_translation(ParticleContainer<traitsT>& pcon) const;
-    void adjust_rotation(ParticleContainer<traitsT>& pcon) const;
+    void adjust_translation(system_type& sys) const;
+    void adjust_rotation   (system_type& sys) const;
 
   private:
     time_type dt_;      //!< dt
@@ -45,41 +48,38 @@ class NVENewtonian : public Integrator<traitsT>
     std::vector<coordinate_type> acceleration_;
 };
 
-template<typename traitsT, typename boundaryT>
-void NVENewtonian<traitsT, boundaryT>::initialize(
-        const ParticleContainer<traitsT>& pcon)
+template<typename traitsT>
+void NewtonianStepper<traitsT>::initialize(const system_type& sys)
 {
-    for(auto iter = make_zip(pcon.cbegin(), acceleration_.begin());
-            iter != make_zip(pcon.cend(), acceleration_.end()); ++iter)
+    for(auto iter = make_zip(sys.cbegin(), acceleration_.begin());
+            iter != make_zip(sys.cend(),   acceleration_.end()); ++iter)
     {
         *get<1>(iter) = get<0>(iter)->force / get<0>(iter)->mass;
     }
-
     return;
 }
 
-// at the initial step, acceleration_ must be initialized
-template<typename traitsT, typename boundaryT>
-typename NVENewtonian<traitsT, boundaryT>::time_type
-NVENewtonian<traitsT, boundaryT>::step(const time_type time,
-        ParticleContainer<traitsT>& pcon, ForceField<traitsT>& ff)
+template<typename traitsT>
+typename NewtonianStepper<traitsT>::real_type
+NewtonianStepper<traitsT>::step(
+        const time_type time, system_type& system, forcefield_type& ff)
 {
     // calc r(t+dt)
-    for(auto iter = make_zip(pcon.begin(), acceleration_.cbegin());
-            iter != make_zip(pcon.end(), acceleration_.cend()); ++iter)
+    for(auto iter = make_zip(system.begin(), acceleration_.cbegin());
+            iter != make_zip(system.end(), acceleration_.cend()); ++iter)
     {
-        get<0>(iter)->position = boundary_type::adjust_absolute(
+        get<0>(iter)->position = system.adjust_position(
             get<0>(iter)->position + dt_ * (get<0>(iter)->velocity) +
             halfdt2_ * (*get<1>(iter)));
         get<0>(iter)->velocity += halfdt_ * (*get<1>(iter));
     }
 
     // calc f(t+dt)
-    ff.calc_force(pcon);
+    ff.calc_force(system);
 
     // calc a(t+dt) and v(t+dt)
-    for(auto iter = make_zip(pcon.begin(), acceleration_.begin());
-            iter != make_zip(pcon.end(), acceleration_.end()); ++iter)
+    for(auto iter = make_zip(system.begin(), acceleration_.begin());
+            iter != make_zip(system.end(), acceleration_.end()); ++iter)
     {
         // consider cash 1/m
         const coordinate_type acc = get<0>(iter)->force / (get<0>(iter)->mass);
@@ -88,15 +88,14 @@ NVENewtonian<traitsT, boundaryT>::step(const time_type time,
         get<0>(iter)->force = coordinate_type(0., 0., 0.);
     }
 
-    this->adjust_translation(pcon);
-    this->adjust_rotation(pcon);
+    this->adjust_translation(system);
+    this->adjust_rotation(system);
 
     return time + dt_;
 }
 
-template<typename traitsT, typename boundaryT>
-void NVENewtonian<traitsT, boundaryT>::adjust_translation(
-        ParticleContainer<traitsT>& pcon) const
+template<typename traitsT>
+void NewtonianStepper<traitsT>::adjust_translation(system_type& pcon) const
 {
     coordinate_type translation(0, 0, 0);
     for(auto iter = pcon.begin(); iter != pcon.end(); ++iter)
@@ -109,9 +108,8 @@ void NVENewtonian<traitsT, boundaryT>::adjust_translation(
     return;
 }
 
-template<typename traitsT, typename boundaryT>
-void NVENewtonian<traitsT, boundaryT>::adjust_rotation(
-        ParticleContainer<traitsT>& pcon) const
+template<typename traitsT>
+void NewtonianStepper<traitsT>::adjust_rotation(system_type& pcon) const
 {
     coordinate_type L(0, 0, 0); // total angular momentum
     for(auto iter = pcon.cbegin(); iter != pcon.cend(); ++iter)
