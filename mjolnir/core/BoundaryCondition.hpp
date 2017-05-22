@@ -28,7 +28,7 @@ struct CubicPeriodicBoundary
   public:
     CubicPeriodicBoundary() = default;
     ~CubicPeriodicBoundary() = default;
-    CubicPeriodicBoundary(const coordinate_type& lw, const coordinate_type& up)
+    CubicPeriodicBoundary(const coordinate_type& lw, const coordinate_type& up) noexcept
     : lower(lw), upper(up), system_size(up-lw), system_size_half(0.5*(up-lw))
     {}
 
@@ -54,11 +54,11 @@ struct CubicPeriodicBoundary
         return pos;
     }
 
-    coordinate_type&       lower_bound()       {return lower;}
-    coordinate_type const& lower_bound() const {return lower;}
-    coordinate_type&       upper_bound()       {return upper;}
-    coordinate_type const& upper_bound() const {return upper;}
-    coordinate_type const& range() const {return system_size;}
+    coordinate_type&       lower_bound()       noexcept {return lower;}
+    coordinate_type const& lower_bound() const noexcept {return lower;}
+    coordinate_type&       upper_bound()       noexcept {return upper;}
+    coordinate_type const& upper_bound() const noexcept {return upper;}
+    coordinate_type const& range() const noexcept {return system_size;}
 
   private:
 
