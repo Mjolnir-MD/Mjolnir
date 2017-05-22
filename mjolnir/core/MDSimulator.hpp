@@ -30,14 +30,14 @@ class MDSimulator final : public SimulatorBase
 
     real_type calc_energy() const;
 
-    system_type&       particles()       {return system_;}
-    system_type const& particles() const {return system_;}
+    system_type&       particles()       noexcept {return system_;}
+    system_type const& particles() const noexcept {return system_;}
 
-    ForceField<traitsT>&       forcefields()       {return ff_;}
-    ForceField<traitsT> const& forcefields() const {return ff_;}
+    ForceField<traitsT>&       forcefields()       noexcept {return ff_;}
+    ForceField<traitsT> const& forcefields() const noexcept {return ff_;}
 
-    real_type& time()       {return time_;}
-    real_type  time() const {return time_;}
+    real_type& time()       noexcept {return time_;}
+    real_type  time() const noexcept {return time_;}
 
   protected:
     real_type       time_;
@@ -49,15 +49,15 @@ class MDSimulator final : public SimulatorBase
 template<typename traitsT>
 inline void MDSimulator<traitsT>::initialize()
 {
-    this->integrator_->initialize(this->pcon_);
-    this->ff_.initialize(this->pcon_, integrator_->delta_t());
+    this->integrator_.initialize(this->system_);
+    this->ff_.initialize(this->system_, integrator_->delta_t());
     return;
 }
 
 template<typename traitsT>
 inline void MDSimulator<traitsT>::step()
 {
-    this->time_ = integrator_->step(this->time_, pcon_, ff_);
+    this->time_ = integrator_.step(this->time_, system_, ff_);
     return;
 }
 
@@ -65,7 +65,7 @@ template<typename traitsT>
 inline typename MDSimulator<traitsT>::real_type
 MDSimulator<traitsT>::calc_energy() const
 {
-    return this->ff_.calc_energy(this->pcon_);
+    return this->ff_.calc_energy(this->system_);
 }
 
 
