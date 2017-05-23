@@ -114,7 +114,7 @@ UnderdampedLangevinStepper<traitsT, randomT>::step(
 
     // calc a(t+dt) and v(t+dt), generate noise
     for(auto iter(make_zip(sys.begin(),    gamma_.cbegin(),
-                           noise_.begin(), accel_.begin()));
+                           noise_.begin(), accel_.begin())),
              end_(make_zip(sys.end(),      gamma_.cend(),
                            noise_.end(),   accel_.end()));
             iter != end_; ++iter)
