@@ -11,25 +11,21 @@ class GlobalInteractionBase
   public:
 
     typedef traitsT traits_type;
-    typedef typename traits_type::time_type time_type;
-    typedef typename traits_type::real_type real_type;
+    typedef System<traits_type> system_type;
+    typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
-    typedef ParticleContainer<traits_type> particle_container_type;
+    typedef typename traits_type::boundary_type   boundary_type;
+    typedef typename system_type::particle_type   particle_type;
 
   public:
+
     virtual ~GlobalInteractionBase() = default;
 
-    virtual void
-    calc_force(particle_container_type& pcon) = 0;
+    virtual void initialize(const system_type& sys, const real_type dt) = 0;
 
-    virtual real_type
-    calc_energy(const particle_container_type& pcon) const = 0;
+    virtual void      calc_force (system_type&)       const = 0;
+    virtual real_type calc_energy(const system_type&) const = 0;
 
-    virtual void initialize(
-            const particle_container_type& pcon, const time_type dt) = 0;
-
-    virtual void reset_parameter(
-            const std::string& name, const real_type value) = 0;
 };
 
 } // mjolnir
