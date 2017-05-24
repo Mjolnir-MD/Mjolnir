@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_GLOBAL_INTEARACTION_BASE
 #define MJOLNIR_GLOBAL_INTEARACTION_BASE
-#include "ParticleContainer.hpp"
+#include "System.hpp"
 
 namespace mjolnir
 {
