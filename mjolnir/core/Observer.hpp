@@ -12,7 +12,9 @@ class Observer
 {
   public:
     typedef traitsT traits_type;
+    typedef System<traits_type> system_type;
     typedef typename traits_type::real_type real_type;
+    typedef typename traits_type::coordinate_type coordinate_type;
 
   public:
     Observer() = default;
@@ -34,10 +36,18 @@ class Observer
     }
     ~Observer() = default;
 
-    void output_coordinate(const Simulator<traitsT>& sim) const;
-    void output_energy(const Simulator<traitsT>& sim) const;
+    void output_coordinate(const system_type& sys) const;
+    void output_energy    (const real_type Ep, const system_type& sys) const;
 
-    real_type calc_kinetic_energy(const ParticleContainer<traitsT>& pcon) const;
+  private:
+
+    real_type calc_kinetic_energy(const system_type& sys) const
+    {
+        real_type k = 0.0;
+        for(const auto& particle : sys)
+            k += length_sq(particle.velocity) * particle.mass;
+        return k * 0.5;
+    }
 
   private:
 
@@ -47,36 +57,33 @@ class Observer
 
 template<typename traitsT>
 inline void
-Observer<traitsT>::output_coordinate(const Simulator<traitsT>& sim) const
+Observer<traitsT>::output_coordinate(const system_type& sys) const
 {
     std::ofstream ofs(xyz_name_, std::ios::app);
-    ofs << sim.particles().size() << std::endl;
-    ofs << "time = " << sim.time() << std::endl;
-    for(auto iter = sim.particles().cbegin(); iter != sim.particles().cend();
-            ++iter)
-    {
-        ofs << "CA    " << std::fixed << std::setprecision(10)
-            << iter->position[0] << " "
-            << iter->position[1] << " "
-            << iter->position[2] << " "
+    ofs << sys.size() << "\n\n";
+    for(auto item : sys)
+    {// TODO change output format
+        ofs << "CA    " << std::fixed << std::setprecision(8)
+            << item.position[0] << " "
+            << item.position[1] << " "
+            << item.position[2] << " "
+            << item.velocity[0] << " "
+            << item.velocity[1] << " "
+            << item.velocity[2] << " "
             << std::endl;
     }
-
     ofs.close();
-
     return ;
 }
 
 template<typename traitsT>
 inline void
-Observer<traitsT>::output_energy(const Simulator<traitsT>& sim) const
+Observer<traitsT>::output_energy(const real_type Ep, const system_type& sys) const
 {
     std::ofstream ofs(ene_name_, std::ios::app);
-    const real_type Ep = sim.calc_energy();
     const real_type Ek = this->calc_kinetic_energy(sim.particles());
 
-    ofs << std::setw(8) << sim.time() << " "
-        << std::setw(12) << Ep << " "
+    ofs << std::setw(12) << Ep << " "
         << std::setw(12) << Ek << " "
         << std::setw(12) << Ep + Ek
         << std::endl;
@@ -84,18 +91,6 @@ Observer<traitsT>::output_energy(const Simulator<traitsT>& sim) const
 
     return ;
 }
-
-template<typename traitsT>
-inline typename Observer<traitsT>::real_type
-Observer<traitsT>::calc_kinetic_energy(const ParticleContainer<traitsT>& pcon) const
-{
-    real_type k = 0.0;
-    for(auto iter = pcon.cbegin(); iter != pcon.cend(); ++iter)
-        k += length_sq(iter->velocity) * iter->mass;
-    return k * 0.5;
-}
-
-
 
 } // mjolnir
 #endif /* MJOLNIR_CORE_OBSERVER */
