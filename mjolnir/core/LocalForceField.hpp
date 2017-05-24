@@ -37,31 +37,24 @@ class LocalForceField
         interactions_.emplace_back(std::move(interaction));
     }
 
-    void      calc_force (system_type& sys);
-    real_type calc_energy(const system_type& sys) const;
+    void calc_force(system_type& sys) const
+    {
+        for(const auto& item : this->interactions_)
+            item->calc_force(sys);
+        return;
+    }
+    real_type calc_energy(const system_type& sys) const
+    {
+        real_type energy = 0.0;
+        for(const auto& item : this->interactions_)
+            energy += item->calc_energy(sys);
+        return energy;
+    }
 
   private:
 
     container_type interactions_;
 };
-
-template<typename traitsT>
-inline void LocalForceField<traitsT>::calc_force(system_type& sys)
-{
-    for(const auto& item : this->interactions_)
-        item->calc_force(sys);
-    return;
-}
-
-template<typename traitsT>
-inline typename LocalForceField<traitsT>::real_type
-LocalForceField<traitsT>::calc_energy(const system_type& pcon) const
-{
-    real_type energy = 0.0;
-    for(const auto& item : this->interactions_)
-        energy += item->calc_energy(sys);
-    return energy;
-}
 
 } // mjolnir
 #endif /* MJOLNIR_LOCAL_FORCE_FIELD */

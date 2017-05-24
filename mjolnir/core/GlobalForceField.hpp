@@ -41,8 +41,19 @@ class GlobalForceField
             item->initialize(sys, dt);
     }
 
-    void      calc_force (system_type&)       const;
-    real_type calc_energy(const system_type&) const;
+    void calc_force(system_type& sys) const
+    {
+        for(const auto& item : this->interactions_)
+            item->calc_force(sys);
+        return;
+    }
+    real_type calc_energy(const system_type& sys) const
+    {
+        real_type energy = 0.;
+        for(const auto& item : this->interactions_)
+            energy += item->calc_energy(pcon);
+        return energy;
+    }
 
   private:
 
@@ -55,24 +66,6 @@ class GlobalForceField
 template<typename traitsT>
 Logger& GlobalForceField<traitsT>::logger_ =
     LoggerManager<char>::get_logger("GlobalForceField");
-
-template<typename traitsT>
-inline void GlobalForceField<traitsT>::calc_force(system_type& sys) const
-{
-    for(const auto& item : this->interactions_)
-        item->calc_force(sys);
-    return;
-}
-
-template<typename traitsT>
-inline typename GlobalForceField<traitsT>::real_type
-GlobalForceField<traitsT>::calc_energy(const system_type& pcon) const
-{
-    real_type energy = 0.;
-    for(const auto& item : this->interactions_)
-        energy += item->calc_energy(pcon);
-    return energy;
-}
 
 } // mjolnir
 #endif /* MJOLNIR_GLOBAL_FORCE_FIELD */
