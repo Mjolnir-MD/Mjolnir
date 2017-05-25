@@ -28,7 +28,7 @@ class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
     ~GlobalDistanceInteraction() = default;
 
     GlobalDistanceInteraction(potential_type&& pot, partition_type&& part)
-        : potential_(std::move(pot)), spatial_partition_(std::move(part))
+        : potential_(std::move(pot)), partition_(std::move(part))
     {}
 
     void initialize(const system_type& sys, const real_type dt) override
@@ -42,17 +42,17 @@ class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
   private:
 
     potential_type potential_;
-    partition_type spatial_partition_;
+    partition_type partition_;
 };
 
 template<typename traitsT, typename potT, typename spaceT>
 void GlobalDistanceInteraction<traitsT, potT, spaceT>::calc_force(
         system_type& sys) const
 {
-    spatial_partition_.update(pcon);
+    partition_.update(sys);
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        for(auto j : this->spatial_partition_.partners(i))
+        for(auto j : this->partition_.partners(i))
         {
             const coordinate_type rij =
                 sys.adjust_direction(sys[j].position - sys[i].position);
@@ -73,7 +73,7 @@ GlobalDistanceInteraction<traitsT, potT, spaceT>::calc_energy(
     real_type e = 0.0;
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        for(auto j : this->spatial_partition_.partners(i))
+        for(auto j : this->partition_.partners(i))
         {
             const real_type l = length(
                 sys.adjust_direction(sys[j].position - sys[i].position));
