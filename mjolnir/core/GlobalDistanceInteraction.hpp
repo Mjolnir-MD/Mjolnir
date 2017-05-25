@@ -1,8 +1,6 @@
 #ifndef MJOLNIR_GLOBAL_DISTANCE_INTEARACTION
 #define MJOLNIR_GLOBAL_DISTANCE_INTEARACTION
 #include "GlobalInteractionBase.hpp"
-#include "SpatialPartition.hpp"
-#include "BoundaryCondition.hpp"
 #include <memory>
 
 namespace mjolnir

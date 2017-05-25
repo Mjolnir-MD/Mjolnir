@@ -1,9 +1,8 @@
 #ifndef MJOLNIR_CORE_VERLET_LIST
 #define MJOLNIR_CORE_VERLET_LIST
-#include <vector>
-#include <unordered_map>
-#include "SpatialPartition.hpp"
-#include "BoundaryCondition.hpp"
+#include "System.hpp"
+#include <algorithm>
+#include <limits>
 
 namespace mjolnir
 {
