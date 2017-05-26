@@ -76,9 +76,8 @@ class VerletList
     particle_info_type informations_;
 };
 
-template<typename traitsT, typename boundaryT>
-Logger& VerletList<traitsT, boundaryT>::logger_ =
-        LoggerManager<char>::get_logger("VerletList");
+template<typename traitsT>
+Logger& VerletList<traitsT>::logger_ = LoggerManager<char>::get_logger("VerletList");
 
 template<typename traitsT>
 std::size_t& VerletList<traitsT>::chain_index(std::size_t i)
@@ -116,9 +115,10 @@ void VerletList<traitsT>::make(const system_type& sys)
 
     const real_type rc = (cutoff_ + mergin_);
     const real_type rc2 = rc * rc;
-    for(std::size_t i=0; i<sys.size()-1; ++i)
+    for(std::size_t i=0; i<sys.size(); ++i)
     {
         const coordinate_type& ri = sys[i].position;
+        const auto& info       = informations_.at(i);
         const auto index_begin = info.except_indices.cbegin();
         const auto index_end   = info.except_indices.cend();
         const auto chain_begin = info.except_chains.cbegin();
@@ -126,9 +126,10 @@ void VerletList<traitsT>::make(const system_type& sys)
 
         for(std::size_t j=i+1; j<sys.size(); ++j)
         {
+            if(std::find(index_begin, index_end, j)       != index_end) continue;
+
             const std::size_t j_chain = informations_.at(j).chain_idx;
             if(std::find(chain_begin, chain_end, j_chain) != chain_end) continue;
-            if(std::find(index_begin, index_end, j)       != index_end) continue;
 
             if(length_sq(sys.adjust_direction(sys[j].position - ri)) < rc2)
                 this->partners_[i].push_back(j);
