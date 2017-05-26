@@ -35,7 +35,7 @@ class NaivePairCalculation
     NaivePairCalculation(NaivePairCalculation&&)            = default;
     NaivePairCalculation& operator=(NaivePairCalculation&&) = default;
 
-    bool valid() const noexcept override {return true;}
+    bool valid() const noexcept {return true;}
 
     std::size_t& chain_index   (std::size_t i);
     index_array& except_indices(std::size_t i);
