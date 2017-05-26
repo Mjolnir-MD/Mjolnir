@@ -12,35 +12,40 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename boundaryT = UnlimitedBoundary<traitsT>>
+template<typename traitsT, std::size_t dimI = 16>
 class UnlimitedGridCellList : public SpatialPartition<traitsT>
 {
   public:
 
-    typedef boundaryT boundary_type;
-    typedef SpatialPartition<traitsT> base_type;
-    typedef typename base_type::time_type time_type;
-    typedef typename base_type::real_type real_type;
-    typedef typename base_type::coordinate_type coordinate_type;
-    typedef typename base_type::coordinate_type position_type;
-    typedef typename base_type::particle_container_type particle_container_type;
-    typedef typename base_type::index_type index_type;
-    typedef typename base_type::index_list index_list;
-    constexpr static std::size_t dim_size   = 16;
+    typedef traitsT traits_type;
+    typedef System<traits_type> system_type;
+    typedef typename triats_type::real_type real_type;
+    typedef typename triats_type::coordinate_type coordinate_type;
+    typedef std::vector<std::size_t> index_array;
+    typedef std::vector<index_array> partners_type;
+
+    constexpr static std::size_t dim_size   = dimI;
     constexpr static int         dim        = dim_size;
     constexpr static std::size_t total_size = dim_size * dim_size * dim_size;
     constexpr static real_type mesh_epsilon = 1e-6;
-    typedef std::array<int, 3>               cell_index_type;
-    typedef std::array<std::size_t, 26>      neighbor_cell_idx;
-    typedef std::pair<index_list, neighbor_cell_idx> unit_cell_type;
-    typedef std::vector<index_list>          verlet_list_type;
-    typedef std::vector<index_list>          except_list_type;
-    typedef std::array<unit_cell_type, total_size> cell_list_type;
+    typedef std::array<int, 3>                        cell_index_type;
+    typedef std::array<std::size_t, 26>               neighbor_cell_idx;
+    typedef std::pair<index_array, neighbor_cell_idx> unit_cell_type;
+    typedef std::array<unit_cell_type, total_size>    cell_list_type;
+
+    struct information
+    {
+        information() : chain_idx(std::numeric_limits<std::size_t>::max()){}
+        std::size_t chain_idx;
+        index_array except_chains;
+        index_array except_indices;
+    };
+    typedef std::vector<information> particle_info_type;
 
   public:
 
     UnlimitedGridCellList() = default;
-    ~UnlimitedGridCellList() override = default;
+    ~UnlimitedGridCellList() = default;
 
     UnlimitedGridCellList(const real_type cutoff, const real_type mergin)
         : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
@@ -49,23 +54,22 @@ class UnlimitedGridCellList : public SpatialPartition<traitsT>
         initialize();
     }
     UnlimitedGridCellList(const real_type cutoff, const real_type mergin,
-                          const time_type dt)
+                          const real_type dt)
         : dt_(dt), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
           inv_cell_size_(1. / (cutoff + mergin + mesh_epsilon))
     {
         initialize();
     }
 
-    bool valid() const noexcept override
+    bool valid() const noexcept
     {
         return current_mergin_ >= 0. || dt_ == 0.;
     }
 
     void initialize();
-    void make  (const particle_container_type& pcon) override;
-    void update(const particle_container_type& pcon) override;
-    void update(const particle_container_type& pcon,
-                const time_type dt) override;
+    void make  (const system_type& sys);
+    void update(const system_type& sys);
+    void update(const system_type& sys, const real_type dt) override;
 
     real_type cutoff() const {return this->cutoff_;}
     real_type mergin() const {return this->mergin_;}
@@ -76,7 +80,7 @@ class UnlimitedGridCellList : public SpatialPartition<traitsT>
   private:
 
 
-    std::size_t index(const position_type& pos)   const;
+    std::size_t index(const coordinate_type& pos) const;
     std::size_t index(const cell_index_type& pos) const;
     cell_index_type add(const int x, const int y, const int z,
                         const cell_index_type&) const;
@@ -89,53 +93,50 @@ class UnlimitedGridCellList : public SpatialPartition<traitsT>
     real_type current_mergin_;
     real_type inv_cell_size_;
 
-    cell_list_type cell_list_;
+    partners_type      partners_;
+    particle_info_type informations_;
+    cell_list_type     cell_list_;
 
     static Logger& logger_;
 };
 
-template<typename traitsT, typename boundaryT>
-Logger& UnlimitedGridCellList<traitsT, boundaryT>::logger_ =
+template<typename traitsT, std::size_t N>
+Logger& UnlimitedGridCellList<traitsT, N>::logger_ =
         LoggerManager<char>::get_logger("UnlimitedGridCellList");
 
-template<typename traitsT, typename boundaryT>
-inline void
-UnlimitedGridCellList<traitsT, boundaryT>::set_cutoff(const real_type c)
+template<typename traitsT, std::size_t N>
+inline void UnlimitedGridCellList<traitsT, N>::set_cutoff(const real_type c)
 {
     this->cutoff_ = c;
     this->inv_cell_size_ = 1. / (cutoff_ + mergin_ + mesh_epsilon);
     return;
 }
 
-template<typename traitsT, typename boundaryT>
-inline void
-UnlimitedGridCellList<traitsT, boundaryT>::set_mergin(const real_type m)
+template<typename traitsT, std::size_t N>
+inline void UnlimitedGridCellList<traitsT, N>::set_mergin(const real_type m)
 {
     this->mergin_ = m;
     this->inv_cell_size_ = 1. / (cutoff_ + mergin_ + mesh_epsilon);
     return;
 }
 
-template<typename traitsT, typename boundaryT>
-void UnlimitedGridCellList<traitsT, boundaryT>::make(
-        const particle_container_type& pcon)
+template<typename traitsT, std::size_t N>
+void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
 {
     MJOLNIR_LOG_DEBUG("UnlimitedGridCellList<traitsT>::make CALLED");
 
-    for(auto iter = this->list_.begin(); iter != this->list_.end(); ++iter)
-        iter->clear();
-    this->list_.resize(pcon.size());
-
-    for(auto iter = cell_list_.begin(); iter != cell_list_.end(); ++iter)
-        iter->first.clear(); // DON'T clear iter->second
-
+    this->partners_.resize(sys.size());
+    for(auto& partner : this->partners_) partner.clear();
+    for(auto& cell : this->cell_list_) cell.first.clear();
     MJOLNIR_LOG_DEBUG("cell_list and verlet_list are cleared");
 
+    if(informations_.size() < sys.size()) informations_.resize(sys.size());
+
     std::size_t idx = 0;
-    for(auto iter = pcon.cbegin(); iter != pcon.cend(); ++iter)
+    for(const auto& particle : sys)
     {
-        MJOLNIR_LOG_DEBUG("set", idx, "-th particle at", index(iter->position));
-        cell_list_[index(iter->position)].first.push_back(idx);
+        MJOLNIR_LOG_DEBUG("set", idx, "-th particle at", index(particle.position));
+        cell_list_[index(particle.position)].first.push_back(idx);
         ++idx;
     }
     MJOLNIR_LOG_DEBUG("cell list is updated");
@@ -143,72 +144,67 @@ void UnlimitedGridCellList<traitsT, boundaryT>::make(
     const real_type r_c = cutoff_ + mergin_;
     const real_type r_c2 = r_c * r_c;
 
-    MJOLNIR_LOG_DEBUG("except list size", this->except_.size());
-
-    MJOLNIR_LOG_DEBUG("exception list is not empty.");
     MJOLNIR_LOG_DEBUG("lookup particles and also except list.");
-    for(std::size_t i=0; i<pcon.size(); ++i)
+    for(std::size_t i=0; i<sys.size(); ++i)
     {
-        const coordinate_type ri   = pcon[i].position;
+        const coordinate_type ri   = sys[i].position;
         const unit_cell_type& cell = cell_list_.at(index(ri));
 
-        MJOLNIR_LOG_DEBUG("particle position", pcon[i].position);
+        MJOLNIR_LOG_DEBUG("particle position", sys[i].position);
         MJOLNIR_LOG_DEBUG("cell index", index(ri));
         MJOLNIR_LOG_DEBUG("making verlet list for index", i);
-        MJOLNIR_LOG_DEBUG("except list for ", i, "-th value has",
-                          this->except_.at(i).size(), "particles");
 
-        const auto cbeg = this->except_.at(i).cbegin();
-        const auto cend = this->except_.at(i).cend();
+        const auto& info       = informations_[i];
+        const auto index_begin = info.except_indices.cbegin();
+        const auto index_end   = info.except_indices.cend();
+        const auto chain_begin = info.except_chains.cbegin();
+        const auto chain_end   = info.except_chains.cend();
 
-        for(std::size_t j=0; j < cell.first.size(); ++j)
+        // same cells
+        for(std::size_t j : cell.first)
         {
-            MJOLNIR_LOG_DEBUG("looking", j, "-th particle in the cell.",
-                              "its index is", cell.first.at(j));
-
-            const std::size_t k = cell.first.at(j);
-            if(k <= i || std::find(cbeg, cend, k) != cend)
+            if(j <= i || std::find(index_begin, index_end, j) != index_end)
                 continue;
 
-            if(length_sq(boundary_type::adjust_direction(
-                            pcon.at(k).position - ri)) < r_c2)
+            MJOLNIR_LOG_DEBUG("looking particle", j);
+
+            const std::size_t j_chain = informations_.at(j).chain_idx;
+            if(std::find(chain_begin, chain_end, j_chain) != chain_end)
+                continue;
+
+            if(length_sq(sys.adjust_direction(sys.at(j).position - ri)) < r_c2)
             {
-                MJOLNIR_LOG_DEBUG("add index", k, "to verlet list", i);
-                this->list_.at(i).push_back(k);
+                MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
+                this->partners_[i].push_back(j);
             }
         }
-        MJOLNIR_LOG_DEBUG("end looking in the same cell");
 
-        // see neighbor cells
-        for(auto iter = cell.second.cbegin(); iter != cell.second.cend(); ++iter)
+        // neighbor cells
+        for(std::size_t cidx : cell.second)
         {
-            MJOLNIR_LOG_DEBUG("see neighboring cell at", std::distance(
-                              cell.second.cbegin(), iter));
-            MJOLNIR_LOG_DEBUG("neighboring cell index", *iter);
+            MJOLNIR_LOG_DEBUG("neighboring cell index", cidx);
 
-            const unit_cell_type& neighbor = cell_list_[*iter];
-            for(std::size_t j=0; j < neighbor.first.size(); ++j)
+            for(std::size_t j : cell_list_[cidx].first)
             {
-                MJOLNIR_LOG_DEBUG("looking", j, "-th particle in the cell.",
-                                  "its index is", neighbor.first.at(j));
-                const std::size_t k = neighbor.first.at(j);
-                if(k <= i || std::find(cbeg, cend, k) != cend)
+                MJOLNIR_LOG_DEBUG("looking particle", j);
+                if(j <= i || std::find(index_begin, index_end, j) != index_end)
                     continue;
 
-                if(length_sq(boundary_type::adjust_direction(
-                                pcon.at(k).position - ri)) < r_c2)
+                const std::size_t j_chain = informations_.at(j).chain_idx;
+                if(std::find(chain_begin, chain_end, j_chain) != chain_end)
+                    continue;
+
+                if(length_sq(sys.adjust_direction(sys.at(j).position - ri)) < r_c2)
                 {
-                    MJOLNIR_LOG_DEBUG("add index", k, "to verlet list", i);
-                    this->list_.at(i).push_back(k);
+                    MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
+                    this->partners_[i].push_back(j);
                 }
             }
         }
     }
 
-    for(auto iter = this->list_.begin(); iter != this->list_.end(); ++iter)
-    {
-        std::sort(iter->begin(), iter->end());
-    }
+    for(auto partner : this->partners_)
+        std::sort(partner.begin(), partner.end());
 
     this->current_mergin_ = mergin_;
 
@@ -216,13 +212,12 @@ void UnlimitedGridCellList<traitsT, boundaryT>::make(
     return ;
 }
 
-template<typename traitsT, typename boundaryT>
-void UnlimitedGridCellList<traitsT, boundaryT>::update(
-        const particle_container_type& pcon)
+template<typename traitsT, std::size_t N>
+void UnlimitedGridCellList<traitsT, N>::update(const system_type& sys)
 {
     real_type max_speed = 0.;
-    for(auto iter = pcon.cbegin(); iter != pcon.cend(); ++iter)
-        max_speed = std::max(max_speed, length_sq(iter->velocity));
+    for(const auto& particle : sys)//TODO cache max_speed in system
+        max_speed = std::max(max_speed, length_sq(particle.velocity));
 
     this->current_mergin_ -= std::sqrt(max_speed) * dt_ * 2.;
     if(this->current_mergin_ < 0.)
@@ -231,18 +226,18 @@ void UnlimitedGridCellList<traitsT, boundaryT>::update(
     return ;
 }
 
-template<typename traitsT, typename boundaryT>
-inline void UnlimitedGridCellList<traitsT, boundaryT>::update(
-        const particle_container_type& pcon, const time_type dt)
+template<typename traitsT, std::size_t N>
+inline void UnlimitedGridCellList<traitsT, N>::update(
+        const system_type& sys, const real_type dt)
 {
     this->dt_ = dt;
-    this->update(pcon);
+    this->update(sys);
     return ;
 }
 
-template<typename traitsT, typename boundaryT>
+template<typename traitsT, std::size_t N>
 inline std::size_t
-UnlimitedGridCellList<traitsT, boundaryT>::index(const position_type& pos) const
+UnlimitedGridCellList<traitsT, N>::index(const coordinate_type& pos) const
 {
     const int x = static_cast<int>(std::floor(pos[0]*inv_cell_size_)) % dim;
     const int y = static_cast<int>(std::floor(pos[1]*inv_cell_size_)) % dim;
@@ -252,18 +247,18 @@ UnlimitedGridCellList<traitsT, boundaryT>::index(const position_type& pos) const
                                   (z < 0) ? z + dim : z}});
 }
 
-template<typename traitsT, typename boundaryT>
+template<typename traitsT, std::size_t N>
 inline std::size_t
-UnlimitedGridCellList<traitsT, boundaryT>::index(const cell_index_type& idx) const
+UnlimitedGridCellList<traitsT, N>::index(const cell_index_type& idx) const
 {
     return idx[0] + dim_size * idx[1] + dim_size * dim_size * idx[2];
 }
 
 
-template<typename traitsT, typename boundaryT>
-inline typename UnlimitedGridCellList<traitsT, boundaryT>::cell_index_type
-UnlimitedGridCellList<traitsT, boundaryT>::add(
-        const int x, const int y, const int z, const cell_index_type& idx) const
+template<typename traitsT, std::size_t N>
+inline typename UnlimitedGridCellList<traitsT, N>::cell_index_type
+UnlimitedGridCellList<traitsT, N>::add(const int x, const int y, const int z,
+        const cell_index_type& idx) const
 {
     int ret_x = (idx[0] + x);
     int ret_y = (idx[1] + y);
@@ -274,14 +269,14 @@ UnlimitedGridCellList<traitsT, boundaryT>::add(
     return cell_index_type{{ret_x, ret_y, ret_z}};
 }
 
-template<typename traitsT, typename boundaryT>
-void UnlimitedGridCellList<traitsT, boundaryT>::initialize()
+template<typename traitsT, std::size_t N>
+void UnlimitedGridCellList<traitsT, N>::initialize()
 {
     MJOLNIR_LOG_DEBUG("UnlimitedGridCellList<traitsT>::initialize CALLED");
-    for(auto iter = cell_list_.begin(); iter != cell_list_.end(); ++iter)
+
+    for(auto& cell : this->cell_list)
     {
-        MJOLNIR_LOG_DEBUG("filled by null", std::distance(cell_list_.begin(), iter));
-        iter->first = index_list{};
+        iter->first.reserve(20);
         iter->second.fill(std::numeric_limits<std::size_t>::max());
     }
 
