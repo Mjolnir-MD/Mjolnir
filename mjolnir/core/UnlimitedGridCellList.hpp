@@ -50,26 +50,22 @@ class UnlimitedGridCellList : public SpatialPartition<traitsT>
     UnlimitedGridCellList(const real_type cutoff, const real_type mergin)
         : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
           inv_cell_size_(1. / (cutoff + mergin + mesh_epsilon))
-    {
-        initialize();
-    }
+    {}
     UnlimitedGridCellList(const real_type cutoff, const real_type mergin,
                           const real_type dt)
         : dt_(dt), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
           inv_cell_size_(1. / (cutoff + mergin + mesh_epsilon))
-    {
-        initialize();
-    }
+    {}
 
     bool valid() const noexcept
     {
         return current_mergin_ >= 0. || dt_ == 0.;
     }
 
-    void initialize();
+    void initialize(const system_type& sys);
     void make  (const system_type& sys);
     void update(const system_type& sys);
-    void update(const system_type& sys, const real_type dt) override;
+    void update(const system_type& sys, const real_type dt);
 
     real_type cutoff() const {return this->cutoff_;}
     real_type mergin() const {return this->mergin_;}
@@ -92,12 +88,11 @@ class UnlimitedGridCellList : public SpatialPartition<traitsT>
     real_type mergin_;
     real_type current_mergin_;
     real_type inv_cell_size_;
+    static Logger& logger_;
 
     partners_type      partners_;
     particle_info_type informations_;
     cell_list_type     cell_list_;
-
-    static Logger& logger_;
 };
 
 template<typename traitsT, std::size_t N>
@@ -144,7 +139,6 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
     const real_type r_c = cutoff_ + mergin_;
     const real_type r_c2 = r_c * r_c;
 
-    MJOLNIR_LOG_DEBUG("lookup particles and also except list.");
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         const coordinate_type ri   = sys[i].position;
@@ -165,8 +159,6 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
         {
             if(j <= i || std::find(index_begin, index_end, j) != index_end)
                 continue;
-
-            MJOLNIR_LOG_DEBUG("looking particle", j);
 
             const std::size_t j_chain = informations_.at(j).chain_idx;
             if(std::find(chain_begin, chain_end, j_chain) != chain_end)
@@ -270,7 +262,7 @@ UnlimitedGridCellList<traitsT, N>::add(const int x, const int y, const int z,
 }
 
 template<typename traitsT, std::size_t N>
-void UnlimitedGridCellList<traitsT, N>::initialize()
+void UnlimitedGridCellList<traitsT, N>::initialize(const system_size& sys)
 {
     MJOLNIR_LOG_DEBUG("UnlimitedGridCellList<traitsT>::initialize CALLED");
 

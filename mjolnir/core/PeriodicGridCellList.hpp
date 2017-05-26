@@ -1,7 +1,5 @@
 #ifndef MJOLNIR_PERIODIC_GRID_CELL_LIST
 #define MJOLNIR_PERIODIC_GRID_CELL_LIST
-#include "BoundaryCondition.hpp"
-#include "SpatialPartition.hpp"
 #include <mjolnir/util/logger.hpp>
 #include <vector>
 #include <cmath>
@@ -10,59 +8,61 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename boundaryT = PeriodicBoundaryXYZ<traitsT>>
-class PeriodicGridCellList : public SpatialPartition<traitsT>
+// XXX: almost same as UnlimitedGridCellList.
+// the difference between UnlimitedGridCellList is only the number of cells.
+// PeriodicGridCellList can optimize the number of cells using boundary size.
+template<typename traitsT>
+class PeriodicGridCellList
 {
   public:
 
-    typedef boundaryT boundary_type;
-    typedef SpatialPartition<traitsT> base_type;
-    typedef typename base_type::time_type time_type;
-    typedef typename base_type::real_type real_type;
-    typedef typename base_type::coordinate_type coordinate_type;
-    typedef typename base_type::coordinate_type position_type;
-    typedef typename base_type::particle_container_type particle_container_type;
-    typedef typename base_type::index_type index_type;
-    typedef typename base_type::index_list index_list;
+    typedef traitsT traits_type;
+    typedef System<traits_type> system_type;
+    typedef typename triats_type::real_type real_type;
+    typedef typename triats_type::coordinate_type coordinate_type;
+    typedef std::vector<std::size_t> index_array;
+    typedef std::vector<index_array> partners_type;
+
+    constexpr static real_type mesh_epsilon = 1e-6;
     typedef std::array<int, 3>          cell_index_type;
     typedef std::array<std::size_t, 26> neighbor_cell_idx;
     typedef std::pair<index_list, neighbor_cell_idx> unit_cell_type;
-    typedef std::vector<index_list> verlet_list_type;
-    typedef std::vector<index_list> except_list_type;
     typedef std::vector<unit_cell_type> cell_list_type;
 
-  private:
-    constexpr static real_type mesh_epsilon = 1e-6;
+    struct information
+    {
+        information() : chain_idx(std::numeric_limits<std::size_t>::max()){}
+        std::size_t chain_idx;
+        index_array except_chains;
+        index_array except_indices;
+    };
+    typedef std::vector<information> particle_info_type;
 
   public:
 
     PeriodicGridCellList() = default;
-    ~PeriodicGridCellList() override = default;
+    ~PeriodicGridCellList() = default;
 
     PeriodicGridCellList(const real_type cutoff, const real_type mergin)
         : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
           inv_cell_size_(1. / (cutoff + mergin + mesh_epsilon))
-    {
-        initialize();
-    }
+    {}
+
     PeriodicGridCellList(const real_type cutoff, const real_type mergin,
-                         const time_type dt)
+                         const real_type dt)
         : dt_(dt), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
           inv_cell_size_(1. / (cutoff + mergin + mesh_epsilon))
-    {
-        initialize();
-    }
+    {}
 
-    bool valid() const noexcept override
+    bool valid() const noexcept
     {
         return current_mergin_ >= 0. || dt_ == 0.;
     }
 
-    void initialize();
-    void make  (const particle_container_type& pcon) override;
-    void update(const particle_container_type& pcon) override;
-    void update(const particle_container_type& pcon,
-                const time_type dt) override;
+    void initialize(const system_size&);
+    void make  (const system_type& sys);
+    void update(const system_type& sys);
+    void update(const system_type& sys, const real_type dt);
 
     real_type cutoff() const {return this->cutoff_;}
     real_type mergin() const {return this->mergin_;}
@@ -79,44 +79,41 @@ class PeriodicGridCellList : public SpatialPartition<traitsT>
 
   private:
 
-    real_type dt_;
-    real_type cutoff_;
-    real_type mergin_;
-    real_type current_mergin_;
-    real_type inv_cell_size_;
+    real_type   dt_;
+    real_type   cutoff_;
+    real_type   mergin_;
+    real_type   current_mergin_;
+    real_type   inv_cell_size_;
     std::size_t dim_x_;
     std::size_t dim_y_;
     std::size_t dim_z_;
-
-    cell_list_type cell_list_;
-
     static Logger& logger_;
+
+    partners_type      partners_;
+    particle_info_type informations_;
+    cell_list_type     cell_list_;
 };
 
-template<typename traitsT, typename boundaryT>
-Logger& PeriodicGridCellList<traitsT, boundaryT>::logger_ =
+template<typename traitsT>
+Logger& PeriodicGridCellList<traitsT>::logger_ =
         LoggerManager<char>::get_logger("PeriodicGridCellList");
 
-template<typename traitsT, typename boundaryT>
-void PeriodicGridCellList<traitsT, boundaryT>::make(
-        const particle_container_type& pcon)
+template<typename traitsT>
+void PeriodicGridCellList<traitsT>::make(const system_type& sys)
 {
     MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::make CALLED");
 
-    for(auto iter = this->list_.begin(); iter != this->list_.end(); ++iter)
-        iter->clear();
-    this->list_.resize(pcon.size());
+    this->partners_.resize(sys.size());
+    for(auto& partner : this->partners_) partner.clear();
+    for(auto& cell : this->cell_list_) cell.first.clear();
 
-    for(auto iter = cell_list_.begin(); iter != cell_list_.end(); ++iter)
-        iter->first.clear(); // DON'T clear iter->second
-
-    MJOLNIR_LOG_DEBUG("cell_list and verlet_list are cleared");
+    if(informations_.size() < sys.size()) informations_.resize(sys.size());
 
     std::size_t idx = 0;
-    for(auto iter = pcon.cbegin(); iter != pcon.cend(); ++iter)
+    for(const auto& particle : sys)
     {
-        cell_list_.at(index(
-            iter->position - boundary_type::lower_bound())).first.push_back(idx);
+        MJOLNIR_LOG_DEBUG("set", idx, "-th particle at", index(particle.position));
+        cell_list_[index(particle.position)].first.push_back(idx);
         ++idx;
     }
     MJOLNIR_LOG_DEBUG("cell list is updated");
@@ -124,70 +121,64 @@ void PeriodicGridCellList<traitsT, boundaryT>::make(
     const real_type r_c  = cutoff_ + mergin_;
     const real_type r_c2 = r_c * r_c;
 
-    MJOLNIR_LOG_DEBUG("except list size", this->except_.size());
-
-    MJOLNIR_LOG_DEBUG("exception list is not empty.");
-    MJOLNIR_LOG_DEBUG("lookup particles and also except list.");
-    for(std::size_t i=0; i<pcon.size(); ++i)
+    for(std::size_t i=0; i<sys.size(); ++i)
     {
-        const coordinate_type ri = pcon[i].position;
-        const auto& cell = cell_list_.at(index(ri - boundary_type::lower_bound()));
+        const coordinate_type ri = sys[i].position;
+        const auto& cell = cell_list_.at(index(ri - sys.boundary().lower_bound()));
 
-        MJOLNIR_LOG_DEBUG("particle position", pcon[i].position);
+        MJOLNIR_LOG_DEBUG("particle position", sys[i].position);
         MJOLNIR_LOG_DEBUG("making verlet list for index", i);
         MJOLNIR_LOG_DEBUG("except list for ", i, "-th value has",
                           this->except_.at(i).size(), "particles");
 
-        const auto cbeg = this->except_.at(i).cbegin();
-        const auto cend = this->except_.at(i).cend();
+        const auto& info       = informations_[i];
+        const auto index_begin = info.except_indices.cbegin();
+        const auto index_end   = info.except_indices.cend();
+        const auto chain_begin = info.except_chains.cbegin();
+        const auto chain_end   = info.except_chains.cend();
 
-        for(std::size_t j=0; j<cell.first.size(); ++j)
+        for(std::size_t j : cell.first)
         {
-            MJOLNIR_LOG_DEBUG("looking", j, "-th particle in the cell.",
-                              "its index is", cell.first.at(j));
-            const std::size_t k = cell.first.at(j);
-            if(k <= i || std::find(cbeg, cend, k) != cend)
+            if(j <= i || std::find(index_begin, index_end, j) != index_end)
                 continue;
 
-            if(length_sq(boundary_type::adjust_direction(
-                            pcon.at(k).position - ri)) < r_c2)
+            const std::size_t j_chain = informations_.at(j).chain_idx;
+            if(std::find(chain_begin, chain_end, j_chain) != chain_end)
+                continue;
+
+            if(length_sq(sys.adjust_direction(sys.at(j).position - ri)) < r_c2)
             {
-                MJOLNIR_LOG_DEBUG("add index", k, "to verlet list");
-                this->list_.at(i).push_back(k);
+                MJOLNIR_LOG_DEBUG("add index", j, "to verlet list");
+                this->partners_[i].push_back(j);
             }
         }
 
-        // see neighbor cells
-
-        for(auto iter = cell.second.cbegin(); iter != cell.second.cend(); ++iter)
+        // neighbor cells
+        for(std::size_t cidx : cell.second)
         {
-            MJOLNIR_LOG_DEBUG("see neighboring cell at", std::distance(
-                              cell.second.cbegin(), iter));
             MJOLNIR_LOG_DEBUG("neighboring cell index", *iter);
 
-            const unit_cell_type& neighbor = cell_list_.at(*iter);
-            for(std::size_t j=0; j < neighbor.first.size(); ++j)
+            for(std::size_t j : cell_list_[cidx].first)
             {
-                MJOLNIR_LOG_DEBUG("looking", j, "-th particle in the cell.",
-                                  "its index is", neighbor.first.at(j));
-                const std::size_t k = neighbor.first.at(j);
-                if(k <= i || std::find(cbeg, cend, k) != cend)
+                MJOLNIR_LOG_DEBUG("looking particle", j);
+                if(j <= i || std::find(index_begin, index_end, j) != index_end)
                     continue;
 
-                if(length_sq(boundary_type::adjust_direction(
-                                pcon.at(k).position - ri)) < r_c2)
+                const std::size_t j_chain = informations_.at(j).chain_idx;
+                if(std::find(chain_begin, chain_end, j_chain) != chain_end)
+                    continue;
+
+                if(length_sq(sys.adjust_direction(sys.at(j).position - ri)) < r_c2)
                 {
-                    MJOLNIR_LOG_DEBUG("add index", k, "to verlet list");
-                    this->list_.at(i).push_back(k);
+                    MJOLNIR_LOG_DEBUG("add index", j, "to verlet list");
+                    this->partners_[i].push_back(j);
                 }
             }
         }
     }
 
-    for(auto iter = this->list_.begin(); iter != this->list_.end(); ++iter)
-    {
-        std::sort(iter->begin(), iter->end());
-    }
+    for(auto partner : this->partners_)
+        std::sort(partner.begin(), partner.end());
 
     this->current_mergin_ = mergin_;
 
@@ -197,51 +188,48 @@ void PeriodicGridCellList<traitsT, boundaryT>::make(
 
 
 
-template<typename traitsT, typename boundaryT>
-inline void
-PeriodicGridCellList<traitsT, boundaryT>::set_cutoff(const real_type c)
+template<typename traitsT>
+inline void PeriodicGridCellList<traitsT>::set_cutoff(const real_type c)
 {
     this->cutoff_ = c;
     this->inv_cell_size_ = 1. / (cutoff_ + mergin_ + mesh_epsilon);
     return;
 }
 
-template<typename traitsT, typename boundaryT>
-inline void
-PeriodicGridCellList<traitsT, boundaryT>::set_mergin(const real_type m)
+template<typename traitsT>
+inline void PeriodicGridCellList<traitsT>::set_mergin(const real_type m)
 {
     this->mergin_ = m;
     this->inv_cell_size_ = 1. / (cutoff_ + mergin_ + mesh_epsilon);
     return;
 }
 
-template<typename traitsT, typename boundaryT>
-void PeriodicGridCellList<traitsT, boundaryT>::update(
-        const particle_container_type& pcon)
+template<typename traitsT>
+void PeriodicGridCellList<traitsT>::update(const system_type& sys)
 {
     real_type max_speed = 0.;
-    for(auto iter = pcon.cbegin(); iter != pcon.cend(); ++iter)
-        max_speed = std::max(max_speed, length_sq(iter->velocity));
+    for(const auto& particle : sys)
+        max_speed = std::max(max_speed, length_sq(particle.velocity));
 
     this->current_mergin_ -= std::sqrt(max_speed) * dt_ * 2.;
     if(this->current_mergin_ < 0.)
-        this->make(pcon);
+        this->make(sys);
 
     return ;
 }
 
-template<typename traitsT, typename boundaryT>
-inline void PeriodicGridCellList<traitsT, boundaryT>::update(
-        const particle_container_type& pcon, const time_type dt)
+template<typename traitsT>
+inline void
+PeriodicGridCellList<traitsT>::update(const system_type& sys, const real_type dt)
 {
     this->dt_ = dt;
-    this->update(pcon);
+    this->update(sys);
     return ;
 }
 
-template<typename traitsT, typename boundaryT>
+template<typename traitsT>
 inline std::size_t
-PeriodicGridCellList<traitsT, boundaryT>::index(const position_type& pos) const
+PeriodicGridCellList<traitsT>::index(const coordinate_type& pos) const
 {
     return index(std::array<int, 3>{{
         static_cast<int>(std::floor(pos[0]*inv_cell_size_)),
@@ -249,17 +237,17 @@ PeriodicGridCellList<traitsT, boundaryT>::index(const position_type& pos) const
         static_cast<int>(std::floor(pos[2]*inv_cell_size_))}});
 }
 
-template<typename traitsT, typename boundaryT>
+template<typename traitsT>
 inline std::size_t
-PeriodicGridCellList<traitsT, boundaryT>::index(cell_index_type idx) const
+PeriodicGridCellList<traitsT>::index(cell_index_type idx) const
 {
     return idx[0] + this->dim_x_ * idx[1] + this->dim_x_ * this->dim_y_ * idx[2];
 }
 
 
-template<typename traitsT, typename boundaryT>
-inline typename PeriodicGridCellList<traitsT, boundaryT>::cell_index_type
-PeriodicGridCellList<traitsT, boundaryT>::add(
+template<typename traitsT>
+inline typename PeriodicGridCellList<traitsT>::cell_index_type
+PeriodicGridCellList<traitsT>::add(
         const int x, const int y, const int z, const cell_index_type& idx) const
 {
     int ret_x = (idx[0] + x);
@@ -268,15 +256,16 @@ PeriodicGridCellList<traitsT, boundaryT>::add(
     if(ret_x < 0) ret_x += dim_x_; else if(ret_x >= dim_x_) ret_x -= dim_x_;
     if(ret_y < 0) ret_y += dim_y_; else if(ret_y >= dim_y_) ret_y -= dim_y_;
     if(ret_z < 0) ret_z += dim_z_; else if(ret_z >= dim_z_) ret_z -= dim_z_;
-    return std::array<int, 3>{{ret_x, ret_y, ret_z}};
+    return cell_index_type{{ret_x, ret_y, ret_z}};
 }
 
-template<typename traitsT, typename boundaryT>
-void PeriodicGridCellList<traitsT, boundaryT>::initialize()
+template<typename traitsT>
+void PeriodicGridCellList<traitsT>::initialize(const system_size& sys)
 {
-    this->dim_x_ = boundary_type::system_size()[0] * inv_cell_size_ + 1;
-    this->dim_y_ = boundary_type::system_size()[1] * inv_cell_size_ + 1;
-    this->dim_z_ = boundary_type::system_size()[2] * inv_cell_size_ + 1;
+    const coordinate_type& system_size = sys.boundary().range();
+    this->dim_x_ = system_size[0] * inv_cell_size_ + 1;
+    this->dim_y_ = system_size[1] * inv_cell_size_ + 1;
+    this->dim_z_ = system_size[2] * inv_cell_size_ + 1;
     this->cell_list_.resize(dim_x_ * dim_y_ * dim_z_);
 
     for(int x = 0; x < dim_x_; ++x)
