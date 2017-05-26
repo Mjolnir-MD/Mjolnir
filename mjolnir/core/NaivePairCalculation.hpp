@@ -37,10 +37,12 @@ class NaivePairCalculation
 
     bool valid() const noexcept {return true;}
 
+
     std::size_t& chain_index   (std::size_t i);
     index_array& except_indices(std::size_t i);
     index_array& except_chains (std::size_t i);
 
+    void initialize(const system_type& sys) const noexcept {return;}
     void make  (const system_type& sys);
     void update(const system_type& sys) noexcept {return;}
     void update(const system_type& sys, const real_type dt) noexcept {return;}

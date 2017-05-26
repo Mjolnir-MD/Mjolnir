@@ -48,6 +48,7 @@ class VerletList
         return current_mergin_ >= 0. || dt_ == 0.;
     }
 
+    void initialize(const system_type&) const noexcept {return;}
     void make  (const system_type& sys);
     void update(const system_type& sys);
     void update(const system_type& sys, const real_type dt);
