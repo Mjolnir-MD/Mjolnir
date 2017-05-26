@@ -50,6 +50,8 @@ class System
     const_iterator cbegin() const noexcept {return particles_.cbegin();}
     const_iterator cend()   const noexcept {return particles_.cend();}
 
+    boundary_type const& boundary() const noexcept {return boundary_;}
+
   private:
 
     real_type      temperature_;
