@@ -18,8 +18,9 @@ class Observer
 
   public:
     Observer() = default;
-    Observer(const std::string& xyz, const std::string& ene)
-        : xyz_name_(xyz), ene_name_(ene)
+    Observer(const std::string& xyz, const std::string& ene,
+             const real_type interval)
+        : interval_(interval), observe_time_(interval), xyz_name_(xyz), ene_name_(ene)
     {
         {
             std::ofstream ofs(xyz);
@@ -36,8 +37,18 @@ class Observer
     }
     ~Observer() = default;
 
-    void output_coordinate(const system_type& sys) const;
-    void output_energy    (const real_type Ep, const system_type& sys) const;
+    bool is_output_time(const real_type time)
+    {
+        if(this->observe_time_ <= time)
+        {
+            this->observe_time_ += interval_;
+            return true;
+        }
+        return false;
+    }
+
+    void output(const system_type& sys) const;
+    void output_energy(const real_type Ep, const system_type& sys) const;
 
   private:
 
@@ -51,26 +62,23 @@ class Observer
 
   private:
 
+    real_type   interval_;
+    real_type   observe_time_;
     std::string xyz_name_;
     std::string ene_name_;
 };
 
 template<typename traitsT>
-inline void
-Observer<traitsT>::output_coordinate(const system_type& sys) const
+inline void Observer<traitsT>::output(const system_type& sys) const
 {
     std::ofstream ofs(xyz_name_, std::ios::app);
     ofs << sys.size() << "\n\n";
-    for(auto item : sys)
+    for(auto particle : sys)
     {// TODO change output format
         ofs << "CA    " << std::fixed << std::setprecision(8)
             << item.position[0] << " "
             << item.position[1] << " "
-            << item.position[2] << " "
-            << item.velocity[0] << " "
-            << item.velocity[1] << " "
-            << item.velocity[2] << " "
-            << std::endl;
+            << item.position[2] << std::endl;
     }
     ofs.close();
     return ;
