@@ -2,7 +2,6 @@
 #define MJOLNIR_UNDERDAMPED_LANGEVIN_INTEGRATOR
 #include "constants.hpp"
 #include "RandomNumberGenerator.hpp"
-#include <mjolnir/util/observer_ptr.hpp>
 #include <mjolnir/util/zip_iterator.hpp>
 #include <mjolnir/util/make_zip.hpp>
 
@@ -16,16 +15,16 @@ class UnderdampedLangevinStepper
     typedef traitsT traits_type;
     typedef System<traits_type>     system_type;
     typedef ForceField<traits_type> forcefield_type;
-    typedef observer_ptr<RandomNumberGenerator<traits_type>> rng_type;
+    typedef RandomNumberGenerator<traits_type>    rng_type;
     typedef typename traits_type::boundary_type   boundary_type;
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
   public:
 
-    UnderdampedLangevinStepper(const time_type dt,
-        std::vector<real_type>&& gamma, RandomNumberGenerator<traitsT>& rng)
-        : dt_(dt), halfdt_(dt * 0.5), halfdt2_(dt * dt * 0.5), rng_(&rng),
+    UnderdampedLangevinStepper(const real_type dt,
+            std::vector<real_type>&& gamma, rng_type&& rng)
+        : dt_(dt), halfdt_(dt * 0.5), halfdt2_(dt * dt * 0.5), rng_(std::move(rng)),
           gamma_(std::move(gamma)), noise_(gamma_.size()), accel_(gamma_.size())
     {}
     ~UnderdampedLangevinStepper() = default;
@@ -39,14 +38,17 @@ class UnderdampedLangevinStepper
         dt_ = dt; halfdt_ = dt * 0.5; halfdt2_ = dt*dt*0.5;
     }
 
+    rng_type&       random_number_generator()       noexcept {return rng_;}
+    rng_type const& random_number_generator() const noexcept {return rng_;}
+
   private:
 
     coordinate_type gen_random_accel(const real_type m, const real_type g)
     {
         const real_type coef = this->noise_coef_ * std::sqrt(g / m);
-        return coordinate_type(this->rng_->gaussian(0., coef),
-                               this->rng_->gaussian(0., coef),
-                               this->rng_->gaussian(0., coef));
+        return coordinate_type(this->rng_.gaussian(0., coef),
+                               this->rng_.gaussian(0., coef),
+                               this->rng_.gaussian(0., coef));
     }
 
   private:
