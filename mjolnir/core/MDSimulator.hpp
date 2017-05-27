@@ -2,6 +2,8 @@
 #define MJOLNIR_MD_SIMULATOR
 #include "SimulatorBase.hpp"
 #include "System.hpp"
+#include "ForceField.hpp"
+#include "Observer.hpp"
 
 namespace mjolnir
 {
@@ -14,24 +16,25 @@ class MDSimulator final : public SimulatorBase
     typedef integratorT integrator_type;
     typedef System<traits_type>     system_type;
     typedef ForceField<traits_type> forcefield_type;
+    typedef Observer<traits_type>   observer_type;
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
-    MDSimulator(System<traitsT>&& sys, ForceField<traitsT>&& ff,
-                integrator_type&& integr)
+    MDSimulator(system_type&& sys, forcefield_type&& ff,
+                integrator_type&& integr, observer_type&& obs)
         : time_(0), system_(std::move(sys)), ff_(std::move(ff)),
-          integrator_(std::move(integr))
+          integrator_(std::move(integr)), observer_(std::move(obs))
     {}
     ~MDSimulator() override = default;
 
     void initialize() override;
     void step()       override;
-    void finalize()   override {return;}
+    void finalize()   override;
 
-    real_type calc_energy() const;
+    real_type calc_energy() const {return this->ff_.calc_energy(this->system_);}
 
-    system_type&       particles()       noexcept {return system_;}
-    system_type const& particles() const noexcept {return system_;}
+    system_type&       system()       noexcept {return system_;}
+    system_type const& system() const noexcept {return system_;}
 
     ForceField<traitsT>&       forcefields()       noexcept {return ff_;}
     ForceField<traitsT> const& forcefields() const noexcept {return ff_;}
@@ -44,6 +47,7 @@ class MDSimulator final : public SimulatorBase
     system_type     system_;
     forcefield_type ff_;
     integrator_type integrator_;
+    observer_type   observer_;
 };
 
 template<typename traitsT>
@@ -51,6 +55,7 @@ inline void MDSimulator<traitsT>::initialize()
 {
     this->integrator_.initialize(this->system_);
     this->ff_.initialize(this->system_, integrator_->delta_t());
+    observer_.output(this->system_);
     return;
 }
 
@@ -58,16 +63,19 @@ template<typename traitsT>
 inline void MDSimulator<traitsT>::step()
 {
     this->time_ = integrator_.step(this->time_, system_, ff_);
+    if(observer_.is_output_time(time_))
+    {
+        observer_.output(this->system_)
+    }
     return;
 }
 
 template<typename traitsT>
-inline typename MDSimulator<traitsT>::real_type
-MDSimulator<traitsT>::calc_energy() const
+inline void MDSimulator<traitsT>::finalize()
 {
-    return this->ff_.calc_energy(this->system_);
+    observer_.output(this->system_);
+    return;
 }
-
 
 } // mjolnir
 #endif /* MJOLNIR_MD_SIMULATOR */
