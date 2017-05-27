@@ -2,6 +2,7 @@
 #define MJOLNIR_MATH_MATRIX
 #include <mjolnir/util/is_all.hpp>
 #include <mjolnir/util/scalar_type_of.hpp>
+#include <iostream>
 #include <array>
 
 namespace mjolnir
@@ -20,14 +21,26 @@ class Matrix
     using iterator       = typename container::iterator;
     using const_iterator = typename container::const_iterator;
 
+    template<typename T>
+    using is_convertible_to_real = std::is_convertible<T, real_type>;
+
   public:
     Matrix() : values_{{}}{}
     ~Matrix() = default;
 
-    template<typename ... T_args, class = typename std::enable_if<
+    template<typename ... T_args, typename std::enable_if<
         (sizeof...(T_args) == number_of_element) &&
-        is_all<std::is_convertible, realT, T_args...>::value>::type>
+        is_all<is_convertible_to_real, T_args...>::value, std::nullptr_t
+        >::type = nullptr>
     Matrix(T_args ... args) : values_{{static_cast<real_type>(args)...}}{}
+
+    template<typename T, typename std::enable_if<
+        std::is_convertible<T, realT>::value, std::nullptr_t>::type = nullptr>
+    Matrix(const std::array<T, number_of_element>& arg)
+    {
+        for(std::size_t i=0; i<number_of_element; ++i)
+            values_[i] = static_cast<real_type>(arg[i]);
+    }
 
     Matrix(const Matrix& mat) = default;
     Matrix& operator=(const Matrix& mat) = default;
