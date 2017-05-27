@@ -20,9 +20,8 @@ class NewtonianStepper
 
   public:
 
-    NewtonianStepper(const time_type dt, const std::size_t number_of_particles)
-        : dt_(dt), halfdt_(dt * 0.5), halfdt2_(dt * dt * 0.5),
-          acceleration_(number_of_particles)
+    NewtonianStepper(const time_type dt)
+        : dt_(dt), halfdt_(dt * 0.5), halfdt2_(dt * dt * 0.5)
     {}
     ~NewtonianStepper() = default;
 
@@ -51,6 +50,8 @@ class NewtonianStepper
 template<typename traitsT>
 void NewtonianStepper<traitsT>::initialize(const system_type& sys)
 {
+    acceleration_.resize(sys.size());
+
     for(auto iter = make_zip(sys.cbegin(), acceleration_.begin());
             iter != make_zip(sys.cend(),   acceleration_.end()); ++iter)
     {
