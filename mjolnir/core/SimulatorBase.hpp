@@ -10,7 +10,7 @@ class SimulatorBase
     virtual ~SimulatorBase() = default;
 
     virtual void initialize() = 0;
-    virtual void step()       = 0;
+    virtual bool step()       = 0;
     virtual void finalize()   = 0;
 };
 

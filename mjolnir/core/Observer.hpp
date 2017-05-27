@@ -17,10 +17,10 @@ class Observer
     typedef typename traits_type::coordinate_type coordinate_type;
 
   public:
-    Observer() = default;
     Observer(const std::string& xyz, const std::string& ene,
-             const real_type interval)
-        : interval_(interval), observe_time_(interval), xyz_name_(xyz), ene_name_(ene)
+             const std::size_t interval)
+        : interval_(interval), observe_count_(0),
+          xyz_name_(xyz), ene_name_(ene)
     {
         {
             std::ofstream ofs(xyz);
@@ -37,13 +37,14 @@ class Observer
     }
     ~Observer() = default;
 
-    bool is_output_time(const real_type time)
+    bool is_output_time()
     {
-        if(this->observe_time_ <= time)
+        if(this->observe_count_ == interval_)
         {
-            this->observe_time_ += interval_;
+            this->observe_count_ = 0;
             return true;
         }
+        ++observe_count_;
         return false;
     }
 
@@ -62,8 +63,8 @@ class Observer
 
   private:
 
-    real_type   interval_;
-    real_type   observe_time_;
+    std::size_t interval_;
+    std::size_t observe_count_;
     std::string xyz_name_;
     std::string ene_name_;
 };
