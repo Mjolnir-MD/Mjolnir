@@ -19,8 +19,12 @@ class System
     typedef typename traits_type::boundary_type     boundary_type;
 
     System()  = default;
-    System(std::size_t num_particle) : particles_(num_particle){}
     ~System() = default;
+
+    System(container_type&& pcon, boundary_type&& bound)
+        : boundary_(bound), particles(pcon), temperature_(0.), pressure_(0.),
+          ionic_strength_(0.)
+    {}
 
     std::size_t size() const noexcept {return particles_.size();}
 
