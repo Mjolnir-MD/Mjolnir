@@ -62,12 +62,12 @@ class UnderdampedLangevinStepper
     std::vector<coordinate_type> accel_;
 };
 
-template<typename traitsT, typename randomT>
-void UnderdampedLangevinStepper<traitsT, randomT>::initialize(
+template<typename traitsT>
+void UnderdampedLangevinStepper<traitsT>::initialize(
         const system_type& system)
 {
-    this->noise_coef =
-        std::sqrt(2 * physics<real_type>::kB * sys.temperature() / dt_);
+    this->noise_coef_ =
+        std::sqrt(2 * physics<real_type>::kB * system.temperature() / dt_);
 
     for(auto iter = make_zip(system.cbegin(), gamma_.cbegin(),
                              noise_.begin(),  accel_.begin());
@@ -83,26 +83,26 @@ void UnderdampedLangevinStepper<traitsT, randomT>::initialize(
 
 }
 
-template<typename traitsT, typename randomT>
-typename UnderdampedLangevinStepper<traitsT, randomT>::real_type
-UnderdampedLangevinStepper<traitsT, randomT>::step(
+template<typename traitsT>
+typename UnderdampedLangevinStepper<traitsT>::real_type
+UnderdampedLangevinStepper<traitsT>::step(
         const real_type time, system_type& sys, forcefield_type& ff)
 {
-    this->noise_coef =
+    this->noise_coef_ =
         std::sqrt(2 * physics<real_type>::kB * sys.temperature() / dt_);
 
     for(auto iter(make_zip(sys.begin(),     gamma_.cbegin(),
                            noise_.cbegin(), accel_.cbegin())),
              end_(make_zip(sys.end(),       gamma_.cend(),
-                           noise_.cend(),   accel_.cend())),
+                           noise_.cend(),   accel_.cend()));
             iter != end_; ++iter)
     {
         const real_type hgdt   = (*get<1>(iter) * halfdt_);
         const real_type o_hgdt = 1. - hgdt;
 
-        const coordinate_type noisy_force = ((*get<2>(iter)) + (*get<3>(iter)) / m);
+        const coordinate_type noisy_force = (*get<2>(iter)) + (*get<3>(iter));
 
-        get<0>(iter)->position = boundary_type::adjust_absolute(
+        get<0>(iter)->position = sys.adjust_position(
                 get<0>(iter)->position +
                 (dt_ * o_hgdt) * (get<0>(iter)->velocity) +
                 halfdt2_ * noisy_force);
@@ -112,7 +112,7 @@ UnderdampedLangevinStepper<traitsT, randomT>::step(
     }
 
     // calc f(t+dt)
-    ff.calc_force(pcon);
+    ff.calc_force(sys);
 
     // calc a(t+dt) and v(t+dt), generate noise
     for(auto iter(make_zip(sys.begin(),    gamma_.cbegin(),
