@@ -32,8 +32,8 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
     BondLengthInteraction(const container_type& pot): potentials(pot){}
     BondLengthInteraction(container_type&& pot): potentials(std::move(pot)){}
 
-    void      calc_force (system_type& pcon)       const override;
-    real_type calc_energy(const system_type& pcon) const override;
+    void      calc_force (system_type&)       const override;
+    real_type calc_energy(const system_type&) const override;
 
   private:
 
@@ -56,9 +56,9 @@ BondLengthInteraction<traitsT, potentialT>::calc_force(system_type& sys) const
         const coordinate_type dpos = sys.adjust_direction(
                 sys[idxp.first[1]].position - sys[idxp.first[0]].position);
         const real_type len = length(dpos);
-        const real_type f = -1 * idxp.second.derivative(len);
+        const real_type force = -1 * idxp.second.derivative(len);
 
-        const coordinate_type f = dpos * (f / len);
+        const coordinate_type f = dpos * (force / len);
         sys[idxp.first[0]].force -= f;
         sys[idxp.first[1]].force += f;
     }
