@@ -52,31 +52,31 @@ class MDSimulator final : public SimulatorBase
     observer_type   observer_;
 };
 
-template<typename traitsT>
-inline void MDSimulator<traitsT>::initialize()
+template<typename traitsT, typename integratorT>
+inline void MDSimulator<traitsT, integratorT>::initialize()
 {
     this->integrator_.initialize(this->system_);
-    this->ff_.initialize(this->system_, integrator_->delta_t());
-    observer_.output(this->system_);
+    this->ff_.initialize(this->system_, integrator_.delta_t());
+    observer_.output(0., this->system_);
     return;
 }
 
-template<typename traitsT>
-inline bool MDSimulator<traitsT>::step()
+template<typename traitsT, typename integratorT>
+inline bool MDSimulator<traitsT, integratorT>::step()
 {
     this->time_ = integrator_.step(this->time_, system_, ff_);
     if(observer_.is_output_time())
     {
-        observer_.output(this->time_, this->system_)
+        observer_.output(this->time_, this->system_);
     }
     ++step_count_;
-    return step_count <= total_step_;
+    return step_count_ < total_step_;
 }
 
-template<typename traitsT>
-inline void MDSimulator<traitsT>::finalize()
+template<typename traitsT, typename integratorT>
+inline void MDSimulator<traitsT, integratorT>::finalize()
 {
-    observer_.output(this->system_);
+//     observer_.output(time_, this->system_);
     return;
 }
 
