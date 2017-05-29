@@ -63,7 +63,7 @@ class VerletList
     void set_cutoff(const real_type c) noexcept {return this->cutoff_ = c;}
     void set_mergin(const real_type m) noexcept {return this->mergin_ = m;}
 
-    index_array const& partners(std::size_t i) const noexcept {return list_[i];}
+    index_array const& partners(std::size_t i) const noexcept {return partners_[i];}
 
   private:
 
@@ -110,7 +110,7 @@ template<typename traitsT>
 void VerletList<traitsT>::make(const system_type& sys)
 {
     this->partners_.resize(sys.size());
-    for(auto& partner : this->partners) partner.clear();
+    for(auto& partner : this->partners_) partner.clear();
 
     if(informations_.size() < sys.size()) informations_.resize(sys.size());
 

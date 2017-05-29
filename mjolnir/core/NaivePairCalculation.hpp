@@ -29,14 +29,13 @@ class NaivePairCalculation
 
   public:
 
-    NaivePairCalculation(): dirty_(true){};
+    NaivePairCalculation() = default;
     ~NaivePairCalculation() = default;
 
     NaivePairCalculation(NaivePairCalculation&&)            = default;
     NaivePairCalculation& operator=(NaivePairCalculation&&) = default;
 
     bool valid() const noexcept {return true;}
-
 
     std::size_t& chain_index   (std::size_t i);
     index_array& except_indices(std::size_t i);
@@ -47,7 +46,7 @@ class NaivePairCalculation
     void update(const system_type& sys) noexcept {return;}
     void update(const system_type& sys, const real_type dt) noexcept {return;}
 
-    index_array const& partners(std::size_t i) const noexcept {return list_[i];}
+    index_array const& partners(std::size_t i) const noexcept {return partners_[i];}
 
   private:
 

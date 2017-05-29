@@ -1,7 +1,6 @@
 #ifndef MJOLNIR_UNLIMITED_GRID_CELL_LIST
 #define MJOLNIR_UNLIMITED_GRID_CELL_LIST
 #include "BoundaryCondition.hpp"
-#include "SpatialPartition.hpp"
 #include <mjolnir/util/logger.hpp>
 #include <functional>
 #include <algorithm>
@@ -13,14 +12,14 @@ namespace mjolnir
 {
 
 template<typename traitsT, std::size_t dimI = 16>
-class UnlimitedGridCellList : public SpatialPartition<traitsT>
+class UnlimitedGridCellList
 {
   public:
 
     typedef traitsT traits_type;
     typedef System<traits_type> system_type;
-    typedef typename triats_type::real_type real_type;
-    typedef typename triats_type::coordinate_type coordinate_type;
+    typedef typename traits_type::real_type real_type;
+    typedef typename traits_type::coordinate_type coordinate_type;
     typedef std::vector<std::size_t> index_array;
     typedef std::vector<index_array> partners_type;
 
@@ -72,6 +71,8 @@ class UnlimitedGridCellList : public SpatialPartition<traitsT>
 
     void set_cutoff(const real_type c);
     void set_mergin(const real_type m);
+
+    index_array const& partners(std::size_t i) const noexcept {return partners_[i];}
 
   private:
 
@@ -213,7 +214,7 @@ void UnlimitedGridCellList<traitsT, N>::update(const system_type& sys)
 
     this->current_mergin_ -= std::sqrt(max_speed) * dt_ * 2.;
     if(this->current_mergin_ < 0.)
-        this->make(pcon);
+        this->make(sys);
 
     return ;
 }
@@ -262,14 +263,14 @@ UnlimitedGridCellList<traitsT, N>::add(const int x, const int y, const int z,
 }
 
 template<typename traitsT, std::size_t N>
-void UnlimitedGridCellList<traitsT, N>::initialize(const system_size& sys)
+void UnlimitedGridCellList<traitsT, N>::initialize(const system_type& sys)
 {
     MJOLNIR_LOG_DEBUG("UnlimitedGridCellList<traitsT>::initialize CALLED");
 
     for(auto& cell : this->cell_list)
     {
-        iter->first.reserve(20);
-        iter->second.fill(std::numeric_limits<std::size_t>::max());
+        cell.first.reserve(20);
+        cell.second.fill(std::numeric_limits<std::size_t>::max());
     }
 
     for(int x = 0; x < dim; ++x)

@@ -18,15 +18,15 @@ class PeriodicGridCellList
 
     typedef traitsT traits_type;
     typedef System<traits_type> system_type;
-    typedef typename triats_type::real_type real_type;
-    typedef typename triats_type::coordinate_type coordinate_type;
+    typedef typename traits_type::real_type real_type;
+    typedef typename traits_type::coordinate_type coordinate_type;
     typedef std::vector<std::size_t> index_array;
     typedef std::vector<index_array> partners_type;
 
     constexpr static real_type mesh_epsilon = 1e-6;
     typedef std::array<int, 3>          cell_index_type;
     typedef std::array<std::size_t, 26> neighbor_cell_idx;
-    typedef std::pair<index_list, neighbor_cell_idx> unit_cell_type;
+    typedef std::pair<index_array, neighbor_cell_idx> unit_cell_type;
     typedef std::vector<unit_cell_type> cell_list_type;
 
     struct information
@@ -59,7 +59,7 @@ class PeriodicGridCellList
         return current_mergin_ >= 0. || dt_ == 0.;
     }
 
-    void initialize(const system_size&);
+    void initialize(const system_type&);
     void make  (const system_type& sys);
     void update(const system_type& sys);
     void update(const system_type& sys, const real_type dt);
@@ -70,10 +70,12 @@ class PeriodicGridCellList
     void set_cutoff(const real_type c);
     void set_mergin(const real_type m);
 
+    index_array const& partners(std::size_t i) const noexcept {return partners_[i];}
+
   private:
 
     std::size_t index(cell_index_type) const;
-    std::size_t index(const position_type& pos) const;
+    std::size_t index(const coordinate_type& pos) const;
     cell_index_type add(const int x, const int y, const int z,
                         const cell_index_type&) const;
 
@@ -260,7 +262,7 @@ PeriodicGridCellList<traitsT>::add(
 }
 
 template<typename traitsT>
-void PeriodicGridCellList<traitsT>::initialize(const system_size& sys)
+void PeriodicGridCellList<traitsT>::initialize(const system_type& sys)
 {
     const coordinate_type& system_size = sys.boundary().range();
     this->dim_x_ = system_size[0] * inv_cell_size_ + 1;
