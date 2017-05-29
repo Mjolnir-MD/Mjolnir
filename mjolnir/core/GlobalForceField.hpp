@@ -41,7 +41,7 @@ class GlobalForceField
             item->initialize(sys, dt);
     }
 
-    void calc_force(system_type& sys) const
+    void calc_force(system_type& sys)
     {
         for(const auto& item : this->interactions_)
             item->calc_force(sys);
@@ -51,7 +51,7 @@ class GlobalForceField
     {
         real_type energy = 0.;
         for(const auto& item : this->interactions_)
-            energy += item->calc_energy(pcon);
+            energy += item->calc_energy(sys);
         return energy;
     }
 
