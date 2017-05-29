@@ -31,10 +31,10 @@ class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
 
     void initialize(const system_type& sys, const real_type dt) override
     {
-        this->spatial_partition_.update(sys, dt);
+        this->partition_.update(sys, dt);
     }
 
-    void      calc_force (system_type&)       const override;
+    void      calc_force (system_type&)             override;
     real_type calc_energy(const system_type&) const override;
 
   private:
@@ -45,8 +45,9 @@ class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
 
 template<typename traitsT, typename potT, typename spaceT>
 void GlobalDistanceInteraction<traitsT, potT, spaceT>::calc_force(
-        system_type& sys) const
+        system_type& sys)
 {
+    potential_.update(sys);
     partition_.update(sys);
     for(std::size_t i=0; i<sys.size(); ++i)
     {
