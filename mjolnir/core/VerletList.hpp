@@ -39,7 +39,7 @@ class VerletList
         : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.)
     {}
     VerletList(const real_type cutoff, const real_type mergin,
-               const time_type dt)
+               const real_type dt)
         : dt_(dt), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.)
     {}
 

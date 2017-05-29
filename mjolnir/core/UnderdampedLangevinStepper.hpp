@@ -29,10 +29,10 @@ class UnderdampedLangevinStepper
     {}
     ~UnderdampedLangevinStepper() = default;
 
-    void initialize(const system_type& pcon);
+    void initialize(const system_type& sys);
     real_type step(const real_type time, system_type& sys, forcefield_type& ff);
 
-    time_type delta_t() const noexcept {return dt_;}
+    real_type delta_t() const noexcept {return dt_;}
     void  set_delta_t(const real_type dt) noexcept
     {
         dt_ = dt; halfdt_ = dt * 0.5; halfdt2_ = dt*dt*0.5;
