@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(test_vector_rotation)
     const Vector3d unit_z(0., 0., 1.);
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
-        const real_type theta = uni(mt) * M_PI;
+        const real_type theta = uni(mt) * 3.14159265358979;
         const Vector3d rot = rotate(theta, unit_z, unit_x);
         BOOST_CHECK_CLOSE_FRACTION(length(rot), 1., tolerance);
         BOOST_CHECK_CLOSE_FRACTION(rot[0], std::cos(theta), tolerance);
