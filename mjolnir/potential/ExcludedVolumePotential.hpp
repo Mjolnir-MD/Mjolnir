@@ -142,15 +142,5 @@ ExcludedVolumePotential<traitsT>::max_cutoff_length() const
     return max_sigma * cutoff_ratio;
 }
 
-template<typename traitsT>
-void ExcludedVolumePotential<traitsT>::reset_parameter(
-        const std::string& name, const real_type val)
-{
-    if(name == "epsilon")
-        this->epsilon_ = val;
-    return;
-}
-
-
 } // mjolnir
 #endif /* MJOLNIR_EXCLUDED_VOLUME_POTENTIAL */
