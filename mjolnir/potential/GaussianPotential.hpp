@@ -35,8 +35,6 @@ class GaussianPotential
         return 2*inv_w2_ * dval * epsilon_ * std::exp(inv_w2_ * dval * dval);
     }
 
-    void reset_parameter(const std::string&, const real_type){return;}
-
   private:
 
     const real_type epsilon_, inv_w2_;
