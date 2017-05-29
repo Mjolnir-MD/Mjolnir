@@ -49,7 +49,7 @@ DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const
                 sys[idxp.first[0]].position - sys[idxp.first[1]].position);
         const coordinate_type r_kj = sys.adjust_direction(
                 sys[idxp.first[2]].position - sys[idxp.first[1]].position);
-        const coordinate_type r_lk = sys,adjust_direction(
+        const coordinate_type r_lk = sys.adjust_direction(
                 sys[idxp.first[3]].position - sys[idxp.first[2]].position);
         const coordinate_type r_kl = -1e0 * r_lk;
 
@@ -105,7 +105,7 @@ DihedralAngleInteraction<traitsT, potentialT>::calc_energy(
                 sys[idxp.first[0]].position - sys[idxp.first[1]].position);
         const coordinate_type r_kj = sys.adjust_direction(
                 sys[idxp.first[2]].position - sys[idxp.first[1]].position);
-        const coordinate_type r_lk = sys,adjust_direction(
+        const coordinate_type r_lk = sys.adjust_direction(
                 sys[idxp.first[3]].position - sys[idxp.first[2]].position);
         const real_type r_kj_lensq_inv = 1. / length_sq(r_kj);
 
