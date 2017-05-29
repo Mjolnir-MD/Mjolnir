@@ -13,7 +13,7 @@ struct constants
 };
 
 template<typename realT>
-class physics
+struct physics
 {
     typedef realT real_type;
     static real_type kB;
