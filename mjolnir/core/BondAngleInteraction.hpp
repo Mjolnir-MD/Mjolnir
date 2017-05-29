@@ -46,12 +46,12 @@ BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const
     for(const auto& idxp : this->potentials)
     {
         const coordinate_type r_ij = sys.adjust_direction(
-                sys[idxp.first[0]] - sys[idxp.first[1]]);
+                sys[idxp.first[0]].position - sys[idxp.first[1]].position);
         const real_type       inv_len_r_ij = fast_inv_sqrt(length_sq(r_ij));
         const coordinate_type r_ij_reg     = r_ij * inv_len_r_ij;
 
         const coordinate_type r_kj = sys.adjust_direction(
-                sys[idxp.first[2]] - sys[idxp.first[1]]);
+                sys[idxp.first[2]].position - sys[idxp.first[1]].position);
         const real_type       inv_len_r_kj = fast_inv_sqrt(length_sq(r_kj));
         const coordinate_type r_kj_reg     = r_kj * inv_len_r_kj;
 
@@ -65,8 +65,8 @@ BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const
 
         const real_type sin_theta = std::sin(theta);
         const real_type coef_inv_sin =
-            (sin_theta > constants<traits_type>::tolerance) ?
-            coef / sin_theta : coef / constants<traits_type>::tolerance;
+            (sin_theta > constants<real_type>::tolerance) ?
+            coef / sin_theta : coef / constants<real_type>::tolerance;
 
         const coordinate_type Fi =
             (coef_inv_sin * inv_len_r_ij) * (cos_theta * r_ij_reg - r_kj_reg);
@@ -90,9 +90,9 @@ BondAngleInteraction<traitsT, potentialT>::calc_energy(
     for(const auto& idxp : this->potentials)
     {
         const coordinate_type v_2to1 = sys.adjust_direction(
-                sys[idxp.first[0]] - sys[idxp.first[1]]);
+                sys[idxp.first[0]].position - sys[idxp.first[1]].position);
         const coordinate_type v_2to3 = sys.adjust_direction(
-                sys[idxp.first[2]] - sys[idxp.first[1]]);
+                sys[idxp.first[2]].position - sys[idxp.first[1]].position);
 
         const real_type lensq_v21 = length_sq(v_2to1);
         const real_type lensq_v23 = length_sq(v_2to3);
