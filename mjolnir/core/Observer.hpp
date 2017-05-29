@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_CORE_OBSERVER
 #define MJOLNIR_CORE_OBSERVER
-#include "Simulator.hpp"
+#include "System.hpp"
 #include <fstream>
 #include <iomanip>
 
@@ -39,16 +39,16 @@ class Observer
 
     bool is_output_time()
     {
+        ++observe_count_;
         if(this->observe_count_ == interval_)
         {
             this->observe_count_ = 0;
             return true;
         }
-        ++observe_count_;
         return false;
     }
 
-    void output(const system_type& sys) const;
+    void output(const real_type time, const system_type& sys) const;
     void output_energy(const real_type Ep, const system_type& sys) const;
 
   private:
@@ -70,16 +70,16 @@ class Observer
 };
 
 template<typename traitsT>
-inline void Observer<traitsT>::output(const system_type& sys) const
+inline void Observer<traitsT>::output(const real_type time, const system_type& sys) const
 {
     std::ofstream ofs(xyz_name_, std::ios::app);
-    ofs << sys.size() << "\n\n";
-    for(auto particle : sys)
+    ofs << sys.size() << "\n" << time << "\n";
+    for(const auto& particle : sys)
     {// TODO change output format
         ofs << "CA    " << std::fixed << std::setprecision(8)
-            << item.position[0] << " "
-            << item.position[1] << " "
-            << item.position[2] << std::endl;
+            << particle.position[0] << " "
+            << particle.position[1] << " "
+            << particle.position[2] << std::endl;
     }
     ofs.close();
     return ;
@@ -90,7 +90,7 @@ inline void
 Observer<traitsT>::output_energy(const real_type Ep, const system_type& sys) const
 {
     std::ofstream ofs(ene_name_, std::ios::app);
-    const real_type Ek = this->calc_kinetic_energy(sim.particles());
+    const real_type Ek = this->calc_kinetic_energy(sys);
 
     ofs << std::setw(12) << Ep << " "
         << std::setw(12) << Ek << " "
