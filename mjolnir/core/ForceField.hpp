@@ -19,7 +19,7 @@ class ForceField
 
   public:
 
-    ForceField(local_force_field_type&& local, global_force_field_type&& global)
+    ForceField(local_forcefield_type&& local, global_forcefield_type&& global)
         : local_(std::move(local)), global_(std::move(global))
     {}
     ~ForceField() = default;
@@ -29,25 +29,25 @@ class ForceField
     ForceField& operator=(const ForceField&) = delete;
     ForceField& operator=(ForceField&&)      = default;
 
-    void initialize(const system_type& sys, const time_type dt)
+    void initialize(const system_type& sys, const real_type dt)
     {
         global_.initialize(sys, dt);
     }
 
-    void calc_force(system_type&) const
+    void calc_force(system_type& sys)
     {
         local_.calc_force(sys);
         global_.calc_force(sys);
     }
-    energy_type calc_energy(const system_type&) const
+    real_type calc_energy(const system_type& sys) const
     {
         return local_.calc_energy(sys) + global_.calc_energy(sys);
     }
 
   private:
 
-    local_force_field_type  local_;
-    global_force_field_type global_;
+    local_forcefield_type  local_;
+    global_forcefield_type global_;
 };
 
 } // mjolnir
