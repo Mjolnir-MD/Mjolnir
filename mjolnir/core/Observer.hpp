@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_CORE_OBSERVER
 #define MJOLNIR_CORE_OBSERVER
 #include "System.hpp"
+#include "ForceField.hpp"
 #include <fstream>
 #include <iomanip>
 
@@ -13,6 +14,7 @@ class Observer
   public:
     typedef traitsT traits_type;
     typedef System<traits_type> system_type;
+    typedef ForceField<traits_type> forcefield_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
@@ -48,8 +50,8 @@ class Observer
         return false;
     }
 
-    void output(const real_type time, const system_type& sys) const;
-    void output_energy(const real_type Ep, const system_type& sys) const;
+    void output(const real_type time, const system_type& sys,
+                const forcefield_type& ff) const;
 
   private:
 
@@ -70,7 +72,8 @@ class Observer
 };
 
 template<typename traitsT>
-inline void Observer<traitsT>::output(const real_type time, const system_type& sys) const
+inline void Observer<traitsT>::output(
+    const real_type time, const system_type& sys, const forcefield_type& ff) const
 {
     std::ofstream ofs(xyz_name_, std::ios::app);
     ofs << sys.size() << "\n" << time << "\n";
@@ -82,20 +85,10 @@ inline void Observer<traitsT>::output(const real_type time, const system_type& s
             << particle.position[2] << std::endl;
     }
     ofs.close();
-    return ;
-}
 
-template<typename traitsT>
-inline void
-Observer<traitsT>::output_energy(const real_type Ep, const system_type& sys) const
-{
-    std::ofstream ofs(ene_name_, std::ios::app);
-    const real_type Ek = this->calc_kinetic_energy(sys);
-
-    ofs << std::setw(12) << Ep << " "
-        << std::setw(12) << Ek << " "
-        << std::setw(12) << Ep + Ek
-        << std::endl;
+    // TODO separate energy terms
+    ofs.open(ene_name_, std::ios::app);
+    ofs << time << " " << ff.calc_energy(sys) << std::endl;
     ofs.close();
 
     return ;

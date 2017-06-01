@@ -57,7 +57,7 @@ inline void MDSimulator<traitsT, integratorT>::initialize()
 {
     this->integrator_.initialize(this->system_);
     this->ff_.initialize(this->system_, integrator_.delta_t());
-    observer_.output(0., this->system_);
+    observer_.output(0., this->system_, this->ff_);
     return;
 }
 
@@ -67,7 +67,7 @@ inline bool MDSimulator<traitsT, integratorT>::step()
     this->time_ = integrator_.step(this->time_, system_, ff_);
     if(observer_.is_output_time())
     {
-        observer_.output(this->time_, this->system_);
+        observer_.output(this->time_, this->system_, this->ff_);
     }
     ++step_count_;
     return step_count_ < total_step_;
