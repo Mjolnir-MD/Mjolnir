@@ -1,0 +1,48 @@
+#ifdef MJOLNIR_IMPLICIT_MEMBRANE_POTENTIAL
+#define MJOLNIR_IMPLICIT_MEMBRANE_POTENTIAL
+#include <vector>
+#include <algorithm>
+#include <cmath>
+
+namespace mjolnir
+{
+  
+  /* Implicit membrane potential & derivative      *
+   * potential field dependent on z coordinate.    *
+   * tanh is used to represent membrane potential. *
+   *  V(z) = ma * tanh(be * (|z| - th))            *
+   * dV/dr = ma * z / (|z| * tanh(be * (|z| - th)))     */
+  template<typename traitT>
+  class ImplicitMembranePotential
+  {
+  public:
+    typedef traitT traits_type;
+    typedef typename traits_type::real_type real_type;
+    typedef typename traits_type::coordinate_type coordinate_type;
+
+  public:
+    ImplicitMembranePotential(const real_type th, const real_type ma, const real_type be)
+      : thickness_(th),interantion_magnitude_(ma),bend_(be);
+    {}
+    ~ImplicitMembranePotential() = default;
+
+    real_type potential(const real_type z) const
+    {
+      return this->interantion_magnitude_ * tanh(bend_ * (abs(z) - thickness_));
+    }
+
+    real_type derivative(const real_type z) const
+    {
+      return this->interantion_magnitude_ * z / (abs(z) * tanh(bend_ * (abs(z) - thickness_)));
+    }
+
+    void reset_parameter(const std::string&, const real_type){return;}
+    
+  private:
+    
+    const real_type thickness_;
+    const real_type interantion_magnitude_;
+    const real_type bend_;
+  };
+}
+#endif /* MJOLNIR_IMPLICIT_MEMBRANE_POTENTIAL */
