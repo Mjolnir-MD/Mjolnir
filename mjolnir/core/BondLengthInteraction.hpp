@@ -36,14 +36,6 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
     real_type calc_energy(const system_type&) const override;
 
   private:
-
-    void
-    calc_force(particle_type& p1, particle_type& p2,
-               const potential_type& pot) const;
-    real_type
-    calc_energy(const particle_type& p1, const particle_type& p2,
-                const potential_type& pot) const;
-  private:
     container_type potentials;
 };
 
