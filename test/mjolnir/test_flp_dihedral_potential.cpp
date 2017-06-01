@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(FlexibleLocalDihedral_double)
         if(std::abs(deri) > h)
             BOOST_CHECK_CLOSE_FRACTION(dpot, deri, h);
         else
-            BOOST_CHECK_SMALL(dpot, h);
+            BOOST_CHECK_SMALL(deri, h);
 
         x += dx;
     }
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(FlexibleLocalDihedral_float)
         if(std::abs(deri) > h)
             BOOST_CHECK_CLOSE_FRACTION(dpot, deri, h);
         else
-            BOOST_CHECK_SMALL(dpot, h);
+            BOOST_CHECK_SMALL(deri, h);
         x += dx;
     }
 }

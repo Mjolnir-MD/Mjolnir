@@ -39,7 +39,11 @@ BOOST_AUTO_TEST_CASE(FlexibleLocalAngle_double)
         const real_type dpot = (pot1 - pot2) / (2 * h);
         const real_type deri = flpa.derivative(x);
 
-        BOOST_CHECK_CLOSE_FRACTION(dpot, deri, h);
+        if(std::abs(deri) > h)
+            BOOST_CHECK_CLOSE_FRACTION(dpot, deri, h);
+        else
+            BOOST_CHECK_SMALL(deri, h);
+
         x += dx;
     }
 }
@@ -71,7 +75,11 @@ BOOST_AUTO_TEST_CASE(FlexibleLocalAngle_float)
         const real_type dpot = (pot1 - pot2) / (2 * h);
         const real_type deri = flpa.derivative(x);
 
-        BOOST_CHECK_CLOSE_FRACTION(dpot, deri, h);
+        if(std::abs(deri) > h)
+            BOOST_CHECK_CLOSE_FRACTION(dpot, deri, h);
+        else
+            BOOST_CHECK_SMALL(deri, h);
+
         x += dx;
     }
 }
