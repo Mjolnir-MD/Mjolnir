@@ -114,7 +114,7 @@ void VerletList<traitsT>::make(const system_type& sys)
 
     if(informations_.size() < sys.size()) informations_.resize(sys.size());
 
-    const real_type rc = (cutoff_ + mergin_);
+    const real_type rc = cutoff_ * (1. + mergin_);
     const real_type rc2 = rc * rc;
     for(std::size_t i=0; i<sys.size(); ++i)
     {
@@ -137,7 +137,7 @@ void VerletList<traitsT>::make(const system_type& sys)
         }
     }
 
-    this->current_mergin_ = mergin_;
+    this->current_mergin_ = cutoff_ * mergin_;
     return ;
 }
 

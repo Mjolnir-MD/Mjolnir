@@ -48,12 +48,12 @@ class UnlimitedGridCellList
 
     UnlimitedGridCellList(const real_type cutoff, const real_type mergin)
         : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
-          inv_cell_size_(1. / (cutoff + mergin + mesh_epsilon))
+          inv_cell_size_(1. / (cutoff * (1. + mergin) + mesh_epsilon))
     {}
     UnlimitedGridCellList(const real_type cutoff, const real_type mergin,
                           const real_type dt)
         : dt_(dt), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
-          inv_cell_size_(1. / (cutoff + mergin + mesh_epsilon))
+          inv_cell_size_(1. / (cutoff * (1. + mergin) + mesh_epsilon))
     {}
 
     bool valid() const noexcept
@@ -104,7 +104,7 @@ template<typename traitsT, std::size_t N>
 inline void UnlimitedGridCellList<traitsT, N>::set_cutoff(const real_type c)
 {
     this->cutoff_ = c;
-    this->inv_cell_size_ = 1. / (cutoff_ + mergin_ + mesh_epsilon);
+    this->inv_cell_size_ = 1. / (cutoff_ * (1. + mergin_) + mesh_epsilon);
     return;
 }
 
@@ -112,7 +112,7 @@ template<typename traitsT, std::size_t N>
 inline void UnlimitedGridCellList<traitsT, N>::set_mergin(const real_type m)
 {
     this->mergin_ = m;
-    this->inv_cell_size_ = 1. / (cutoff_ + mergin_ + mesh_epsilon);
+    this->inv_cell_size_ = 1. / (cutoff_ * (1. + mergin_) + mesh_epsilon);
     return;
 }
 
@@ -137,7 +137,7 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
     }
     MJOLNIR_LOG_DEBUG("cell list is updated");
 
-    const real_type r_c = cutoff_ + mergin_;
+    const real_type r_c = cutoff_ * (1. + mergin_);
     const real_type r_c2 = r_c * r_c;
 
     for(std::size_t i=0; i<sys.size(); ++i)
@@ -199,7 +199,7 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
     for(auto partner : this->partners_)
         std::sort(partner.begin(), partner.end());
 
-    this->current_mergin_ = mergin_;
+    this->current_mergin_ = cutoff_ * mergin_;
 
     MJOLNIR_LOG_DEBUG("UnlimitedGridCellList::make() RETURNED");
     return ;
@@ -267,7 +267,7 @@ void UnlimitedGridCellList<traitsT, N>::initialize(const system_type& sys)
 {
     MJOLNIR_LOG_DEBUG("UnlimitedGridCellList<traitsT>::initialize CALLED");
 
-    for(auto& cell : this->cell_list)
+    for(auto& cell : this->cell_list_)
     {
         cell.first.reserve(20);
         cell.second.fill(std::numeric_limits<std::size_t>::max());

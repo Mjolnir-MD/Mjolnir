@@ -122,7 +122,7 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
     }
     MJOLNIR_LOG_DEBUG("cell list is updated");
 
-    const real_type r_c  = cutoff_ + mergin_;
+    const real_type r_c  = cutoff_ * (1. + mergin_);
     const real_type r_c2 = r_c * r_c;
 
     for(std::size_t i=0; i<sys.size(); ++i)
@@ -182,7 +182,7 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
     for(auto partner : this->partners_)
         std::sort(partner.begin(), partner.end());
 
-    this->current_mergin_ = mergin_;
+    this->current_mergin_ = cutoff_ * mergin_;
 
     MJOLNIR_LOG_DEBUG("PeriodicGridCellList::make() RETURNED");
     return ;
@@ -194,7 +194,7 @@ template<typename traitsT>
 inline void PeriodicGridCellList<traitsT>::set_cutoff(const real_type c)
 {
     this->cutoff_ = c;
-    this->inv_cell_size_ = 1. / (cutoff_ + mergin_ + mesh_epsilon);
+    this->inv_cell_size_ = 1. / (cutoff_ * (1. + mergin_) + mesh_epsilon);
     return;
 }
 
@@ -202,13 +202,14 @@ template<typename traitsT>
 inline void PeriodicGridCellList<traitsT>::set_mergin(const real_type m)
 {
     this->mergin_ = m;
-    this->inv_cell_size_ = 1. / (cutoff_ + mergin_ + mesh_epsilon);
+    this->inv_cell_size_ = 1. / (cutoff_ * (1. + mergin_) + mesh_epsilon);
     return;
 }
 
 template<typename traitsT>
 void PeriodicGridCellList<traitsT>::update(const system_type& sys)
 {
+    // FIXME cache max_speed in system
     real_type max_speed = 0.;
     for(const auto& particle : sys)
         max_speed = std::max(max_speed, length_sq(particle.velocity));
