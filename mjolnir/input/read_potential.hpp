@@ -27,7 +27,7 @@ read_harmonic_potential(const toml::Table& local)
         const auto& parameter = item.cast<toml::value_t::Table>();
         auto indices = toml::get<std::array<std::size_t, N>>(
                 parameter.at("indices"));
-        auto r0 = toml::get<typename traitsT::real_type>(parameter.at("r0"));
+        auto r0 = toml::get<typename traitsT::real_type>(parameter.at("native"));
         auto k  = toml::get<typename traitsT::real_type>(parameter.at("k"));
 
         retval.emplace_back(std::move(indices), HarmonicPotential<traitsT>(k, r0));
@@ -48,7 +48,7 @@ read_go1012_contact_potential(const toml::Table& local)
         const auto& parameter = item.cast<toml::value_t::Table>();
         auto indices = toml::get<std::array<std::size_t, N>>(
                 parameter.at("indices"));
-        auto r0 = toml::get<typename traitsT::real_type>(parameter.at("r0"));
+        auto r0 = toml::get<typename traitsT::real_type>(parameter.at("native"));
         auto k  = toml::get<typename traitsT::real_type>(parameter.at("k"));
 
         retval.emplace_back(std::move(indices),
