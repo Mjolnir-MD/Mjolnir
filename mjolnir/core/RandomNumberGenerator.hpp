@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_CORE_RANDOM_NUMBER_GENERATOR
 #define MJOLNIR_CORE_RANDOM_NUMBER_GENERATOR
 #include <random>
+#include <cstdint>
 
 namespace mjolnir
 {
@@ -11,11 +12,10 @@ class RandomNumberGenerator
   public:
     typedef traitsT traits_type;
     typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::time_type time_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
   public:
-    RandomNumberGenerator(const std::uint_fast32_t seed)
+    RandomNumberGenerator(const std::uint32_t seed)
         : seed_(seed), rng_(seed)
     {}
     ~RandomNumberGenerator() = default;
@@ -29,27 +29,12 @@ class RandomNumberGenerator
 
     coordinate_type
     underdamped_langevin(const real_type mass, const real_type gamma,
-        const time_type dt, const real_type temperature, const real_type kB);
+        const real_type dt, const real_type temperature, const real_type kB);
 
   private:
-    const std::uint_fast32_t seed_;
+    const std::uint32_t seed_;
     std::mt19937 rng_;
 };
-
-// TODO: measure
-// mt19937 v.s. mt19937_64
-// (or other random number generator like xorshift)
-//
-// (construct distribution at each time)
-// v.s.
-// (pre-constructed distro and some calculation)
-//
-// and
-//
-// standard C++ library
-// v.s.
-// GNU Scientific library [[likely]]
- 
 
 template<typename traitsT>
 inline typename RandomNumberGenerator<traitsT>::real_type
@@ -79,7 +64,7 @@ RandomNumberGenerator<traitsT>::maxwell_boltzmann(
 template<typename traitsT>
 inline typename RandomNumberGenerator<traitsT>::coordinate_type
 RandomNumberGenerator<traitsT>::underdamped_langevin(const real_type m,
-        const real_type g, const time_type dt, const real_type T, const real_type kB)
+        const real_type g, const real_type dt, const real_type T, const real_type kB)
 {
     std::normal_distribution<real_type>
         distro(0., std::sqrt(2 * kB * T * g / (m * dt)));

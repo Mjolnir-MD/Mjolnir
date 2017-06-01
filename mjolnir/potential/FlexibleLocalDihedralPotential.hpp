@@ -26,9 +26,9 @@ class FlexibleLocalDihedralPotential
             const std::array<real_type, 7>& term)
         : k_(k), term_(term)
     {
-        real_type phi = -constants<traits_type>::pi;
+        real_type phi = -constants<real_type>::pi;
         this->min_energy = std::numeric_limits<real_type>::max();
-        while(phi < constants<traitsT>::pi)
+        while(phi < constants<real_type>::pi)
         {
             this->min_energy = std::min(this->min_energy,
                     term_[1] * std::cos(  phi) + term_[2] * std::sin(  phi) +
@@ -53,8 +53,6 @@ class FlexibleLocalDihedralPotential
                    -2*term_[3] * std::sin(2*phi) + 2*term_[4] * std::cos(2*phi)
                    -3*term_[5] * std::sin(3*phi) + 3*term_[6] * std::cos(3*phi));
     }
-
-    void reset_parameter(const std::string&, const real_type){return;}
 
   private:
     real_type min_energy;

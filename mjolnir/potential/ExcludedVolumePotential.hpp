@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
 #define MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
+#include <mjolnir/core/System.hpp>
 #include <algorithm>
 #include <cmath>
 
@@ -34,6 +35,8 @@ class ExcludedVolumePotential
     {}
     ~ExcludedVolumePotential() = default;
 
+    void update(const System<traitsT>& sys) const {return;}
+
     real_type  epsilon() const {return epsilon_;}
     real_type& epsilon()       {return epsilon_;}
 
@@ -58,10 +61,8 @@ class ExcludedVolumePotential
 
     real_type derivative(const std::size_t i, const std::size_t j,
                          const real_type r) const;
-    
-    real_type max_cutoff_length() const;
 
-    void reset_parameter(const std::string&, const real_type);
+    real_type max_cutoff_length() const;
 
   private:
 
@@ -140,16 +141,6 @@ ExcludedVolumePotential<traitsT>::max_cutoff_length() const
         *(std::max_element(radii_.cbegin(), radii_.cend()));
     return max_sigma * cutoff_ratio;
 }
-
-template<typename traitsT>
-void ExcludedVolumePotential<traitsT>::reset_parameter(
-        const std::string& name, const real_type val)
-{
-    if(name == "epsilon")
-        this->epsilon_ = val;
-    return;
-}
-
 
 } // mjolnir
 #endif /* MJOLNIR_EXCLUDED_VOLUME_POTENTIAL */

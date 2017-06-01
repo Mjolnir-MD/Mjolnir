@@ -49,8 +49,6 @@ class Go1012ContactPotential
         return this->epsilon_ * 60. * (rd10 - rd12) * invr;
     }
 
-    void reset_parameter(const std::string&, const real_type){return;}
-
   private:
 
     const real_type epsilon_;

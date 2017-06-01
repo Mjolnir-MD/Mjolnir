@@ -35,8 +35,6 @@ class QuarticPotential
         return  2 * this->k1_ * dr + 4 * this->k2_ * dr * dr * dr;
     }
 
-    void reset_parameter(const std::string&, const real_type){return;}
-
   private:
 
     const real_type k1_;

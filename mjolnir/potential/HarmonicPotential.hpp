@@ -32,8 +32,6 @@ class HarmonicPotential
         return  2 * this->k_ * (r - r0_);
     }
 
-    void reset_parameter(const std::string&, const real_type){return;}
-
   private:
 
     const real_type k_;

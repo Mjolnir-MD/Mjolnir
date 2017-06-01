@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_CORE_OBSERVER
 #define MJOLNIR_CORE_OBSERVER
-#include "Simulator.hpp"
+#include "System.hpp"
+#include "ForceField.hpp"
 #include <fstream>
 #include <iomanip>
 
@@ -12,12 +13,16 @@ class Observer
 {
   public:
     typedef traitsT traits_type;
+    typedef System<traits_type> system_type;
+    typedef ForceField<traits_type> forcefield_type;
     typedef typename traits_type::real_type real_type;
+    typedef typename traits_type::coordinate_type coordinate_type;
 
   public:
-    Observer() = default;
-    Observer(const std::string& xyz, const std::string& ene)
-        : xyz_name_(xyz), ene_name_(ene)
+    Observer(const std::string& xyz, const std::string& ene,
+             const std::size_t interval)
+        : interval_(interval), observe_count_(0),
+          xyz_name_(xyz), ene_name_(ene)
     {
         {
             std::ofstream ofs(xyz);
@@ -34,68 +39,60 @@ class Observer
     }
     ~Observer() = default;
 
-    void output_coordinate(const Simulator<traitsT>& sim) const;
-    void output_energy(const Simulator<traitsT>& sim) const;
+    bool is_output_time()
+    {
+        ++observe_count_;
+        if(this->observe_count_ == interval_)
+        {
+            this->observe_count_ = 0;
+            return true;
+        }
+        return false;
+    }
 
-    real_type calc_kinetic_energy(const ParticleContainer<traitsT>& pcon) const;
+    void output(const real_type time, const system_type& sys,
+                const forcefield_type& ff) const;
 
   private:
 
+    real_type calc_kinetic_energy(const system_type& sys) const
+    {
+        real_type k = 0.0;
+        for(const auto& particle : sys)
+            k += length_sq(particle.velocity) * particle.mass;
+        return k * 0.5;
+    }
+
+  private:
+
+    std::size_t interval_;
+    std::size_t observe_count_;
     std::string xyz_name_;
     std::string ene_name_;
 };
 
 template<typename traitsT>
-inline void
-Observer<traitsT>::output_coordinate(const Simulator<traitsT>& sim) const
+inline void Observer<traitsT>::output(
+    const real_type time, const system_type& sys, const forcefield_type& ff) const
 {
     std::ofstream ofs(xyz_name_, std::ios::app);
-    ofs << sim.particles().size() << std::endl;
-    ofs << "time = " << sim.time() << std::endl;
-    for(auto iter = sim.particles().cbegin(); iter != sim.particles().cend();
-            ++iter)
-    {
-        ofs << "CA    " << std::fixed << std::setprecision(10)
-            << iter->position[0] << " "
-            << iter->position[1] << " "
-            << iter->position[2] << " "
-            << std::endl;
+    ofs << sys.size() << "\n" << time << "\n";
+    for(const auto& particle : sys)
+    {// TODO change output format
+        ofs << "CA    " << std::fixed << std::setprecision(8)
+            << particle.position[0] << " "
+            << particle.position[1] << " "
+            << particle.position[2] << std::endl;
     }
+    ofs.close();
 
+    // TODO separate energy terms
+    ofs.open(ene_name_, std::ios::app);
+    ofs << time << " " << ff.calc_energy(sys) << std::endl;
     ofs.close();
 
     return ;
 }
-
-template<typename traitsT>
-inline void
-Observer<traitsT>::output_energy(const Simulator<traitsT>& sim) const
-{
-    std::ofstream ofs(ene_name_, std::ios::app);
-    const real_type Ep = sim.calc_energy();
-    const real_type Ek = this->calc_kinetic_energy(sim.particles());
-
-    ofs << std::setw(8) << sim.time() << " "
-        << std::setw(12) << Ep << " "
-        << std::setw(12) << Ek << " "
-        << std::setw(12) << Ep + Ek
-        << std::endl;
-    ofs.close();
-
-    return ;
-}
-
-template<typename traitsT>
-inline typename Observer<traitsT>::real_type
-Observer<traitsT>::calc_kinetic_energy(const ParticleContainer<traitsT>& pcon) const
-{
-    real_type k = 0.0;
-    for(auto iter = pcon.cbegin(); iter != pcon.cend(); ++iter)
-        k += length_sq(iter->velocity) * iter->mass;
-    return k * 0.5;
-}
-
-
 
 } // mjolnir
 #endif /* MJOLNIR_CORE_OBSERVER */

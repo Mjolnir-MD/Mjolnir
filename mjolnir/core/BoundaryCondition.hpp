@@ -5,101 +5,69 @@
 namespace mjolnir
 {
 
-template<typename traitsT>
+template<typename realT, typename coordT>
 struct UnlimitedBoundary
 {
-    typedef traitsT traits_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
+    typedef realT  real_type;
+    typedef coordT coord_type;
 
     UnlimitedBoundary() = default;
     ~UnlimitedBoundary() = default;
 
-    static coordinate_type
-    adjust_direction(coordinate_type dr) {return dr;}
-    static coordinate_type
-    adjust_absolute(coordinate_type r) {return r;}
+    coord_type adjust_direction(coord_type dr) const noexcept {return dr;}
+    coord_type adjust_position (coord_type r ) const noexcept {return r;}
 };
 
-template<typename traitsT>
-struct PeriodicBoundaryXYZ
+template<typename realT, typename coordT>
+struct CubicPeriodicBoundary
 {
   public:
-    typedef traitsT traits_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
+    typedef realT  real_type;
+    typedef coordT coordinate_type;
 
   public:
-    PeriodicBoundaryXYZ() = default;
-    ~PeriodicBoundaryXYZ() = default;
+    CubicPeriodicBoundary() = default;
+    ~CubicPeriodicBoundary() = default;
+    CubicPeriodicBoundary(
+            const coordinate_type& lw, const coordinate_type& up) noexcept
+    : lower(lw), upper(up), system_size_(up-lw), system_size_half(0.5*(up-lw))
+    {}
 
-    static void
-    set_system(const coordinate_type& lower, const coordinate_type upper)
+    coordinate_type adjust_direction(coordinate_type dr) const noexcept
     {
-        lower_         = lower;
-        upper_         = upper;
-        sys_size_      = upper_ - lower_;
-        sys_size_half_ = 0.5 * sys_size_;
-
-        assert(sys_size_[0] > 0.0);
-        assert(sys_size_[1] > 0.0);
-        assert(sys_size_[2] > 0.0);
-
-        assert(sys_size_half_[0] > 0.0);
-        assert(sys_size_half_[1] > 0.0);
-        assert(sys_size_half_[2] > 0.0);
-        return;
-    }
-
-    static coordinate_type
-    adjust_direction(coordinate_type dr)
-    {
-             if(dr[0] < -sys_size_half_[0]) dr[0] += sys_size_[0];
-        else if(dr[0] >  sys_size_half_[0]) dr[0] -= sys_size_[0];
-             if(dr[1] < -sys_size_half_[1]) dr[1] += sys_size_[1];
-        else if(dr[1] >  sys_size_half_[1]) dr[1] -= sys_size_[1];
-             if(dr[2] < -sys_size_half_[2]) dr[2] += sys_size_[2];
-        else if(dr[2] >  sys_size_half_[2]) dr[2] -= sys_size_[2];
+             if(dr[0] < -system_size_half[0]) dr[0] += system_size_[0];
+        else if(dr[0] >  system_size_half[0]) dr[0] -= system_size_[0];
+             if(dr[1] < -system_size_half[1]) dr[1] += system_size_[1];
+        else if(dr[1] >  system_size_half[1]) dr[1] -= system_size_[1];
+             if(dr[2] < -system_size_half[2]) dr[2] += system_size_[2];
+        else if(dr[2] >  system_size_half[2]) dr[2] -= system_size_[2];
         return dr;
     }
 
-    static coordinate_type
-    adjust_absolute(coordinate_type pos)
+    coordinate_type adjust_position(coordinate_type pos) const noexcept
     {
-             if(pos[0] < lower_[0]) pos[0] += sys_size_[0];
-        else if(pos[0] > upper_[0]) pos[0] -= sys_size_[0];
-             if(pos[1] < lower_[1]) pos[1] += sys_size_[1];
-        else if(pos[1] > upper_[1]) pos[1] -= sys_size_[1];
-             if(pos[2] < lower_[2]) pos[2] += sys_size_[2];
-        else if(pos[2] > upper_[2]) pos[2] -= sys_size_[2];
+             if(pos[0] < lower[0]) pos[0] += system_size_[0];
+        else if(pos[0] > upper[0]) pos[0] -= system_size_[0];
+             if(pos[1] < lower[1]) pos[1] += system_size_[1];
+        else if(pos[1] > upper[1]) pos[1] -= system_size_[1];
+             if(pos[2] < lower[2]) pos[2] += system_size_[2];
+        else if(pos[2] > upper[2]) pos[2] -= system_size_[2];
         return pos;
     }
 
-    static coordinate_type const& lower_bound() {return lower_;}
-    static coordinate_type const& upper_bound() {return upper_;}
-    static coordinate_type const& system_size() {return sys_size_;}
+    coordinate_type&       lower_bound()       noexcept {return lower;}
+    coordinate_type const& lower_bound() const noexcept {return lower;}
+    coordinate_type&       upper_bound()       noexcept {return upper;}
+    coordinate_type const& upper_bound() const noexcept {return upper;}
+    coordinate_type const& range() const noexcept {return system_size_;}
 
   private:
 
-    static coordinate_type lower_;
-    static coordinate_type upper_;
-    static coordinate_type sys_size_;
-    static coordinate_type sys_size_half_;
+    coordinate_type lower;
+    coordinate_type upper;
+    coordinate_type system_size_;
+    coordinate_type system_size_half;
 };
-
-template<typename traitsT>
-typename PeriodicBoundaryXYZ<traitsT>::coordinate_type
-PeriodicBoundaryXYZ<traitsT>::lower_;
-template<typename traitsT>
-typename PeriodicBoundaryXYZ<traitsT>::coordinate_type
-PeriodicBoundaryXYZ<traitsT>::upper_;
-template<typename traitsT>
-typename PeriodicBoundaryXYZ<traitsT>::coordinate_type
-PeriodicBoundaryXYZ<traitsT>::sys_size_;
-template<typename traitsT>
-typename PeriodicBoundaryXYZ<traitsT>::coordinate_type
-PeriodicBoundaryXYZ<traitsT>::sys_size_half_;
-
 
 }//mjolnir
 #endif /* MJOLNIR_BOUNDARY_CONDITION */

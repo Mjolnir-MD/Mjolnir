@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_LENNARD_JONES_POTENTIAL
 #define MJOLNIR_LENNARD_JONES_POTENTIAL
 #include <mjolnir/math/fast_inv_sqrt.hpp>
+#include <mjolnir/core/System.hpp>
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -34,6 +35,8 @@ class LennardJonesPotential
     {}
     ~LennardJonesPotential() = default;
 
+    void update(const System<traitsT>& sys) const {return;}
+
     void emplace(const parameter_type& radius);
     void emplace(parameter_type&& radius);
 
@@ -56,8 +59,6 @@ class LennardJonesPotential
                          const real_type r) const;
 
     real_type max_cutoff_length() const;
-
-    void reset_parameter(const std::string&, const real_type){return;}
 
   private:
 
