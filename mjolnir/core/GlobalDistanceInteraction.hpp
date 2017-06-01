@@ -31,6 +31,7 @@ class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
 
     void initialize(const system_type& sys, const real_type dt) override
     {
+        this->partition_.initialize(sys);
         this->partition_.update(sys, dt);
     }
 
