@@ -1,7 +1,5 @@
 #ifdef MJOLNIR_IMPLICIT_MEMBRANE_POTENTIAL
 #define MJOLNIR_IMPLICIT_MEMBRANE_POTENTIAL
-#include <vector>
-#include <algorithm>
 #include <cmath>
 
 namespace mjolnir
@@ -28,12 +26,13 @@ namespace mjolnir
 
     real_type potential(const real_type z) const
     {
-      return this->interantion_magnitude_ * tanh(bend_ * (abs(z) - thickness_));
+      return this->interantion_magnitude_ * std::tanh(bend_ * (std::abs(z) - thickness_));
     }
 
     real_type derivative(const real_type z) const
     {
-      return this->interantion_magnitude_ * z / (abs(z) * tanh(bend_ * (abs(z) - thickness_)));
+      return this->interantion_magnitude_ * z
+	/ (std::abs(z) * std::tanh(bend_ * (std::abs(z) - thickness_)));
     }
 
     void reset_parameter(const std::string&, const real_type){return;}
