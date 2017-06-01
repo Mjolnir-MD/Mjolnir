@@ -26,7 +26,7 @@ namespace mjolnir
       ~GlobalExternalInteraction() = default;
 
       GlobalExternalInteraction(potential_type&& pot,
-				       spatial_partition_type&& space)
+				spatial_partition_type&& space)
 	: potential_(std::move<potential_type>(pot)),
 	  spatial_partition_(std::move<spatial_partition_type>(space))
       {}
@@ -47,7 +47,7 @@ namespace mjolnir
     };
   
   //TODO この先に関数の実装を書く
-  template<typename traitT, typename potT, typename spaceT, typename boundaryT>
+  template<typename traitsT, typename potT, typename spaceT, typename boundaryT>
   void GlobalExternalInteraction<traitsT, potT, spaceT, boundaryT>::calc_force
   (particle_container_type& pcon)
   {
@@ -58,7 +58,32 @@ namespace mjolnir
     return ;
   }
 
-  template<typename traitT, typename potT, typename spaceT, typename boundaryT>
-  typename GlobalExternalInteraction
-  
+  template<typename traitsT, typename potT, typename spaceT, typename boundaryT>
+  typename GlobalExternalInteraction<traitsT, potT,spaceT, boundaryT>::calc_energy
+  (particle_container_type& pcon) const
+  {
+    real_type e = 0.0;
+    for(std::size_t i = 0; i < pcon.size(); ++i){
+      e += potential_.potential(i);
+    }
+    return e;
+  }
+
+  template<typename traitsT, typename potaT, typename spaceT, typename boudaryT>
+  void GlobalExternalInteraction<traitsT, potT, spaceT, boundaryT>::initialize
+  (const particle_container_type& pcon, const time_type dt)
+  {
+    this->spatial_partition_.update(pcon, dt);
+    return ;
+  }
+
+  template<typename traitsT, typename potaT, typename spaceT, typename boudaryT>
+  void GlobalDistanceInteraction<traitsT, potT, spaceT, boundaryT>::reset_parameter
+  (const std::string& name, const real_type val)
+  {
+    this->potential_.reset_parameter(name, val);
+    return ;
+  }
+ 
+   
 #endif /* MJOLNIR_GLOBAL_EXTERNAL_INTERACTION */
