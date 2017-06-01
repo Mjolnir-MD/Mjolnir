@@ -45,13 +45,13 @@ class PeriodicGridCellList
 
     PeriodicGridCellList(const real_type cutoff, const real_type mergin)
         : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
-          inv_cell_size_(1. / (cutoff + mergin + mesh_epsilon))
+          inv_cell_size_(1. / (cutoff * (1+mergin) + mesh_epsilon))
     {}
 
     PeriodicGridCellList(const real_type cutoff, const real_type mergin,
                          const real_type dt)
         : dt_(dt), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
-          inv_cell_size_(1. / (cutoff + mergin + mesh_epsilon))
+          inv_cell_size_(1. / (cutoff * (1+mergin) + mesh_epsilon))
     {}
 
     bool valid() const noexcept
@@ -91,6 +91,7 @@ class PeriodicGridCellList
     std::size_t dim_z_;
     static Logger& logger_;
 
+    coordinate_type    lower_bound_;
     partners_type      partners_;
     particle_info_type informations_;
     cell_list_type     cell_list_;
@@ -103,6 +104,7 @@ Logger& PeriodicGridCellList<traitsT>::logger_ =
 template<typename traitsT>
 void PeriodicGridCellList<traitsT>::make(const system_type& sys)
 {
+    this->lower_bound_ = sys.boundary().lower_bound();
     MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::make CALLED");
 
     this->partners_.resize(sys.size());
@@ -115,7 +117,7 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
     for(const auto& particle : sys)
     {
         MJOLNIR_LOG_DEBUG("set", idx, "-th particle at", index(particle.position));
-        cell_list_[index(particle.position)].first.push_back(idx);
+        cell_list_.at(index(particle.position)).first.push_back(idx);
         ++idx;
     }
     MJOLNIR_LOG_DEBUG("cell list is updated");
@@ -126,12 +128,11 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         const coordinate_type ri = sys[i].position;
-        const auto& cell = cell_list_.at(index(ri - sys.boundary().lower_bound()));
+        const auto& cell = cell_list_.at(index(ri));
 
         MJOLNIR_LOG_DEBUG("particle position", sys[i].position);
         MJOLNIR_LOG_DEBUG("making verlet list for index", i);
-        MJOLNIR_LOG_DEBUG("except list for ", i, "-th value has",
-                          this->except_.at(i).size(), "particles");
+        MJOLNIR_LOG_DEBUG("except list for ", i, "-th value");
 
         const auto& info       = informations_[i];
         const auto index_begin = info.except_indices.cbegin();
@@ -150,7 +151,7 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
 
             if(length_sq(sys.adjust_direction(sys.at(j).position - ri)) < r_c2)
             {
-                MJOLNIR_LOG_DEBUG("add index", j, "to verlet list");
+                MJOLNIR_LOG_DEBUG("add index", j, "to verlet list of", i);
                 this->partners_[i].push_back(j);
             }
         }
@@ -158,11 +159,10 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
         // neighbor cells
         for(std::size_t cidx : cell.second)
         {
-            MJOLNIR_LOG_DEBUG("neighboring cell index", *iter);
+            MJOLNIR_LOG_DEBUG("neighboring cell index", cidx);
 
             for(std::size_t j : cell_list_[cidx].first)
             {
-                MJOLNIR_LOG_DEBUG("looking particle", j);
                 if(j <= i || std::find(index_begin, index_end, j) != index_end)
                     continue;
 
@@ -172,7 +172,7 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
 
                 if(length_sq(sys.adjust_direction(sys.at(j).position - ri)) < r_c2)
                 {
-                    MJOLNIR_LOG_DEBUG("add index", j, "to verlet list");
+                    MJOLNIR_LOG_DEBUG("add index", j, "to verlet list of", i);
                     this->partners_[i].push_back(j);
                 }
             }
@@ -234,9 +234,9 @@ inline std::size_t
 PeriodicGridCellList<traitsT>::index(const coordinate_type& pos) const
 {
     return index(std::array<int, 3>{{
-        static_cast<int>(std::floor(pos[0]*inv_cell_size_)),
-        static_cast<int>(std::floor(pos[1]*inv_cell_size_)),
-        static_cast<int>(std::floor(pos[2]*inv_cell_size_))}});
+        static_cast<int>(std::floor((pos[0]-lower_bound_[0])*inv_cell_size_)),
+        static_cast<int>(std::floor((pos[1]-lower_bound_[1])*inv_cell_size_)),
+        static_cast<int>(std::floor((pos[2]-lower_bound_[2])*inv_cell_size_))}});
 }
 
 template<typename traitsT>
@@ -264,7 +264,9 @@ PeriodicGridCellList<traitsT>::add(
 template<typename traitsT>
 void PeriodicGridCellList<traitsT>::initialize(const system_type& sys)
 {
-    const coordinate_type& system_size = sys.boundary().range();
+    MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::initialize CALLED");
+    this->lower_bound_ = sys.boundary().lower_bound();
+    const auto system_size = sys.boundary().range();
     this->dim_x_ = system_size[0] * inv_cell_size_ + 1;
     this->dim_y_ = system_size[1] * inv_cell_size_ + 1;
     this->dim_z_ = system_size[2] * inv_cell_size_ + 1;
@@ -276,6 +278,7 @@ void PeriodicGridCellList<traitsT>::initialize(const system_type& sys)
     {
         const cell_index_type idx{{x, y, z}};
         auto& cell = this->cell_list_[index(idx)];
+
         cell.second[ 0] = index(add( 1,  0,  0, idx));
         cell.second[ 1] = index(add( 0,  1,  0, idx));
         cell.second[ 2] = index(add( 0,  0,  1, idx));
@@ -307,7 +310,12 @@ void PeriodicGridCellList<traitsT>::initialize(const system_type& sys)
         assert(self == cell.second.end());
         auto uniq = std::unique(cell.second.begin(), cell.second.end());
         assert(uniq == cell.second.end());
+        for(auto i : cell.second)
+        {
+            assert(0 <= i && i <= cell_list_.size());
+        }
     }
+    MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::initialize end");
     return;
 }
 
