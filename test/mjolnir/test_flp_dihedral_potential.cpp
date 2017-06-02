@@ -49,8 +49,9 @@ BOOST_AUTO_TEST_CASE(FlexibleLocalDihedral_double)
 BOOST_AUTO_TEST_CASE(FlexibleLocalDihedral_float)
 {
     typedef mjolnir::SimulatorTraitsBase<float, mjolnir::UnlimitedBoundary> traits;
-    constexpr static std::size_t       N = 100;
-    constexpr static traits::real_type h = 1e-3;
+    constexpr static std::size_t       N   = 100;
+    constexpr static traits::real_type h   = 1e-3;
+    constexpr static traits::real_type tol = 5e-3;
 
     typedef typename traits::real_type real_type;
     const real_type k  = 1.0;
@@ -72,9 +73,9 @@ BOOST_AUTO_TEST_CASE(FlexibleLocalDihedral_float)
         const real_type deri = flpd.derivative(x);
 
         if(std::abs(deri) > h)
-            BOOST_CHECK_CLOSE_FRACTION(dpot, deri, h);
+            BOOST_CHECK_CLOSE_FRACTION(dpot, deri, tol);
         else
-            BOOST_CHECK_SMALL(deri, h);
+            BOOST_CHECK_SMALL(deri, tol);
         x += dx;
     }
 }
