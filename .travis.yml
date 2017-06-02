@@ -3,29 +3,38 @@ language: cpp
 
 matrix:
   include:
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - build-essential
-            - g++-5
-      env: COMPILER=g++-5
-    - compiler: clang
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.7
-          packages:
-            - build-essential
-            - clang-3.7
-      env: COMPILER=clang++-3.7
+  - os: linux
+    language: cpp
+    compiler: gcc
+    env: COMPILER="g++-5"
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-5
+        - build-essential
+        - cmake
+        - libboost-test-dev
+  - os: linux
+    language: cpp
+    compiler: clang
+    env: COMPILER="clang++-3.7"
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - llvm-toolchain-precise-3.7
+        packages:
+        - clang-3.7
+        - build-essential
+        - cmake
+        - libboost-test-dev
+  - os: osx
+    language: cpp
+    compiler: clang
 
 install:
-- sudo apt-get -qq update;
-- sudo apt-get -qq install libboost-all-dev;
 - git submodule init
 - git submodule update
 
