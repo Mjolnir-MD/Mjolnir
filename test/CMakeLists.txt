@@ -1,2 +1,2 @@
 add_subdirectory(mjolnir)
-add_subdirectory(megingjord)
+# add_subdirectory(megingjord)
