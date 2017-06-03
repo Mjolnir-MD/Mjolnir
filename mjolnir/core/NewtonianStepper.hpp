@@ -87,7 +87,6 @@ NewtonianStepper<traitsT>::step(
     for(auto iter = make_zip(system.begin(), acceleration_.begin());
             iter != make_zip(system.end(), acceleration_.end()); ++iter)
     {
-        // consider cash 1/m
         const coordinate_type acc = get<0>(iter)->force / (get<0>(iter)->mass);
         *get<1>(iter) = acc;
         get<0>(iter)->velocity += halfdt_ * acc;

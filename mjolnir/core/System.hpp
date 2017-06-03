@@ -29,6 +29,8 @@ class System
 
     std::size_t size() const noexcept {return particles_.size();}
 
+    //XXX! these parameters are 'reference's. these are not a calculated values
+    //     but set by input to be used in thermostat, barostat, etc.
     real_type& pressure()             noexcept {return pressure_;}
     real_type  pressure()       const noexcept {return pressure_;}
     real_type& temperature()          noexcept {return temperature_;}
