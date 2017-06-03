@@ -59,11 +59,15 @@ class System
 
     boundary_type const& boundary() const noexcept {return boundary_;}
 
+    real_type& max_speed()       noexcept {return max_speed_;}
+    real_type  max_speed() const noexcept {return max_speed_;}
+
   private:
 
     real_type      temperature_;
     real_type      pressure_;
     real_type      ionic_strength_;
+    real_type      max_speed_;
     boundary_type  boundary_;
     container_type particles_;
 };
