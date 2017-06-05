@@ -20,18 +20,18 @@ namespace mjolnir
 
   public:
     ImplicitMembranePotential(const real_type th, const real_type ma, const real_type be)
-      : thickness_(th),interantion_magnitude_(ma),bend_(be);
+      : thickness_(th),interaction_magnitude_(ma),bend_(be);
     {}
     ~ImplicitMembranePotential() = default;
 
     real_type potential(const real_type z) const
     {
-      return this->interantion_magnitude_ * std::tanh(bend_ * (std::abs(z) - thickness_));
+      return this->interaction_magnitude_ * std::tanh(bend_ * (std::abs(z) - thickness_));
     }
 
     real_type derivative(const real_type z) const
     {
-      return this->interantion_magnitude_ * z
+      return this->interaction_magnitude_ * z
 	/ (std::abs(z) * std::tanh(bend_ * (std::abs(z) - thickness_)));
     }
 
@@ -39,9 +39,9 @@ namespace mjolnir
     
   private:
     
-    const real_type thickness_;
-    const real_type interantion_magnitude_;
-    const real_type bend_;
+    const real_type thickness_;//membrane thickness.
+    const real_type interaction_magnitude_;
+    const real_type bend_;//bend_ decide the slope of tanh carve.
   };
 }
 #endif /* MJOLNIR_IMPLICIT_MEMBRANE_POTENTIAL */
