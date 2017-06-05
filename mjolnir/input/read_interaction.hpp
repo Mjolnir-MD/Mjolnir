@@ -131,6 +131,18 @@ read_global_distance_interaction(const toml::Table& global)
     }
 }
 
+  template<typename traitsT>
+  std::unique_ptr<GlobalInteractionBase<traitT>>
+  read_global_external_interaction(const toml::Table& global)
+  {
+    const auto potential = toml::get<std::string>(global.at("potential"));
+    if(potential == "ImplicitMembrane")
+      {
+	//This is for MU.
+	return read_implicit_membrane_potential<traitT>(global);
+      }
+  }
+  
 template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
 read_local_interaction(const toml::Table& local)
@@ -164,6 +176,10 @@ read_global_interaction(const toml::Table& global)
     {
         return read_global_distance_interaction<traitsT>(global);
     }
+    else if(interaction == "External")
+      {
+	return read_global_external_interaction<traitT>(global);
+      }
     else
     {
         throw std::runtime_error(
