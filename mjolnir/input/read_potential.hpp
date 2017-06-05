@@ -10,6 +10,7 @@
 #include <mjolnir/potential/ExcludedVolumePotential.hpp>
 #include <mjolnir/potential/LennardJonesPotential.hpp>
 #include <mjolnir/potential/DebyeHuckelPotential.hpp>
+#include <mjolnir/potential/ImplicitMembranePotential.hpp>
 
 namespace mjolnir
 {
@@ -223,6 +224,19 @@ read_debye_huckel_potential(const toml::Table& global)
     return DebyeHuckelPotential<traitsT>(std::move(params));
 }
 
-
+  template<typename traitT>
+  ImplicitMembranePotential<traitT>
+  read_implicit_membrane_potential(const toml::Table& global)
+  {
+    typedef typename traitT::real_type real_type;
+    real_type thickness = toml::get<real_type>(global.at("thickness"));
+    real_type interaction_magnitude = toml::get<real_type>(global.at("interaction_magnitude"));
+    real_type bend = toml::get<real_type>(global.at("bend"));
+    const auto& global.at("parameters").cast<toml::value_t::Array>();
+    
+    //TODO many things.
+    return ImplicitMembranePotential<traitT>(std::move(params));
+  }
+  
 }
 #endif // MJOLNIR_READ_POTENTIAL
