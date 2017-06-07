@@ -1,4 +1,4 @@
-#ifdef MJOLNIR_IMPLICIT_MEMBRANE_POTENTIAL
+#ifndef MJOLNIR_IMPLICIT_MEMBRANE_POTENTIAL
 #define MJOLNIR_IMPLICIT_MEMBRANE_POTENTIAL
 #include <cmath>
 
@@ -9,7 +9,7 @@ namespace mjolnir
    * potential field dependent on z coordinate.    *
    * tanh is used to represent membrane potential. *
    *  V(z) = ma * tanh(be * (|z| - th))            *
-   * dV/dr = ma * z / (|z| * tanh(be * (|z| - th)))     */
+   * dV/dr = ma * z / (|z| * tanh(be * (|z| - th)))*///TODO This is incorrect. fix!
   template<typename traitT>
   class ImplicitMembranePotential
   {
@@ -18,6 +18,9 @@ namespace mjolnir
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
+    //TODO set cutoff_ratio;
+    constexpr static real_type cutoff_ratio
+    
   public:
     ImplicitMembranePotential(const real_type th, const real_type ma, const real_type be)
       : thickness_(th),interaction_magnitude_(ma),bend_(be);
