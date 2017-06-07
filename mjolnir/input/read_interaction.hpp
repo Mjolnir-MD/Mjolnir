@@ -139,8 +139,14 @@ read_global_distance_interaction(const toml::Table& global)
     if(potential == "ImplicitMembrane")
       {
 	//This is for MU.
-	return read_implicit_membrane_potential<traitT>(global);
+	return read_spatial_partition_for_external<
+	  traitsT, ImplicitMembranePotential<traitsT>>(
+		    global, read_implicit_membrane_potential<traitT>(global));
       }
+        else
+    {
+        throw std::runtime_error("invalid distance potential: " + potential);
+    }
   }
   
 template<typename traitsT>
