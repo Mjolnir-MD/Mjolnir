@@ -745,6 +745,8 @@ potential = "ImplicitMemnrane"
 thickness = 1.0 #TODO search proper value
 interaction_magnitude = 1.0 #TODO search proper value
 bend = 1.0 #TODO search proper value
+except_chains = []
+except_beads = []
 # params{{{
 parameters = [
 {index =  0, chain = 0, hydrophobicity = 1.0},
