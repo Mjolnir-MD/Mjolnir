@@ -232,9 +232,18 @@ read_debye_huckel_potential(const toml::Table& global)
     real_type thickness = toml::get<real_type>(global.at("thickness"));
     real_type interaction_magnitude = toml::get<real_type>(global.at("interaction_magnitude"));
     real_type bend = toml::get<real_type>(global.at("bend"));
-    const auto& global.at("parameters").cast<toml::value_t::Array>();
+    const auto& ps = global.at("parameters").cast<toml::value_t::Array>();
+
+    std::vector<real_type> params; params.reserve(ps.size());
+    for(const auto& param : ps)
+      {
+	const auto& tab = param.cast<toml::value_t::Table>();
+	const auto idx = toml::get<std::size_t>(tab.at("index"));
+	if(params.size() <= idx)
+	  params.resize(idx+1, 0.);
+	params.at(idx) = toml::get<real_type>(tab.at("sigma"));
+      }
     
-    //TODO many things.
     return ImplicitMembranePotential<traitT>(std::move(params));
   }
   
