@@ -5,11 +5,11 @@
 namespace mjolnir
 {
   
-  /* Implicit membrane potential & derivative      *
-   * potential field dependent on z coordinate.    *
-   * tanh is used to represent membrane potential. *
-   *  V(z) = ma * tanh(be * (|z| - th))            *
-   * dV/dr = ma * z / (|z| * tanh(be * (|z| - th)))*///TODO This is incorrect. fix!
+  /* Implicit membrane potential & derivative         *
+   * potential field dependent on z coordinate.       *
+   * tanh is used to represent membrane potential.    *
+   *  V(z) = ma * tanh(be * (|z| - th))               *
+   * dV/dr = (z/|z|) * ma * (cosh^2(be * (|z| - th))) */
   template<typename traitT>
   class ImplicitMembranePotential
   {
@@ -34,8 +34,8 @@ namespace mjolnir
 
     real_type derivative(const real_type z) const
     {
-      return this->interaction_magnitude_ * z
-	/ (std::abs(z) * std::tanh(bend_ * (std::abs(z) - thickness_)));
+      return this->std::copysign(1.0, z) * interaction_magnitude_
+	* be / std::pow((std::cosh(bend_ * (std::abs(z) - thickness_))),2);
     }
 
     void reset_parameter(const std::string&, const real_type){return;}
