@@ -101,5 +101,11 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT&& pot)
     }
 }
 
+template<typename traitsT, typename potentialT>
+std::unique_ptr<GlobalInteractionBase<traitT>>
+read_spatial_partition_for_externalMU(const toml::Table& global, potentialT&& pot)
+{
+    return make_unique<GlobalExternalInteraction<>>
+}
 }
 #endif// MJOLNIR_READ_SPATIAL_PARTITION
