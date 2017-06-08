@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(EXV_double)
 
 BOOST_AUTO_TEST_CASE(EXV_float)
 {
-    typedef mjolnir::SimulatorTraitsBase<double, mjolnir::UnlimitedBoundary> traits;
+    typedef mjolnir::SimulatorTraitsBase<float, mjolnir::UnlimitedBoundary> traits;
     constexpr static std::size_t       N    = 1000;
     constexpr static traits::real_type h    = 1e-3;
 
