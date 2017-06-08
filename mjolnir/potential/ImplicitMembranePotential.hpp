@@ -29,16 +29,19 @@ class ImplicitMembranePotential
 
     real_type potential(const real_type z) const
     {
-	return this->interaction_magnitude_ * std::tanh(bend_ * (std::abs(z) - thickness_));
+	return interaction_magnitude_ * std::tanh(bend_ * (std::abs(z) - thickness_));
     }
-
+    
     real_type derivative(const real_type z) const
     {
-	return this->std::copysign(1.0, z) * interaction_magnitude_
-	    * be / std::pow((std::cosh(bend_ * (std::abs(z) - thickness_))),2);
+	return std::copysign(1.0, z) * interaction_magnitude_
+	    * bend_ / std::pow((std::cosh(bend_ * (std::abs(z) - thickness_))),2);
     }
 
-    void reset_parameter(const std::string&, const real_type){return;}
+    real_type max_cutoff_length() const
+    {
+	return cutoff_ratio / bend_;
+    }
     
   private:
     
@@ -46,5 +49,7 @@ class ImplicitMembranePotential
     const real_type interaction_magnitude_;
     const real_type bend_;//bend_ decide the slope of tanh carve.
 };
+
+
 }
 #endif /* MJOLNIR_IMPLICIT_MEMBRANE_POTENTIAL */
