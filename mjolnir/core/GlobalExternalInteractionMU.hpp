@@ -42,7 +42,6 @@ class GlobalExternalInteraction : public GlobalInteractionBase<traitsT>
     spatial_partition_type spatial_partition_;
 };
 
-//TODO この先に関数の実装を書く
 template<typename traitsT, typename potT, typename spaceT, typename boundaryT>
 void GlobalExternalInteraction<traitsT, potT, spaceT, boundaryT>::calc_force
 (particle_container_type& pcon)
