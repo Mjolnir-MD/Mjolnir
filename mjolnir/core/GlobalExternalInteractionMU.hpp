@@ -5,36 +5,37 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename potentialT, typename partitionT,
-	 typename boundaryT = UnlimitedBoundary<traitT>>
+template<typename traitsT, typename potentialT, typename partition>
 class GlobalExternalInteraction : public GlobalInteractionBase<traitsT>
 {
   public:
     
-    using traits_type = traitsT;
-    using potential_type = potentialT;
-    using spartial_partition_type = partitionT;
-    using boundary_type = boudaryT;
-    using base_type = GlobalInteractionBase<traits_type>;
-    using time_type = base_type::time_type;
-    using real_type = base_type::real_type;
-    using coordinate_type = base_type::coordinate_type;
-    using particle_container_type = base_type::particle_container_type;
+    using traits_type             = traitsT;
+    using potential_type          = potentialT;
+    using partition_type = partitionT;
+    using base_type               = GlobalInteractionBase<traits_type>;
+    using real_type               = base_type::real_type;
+    using coordinate_type         = base_type::coordinate_type;
+    using system_type             = base_type::system_type;
+    using particle_type           = base_type::particle_type;
+    using boundary_type           = base_type::boundary_type;
     
   public:
     GlobalExternalInteraction()  = default;
     ~GlobalExternalInteraction() = default;
     
-    GlobalExternalInteraction(potential_type&& pot,
-			      spatial_partition_type&& space)
-	: potential_(std::move<potential_type>(pot)),
-	  spatial_partition_(std::move<spatial_partition_type>(space))
+    GlobalExternalInteraction(potential_type&& pot, partition_type&& part)
+	: potential_(std::move(pot)),spatial_partition_(std::move(part))
     {}
     
-    void
-    initialize(const particle_container_type& pcon, const time_type dt) override;
-    void calc_force(particle_container_type& pcon) override;
-    void calc_energy(const particle_container_type& pcon) override;
+    void initialize(const system_type&, const real_type) override
+    {
+	return ;
+	
+    }
+    
+    void calc_force(system_type&)                          override;
+    void calc_energy(const particle_container_type&) const override;
     
   private:
     
@@ -42,33 +43,27 @@ class GlobalExternalInteraction : public GlobalInteractionBase<traitsT>
     spatial_partition_type spatial_partition_;
 };
 
-template<typename traitsT, typename potT, typename spaceT, typename boundaryT>
-void GlobalExternalInteraction<traitsT, potT, spaceT, boundaryT>::calc_force
-(particle_container_type& pcon)
+template<typename traitsT, typename potT, typename spaceT>
+void GlobalExternalInteraction<traitsT, potT, spaceT>::calc_force(
+    system_type& sys)
 {
-    for(std::size_t i = 0; i < pcon.size(); ++i){
-	const coordinate_type f = potential_.derivative(i);
-	pcon[i].force += f;
+    for(std::size_t i = 0; i < sys.size(); ++i){
+	const real_type force = potential_.derivative(sys[i].position.at(2));
+	sys[i].force.at(2) += f;
     }
     return ;
 }
 
-template<typename traitsT, typename potT, typename spaceT, typename boundaryT>
-typename GlobalExternalInteraction<traitsT, potT,spaceT, boundaryT>::calc_energy
-(particle_container_type& pcon) const
+template<typename traitsT, typename potT, typename spaceT>
+typename GlobalExternalInteraction<traitsT, potT, spaceT>::calc_energy
+(system_type& sys) const
 {
     real_type e = 0.0;
-    for(std::size_t i = 0; i < pcon.size(); ++i){
-	e += potential_.potential(i);
+    for(std::size_t i = 0; i < sys.size(); ++i){
+	e += potential_.potential(sys[i].position.at(2));
     }
     return e;
 }
 
-template<typename traitsT, typename potaT, typename spaceT, typename boudaryT>
-void GlobalExternalInteraction<traitsT, potT, spaceT, boundaryT>::initialize
-(const particle_container_type& pcon, const time_type dt)
-{
-    this->spatial_partition_.update(pcon, dt);
-    return ;
 }  
 #endif /* MJOLNIR_GLOBAL_EXTERNAL_INTERACTION */
