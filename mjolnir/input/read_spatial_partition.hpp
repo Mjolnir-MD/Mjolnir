@@ -105,7 +105,9 @@ template<typename traitsT, typename potentialT>
 std::unique_ptr<GlobalInteractionBase<traitT>>
 read_spatial_partition_for_externalMU(const toml::Table& global, potentialT&& pot)
 {
-    return make_unique<GlobalExternalInteraction<>>
+    return make_unique<GlobalExternalInteraction<
+      traitsT, potentialT, SpatialPartitionForMU<traitsT>>
+		       >(std::move(pot), SpatialPartitionForMU<traitsT>{});
 }
 }
 #endif// MJOLNIR_READ_SPATIAL_PARTITION
