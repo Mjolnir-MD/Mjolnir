@@ -139,7 +139,7 @@ read_global_distance_interaction(const toml::Table& global)
     if(potential == "ImplicitMembrane")
       {
 	//This is for MU.
-	return read_spatial_partition_for_external<
+	return read_spatial_partition_for_externalMU<
 	  traitsT, ImplicitMembranePotential<traitsT>>(
 		    global, read_implicit_membrane_potential<traitT>(global));
       }
