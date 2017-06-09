@@ -12,7 +12,7 @@ class GlobalExternalInteraction : public GlobalInteractionBase<traitsT>
     
     using traits_type             = traitsT;
     using potential_type          = potentialT;
-    using partition_type = partitionT;
+    using partition_type          = partitionT;
     using base_type               = GlobalInteractionBase<traits_type>;
     using real_type               = base_type::real_type;
     using coordinate_type         = base_type::coordinate_type;
@@ -30,8 +30,7 @@ class GlobalExternalInteraction : public GlobalInteractionBase<traitsT>
     
     void initialize(const system_type&, const real_type) override
     {
-	return ;
-	
+	return ;	
     }
     
     void calc_force(system_type&)                          override;
