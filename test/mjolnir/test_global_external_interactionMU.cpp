@@ -15,25 +15,36 @@
 
 BOOST_AUTO_TEST_CASE(GlobalExternal_calc_force)
 {
-  typedef mjolnir::SimulatorTraitsBase<double, mjolnir::Unlimited> traits;
-  constexpr static traits::real_type tolerance = 1e-8;
+    typedef mjolnir::SimulatorTraitsBase<double, mjolnir::Unlimited> traits;
+    constexpr static traits::real_type tolerance = 1e-8;
 
-  typedef traits::real_type real_type;
-  typedef traits::coordinate_type coord_type;
-  typedef traits::boundary_type boudary_type;
-  typedef mjolnir::Particle<coord_type> particle_type;
-  typedef mjolnir::System<traits> system_type;
-  typedef mjolnir::ImplicitMembranePotential<traits> implicit_membrane_type;
-  typedef mjolnir::GlobalExternalInteraction<traits, implicit_membrane_type>
-    global_external_type;
+    typedef traits::real_type real_type;
+    typedef traits::coordinate_type coord_type;
+    typedef traits::boundary_type boudary_type;
+    typedef mjolnir::Particle<coord_type> particle_type;
+    typedef mjolnir::System<traits> system_type;
+    typedef mjolnir::ImplicitMembranePotential<traits> implicit_membrane_type;
+    typedef mjolnir::GlobalExternalInteraction<traits, implicit_membrane_type>
+	global_external_type;
+  
+    const real_type thickness(10.);
+    const real_type interaction_magnitude(1.);
+    const real_type bend(1.5);
 
-  std::vector<particle_type> ps{
-    {1., coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)}
-  };
-  system_type sys(std::move(ps), boundary_type{});
+    implicit_membrane_type potential{thickness, interaction_magnitude, bend};
+    global_external_type interaction{potential, boundary_type{}};
+  
+    std::vector<particle_type> ps{
+	{1., coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)}
+    };
+    system_type sys(std::move(ps), boundary_type{});
+  
+    const real_type dr = 1e-2;
+    real_type dist = -5.;
+    for(int i = 0; i < 2000; ++i)
+    {
+      
+    }
+}
 
-  
-  
-  implicit_membrane_type potential{  };
-  
   
