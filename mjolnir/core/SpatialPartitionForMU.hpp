@@ -22,10 +22,9 @@ class SpatialPartitionForMU
 
     SpatialPartitionForMU();
     ~SpatialPartitionForMU();
-
     
-	
-}    
+};
+
 }//end namspace mockup.
     
 }//end namespace mjolnir
