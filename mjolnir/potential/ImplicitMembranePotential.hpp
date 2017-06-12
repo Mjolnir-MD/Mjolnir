@@ -23,8 +23,7 @@ class ImplicitMembranePotential
     
   public:
     ImplicitMembranePotential(const real_type th, const real_type ma, const real_type be)
-	: thickness_(th),interaction_magnitude_(ma),bend_(be);
-    {}
+	: thickness_(th),interaction_magnitude_(ma),bend_(be){}
     ~ImplicitMembranePotential() = default;
 
     real_type potential(const real_type z) const
