@@ -4,6 +4,7 @@
 #include <mjolnir/core/PeriodicGridCellList.hpp>
 #include <mjolnir/core/NaivePairCalculation.hpp>
 #include <mjolnir/core/VerletList.hpp>
+#include <mjolnir/core/SpatialPartitionForMU.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 namespace mjolnir
@@ -102,7 +103,7 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT&& pot)
 }
 
 template<typename traitsT, typename potentialT>
-std::unique_ptr<GlobalInteractionBase<traitT>>
+std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_spatial_partition_for_externalMU(const toml::Table& global, potentialT&& pot)
 {
     return make_unique<GlobalExternalInteraction<
