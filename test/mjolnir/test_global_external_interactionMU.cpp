@@ -35,15 +35,31 @@ BOOST_AUTO_TEST_CASE(GlobalExternal_calc_force)
     global_external_type interaction{potential, boundary_type{}};
   
     std::vector<particle_type> ps{
-	{1., coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)}
+	{1., coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)}	
     };
     system_type sys(std::move(ps), boundary_type{});
   
     const real_type dr = 1e-2;
-    real_type dist = -5.;
+    real_type dist = -10.;
     for(int i = 0; i < 2000; ++i)
     {
-      
+	sys[0].position[0] = dist;
+	sys[0].position[1] = dist;
+	sys[0].position[2] = dist;
+
+	const real_type deriv = potential.derivative(dist);
+        const real_type coef  = std::abs(deriv);
+	
+	interaction.calcu_force(sys);
+
+	const real_type force_strength = mjolnir::length(sys[0].force);
+
+	BOOST_CHECK_CLOSE_FRACTION(coef, force_strength, tolerance);
+
+	BOOST_CHECK_EQUAL(sys[0].force[0],0);
+	BOOST_CHECK_EQUAL(sys[0].force[1],0);
+
+	dist += dr
     }
 }
 
