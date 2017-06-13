@@ -6,8 +6,7 @@
 
 namespace mjolnir
 {
-namespace mockup
-{
+
 template<typename traitsT>
 class SpatialPartitionForMU
 {
@@ -24,8 +23,6 @@ class SpatialPartitionForMU
     ~SpatialPartitionForMU();
     
 };
-
-}//end namspace mockup.
     
 }//end namespace mjolnir
 #endif// MJOLNIR_CORE_SPATIAL_PARTITION_FOR_MU
