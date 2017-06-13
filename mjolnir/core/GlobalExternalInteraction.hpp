@@ -37,8 +37,6 @@ namespace mjolnir
       calc_force(particle_container_type& pcon) override;
       void
       calc_energy(const particle_container_type& pcon) override;
-      void
-      reset_parameter(const std::string& name, const real_type value) override;
        
       
     private:
