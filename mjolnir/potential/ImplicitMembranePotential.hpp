@@ -5,12 +5,12 @@
 namespace mjolnir
 {
   
-/* Implicit membrane potential & derivative         *
- * potential field dependent on z coordinate.       *
- * tanh is used to represent membrane potential.    *
- *  V(z) = ma * tanh(be * (|z| - th))               *
- * dV/dr = (z/|z|) * ma * (cosh^2(be * (|z| - th))) *
- * Cutoff ratio ensure 1/1000 accuracy.             */
+/* Implicit membrane potential & derivative           *
+ * potential field dependent on z coordinate.         *
+ * tanh is used to represent membrane potential.      *
+ *  V(z) = ma * tanh(be * (|z| - th/2))               *
+ * dV/dr = (z/|z|) * ma * (cosh^2(be * (|z| - th/2))) *
+ * Cutoff ratio ensure 1/1000 accuracy.               */
 template<typename traitT>
 class ImplicitMembranePotential
 {
@@ -23,24 +23,26 @@ class ImplicitMembranePotential
     constexpr static real_type cutoff_ratio = 4.0;    
     
   public:
+    ImplicitMembranePotential() = default;
     ImplicitMembranePotential(
 	const real_type th, const real_type ma,
 	const real_type be, const std::vector<parameter_type>& params)
-	: thickness_(th),interaction_magnitude_(ma),bend_(be), hydrophobicities_(params)
+	: half_thick_(th * 0.5),interaction_magnitude_(ma),
+	  bend_(be), hydrophobicities_(params)
     {}
 
     ImplicitMembranePotential(
 	real_type&& th, real_type&& ma,
 	real_type&& be, std::vector<parameter_type>&& params)
-	: thickness_(std::forward<real_type>(th)),
+	: half_thick_(std::forward<real_type>(th * 0.5)),
 	  interaction_magnitude_(std::forward<real_type>(ma)),
 	  bend_(std::forward<real_type>(be)),
 	  hydrophobicities_(std::forward<real_type>(params))
     {}
     ~ImplicitMembranePotential() = default;
 
-    real_type  thickness() const {return thickness_;}
-    real_type& thickness()       {return thickness_;}
+    real_type  half_thick() const {return half_thick_;}
+    real_type& half_thick()       {return half_thick_;}
     real_type  interaction_magnitude() const {return interaction_magnitude_;}
     real_type& interaction_magnitude()       {return interaction_magnitude_;}
     real_type  bend() const {return bend_;}
@@ -72,7 +74,7 @@ class ImplicitMembranePotential
     
   private:
     
-    real_type thickness_;//membrane thickness.
+    real_type half_thick_;//membrane half of thickness.
     real_type interaction_magnitude_;
     real_type bend_;//bend_ decide the slope of tanh carve.
     std::vector<parameter_type> hydrophobicities_;
@@ -120,7 +122,7 @@ ImplicitMembranePotential<traitsT>::potential(
     const std::size_t i, const real_type z) const
 {
     return hydrophobicities_[i] *
-	interaction_magnitude_ * std::tanh(bend_ * (std::abs(z) - thickness_));
+	interaction_magnitude_ * std::tanh(bend_ * (std::abs(z) - half_thick_));
 }
 
 template<typename traitsT>
@@ -129,14 +131,14 @@ ImplicitMembranePotential<traitsT>::derivative(
     const std::size_t i, const real_type z) const
 {
     return hydrophobicities_[i] * std::copysign(1.0, z) * interaction_magnitude_
-	* bend_ / std::pow((std::cosh(bend_ * (std::abs(z) - thickness_))),2);
+	* bend_ / std::pow((std::cosh(bend_ * (std::abs(z) - half_thick_))),2);
 }
 
 template<typename traitsT>
 inline typename ImplicitMembranePotential<traitsT>::real_type
 ImplicitMembranePotential<traitsT>::max_cutoff_length() const
 {
-    return cutoff_ratio / bend_;
+    return cutoff_ratio / bend_ + half_thick_;
 }
     
 
