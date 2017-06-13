@@ -17,17 +17,17 @@ namespace mjolnir
 
 template<typename traitsT, std::size_t N>
 std::vector<std::pair<std::array<std::size_t, N>, HarmonicPotential<traitsT>>>
-read_harmonic_potential(const toml::Table& local)
+    read_harmonic_potential(const toml::Table& local)
 {
     const auto& params = local.at("parameters").cast<toml::value_t::Array>();
     std::vector<std::pair<std::array<std::size_t, N>,
-        HarmonicPotential<traitsT>>> retval; retval.reserve(params.size());
+			  HarmonicPotential<traitsT>>> retval; retval.reserve(params.size());
 
     for(const auto& item : params)
     {
         const auto& parameter = item.cast<toml::value_t::Table>();
         auto indices = toml::get<std::array<std::size_t, N>>(
-                parameter.at("indices"));
+	    parameter.at("indices"));
         auto r0 = toml::get<typename traitsT::real_type>(parameter.at("native"));
         auto k  = toml::get<typename traitsT::real_type>(parameter.at("k"));
 
@@ -38,17 +38,17 @@ read_harmonic_potential(const toml::Table& local)
 
 template<typename traitsT, std::size_t N>
 std::vector<std::pair<std::array<std::size_t, N>, Go1012ContactPotential<traitsT>>>
-read_go1012_contact_potential(const toml::Table& local)
+    read_go1012_contact_potential(const toml::Table& local)
 {
     const auto& params = local.at("parameters").cast<toml::value_t::Array>();
     std::vector<std::pair<std::array<std::size_t, N>,
-        Go1012ContactPotential<traitsT>>> retval; retval.reserve(params.size());
+			  Go1012ContactPotential<traitsT>>> retval; retval.reserve(params.size());
 
     for(const auto& item : params)
     {
         const auto& parameter = item.cast<toml::value_t::Table>();
         auto indices = toml::get<std::array<std::size_t, N>>(
-                parameter.at("indices"));
+	    parameter.at("indices"));
         auto r0 = toml::get<typename traitsT::real_type>(parameter.at("native"));
         auto k  = toml::get<typename traitsT::real_type>(parameter.at("k"));
 
@@ -60,18 +60,18 @@ read_go1012_contact_potential(const toml::Table& local)
 
 template<typename traitsT, std::size_t N>
 std::vector<std::pair<std::array<std::size_t, N>, GaussianPotential<traitsT>>>
-read_gaussian_potential(const toml::Table& local)
+    read_gaussian_potential(const toml::Table& local)
 {
     typedef typename traitsT::real_type real_type;
     const auto& params = local.at("parameters").cast<toml::value_t::Array>();
     std::vector<std::pair<std::array<std::size_t, N>,
-        GaussianPotential<traitsT>>> retval; retval.reserve(params.size());
+			  GaussianPotential<traitsT>>> retval; retval.reserve(params.size());
 
     for(const auto& item : params)
     {
         const auto& parameter = item.cast<toml::value_t::Table>();
         auto indices = toml::get<std::array<std::size_t, N>>(
-                parameter.at("indices"));
+	    parameter.at("indices"));
         auto native  = toml::get<real_type>(parameter.at("native"));
         auto epsilon = toml::get<real_type>(parameter.at("epsilon"));
         auto w       = toml::get<real_type>(parameter.at("w"));
@@ -85,26 +85,26 @@ read_gaussian_potential(const toml::Table& local)
 template<typename traitsT, std::size_t N>
 std::vector<std::pair<std::array<std::size_t, N>,
                       FlexibleLocalAnglePotential<traitsT>>>
-read_flexible_local_angle_potential(const toml::Table& local)
+    read_flexible_local_angle_potential(const toml::Table& local)
 {
     typedef typename traitsT::real_type real_type;
 
     const auto& params = local.at("parameters").cast<toml::value_t::Array>();
     std::vector<std::pair<std::array<std::size_t, N>,
-        FlexibleLocalAnglePotential<traitsT>>> retval;
+			  FlexibleLocalAnglePotential<traitsT>>> retval;
     retval.reserve(params.size());
 
     for(const auto& item : params)
     {
         const auto& parameter = item.cast<toml::value_t::Table>();
         auto indices = toml::get<std::array<std::size_t, N>>(
-                parameter.at("indices"));
+	    parameter.at("indices"));
         auto k     = toml::get<real_type>(parameter.at("k"));
         auto term1 = toml::get<std::array<real_type, 10>>(parameter.at("term1"));
         auto term2 = toml::get<std::array<real_type, 10>>(parameter.at("term2"));
 
         retval.emplace_back(std::move(indices),
-            FlexibleLocalAnglePotential<traitsT>(k, term1, term2));
+			    FlexibleLocalAnglePotential<traitsT>(k, term1, term2));
     }
     return retval;
 }
@@ -112,18 +112,18 @@ read_flexible_local_angle_potential(const toml::Table& local)
 template<typename traitsT, std::size_t N>
 std::vector<std::pair<std::array<std::size_t, N>,
                       ClementiDihedralPotential<traitsT>>>
-read_clementi_dihedral_potential(const toml::Table& local)
+    read_clementi_dihedral_potential(const toml::Table& local)
 {
     typedef typename traitsT::real_type real_type;
     const auto& params = local.at("parameters").cast<toml::value_t::Array>();
     std::vector<std::pair<std::array<std::size_t, N>,
-        ClementiDihedralPotential<traitsT>>> retval; retval.reserve(params.size());
+			  ClementiDihedralPotential<traitsT>>> retval; retval.reserve(params.size());
 
     for(const auto& item : params)
     {
         const auto& parameter = item.cast<toml::value_t::Table>();
         auto indices = toml::get<std::array<std::size_t, N>>(
-                parameter.at("indices"));
+	    parameter.at("indices"));
         auto native = toml::get<real_type>(parameter.at("native"));
         auto k1     = toml::get<real_type>(parameter.at("k1"));
         auto k3     = toml::get<real_type>(parameter.at("k3"));
@@ -137,19 +137,19 @@ read_clementi_dihedral_potential(const toml::Table& local)
 template<typename traitsT, std::size_t N>
 std::vector<std::pair<std::array<std::size_t, N>,
                       FlexibleLocalDihedralPotential<traitsT>>>
-read_flexible_local_dihedral_potential(const toml::Table& local)
+    read_flexible_local_dihedral_potential(const toml::Table& local)
 {
     typedef typename traitsT::real_type real_type;
     const auto& params = local.at("parameters").cast<toml::value_t::Array>();
     std::vector<std::pair<std::array<std::size_t, N>,
-        FlexibleLocalDihedralPotential<traitsT>>> retval;
+			  FlexibleLocalDihedralPotential<traitsT>>> retval;
     retval.reserve(params.size());
 
     for(const auto& item : params)
     {
         const auto& parameter = item.cast<toml::value_t::Table>();
         auto indices = toml::get<std::array<std::size_t, N>>(
-                parameter.at("indices"));
+	    parameter.at("indices"));
         auto k    = toml::get<real_type>(parameter.at("k"));
         auto term = toml::get<std::array<real_type, 7>>(parameter.at("term"));
 
@@ -224,28 +224,30 @@ read_debye_huckel_potential(const toml::Table& global)
     return DebyeHuckelPotential<traitsT>(std::move(params));
 }
 
-  template<typename traitT>
-  ImplicitMembranePotential<traitT>
-  read_implicit_membrane_potential(const toml::Table& global)
-  {
-    typedef typename traitT::real_type real_type;
+template<typename traitsT>
+ImplicitMembranePotential<traitsT>
+read_implicit_membrane_potential(const toml::Table& global)
+{
+    typedef typename traitsT::real_type real_type;
     real_type thickness = toml::get<real_type>(global.at("thickness"));
-    real_type interaction_magnitude = toml::get<real_type>(global.at("interaction_magnitude"));
+    real_type interaction_magnitude =
+	toml::get<real_type>(global.at("interaction_magnitude"));
     real_type bend = toml::get<real_type>(global.at("bend"));
     const auto& ps = global.at("parameters").cast<toml::value_t::Array>();
 
     std::vector<real_type> params; params.reserve(ps.size());
     for(const auto& param : ps)
-      {
+    {
 	const auto& tab = param.cast<toml::value_t::Table>();
 	const auto idx = toml::get<std::size_t>(tab.at("index"));
 	if(params.size() <= idx)
-	  params.resize(idx+1, 0.);
+	    params.resize(idx+1, 0.);
 	params.at(idx) = toml::get<real_type>(tab.at("sigma"));
-      }
+    }
     
-    return ImplicitMembranePotential<traitT>(std::move(params));
-  }
+    return ImplicitMembranePotential<traitsT>(
+	thickness, interaction_magnitude, bend, std::move(params));
+}
   
 }
 #endif // MJOLNIR_READ_POTENTIAL
