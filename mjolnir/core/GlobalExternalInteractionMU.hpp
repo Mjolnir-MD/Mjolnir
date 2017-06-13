@@ -1,12 +1,13 @@
 #ifndef MJOLNIR_GLOBAL_EXTERNAL_INTERACTION
 #define MJOLNIR_GLOBAL_EXTERNAL_INTERACTION
 #include "GlobalInteractionBase.hpp"
+#include <memory>
 
 namespace mjolnir
 {
 
 template<typename traitsT, typename potentialT, typename partitionT>
-class GlobalExternalInteraction : public GlobalInteractionBase<traitsT>
+class GlobalExternalInteraction final : public GlobalInteractionBase<traitsT>
 {
   public:
     
@@ -25,10 +26,10 @@ class GlobalExternalInteraction : public GlobalInteractionBase<traitsT>
     ~GlobalExternalInteraction() = default;
     
     GlobalExternalInteraction(potential_type&& pot, partition_type&& part)
-	: potential_(std::move(pot)),spatial_partition_(std::move(part))
+	: potential_(std::move(pot)), partition_(std::move(part))
     {}
     
-    void initialize(const system_type&, const real_type) override
+    void initialize(const system_type& sys, const real_type dt) override
     {
 	return ;	
     }
@@ -39,7 +40,7 @@ class GlobalExternalInteraction : public GlobalInteractionBase<traitsT>
   private:
     
     potential_type potential_;
-    partition_type spatial_partition_;
+    partition_type partition_;
 };
 
 template<typename traitsT, typename potT, typename spaceT>
@@ -65,5 +66,5 @@ GlobalExternalInteraction<traitsT, potT, spaceT>::calc_energy(
     return e;
 }
 
-}  
+} //mjolnir
 #endif /* MJOLNIR_GLOBAL_EXTERNAL_INTERACTION */
