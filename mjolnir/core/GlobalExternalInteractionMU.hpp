@@ -5,7 +5,7 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename potentialT, typename partition>
+template<typename traitsT, typename potentialT, typename partitionT>
 class GlobalExternalInteraction : public GlobalInteractionBase<traitsT>
 {
   public:
@@ -14,11 +14,11 @@ class GlobalExternalInteraction : public GlobalInteractionBase<traitsT>
     using potential_type          = potentialT;
     using partition_type          = partitionT;
     using base_type               = GlobalInteractionBase<traits_type>;
-    using real_type               = base_type::real_type;
-    using coordinate_type         = base_type::coordinate_type;
-    using system_type             = base_type::system_type;
-    using particle_type           = base_type::particle_type;
-    using boundary_type           = base_type::boundary_type;
+    using real_type               = typename base_type::real_type;
+    using coordinate_type         = typename base_type::coordinate_type;
+    using system_type             = typename base_type::system_type;
+    using particle_type           = typename base_type::particle_type;
+    using boundary_type           = typename base_type::boundary_type;
     
   public:
     GlobalExternalInteraction()  = default;
@@ -33,13 +33,13 @@ class GlobalExternalInteraction : public GlobalInteractionBase<traitsT>
 	return ;	
     }
     
-    void calc_force(system_type&)                          override;
-    void calc_energy(const particle_container_type&) const override;
+    void      calc_force(system_type&)              override;
+    real_type calc_energy(const system_type&) const override;
     
   private:
     
     potential_type potential_;
-    spatial_partition_type spatial_partition_;
+    partition_type spatial_partition_;
 };
 
 template<typename traitsT, typename potT, typename spaceT>
@@ -47,19 +47,20 @@ void GlobalExternalInteraction<traitsT, potT, spaceT>::calc_force(
     system_type& sys)
 {
     for(std::size_t i = 0; i < sys.size(); ++i){
-	const real_type force = potential_.derivative(sys[i].position.at(2));
-	sys[i].force.at(2) += f;
+	const real_type force = -potential_.derivative(i, sys[i].position.at(2));
+	sys[i].force.at(2) += force;
     }
     return ;
 }
 
 template<typename traitsT, typename potT, typename spaceT>
-typename GlobalExternalInteraction<traitsT, potT, spaceT>::calc_energy
-(system_type& sys) const
+typename GlobalExternalInteraction<traitsT, potT, spaceT>::real_type 
+GlobalExternalInteraction<traitsT, potT, spaceT>::calc_energy(
+    const system_type& sys) const
 {
     real_type e = 0.0;
     for(std::size_t i = 0; i < sys.size(); ++i){
-	e += potential_.potential(sys[i].position.at(2));
+	e += potential_.potential(i, sys[i].position.at(2));
     }
     return e;
 }
