@@ -19,8 +19,8 @@ class SpatialPartitionForMU
     
   public:
 
-    SpatialPartitionForMU();
-    ~SpatialPartitionForMU();
+    SpatialPartitionForMU() = default;
+    ~SpatialPartitionForMU() = default;
     
 };
     
