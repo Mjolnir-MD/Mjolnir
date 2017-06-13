@@ -10,33 +10,40 @@
 #include <mjolnir/core/GlobalExternalInteractionMU.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/SpatialPartitionForMU.hpp>
 #include <mjolnir/potential/ImplicitMembranePotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 BOOST_AUTO_TEST_CASE(GlobalExternal_calc_force)
 {
-    typedef mjolnir::SimulatorTraitsBase<double, mjolnir::Unlimited> traits;
+    typedef mjolnir::SimulatorTraitsBase<double, mjolnir::UnlimitedBoundary> traits;
     constexpr static traits::real_type tolerance = 1e-8;
 
     typedef traits::real_type real_type;
     typedef traits::coordinate_type coord_type;
-    typedef traits::boundary_type boudary_type;
+    typedef traits::boundary_type boundary_type;
     typedef mjolnir::Particle<coord_type> particle_type;
     typedef mjolnir::System<traits> system_type;
     typedef mjolnir::ImplicitMembranePotential<traits> implicit_membrane_type;
-    typedef mjolnir::GlobalExternalInteraction<traits, implicit_membrane_type>
+    typedef mjolnir::SpatialPartitionForMU<traits> partition_for_mockup_type;
+    typedef mjolnir::GlobalExternalInteraction<
+	traits, implicit_membrane_type,partition_for_mockup_type>
 	global_external_type;
   
     const real_type thickness(10.);
     const real_type interaction_magnitude(1.);
     const real_type bend(1.5);
+    const std::vector<real_type> hydrophobicity{1.};
 
-    implicit_membrane_type potential{thickness, interaction_magnitude, bend};
-    global_external_type interaction{potential, boundary_type{}};
-  
+    implicit_membrane_type potential{
+	thickness, interaction_magnitude, bend, hydrophobicity};
+    global_external_type interaction{
+	std::forward<implicit_membrane_type>(potential), partition_for_mockup_type{}};
+    
     std::vector<particle_type> ps{
 	{1., coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)}	
     };
+    
     system_type sys(std::move(ps), boundary_type{});
   
     const real_type dr = 1e-2;
@@ -47,10 +54,10 @@ BOOST_AUTO_TEST_CASE(GlobalExternal_calc_force)
 	sys[0].position[1] = dist;
 	sys[0].position[2] = dist;
 
-	const real_type deriv = potential.derivative(dist);
+	const real_type deriv = potential.derivative(0, dist);
         const real_type coef  = std::abs(deriv);
 	
-	interaction.calcu_force(sys);
+	interaction.calc_force(sys);
 
 	const real_type force_strength = mjolnir::length(sys[0].force);
 
@@ -59,7 +66,7 @@ BOOST_AUTO_TEST_CASE(GlobalExternal_calc_force)
 	BOOST_CHECK_EQUAL(sys[0].force[0],0);
 	BOOST_CHECK_EQUAL(sys[0].force[1],0);
 
-	dist += dr
+	dist += dr;
     }
 }
 
