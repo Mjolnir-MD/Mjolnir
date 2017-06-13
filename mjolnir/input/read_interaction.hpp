@@ -7,6 +7,7 @@
 #include <mjolnir/core/DihedralAngleInteraction.hpp>
 #include <mjolnir/core/GlobalInteractionBase.hpp>
 #include <mjolnir/core/GlobalDistanceInteraction.hpp>
+#include <mjolnir/core/GlobalExternalInteractionMU.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <memory>
 #include "read_potential.hpp"
@@ -132,7 +133,7 @@ read_global_distance_interaction(const toml::Table& global)
 }
 
   template<typename traitsT>
-  std::unique_ptr<GlobalInteractionBase<traitT>>
+  std::unique_ptr<GlobalInteractionBase<traitsT>>
   read_global_external_interaction(const toml::Table& global)
   {
     const auto potential = toml::get<std::string>(global.at("potential"));
@@ -141,7 +142,7 @@ read_global_distance_interaction(const toml::Table& global)
 	//This is for MU.
 	return read_spatial_partition_for_externalMU<
 	  traitsT, ImplicitMembranePotential<traitsT>>(
-		    global, read_implicit_membrane_potential<traitT>(global));
+		    global, read_implicit_membrane_potential<traitsT>(global));
       }
         else
     {
@@ -184,7 +185,7 @@ read_global_interaction(const toml::Table& global)
     }
     else if(interaction == "External")
       {
-	return read_global_external_interaction<traitT>(global);
+	return read_global_external_interaction<traitsT>(global);
       }
     else
     {
