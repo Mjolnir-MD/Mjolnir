@@ -242,7 +242,7 @@ read_implicit_membrane_potential(const toml::Table& global)
 	const auto idx = toml::get<std::size_t>(tab.at("index"));
 	if(params.size() <= idx)
 	    params.resize(idx+1, 0.);
-	params.at(idx) = toml::get<real_type>(tab.at("sigma"));
+	params.at(idx) = toml::get<real_type>(tab.at("hydrophobicity"));
     }
     
     return ImplicitMembranePotential<traitsT>(
