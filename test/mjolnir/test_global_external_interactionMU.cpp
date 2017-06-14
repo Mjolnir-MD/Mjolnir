@@ -53,7 +53,8 @@ BOOST_AUTO_TEST_CASE(GlobalExternal_calc_force)
 	sys[0].position[0] = dist;
 	sys[0].position[1] = dist;
 	sys[0].position[2] = dist;
-
+	sys[0].force = coord_type(0, 0, 0); 
+	
 	const real_type deriv = potential.derivative(0, dist);
         const real_type coef  = std::abs(deriv);
 	
