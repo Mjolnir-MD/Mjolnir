@@ -741,16 +741,70 @@ parameters = [
 #}}}
 [[forcefields.global]]
 interaction = "External"
-potential = "ImplicitMemnrane"
-thickness = 1.0 #TODO search proper value
+potential = "ImplicitMembrane"
+thickness = 10.0 #TODO search proper value
 interaction_magnitude = 1.0 #TODO search proper value
 bend = 1.0 #TODO search proper value
-except_chains = []
-except_beads = []
+#except_chains = [] TODO
+#except_beads = [] TODO
 # params{{{
 parameters = [
 {index =  0, chain = 0, hydrophobicity = 1.0},
-{index =  1, chain = 0, hydrophobicity = 0.0},
+{index =  1, chain = 0, hydrophobicity = 1.0},
+{index =  2, chain = 0, hydrophobicity = 1.0},
+{index =  3, chain = 0, hydrophobicity = 1.0},
+{index =  4, chain = 0, hydrophobicity = 1.0},
+{index =  5, chain = 0, hydrophobicity = 1.0},
+{index =  6, chain = 0, hydrophobicity = 1.0},
+{index =  7, chain = 0, hydrophobicity = 1.0},
+{index =  8, chain = 0, hydrophobicity = 1.0},
+{index =  9, chain = 0, hydrophobicity = 1.0},
+{index = 10, chain = 0, hydrophobicity = 1.0},
+{index = 11, chain = 0, hydrophobicity = 1.0},
+{index = 12, chain = 0, hydrophobicity = 1.0},
+{index = 13, chain = 0, hydrophobicity = 1.0},
+{index = 14, chain = 0, hydrophobicity = 1.0},
+{index = 15, chain = 0, hydrophobicity = 1.0},
+{index = 16, chain = 0, hydrophobicity = 1.0},
+{index = 17, chain = 0, hydrophobicity = 1.0},
+{index = 18, chain = 0, hydrophobicity = 1.0},
+{index = 19, chain = 0, hydrophobicity = 1.0},
+{index = 20, chain = 0, hydrophobicity = 1.0},
+{index = 21, chain = 0, hydrophobicity = 1.0},
+{index = 22, chain = 0, hydrophobicity = 1.0},
+{index = 23, chain = 0, hydrophobicity = 1.0},
+{index = 24, chain = 0, hydrophobicity = 1.0},
+{index = 25, chain = 0, hydrophobicity = 1.0},
+{index = 26, chain = 0, hydrophobicity = 1.0},
+{index = 27, chain = 0, hydrophobicity = 1.0},
+{index = 28, chain = 0, hydrophobicity = 1.0},
+{index = 29, chain = 0, hydrophobicity = 1.0},
+{index = 30, chain = 0, hydrophobicity = 1.0},
+{index = 31, chain = 0, hydrophobicity = 1.0},
+{index = 32, chain = 0, hydrophobicity = 1.0},
+{index = 33, chain = 0, hydrophobicity = 1.0},
+{index = 34, chain = 0, hydrophobicity = 1.0},
+{index = 35, chain = 0, hydrophobicity = 1.0},
+{index = 36, chain = 0, hydrophobicity = 1.0},
+{index = 37, chain = 0, hydrophobicity = 1.0},
+{index = 38, chain = 0, hydrophobicity = 1.0},
+{index = 39, chain = 0, hydrophobicity = 1.0},
+{index = 40, chain = 0, hydrophobicity = 1.0},
+{index = 41, chain = 0, hydrophobicity = 1.0},
+{index = 42, chain = 0, hydrophobicity = 1.0},
+{index = 43, chain = 0, hydrophobicity = 1.0},
+{index = 44, chain = 0, hydrophobicity = 1.0},
+{index = 45, chain = 0, hydrophobicity = 1.0},
+{index = 46, chain = 0, hydrophobicity = 1.0},
+{index = 47, chain = 0, hydrophobicity = 1.0},
+{index = 48, chain = 0, hydrophobicity = 1.0},
+{index = 49, chain = 0, hydrophobicity = 1.0},
+{index = 50, chain = 0, hydrophobicity = 1.0},
+{index = 51, chain = 0, hydrophobicity = 1.0},
+{index = 52, chain = 0, hydrophobicity = 1.0},
+{index = 53, chain = 0, hydrophobicity = 1.0},
+{index = 54, chain = 0, hydrophobicity = 1.0},
+{index = 55, chain = 0, hydrophobicity = 1.0},
+]                        
 #TODO write continuation#
-]
-#}}}
+#}}}                     
