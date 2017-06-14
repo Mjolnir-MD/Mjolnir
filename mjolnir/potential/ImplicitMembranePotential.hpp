@@ -26,18 +26,18 @@ class ImplicitMembranePotential
     ImplicitMembranePotential() = default;
     ImplicitMembranePotential(
 	const real_type th, const real_type ma,
-	const real_type be, const std::vector<parameter_type>& params)
+	const real_type be, const std::vector<parameter_type>& hydrophobicities)
 	: half_thick_(th * 0.5),interaction_magnitude_(ma),
-	  bend_(be), hydrophobicities_(params)
+	  bend_(be), hydrophobicities_(hydrophobicities)
     {}
 
     ImplicitMembranePotential(
 	real_type&& th, real_type&& ma,
-	real_type&& be, std::vector<parameter_type>&& params)
+	real_type&& be, std::vector<parameter_type>&& hydrophobicities)
 	: half_thick_(std::forward<real_type>(th * 0.5)),
 	  interaction_magnitude_(std::forward<real_type>(ma)),
 	  bend_(std::forward<real_type>(be)),
-	  hydrophobicities_(std::forward<real_type>(params))
+	  hydrophobicities_(std::forward<real_type>(hydrophobicities))
     {}
     ~ImplicitMembranePotential() = default;
 
