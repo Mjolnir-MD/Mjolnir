@@ -12,7 +12,7 @@ struct SimulatorTraitsBase
     typedef realT                                 real_type;
     typedef Vector<real_type, 3>                  coordinate_type;
     typedef coordinate_type                       position_type;
-    typedef Particle<real_type, coordinate_type>  particle_type;
+    typedef Particle<coordinate_type>             particle_type;
     typedef boundaryT<real_type, coordinate_type> boundary_type;
 };
 
