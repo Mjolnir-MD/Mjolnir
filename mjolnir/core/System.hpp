@@ -1,6 +1,5 @@
 #ifndef MJOLNIR_SYSTEM
 #define MJOLNIR_SYSTEM
-#include "Particle.hpp"
 #include <vector>
 
 namespace mjolnir
@@ -14,7 +13,7 @@ class System
     typedef typename traits_type::real_type         real_type;
     typedef typename traits_type::coordinate_type   coordinate_type;
     typedef typename traits_type::boundary_type     boundary_type;
-    typedef Particle<coordinate_type>               particle_type;
+    typedef typename traits_type::particle_type     particle_type;
     typedef std::vector<particle_type>              container_type;
     typedef typename container_type::iterator       iterator;
     typedef typename container_type::const_iterator const_iterator;
