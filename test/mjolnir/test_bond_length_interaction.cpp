@@ -10,7 +10,7 @@
 #include <mjolnir/core/BondLengthInteraction.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/potential/HarmonicPotential.hpp>
+#include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 BOOST_AUTO_TEST_CASE(BondLength_calc_force)

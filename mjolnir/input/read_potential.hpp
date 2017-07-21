@@ -1,15 +1,15 @@
 #ifndef MJOLNIR_READ_POTENTIAL
 #define MJOLNIR_READ_POTENTIAL
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/potential/HarmonicPotential.hpp>
-#include <mjolnir/potential/Go1012ContactPotential.hpp>
-#include <mjolnir/potential/ClementiDihedralPotential.hpp>
-#include <mjolnir/potential/GaussianPotential.hpp>
-#include <mjolnir/potential/FlexibleLocalAnglePotential.hpp>
-#include <mjolnir/potential/FlexibleLocalDihedralPotential.hpp>
-#include <mjolnir/potential/ExcludedVolumePotential.hpp>
-#include <mjolnir/potential/LennardJonesPotential.hpp>
-#include <mjolnir/potential/DebyeHuckelPotential.hpp>
+#include <mjolnir/potential/local/HarmonicPotential.hpp>
+#include <mjolnir/potential/local/Go1012ContactPotential.hpp>
+#include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
+#include <mjolnir/potential/local/GaussianPotential.hpp>
+#include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
+#include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
+#include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
+#include <mjolnir/potential/global/LennardJonesPotential.hpp>
+#include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
 
 namespace mjolnir
 {
