@@ -107,7 +107,7 @@ std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_spatial_partition_for_implicit_membrane(const toml::Table& global, potentialT&& pot)
 {
     const auto cutoff = pot.max_cutoff_length();
-    return make_unique<GlobalExternalInteraction<
+    return make_unique<ZaxisExternalForceInteraction<
       traitsT, potentialT, ImplicitMembraneList<traitsT>>
 		       >(std::move(pot), ImplicitMembraneList<traitsT>{cutoff});
 }
