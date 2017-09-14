@@ -7,7 +7,7 @@
 #include <mjolnir/core/DihedralAngleInteraction.hpp>
 #include <mjolnir/core/GlobalInteractionBase.hpp>
 #include <mjolnir/core/GlobalDistanceInteraction.hpp>
-#include <mjolnir/core/GlobalExternalInteractionMU.hpp>
+#include <mjolnir/core/GlobalExternalInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <memory>
 #include "read_potential.hpp"
@@ -138,13 +138,12 @@ read_global_distance_interaction(const toml::Table& global)
   {
     const auto potential = toml::get<std::string>(global.at("potential"));
     if(potential == "ImplicitMembrane")
-      {
-	//This is for MU.
-	return read_spatial_partition_for_externalMU<
-	  traitsT, ImplicitMembranePotential<traitsT>>(
-		    global, read_implicit_membrane_potential<traitsT>(global));
-      }
-        else
+    {
+	return read_spatial_partition_for_implicit_membrane<
+	    traitsT, ImplicitMembranePotential<traitsT>>(
+		global, read_implicit_membrane_potential<traitsT>(global));
+    }
+    else
     {
         throw std::runtime_error("invalid distance potential: " + potential);
     }
