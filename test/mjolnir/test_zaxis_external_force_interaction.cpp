@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "test_global_external_interactionMU"
+#define BOOST_TEST_MODULE "test_zaxis_external_force_interactionMU"
 
 #ifdef UNITTEST_FRAMEWORK_LIBRARY_EXIST
 #include <boost/test/unit_test.hpp>
@@ -7,14 +7,15 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/core/GlobalExternalInteractionMU.hpp>
+#include <cmath>
+#include <mjolnir/core/ZaxisExternalForceInteraction.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/ImplicitMembraneList.hpp>
 #include <mjolnir/potential/ImplicitMembranePotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
-BOOST_AUTO_TEST_CASE(GlobalExternal_calc_force)
+BOOST_AUTO_TEST_CASE(ZaxisExternalForceInteraction_calc_force)
 {
     typedef mjolnir::SimulatorTraitsBase<double, mjolnir::UnlimitedBoundary> traits;
     constexpr static traits::real_type tolerance = 1e-8;
@@ -26,9 +27,9 @@ BOOST_AUTO_TEST_CASE(GlobalExternal_calc_force)
     typedef mjolnir::System<traits> system_type;
     typedef mjolnir::ImplicitMembranePotential<traits> implicit_membrane_type;
     typedef mjolnir::ImplicitMembraneList<traits> partition_type;
-    typedef mjolnir::GlobalExternalInteraction<
+    typedef mjolnir::ZaxisExternalForceInteraction<
 	traits, implicit_membrane_type,partition_type>
-	global_external_type;
+	zaxis_external_force_type;
   
     const real_type thickness(10.);
     const real_type interaction_magnitude(1.);
@@ -37,7 +38,7 @@ BOOST_AUTO_TEST_CASE(GlobalExternal_calc_force)
 
     implicit_membrane_type potential{
 	thickness, interaction_magnitude, bend, hydrophobicity};
-    global_external_type interaction{
+    zaxis_external_force_type interaction{
 	std::forward<implicit_membrane_type>(potential),
 	    partition_type{potential.max_cutoff_length()}};
     
@@ -61,10 +62,14 @@ BOOST_AUTO_TEST_CASE(GlobalExternal_calc_force)
 	
 	interaction.calc_force(sys);
 
-	const real_type force_strength = mjolnir::length(sys[0].force);
-
-	BOOST_CHECK_CLOSE_FRACTION(coef, force_strength, tolerance);
-
+	if(abs(sys[0].position[2]) >= potential.max_cutoff_length())
+	    BOOST_CHECK_EQUAL(sys[0].force[2],0);
+	else
+	{
+	    const real_type force_strength = mjolnir::length(sys[0].force);
+	    BOOST_CHECK_CLOSE_FRACTION(coef, force_strength, tolerance);
+	}
+	
 	BOOST_CHECK_EQUAL(sys[0].force[0],0);
 	BOOST_CHECK_EQUAL(sys[0].force[1],0);
 
