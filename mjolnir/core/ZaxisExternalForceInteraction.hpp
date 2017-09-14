@@ -7,7 +7,7 @@ namespace mjolnir
 {
 
 template<typename traitsT, typename potentialT, typename partitionT>
-class GlobalExternalInteraction final : public GlobalInteractionBase<traitsT>
+class ZaxisExternalForceInteraction final : public GlobalInteractionBase<traitsT>
 {
   public:
     
@@ -22,10 +22,10 @@ class GlobalExternalInteraction final : public GlobalInteractionBase<traitsT>
     using boundary_type           = typename base_type::boundary_type;
     
   public:
-    GlobalExternalInteraction()  = default;
-    ~GlobalExternalInteraction() = default;
+    ZaxisExternalForceInteraction()  = default;
+    ~ZaxisExternalForceInteraction() = default;
     
-    GlobalExternalInteraction(potential_type&& pot, partition_type&& part)
+    ZaxisExternalForceInteraction(potential_type&& pot, partition_type&& part)
 	: potential_(std::move(pot)), partition_(std::move(part))
     {}
     
@@ -45,7 +45,7 @@ class GlobalExternalInteraction final : public GlobalInteractionBase<traitsT>
 };
 
 template<typename traitsT, typename potT, typename spaceT>
-void GlobalExternalInteraction<traitsT, potT, spaceT>::calc_force(
+void ZaxisExternalForceInteraction<traitsT, potT, spaceT>::calc_force(
     system_type& sys)
 {
     partition_.update(sys);
@@ -58,8 +58,8 @@ void GlobalExternalInteraction<traitsT, potT, spaceT>::calc_force(
 }
 
 template<typename traitsT, typename potT, typename spaceT>
-typename GlobalExternalInteraction<traitsT, potT, spaceT>::real_type 
-GlobalExternalInteraction<traitsT, potT, spaceT>::calc_energy(
+typename ZaxisExternalForceInteraction<traitsT, potT, spaceT>::real_type 
+ZaxisExternalForceInteraction<traitsT, potT, spaceT>::calc_energy(
     const system_type& sys) const
 {
     real_type e = 0.0;
