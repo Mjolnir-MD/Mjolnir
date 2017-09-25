@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_IMPLICIT_MEMBRANE_LIST
 #define MJOLNIR_IMPLICIT_MEMBRANE_LIST
 
+#include <vector>
 #include <cmath>
 
 namespace mjolnir
@@ -18,7 +19,7 @@ class ImplicitMembraneList
     ImplicitMembraneList() = default;
     ~ImplicitMembraneList() = default;
 
-    ImplicitMembraneList(const real_type cutoff):cutoff_(cutoff){}
+    ImplicitMembraneList(const real_type cutoff) noexcept :cutoff_(cutoff) {}
     
     void initialize(const system_type& sys);
     void update(const system_type& sys);
@@ -35,7 +36,7 @@ void ImplicitMembraneList<traitT>::initialize(const system_type& sys)
 {
     for(std::size_t particle_idx = 0;  particle_idx < sys.size(); ++particle_idx)
     {
-	if(abs(sys.at(particle_idx).position.at(2)) < cutoff_)
+	if(std::abs(sys[particle_idx].position[2]) < cutoff_)
 	    obj_indices_.push_back(particle_idx);
     }
     return;
