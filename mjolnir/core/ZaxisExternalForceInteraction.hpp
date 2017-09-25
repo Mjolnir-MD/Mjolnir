@@ -1,6 +1,6 @@
-#ifndef MJOLNIR_GLOBAL_EXTERNAL_INTERACTION
-#define MJOLNIR_GLOBAL_EXTERNAL_INTERACTION
-#include "GlobalInteractionBase.hpp"
+#ifndef MJOLNIR_ZAXIS_EXTERNAL_FORCE_INTERACTION
+#define MJOLNIR_ZAXIS_EXTERNAL_FORCE_INTERACTION
+#include <mjolnir/core/GlobalInteractionBase.hpp>
 #include <memory>
 
 namespace mjolnir
@@ -51,8 +51,8 @@ void ZaxisExternalForceInteraction<traitsT, potT, spaceT>::calc_force(
     partition_.update(sys);
     for(std::size_t i : partition_.obj_indices())
     {
-	const real_type force = -potential_.derivative(i, sys[i].position.at(2));
-	sys[i].force.at(2) += force;
+	const real_type force = -potential_.derivative(i, sys[i].position[2]);
+	sys[i].force[2] += force;
     }
     return ;
 }
@@ -63,11 +63,12 @@ ZaxisExternalForceInteraction<traitsT, potT, spaceT>::calc_energy(
     const system_type& sys) const
 {
     real_type e = 0.0;
-    for(std::size_t i = 0; i < sys.size(); ++i){
-	e += potential_.potential(i, sys[i].position.at(2));
+    for(std::size_t i = 0; i < sys.size(); ++i)
+    {
+	e += potential_.potential(i, sys[i].position[2]);
     }
     return e;
 }
 
 } //mjolnir
-#endif /* MJOLNIR_GLOBAL_EXTERNAL_INTERACTION */
+#endif /* MJOLNIR_ZAXIS_EXTERNAL_FORCE_INTERACTION */
