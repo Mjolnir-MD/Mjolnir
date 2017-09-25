@@ -32,24 +32,24 @@ class ImplicitMembranePotential
     {}
 
     ImplicitMembranePotential(
-	real_type&& th, real_type&& ma,
-	real_type&& be, std::vector<parameter_type>&& hydrophobicities)
-	: half_thick_(std::forward<real_type>(th * 0.5)),
-	  interaction_magnitude_(std::forward<real_type>(ma)),
-	  bend_(std::forward<real_type>(be)),
-	  hydrophobicities_(std::forward<real_type>(hydrophobicities))
+	real_type th, real_type ma,
+	real_type be, std::vector<parameter_type>&& hydrophobicities)
+	: half_thick_(th * 0.5), interaction_magnitude_(ma), bend_(be),
+	  hydrophobicities_(std::move(hydrophobicities))
     {}
     ~ImplicitMembranePotential() = default;
 
-    real_type  half_thick() const {return half_thick_;}
-    real_type& half_thick()       {return half_thick_;}
-    real_type  interaction_magnitude() const {return interaction_magnitude_;}
-    real_type& interaction_magnitude()       {return interaction_magnitude_;}
-    real_type  bend() const {return bend_;}
-    real_type& bend()       {return bend_;}
+    real_type  half_thick() const noexcept {return half_thick_;}
+    real_type& half_thick() noexcept {return half_thick_;}
+    real_type  interaction_magnitude() const noexcept
+    {
+	return interaction_magnitude_;
+    }
+    real_type& interaction_magnitude() noexcept {return interaction_magnitude_;}
+    real_type  bend() const noexcept {return bend_;}
+    real_type& bend() noexcept {return bend_;}
 
-    void hydrophobicities_emplace(const parameter_type&);
-    void hydrophobicities_emplace(parameter_type&&);
+    void hydrophobicities_emplace(const parameter_type);
 
     void set_hydrophobicities(const std::vector<parameter_type>& hydrophobicities);
     void set_hydrophobicities(std::vector<parameter_type>&& hydrophobicities);
@@ -59,9 +59,9 @@ class ImplicitMembranePotential
     void reserve(const std::size_t i){hydrophobicities_.reserve();}
     void clear(){hydrophobicities_.clear();}
 
-    parameter_type&        operator[](const std::size_t i)      {
+    parameter_type&        operator[](const std::size_t i) noexcept {
 	return hydrophobicities_[i];}
-    parameter_type  const& operator[](const std::size_t i) const{
+    parameter_type  const& operator[](const std::size_t i) const noexcept{
 	return hydrophobicities_[i];}
     parameter_type&        at(const std::size_t i)       {
 	return hydrophobicities_.at(i);}
@@ -70,7 +70,7 @@ class ImplicitMembranePotential
     
     real_type potential(const std::size_t i, const real_type z) const;
     real_type derivative(const std::size_t i, const real_type z) const;
-    real_type max_cutoff_length() const;
+    real_type max_cutoff_length() const noexcept;
     
   private:
     
@@ -83,17 +83,9 @@ class ImplicitMembranePotential
 template<typename traitsT>
 inline void
 ImplicitMembranePotential<traitsT>::hydrophobicities_emplace(
-    const parameter_type& hydrophobicity)
+    const parameter_type hydrophobicity)
 {
-    hydrophobicities_.push_back(hydrophobicity);    
-}
-
-template<typename traitsT>
-inline void
-ImplicitMembranePotential<traitsT>::hydrophobicities_emplace(
-    parameter_type&& hydrophobicity)
-{
-    hydrophobicities_.emplace_back(std::forward<parameter_type>(hydrophobicity));  
+    hydrophobicities_.emplace_back(hydrophobicity);    
 }
 
 template<typename traitsT>
@@ -111,7 +103,7 @@ ImplicitMembranePotential<traitsT>::set_hydrophobicities(
     std::vector<parameter_type>&& hydrophobicities)
 {
     hydrophobicities_ =
-	std::forward<std::vector<parameter_type>>(hydrophobicities);
+	std::move(hydrophobicities);
     return ;
 }
 
@@ -136,7 +128,7 @@ ImplicitMembranePotential<traitsT>::derivative(
 
 template<typename traitsT>
 inline typename ImplicitMembranePotential<traitsT>::real_type
-ImplicitMembranePotential<traitsT>::max_cutoff_length() const
+ImplicitMembranePotential<traitsT>::max_cutoff_length() const noexcept
 {
     return cutoff_ratio / bend_ + half_thick_;
 }
