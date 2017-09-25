@@ -9,9 +9,9 @@
 #include <mjolnir/core/GlobalDistanceInteraction.hpp>
 #include <mjolnir/core/ZaxisExternalForceInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
+#include <mjolnir/input/read_potential.hpp>
+#include <mjolnir/input/read_spatial_partition.hpp>
 #include <memory>
-#include "read_potential.hpp"
-#include "read_spatial_partition.hpp"
 
 namespace mjolnir
 {
@@ -24,20 +24,20 @@ read_bond_length_interaction(const toml::Table& local)
     if(potential == "Harmonic")
     {
         return make_unique<BondLengthInteraction<
-            traitsT, HarmonicPotential<traitsT>>>(
-                    read_harmonic_potential<traitsT, 2>(local));
+			       traitsT, HarmonicPotential<traitsT>>>(
+				   read_harmonic_potential<traitsT, 2>(local));
     }
     else if(potential == "Go1012Contact")
     {
         return make_unique<BondLengthInteraction<
-            traitsT, Go1012ContactPotential<traitsT>>>(
-                    read_go1012_contact_potential<traitsT, 2>(local));
+			       traitsT, Go1012ContactPotential<traitsT>>>(
+				   read_go1012_contact_potential<traitsT, 2>(local));
     }
     else if(potential == "AICG2PlusAngle")
     {
         return make_unique<BondLengthInteraction<
-            traitsT, GaussianPotential<traitsT>>>(
-                    read_gaussian_potential<traitsT, 2>(local));
+			       traitsT, GaussianPotential<traitsT>>>(
+				   read_gaussian_potential<traitsT, 2>(local));
     }
     else
     {
@@ -53,14 +53,14 @@ read_bond_angle_interaction(const toml::Table& local)
     if(potential == "Harmonic")
     {
         return make_unique<BondAngleInteraction<
-            traitsT, HarmonicPotential<traitsT>>>(
-                    read_harmonic_potential<traitsT, 3>(local));
+			       traitsT, HarmonicPotential<traitsT>>>(
+				   read_harmonic_potential<traitsT, 3>(local));
     }
     else if(potential == "FlexibleLocalAngle")
     {
         return make_unique<BondAngleInteraction<
-            traitsT, FlexibleLocalAnglePotential<traitsT>>>(
-                    read_flexible_local_angle_potential<traitsT, 3>(local));
+			       traitsT, FlexibleLocalAnglePotential<traitsT>>>(
+				   read_flexible_local_angle_potential<traitsT, 3>(local));
     }
     else
     {
@@ -76,26 +76,26 @@ read_dihedral_angle_interaction(const toml::Table& local)
     if(potential == "Harmonic")
     {
         return make_unique<DihedralAngleInteraction<
-            traitsT, HarmonicPotential<traitsT>>>(
-                    read_harmonic_potential<traitsT, 4>(local));
+			       traitsT, HarmonicPotential<traitsT>>>(
+				   read_harmonic_potential<traitsT, 4>(local));
     }
     else if(potential == "ClementiDihedral")
     {
         return make_unique<DihedralAngleInteraction<
-            traitsT, ClementiDihedralPotential<traitsT>>>(
-                    read_clementi_dihedral_potential<traitsT, 4>(local));
+			       traitsT, ClementiDihedralPotential<traitsT>>>(
+				   read_clementi_dihedral_potential<traitsT, 4>(local));
     }
     else if(potential == "AICG2PlusDihedral")
     {
         return make_unique<DihedralAngleInteraction<
-            traitsT, GaussianPotential<traitsT>>>(
-                    read_gaussian_potential<traitsT, 4>(local));
+			       traitsT, GaussianPotential<traitsT>>>(
+				   read_gaussian_potential<traitsT, 4>(local));
     }
     else if(potential == "FlexibleLocalDihedral")
     {
         return make_unique<DihedralAngleInteraction<
-            traitsT, FlexibleLocalDihedralPotential<traitsT>>>(
-                    read_flexible_local_dihedral_potential<traitsT, 4>(local));
+			       traitsT, FlexibleLocalDihedralPotential<traitsT>>>(
+				   read_flexible_local_dihedral_potential<traitsT, 4>(local));
     }
     else
     {
@@ -112,19 +112,19 @@ read_global_distance_interaction(const toml::Table& global)
     {
         return read_spatial_partition_for_distance<
             traitsT, ExcludedVolumePotential<traitsT>>(
-                       global, read_excluded_volume_potential<traitsT>(global));
+		global, read_excluded_volume_potential<traitsT>(global));
     }
     else if(potential == "DebyeHuckel")
     {
         return read_spatial_partition_for_distance<
             traitsT, DebyeHuckelPotential<traitsT>>(
-                       global, read_debye_huckel_potential<traitsT>(global));
+		global, read_debye_huckel_potential<traitsT>(global));
     }
     else if(potential == "LennardJones")
     {
         return read_spatial_partition_for_distance<
             traitsT, LennardJonesPotential<traitsT>>(
-                       global, read_lennard_jones_potential<traitsT>(global));
+		global, read_lennard_jones_potential<traitsT>(global));
     }
     else
     {
@@ -132,10 +132,10 @@ read_global_distance_interaction(const toml::Table& global)
     }
 }
 
-  template<typename traitsT>
-  std::unique_ptr<GlobalInteractionBase<traitsT>>
-  read_zaxis_external_force_interaction(const toml::Table& global)
-  {
+template<typename traitsT>
+std::unique_ptr<GlobalInteractionBase<traitsT>>
+read_zaxis_external_force_interaction(const toml::Table& global)
+{
     const auto potential = toml::get<std::string>(global.at("potential"));
     if(potential == "ImplicitMembrane")
     {
@@ -147,7 +147,7 @@ read_global_distance_interaction(const toml::Table& global)
     {
         throw std::runtime_error("invalid distance potential: " + potential);
     }
-  }
+}
   
 template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
@@ -169,7 +169,7 @@ read_local_interaction(const toml::Table& local)
     else
     {
         throw std::runtime_error(
-                "invalid local interaction type: " + interaction);
+	    "invalid local interaction type: " + interaction);
     }
 }
 
@@ -183,13 +183,13 @@ read_global_interaction(const toml::Table& global)
         return read_global_distance_interaction<traitsT>(global);
     }
     else if(interaction == "External")
-      {
+    {
 	return read_zaxis_external_force_interaction<traitsT>(global);
-      }
+    }
     else
     {
         throw std::runtime_error(
-                "invalid global interaction type: " + interaction);
+	    "invalid global interaction type: " + interaction);
     }
 }
 
