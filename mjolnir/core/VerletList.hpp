@@ -144,11 +144,7 @@ void VerletList<traitsT>::make(const system_type& sys)
 template<typename traitsT>
 void VerletList<traitsT>::update(const system_type& sys)
 {
-    real_type max_speed = 0.;
-    for(const auto& particle : sys)
-        max_speed = std::max(max_speed, length_sq(particle.velocity));
-
-    this->current_mergin_ -= std::sqrt(max_speed) * dt_ * 2.;
+    this->current_mergin_ -= sys.max_speed() * dt_ * 2.;
     if(this->current_mergin_ < 0.)
         this->make(sys);
     return ;

@@ -14,6 +14,8 @@ class Go1012ContactPotential
     typedef traitsT traits_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
+    constexpr static real_type cutoff_ratio = 2.5;
+    constexpr static real_type rcutoff_ratio = 1. / cutoff_ratio;
 
   public:
     Go1012ContactPotential(const real_type e, const real_type r0)
@@ -24,7 +26,7 @@ class Go1012ContactPotential
     real_type potential(const real_type r) const
     {
         const real_type rd   = this->r0_ / r;
-        if(rd < 0.4) return 0.0;
+        if(rd < rcutoff_ratio) return 0.0;
 
         const real_type rd2  = rd  * rd;
         const real_type rd4  = rd2 * rd2;
@@ -39,7 +41,7 @@ class Go1012ContactPotential
     {
         const real_type invr = 1. / r;
         const real_type rd   = this->r0_ * invr;
-        if(rd < 0.4) return 0.0;
+        if(rd < rcutoff_ratio) return 0.0;
 
         const real_type rd2  = rd  * rd;
         const real_type rd4  = rd2 * rd2;

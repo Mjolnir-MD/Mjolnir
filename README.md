@@ -11,6 +11,8 @@ Molecular Dynamics Simulation Software written in c++11.
 
 Flexible, well-organized, and modern molecular dynamics simulation code.
 
+Mainly focused on Coarse-Grained MD simulation.
+
 ### Goals
 
 1. __Mjolnir__ should be able to execute arbitrary molecular model and arbitrary force field.
@@ -20,9 +22,10 @@ Flexible, well-organized, and modern molecular dynamics simulation code.
 
 ## Build
 
-Testing code depends on Boost.unittest framework. please install boost.unittest.
+__Mjolnir__ depends on library to parse `toml` format file, [toml11](https://github.com/ToruNiina/toml11).
+It is managed as a `git submodule`. Please initialize and update it after `git clone`.
 
-`g++-5` and `clang++-3.7` on `Ubuntu 14.04 Trusty Tahr` are tested on __Travis CI__.
+Testing code depends on Boost.unittest framework. please install boost.unittest.
 
 ```sh
 $ git submodule init   # (if you've just cloned this repo)
@@ -33,58 +36,40 @@ $ cmake ..
 $ make
 ```
 
+`g++-5` and `clang++-3.7` on `Ubuntu 14.04`, `clang++` on `OS X` are tested on __Travis CI__.
+
 ## Example
 
-__NOTE__:
-Specification of this project is currently unstable.
-Most of the following procedures (mainly unhandy or confusing steps) may be changed.
+__NOTE__: Specification of this project is currently unstable.
+Most of the following procedures may be changed.
 
 ### SRC tyrosine kinase SH3 domain
 
-download `1SRL.pdb` from Protein Data Bank.
+Example input files are in `input` directory. You can run it with the command below.
 
-First, decide some parameters and write them to `toml` file.
-
-```toml
-# 1SRL.toml file
-[simulator]
-file_name        = "1SRL"                 # name of output files
-time_integration = "Underdamped Langevin" # time integration method
-boundary         = "Unlimited"            # boundary condition
-delta_t          = 0.4                    # delta t
-total_step       = 50_000                 # number of total steps
-save_step        = 100                    # number of time interval to output
-temperature      = 300.0                  # it is just a temperature.
-kB               = 1.986231313e-3         # value of boltzmann constant
-seed             = 2374                   # seed of random variable.
+```console
+$ mjolnir input/sh3_AICG2+.toml
 ```
 
-__Jarngreipr__ on current version generates Clementi-Go forcefield in default.
+the trajectory will be written in `sh3_domain_unlim.xyz`.
+You can see the trajectory with some protein viewer like `vmd`.
 
-```sh
-$ jarngreipr 1SRL.pdb >> 1SRL.toml
-$ mjolnir 1SRL.toml
-```
+### Input File
 
-simulation takes about 2~3 seconds. after that, you can see the trajectory
-using molecular visualization software like `vmd`, `pymol` or others.
+Input file is composed of mainly 5 parts.
 
-```sh
-$ [visualizer] 1SRL.xyz
-```
-
-### Beta-Galactosidase in complex with allolactose
-
-download `1JZ8.pdb` from Protein Data Bank.
-
-Then extract `ATOM` line in pdb file.
-
-```sh
-$ grep "^ATOM" 1JZ8.pdb > 1JZ8_ATOM.pdb
-```
-
-After that, the procedure is same as the above one.
-You can run simulation of protein complex with ease.
+* general
+    * define general parameter like precition, filename prefix, etc.
+      for some reason, boundary condition is defined here.
+* parameter
+    * set physical parameters.
+* system
+    * define initial condition containing coordinates and system parameters
+      like temperature, ionic strength, boundary, etc.
+* simulator
+    * setup simulator. now, only "Molecular Dynamics" is available.
+* forcefield
+    * define forcefields composed of pairs of interaction and potentials.
 
 ## Testing
 

@@ -91,12 +91,15 @@ UnderdampedLangevinStepper<traitsT>::step(
     this->noise_coef_ =
         std::sqrt(2 * physics<real_type>::kB * sys.temperature() / dt_);
 
+    real_type max_speed2(0.);
     for(auto iter(make_zip(sys.begin(),     gamma_.cbegin(),
                            noise_.cbegin(), accel_.cbegin())),
              end_(make_zip(sys.end(),       gamma_.cend(),
                            noise_.cend(),   accel_.cend()));
             iter != end_; ++iter)
     {
+        max_speed2 = std::max(max_speed2, length_sq(get<0>(iter)->velocity));
+
         const real_type hgdt   = (*get<1>(iter) * halfdt_);
         const real_type o_hgdt = 1. - hgdt;
 
@@ -110,6 +113,8 @@ UnderdampedLangevinStepper<traitsT>::step(
         get<0>(iter)->velocity *= o_hgdt * (o_hgdt * o_hgdt + hgdt);
         get<0>(iter)->velocity += (halfdt_ * o_hgdt) * noisy_force;
     }
+
+    sys.max_speed() = std::sqrt(max_speed2);
 
     // calc f(t+dt)
     ff.calc_force(sys);

@@ -20,7 +20,7 @@ class ExcludedVolumePotential
     typedef real_type parameter_type;
 
     // rc = 2.5 * sigma
-    constexpr static real_type cutoff_ratio = 2.5;
+    constexpr static real_type  cutoff_ratio = 2.5;
 
   public:
     ExcludedVolumePotential() = default;
@@ -109,23 +109,23 @@ ExcludedVolumePotential<traitsT>::potential(
         const std::size_t i, const std::size_t j, const real_type r) const
 {
     const real_type d = radii_[i] + radii_[j];
+    if(d * cutoff_ratio < r) return 0.0;
     const real_type d_r = d / r;
-    if(d_r < 0.4) return 0.0;
     const real_type dr3 = d_r * d_r * d_r;
     const real_type dr6 = dr3 * dr3;
     const real_type dr12 = dr6 * dr6;
     return epsilon_ * dr12;
 }
- 
+
 template<typename traitsT>
 inline typename ExcludedVolumePotential<traitsT>::real_type
 ExcludedVolumePotential<traitsT>::derivative(
         const std::size_t i, const std::size_t j, const real_type r) const
 {
     const real_type d = radii_[i] + radii_[j];
+    if(d * cutoff_ratio < r) return 0.0;
     const real_type rinv = 1. / r;
     const real_type d_r = d * rinv;
-    if(d_r < 0.4) return 0.0;
     const real_type dr3 = d_r * d_r * d_r;
     const real_type dr6 = dr3 * dr3;
     const real_type dr12 = dr6 * dr6;

@@ -7,7 +7,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/FlexibleLocalAnglePotential.hpp>
+#include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/util/make_unique.hpp>

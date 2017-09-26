@@ -1,6 +1,5 @@
 #ifndef MJOLNIR_SYSTEM
 #define MJOLNIR_SYSTEM
-#include "Particle.hpp"
 #include <vector>
 
 namespace mjolnir
@@ -14,7 +13,7 @@ class System
     typedef typename traits_type::real_type         real_type;
     typedef typename traits_type::coordinate_type   coordinate_type;
     typedef typename traits_type::boundary_type     boundary_type;
-    typedef Particle<coordinate_type>               particle_type;
+    typedef typename traits_type::particle_type     particle_type;
     typedef std::vector<particle_type>              container_type;
     typedef typename container_type::iterator       iterator;
     typedef typename container_type::const_iterator const_iterator;
@@ -29,6 +28,8 @@ class System
 
     std::size_t size() const noexcept {return particles_.size();}
 
+    //XXX! these parameters are 'reference's. these are not a calculated values
+    //     but set by input to be used in thermostat, barostat, etc.
     real_type& pressure()             noexcept {return pressure_;}
     real_type  pressure()       const noexcept {return pressure_;}
     real_type& temperature()          noexcept {return temperature_;}
@@ -59,11 +60,15 @@ class System
 
     boundary_type const& boundary() const noexcept {return boundary_;}
 
+    real_type& max_speed()       noexcept {return max_speed_;}
+    real_type  max_speed() const noexcept {return max_speed_;}
+
   private:
 
     real_type      temperature_;
     real_type      pressure_;
     real_type      ionic_strength_;
+    real_type      max_speed_;
     boundary_type  boundary_;
     container_type particles_;
 };

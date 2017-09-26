@@ -29,8 +29,8 @@ class NewtonianStepper
 
     real_type step(const real_type time, system_type& sys, forcefield_type& ff);
 
-    real_type delta_t() const {return dt_;}
-    void set_delta_t(const real_type dt)
+    real_type delta_t() const noexcept {return dt_;}
+    void set_delta_t(const real_type dt) noexcept
     {
         dt_ = dt; halfdt_ = dt * 0.5; halfdt2_ = halfdt_ * dt_;
     }
@@ -65,15 +65,20 @@ typename NewtonianStepper<traitsT>::real_type
 NewtonianStepper<traitsT>::step(
         const real_type time, system_type& system, forcefield_type& ff)
 {
+    real_type max_speed2(0.);
+
     // calc r(t+dt)
     for(auto iter = make_zip(system.begin(), acceleration_.cbegin());
             iter != make_zip(system.end(), acceleration_.cend()); ++iter)
     {
+        max_speed2 = std::max(max_speed2, length_sq(get<0>(iter)->velocity));
+
         get<0>(iter)->position = system.adjust_position(
             get<0>(iter)->position + dt_ * (get<0>(iter)->velocity) +
             halfdt2_ * (*get<1>(iter)));
         get<0>(iter)->velocity += halfdt_ * (*get<1>(iter));
     }
+    system.max_speed() = std::sqrt(max_speed2);
 
     // calc f(t+dt)
     ff.calc_force(system);
@@ -82,7 +87,6 @@ NewtonianStepper<traitsT>::step(
     for(auto iter = make_zip(system.begin(), acceleration_.begin());
             iter != make_zip(system.end(), acceleration_.end()); ++iter)
     {
-        // consider cash 1/m
         const coordinate_type acc = get<0>(iter)->force / (get<0>(iter)->mass);
         *get<1>(iter) = acc;
         get<0>(iter)->velocity += halfdt_ * acc;

@@ -12,57 +12,86 @@ else(DEBUG)
     add_definitions(-DMJOLNIR_NO_DEBUG)
 endif(DEBUG)
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    execute_process(COMMAND cat /proc/cpuinfo OUTPUT_FILE "cpuinfo.dat")
+    execute_process(COMMAND grep flags "cpuinfo.dat" OUTPUT_FILE "flags.dat")
+    execute_process(COMMAND head --lines=1 "flags.dat" OUTPUT_FILE "cpuinfo.dat")
+    execute_process(COMMAND rm "flags.dat")
+    exec_program(grep ARGS "--count mmx    cpuinfo.dat" OUTPUT_VARIABLE cpu_found_mmx)
+    exec_program(grep ARGS "--count sse    cpuinfo.dat" OUTPUT_VARIABLE cpu_found_sse)
+    exec_program(grep ARGS "--count sse2   cpuinfo.dat" OUTPUT_VARIABLE cpu_found_sse2)
+    exec_program(grep ARGS "--count sse3   cpuinfo.dat" OUTPUT_VARIABLE cpu_found_sse3)
+    exec_program(grep ARGS "--count sse4_1 cpuinfo.dat" OUTPUT_VARIABLE cpu_found_sse4_1)
+    exec_program(grep ARGS "--count sse4_2 cpuinfo.dat" OUTPUT_VARIABLE cpu_found_sse4_2)
+    exec_program(grep ARGS "--count fma    cpuinfo.dat" OUTPUT_VARIABLE cpu_found_fma)
+    exec_program(grep ARGS "--count avx    cpuinfo.dat" OUTPUT_VARIABLE cpu_found_avx)
+    exec_program(grep ARGS "--count avx2   cpuinfo.dat" OUTPUT_VARIABLE cpu_found_avx2)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    execute_process(COMMAND "/usr/sbin/sysctl -n machdep.cpu.features" OUTPUT_FILE "cpuinfo.dat")
+    exec_program(grep ARGS "--count MMX    cpuinfo.dat" OUTPUT_VARIABLE cpu_found_mmx)
+    exec_program(grep ARGS "--count SSE    cpuinfo.dat" OUTPUT_VARIABLE cpu_found_sse)
+    exec_program(grep ARGS "--count SSE2   cpuinfo.dat" OUTPUT_VARIABLE cpu_found_sse2)
+    exec_program(grep ARGS "--count SSE3   cpuinfo.dat" OUTPUT_VARIABLE cpu_found_sse3)
+    exec_program(grep ARGS "--count SSE4.1 cpuinfo.dat" OUTPUT_VARIABLE cpu_found_sse4_1)
+    exec_program(grep ARGS "--count SSE4.2 cpuinfo.dat" OUTPUT_VARIABLE cpu_found_sse4_2)
+    exec_program(grep ARGS "--count FMA    cpuinfo.dat" OUTPUT_VARIABLE cpu_found_fma)
+    exec_program(grep ARGS "--count AVX    cpuinfo.dat" OUTPUT_VARIABLE cpu_found_avx)
+    exec_program(grep ARGS "--count AVX2   cpuinfo.dat" OUTPUT_VARIABLE cpu_found_avx2)
+endif()
 
-include(CheckIncludeFileCXX)
-include(CheckCXXSourceCompiles)
+if(cpu_found_mmx GREATER 0)
+    message("MMX found")
+    add_definitions(-DMJOLNIR_HAVE_MMX)
+    add_definitions(-mmmx)
+endif()
 
-check_include_file_cxx(xmmintrin.h FOUND_SSE_INTRINSIC)
-if(FOUND_SSE_INTRINSIC)
-    check_cxx_source_compiles(
-    "#include <xmmintrin.h>
-     int main(){
-         float r=1.;
-         _mm_store_ss(&r, _mm_rsqrt_ss(_mm_load_ss(&r)));
-         return 0;
-     }" SSE_COMPILE_SUCCESS)
+if(cpu_found_sse GREATER 0)
+    message("SSE found")
+    add_definitions(-DMJOLNIR_HAVE_SSE)
+    add_definitions(-msse)
+endif()
 
-    if(SSE_COMPILE_SUCCESS)
-        add_definitions(-DMJOLNIR_HAVE_SSE)
-        add_definitions(-mmmx -msse)
-    endif(SSE_COMPILE_SUCCESS)
-endif(FOUND_SSE_INTRINSIC)
+if(cpu_found_sse2 GREATER 0)
+    message("SSE2 found")
+    add_definitions(-DMJOLNIR_HAVE_SSE2)
+    add_definitions(-msse2)
+endif()
 
-check_include_file_cxx(immintrin.h FOUND_AVX_INTRINSIC)
-if(FOUND_AVX_INTRINSIC)
-    set(CMAKE_REQUIRED_DEFINITIONS -mavx)
-    check_cxx_source_compiles(
-    "#include <immintrin.h>
-     int main(){
-         double r=1.;
-         double xs[4];
-         _mm256_storeu_pd(xs, _mm256_add_pd(_mm256_set1_pd(r), _mm256_set1_pd(r)));
-         return 0;
-     }" AVX_COMPILE_SUCCESS)
+if(cpu_found_sse3 GREATER 0)
+    message("SSE3 found")
+    add_definitions(-DMJOLNIR_HAVE_SSE3)
+    add_definitions(-msse3)
+endif()
 
-    if(AVX_COMPILE_SUCCESS)
-        add_definitions(-DMJOLNIR_HAVE_AVX)
-        add_definitions(-mavx)
-    endif(AVX_COMPILE_SUCCESS)
+if(cpu_found_sse4_1 GREATER 0)
+    message("SSE4.1 found")
+    add_definitions(-DMJOLNIR_HAVE_SSE4_1)
+    add_definitions(-msse4.1)
+endif()
 
-    set(CMAKE_REQUIRED_DEFINITIONS -mavx2)
-    check_cxx_source_compiles(
-    "#include <immintrin.h>
-     int main(){
-         __m256i x = _mm256_add_epi32(_mm256_set1_epi32(1), _mm256_set1_epi32(2));
-         return 0;
-     }" AVX2_COMPILE_SUCCESS)
+if(cpu_found_sse4_2 GREATER 0)
+    message("SSE4.2 found")
+    add_definitions(-DMJOLNIR_HAVE_SSE4_2)
+    add_definitions(-msse4.2)
+endif()
 
-    if(AVX2_COMPILE_SUCCESS)
-        add_definitions(-DMJOLNIR_HAVE_AVX2)
-        add_definitions(-mavx2)
-    endif(AVX2_COMPILE_SUCCESS)
-endif(FOUND_AVX_INTRINSIC)
+if(cpu_found_avx GREATER 0)
+    message("AVX found")
+    add_definitions(-DMJOLNIR_HAVE_AVX)
+    add_definitions(-mavx)
+endif()
 
+if(cpu_found_avx2 GREATER 0)
+    message("AVX2 found")
+    add_definitions(-DMJOLNIR_HAVE_AVX2)
+    add_definitions(-mavx2)
+endif()
+
+if(cpu_found_fma GREATER 0)
+    message("FMA found")
+    add_definitions(-DMJOLNIR_HAVE_FMA)
+    add_definitions(-mfma)
+endif()
 
 add_subdirectory(src)
 add_subdirectory(test)
