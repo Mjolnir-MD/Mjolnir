@@ -13,6 +13,8 @@ set(TEST_NAMES
     test_bond_length_interaction
     test_bond_angle_interaction
     test_dihedral_angle_interaction
+    test_implicit_membrane_potential
+    test_zaxis_external_force_interaction
     )
 
 add_definitions("-O3 -std=c++11")
