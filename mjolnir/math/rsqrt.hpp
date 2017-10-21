@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_FAST_INV_SQRT
-#define MJOLNIR_FAST_INV_SQRT
+#ifndef MJOLNIR_MATH_RSQRT
+#define MJOLNIR_MATH_RSQRT
 #include <cstdint>
 
 /* Here, functions that calculates reverse square-root is defined. *
@@ -62,4 +62,4 @@ inline double rsqrt(double x)
 }// mjolnir
 
 #endif // HAVE_SSE
-#endif /* MJOLNIR_FAST_INV_SQRT */
+#endif // MJOLNIR_MATH_RSQRT
