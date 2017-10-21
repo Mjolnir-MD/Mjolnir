@@ -2,20 +2,23 @@
 #define MJOLNIR_FAST_INV_SQRT
 #include <cstdint>
 
+/* Here, functions that calculates reverse square-root is defined. *
+ * `rsqrt(x);` returns `1. / sqrt(x)`.                             */
+
 #ifdef MJOLNIR_HAVE_SSE
 #include <xmmintrin.h>
 
 namespace mjolnir
 {
 
-inline float fast_inv_sqrt(float x)
+inline float rsqrt(float x)
 {
     float r;
     _mm_store_ss(&r, _mm_rsqrt_ss(_mm_load_ss(&x)));
     return r * (3.0f - x * r * r) * 0.5f;
 }
 
-inline double fast_inv_sqrt(double x)
+inline double rsqrt(double x)
 {
     const double xhalf = 0.5 * x;
     float f = static_cast<float>(x);
@@ -33,7 +36,7 @@ inline double fast_inv_sqrt(double x)
 namespace mjolnir
 {
 
-inline float fast_inv_sqrt(float x)
+inline float rsqrt(float x)
 {
     const float xhalf = 0.5f * x;
     std::int32_t i = *(reinterpret_cast<std::int32_t*>(&x));
@@ -43,7 +46,7 @@ inline float fast_inv_sqrt(float x)
     return x * (1.5f - xhalf * x * x);
 }
 
-inline double fast_inv_sqrt(double x)
+inline double rsqrt(double x)
 {
     const double xhalf = 0.5 * x;
     std::int64_t i = *(reinterpret_cast<std::int64_t*>(&x));
