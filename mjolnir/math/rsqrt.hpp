@@ -11,14 +11,14 @@
 namespace mjolnir
 {
 
-inline float rsqrt(float x)
+inline float rsqrt(float x) noexcept
 {
     float r;
     _mm_store_ss(&r, _mm_rsqrt_ss(_mm_load_ss(&x)));
     return r * (3.0f - x * r * r) * 0.5f;
 }
 
-inline double rsqrt(double x)
+inline double rsqrt(double x) noexcept
 {
     const double xhalf = 0.5 * x;
     float f = static_cast<float>(x);
@@ -36,7 +36,7 @@ inline double rsqrt(double x)
 namespace mjolnir
 {
 
-inline float rsqrt(float x)
+inline float rsqrt(float x) noexcept
 {
     const float xhalf = 0.5f * x;
     std::int32_t i = *(reinterpret_cast<std::int32_t*>(&x));
@@ -46,7 +46,7 @@ inline float rsqrt(float x)
     return x * (1.5f - xhalf * x * x);
 }
 
-inline double rsqrt(double x)
+inline double rsqrt(double x) noexcept
 {
     const double xhalf = 0.5 * x;
     std::int64_t i = *(reinterpret_cast<std::int64_t*>(&x));

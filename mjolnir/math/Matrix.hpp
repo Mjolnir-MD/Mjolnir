@@ -32,11 +32,11 @@ class Matrix
         (sizeof...(T_args) == number_of_element) &&
         is_all<is_convertible_to_real, T_args...>::value, std::nullptr_t
         >::type = nullptr>
-    Matrix(T_args ... args) : values_{{static_cast<real_type>(args)...}}{}
+    Matrix(T_args ... args) noexcept : values_{{static_cast<real_type>(args)...}}{}
 
     template<typename T, typename std::enable_if<
         std::is_convertible<T, real_type>::value, std::nullptr_t>::type = nullptr>
-    Matrix(const std::array<T, number_of_element>& rhs)
+    Matrix(const std::array<T, number_of_element>& rhs) noexcept
     {
         for(std::size_t i=0; i<number_of_element; ++i)
             (*this)[i] = static_cast<real_type>(rhs[i]);
@@ -156,7 +156,7 @@ Matrix<realT, R, C>::operator/=(const T& s) noexcept
 
 template<typename T, typename U, std::size_t R, std::size_t C>
 inline Matrix<typename std::common_type<T, U>::type, R, C>
-operator+(const Matrix<T, R, C>& lhs, const Matrix<U, R, C>& rhs)
+operator+(const Matrix<T, R, C>& lhs, const Matrix<U, R, C>& rhs) noexcept
 {
     Matrix<typename std::common_type<T, U>::type, R, C> retval;
     for(std::size_t i=0; i<R*C; ++i)
@@ -166,7 +166,7 @@ operator+(const Matrix<T, R, C>& lhs, const Matrix<U, R, C>& rhs)
 
 template<typename T, typename U, std::size_t R, std::size_t C>
 inline Matrix<typename std::common_type<T, U>::type, R, C>
-operator-(const Matrix<T, R, C>& lhs, const Matrix<U, R, C>& rhs)
+operator-(const Matrix<T, R, C>& lhs, const Matrix<U, R, C>& rhs) noexcept
 {
     Matrix<typename std::common_type<T, U>::type, R, C> retval;
     for(std::size_t i=0; i<R*C; ++i)
@@ -177,7 +177,7 @@ operator-(const Matrix<T, R, C>& lhs, const Matrix<U, R, C>& rhs)
 template<typename T, typename U, std::size_t R, std::size_t C, class = typename
          std::enable_if<std::is_convertible<U, T>::value>::type>
 inline Matrix<T, R, C>
-operator*(const Matrix<T, R, C>& lhs, const U rhs)
+operator*(const Matrix<T, R, C>& lhs, const U rhs) noexcept
 {
     Matrix<typename std::common_type<T, U>::type, R, C> retval;
     for(std::size_t i=0; i<R*C; ++i)
@@ -188,7 +188,7 @@ operator*(const Matrix<T, R, C>& lhs, const U rhs)
 template<typename T, typename U, std::size_t R, std::size_t C, class = typename
          std::enable_if<std::is_convertible<U, T>::value>::type>
 inline Matrix<T, R, C>
-operator*(const U lhs, const Matrix<T, R, C>& rhs)
+operator*(const U lhs, const Matrix<T, R, C>& rhs) noexcept
 {
     Matrix<typename std::common_type<T, U>::type, R, C> retval;
     for(std::size_t i=0; i<R*C; ++i)
@@ -199,7 +199,7 @@ operator*(const U lhs, const Matrix<T, R, C>& rhs)
 template<typename T, typename U, std::size_t R, std::size_t C, class = typename
          std::enable_if<std::is_convertible<U, T>::value>::type>
 inline Matrix<T, R, C>
-operator/(const Matrix<T, R, C>& lhs, const U rhs)
+operator/(const Matrix<T, R, C>& lhs, const U rhs) noexcept
 {
     Matrix<T, R, C> retval;
     for(std::size_t i=0; i<R*C; ++i)
@@ -210,7 +210,7 @@ operator/(const Matrix<T, R, C>& lhs, const U rhs)
 template<typename T, typename U, std::size_t L, std::size_t M, std::size_t N,
     class = typename std::enable_if<std::is_convertible<U, T>::value>::type>
 inline Matrix<typename std::common_type<T, U>::type, L, N>
-operator*(const Matrix<T, L, M>& lhs, const Matrix<U, M, N>& rhs)
+operator*(const Matrix<T, L, M>& lhs, const Matrix<U, M, N>& rhs) noexcept
 {
     Matrix<typename std::common_type<T, U>::type, L, N> retval;
     for(std::size_t i=0; i < L; ++i)
@@ -249,7 +249,7 @@ Matrix<realT, R, C>::operator()(const std::size_t i, const std::size_t j) noexce
 }
 
 template<typename realT, std::size_t R, std::size_t C>
-Matrix<realT, C, R> transpose(const Matrix<realT, R, C>& mat)
+Matrix<realT, C, R> transpose(const Matrix<realT, R, C>& mat) noexcept
 {
     Matrix<realT, C, R> retval;
     for(std::size_t i=0; i<R; ++i)
@@ -272,7 +272,7 @@ operator<<(std::basic_ostream<charT, traits>& os, const Matrix<realT, R, C>& m)
 
 // for 3*3 only ...
 template<typename realT>
-inline realT determinant(const Matrix<realT, 3, 3>& mat)
+inline realT determinant(const Matrix<realT, 3, 3>& mat) noexcept
 {
     return mat(0,0) * mat(1,1) * mat(2,2) +
            mat(1,0) * mat(2,1) * mat(0,2) +
@@ -283,7 +283,7 @@ inline realT determinant(const Matrix<realT, 3, 3>& mat)
 }
 
 template<typename realT>
-Matrix<realT, 3, 3> inverse(const Matrix<realT, 3, 3>& mat)
+Matrix<realT, 3, 3> inverse(const Matrix<realT, 3, 3>& mat) noexcept
 {
     const auto det_inv = 1e0 / determinant(mat);
 
