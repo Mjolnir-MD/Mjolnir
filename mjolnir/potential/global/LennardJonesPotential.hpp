@@ -1,6 +1,5 @@
 #ifndef MJOLNIR_LENNARD_JONES_POTENTIAL
 #define MJOLNIR_LENNARD_JONES_POTENTIAL
-#include <mjolnir/math/fast_inv_sqrt.hpp>
 #include <mjolnir/core/System.hpp>
 #include <vector>
 #include <algorithm>

@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_BOND_LENGTH_INTERACTION
 #define MJOLNIR_BOND_LENGTH_INTERACTION
-#include "LocalInteractionBase.hpp"
-#include <mjolnir/math/fast_inv_sqrt.hpp>
+#include <mjolnir/core/LocalInteractionBase.hpp>
+#include <mjolnir/math/rsqrt.hpp>
 #include <cmath>
 
 namespace mjolnir
@@ -45,12 +45,13 @@ BondLengthInteraction<traitsT, potentialT>::calc_force(system_type& sys) const
 {
     for(const auto& idxp : this->potentials)
     {
-        const coordinate_type dpos = sys.adjust_direction(
+        const coordinate_type dpos = sys.adjust_direction(// for PBCs
                 sys[idxp.first[1]].position - sys[idxp.first[0]].position);
-        const real_type len = length(dpos);
-        const real_type force = -1 * idxp.second.derivative(len);
+        const real_type len2 = length_sq(dpos); // l^2
+        const real_type rlen = rsqrt(len2);     // 1/l
+        const real_type force = -1 * idxp.second.derivative(len2 * rlen); // l^2/l = l
 
-        const coordinate_type f = dpos * (force / len);
+        const coordinate_type f = dpos * (force * rlen);
         sys[idxp.first[0]].force -= f;
         sys[idxp.first[1]].force += f;
     }

@@ -1,7 +1,7 @@
-#ifndef MJOLNIR_DIHEDRAL_ANGLE_INTERACTION
-#define MJOLNIR_DIHEDRAL_ANGLE_INTERACTION
-#include "LocalInteractionBase.hpp"
-#include <mjolnir/math/fast_inv_sqrt.hpp>
+#ifndef MJOLNIR_CORE_DIHEDRAL_ANGLE_INTERACTION
+#define MJOLNIR_CORE_DIHEDRAL_ANGLE_INTERACTION
+#include <mjolnir/core/LocalInteractionBase.hpp>
+#include <mjolnir/math/rsqrt.hpp>
 #include <cmath>
 
 namespace mjolnir
@@ -69,8 +69,7 @@ DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const
         const real_type R_lensq = length_sq(R);
         const real_type S_lensq = length_sq(S);
 
-        const real_type dot_RS  = dot_product(R, S) *
-                                  fast_inv_sqrt(R_lensq * S_lensq);
+        const real_type dot_RS  = dot_product(R, S) * rsqrt(R_lensq * S_lensq);
         const real_type cos_phi = (-1. <= dot_RS && dot_RS <= 1.)
                                   ? dot_RS : std::copysign(1.0, dot_RS);
         const real_type phi = std::copysign(std::acos(cos_phi),
@@ -118,8 +117,7 @@ DihedralAngleInteraction<traitsT, potentialT>::calc_energy(
         const real_type R_lensq = length_sq(R);
         const real_type S_lensq = length_sq(S);
 
-        const real_type dot_RS = dot_product(R, S) *
-                                 fast_inv_sqrt(R_lensq * S_lensq);
+        const real_type dot_RS = dot_product(R, S) * rsqrt(R_lensq * S_lensq);
         const real_type cos_phi = (-1e0 <= dot_RS && dot_RS <= 1e0)
                                   ? dot_RS : std::copysign(1.0, dot_RS);
         const real_type phi =

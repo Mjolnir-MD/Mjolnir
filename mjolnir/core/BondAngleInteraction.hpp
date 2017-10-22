@@ -1,9 +1,9 @@
-#ifndef MJOLNIR_BOND_ANGLE_INTERACTION
-#define MJOLNIR_BOND_ANGLE_INTERACTION
-#include "LocalInteractionBase.hpp"
-#include "BoundaryCondition.hpp"
-#include "constants.hpp"
-#include <mjolnir/math/fast_inv_sqrt.hpp>
+#ifndef MJOLNIR_CORE_BOND_ANGLE_INTERACTION
+#define MJOLNIR_CORE_BOND_ANGLE_INTERACTION
+#include <mjolnir/core/LocalInteractionBase.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/constants.hpp>
+#include <mjolnir/math/rsqrt.hpp>
 #include <cmath>
 
 namespace mjolnir
@@ -47,12 +47,12 @@ BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const
     {
         const coordinate_type r_ij = sys.adjust_direction(
                 sys[idxp.first[0]].position - sys[idxp.first[1]].position);
-        const real_type       inv_len_r_ij = fast_inv_sqrt(length_sq(r_ij));
+        const real_type       inv_len_r_ij = rsqrt(length_sq(r_ij));
         const coordinate_type r_ij_reg     = r_ij * inv_len_r_ij;
 
         const coordinate_type r_kj = sys.adjust_direction(
                 sys[idxp.first[2]].position - sys[idxp.first[1]].position);
-        const real_type       inv_len_r_kj = fast_inv_sqrt(length_sq(r_kj));
+        const real_type       inv_len_r_kj = rsqrt(length_sq(r_kj));
         const coordinate_type r_kj_reg     = r_kj * inv_len_r_kj;
 
         const real_type dot_ijk = dot_product(r_ij_reg, r_kj_reg);
@@ -98,11 +98,10 @@ BondAngleInteraction<traitsT, potentialT>::calc_energy(
         const real_type lensq_v23 = length_sq(v_2to3);
         const real_type dot_v21_v23 = dot_product(v_2to1, v_2to3);
 
-        const real_type dot_ijk =
-            dot_v21_v23 * fast_inv_sqrt(lensq_v21 * lensq_v23);
+        const real_type dot_ijk   = dot_v21_v23 * rsqrt(lensq_v21 * lensq_v23);
         const real_type cos_theta = (-1. <= dot_ijk && dot_ijk <= 1.)
                                     ? dot_ijk : std::copysign(1.0, dot_ijk);
-        const real_type theta = std::acos(cos_theta);
+        const real_type theta     = std::acos(cos_theta);
 
         E += idxp.second.potential(theta);
     }

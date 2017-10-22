@@ -7,7 +7,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/math/fast_inv_sqrt.hpp>
+#include <mjolnir/math/rsqrt.hpp>
 #include <cmath>
 
 #include <random>
@@ -17,7 +17,7 @@
 constexpr static unsigned int seed = 32479327;
 constexpr static std::size_t N = 10000;
 
-BOOST_AUTO_TEST_CASE(fast_inv_sqrt_double)
+BOOST_AUTO_TEST_CASE(rsqrt_double)
 {
     std::mt19937 mt(seed);
     std::uniform_real_distribution<double> uni(0.0, 100.0);
@@ -26,11 +26,11 @@ BOOST_AUTO_TEST_CASE(fast_inv_sqrt_double)
         const double x = uni(mt);
         const double x2 = x * x;
         const double x_inv = 1. / x;
-        BOOST_CHECK_CLOSE_FRACTION(x_inv, mjolnir::fast_inv_sqrt(x2), 1e-10);
+        BOOST_CHECK_CLOSE_FRACTION(x_inv, mjolnir::rsqrt(x2), 1e-10);
     }
 }
 
-BOOST_AUTO_TEST_CASE(fast_inv_sqrt_float)
+BOOST_AUTO_TEST_CASE(rsqrt_float)
 {
     std::mt19937 mt(seed);
     std::uniform_real_distribution<float> uni(0.0, 100.0);
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(fast_inv_sqrt_float)
         const float x = uni(mt);
         const float x2 = x * x;
         const float x_inv = 1. / x;
-        BOOST_CHECK_CLOSE_FRACTION(x_inv, mjolnir::fast_inv_sqrt(x2), 1e-5);
+        BOOST_CHECK_CLOSE_FRACTION(x_inv, mjolnir::rsqrt(x2), 1e-5);
     }
 }
 
