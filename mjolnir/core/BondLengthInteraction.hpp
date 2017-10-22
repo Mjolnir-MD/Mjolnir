@@ -32,8 +32,8 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
     BondLengthInteraction(const container_type& pot): potentials(pot){}
     BondLengthInteraction(container_type&& pot): potentials(std::move(pot)){}
 
-    void      calc_force (system_type&)       const override;
-    real_type calc_energy(const system_type&) const override;
+    void      calc_force (system_type&)       const noexcept override;
+    real_type calc_energy(const system_type&) const noexcept override;
 
   private:
     container_type potentials;
@@ -41,19 +41,24 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
 
 template<typename traitsT, typename potentialT>
 void
-BondLengthInteraction<traitsT, potentialT>::calc_force(system_type& sys) const
+BondLengthInteraction<traitsT, potentialT>::calc_force(system_type& sys) const noexcept
 {
     for(const auto& idxp : this->potentials)
     {
-        const coordinate_type dpos = sys.adjust_direction(// for PBCs
-                sys[idxp.first[1]].position - sys[idxp.first[0]].position);
+        const std::size_t idx0 = idxp.first[0];
+        const std::size_t idx1 = idxp.first[1];
+
+        const auto dpos =
+            sys.adjust_direction(sys[idx1].position - sys[idx0].position);
+
         const real_type len2 = length_sq(dpos); // l^2
         const real_type rlen = rsqrt(len2);     // 1/l
-        const real_type force = -1 * idxp.second.derivative(len2 * rlen); // l^2/l = l
+        const real_type force = -1 * idxp.second.derivative(len2 * rlen);
+        // here, L^2 * (1 / L) = L.
 
         const coordinate_type f = dpos * (force * rlen);
-        sys[idxp.first[0]].force -= f;
-        sys[idxp.first[1]].force += f;
+        sys[idx0].force -= f;
+        sys[idx1].force += f;
     }
     return;
 }
@@ -61,7 +66,7 @@ BondLengthInteraction<traitsT, potentialT>::calc_force(system_type& sys) const
 template<typename traitsT, typename potentialT>
 typename BondLengthInteraction<traitsT, potentialT>::real_type
 BondLengthInteraction<traitsT, potentialT>::calc_energy(
-        const system_type& sys) const
+        const system_type& sys) const noexcept
 {
     real_type E = 0.;
     for(const auto& idxp : this->potentials)

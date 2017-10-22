@@ -31,8 +31,8 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
     DihedralAngleInteraction(const container_type& pot): potentials(pot){}
     DihedralAngleInteraction(container_type&& pot): potentials(std::move(pot)){}
 
-    void      calc_force (system_type&)       const override;
-    real_type calc_energy(const system_type&) const override;
+    void      calc_force (system_type&)       const noexcept override;
+    real_type calc_energy(const system_type&) const noexcept override;
 
    private:
     container_type potentials;
@@ -41,39 +41,46 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
 
 template<typename traitsT, typename pT>
 void
-DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const
+DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const noexcept
 {
     for(const auto& idxp : this->potentials)
     {
-        const coordinate_type r_ij = sys.adjust_direction(
-                sys[idxp.first[0]].position - sys[idxp.first[1]].position);
-        const coordinate_type r_kj = sys.adjust_direction(
-                sys[idxp.first[2]].position - sys[idxp.first[1]].position);
-        const coordinate_type r_lk = sys.adjust_direction(
-                sys[idxp.first[3]].position - sys[idxp.first[2]].position);
+        const std::size_t idx0 = idxp.first[0];
+        const std::size_t idx1 = idxp.first[1];
+        const std::size_t idx2 = idxp.first[2];
+        const std::size_t idx3 = idxp.first[3];
+
+        const coordinate_type r_ij =
+            sys.adjust_direction(sys[idx0].position - sys[idx1].position);
+        const coordinate_type r_kj =
+            sys.adjust_direction(sys[idx2].position - sys[idx1].position);
+        const coordinate_type r_lk =
+            sys.adjust_direction(sys[idx3].position - sys[idx2].position);
         const coordinate_type r_kl = -1e0 * r_lk;
 
-        const real_type r_kj_lensq     = length_sq(r_kj);
-        const real_type r_kj_lensq_inv = 1. / r_kj_lensq;
-        const real_type r_kj_len       = std::sqrt(r_kj_lensq);
+        const real_type r_kj_lensq  = length_sq(r_kj);
+        const real_type r_kj_rlen   = rsqrt(r_kj_lensq);
+        const real_type r_kj_rlensq = r_kj_rlen * r_kj_rlen;
+        const real_type r_kj_len    = r_kj_rlen * r_kj_lensq;
 
         const coordinate_type m = cross_product(r_ij, r_kj);
         const coordinate_type n = cross_product(r_kj, r_kl);
         const real_type m_lensq = length_sq(m);
         const real_type n_lensq = length_sq(n);
 
-        const coordinate_type R = r_ij -
-                                  (dot_product(r_ij, r_kj) * r_kj_lensq_inv) * r_kj;
-        const coordinate_type S = r_lk -
-                                  (dot_product(r_lk, r_kj) * r_kj_lensq_inv) * r_kj;
+        const coordinate_type R =
+            r_ij - (dot_product(r_ij, r_kj) * r_kj_rlensq) * r_kj;
+        const coordinate_type S =
+            r_lk - (dot_product(r_lk, r_kj) * r_kj_rlensq) * r_kj;
+
         const real_type R_lensq = length_sq(R);
         const real_type S_lensq = length_sq(S);
 
         const real_type dot_RS  = dot_product(R, S) * rsqrt(R_lensq * S_lensq);
         const real_type cos_phi = (-1. <= dot_RS && dot_RS <= 1.)
                                   ? dot_RS : std::copysign(1.0, dot_RS);
-        const real_type phi = std::copysign(std::acos(cos_phi),
-                                            dot_product(r_ij, n));
+        const real_type phi =
+            std::copysign(std::acos(cos_phi), dot_product(r_ij, n));
 
         // -dV / dphi
         const real_type coef = -(idxp.second.derivative(phi));
@@ -81,13 +88,13 @@ DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const
         const coordinate_type Fi = ( coef * r_kj_len / m_lensq) * m;
         const coordinate_type Fl = (-coef * r_kj_len / n_lensq) * n;
 
-        const real_type coef_ijk = dot_product(r_ij, r_kj) * r_kj_lensq_inv;
-        const real_type coef_jkl = dot_product(r_kl, r_kj) * r_kj_lensq_inv;
+        const real_type coef_ijk = dot_product(r_ij, r_kj) * r_kj_rlensq;
+        const real_type coef_jkl = dot_product(r_kl, r_kj) * r_kj_rlensq;
 
-        sys[idxp.first[0]].force += Fi;
-        sys[idxp.first[1]].force += (coef_ijk - 1e0) * Fi - coef_jkl * Fl;
-        sys[idxp.first[2]].force += (coef_jkl - 1e0) * Fl - coef_ijk * Fi;
-        sys[idxp.first[3]].force += Fl;
+        sys[idx0].force += Fi;
+        sys[idx1].force += (coef_ijk - 1.0) * Fi - coef_jkl * Fl;
+        sys[idx2].force += (coef_jkl - 1.0) * Fl - coef_ijk * Fi;
+        sys[idx3].force += Fl;
     }
     return;
 }
@@ -95,7 +102,7 @@ DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const
 template<typename traitsT, typename potentialT>
 typename DihedralAngleInteraction<traitsT, potentialT>::real_type
 DihedralAngleInteraction<traitsT, potentialT>::calc_energy(
-        const system_type& sys) const
+        const system_type& sys) const noexcept
 {
     real_type E = 0.;
     for(const auto& idxp : this->potentials)

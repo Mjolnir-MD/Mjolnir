@@ -32,8 +32,8 @@ class BondAngleInteraction : public LocalInteractionBase<traitsT>
     BondAngleInteraction(const container_type& pot): potentials(pot){}
     BondAngleInteraction(container_type&& pot): potentials(std::move(pot)){}
 
-    void      calc_force (system_type&)        const override;
-    real_type calc_energy(const system_type& ) const override;
+    void      calc_force (system_type&)        const noexcept override;
+    real_type calc_energy(const system_type& ) const noexcept override;
 
   private:
     container_type potentials;
@@ -41,29 +41,34 @@ class BondAngleInteraction : public LocalInteractionBase<traitsT>
 
 template<typename traitsT, typename potentialT>
 void
-BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const
+BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const noexcept
 {
     for(const auto& idxp : this->potentials)
     {
-        const coordinate_type r_ij = sys.adjust_direction(
-                sys[idxp.first[0]].position - sys[idxp.first[1]].position);
+        const std::size_t idx0 = idxp.first[0];
+        const std::size_t idx1 = idxp.first[1];
+        const std::size_t idx2 = idxp.first[2];
+
+        const coordinate_type r_ij =
+            sys.adjust_direction(sys[idx0].position - sys[idx1].position);
+
         const real_type       inv_len_r_ij = rsqrt(length_sq(r_ij));
         const coordinate_type r_ij_reg     = r_ij * inv_len_r_ij;
 
-        const coordinate_type r_kj = sys.adjust_direction(
-                sys[idxp.first[2]].position - sys[idxp.first[1]].position);
+        const coordinate_type r_kj =
+            sys.adjust_direction(sys[idx2].position - sys[idx1].position);
+
         const real_type       inv_len_r_kj = rsqrt(length_sq(r_kj));
         const coordinate_type r_kj_reg     = r_kj * inv_len_r_kj;
 
         const real_type dot_ijk = dot_product(r_ij_reg, r_kj_reg);
         const real_type cos_theta = (-1. <= dot_ijk && dot_ijk <= 1.)
-            ? dot_ijk : std::copysign(1.0, dot_ijk);
+            ? dot_ijk : std::copysign(1.0, dot_ijk); // for numerical robustness
 
         const real_type theta = std::acos(cos_theta);
+        const real_type coef  = -(idxp.second.derivative(theta));
 
-        const real_type coef = -(idxp.second.derivative(theta));
-
-        const real_type sin_theta = std::sin(theta);
+        const real_type sin_theta    = std::sin(theta);
         const real_type coef_inv_sin =
             (sin_theta > constants<real_type>::tolerance) ?
             coef / sin_theta : coef / constants<real_type>::tolerance;
@@ -74,9 +79,9 @@ BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const
         const coordinate_type Fk =
             (coef_inv_sin * inv_len_r_kj) * (cos_theta * r_kj_reg - r_ij_reg);
 
-        sys[idxp.first[0]].force += Fi;
-        sys[idxp.first[1]].force -= (Fi + Fk);
-        sys[idxp.first[2]].force += Fk;
+        sys[idx0].force += Fi;
+        sys[idx1].force -= (Fi + Fk);
+        sys[idx2].force += Fk;
     }
     return;
 }
@@ -84,18 +89,22 @@ BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const
 template<typename traitsT, typename potentialT>
 typename BondAngleInteraction<traitsT, potentialT>::real_type
 BondAngleInteraction<traitsT, potentialT>::calc_energy(
-        const system_type& sys) const
+        const system_type& sys) const noexcept
 {
     real_type E = 0.;
     for(const auto& idxp : this->potentials)
     {
-        const coordinate_type v_2to1 = sys.adjust_direction(
-                sys[idxp.first[0]].position - sys[idxp.first[1]].position);
-        const coordinate_type v_2to3 = sys.adjust_direction(
-                sys[idxp.first[2]].position - sys[idxp.first[1]].position);
+        const std::size_t idx0 = idxp.first[0];
+        const std::size_t idx1 = idxp.first[1];
+        const std::size_t idx2 = idxp.first[2];
 
-        const real_type lensq_v21 = length_sq(v_2to1);
-        const real_type lensq_v23 = length_sq(v_2to3);
+        const coordinate_type v_2to1 =
+            sys.adjust_direction(sys[idx0].position - sys[idx1].position);
+        const coordinate_type v_2to3 =
+            sys.adjust_direction(sys[idx2].position - sys[idx1].position);
+
+        const real_type lensq_v21   = length_sq(v_2to1);
+        const real_type lensq_v23   = length_sq(v_2to3);
         const real_type dot_v21_v23 = dot_product(v_2to1, v_2to3);
 
         const real_type dot_ijk   = dot_v21_v23 * rsqrt(lensq_v21 * lensq_v23);

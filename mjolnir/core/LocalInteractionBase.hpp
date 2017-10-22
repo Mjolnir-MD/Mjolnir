@@ -23,10 +23,10 @@ class LocalInteractionBase
     virtual ~LocalInteractionBase() = default;
 
     virtual void
-    calc_force(system_type&) const = 0;
+    calc_force(system_type&) const noexcept = 0;
 
     virtual real_type
-    calc_energy(const system_type&) const = 0;
+    calc_energy(const system_type&) const noexcept = 0;
 };
 
 } // mjolnir
