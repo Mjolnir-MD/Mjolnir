@@ -53,20 +53,20 @@ inline realT length(const Vector<realT, 3>& lhs) noexcept
 }
 
 template<typename realT>
-Vector<realT>
-rotate(const realT angle, const Vector<realT>& axis,
-       const Vector<realT>& target) noexcept
+Vector<realT, 3>
+rotate(const realT angle, const Vector<realT, 3>& axis,
+       const Vector<realT, 3>& target) noexcept
 {
     const realT half_angle     = angle / 2;
     const realT sin_normalized = std::sin(half_angle) * rsqrt(length_sq(axis));
     const quaternion<realT> Q{std::cos(half_angle),
-                              axis[0] * sin_normalize,
-                              axis[1] * sin_normalize,
-                              axis[2] * sin_normalize};
+                              axis[0] * sin_normalized,
+                              axis[1] * sin_normalized,
+                              axis[2] * sin_normalized};
     const quaternion<realT> P(0e0, target[0], target[1], target[2]);
     const quaternion<realT> S(Q * P * conj(Q));
 
-    return Vector<realT>{S[1], S[2], S[3]};
+    return Vector<realT, 3>{S[1], S[2], S[3]};
 }
 
 }
