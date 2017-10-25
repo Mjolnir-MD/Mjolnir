@@ -1,0 +1,57 @@
+# this file is for jarngreipr.
+
+[general]
+file_name      = "result_file_name"
+output_path    = "./"
+parameter_path = "./parameter/"
+boundary       = "Unlimited" # Unlimited or PeriodicXYZ
+seed           = 2374
+
+[[structures]]
+# index of this set of structures (optional).
+# index = 0
+A = {reference = "./data/pdb/example.pdb", model = "CarbonAlpha"}
+
+# in the case of multi-chains, you can write
+# A-D = {reference = "./data/pdb/something.pdb", model = "CarbonAlpha"}
+# or
+# A = {reference = "./data/pdb/something1.pdb", model = "CarbonAlpha"}
+# B = {reference = "./data/pdb/something2.pdb", model = "CarbonAlpha"}
+# C = {reference = "./data/pdb/something3.pdb", model = "CarbonAlpha"}
+# D = {reference = "./data/pdb/something4.pdb", model = "CarbonAlpha"}
+
+[[simulators]]
+# index of this simulator (optional).
+# index            = 0
+time_integration = "Underdamped Langevin"
+delta_t          = 0.4
+total_step       = 50_000
+save_step        = 100
+
+[[systems]]
+# index of this system (optional).
+# index            = 0
+temperature      = 300.0
+ionic_strength   = 0.1
+# boundary condition, pressure, etc...
+
+[[forcefields]]
+# index of the forcefield (optional).
+#   for switching-forcefield, multiple-basin, or some other complex forcefields.
+# index = 0
+
+[forcefields.local] # contains local forcefield.
+
+# If you set multiple local forcefield in this array, all the forcefields
+# are applied simultaneously (so the energy become sum of those forcefields).
+A = ["ClementiGo"]
+
+# in the case of multi-chains, you can write
+# A-D = ["AICG_2_plus"]
+# or
+# A-B = ["AICG_2_plus"]
+# C   = ["AICG_2_plus"]
+# D   = ["AICG_2_plus"]
+
+[forcefields.global] # contains global forcefield.
+A = ["GoContact", "ExcludedVolume"]
