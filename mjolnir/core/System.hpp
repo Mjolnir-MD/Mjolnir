@@ -46,9 +46,9 @@ class System
     {return particles_[i];}
     particle_type const& operator[](std::size_t i) const noexcept
     {return particles_[i];}
-    particle_type &      at(std::size_t i)       noexcept
+    particle_type &      at(std::size_t i)
     {return particles_.at(i);}
-    particle_type const& at(std::size_t i) const noexcept
+    particle_type const& at(std::size_t i) const
     {return particles_.at(i);}
 
     iterator       begin()        noexcept {return particles_.begin();}
