@@ -11,6 +11,8 @@ struct SimulatorTraitsBase
 {
     typedef realT                                 real_type;
     typedef Vector<real_type, 3>                  coordinate_type;
+    template<std::size_t N, std::size_t M>
+    using matrix_type = Matrix<real_type, N, M>;
     typedef coordinate_type                       position_type;
     typedef Particle<coordinate_type>             particle_type;
     typedef boundaryT<real_type, coordinate_type> boundary_type;
