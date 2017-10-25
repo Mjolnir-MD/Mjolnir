@@ -27,7 +27,7 @@ read_simulator(const toml::Table& data)
         if(integration == "Newtonian")
         {
             return make_unique<
-                MDSimulator<traitsT, NewtonianStepper<traitsT>>>(tstep,
+                MDSimulator<traitsT, VelocityVerletStepper<traitsT>>>(tstep,
                     read_system<traitsT>(data, 0), read_forcefield<traitsT>(data, 0),
                     read_velocity_verlet_stepper<traitsT>(data),
                     read_observer<traitsT>(data));

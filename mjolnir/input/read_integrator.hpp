@@ -8,12 +8,12 @@ namespace mjolnir
 {
 
 template<typename traitsT>
-NewtonianStepper<traitsT>
+VelocityVerletStepper<traitsT>
 read_velocity_verlet_stepper(const toml::Table& data)
 {
     const auto& simulator = data.at("simulator").cast<toml::value_t::Table>();
-    return NewtonianStepper<traitsT>(toml::get<typename traitsT::real_type>(
-                simulator.at("delta_t")));
+    return VelocityVerletStepper<traitsT>(
+            toml::get<typename traitsT::real_type>(simulator.at("delta_t")));
 }
 
 
