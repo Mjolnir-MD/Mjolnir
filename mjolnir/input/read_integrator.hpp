@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_READ_INTEGRATOR
 #define MJOLNIR_READ_INTEGRATOR
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/core/NewtonianStepper.hpp>
+#include <mjolnir/core/VelocityVerletStepper.hpp>
 #include <mjolnir/core/UnderdampedLangevinStepper.hpp>
 
 namespace mjolnir
