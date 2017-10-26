@@ -53,6 +53,20 @@ inline realT length(const Vector<realT, 3>& lhs) noexcept
 }
 
 template<typename realT>
+inline realT
+distance_sq(const Vector<realT, 3>& lhs, const Vector<realT, 3>& rhs) noexcept
+{
+    return length_sq(lhs - rhs);
+}
+
+template<typename realT>
+inline realT
+distance(const Vector<realT, 3>& lhs, const Vector<realT, 3>& rhs) noexcept
+{
+    return std::sqrt(distance_sq(lhs, rhs));
+}
+
+template<typename realT>
 Vector<realT, 3>
 rotate(const realT angle, const Vector<realT, 3>& axis,
        const Vector<realT, 3>& target) noexcept
@@ -69,6 +83,5 @@ rotate(const realT angle, const Vector<realT, 3>& axis,
     return Vector<realT, 3>{S[1], S[2], S[3]};
 }
 
-}
-
+} // mjolnir
 #endif /* MJOLNIR_VECTOR */

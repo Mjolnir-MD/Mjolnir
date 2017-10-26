@@ -9,21 +9,6 @@
 namespace jarngreipr
 {
 
-template<typename coordT>
-inline typename mjolnir::scalar_type_of<coordT>::type
-distance_sq(const coordT& lhs, const coordT& rhs)
-{
-    return mjolnir::length_sq(lhs - rhs);
-}
-
-template<typename coordT>
-inline typename mjolnir::scalar_type_of<coordT>::type
-distance(const coordT& lhs, const coordT& rhs)
-{
-    return std::sqrt(distance_sq(lhs, rhs));
-}
-
-
 template<typename traitsT>
 inline typename traitsT::real_type
 distance_sq(const PDBAtom<traitsT>& lhs, const PDBAtom<traitsT>& rhs)
