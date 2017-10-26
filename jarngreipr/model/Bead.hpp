@@ -1,39 +1,52 @@
-#ifndef JARNGREIPR_BEAD
-#define JARNGREIPR_BEAD
+#ifndef JARNGREIPR_MODEL_BEAD
+#define JARNGREIPR_MODEL_BEAD
 #include <jarngreipr/io/PDBAtom.hpp>
 #include <vector>
 #include <string>
 
-namespace jarngreipr
+namespace mjolnir
 {
 
-template<typename traitsT>
+template<typename coordT>
 class Bead
 {
   public:
-
-    typedef traitsT traits_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    typedef PDBAtom<traits_type> atom_type;
+    typedef coordT                 coord_type;
+    typedef PDBAtom<coord_type>    atom_type;
     typedef std::vector<atom_type> container_type;
 
   public:
-
     Bead() = default;
+    virtual ~Bead() = default;
+
     explicit Bead(const container_type& atoms) : atoms_(atoms){}
-    explicit Bead(const std::string& name) : name_(name){}
+    explicit Bead(container_type&&      atoms) : atoms_(std::move(atoms)){}
+    explicit Bead(const std::string& name)     : name_(name){}
+    explicit Bead(std::string&& name)          : name_(std::move(name)){}
+
     Bead(const container_type& atoms, const std::string& name)
-        : atoms_(atoms), name_(name){}
-    ~Bead() = default;
+        : atoms_(atoms), name_(name)
+    {}
+    Bead(const container_type& atoms, std::string&& name)
+        : atoms_(atoms), name_(std::move(name))
+    {}
+    Bead(container_type&& atoms, const std::string& name)
+        : atoms_(std::move(atoms)), name_(name)
+    {}
+    Bead(container_type&& atoms, std::string&& name)
+        : atoms_(std::move(atoms)), name_(std::move(name))
+    {}
 
-    virtual coordinate_type position(const std::size_t i) const = 0;
+    virtual coord_type  position() const = 0;
+    virtual std::string attribute(const std::string& attr_name) const = 0;
 
-    container_type const& atoms() const {return atoms_;}
-    container_type &      atoms()       {return atoms_;}
+    void assign(const atom_type& atom) {atoms_.push_back(atom);}
 
-    std::string const& name() const {return name_;}
-    std::string &      name()       {return name_;}
+    container_type const& atoms() const noexcept {return atoms_;}
+    container_type &      atoms()       noexcept {return atoms_;}
+
+    std::string const& name() const noexcept {return name_;}
+    std::string &      name()       noexcept {return name_;}
 
   protected:
 
