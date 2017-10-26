@@ -35,8 +35,8 @@ inline realT
 scalar_triple_product(const Vector<realT, 3>& lhs, const Vector<realT, 3>& mid,
                       const Vector<realT, 3>& rhs) noexcept
 {
-    return (lhs[1] * mid[2] - lhs[2] * mid[1]) * rhs[0] + 
-           (lhs[2] * mid[0] - lhs[0] * mid[2]) * rhs[1] + 
+    return (lhs[1] * mid[2] - lhs[2] * mid[1]) * rhs[0] +
+           (lhs[2] * mid[0] - lhs[0] * mid[2]) * rhs[1] +
            (lhs[0] * mid[1] - lhs[1] * mid[0]) * rhs[2];
 }
 
