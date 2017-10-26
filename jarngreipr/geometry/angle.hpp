@@ -1,22 +1,23 @@
 #ifndef JARNGREIPR_GEOMETRY_ANGLE
 #define JARNGREIPR_GEOMETRY_ANGLE
-#include "distance.hpp"
-#include <mjolnir/math/fast_inv_sqrt.hpp>
+#include <mjolnir/math/rsqrt.hpp>
+#include <mjolnir/math/Vector.hpp>
 #include <mjolnir/util/scalar_type_of.hpp>
+#include <cmath>
 
-namespace jarngreipr
+namespace mjolnir
 {
 
 template<typename coordT>
-inline typename mjolnir::scalar_type_of<coordT>::type
+inline typename scalar_type_of<coordT>::type
 cos_theta(const coordT& lhs, const coordT& rhs)
 {
-    const auto dist2     = mjolnir::length_sq(lhs) * mjolnir::length_sq(rhs);
-    const auto dot       = mjolnir::dot_product(lhs, rhs);
-    const auto cos_theta = dot * mjolnir::fast_inv_sqrt(dist2);
-         if(cos_theta < -1.) return -1.;
-    else if(cos_theta >  1.) return 1.;
-    else                     return cos_theta;
+    const auto dist2     = length_sq(lhs) * length_sq(rhs);
+    const auto dot       = dot_product(lhs, rhs);
+    const auto cos_theta = dot * mjolnir::rsqrt(dist2);
+         if(cos_theta < -1.0){return -1.0;}
+    else if(cos_theta >  1.0){return  1.0;}
+    else                     {return cos_theta;}
 }
 
 template<typename coordT>
