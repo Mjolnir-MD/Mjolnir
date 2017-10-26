@@ -4,54 +4,62 @@
 file_name      = "result_file_name"
 output_path    = "./"
 parameter_path = "./parameter/"
-boundary       = "Unlimited" # Unlimited or PeriodicXYZ
 seed           = 2374
+# This value is not the exact seed used by the simulators.
+# By using this, the initial conditions and the seeds of the simulators are set.
 
 [[structures]]
 # index of this set of structures (optional).
 # index = 0
-A = {reference = "./data/pdb/example.pdb", model = "CarbonAlpha"}
 
-# in the case of multi-chains, you can write
-# A-D = {reference = "./data/pdb/something.pdb", model = "CarbonAlpha"}
+[structures.reference]
+A-D = {file = "./data/pdb/example.pdb", model = "CarbonAlpha"}
 # or
-# A = {reference = "./data/pdb/something1.pdb", model = "CarbonAlpha"}
-# B = {reference = "./data/pdb/something2.pdb", model = "CarbonAlpha"}
-# C = {reference = "./data/pdb/something3.pdb", model = "CarbonAlpha"}
-# D = {reference = "./data/pdb/something4.pdb", model = "CarbonAlpha"}
+# A = {file = "./data/pdb/something1.pdb", model = "CarbonAlpha"}
+# B = {file = "./data/pdb/something2.pdb", model = "CarbonAlpha"}
+# C = {file = "./data/pdb/something3.pdb", model = "CarbonAlpha"}
+# D = {file = "./data/pdb/something4.pdb", model = "CarbonAlpha"}
+
+[structures.initial]
+A-D = {file = "./data/pdb/example.pdb"}
 
 [[simulators]]
 # index of this simulator (optional).
 # index            = 0
-time_integration = "Underdamped Langevin"
-delta_t          = 0.4
-total_step       = 50_000
-save_step        = 100
+scheme     = "Underdamped Langevin"
+delta_t    = 0.4    # the unit [tau] depends on the forcefield and parameters
+total_step = 50_000 # the total simulation time will be 0.4 * 50000 = 20000.
+save_step  = 100    # each 40 [tau], the configurations are saved.
 
 [[systems]]
 # index of this system (optional).
 # index            = 0
-temperature      = 300.0
-ionic_strength   = 0.1
-# boundary condition, pressure, etc...
+temperature    = 300.0       # [K]
+ionic_strength = 0.1         # [mol/L]
+boundary       = "Unlimited"
 
 [[forcefields]]
 # index of the forcefield (optional).
-#   for switching-forcefield, multiple-basin, or some other complex forcefields.
 # index = 0
 
 [forcefields.local] # contains local forcefield.
 
 # If you set multiple local forcefield in this array, all the forcefields
-# are applied simultaneously (so the energy become sum of those forcefields).
-A = ["ClementiGo"]
-
-# in the case of multi-chains, you can write
-# A-D = ["AICG_2_plus"]
+# are applied simultaneously (so the energy become the sum of those).
+A-D = [{name = "ClementiGo"}]
 # or
-# A-B = ["AICG_2_plus"]
-# C   = ["AICG_2_plus"]
-# D   = ["AICG_2_plus"]
+# A = ["AICG_2_plus"]
+# B = ["AICG_2_plus"]
+# C = ["AICG_2_plus"]
+# D = ["AICG_2_plus"]
 
 [forcefields.global] # contains global forcefield.
-A = ["GoContact", "ExcludedVolume"]
+A-D = [{name = "GoContact"}, {name = "ExcludedVolume"}]
+# to specify one-by-one, you can do this.
+# "A&B" = [{name = "GoContact", scale = 1.0}, {name = "ExcludedVolume"}]
+# "A&C" = [{name = "GoContact", scale = 0.5}, {name = "ExcludedVolume"}]
+# "A&D" = [{name = "GoContact", scale = 0.5}, {name = "ExcludedVolume"}]
+# "B&C" = [{name = "GoContact", scale = 0.5}, {name = "ExcludedVolume"}]
+# "B&D" = [{name = "GoContact", scale = 0.5}, {name = "ExcludedVolume"}]
+# "C&D" = [{name = "GoContact", scale = 1.0}, {name = "ExcludedVolume"}]
+# the strength of potential will be scaled by the value of `scale`.
