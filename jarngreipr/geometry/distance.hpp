@@ -96,12 +96,43 @@ min_distance_sq(const containerT& lhs, const containerT& rhs)
     return min_dist;
 }
 
+template<typename containerT, typename UnaryPredicate>
+typename scalar_type_of<typename containerT::value_type::coordinate_type>::type
+min_distance_sq_if(const containerT& lhs, const containerT& rhs,
+                   UnaryPredicate&& satisfy)
+{
+    typedef typename scalar_type_of<
+        typename containerT::value_type::coordinate_type>::type real_type;
+    auto min_dist = std::numeric_limits<real_type>::infinity();
+
+    for(auto l : lhs)
+    {
+        if(false == satisfy(l)) {continue;}
+        for(auto r : rhs)
+        {
+            if(false == satisfy(r)) {continue;}
+            const auto dist = min_distance_sq(l, r);
+            if(min_dist > dist) {min_dist = dist;}
+        }
+    }
+    return min_dist;
+}
+
 template<typename coordT>
 inline typename scalar_type_of<coordT>::type
 min_distance(const std::vector<PDBAtom<coordT>>& lhs,
              const std::vector<PDBAtom<coordT>>& rhs)
 {
     return std::sqrt(min_distance_sq(lhs, rhs));
+}
+
+template<typename coordT>
+inline typename scalar_type_of<coordT>::type
+min_distance_if(const std::vector<PDBAtom<coordT>>& lhs,
+                const std::vector<PDBAtom<coordT>>& rhs,
+                UnaryPredicate&& satisfy)
+{
+    return std::sqrt(min_distance_sq_if(lhs, rhs, satisfy));
 }
 
 /* ---------------------------- distance_center ----------------------------- */
