@@ -1,329 +1,206 @@
 #ifndef JARNGREIPR_CLEMENTI_GO
 #define JARNGREIPR_CLEMENTI_GO
-#include "Model.hpp"
-#include "CarbonAlpha.hpp"
+#include <jarngreipr/forcefield/ForceFieldGenerator.hpp>
 #include <jarngreipr/geometry/distance.hpp>
 #include <jarngreipr/geometry/angle.hpp>
 #include <jarngreipr/geometry/dihedral.hpp>
-#include <mjolnir/util/make_unique.hpp>
 #include <iterator>
+#include <iostream>
 #include <vector>
 
-namespace jarngreipr
+namespace mjolnir
 {
 
-template<typename traitsT>
-class ClementiGo : public Model<traitsT>
+template<typename coordT>
+class ClementiGo final : public ForceFieldGenerator<coordT>
 {
   public:
-
-    typedef traitsT traits_type;
-    typedef Model<traitsT> base_type;
-    typedef typename base_type::real_type            real_type;
-    typedef typename base_type::coordinate_type      coordinate_type;
-    typedef typename base_type::bead_type            bead_type;
-    typedef typename base_type::bead_container_type  bead_container_type;
-    typedef typename base_type::chain_type           chain_type;
-    typedef typename base_type::chain_container_type chain_container_type;
-    typedef PDBResidue<traits_type>                  residue_type;
-    typedef std::vector<std::size_t>                 index_list_type;
-    typedef std::vector<index_list_type>             exception_list_type;
-
-    template<std::size_t N>
-    using interaction_type = std::pair<std::array<std::size_t, N>, real_type>;
+    typedef coordT                      coordinate_type;
+    typedef ForceFieldGenerator<coordT> base_type;
+    typedef typename base_type::atom_type       atom_type;
+    typedef typename base_type::residue_type    residue_type;
+    typedef typename base_type::chain_type      chain_type;
+    typedef typename base_type::cg_chain_type   cg_chain_type;
+    typedef typename base_type::connection_info connection_info;
+    typedef typename scalar_type_of<coordinate_type>::type real_type;
 
   public:
 
-    ClementiGo(): contact_threshold_(6.5){}
-    explicit ClementiGo(const real_type th): contact_threshold_(th){}
-    ~ClementiGo() = default;
+    ClementiGo()
+        : contact_threshold_(6.5), k_bond_length(100.0), k_bond_angle(20.0),
+          k_dihedral_angle_1_(1.0), k_dihedral_angle_3_(0.5), k_intra_go_(0.3)
+    {}
+    ~ClementiGo() override = default;
 
-    void make(const chain_container_type& chain) override;
+    explicit ClementiGo(const real_type th)
+        : contact_threshold_(th), k_bond_length(100.0), k_bond_angle(20.0),
+          k_dihedral_angle_1_(1.0), k_dihedral_angle_3_(0.5), k_intra_go_(0.3)
+    {}
 
-    real_type& contact_threshold()       {return contact_threshold_;}
-    real_type  contact_threshold() const {return contact_threshold_;}
+    ClementiGo(const real_type conth,
+            const real_type k_bl, const real_type k_ba, const real_type k_dih1,
+            const real_type k_dih3, const real_type k_igo)
+        : contact_threshold_(conth), k_bond_length(k_bl), k_bond_angle(k_ba),
+          k_dihedral_angle_1_(k_dih1), k_dihedral_angle_3_(k_dih3),
+          k_intra_go_(k_igo)
+    {}
 
-    std::vector<interaction_type<2>>&       bonds()           {return bond_length_;}
-    std::vector<interaction_type<2>> const& bonds()     const {return bond_length_;}
-    std::vector<interaction_type<2>>&       contacts()        {return go_contact_;}
-    std::vector<interaction_type<2>> const& contacts()  const {return go_contact_;}
-    std::vector<interaction_type<3>>&       angles()          {return bond_angle_;}
-    std::vector<interaction_type<3>> const& angles()    const {return bond_angle_;}
-    std::vector<interaction_type<4>>&       dihedrals()       {return dihedral_angle_;}
-    std::vector<interaction_type<4>> const& dihedrals() const {return dihedral_angle_;}
-    exception_list_type &      exception()       {return exception_;}
-    exception_list_type const& exception() const {return exception_;}
+    // generate parameters and write out to `ostrm`.
+    connection_info
+    generate(std::ostream& ostrm, const cg_chain_type& chain,
+             const std::size_t offset) const override;
 
-    // enum
-//     void output(std::ostream& os, const std::string& pot_name) const;
+    bool check_beads_kind(const cg_chain_type& chain) const override;
 
-    void output_bond(std::ostream& os) const;
-    void output_go(std::ostream& os) const;
-    void output_angle(std::ostream& os) const;
-    void output_dihedral(std::ostream& os) const;
-    void output_exception(std::ostream& os) const;
+    real_type& contact_threshold()       noexcept {return contact_threshold_;}
+    real_type  contact_threshold() const noexcept {return contact_threshold_;}
 
   private:
-
-    real_type
-    min_distance_heavy_atom_sq(
-            const residue_type& lhs, const residue_type& rhs) const;
-    real_type
-    min_distance_heavy_atom(
-            const residue_type& lhs, const residue_type& rhs) const;
-  private:
-
     real_type contact_threshold_;
-
-    std::vector<interaction_type<2>> bond_length_;
-    std::vector<interaction_type<2>> go_contact_;
-    std::vector<interaction_type<3>> bond_angle_;
-    std::vector<interaction_type<4>> dihedral_angle_;
-    exception_list_type exception_; // !< for EXV exception
+    real_type k_bond_length_;
+    real_type k_bond_angle_;
+    real_type k_dihedral_angle_1_;
+    real_type k_dihedral_angle_3_;
+    real_type k_intra_go_;
 };
 
-template<typename traitsT>
-void ClementiGo<traitsT>::make(const chain_container_type& chains)
+template<typename coordT>
+typename ClementiGo<coordT>::connection_info
+ClementiGo<coordT>::generate(std::ostream& ostrm,
+        const cg_chain_type& chain, const std::size_t offset) const
 {
-    const real_type threshold2 = contact_threshold_ * contact_threshold_;
-
-    for(auto chain = chains.cbegin(); chain != chains.cend(); ++chain)
+    if(false == this->check_bead_kind(chain))
     {
-        const std::size_t cg_begin = this->beads_.size();
-        // make cg-beads
-        for(auto iter = chain->cbegin(); iter != chain->cend(); ++iter)
-            this->beads_.emplace_back(mjolnir::make_unique<CarbonAlpha<traitsT>>(
-                        iter->atoms(), iter->residue_name()));
+        throw std::invalid_argument("jarngreipr::ClementiGo::generate: "_str +
+                "invalid bead kind appear in argument `chain`."_str);
+    }
+    connection_info connections;
+    for(std::size_t i=0; i < chain.size(); ++i)
+    {
+        const std::size_t index = i + offset;
+        connections[index].insert(index);
+    }
 
-        { // ditect go-contact
-        std::size_t i = cg_begin;
-        this->exception_.resize(this->beads_.size());
-        for(auto iter = chain->cbegin(); iter != chain->cend()-4; ++iter)
+    const real_type th2 = this->contact_threshold_ * this->contact_threshold_;
+
+    /* bond-length */ {
+        ostrm << "[[forcefields.local]]\n";
+        ostrm << "interaction = \"BondLength\"\n";
+        ostrm << "potential   = \"Harmonic\"\n";
+        ostrm << "parameters  = [\n";
+        for(std::size_t i=0, sz = chain.size() - 1; i<sz; ++i)
         {
-             std::size_t j = i+4;
-             for(auto jter = iter + 4; jter != chain->cend(); ++jter)
-             {
-                if(min_distance_heavy_atom_sq(*iter, *jter) < threshold2)
+            const std::size_t index1 = i + offset;
+            const std::size_t index2 = i + offset + 1;
+
+            connections[index1].insert(index2);
+            connections[index2].insert(index1);
+
+            ostrm << "{indices = [" << index1 << ", " << index2 << "], ";
+            ostrm << "native = " << std::fixed << std::showpoint
+                  << distance(chain.at(i), chain.at(i+1)) << ", ";
+            ostrm << "k = " << std::fixed << std::showpoint
+                  << this->k_bond_length_;
+            ostrm << "},\n";
+        }
+        ostrm << "]\n";
+    }
+    /* bond-angle */{
+        ostrm << "[[forcefields.local]]\n";
+        ostrm << "interaction = \"BondAngle\"\n";
+        ostrm << "potential   = \"Harmonic\"\n";
+        ostrm << "parameters  = [\n";
+        for(std::size_t i=0, sz = chain.size() - 2; i<sz; ++i)
+        {
+            const std::size_t index1 = i + offset;
+            const std::size_t index2 = i + offset + 1;
+            const std::size_t index3 = i + offset + 2;
+
+            ostrm << "{indices = [" << index1 << ", " << index2
+                  << ", " << index3 << "], ";
+            ostrm << "native = " << std::fixed << std::showpoint
+                  << angle(chain.at(i), chain.at(i+1), chain.at(i+2))
+                  << ", ";
+            ostrm << "k = " << std::fixed << std::showpoint
+                  << this->k_bond_angle_;
+            ostrm << "},\n";
+        }
+        ostrm << "]\n";
+    }
+    /* dihedral-angle */{
+        ostrm << "[[forcefields.local]]\n";
+        ostrm << "interaction = \"DihedralAngle\"\n";
+        ostrm << "potential   = \"ClementiDihedral\"\n";
+        ostrm << "parameters  = [\n";
+        for(std::size_t i=0, sz = chain.size() - 3; i<sz; ++i)
+        {
+            const std::size_t index1 = i + offset;
+            const std::size_t index2 = i + offset + 1;
+            const std::size_t index3 = i + offset + 2;
+            const std::size_t index4 = i + offset + 3;
+
+            ostrm << "{indices = [" << index1 << ", " << index2
+                  << ", " << index3 << ", " << index4 << "], ";
+            ostrm << "native = " << std::fixed << std::showpoint
+                  << dihedral_angle(chain.at(i),   chain.at(i+1),
+                                    chain.at(i+2), chain.at(i+3)) << ", ";
+            ostrm << "k1 = " << std::fixed << std::showpoint
+                  << this->k_dihedral_angle_1_;
+            ostrm << "k3 = " << std::fixed << std::showpoint
+                  << this->k_dihedral_angle_3_;
+            ostrm << "},\n";
+        }
+        ostrm << "]\n";
+    }
+    /* intra-chain-go-contacts */{
+        ostrm << "[[forcefields.local]]\n";
+        ostrm << "interaction = \"BondLength\"\n";
+        ostrm << "potential = \"Go1012Contact\"\n";
+        ostrm << "parameters  = [\n";
+        for(std::size_t i=0, sz_i = chain.size()-4; i<sz_i; ++i)
+        {
+            for(std::size_t j=i+4, sz_j = chain.size(); j<sz_j; ++j)
+            {
+                if(th2 > min_distance_sq_if(
+                        chain.at(i)->atoms(), chain.at(j)->atoms(),
+                        [](const PDBAtom<coordT>& atom){
+                            // ignore hydrogens
+                            return atom.atom_name.front() != 'H';
+                        }))
                 {
-                    const auto dist = distance(this->beads_.at(i)->position(0),
-                                               this->beads_.at(j)->position(0));
-                    std::array<std::size_t, 2> indices{{i, j}};
-                    this->go_contact_.emplace_back(indices, dist);
-                    this->exception_.at(i).push_back(j);
-                    this->exception_.at(j).push_back(i);
+                    connections[i].insert(j);
+                    connections[j].insert(i);
+
+                    ostrm << "{indices = [" << i << ", " << j << "], ";
+                    ostrm << "native = " << std::fixed << std::showpoint
+                          << distance(chain.at(i), chain.at(j)) << ", ";
+                    ostrm << "k = " << std::fixed << std::showpoint
+                          << this->k_intra_go_;
+                    ostrm << "},\n";
                 }
-                ++j;
-             }
-             ++i;
+            }
         }
-        } // go-contact
+        ostrm << "]\n";
+    }
+    return connections;
+}
 
-        {// bond, angle, dihd
-        for(std::size_t i=cg_begin; i<this->beads_.size(); ++i)
+template<typename coordT>
+bool ClementiGo<coordT>::check_beads_kind(const cg_chain_type& chain) const
+{
+    bool result = true;
+    for(const auto& bead : chain)
+    {
+        if(bead->kind() != "CarbonAlpha"_str)
         {
-            this->exception_.at(i).reserve(8);
-            for(std::size_t j = std::max(static_cast<int>(i)-3, 0);
-                    j <= std::min(i+3, this->beads_.size()); ++j)
-            {
-                this->exception_.at(i).push_back(j);
-            }
-
-            if(i+1 < this->beads_.size()) // bond
-            {
-                const std::array<std::size_t, 2> indices{{i, i+1}};
-                bond_length_.emplace_back(indices, distance(
-                        this->beads_.at(i)->position(0),
-                        this->beads_.at(i+1)->position(0)));
-            }
-
-            if(i+2 < this->beads_.size()) // angle
-            {
-                const std::array<std::size_t, 3> indices{{i, i+1, i+2}};
-                bond_angle_.emplace_back(indices, angle(
-                        this->beads_.at(i)->position(0),
-                        this->beads_.at(i+1)->position(0),
-                        this->beads_.at(i+2)->position(0)));
-            }
-
-            if(i+3 < this->beads_.size()) // dihd
-            {
-                const std::array<std::size_t, 4> indices{{i, i+1, i+2, i+3}};
-                dihedral_angle_.emplace_back(indices, dihedral_angle(
-                            this->beads_.at(i  )->position(0),
-                            this->beads_.at(i+1)->position(0),
-                            this->beads_.at(i+2)->position(0),
-                            this->beads_.at(i+3)->position(0)));
-            }
-        }
-        }// bond, angle, dihd
-    }
-
-    // inter-chain go-contact assuming(num of residue == num of Ca)
-    std::size_t i_begin = 0;
-    std::size_t j_begin = 0;
-    for(auto iter = chains.cbegin(); iter != chains.cend()-1; ++iter)
-    {
-        j_begin = i_begin + iter->size();
-        for(auto jter = iter+1; jter != chains.cend(); ++jter)
-        {
-            std::size_t i = i_begin;
-            for(auto lhs = iter->cbegin(); lhs != iter->cend(); ++lhs)
-            {
-                std::size_t j = j_begin;
-                for(auto rhs = jter->cbegin(); rhs != jter->cend(); ++rhs)
-                {
-                    if(min_distance_heavy_atom_sq(*lhs, *rhs) < threshold2)
-                    {
-                        const auto dist = distance(this->beads_.at(i)->position(0),
-                                                   this->beads_.at(j)->position(0));
-                        const std::array<std::size_t, 2> indices{{i, j}};
-                        this->go_contact_.emplace_back(indices, dist);
-                        this->exception_.at(i).push_back(j);
-                        this->exception_.at(j).push_back(i);
-                    }
-                    ++j;
-                }
-                ++i;
-            }
-            j_begin += jter->size();
-        }
-        i_begin += iter->size();
-    }
-    return;
-}
-
-
-template<typename traitsT>
-void ClementiGo<traitsT>::output_bond(std::ostream& os) const
-{
-    os << "[forcefield]" << std::endl;
-    os << "[[localforcefield]]" << std::endl;
-    os << "interaction = \"BondLength\"" << std::endl;
-    os << "potential = \"Harmonic\"" << std::endl;
-
-    os << "# params{{{" << std::endl;
-    os << "parameters = [" << std::endl;
-    for(auto iter = this->bond_length_.cbegin();
-            iter != this->bond_length_.cend(); ++iter)
-    {
-        os << "{indices = [" << iter->first[0] << ", " << iter->first[1]
-           << "], r0 = " << iter->second << ", k = 100.0}," << std::endl;
-    }
-    os << "]" << std::endl;
-    os << "# }}}" << std::endl;
-
-    return;
-}
-
-template<typename traitsT>
-void ClementiGo<traitsT>::output_go(std::ostream& os) const
-{
-    os << "[[localforcefield]]" << std::endl;
-    os << "interaction = \"BondLength\"" << std::endl;
-    os << "potential = \"Go1012Contact\"" << std::endl;
-    os << "# params{{{" << std::endl;
-    os << "parameters = [" << std::endl;
-    for(auto iter = go_contact_.cbegin();
-            iter != go_contact_.cend(); ++iter)
-    {
-        os << "{indices = [" << iter->first[0] << ", " << iter->first[1]
-           << "], r0 = " << iter->second << ", k = 0.3}," << std::endl;
-    }
-    os << "]" << std::endl;
-    os << "# }}}" << std::endl;
-
-    return;
-}
-
-template<typename traitsT>
-void ClementiGo<traitsT>::output_angle(std::ostream& os) const
-{
-    os << "[[localforcefield]]" << std::endl;
-    os << "interaction = \"BondAngle\"" << std::endl;
-    os << "potential = \"Harmonic\"" << std::endl;
-    os << "# params{{{" << std::endl;
-    os << "parameters = [" << std::endl;
-    for(auto iter = bond_angle_.cbegin();
-            iter != bond_angle_.cend(); ++iter)
-    {
-        os << "{indices = ["
-           << iter->first[0] << ", " << iter->first[1] << ", " << iter->first[2]
-           << "], r0 = " << iter->second << ", k = 20.0}," << std::endl;
-    }
-    os << "]" << std::endl;
-    os << "# }}}" << std::endl;
-
-    return;
-}
-
-template<typename traitsT>
-void ClementiGo<traitsT>::output_dihedral(std::ostream& os) const
-{
-    os << "[[localforcefield]]" << std::endl;
-    os << "interaction = \"DihedralAngle\"" << std::endl;
-    os << "potential = \"ClementiDihedral\"" << std::endl;
-    os << "# params{{{" << std::endl;
-    os << "parameters = [" << std::endl;
-    for(auto iter = dihedral_angle_.cbegin();
-            iter != dihedral_angle_.cend(); ++iter)
-    {
-        os << "{indices = ["
-           << iter->first[0] << ", " << iter->first[1] << ", "
-           << iter->first[2] << ", " << iter->first[3]
-           << "], phi0 = " << iter->second << ", k1 = 1.0, k3 = 0.5}," << std::endl;
-    }
-    os << "]" << std::endl;
-    os << "# }}}" << std::endl;
-    return;
-}
-
-template<typename traitsT>
-void ClementiGo<traitsT>::output_exception(std::ostream& os) const
-{
-    std::cout << "# excepts{{{" << std::endl;
-    std::cout << "excepts = [" << std::endl;
-    for(auto iter = this->exception_.cbegin();
-            iter != this->exception_.cend(); ++iter)
-    {
-        std::cout << "[";
-        for(auto jter = iter->cbegin(); jter != iter->cend(); ++jter)
-        {
-            std::cout << *jter << ",";
-        }
-        std::cout << "]," << std::endl;
-    }
-    std::cout << "]" << std::endl;
-    std::cout << "# }}}" << std::endl;
-    return;
-}
-
-template<typename traitsT>
-typename ClementiGo<traitsT>::real_type
-ClementiGo<traitsT>::min_distance_heavy_atom_sq(
-        const residue_type& lhs, const residue_type& rhs) const
-{
-    real_type min_dist_sq = std::numeric_limits<real_type>::max();
-    for(auto iter = lhs.cbegin(); iter != lhs.cend(); ++iter)
-    {
-        if(iter->atom_name.front() == 'H')
-            continue;
-        for(auto jter = rhs.cbegin(); jter != rhs.cend(); ++jter)
-        {
-            if(jter->atom_name.front() == 'H')
-                continue;
-            const auto dist_sq = distance_sq(iter->position, jter->position);
-            if(min_dist_sq > dist_sq) min_dist_sq = dist_sq;
+            std::cerr << "jarngreipr::ClementiGo::check_beads_kind: Error: \n";
+            std::cerr << "    invalid coarse-grained bead kind: "
+                      << bead->kind() << '\n';
+            std::cerr << "    ClementiGo contains only CarbonAlpha beads.\n";
+            result = false;
         }
     }
-    return min_dist_sq;
-}
-
-template<typename traitsT>
-typename ClementiGo<traitsT>::real_type
-ClementiGo<traitsT>::min_distance_heavy_atom(
-        const residue_type& lhs, const residue_type& rhs) const
-{
-    return std::sqrt(min_distance_heavy_atom(lhs, rhs));
+    return result;
 }
 
 }//jarngreipr
