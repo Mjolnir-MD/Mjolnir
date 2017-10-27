@@ -11,9 +11,9 @@ template<typename coordT>
 class Bead
 {
   public:
-    typedef coordT                 coord_type;
-    typedef PDBAtom<coord_type>    atom_type;
-    typedef std::vector<atom_type> container_type;
+    typedef coordT                   coordinate_type;
+    typedef PDBAtom<coordinate_type> atom_type;
+    typedef std::vector<atom_type>   container_type;
 
   public:
     Bead() = default;
@@ -37,7 +37,7 @@ class Bead
         : atoms_(std::move(atoms)), name_(std::move(name))
     {}
 
-    virtual coord_type  position() const = 0;
+    virtual coordinate_type position() const = 0;
     virtual std::string attribute(const std::string& attr_name) const = 0;
 
     void assign(const atom_type& atom) {atoms_.push_back(atom);}

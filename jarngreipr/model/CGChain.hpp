@@ -14,7 +14,7 @@ template<typename coordT>
 class CGChain
 {
   public:
-    typedef coordT       coord_type;
+    typedef coordT       coordinate_type;
     typedef Bead<coordT> bead_type;
     typedef std::unique_ptr<bead_type> bead_ptr_type;
     typedef std::vector<bead_ptr_type> container_type;

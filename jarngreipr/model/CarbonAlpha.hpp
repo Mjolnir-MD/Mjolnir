@@ -17,7 +17,7 @@ class CarbonAlpha final : public Bead<coordT>
   public:
 
     typedef Bead<coordT> base_type;
-    typedef typename base_type::coordinate_type coord_type;
+    typedef typename base_type::coordinate_type coordinate_type;
     typedef typename base_type::atom_type       atom_type;
     typedef typename base_type::container_type  container_type;
 
