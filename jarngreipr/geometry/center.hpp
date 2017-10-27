@@ -150,15 +150,15 @@ coordT center_if(const PDBChain<coordT>& chain, UnaryPredicate&& satisfy)
 }
 
 template<typename Iterator>
-inline typename std::iterator_traits<Iterator>::value_type::coord_type
+inline typename std::iterator_traits<Iterator>::value_type::coordinate_type
 center(Iterator first, const Iterator last) noexcept
 {
-    typedef typename std::iterator_traits<Iterator>::value_type::coord_type
-            coord_type;
-    typedef typename coord_type::real_type real_type;
+    typedef typename std::iterator_traits<Iterator>::value_type::coordinate_type
+            coordinate_type;
+    typedef typename coordinate_type::real_type real_type;
 
     std::size_t num_p = 0;
-    coord_type  pos(0,0,0);
+    coordinate_type  pos(0,0,0);
     for(; first != last; ++first)
     {
         pos += center(*first);
