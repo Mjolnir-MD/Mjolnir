@@ -10,10 +10,10 @@ class PDBChain
 {
   public:
     typedef PDBResidue<coordT> residue_type;
-    typedef typename residue_type::int_type   int_type;
-    typedef typename residue_type::real_type  real_type;
-    typedef typename residue_type::coord_type coord_type;
-    typedef typename residue_type::atom_type  atom_type;
+    typedef typename residue_type::int_type        int_type;
+    typedef typename residue_type::real_type       real_type;
+    typedef typename residue_type::coordinate_type coordinate_type;
+    typedef typename residue_type::atom_type       atom_type;
 
     typedef std::vector<residue_type> container_type;
     typedef typename container_type::value_type     value_type;

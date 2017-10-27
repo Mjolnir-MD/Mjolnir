@@ -13,7 +13,7 @@ class PDBResidue
     typedef PDBAtom<coordT> atom_type;
     typedef typename atom_type::int_type   int_type;
     typedef typename atom_type::real_type  real_type;
-    typedef typename atom_type::coord_type coord_type;
+    typedef typename atom_type::coordinate_type coordinate_type;
 
     typedef std::vector<atom_type> container_type;
     typedef typename container_type::value_type     value_type;

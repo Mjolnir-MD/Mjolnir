@@ -15,8 +15,8 @@ namespace mjolnir
 template<typename coordT>
 struct PDBAtom
 {
-    typedef coordT   coord_type;
-    typedef typename scalar_type_of<coord_type>::type scalar_type;
+    typedef coordT   coordinate_type;
+    typedef typename scalar_type_of<coordinate_type>::type scalar_type;
     typedef scalar_type real_type;
     typedef std::int64_t int_type;
 
@@ -35,13 +35,13 @@ struct PDBAtom
     std::string chain_id;
     std::string element;
     std::string charge;
-    coord_type  position;
+    coordinate_type  position;
 
-    explicit PDBAtom(const coord_type& pos);
-    PDBAtom(const int_type atomid, const coord_type& pos);
+    explicit PDBAtom(const coordinate_type& pos);
+    PDBAtom(const int_type atomid, const coordinate_type& pos);
     PDBAtom(const int_type atomid, const int_type resid,
             const std::string& atomname, const std::string& resname,
-            const std::string& chainid,  const coord_type& pos);
+            const std::string& chainid,  const coordinate_type& pos);
 
     PDBAtom()  = default;
     ~PDBAtom() = default;
@@ -52,7 +52,7 @@ struct PDBAtom
 };
 
 template<typename coordT>
-PDBAtom<coordT>::PDBAtom(const coord_type& pos)
+PDBAtom<coordT>::PDBAtom(const coordinate_type& pos)
     : altloc(' '), icode(' '), atom_id(0), residue_id(0), occupancy(0.0),
       temperature_factor(0.0), prefix("ATOM"), atom_name("X"),
       residue_name("XXX"), chain_id("X"), element("X"), charge("X"),
@@ -60,7 +60,7 @@ PDBAtom<coordT>::PDBAtom(const coord_type& pos)
 {}
 
 template<typename coordT>
-PDBAtom<coordT>::PDBAtom(const int_type atomid, const coord_type& pos)
+PDBAtom<coordT>::PDBAtom(const int_type atomid, const coordinate_type& pos)
     : altloc(' '), icode(' '), atom_id(atomid), residue_id(0), occupancy(0.0),
       temperature_factor(0.0), prefix("ATOM"), atom_name("X"),
       residue_name("XXX"), chain_id("A"), element("X"), charge("X"),
@@ -70,7 +70,7 @@ PDBAtom<coordT>::PDBAtom(const int_type atomid, const coord_type& pos)
 template<typename coordT>
 PDBAtom<coordT>::PDBAtom(const int_type atomid, const int_type resid,
         const std::string& atomname, const std::string& resname,
-        const std::string& chainid,  const coord_type& pos)
+        const std::string& chainid,  const coordinate_type& pos)
     : altloc(' '), icode(' '), atom_id(atomid), residue_id(resid),
       occupancy(0.0), temperature_factor(0.0), prefix("ATOM"),
       atom_name(atomname), residue_name(resname), chain_id(chainid),

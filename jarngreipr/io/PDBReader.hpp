@@ -195,10 +195,10 @@ class PDBReader
 {
   public:
 
-    typedef coordT coord_type;
-    typedef PDBAtom<coord_type>    atom_type;
-    typedef PDBResidue<coord_type> residue_type;
-    typedef PDBChain<coord_type>   chain_type;
+    typedef coordT coordinate_type;
+    typedef PDBAtom<coordinate_type>    atom_type;
+    typedef PDBResidue<coordinate_type> residue_type;
+    typedef PDBChain<coordinate_type>   chain_type;
   public:
 
     explicit PDBReader(const std::string& fname)
