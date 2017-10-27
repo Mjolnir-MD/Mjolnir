@@ -11,7 +11,7 @@ namespace mjolnir
 
 template<typename coordT>
 inline typename scalar_type_of<coordT>::type
-distance_sq(const Bead<coordT>& lhs, const PDBAtom<coordT>& rhs) noexcept
+distance_sq(const Bead<coordT>& lhs, const Bead<coordT>& rhs) noexcept
 {
     return distance_sq(lhs.position(), rhs.position());
 }
