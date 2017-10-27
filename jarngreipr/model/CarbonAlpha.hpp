@@ -57,6 +57,8 @@ class CarbonAlpha final : public Bead<coordT>
 
     std::string     attribute(const std::string& n) const override
     {return ""_str;}
+
+    std::string kind() const override {return "CarbonAlpha"_str;}
 };
 
 template<typename coordT>

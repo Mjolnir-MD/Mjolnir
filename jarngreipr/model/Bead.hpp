@@ -48,6 +48,8 @@ class Bead
     std::string const& name() const noexcept {return name_;}
     std::string &      name()       noexcept {return name_;}
 
+    virtual std::string kind() const = 0;
+
   protected:
 
     std::string     name_;
