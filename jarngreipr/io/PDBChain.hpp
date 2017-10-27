@@ -16,6 +16,7 @@ class PDBChain
     typedef typename residue_type::atom_type  atom_type;
 
     typedef std::vector<residue_type> container_type;
+    typedef typename container_type::value_type     value_type;
     typedef typename container_type::iterator       iterator;
     typedef typename container_type::const_iterator const_iterator;
 

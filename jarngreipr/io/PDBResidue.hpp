@@ -16,6 +16,7 @@ class PDBResidue
     typedef typename atom_type::coord_type coord_type;
 
     typedef std::vector<atom_type> container_type;
+    typedef typename container_type::value_type     value_type;
     typedef typename container_type::iterator       iterator;
     typedef typename container_type::const_iterator const_iterator;
 
