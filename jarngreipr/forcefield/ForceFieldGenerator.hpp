@@ -6,7 +6,7 @@
 #include <jarngreipr/model/Bead.hpp>
 #include <jarngreipr/model/CGChain.hpp>
 #include <jarngreipr/model/CarbonAlpha.hpp>
-#include <jarngreipr/forcefield/ConnectingIndices.hpp>
+#include <jarngreipr/forcefield/ConnectionInfo.hpp>
 #include <ostream>
 
 namespace mjolnir
