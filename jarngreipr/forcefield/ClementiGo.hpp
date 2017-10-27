@@ -12,16 +12,16 @@ namespace mjolnir
 {
 
 template<typename coordT>
-class ClementiGo final : public ForceFieldGenerator<coordT>
+class ClementiGo final : public IntraChainForceFieldGenerator<coordT>
 {
   public:
-    typedef coordT                      coordinate_type;
-    typedef ForceFieldGenerator<coordT> base_type;
-    typedef typename base_type::atom_type       atom_type;
-    typedef typename base_type::residue_type    residue_type;
-    typedef typename base_type::chain_type      chain_type;
-    typedef typename base_type::cg_chain_type   cg_chain_type;
-    typedef typename base_type::connection_info connection_info;
+    typedef coordT coordinate_type;
+    typedef IntraChainForceFieldGenerator<coordT> base_type;
+    typedef typename base_type::atom_type         atom_type;
+    typedef typename base_type::residue_type      residue_type;
+    typedef typename base_type::chain_type        chain_type;
+    typedef typename base_type::cg_chain_type     cg_chain_type;
+    typedef typename base_type::connection_info   connection_info;
     typedef typename scalar_type_of<coordinate_type>::type real_type;
 
   public:
@@ -162,11 +162,10 @@ ClementiGo<coordT>::generate(std::ostream& ostrm,
             for(std::size_t j=i+4, sz_j = chain.size(); j<sz_j; ++j)
             {
                 if(th2 > min_distance_sq_if(
-                        chain.at(i)->atoms(), chain.at(j)->atoms(),
-                        [](const PDBAtom<coordT>& atom){
-                            // ignore hydrogens
-                            return atom.atom_name.front() != 'H';
-                        }))
+                    chain.at(i)->atoms(), chain.at(j)->atoms(),
+                    [](const PDBAtom<coordT>& atom){// ignore hydrogens
+                        return atom.atom_name.front() != 'H';
+                    }))
                 {
                     connections[i].insert(j);
                     connections[j].insert(i);
