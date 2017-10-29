@@ -29,8 +29,7 @@ class PDBChain
     PDBChain& operator=(const PDBChain&) = default;
     PDBChain& operator=(PDBChain&&)      = default;
 
-    std::string const& chain_id() const noexcept
-    {return this->front().chain_id();}
+    char chain_id() const noexcept {return this->front().chain_id();}
 
     bool        empty() const noexcept {return residues_.empty();}
     std::size_t size()  const noexcept {return residues_.size();}

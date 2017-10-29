@@ -25,6 +25,7 @@ struct PDBAtom
 
     char        altloc;
     char        icode;
+    char        chain_id;
     int_type    atom_id;
     int_type    residue_id;
     real_type   occupancy;
@@ -32,7 +33,6 @@ struct PDBAtom
     std::string prefix;
     std::string atom_name;
     std::string residue_name;
-    std::string chain_id;
     std::string element;
     std::string charge;
     coordinate_type  position;
@@ -41,7 +41,7 @@ struct PDBAtom
     PDBAtom(const int_type atomid, const coordinate_type& pos);
     PDBAtom(const int_type atomid, const int_type resid,
             const std::string& atomname, const std::string& resname,
-            const std::string& chainid,  const coordinate_type& pos);
+            const char         chainid,  const coordinate_type& pos);
 
     PDBAtom()  = default;
     ~PDBAtom() = default;
@@ -55,7 +55,7 @@ template<typename coordT>
 PDBAtom<coordT>::PDBAtom(const coordinate_type& pos)
     : altloc(' '), icode(' '), atom_id(0), residue_id(0), occupancy(0.0),
       temperature_factor(0.0), prefix("ATOM"), atom_name("X"),
-      residue_name("XXX"), chain_id("X"), element("X"), charge("X"),
+      residue_name("XXX"), chain_id('X'), element("X"), charge("X"),
       position(pos)
 {}
 
@@ -63,14 +63,14 @@ template<typename coordT>
 PDBAtom<coordT>::PDBAtom(const int_type atomid, const coordinate_type& pos)
     : altloc(' '), icode(' '), atom_id(atomid), residue_id(0), occupancy(0.0),
       temperature_factor(0.0), prefix("ATOM"), atom_name("X"),
-      residue_name("XXX"), chain_id("A"), element("X"), charge("X"),
+      residue_name("XXX"), chain_id('A'), element("X"), charge("X"),
       position(pos)
 {}
 
 template<typename coordT>
 PDBAtom<coordT>::PDBAtom(const int_type atomid, const int_type resid,
         const std::string& atomname, const std::string& resname,
-        const std::string& chainid,  const coordinate_type& pos)
+        const char         chainid,  const coordinate_type& pos)
     : altloc(' '), icode(' '), atom_id(atomid), residue_id(resid),
       occupancy(0.0), temperature_factor(0.0), prefix("ATOM"),
       atom_name(atomname), residue_name(resname), chain_id(chainid),

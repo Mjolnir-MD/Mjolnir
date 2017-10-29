@@ -31,7 +31,7 @@ class PDBResidue
     {return this->atoms_.front().residue_id;}
     std::string const& residue_name() const noexcept
     {return this->atoms_.front().residue_name;}
-    std::string const& chain_id()     const noexcept
+    char chain_id() const noexcept
     {return this->atoms_.front().chain_id;}
 
     void push_back(atom_type const& atom)

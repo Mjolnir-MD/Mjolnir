@@ -212,7 +212,8 @@ class PDBReader
 
     std::string const& filename() const noexcept {return this->filename_;}
 
-    bool is_eof() {ifs_.peek(); return ifs_.eof();}
+    bool is_eof()  {ifs_.peek(); return ifs_.eof();}
+    bool is_good() {return ifs.good();}
 
   private:
 
