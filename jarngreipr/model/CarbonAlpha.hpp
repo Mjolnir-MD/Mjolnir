@@ -29,7 +29,7 @@ class CarbonAlpha final : public Bead<coordT>
     ~CarbonAlpha() override = default;
 
     explicit CarbonAlpha(const residue_type& residue)
-        : base_type(residue.atoms())
+        : base_type(residue.atoms(), residue.residue_name())
     {}
 
     explicit CarbonAlpha(const container_type& atoms): base_type(atoms){}
