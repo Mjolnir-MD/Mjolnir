@@ -62,7 +62,8 @@ class CarbonAlpha final : public Bead<coordT>
 };
 
 template<typename coordT>
-coordT CarbonAlpha<coordT>::position(const std::size_t i) const
+typename CarbonAlpha<coordT>::coordinate_type
+CarbonAlpha<coordT>::position() const
 {
     const auto finder = [](const atom_type& a){return a.atom_name == "CA"_str;};
     const std::size_t num_ca =
