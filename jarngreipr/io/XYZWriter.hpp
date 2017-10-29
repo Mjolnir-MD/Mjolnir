@@ -15,7 +15,7 @@ std::ostream& operator<<(std::ostream& ostrm, const XYZLine<coordT>& line)
     ostrm << line.name << std::fixed << std::showpoint << std::setprecision(5)
           << line.position[0] << ' ' << line.position[1] << ' '
           << line.position[2];
-    return;
+    return ostrm;
 }
 
 template<typename coordT>
