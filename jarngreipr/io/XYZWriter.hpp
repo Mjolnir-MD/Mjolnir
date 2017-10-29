@@ -12,9 +12,11 @@ namespace mjolnir
 template<typename coordT>
 std::ostream& operator<<(std::ostream& ostrm, const XYZLine<coordT>& line)
 {
-    ostrm << line.name << std::fixed << std::showpoint << std::setprecision(5)
-          << line.position[0] << ' ' << line.position[1] << ' '
-          << line.position[2];
+    ostrm << std::setw(8)  << std::left << line.name
+          << std::fixed << std::showpoint << std::setprecision(5) << std::right
+          << std::setw(10) << line.position[0] << ' '
+          << std::setw(10) << line.position[1] << ' '
+          << std::setw(10) << line.position[2];
     return ostrm;
 }
 
