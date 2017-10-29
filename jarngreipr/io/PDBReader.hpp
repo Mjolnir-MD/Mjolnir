@@ -38,7 +38,7 @@ PDBAtom<coordT> read_pdb_atom_line(const std::string& line)
     try
     {
         const std::string prefix = remove_whitespace(line.substr(0, 6));
-        if(prefix != "ATOM" && prefix != "HETATM")
+        if(prefix != "ATOM")
         {
             throw pdb::different_line(
                     "mjolnir::read_pdb_atom: neither ATOM nor HETATM line");
@@ -213,7 +213,7 @@ class PDBReader
     std::string const& filename() const noexcept {return this->filename_;}
 
     bool is_eof()  {ifs_.peek(); return ifs_.eof();}
-    bool is_good() {return ifs.good();}
+    bool is_good() {return ifs_.good();}
 
   private:
 
