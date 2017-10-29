@@ -1,6 +1,7 @@
 #ifndef JARNGREIPR_MAKE_COARSE_GRAINED
 #define JARNGREIPR_MAKE_COARSE_GRAINED
 #include <jarngreipr/model/CGChain.hpp>
+#include <jarngreipr/model/CarbonAlpha.hpp>
 #include <jarngreipr/io/PDBChain.hpp>
 
 namespace mjolnir
@@ -17,6 +18,7 @@ make_coarse_grained(const PDBChain<coordT>& pdb, const std::string& model)
         {
             cg.push_back(make_unique<CarbonAlpha<coordT>>(residue));
         }
+        return cg;
     }
     else
     {
