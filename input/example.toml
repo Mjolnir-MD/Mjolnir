@@ -12,16 +12,18 @@ seed           = 2374
 # index of this set of structures (optional).
 # index = 0
 
-[structures.reference]
 A-D = {file = "./data/pdb/example.pdb", model = "CarbonAlpha"}
 # or
 # A = {file = "./data/pdb/something1.pdb", model = "CarbonAlpha"}
 # B = {file = "./data/pdb/something2.pdb", model = "CarbonAlpha"}
 # C = {file = "./data/pdb/something3.pdb", model = "CarbonAlpha"}
 # D = {file = "./data/pdb/something4.pdb", model = "CarbonAlpha"}
-
-[structures.initial]
-A-D = {file = "./data/pdb/example.pdb"}
+# This means the same thing. `A-D` means `from A to D`. the alphabets correspond
+# to chain IDs in the pdb file.
+#
+# To specify the initial conformation that is differrent from reference
+# structure, define `initial`.
+# A-D = {file = "./data/pdb/example.pdb", initial = "./data/pdb/example2.pdb", model = "CarbonAlpha"}
 
 [[simulators]]
 # index of this simulator (optional).
