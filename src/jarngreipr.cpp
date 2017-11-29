@@ -14,24 +14,245 @@
 
 using mjolnir::operator"" _str;
 
-std::vector<char> split_ids(const std::string& key)
+namespace mjolnir
 {
-    std::vector<char> ids;
-    if(key.find('-') == std::string::npos)
+
+std::vector<char> split_chain_ids(const std::string& key)
+{
+    if(key.size() == 1)
     {
-        ids.push_back(key.front());
-    }
-    else
-    {
-        const char first = key.front();
-        const char last  = key.back();
-        for(char c = first; c <= last; ++c)
+        if(not std::isupper(key.front()))
         {
-            ids.push_back(c);
+            throw std::runtime_error("jarngreipr::split_chain_ids: "
+                    "chain ID should be specified in upper case.");
         }
+        return std::vector<char>{key.front()};
+    }
+
+    if(not (key.size() == 3 && (key.at(1) == '-' || key.at(1) == '&') &&
+            std::isupper(key.front()) && std::isupper(key.back())))
+    {
+        throw std::runtime_error("jarngreipr::split_chain_ids: "
+                "chain ID must be upper case and supplied in this way: "
+                "'A', 'A-C', or 'A&D'");
+    }
+
+    if(key.at(1) == '&')
+    {
+        // "A&D" -> {A, D}
+        return std::vector<char>{key.front(), key.back()};
+    }
+
+    // "A-D" -> {A, B, C, D}
+    std::vector<char> ids;
+    for(char c = key.front(); c <= key.back(); ++c)
+    {
+        ids.push_back(c);
     }
     return ids;
 }
+
+template<typename coordT>
+std::vector<std::unordered_map<char, PDBChain<coordT>>>
+read_reference_structures(const std::vector<toml::Table>& structures)
+{
+    std::vector<std::unordered_map<char, PDBChain<coordT>>> tables;
+    for(const auto& conf : structures)
+    {
+        std::unordered_map<char, PDBChain<coordT>> table;
+        for(const auto& kvp : conf)
+        {
+            std::vector<char> chIDs = split_chain_ids(kvp.first);
+            const toml::Table val = toml::get<toml::Table>(kvp.second);
+
+            std::string filename;
+            try
+            {
+                filename = toml::get<std::string>(val.at("file"));
+            }
+            catch(const std::exception& except)
+            {
+                throw std::runtime_error("jarngreipr::read_reference_structures: "
+                        "file is not specified for chain " + kbp.first);
+            }
+
+            if(filename.substr(filename.size() - 4) == ".pdb")
+            {
+                mjolnir::PDBReader<coord_type> pdb_reader(filename);
+                if(not pdb_reader.is_good())
+                {
+                    throw std::runtime_error(
+                            "jarngreipr::read_reference_structures: "
+                            "file open error: filename = " + filename);
+                }
+                while(not pdb_reader.is_eof())
+                {
+                    const auto chain = pdb_reader.read_next_chain();
+                    const char chain_id = chain.chain_id();
+                    const auto found = std::find(
+                            chIDs.begin(), chIDs.end(), chain_id);
+                    if(found != chIDs.end())
+                    {
+                        table[*found] = chain;
+                        chIDs.erase(found);
+                    }
+                }
+            }
+            else
+            {
+                throw std::runtime_error("jarngreipr::read_reference_structures: "
+                        "unrecognizable file: " + filename);
+            }
+
+            if(not chIDs.empty())
+            {
+                std::string mes("jarngreipr::read_reference_structures: "
+                                "missing chains in : ");
+                mes += filename;
+                mes += ", ID = ";
+                mes += std::string(chIDs.begin(), chIDs.end());
+                throw std::runtime_error(mes);
+            }
+        }
+        tables.push_back(std::move(table));
+    }
+    return tables;
+}
+
+template<typename coordT>
+std::vector<std::unordered_map<char, PDBChain<coordT>>>
+read_initial_structures(const std::vector<toml::Table>& structures)
+{
+    std::vector<std::unordered_map<char, PDBChain<coordT>>> tables;
+    for(const auto& conf : structures)
+    {
+        std::unordered_map<char, PDBChain<coordT>> table;
+        for(const auto& kvp : conf)
+        {
+            std::vector<char> chIDs = split_chain_ids(kvp.first);
+            const toml::Table val = toml::get<toml::Table>(kvp.second);
+
+            std::string filename;
+            try
+            {
+                filename = toml::get<std::string>(val.at("initial"));
+            }
+            catch(const std::exception& except)
+            {
+                // do nothing. initial configuration is optional.
+            }
+            try
+            {
+                filename = toml::get<std::string>(val.at("file"));
+            }
+            catch(const std::exception& except)
+            {
+                throw std::runtime_error("jarngreipr::read_initial_structures: "
+                        "neither file nor initial exists for chain " + kbp.first);
+            }
+
+            if(filename.substr(filename.size() - 4) == ".pdb")
+            {
+                mjolnir::PDBReader<coord_type> pdb_reader(pdb_filename);
+                if(not pdb_reader.is_good())
+                {
+                    throw std::runtime_error(
+                            "jarngreipr::read_reference_structures: "
+                            "file open error: " + pdb_filename);
+                }
+                while(not pdb_reader.is_eof())
+                {
+                    const auto chain = pdb_reader.read_next_chain();
+                    const char chain_id = chain.chain_id();
+                    const auto found = std::find(
+                            chIDs.begin(), chIDs.end(), chain_id);
+                    if(found != chIDs.end())
+                    {
+                        table[*found] = chain;
+                        chIDs.erase(found);
+                    }
+                }
+            }
+            else
+            {
+                throw std::runtime_error("jarngreipr::read_reference_structures: "
+                        "unrecognizable file: " + filename);
+            }
+
+            if(not chIDs.empty())
+            {
+                std::string mes("jarngreipr::read_reference_structures: "
+                                "missing chains in : ");
+                mes += filename;
+                mes += ", ID = ";
+                mes += std::string(chIDs.begin(), chIDs.end());
+                throw std::runtime_error(mes);
+            }
+        }
+        tables.push_back(std::move(table));
+    }
+    return tables;
+}
+
+inline std::vector<std::unordered_map<char, std::string>>
+read_coarse_grained_models(const std::vector<toml::Table>& structures)
+{
+    std::vector<std::unordered_map<char, std::string>> tables;
+    for(const auto& conf : structures)
+    {
+        std::unordered_map<char, std::string> table;
+        for(const auto& kvp : conf)
+        {
+            const std::vector<char> chIDs = split_chain_ids(kvp.first);
+            const toml::Table val = toml::get<toml::Table>(kvp.second);
+
+            std::string model_name;
+            try
+            {
+                model_name = toml::get<std::string>(val.at("initial"));
+            }
+            catch(const std::exception& except)
+            {
+                throw std::runtime_error("jarngreipr::read_coarse_grained model: "
+                        "model is not specified for chain " + kbp.first);
+            }
+
+            for(char id : chIDs)
+            {
+                table[id] = model_name;
+            }
+        }
+        tables.push_back(std::move(table));
+    }
+    return tables;
+}
+
+template<typename coordT>
+std::vector<std::unordered_map<char, CGChain<coordT>>>
+apply_coarse_grained_models(
+        const std::vector<std::unordered_map<char, PDBChain<coordT>>>& pdbs,
+        const std::vector<std::unordered_map<char, std::string>>& models)
+{
+    assert(pdbs.size() == models.size());
+    std::vector<std::unordered_map<char, CGChain<coordT>>> cgss;
+    for(std::size_t i=0; i<pdbs.size(); ++i)
+    {
+        std::unordered_map<char, CGChain<coordT>> cgs;
+        const auto& pdb   = pdbs.at(i);
+        const auto& model = models.at(i);
+
+        for(const auto& kv : pdb)
+        {
+            const auto chid = kv.first;
+            const auto&  ch = kv.second;
+            cgs[chid] = make_coarse_grained(ch, model.at(chid));
+        }
+        cgss.push_back(std::move(cgs));
+    }
+    return cgss;
+}
+
+} // mjolnir
 
 int main(int argc, char **argv)
 {
@@ -41,7 +262,7 @@ int main(int argc, char **argv)
 
     if(argc != 2)
     {
-        std::cerr << "Usage: " << argv[0] << " [file.toml]\n";
+        std::cerr << "Usage: $ jarngreipr [file.toml]\n";
         std::cerr << "    see input/example.toml for the format" << std::endl;
         return 1;
     }
@@ -56,146 +277,18 @@ int main(int argc, char **argv)
 //             toml::get<std::string>(general.at("parameter_path")));
 
     /* generating coarse-grained structures */
-    const auto& structure_tables = toml::get<std::vector<toml::Table>>(
-            input_data.at("structures"));
+    const auto structure_config =
+            toml::get<std::vector<toml::Table>>(input_data.at("structures"));
 
-    // structure = listof{chain}; chain = pairof{reference, initial}
-    std::vector<std::vector<std::tuple<char, cg_chain_type, cg_chain_type>>>
-        structure_sets;
+    // vector<map<char, PDBChain<coord>>>
+    // in most cases, the size of vector is one.
+    const auto ref_pdbs = mjolnir::read_reference_structures (structure_config);
+    const auto ini_pdbs = mjolnir::read_initial_structures   (structure_config);
+    const auto models   = mjolnir::read_coarse_grained_models(structure_config);
+    // Coarse Grained Structure -> cgs
+    const auto ref_cgss = mjolnir::apply_coarse_grained_models(ref_pdbs, models);
+    const auto ini_cgss = mjolnir::apply_coarse_grained_models(ini_pdbs, models);
 
-    std::size_t structure_index=0;
-    for(const auto& structure_table : structure_tables)
-    {
-        std::vector<std::tuple<char, cg_chain_type, cg_chain_type>>
-            structure_set;
-
-        if(structure_table.count("index") == 0)
-        {
-            ++structure_index; // XXX more safer way?
-        }
-        else
-        {
-            structure_index =
-                toml::get<std::size_t>(structure_table.at("index"));
-        }
-
-        for(const auto& kv : structure_table)
-        {
-            // value = {file = "*.pdb", initial = "*.pdb", model = "CarbonAlpha"}
-            const auto& value = kv.second.cast<toml::value_t::Table>();
-            for(char cid : split_ids(kv.first))
-            {
-                structure_set.emplace_back(
-                        cid, cg_chain_type{}, cg_chain_type{});
-            }
-            const auto model = toml::get<std::string>(value.at("model"));
-
-            // read pdb file
-            const std::string pdb_filename =
-                toml::get<std::string>(value.at("file"));
-
-            std::string ini_filename = pdb_filename;
-            try
-            {
-                ini_filename = toml::get<std::string>(value.at("initial"));
-            }
-            catch(...)
-            {
-                // use pdb_filename as initial configuration file.
-            }
-            /* read reference file */{
-                mjolnir::PDBReader<coord_type> pdb_reader(pdb_filename);
-                if(not pdb_reader.is_good())
-                {
-                    std::cerr << "jarngreipr: at main(): file open error \n"
-                        << "    while reading pdb file in [[structures]] table.: "
-                        << pdb_filename << std::endl;
-                    return 1;
-                }
-
-                // find all chains
-                while(not pdb_reader.is_eof())
-                {
-                    const auto chain = pdb_reader.read_next_chain();
-                    const char chain_id = chain.chain_id();
-                    const auto found = std::find_if(
-                        structure_set.begin(), structure_set.end(),
-                        [=](const std::tuple<char, cg_chain_type, cg_chain_type>& v){
-                            return std::get<0>(v) == chain_id;
-                        });
-                    if(found != structure_set.end())
-                    {
-                        std::get<1>(*found) =
-                            mjolnir::make_coarse_grained(chain, model);
-                    }
-                }
-                for(const auto& item : structure_set)
-                {
-                    if(std::get<1>(item).empty())
-                    {
-                        throw std::runtime_error(
-                            "jarngreipr: at main(): missing chain "_str +
-                            std::string(1, std::get<0>(item)) + " in file "_str +
-                            ini_filename);
-                    }
-                }
-            }
-            /* read reference file */{
-                mjolnir::PDBReader<coord_type> ini_reader(ini_filename);
-                if(not ini_reader.is_good())
-                {
-                    std::cerr << "jarngreipr: at main(): file open error \n"
-                        << "    while reading pdb file in [[structures]] table.: "
-                        << ini_filename << std::endl;
-                    return 1;
-                }
-
-                // find all chains
-                while(not ini_reader.is_eof())
-                {
-                    const auto chain = ini_reader.read_next_chain();
-                    const char chain_id = chain.chain_id();
-                    const auto found = std::find_if(
-                        structure_set.begin(), structure_set.end(),
-                        [=](const std::tuple<char, cg_chain_type, cg_chain_type>& v){
-                            return std::get<0>(v) == chain_id;
-                        });
-                    if(found != structure_set.end())
-                    {
-                        std::get<2>(*found) =
-                            mjolnir::make_coarse_grained(chain, model);
-                    }
-                }
-                for(const auto& item : structure_set)
-                {
-                    if(std::get<2>(item).empty())
-                    {
-                        throw std::runtime_error(
-                            "jarngreipr: at main(): missing chain "_str +
-                            std::string(1, std::get<0>(item)) + " in file "_str +
-                            ini_filename);
-                    }
-                }
-            }
-        }
-        structure_sets.push_back(std::move(structure_set));
-    }
-    /* output coarse-grained structure */{
-        for(const auto& structure_set : structure_sets)
-        {
-            std::ofstream refstr(file_name + "_cg_"_str +
-                                 std::to_string(structure_index) + ".xyz"_str);
-            std::ofstream inicon(file_name + "_init_"_str +
-                                 std::to_string(structure_index) + ".xyz"_str);
-            std::size_t offset = 0;
-            for(const auto& structure : structure_set)
-            {
-                write_as_pdb(refstr, std::get<1>(structure), offset);
-                write_as_pdb(inicon, std::get<2>(structure), offset);
-                offset += structure.size();
-            }
-        }
-    }
 
 
 
