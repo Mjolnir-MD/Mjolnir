@@ -22,7 +22,7 @@ class IntraChainForceFieldGenerator
     typedef PDBChain<coordinate_type>   chain_type;
     typedef Bead<coordinate_type>       bead_type;
     typedef CGChain<coordinate_type>    cg_chain_type;
-    typedef std::map<std::size_t, ConnectingIndices> connection_info;
+    typedef std::map<std::size_t, ConnectionIndices> connection_info;
 
   public:
     virtual ~IntraChainForceFieldGenerator() = default;
@@ -35,7 +35,7 @@ class IntraChainForceFieldGenerator
 
     //!@brief if chain contains invalid bead, return false.
     virtual bool
-    check_bead_kind(const cg_chain_type& chain) const = 0;
+    check_beads_kind(const cg_chain_type& chain) const = 0;
 };
 
 // mainly for GoContact.
@@ -49,10 +49,10 @@ class InterChainForceFieldGenerator
     typedef PDBChain<coordinate_type>   chain_type;
     typedef Bead<coordinate_type>       bead_type;
     typedef CGChain<coordinate_type>    cg_chain_type;
-    typedef std::map<std::size_t, ConnectingIndices> connection_info;
+    typedef std::map<std::size_t, ConnectionIndices> connection_info;
 
   public:
-    virtual ~IntraChainForceFieldGenerator() = default;
+    virtual ~InterChainForceFieldGenerator() = default;
 
     //!@brief generate parameter values and write out to ostream.
     //@return connection_information. for scaling or ignoring Global interaction
@@ -63,7 +63,7 @@ class InterChainForceFieldGenerator
 
     //!@brief if chain contains invalid bead, return false.
     virtual bool
-    check_bead_kind(const cg_chain_type& chain) const = 0;
+    check_beads_kind(const cg_chain_type& chain) const = 0;
 };
 
 } // mjolnir

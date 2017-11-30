@@ -8,7 +8,7 @@
 namespace mjolnir
 {
 
-struct ConnectingIndices
+struct ConnectionIndices
 {
     typedef std::vector<std::size_t> container_type;
     typedef typename container_type::iterator       iterator;
@@ -16,6 +16,10 @@ struct ConnectingIndices
 
     ConnectionIndices() = default;
     ~ConnectionIndices() = default;
+    ConnectionIndices(const ConnectionIndices&) = default;
+    ConnectionIndices(ConnectionIndices&&)      = default;
+    ConnectionIndices& operator=(const ConnectionIndices&) = default;
+    ConnectionIndices& operator=(ConnectionIndices&&)      = default;
 
     bool insert(std::size_t i)
     {
@@ -39,11 +43,11 @@ struct ConnectingIndices
         return false;
     }
 
-    void merge(const ConnectingIndices& rhs)
+    void merge(const ConnectionIndices& rhs)
     {
         if(this->empty())
         {
-            this->indices_ = rhs;
+            this->indices_ = rhs.indices_;
             return;
         }
 

@@ -27,20 +27,20 @@ class ClementiGo final : public IntraChainForceFieldGenerator<coordT>
   public:
 
     ClementiGo()
-        : contact_threshold_(6.5), k_bond_length(100.0), k_bond_angle(20.0),
+        : contact_threshold_(6.5), k_bond_length_(100.0), k_bond_angle_(20.0),
           k_dihedral_angle_1_(1.0), k_dihedral_angle_3_(0.5), k_intra_go_(0.3)
     {}
     ~ClementiGo() override = default;
 
     explicit ClementiGo(const real_type th)
-        : contact_threshold_(th), k_bond_length(100.0), k_bond_angle(20.0),
+        : contact_threshold_(th), k_bond_length_(100.0), k_bond_angle_(20.0),
           k_dihedral_angle_1_(1.0), k_dihedral_angle_3_(0.5), k_intra_go_(0.3)
     {}
 
     ClementiGo(const real_type conth,
             const real_type k_bl, const real_type k_ba, const real_type k_dih1,
             const real_type k_dih3, const real_type k_igo)
-        : contact_threshold_(conth), k_bond_length(k_bl), k_bond_angle(k_ba),
+        : contact_threshold_(conth), k_bond_length_(k_bl), k_bond_angle_(k_ba),
           k_dihedral_angle_1_(k_dih1), k_dihedral_angle_3_(k_dih3),
           k_intra_go_(k_igo)
     {}
@@ -69,10 +69,10 @@ typename ClementiGo<coordT>::connection_info
 ClementiGo<coordT>::generate(std::ostream& ostrm,
         const cg_chain_type& chain, const std::size_t offset) const
 {
-    if(false == this->check_bead_kind(chain))
+    if(false == this->check_beads_kind(chain))
     {
-        throw std::invalid_argument("jarngreipr::ClementiGo::generate: "_str +
-                "invalid bead kind appear in argument `chain`."_str);
+        throw std::invalid_argument("jarngreipr::ClementiGo::generate: "
+                "invalid bead kind appear in argument `chain`.");
     }
     connection_info connections;
     for(std::size_t i=0; i < chain.size(); ++i)
