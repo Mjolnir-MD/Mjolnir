@@ -38,5 +38,16 @@ typename mjolnir::scalar_type_of<coordT>::type dihedral_angle(
     return phi;
 }
 
+template<typename coordT>
+typename mjolnir::scalar_type_of<coordT>::type dihedral_angle(
+        const std::unique_ptr<Bead<coordT>>& p1,
+        const std::unique_ptr<Bead<coordT>>& p2,
+        const std::unique_ptr<Bead<coordT>>& p3,
+        const std::unique_ptr<Bead<coordT>>& p4)
+{
+    return dihedral_angle(p1->position(), p2->position(),
+                          p3->position(), p4->position());
+}
+
 } // mjolnir
 #endif /* JARNGREIPR_GEOMETRY_DIHEDRAL */

@@ -64,7 +64,7 @@ template<typename coordT>
 inline typename scalar_type_of<coordT>::type
 min_distance_sq(const PDBAtom<coordT>& lhs, const PDBAtom<coordT>& rhs) noexcept
 {
-    return distance_sq(lhs->position(), rhs->position());
+    return distance_sq(lhs.position, rhs.position);
 }
 
 template<typename coordT>
@@ -126,7 +126,7 @@ min_distance(const std::vector<PDBAtom<coordT>>& lhs,
     return std::sqrt(min_distance_sq(lhs, rhs));
 }
 
-template<typename coordT>
+template<typename coordT, typename UnaryPredicate>
 inline typename scalar_type_of<coordT>::type
 min_distance_if(const std::vector<PDBAtom<coordT>>& lhs,
                 const std::vector<PDBAtom<coordT>>& rhs,

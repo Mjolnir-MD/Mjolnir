@@ -41,5 +41,22 @@ angle(const coordT& p1, const coordT& p2, const coordT& p3)
     return std::acos(cos_theta(p1, p2, p3));
 }
 
+template<typename coordT>
+typename mjolnir::scalar_type_of<coordT>::type
+angle(const std::unique_ptr<Bead<coordT>>& lhs,
+      const std::unique_ptr<Bead<coordT>>& rhs)
+{
+    return std::acos(cos_theta(lhs->position(), rhs->position()));
+}
+
+template<typename coordT>
+typename mjolnir::scalar_type_of<coordT>::type
+angle(const std::unique_ptr<Bead<coordT>>& p1,
+      const std::unique_ptr<Bead<coordT>>& p2,
+      const std::unique_ptr<Bead<coordT>>& p3)
+{
+    return std::acos(cos_theta(p1->position(), p2->position(), p3->position()));
+}
+
 } // jarngreipr
 #endif /* JARNGREIPR_GEOMETRY_ANGLE */
