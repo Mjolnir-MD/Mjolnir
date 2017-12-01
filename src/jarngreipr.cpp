@@ -5,6 +5,8 @@
 #include <jarngreipr/io/write_as_xyz.hpp>
 #include <jarngreipr/model/CGChain.hpp>
 #include <jarngreipr/model/make_coarse_grained.hpp>
+#include <jarngreipr/forcefield/ForceFieldGenerator.hpp>
+#include <jarngreipr/forcefield/ClementiGo.hpp>
 // #include <jarngreipr/io/read_parameter_table.hpp>
 // #include <jarngreipr/model/ClementiGo.hpp>
 #include <mjolnir/math/Vector.hpp>
@@ -73,12 +75,12 @@ read_reference_structures(const std::vector<toml::Table>& structures)
             catch(const std::exception& except)
             {
                 throw std::runtime_error("jarngreipr::read_reference_structures: "
-                        "file is not specified for chain " + kbp.first);
+                        "file is not specified for chain " + kvp.first);
             }
 
             if(filename.substr(filename.size() - 4) == ".pdb")
             {
-                mjolnir::PDBReader<coord_type> pdb_reader(filename);
+                mjolnir::PDBReader<coordT> pdb_reader(filename);
                 if(not pdb_reader.is_good())
                 {
                     throw std::runtime_error(
@@ -148,17 +150,17 @@ read_initial_structures(const std::vector<toml::Table>& structures)
             catch(const std::exception& except)
             {
                 throw std::runtime_error("jarngreipr::read_initial_structures: "
-                        "neither file nor initial exists for chain " + kbp.first);
+                        "neither file nor initial exists for chain " + kvp.first);
             }
 
             if(filename.substr(filename.size() - 4) == ".pdb")
             {
-                mjolnir::PDBReader<coord_type> pdb_reader(pdb_filename);
+                mjolnir::PDBReader<coordT> pdb_reader(filename);
                 if(not pdb_reader.is_good())
                 {
                     throw std::runtime_error(
                             "jarngreipr::read_reference_structures: "
-                            "file open error: " + pdb_filename);
+                            "file open error: " + filename);
                 }
                 while(not pdb_reader.is_eof())
                 {
@@ -209,12 +211,12 @@ read_coarse_grained_models(const std::vector<toml::Table>& structures)
             std::string model_name;
             try
             {
-                model_name = toml::get<std::string>(val.at("initial"));
+                model_name = toml::get<std::string>(val.at("model"));
             }
             catch(const std::exception& except)
             {
                 throw std::runtime_error("jarngreipr::read_coarse_grained model: "
-                        "model is not specified for chain " + kbp.first);
+                        "model is not specified for chain " + kvp.first);
             }
 
             for(char id : chIDs)
@@ -282,18 +284,26 @@ int main(int argc, char **argv)
 
     // vector<map<char, PDBChain<coord>>>
     // in most cases, the size of vector is one.
-    const auto ref_pdbs = mjolnir::read_reference_structures (structure_config);
-    const auto ini_pdbs = mjolnir::read_initial_structures   (structure_config);
+    const auto ref_pdbs = mjolnir::read_reference_structures<coord_type>(structure_config);
+    const auto ini_pdbs = mjolnir::read_initial_structures  <coord_type>(structure_config);
     const auto models   = mjolnir::read_coarse_grained_models(structure_config);
     // Coarse Grained Structure -> cgs
     const auto ref_cgss = mjolnir::apply_coarse_grained_models(ref_pdbs, models);
     const auto ini_cgss = mjolnir::apply_coarse_grained_models(ini_pdbs, models);
 
+    const std::unique_ptr<mjolnir::IntraChainForceFieldGenerator<coord_type>>
+        ffgen = mjolnir::make_unique<mjolnir::ClementiGo<coord_type>>();
 
-
-
-
-
+    std::size_t offset(0);
+    for(const auto& chains : ref_cgss)
+    {
+        for(const auto& idch : chains)
+        {
+            const auto& ch = idch.second;
+            const auto connect = ffgen->generate(std::cout, ch, offset);
+            offset += ch.size();
+        }
+    }
 
     return 0;
 }
