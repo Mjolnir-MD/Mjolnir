@@ -1,10 +1,10 @@
 # this file is for jarngreipr.
 
 [general]
-file_name      = "result_file_name"
-output_path    = "./"
-parameter_path = "./parameter/"
-seed           = 2374
+file_name   = "result_file_name"
+output_path = "./"
+parameters  = "./parameter/parameters.toml"
+seed        = 2374
 # This value is not the exact seed used by the simulators.
 # By using this, the initial conditions and the seeds of the simulators are set.
 
