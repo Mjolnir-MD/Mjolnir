@@ -146,7 +146,7 @@ ClementiGo<coordT>::generate(std::ostream& ostrm,
                                     chain.at(i+2), chain.at(i+3)) << ", ";
             ostrm << "k1 = " << std::fixed << std::showpoint
                   << this->k_dihedral_angle_1_;
-            ostrm << "k3 = " << std::fixed << std::showpoint
+            ostrm << ", k3 = " << std::fixed << std::showpoint
                   << this->k_dihedral_angle_3_;
             ostrm << "},\n";
         }
