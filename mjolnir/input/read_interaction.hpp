@@ -9,6 +9,7 @@
 #include <mjolnir/core/GlobalDistanceInteraction.hpp>
 #include <mjolnir/core/ZaxisExternalForceInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
+#include <mjolnir/input/get_toml_value.hpp>
 #include <mjolnir/input/read_potential.hpp>
 #include <mjolnir/input/read_spatial_partition.hpp>
 #include <memory>
@@ -20,7 +21,8 @@ template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
 read_bond_length_interaction(const toml::Table& local)
 {
-    const auto potential = toml::get<std::string>(local.at("potential"));
+    const auto potential = toml::get<std::string>(
+            detail::value_at(local, "potential", "[forcefield.local]"));
     if(potential == "Harmonic")
     {
         return make_unique<BondLengthInteraction<
@@ -49,7 +51,8 @@ template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
 read_bond_angle_interaction(const toml::Table& local)
 {
-    const auto potential = toml::get<std::string>(local.at("potential"));
+    const auto potential = toml::get<std::string>(
+            detail::value_at(local, "potential", "[[forcefield.local]]"));
     if(potential == "Harmonic")
     {
         return make_unique<BondAngleInteraction<
@@ -72,7 +75,8 @@ template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
 read_dihedral_angle_interaction(const toml::Table& local)
 {
-    const auto potential = toml::get<std::string>(local.at("potential"));
+    const auto potential = toml::get<std::string>(
+            detail::value_at(local, "potential", "[forcefield.local]"));
     if(potential == "Harmonic")
     {
         return make_unique<DihedralAngleInteraction<
@@ -107,7 +111,8 @@ template<typename traitsT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_global_distance_interaction(const toml::Table& global)
 {
-    const auto potential = toml::get<std::string>(global.at("potential"));
+    const auto potential = toml::get<std::string>(
+            detail::value_at(global, "potential", "[forcefield.local]"));
     if(potential == "ExcludedVolume")
     {
         return read_spatial_partition_for_distance<
@@ -136,7 +141,8 @@ template<typename traitsT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_zaxis_external_force_interaction(const toml::Table& global)
 {
-    const auto potential = toml::get<std::string>(global.at("potential"));
+    const auto potential = toml::get<std::string>(
+            detail::value_at(global, "potential", "[forcefield.local]"));
     if(potential == "ImplicitMembrane")
     {
 	return read_spatial_partition_for_implicit_membrane<
@@ -148,12 +154,13 @@ read_zaxis_external_force_interaction(const toml::Table& global)
         throw std::runtime_error("invalid distance potential: " + potential);
     }
 }
-  
+
 template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
 read_local_interaction(const toml::Table& local)
 {
-    const auto interaction = toml::get<std::string>(local.at("interaction"));
+    const auto interaction = toml::get<std::string>(
+            detail::value_at(local, "interaction", "[forcefield.local]"));
     if(interaction == "BondLength")
     {
         return read_bond_length_interaction<traitsT>(local);
@@ -169,7 +176,7 @@ read_local_interaction(const toml::Table& local)
     else
     {
         throw std::runtime_error(
-	    "invalid local interaction type: " + interaction);
+                "invalid local interaction type: " + interaction);
     }
 }
 
@@ -177,7 +184,8 @@ template<typename traitsT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_global_interaction(const toml::Table& global)
 {
-    const auto interaction = toml::get<std::string>(global.at("interaction"));
+    const auto interaction = toml::get<std::string>(
+            detail::value_at(global, "interaction", "[forcefield.local]"));
     if(interaction == "Distance")
     {
         return read_global_distance_interaction<traitsT>(global);
@@ -189,7 +197,7 @@ read_global_interaction(const toml::Table& global)
     else
     {
         throw std::runtime_error(
-	    "invalid global interaction type: " + interaction);
+                "invalid global interaction type: " + interaction);
     }
 }
 
