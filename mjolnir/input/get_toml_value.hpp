@@ -20,7 +20,7 @@ value_at(const toml::Table& tab, const std::string& key,
     catch(const std::out_of_range& oor)
     {
         throw std::out_of_range("mjolnir: while reading toml file: key " + key +
-                std::string("in table ") + tablename + std::string(" missing"));
+                std::string(" in table ") + tablename + std::string(" missing"));
     }
 }
 
