@@ -31,8 +31,8 @@ save_step  = 100    # each 40 [tau], the configurations are saved.
 [[systems]]
 temperature    = 300.0       # [K]
 ionic_strength = 0.1         # [mol/L]
-boundary       = {type = "Unlimited"}
-# boundary       = {type = "Periodic", lower = [0.0, 0.0, 0.0], upper = [10.0, 10.0, 10.0]}
+boundary       = {}
+# boundary       = {lower = [0.0, 0.0, 0.0], upper = [10.0, 10.0, 10.0]}
 
 [[forcefields]]
 
