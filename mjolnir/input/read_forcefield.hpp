@@ -53,11 +53,11 @@ read_forcefield(const toml::Table& data, std::size_t N)
     std::vector<toml::Table> fflocal;
     std::vector<toml::Table> ffglobal;
 
-    if(ffs.count("local"))
+    if(ff.count("local"))
     {
         fflocal  = toml::get<std::vector<toml::Table>>(ff.at("local"));
     }
-    if(ffs.count("global"))
+    if(ff.count("global"))
     {
         ffglobal = toml::get<std::vector<toml::Table>>(ff.at("global"));
     }
