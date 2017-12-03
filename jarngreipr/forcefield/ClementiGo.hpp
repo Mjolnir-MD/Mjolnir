@@ -167,10 +167,12 @@ ClementiGo<coordT>::generate(std::ostream& ostrm,
                         return atom.atom_name.front() != 'H';
                     }))
                 {
-                    connections[i].insert(j);
-                    connections[j].insert(i);
+                    const std::size_t index1 = i + offset;
+                    const std::size_t index2 = j + offset;
+                    connections[index1].insert(index2);
+                    connections[index2].insert(index1);
 
-                    ostrm << "{indices = [" << i << ", " << j << "], ";
+                    ostrm << "{indices = [" << index1 << ", " << index2 << "], ";
                     ostrm << "native = " << std::fixed << std::showpoint
                           << distance(chain.at(i), chain.at(j)) << ", ";
                     ostrm << "k = " << std::fixed << std::showpoint
