@@ -5,7 +5,8 @@
 #include <mjolnir/core/constants.hpp>
 #include <mjolnir/core/SimulatorBase.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include "read_simulator.hpp"
+#include <mjolnir/input/read_simulator.hpp>
+#include <mjolnir/input/get_toml_value.hpp>
 #include <memory>
 
 namespace mjolnir
@@ -16,14 +17,18 @@ std::unique_ptr<SimulatorBase>
 read_parameter(const toml::Table& data)
 {
     typedef typename traitsT::real_type real_type;
-    const auto& parameter =
-        data.at("parameter").template cast<toml::value_t::Table>();
+    const auto& parameter = ::mjolnir::detail::value_at(data, "parameter", "<root>"
+            ).template cast<toml::value_t::Table>();
 
-    physics<real_type>::kB = toml::get<real_type>(parameter.at("kB"));
-    physics<real_type>::NA = toml::get<real_type>(parameter.at("NA"));
-    physics<real_type>::e  = toml::get<real_type>(parameter.at("e"));
-    physics<real_type>::vacuum_permittivity =
-        toml::get<real_type>(parameter.at("vacuum_permittivity"));
+    physics<real_type>::kB = toml::get<real_type>(
+            ::mjolnir::detail::value_at(parameter, "kB", "[parameter]"));
+    physics<real_type>::NA = toml::get<real_type>(
+            ::mjolnir::detail::value_at(parameter, "NA", "[parameter]"));
+    physics<real_type>::e  = toml::get<real_type>(
+            ::mjolnir::detail::value_at(parameter, "e",  "[parameter]"));
+    physics<real_type>::vacuum_permittivity = toml::get<real_type>(
+            ::mjolnir::detail::value_at(parameter, "vacuum_permittivity",
+                                      "[parameter]"));
 
     return read_simulator<traitsT>(data);
 }
@@ -32,8 +37,11 @@ template<typename realT>
 std::unique_ptr<SimulatorBase>
 read_boundary(const toml::Table& data)
 {
-    const auto& general = data.at("general").template cast<toml::value_t::Table>();
-    std::string boundary = toml::get<std::string>(general.at("boundary"));
+    const auto& general = ::mjolnir::detail::value_at(data, "general", "<root>"
+            ).template cast<toml::value_t::Table>();
+    const auto boundary = toml::get<std::string>(
+            ::mjolnir::detail::value_at(general, "boundary", "[general]"));
+
     if(boundary == "Unlimited")
     {
         return read_parameter<
@@ -54,8 +62,10 @@ read_boundary(const toml::Table& data)
 inline std::unique_ptr<SimulatorBase>
 read_precision(const toml::Table& data)
 {
-    const auto& general = data.at("general").template cast<toml::value_t::Table>();
-    std::string prec = toml::get<std::string>(general.at("precision"));
+    const auto& general = ::mjolnir::detail::value_at(data, "general", "<root>"
+            ).template cast<toml::value_t::Table>();
+    const auto prec = toml::get<std::string>(
+            ::mjolnir::detail::value_at(general, "precision", "[general]"));
     if(prec == "double")
     {
         return read_boundary<double>(data);
