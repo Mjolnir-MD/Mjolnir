@@ -160,7 +160,7 @@ std::unique_ptr<LocalInteractionBase<traitsT>>
 read_local_interaction(const toml::Table& local)
 {
     const auto interaction = toml::get<std::string>(
-            detail::value_at(local, "interaction", "[forcefield.local]"));
+            detail::value_at(local, "interaction", "[forcefields.local]"));
     if(interaction == "BondLength")
     {
         return read_bond_length_interaction<traitsT>(local);
@@ -185,7 +185,7 @@ std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_global_interaction(const toml::Table& global)
 {
     const auto interaction = toml::get<std::string>(
-            detail::value_at(global, "interaction", "[forcefield.local]"));
+            detail::value_at(global, "interaction", "[forcefields.global]"));
     if(interaction == "Distance")
     {
         return read_global_distance_interaction<traitsT>(global);
