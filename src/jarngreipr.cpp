@@ -7,8 +7,6 @@
 #include <jarngreipr/model/make_coarse_grained.hpp>
 #include <jarngreipr/forcefield/ForceFieldGenerator.hpp>
 #include <jarngreipr/forcefield/ClementiGo.hpp>
-// #include <jarngreipr/io/read_parameter_table.hpp>
-// #include <jarngreipr/model/ClementiGo.hpp>
 #include <mjolnir/math/Vector.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <algorithm>
