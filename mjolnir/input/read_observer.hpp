@@ -2,6 +2,7 @@
 #define MJOLNIR_READ_OBSERVER
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/Observer.hpp>
+#include <mjolnir/input/get_toml_value.hpp>
 
 namespace mjolnir
 {
@@ -10,13 +11,17 @@ template<typename traitsT>
 Observer<traitsT>
 read_observer(const toml::Table& data)
 {
-    const auto& general = data.at("general").cast<toml::value_t::Table>();
-    const std::string path  = toml::get<std::string>(general.at("output_path"));
-    const std::string fname = toml::get<std::string>(general.at("file_name"));
+    const auto& general = detail::value_at(data, "general", "<root>"
+            ).cast<toml::value_t::Table>();
+    const std::string path  = toml::get<std::string>(
+            detail::value_at(general, "output_path", "[general]"));
+    const std::string fname = toml::get<std::string>(
+            detail::value_at(general, "file_name", "[general]"));
 
-    const auto& simulator = data.at("simulator").cast<toml::value_t::Table>();
-    const std::size_t interval =
-        toml::get<std::size_t>(simulator.at("observe_interval"));
+    const auto& simulator = detail::value_at(data, "simulator", "<root>"
+            ).cast<toml::value_t::Table>();
+    const std::size_t interval = toml::get<std::size_t>(
+            detail::value_at(simulator, "observe_interval", "[simulator]"));
 
     return Observer<traitsT>(path + fname + std::string(".xyz"),
                              path + fname + std::string(".ene"),
