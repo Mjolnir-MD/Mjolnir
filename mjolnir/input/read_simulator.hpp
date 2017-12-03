@@ -3,10 +3,11 @@
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/MDSimulator.hpp>
 #include <mjolnir/util/make_unique.hpp>
-#include "read_system.hpp"
-#include "read_forcefield.hpp"
-#include "read_integrator.hpp"
-#include "read_observer.hpp"
+#include <mjolnir/input/get_toml_value.hpp>
+#include <mjolnir/input/read_system.hpp>
+#include <mjolnir/input/read_forcefield.hpp>
+#include <mjolnir/input/read_integrator.hpp>
+#include <mjolnir/input/read_observer.hpp>
 
 namespace mjolnir
 {
@@ -15,14 +16,17 @@ template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_simulator(const toml::Table& data)
 {
-    const auto& simulator = data.at("simulator").cast<toml::value_t::Table>();
-    const std::string type = toml::get<std::string>(simulator.at("simulator_type"));
+    const auto& simulator = detail::value_at(data, "simulator", "<root>"
+            ).cast<toml::value_t::Table>();
+    const std::string type = toml::get<std::string>(
+            detail::value_at(simulator, "simulator_type", "[[simulator]]"));
+
     if(type == "Molecular Dynamics")
     {//XXX: separate this block from read_simulator() ?
-        const std::string integration =
-            toml::get<std::string>(simulator.at("time_integration_scheme"));
-        const std::size_t tstep =
-            toml::get<std::size_t>(simulator.at("total_step"));
+        const std::string integration = toml::get<std::string>(detail::value_at(
+                simulator, "time_integration_scheme", "[[simulator]]"));
+        const std::size_t tstep = toml::get<std::size_t>(detail::value_at(
+                simulator, "total_step", "[[simulator]]"));
 
         if(integration == "Newtonian")
         {
