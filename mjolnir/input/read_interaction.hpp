@@ -192,7 +192,7 @@ read_global_interaction(const toml::Table& global)
     }
     else if(interaction == "External")
     {
-	return read_zaxis_external_force_interaction<traitsT>(global);
+        return read_zaxis_external_force_interaction<traitsT>(global);
     }
     else
     {
