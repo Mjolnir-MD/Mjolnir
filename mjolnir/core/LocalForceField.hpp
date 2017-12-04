@@ -15,13 +15,15 @@ class LocalForceField
 {
   public:
     typedef traitsT traits_type;
-    typedef typename traits_type::real_type       real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    typedef System<traits_type>                   system_type;
-    typedef typename system_type::particle_type   particle_type;
-    typedef LocalInteractionBase<traitsT>         interaction_type;
-    typedef std::unique_ptr<interaction_type>     interaction_ptr;
-    typedef std::vector<interaction_ptr>          container_type;
+    typedef typename traits_type::real_type         real_type;
+    typedef typename traits_type::coordinate_type   coordinate_type;
+    typedef System<traits_type>                     system_type;
+    typedef typename system_type::particle_type     particle_type;
+    typedef LocalInteractionBase<traitsT>           interaction_type;
+    typedef std::unique_ptr<interaction_type>       interaction_ptr;
+    typedef std::vector<interaction_ptr>            container_type;
+    typedef typename container_type::iterator       iterator;
+    typedef typename container_type::const_iterator const_iterator;
 
   public:
 
@@ -32,9 +34,26 @@ class LocalForceField
     LocalForceField& operator=(LocalForceField const&) = delete;
     LocalForceField& operator=(LocalForceField&&)      = default;
 
-    void emplace(interaction_ptr&& interaction)
+    void append(interaction_ptr&& interaction)
     {
-        interactions_.emplace_back(std::move(interaction));
+        //XXX to reduce the number of LocalInteractions
+        bool found = false;
+        for(auto& item : interactions_)
+        {
+            if(typeid(*(item.get())) == typeid(*(interaction.get())))
+            {
+                std::cout << "lhs name = " << typeid(*(item.get())).name() << std::endl;
+                std::cout << "rhs name = " << typeid(*(interaction.get())).name() << std::endl;
+                std::cout << std::endl;
+                item->append(std::move(interaction));
+                found = true;
+                break;
+            }
+        }
+        if(not found)
+        {
+            interactions_.emplace_back(std::move(interaction));
+        }
     }
 
     void calc_force(system_type& sys) const
@@ -50,6 +69,13 @@ class LocalForceField
             energy += item->calc_energy(sys);
         return energy;
     }
+
+    iterator       begin()        noexcept {return interactions_.begin();}
+    iterator       end()          noexcept {return interactions_.end();}
+    const_iterator begin()  const noexcept {return interactions_.begin();}
+    const_iterator end()    const noexcept {return interactions_.end();}
+    const_iterator cbegin() const noexcept {return interactions_.begin();}
+    const_iterator cend()   const noexcept {return interactions_.end();}
 
   private:
 

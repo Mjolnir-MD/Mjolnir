@@ -22,6 +22,8 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
     typedef std::array<std::size_t, 4>          indices_type;
     typedef std::pair<indices_type, potentialT> potential_index_pair;
     typedef std::vector<potential_index_pair>   container_type;
+    typedef typename container_type::iterator       iterator;
+    typedef typename container_type::const_iterator const_iterator;
 
   public:
 
@@ -33,6 +35,15 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
 
     void      calc_force (system_type&)       const noexcept override;
     real_type calc_energy(const system_type&) const noexcept override;
+
+    std::size_t size() const noexcept {return potentials.size();}
+
+    const_iterator begin()  const noexcept {return potentials.begin();}
+    const_iterator end()    const noexcept {return potentials.end();}
+    const_iterator cbegin() const noexcept {return potentials.begin();}
+    const_iterator cend()   const noexcept {return potentials.end();}
+
+    void append(std::unique_ptr<LocalInteractionBase<traitsT>>&& other) override;
 
    private:
     container_type potentials;
@@ -133,6 +144,23 @@ DihedralAngleInteraction<traitsT, potentialT>::calc_energy(
         E += idxp.second.potential(phi);
     }
     return E;
+}
+
+template<typename traitsT, typename potentialT>
+void DihedralAngleInteraction<traitsT, potentialT>::append(
+        std::unique_ptr<LocalInteractionBase<traitsT>>&& other)
+{
+    const DihedralAngleInteraction<traitsT, potentialT>* rptr =
+        dynamic_cast<DihedralAngleInteraction<traitsT, potentialT>*>(other.get());
+    if(rptr == nullptr)
+    {
+        throw std::invalid_argument("mjolnir::DihedralAngleInteraction::append: "
+                "non-subclass appears!");
+    }
+    this->potentials.reserve(this->potentials.size() + rptr->size());
+    std::copy(rptr->begin(), rptr->end(), std::back_inserter(this->potentials));
+    other.release();
+    return;
 }
 
 }// mjolnir
