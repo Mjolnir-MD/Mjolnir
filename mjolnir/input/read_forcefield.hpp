@@ -13,11 +13,9 @@ LocalForceField<traitsT>
 read_local_forcefield(std::vector<toml::Table> interactions)
 {
     LocalForceField<traitsT> lff;
-    //XXX: TODO?
-    // by using typeid(), merge interactions if the types are same.
     for(const auto& interaction : interactions)
     {
-        lff.emplace(read_local_interaction<traitsT>(interaction));
+        lff.append(read_local_interaction<traitsT>(interaction));
     }
     return lff;
 }

@@ -42,8 +42,6 @@ class LocalForceField
         {
             if(typeid(*(item.get())) == typeid(*(interaction.get())))
             {
-                std::cout << "lhs name = " << typeid(*(item.get())).name() << std::endl;
-                std::cout << "rhs name = " << typeid(*(interaction.get())).name() << std::endl;
                 std::cout << std::endl;
                 item->append(std::move(interaction));
                 found = true;
