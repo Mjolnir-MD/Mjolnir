@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_LOCAL_INTEARACTION_BASE
 #define MJOLNIR_LOCAL_INTEARACTION_BASE
-#include "System.hpp"
+#include <mjolnir/core/System.hpp>
+#include <memory>
 #include <array>
 
 namespace mjolnir
@@ -27,6 +28,9 @@ class LocalInteractionBase
 
     virtual real_type
     calc_energy(const system_type&) const noexcept = 0;
+
+    virtual void
+    append(std::unique_ptr<LocalInteractionBase<traitsT>>&& other) = 0;
 };
 
 } // mjolnir
