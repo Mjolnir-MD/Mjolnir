@@ -64,12 +64,12 @@ class CGChain
     bead_ptr_type&       at(const std::size_t i)       {return container_.at(i);}
     bead_ptr_type const& at(const std::size_t i) const {return container_.at(i);}
 
-    iterator       begin()        noexcept {container_.begin();}
-    iterator       end()          noexcept {container_.end();}
-    const_iterator begin()  const noexcept {container_.begin();}
-    const_iterator end()    const noexcept {container_.end();}
-    const_iterator cbegin() const noexcept {container_.cbegin();}
-    const_iterator cend()   const noexcept {container_.cend();}
+    iterator       begin()        noexcept {return container_.begin();}
+    iterator       end()          noexcept {return container_.end();}
+    const_iterator begin()  const noexcept {return container_.begin();}
+    const_iterator end()    const noexcept {return container_.end();}
+    const_iterator cbegin() const noexcept {return container_.cbegin();}
+    const_iterator cend()   const noexcept {return container_.cend();}
 
   private:
     container_type container_;
