@@ -30,8 +30,7 @@ class IntraChainForceFieldGenerator
     //!@brief generate parameter values and write out to ostream.
     //@return connection_information. for scaling or ignoring Global interaction
     virtual connection_info
-    generate(std::ostream& ostrm,
-             const cg_chain_type& chain, const std::size_t offset) const = 0;
+    generate(std::ostream& ostrm, const cg_chain_type& chain) const = 0;
 
     //!@brief if chain contains invalid bead, return false.
     virtual bool
@@ -58,8 +57,7 @@ class InterChainForceFieldGenerator
     //@return connection_information. for scaling or ignoring Global interaction
     virtual connection_info
     generate(std::ostream& ostrm,
-        const std::vector<std::pair<cg_chain_type, std::size_t>>& chain_offset
-        ) const = 0;
+        const std::vector<cg_chain_type>& chain_offset) const = 0;
 
     //!@brief if chain contains invalid bead, return false.
     virtual bool
