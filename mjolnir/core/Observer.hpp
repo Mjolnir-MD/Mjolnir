@@ -33,7 +33,9 @@ class Observer
         {
             std::ofstream ofs(ene);
             if(not ofs.good())
+            {
                 throw std::invalid_argument("file open error: " + ene);
+            }
             ofs.close();
         }
     }
@@ -59,7 +61,9 @@ class Observer
     {
         real_type k = 0.0;
         for(const auto& particle : sys)
+        {
             k += length_sq(particle.velocity) * particle.mass;
+        }
         return k * 0.5;
     }
 
@@ -76,19 +80,21 @@ inline void Observer<traitsT>::output(
     const real_type time, const system_type& sys, const forcefield_type& ff) const
 {
     std::ofstream ofs(xyz_name_, std::ios::app);
-    ofs << sys.size() << "\n" << time << "\n";
+    ofs << sys.size() << '\n' << time << '\n';
     for(const auto& particle : sys)
     {// TODO change output format
         ofs << "CA    " << std::fixed << std::setprecision(8)
-            << particle.position[0] << " "
-            << particle.position[1] << " "
-            << particle.position[2] << std::endl;
+            << particle.position[0] << ' '
+            << particle.position[1] << ' '
+            << particle.position[2] << '\n';
     }
     ofs.close();
 
     // TODO separate energy terms
     ofs.open(ene_name_, std::ios::app);
-    ofs << time << " " << ff.calc_energy(sys) << std::endl;
+    ofs << ff.list_local_energy() << '\n';
+    ofs << time << ' ' << ff.dump_local_energy(sys) << ' '
+        << this->calc_kinetic_energy(sys) << '\n';
     ofs.close();
 
     return ;

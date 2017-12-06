@@ -64,8 +64,32 @@ class LocalForceField
     {
         real_type energy = 0.0;
         for(const auto& item : this->interactions_)
+        {
             energy += item->calc_energy(sys);
+        }
         return energy;
+    }
+
+    std::string list_energy() const noexcept
+    {
+        std::string retval;
+        for(const auto& i : interactions_)
+        {
+            retval += i->name();
+            retval += ' ';
+        }
+        return retval;
+    }
+
+    std::string dump_energy(const system_type& sys) const noexcept
+    {
+        std::string retval;
+        for(const auto& i : interactions_)
+        {
+            retval += std::to_string(i->calc_energy(sys));
+            retval += ' ';
+        }
+        return retval;
     }
 
     iterator       begin()        noexcept {return interactions_.begin();}
