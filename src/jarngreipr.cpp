@@ -53,13 +53,13 @@ std::vector<char> split_chain_ids(const std::string& key)
 }
 
 template<typename coordT>
-std::vector<std::unordered_map<char, PDBChain<coordT>>>
+std::vector<std::map<char, PDBChain<coordT>>>
 read_reference_structures(const std::vector<toml::Table>& structures)
 {
-    std::vector<std::unordered_map<char, PDBChain<coordT>>> tables;
+    std::vector<std::map<char, PDBChain<coordT>>> tables;
     for(const auto& conf : structures)
     {
-        std::unordered_map<char, PDBChain<coordT>> table;
+        std::map<char, PDBChain<coordT>> table;
         for(const auto& kvp : conf)
         {
             std::vector<char> chIDs = split_chain_ids(kvp.first);
@@ -120,13 +120,13 @@ read_reference_structures(const std::vector<toml::Table>& structures)
 }
 
 template<typename coordT>
-std::vector<std::unordered_map<char, PDBChain<coordT>>>
+std::vector<std::map<char, PDBChain<coordT>>>
 read_initial_structures(const std::vector<toml::Table>& structures)
 {
-    std::vector<std::unordered_map<char, PDBChain<coordT>>> tables;
+    std::vector<std::map<char, PDBChain<coordT>>> tables;
     for(const auto& conf : structures)
     {
-        std::unordered_map<char, PDBChain<coordT>> table;
+        std::map<char, PDBChain<coordT>> table;
         for(const auto& kvp : conf)
         {
             std::vector<char> chIDs = split_chain_ids(kvp.first);
@@ -189,18 +189,19 @@ read_initial_structures(const std::vector<toml::Table>& structures)
                 throw std::runtime_error(mes);
             }
         }
+
         tables.push_back(std::move(table));
     }
     return tables;
 }
 
-inline std::vector<std::unordered_map<char, std::string>>
+inline std::vector<std::map<char, std::string>>
 read_coarse_grained_models(const std::vector<toml::Table>& structures)
 {
-    std::vector<std::unordered_map<char, std::string>> tables;
+    std::vector<std::map<char, std::string>> tables;
     for(const auto& conf : structures)
     {
-        std::unordered_map<char, std::string> table;
+        std::map<char, std::string> table;
         for(const auto& kvp : conf)
         {
             const std::vector<char> chIDs = split_chain_ids(kvp.first);
@@ -228,16 +229,16 @@ read_coarse_grained_models(const std::vector<toml::Table>& structures)
 }
 
 template<typename coordT>
-std::vector<std::unordered_map<char, CGChain<coordT>>>
+std::vector<std::map<char, CGChain<coordT>>>
 apply_coarse_grained_models(
-        const std::vector<std::unordered_map<char, PDBChain<coordT>>>& pdbs,
-        const std::vector<std::unordered_map<char, std::string>>& models)
+        const std::vector<std::map<char, PDBChain<coordT>>>& pdbs,
+        const std::vector<std::map<char, std::string>>& models)
 {
     assert(pdbs.size() == models.size());
-    std::vector<std::unordered_map<char, CGChain<coordT>>> cgss;
+    std::vector<std::map<char, CGChain<coordT>>> cgss;
     for(std::size_t i=0; i<pdbs.size(); ++i)
     {
-        std::unordered_map<char, CGChain<coordT>> cgs;
+        std::map<char, CGChain<coordT>> cgs;
         const auto& pdb   = pdbs.at(i);
         const auto& model = models.at(i);
 
@@ -247,6 +248,17 @@ apply_coarse_grained_models(
             const auto&  ch = kv.second;
             cgs[chid] = make_coarse_grained(ch, model.at(chid));
         }
+
+        std::size_t index = 0;
+        for(auto& id_chain: cgs)
+        {
+            for(auto& bead : id_chain.second)
+            {
+                bead->index() = index;
+                ++index;
+            }
+        }
+
         cgss.push_back(std::move(cgs));
     }
     return cgss;
@@ -355,15 +367,13 @@ int main(int argc, char **argv)
     const std::unique_ptr<mjolnir::IntraChainForceFieldGenerator<coord_type>>
         ffgen = mjolnir::make_unique<mjolnir::ClementiGo<coord_type>>();
 
-    std::size_t offset(0);
     for(const auto& chains : ref_cgss)
     {
         std::cout << "[[forcefields]]\n";
         for(const auto& idch : chains)
         {
             const auto& ch = idch.second;
-            const auto connect = ffgen->generate(std::cout, ch, offset);
-            offset += ch.size();
+            const auto connect = ffgen->generate(std::cout, ch);
         }
     }
 
