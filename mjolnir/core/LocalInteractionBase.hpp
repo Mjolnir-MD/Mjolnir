@@ -31,6 +31,8 @@ class LocalInteractionBase
 
     virtual void
     append(std::unique_ptr<LocalInteractionBase<traitsT>>&& other) = 0;
+
+    virtual std::string name() const = 0;
 };
 
 } // mjolnir
