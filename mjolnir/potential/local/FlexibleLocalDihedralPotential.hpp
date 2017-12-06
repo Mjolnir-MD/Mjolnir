@@ -54,6 +54,8 @@ class FlexibleLocalDihedralPotential
                    -3*term_[5] * std::sin(3*phi) + 3*term_[6] * std::cos(3*phi));
     }
 
+    std::string name() const noexcept {return "FlexibleLocalDihedral";}
+
   private:
     real_type min_energy;
     const real_type k_;

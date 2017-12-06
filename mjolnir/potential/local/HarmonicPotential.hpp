@@ -32,6 +32,8 @@ class HarmonicPotential
         return  2 * this->k_ * (r - r0_);
     }
 
+    std::string name() const noexcept {return "Harmonic";}
+
   private:
 
     const real_type k_;

@@ -82,6 +82,8 @@ class FlexibleLocalAnglePotential
         else return spline_derivative(th) * k_;
     }
 
+    std::string name() const noexcept {return "FlexibleLocalAngle";}
+
   private:
 
     real_type spline_interpolate(const real_type th) const

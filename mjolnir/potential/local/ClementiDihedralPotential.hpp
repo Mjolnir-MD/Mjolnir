@@ -36,6 +36,8 @@ class ClementiDihedralPotential
         return k1_ * std::sin(dphi) + 3. * k3_ * std::sin(3. * dphi);
     }
 
+    std::string name() const noexcept {return "ClementiDihedral";}
+
   private:
 
     const real_type k1_;

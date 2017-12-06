@@ -35,6 +35,8 @@ class GaussianPotential
         return 2*inv_w2_ * dval * epsilon_ * std::exp(inv_w2_ * dval * dval);
     }
 
+    std::string name() const noexcept {return "Gaussian";}
+
   private:
 
     const real_type epsilon_, inv_w2_;

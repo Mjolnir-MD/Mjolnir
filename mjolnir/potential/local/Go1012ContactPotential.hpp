@@ -51,6 +51,8 @@ class Go1012ContactPotential
         return this->epsilon_ * 60. * (rd10 - rd12) * invr;
     }
 
+    std::string name() const noexcept {return "Go1012Contact";}
+
   private:
 
     const real_type epsilon_;
