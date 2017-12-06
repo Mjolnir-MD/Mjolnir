@@ -41,8 +41,7 @@ class GoContact final : public InterChainForceFieldGenerator<coordT>
 
     connection_info
     generate(std::ostream& ostrm,
-        const std::vector<std::pair<cg_chain_type, std::size_t>>& chain_offset
-        ) const;
+             const std::vector<cg_chain_type>& chains) const;
 
     bool check_beads_kind(const cg_chain_type& chain) const override
     {
@@ -62,12 +61,11 @@ class GoContact final : public InterChainForceFieldGenerator<coordT>
 template<typename coordT>
 typename GoContact<coordT>::connection_info
 GoContact<coordT>::generate(std::ostream& ostrm,
-        const std::vector<std::pair<cg_chain_type, std::size_t>>& chain_offset
-        ) const
+        const std::vector<cg_chain_type>& chains) const
 {
-    for(const auto& ch_ofs : chain_offset)
+    for(const auto& chain : chains)
     {
-        if(false == this->check_bead_kind(ch_ofs.first))
+        if(false == this->check_bead_kind(chain))
         {
             // never reach here...; for consistency.
             throw std::invalid_argument(
@@ -77,13 +75,12 @@ GoContact<coordT>::generate(std::ostream& ostrm,
     }
 
     connection_info connections;
-    for(const auto& ch_ofs : chain_offset)
+    for(const auto& chain : chains)
     {
-        const auto& chain  = ch_ofs.first;
-        const auto  offset = ch_ofs.second;
-        for(std::size_t i=0; i < chain.first.size(); ++i)
+        for(std::size_t i=0; i < chain.size(); ++i)
         {
-            const std::size_t index = i + offset;
+            const auto& b = chain.at(i)
+            const std::size_t index = b->index();
             connections[index].insert(index);
         }
     }
@@ -94,36 +91,36 @@ GoContact<coordT>::generate(std::ostream& ostrm,
     ostrm << "parameters  = [\n";
 
     const real_type th2 = this->contact_threshold_ * this->contact_threshold_;
-    for(std::size_t chain1_index = 0, chain1_end = chain_offset.size()-1;
-            chain1_index < chain1_end; ++chain1_index)
+    for(std::size_t ch1idx = 0, ch1end = chains.size()-1;
+            ch1idx < ch1end; ++ch1idx)
     {
-        const auto& chain1        = chain_offset.at(chain1_index).first;
-        const auto& chain1_offset = chain_offset.at(chain1_index).second;
+        const auto& chain1 = chains.at(ch1idx);
 
-        for(std::size_t chain2_index = chain1_index+1;
-                chain2_index < chain_offset.size(); ++chain2_index)
+        for(std::size_t ch2idx = ch1idx+1, ch2end = chains.size();
+                ch2idx < ch2end; ++ch2idx)
         {
-            const auto& chain2        = chain_offset.at(chain2_index).first;
-            const auto& chain2_offset = chain_offset.at(chain2_index).second;
+            const auto& chain2 = chains.at(ch2idx);
 
             for(std::size_t i=0, i < chain1.size(); ++i)
             {
                 for(std::size_t j=0, j < chain2.size(); ++j)
                 {
-                    if(th2 > min_distance_sq_if(
-                        chain1.at(i)->atoms(), chain2.at(j).atoms(),
+                    const auto& bead1 = chain1.at(i);
+                    const auto& bead2 = chain2.at(j);
+                    if(th2 > min_distance_sq_if(bead1->atoms(), bead2->atoms(),
                         [](const PDBAtom<coordT>& atom){// ignore hydrogens
                             return atom.atom_name.front() != 'H';
                         }))
                     {
-                        connections[i].insert(j);
-                        connections[j].insert(i);
+                        const std::size_t idx1 = bead1->index();
+                        const std::size_t idx2 = bead2->index();
+                        connections[idx1].insert(idx2);
+                        connections[idx2].insert(idx1);
 
-                        ostrm << "{indices = [" << i << ", " << j << "], ";
+                        ostrm << "{indices = [" << idx1 << ", " << idx2 << "], ";
                         ostrm << "native = " << std::fixed << std::showpoint
-                              << distance(chain1.at(i), chain2.at(j)) << ", ";
-                        ostrm << "k = " << std::fixed << std::showpoint
-                              << this->k_;
+                              << distance(bead1, bead2) << ", ";
+                        ostrm << "k = " << std::fixed << std::showpoint << this->k_;
                         ostrm << "},\n";
                     }
                 }

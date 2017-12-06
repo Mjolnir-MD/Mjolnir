@@ -47,8 +47,7 @@ class ClementiGo final : public IntraChainForceFieldGenerator<coordT>
 
     // generate parameters and write out to `ostrm`.
     connection_info
-    generate(std::ostream& ostrm, const cg_chain_type& chain,
-             const std::size_t offset) const override;
+    generate(std::ostream& ostrm, const cg_chain_type& chain) const override;
 
     bool check_beads_kind(const cg_chain_type& chain) const override;
 
@@ -66,8 +65,8 @@ class ClementiGo final : public IntraChainForceFieldGenerator<coordT>
 
 template<typename coordT>
 typename ClementiGo<coordT>::connection_info
-ClementiGo<coordT>::generate(std::ostream& ostrm,
-        const cg_chain_type& chain, const std::size_t offset) const
+ClementiGo<coordT>::generate(
+        std::ostream& ostrm, const cg_chain_type& chain) const
 {
     if(false == this->check_beads_kind(chain))
     {
@@ -75,10 +74,9 @@ ClementiGo<coordT>::generate(std::ostream& ostrm,
                 "invalid bead kind appear in argument `chain`.");
     }
     connection_info connections;
-    for(std::size_t i=0; i < chain.size(); ++i)
+    for(const auto& b : chain)
     {
-        const std::size_t index = i + offset;
-        connections[index].insert(index);
+        connections[b->index()].insert(b->index());
     }
 
     const real_type th2 = this->contact_threshold_ * this->contact_threshold_;
@@ -90,15 +88,17 @@ ClementiGo<coordT>::generate(std::ostream& ostrm,
         ostrm << "parameters  = [\n";
         for(std::size_t i=0, sz = chain.size() - 1; i<sz; ++i)
         {
-            const std::size_t index1 = i + offset;
-            const std::size_t index2 = i + offset + 1;
+            const auto& bead1 = chain.at(i);
+            const auto& bead2 = chain.at(i+1);
+            const std::size_t index1 = bead1->index();
+            const std::size_t index2 = bead2->index();
 
             connections[index1].insert(index2);
             connections[index2].insert(index1);
 
             ostrm << "{indices = [" << index1 << ", " << index2 << "], ";
             ostrm << "native = " << std::fixed << std::showpoint
-                  << distance(chain.at(i), chain.at(i+1)) << ", ";
+                  << distance(bead1, bead2) << ", ";
             ostrm << "k = " << std::fixed << std::showpoint
                   << this->k_bond_length_;
             ostrm << "},\n";
@@ -112,15 +112,17 @@ ClementiGo<coordT>::generate(std::ostream& ostrm,
         ostrm << "parameters  = [\n";
         for(std::size_t i=0, sz = chain.size() - 2; i<sz; ++i)
         {
-            const std::size_t index1 = i + offset;
-            const std::size_t index2 = i + offset + 1;
-            const std::size_t index3 = i + offset + 2;
+            const auto& bead1 = chain.at(i);
+            const auto& bead2 = chain.at(i+1);
+            const auto& bead3 = chain.at(i+2);
+            const std::size_t index1 = bead1->index();
+            const std::size_t index2 = bead2->index();
+            const std::size_t index3 = bead3->index();
 
             ostrm << "{indices = [" << index1 << ", " << index2
                   << ", " << index3 << "], ";
             ostrm << "native = " << std::fixed << std::showpoint
-                  << angle(chain.at(i), chain.at(i+1), chain.at(i+2))
-                  << ", ";
+                  << angle(bead1, bead2, bead3) << ", ";
             ostrm << "k = " << std::fixed << std::showpoint
                   << this->k_bond_angle_;
             ostrm << "},\n";
@@ -134,16 +136,19 @@ ClementiGo<coordT>::generate(std::ostream& ostrm,
         ostrm << "parameters  = [\n";
         for(std::size_t i=0, sz = chain.size() - 3; i<sz; ++i)
         {
-            const std::size_t index1 = i + offset;
-            const std::size_t index2 = i + offset + 1;
-            const std::size_t index3 = i + offset + 2;
-            const std::size_t index4 = i + offset + 3;
+            const auto& bead1 = chain.at(i);
+            const auto& bead2 = chain.at(i+1);
+            const auto& bead3 = chain.at(i+2);
+            const auto& bead4 = chain.at(i+3);
+            const std::size_t index1 = bead1->index();
+            const std::size_t index2 = bead2->index();
+            const std::size_t index3 = bead3->index();
+            const std::size_t index4 = bead4->index();
 
             ostrm << "{indices = [" << index1 << ", " << index2
                   << ", " << index3 << ", " << index4 << "], ";
             ostrm << "native = " << std::fixed << std::showpoint
-                  << dihedral_angle(chain.at(i),   chain.at(i+1),
-                                    chain.at(i+2), chain.at(i+3)) << ", ";
+                  << dihedral_angle(bead1, bead2, bead3, bead4) << ", ";
             ostrm << "k1 = " << std::fixed << std::showpoint
                   << this->k_dihedral_angle_1_;
             ostrm << ", k3 = " << std::fixed << std::showpoint
@@ -167,14 +172,16 @@ ClementiGo<coordT>::generate(std::ostream& ostrm,
                         return atom.atom_name.front() != 'H';
                     }))
                 {
-                    const std::size_t index1 = i + offset;
-                    const std::size_t index2 = j + offset;
+                    const auto& bead1 = chain.at(i);
+                    const auto& bead2 = chain.at(j);
+                    const std::size_t index1 = bead1->index();
+                    const std::size_t index2 = bead2->index();
                     connections[index1].insert(index2);
                     connections[index2].insert(index1);
 
                     ostrm << "{indices = [" << index1 << ", " << index2 << "], ";
                     ostrm << "native = " << std::fixed << std::showpoint
-                          << distance(chain.at(i), chain.at(j)) << ", ";
+                          << distance(bead1, bead2) << ", ";
                     ostrm << "k = " << std::fixed << std::showpoint
                           << this->k_intra_go_;
                     ostrm << "},\n";
