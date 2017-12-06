@@ -48,10 +48,14 @@ class Bead
     std::string const& name() const noexcept {return name_;}
     std::string &      name()       noexcept {return name_;}
 
+    std::size_t const& index() const noexcept {return index_;}
+    std::size_t &      index()       noexcept {return index_;}
+
     virtual std::string kind() const = 0;
 
   protected:
 
+    std::size_t     index_;
     std::string     name_;
     container_type  atoms_;
 };
