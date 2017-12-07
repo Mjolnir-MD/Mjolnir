@@ -59,6 +59,8 @@ class LennardJonesPotential
 
     real_type max_cutoff_length() const;
 
+    std::string name() const noexcept {return "LennardJones";}
+
   private:
 
     std::vector<parameter_type> radii_;

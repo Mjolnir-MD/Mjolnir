@@ -64,6 +64,8 @@ class ExcludedVolumePotential
 
     real_type max_cutoff_length() const;
 
+    std::string name() const noexcept {return "ExcludedVolume";}
+
   private:
 
     real_type epsilon_;

@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_GLOBAL_INTEARACTION_BASE
 #define MJOLNIR_GLOBAL_INTEARACTION_BASE
-#include "System.hpp"
+#include <mjolnir/core/System.hpp>
 
 namespace mjolnir
 {
@@ -26,6 +26,7 @@ class GlobalInteractionBase
     virtual void      calc_force (system_type&)             = 0;
     virtual real_type calc_energy(const system_type&) const = 0;
 
+    virtual std::string name() const = 0;
 };
 
 } // mjolnir

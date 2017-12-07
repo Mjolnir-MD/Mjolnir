@@ -60,6 +60,8 @@ class DebyeHuckelPotential
 
     real_type max_cutoff_length() const;
 
+    std::string name() const noexcept {return "DebyeHuckel";}
+
   private:
 
     void      calc_parameters();
