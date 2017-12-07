@@ -37,6 +37,8 @@ class ZaxisExternalForceInteraction final : public GlobalInteractionBase<traitsT
     void      calc_force(system_type&)              override;
     real_type calc_energy(const system_type&) const override;
 
+    std::string name() const noexcept override {return "ZaxisExternalForce";}
+
   private:
 
     potential_type potential_;

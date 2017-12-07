@@ -26,7 +26,7 @@ class GlobalInteractionBase
     virtual void      calc_force (system_type&)             = 0;
     virtual real_type calc_energy(const system_type&) const = 0;
 
-    virtual std::string name() const = 0;
+    virtual std::string name() const noexcept = 0;
 };
 
 } // mjolnir
