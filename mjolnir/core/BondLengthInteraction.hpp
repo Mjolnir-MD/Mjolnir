@@ -48,7 +48,7 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
     void append(std::unique_ptr<LocalInteractionBase<traitsT>>&& other) override;
 
     std::string name() const override
-    {return "BondLengthInteraction:" + potentials.front().second.name();}
+    {return "BondLength:" + potentials.front().second.name();}
 
   private:
     container_type potentials;
