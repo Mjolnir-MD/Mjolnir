@@ -1,12 +1,14 @@
 # this file is for jarngreipr.
 
 [general]
-file_name   = "result_file_name"
+file_prefix = "result_file_prefix"
 output_path = "./"
 parameters  = "./parameter/parameters.toml"
+boundary    = "Unlimited"
+precision   = "double"
+thread      = false
+gpu         = false
 seed        = 2374
-# This value is not the exact seed used by the simulators.
-# By using this, the initial conditions and the seeds of the simulators are set.
 
 [[structures]]
 A-D = {file = "./data/pdb/example.pdb", model = "CarbonAlpha"}
