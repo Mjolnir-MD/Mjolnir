@@ -290,7 +290,7 @@ int main(int argc, char **argv)
     /* output general information */{
         std::cout << "[general]\n";
         std::cout << "file_name   = "
-                  << toml::get_or(general, "file_prefix", "data"_str) << '\n';
+                  << toml::get<std::string>(general.at("file_prefix")) << '\n';
         std::cout << "output_path = "
                   << toml::get_or(general, "output_path", "./"_str) << '\n';
         std::cout << "precision = "
