@@ -283,12 +283,35 @@ int main(int argc, char **argv)
 
     /* prepairing parameters */
     const auto general   = toml::get<toml::Table>(input_data.at("general"));
-    const auto file_name = toml::get<std::string>(general.at("file_name"));
-    const auto seed      = toml::get<std::int64_t>(general.at("seed"));
-    std::mt19937 mt(seed);
+    const auto file_name = toml::get<std::string>(general.at("file_prefix"));
+    std::random_device devrand;
+    std::mt19937 mt(devrand());
+
+    /* output general information */{
+        std::cout << "[general]\n";
+        std::cout << "file_name   = "
+                  << toml::get_or(general, "file_prefix", "data"_str) << '\n';
+        std::cout << "output_path = "
+                  << toml::get_or(general, "output_path", "./"_str) << '\n';
+        std::cout << "precision = "
+                  << toml::get_or(general, "precision", "double"_str) << '\n';
+        std::cout << "boundary  = "
+                  << toml::get_or(general, "boundary", "Unlimited"_str) << '\n';
+        std::cout << "thread    = " << std::boolalpha
+                  << toml::get_or(general, "thread", false) << '\n';
+        std::cout << "GPU       = " << std::boolalpha
+                  << toml::get_or(general, "GPU",    false) << '\n';
+        const std::int64_t default_seed = devrand();
+        std::cout << "seed      = "
+                  << toml::get_or(general, "seed", default_seed) << '\n';
+    }
+
 
     const auto parameters =
         toml::parse(toml::get<std::string>(general.at("parameters")));
+    const auto phys_paras = toml::get<toml::Table>(parameters.at("physical_constants"));
+    const auto vac_permit = toml::get<double>(phys_paras.at("ε0"));
+
     const auto& mass =
         toml::get<toml::Table>(parameters.at("mass"));
     const auto& phys =
@@ -322,7 +345,7 @@ int main(int argc, char **argv)
         // TODO {{{
         const auto& sysconf = system_config.at(i);
         const auto T = toml::get<double>(sysconf.at("temperature"));
-        std::cout << "temperature = " << std::fixed << T << '\n';
+        std::cout << "temperature    = " << std::fixed << T << '\n';
         std::cout << "ionic_strength = " << std::fixed
                   << toml::get<double>(sysconf.at("ionic_strength")) << '\n';
         std::cout << "boundary = {";
@@ -376,6 +399,8 @@ int main(int argc, char **argv)
             const auto connect = ffgen->generate(std::cout, ch);
         }
     }
+
+    // output parameter
 
     return 0;
 }
