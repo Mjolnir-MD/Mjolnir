@@ -27,7 +27,7 @@ read_parameter(const toml::Table& data)
     physics<real_type>::e  = toml::get<real_type>(
             detail::value_at(parameter, "e",  "[parameter]"));
     physics<real_type>::vacuum_permittivity = toml::get<real_type>(
-            detail::value_at(parameter, "vacuum_permittivity", "[parameter]"));
+            detail::value_at(parameter, "ε0", "[parameter]"));
 
     return read_simulator<traitsT>(data);
 }
