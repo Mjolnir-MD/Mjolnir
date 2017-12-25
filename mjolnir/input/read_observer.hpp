@@ -11,17 +11,17 @@ template<typename traitsT>
 Observer<traitsT>
 read_observer(const toml::Table& data)
 {
-    const auto& general = detail::value_at(data, "general", "<root>"
+    const auto& general = toml_value_at(data, "general", "<root>"
             ).cast<toml::value_t::Table>();
     const std::string path  = toml::get<std::string>(
-            detail::value_at(general, "output_path", "[general]"));
+            toml_value_at(general, "output_path", "[general]"));
     const std::string fname = toml::get<std::string>(
-            detail::value_at(general, "file_name", "[general]"));
+            toml_value_at(general, "file_name", "[general]"));
 
-    const auto& simulator = detail::value_at(data, "simulator", "<root>"
+    const auto& simulator = toml_value_at(data, "simulator", "<root>"
             ).cast<toml::value_t::Table>();
     const std::size_t interval = toml::get<std::size_t>(
-            detail::value_at(simulator, "observe_interval", "[simulator]"));
+            toml_value_at(simulator, "observe_interval", "[simulator]"));
 
     return Observer<traitsT>(path + fname + std::string(".xyz"),
                              path + fname + std::string(".ene"),

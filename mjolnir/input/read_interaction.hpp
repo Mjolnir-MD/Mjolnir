@@ -22,7 +22,7 @@ std::unique_ptr<LocalInteractionBase<traitsT>>
 read_bond_length_interaction(const toml::Table& local)
 {
     const auto potential = toml::get<std::string>(
-            detail::value_at(local, "potential", "[forcefield.local]"));
+            toml_value_at(local, "potential", "[forcefield.local]"));
     if(potential == "Harmonic")
     {
         return make_unique<BondLengthInteraction<
@@ -52,7 +52,7 @@ std::unique_ptr<LocalInteractionBase<traitsT>>
 read_bond_angle_interaction(const toml::Table& local)
 {
     const auto potential = toml::get<std::string>(
-            detail::value_at(local, "potential", "[[forcefield.local]]"));
+            toml_value_at(local, "potential", "[[forcefield.local]]"));
     if(potential == "Harmonic")
     {
         return make_unique<BondAngleInteraction<
@@ -76,7 +76,7 @@ std::unique_ptr<LocalInteractionBase<traitsT>>
 read_dihedral_angle_interaction(const toml::Table& local)
 {
     const auto potential = toml::get<std::string>(
-            detail::value_at(local, "potential", "[forcefield.local]"));
+            toml_value_at(local, "potential", "[forcefield.local]"));
     if(potential == "Harmonic")
     {
         return make_unique<DihedralAngleInteraction<
@@ -112,7 +112,7 @@ std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_global_distance_interaction(const toml::Table& global)
 {
     const auto potential = toml::get<std::string>(
-            detail::value_at(global, "potential", "[forcefield.local]"));
+            toml_value_at(global, "potential", "[forcefield.local]"));
     if(potential == "ExcludedVolume")
     {
         return read_spatial_partition_for_distance<
@@ -142,7 +142,7 @@ std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_zaxis_external_force_interaction(const toml::Table& global)
 {
     const auto potential = toml::get<std::string>(
-            detail::value_at(global, "potential", "[forcefield.local]"));
+            toml_value_at(global, "potential", "[forcefield.local]"));
     if(potential == "ImplicitMembrane")
     {
 	return read_spatial_partition_for_implicit_membrane<
@@ -160,7 +160,7 @@ std::unique_ptr<LocalInteractionBase<traitsT>>
 read_local_interaction(const toml::Table& local)
 {
     const auto interaction = toml::get<std::string>(
-            detail::value_at(local, "interaction", "[forcefields.local]"));
+            toml_value_at(local, "interaction", "[forcefields.local]"));
     if(interaction == "BondLength")
     {
         return read_bond_length_interaction<traitsT>(local);
@@ -185,7 +185,7 @@ std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_global_interaction(const toml::Table& global)
 {
     const auto interaction = toml::get<std::string>(
-            detail::value_at(global, "interaction", "[forcefields.global]"));
+            toml_value_at(global, "interaction", "[forcefields.global]"));
     if(interaction == "Distance")
     {
         return read_global_distance_interaction<traitsT>(global);
