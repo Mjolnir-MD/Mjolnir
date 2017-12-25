@@ -11,7 +11,7 @@ output_path = "./"               # output path
 kB = 1.986231313e-3    # Boltzmann constant [kcal/mol]
 NA = 6.0221417930e23   # Avogadro constant  [/mol]
 e  = 1.0               # elementary charge  [1.60217648740e-19C]
-vacuum_permittivity = 8.854187817e-12 #     []
+"ε0" = 8.854187817e-12 #     []
 
 [[systems]]
 temperature    = 300.0 # [K]
