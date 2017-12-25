@@ -137,14 +137,14 @@ read_initial_structures(const std::vector<toml::Table>& structures)
             try
             {
                 filename = toml::get<std::string>(
-                        detail::value_at(val, "initial", "[[structures]]"));
+                        toml_value_at(val, "initial", "[[structures]]"));
             }
             catch(const std::exception& except)
             {
                 // if no initial configuration is specified, start from
                 // the reference structure.
                 filename = toml::get<std::string>(
-                        detail::value_at(val, "file", "[[structures]]"));
+                        toml_value_at(val, "file", "[[structures]]"));
             }
 
             if(filename.substr(filename.size() - 4) == ".pdb")
@@ -205,7 +205,7 @@ read_coarse_grained_models(const std::vector<toml::Table>& structures)
 
             std::string model_name;
             model_name = toml::get<std::string>(
-                    detail::value_at(val, "model", "[[structures]]"));
+                    toml_value_at(val, "model", "[[structures]]"));
             for(char id : chIDs)
             {
                 table[id] = model_name;
@@ -271,9 +271,9 @@ int main(int argc, char **argv)
 
     /* prepairing parameters */
     const auto general   = toml::get<toml::Table>(
-            mjolnir::detail::value_at(input_data, "general", "<root>"));
+            mjolnir::toml_value_at(input_data, "general", "<root>"));
     const auto file_name = toml::get<std::string>(
-            mjolnir::detail::value_at(general, "file_prefix", "<root>"));
+            mjolnir::toml_value_at(general, "file_prefix", "<root>"));
     std::random_device devrand;
     std::mt19937 mt(devrand());
 
