@@ -6,11 +6,9 @@
 
 namespace mjolnir
 {
-namespace detail
-{
 
 inline toml::value const&
-value_at(const toml::Table& tab, const std::string& key,
+toml_value_at(const toml::Table& tab, const std::string& key,
          const std::string& tablename = "<couldn't provided>")
 {
     try
@@ -24,6 +22,5 @@ value_at(const toml::Table& tab, const std::string& key,
     }
 }
 
-} // detail
 } // mjolnir
 #endif// MJOLNIR_INPUT_GET_TOML_VALUE

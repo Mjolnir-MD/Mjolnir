@@ -9,6 +9,7 @@
 #include <jarngreipr/forcefield/ClementiGo.hpp>
 #include <mjolnir/math/Vector.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
+#include <mjolnir/input/get_toml_value.hpp>
 #include <algorithm>
 #include <map>
 
@@ -135,20 +136,15 @@ read_initial_structures(const std::vector<toml::Table>& structures)
             std::string filename;
             try
             {
-                filename = toml::get<std::string>(val.at("initial"));
+                filename = toml::get<std::string>(
+                        toml_value_at(val, "initial", "[[structures]]"));
             }
             catch(const std::exception& except)
             {
-                // do nothing. initial configuration is optional.
-            }
-            try
-            {
-                filename = toml::get<std::string>(val.at("file"));
-            }
-            catch(const std::exception& except)
-            {
-                throw std::runtime_error("jarngreipr::read_initial_structures: "
-                        "neither file nor initial exists for chain " + kvp.first);
+                // if no initial configuration is specified, start from
+                // the reference structure.
+                filename = toml::get<std::string>(
+                        toml_value_at(val, "file", "[[structures]]"));
             }
 
             if(filename.substr(filename.size() - 4) == ".pdb")
@@ -208,16 +204,8 @@ read_coarse_grained_models(const std::vector<toml::Table>& structures)
             const toml::Table val = toml::get<toml::Table>(kvp.second);
 
             std::string model_name;
-            try
-            {
-                model_name = toml::get<std::string>(val.at("model"));
-            }
-            catch(const std::exception& except)
-            {
-                throw std::runtime_error("jarngreipr::read_coarse_grained model: "
-                        "model is not specified for chain " + kvp.first);
-            }
-
+            model_name = toml::get<std::string>(
+                    toml_value_at(val, "model", "[[structures]]"));
             for(char id : chIDs)
             {
                 table[id] = model_name;
@@ -282,8 +270,10 @@ int main(int argc, char **argv)
     const auto input_data = toml::parse(std::string(argv[1]));
 
     /* prepairing parameters */
-    const auto general   = toml::get<toml::Table>(input_data.at("general"));
-    const auto file_name = toml::get<std::string>(general.at("file_prefix"));
+    const auto general   = toml::get<toml::Table>(
+            mjolnir::toml_value_at(input_data, "general", "<root>"));
+    const auto file_name = toml::get<std::string>(
+            mjolnir::toml_value_at(general, "file_prefix", "<root>"));
     std::random_device devrand;
     std::mt19937 mt(devrand());
 
@@ -309,8 +299,6 @@ int main(int argc, char **argv)
 
     const auto parameters =
         toml::parse(toml::get<std::string>(general.at("parameters")));
-    const auto phys_paras = toml::get<toml::Table>(parameters.at("physical_constants"));
-    const auto vac_permit = toml::get<double>(phys_paras.at("ε0"));
 
     const auto& mass =
         toml::get<toml::Table>(parameters.at("mass"));

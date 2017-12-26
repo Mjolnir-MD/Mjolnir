@@ -42,24 +42,24 @@ template<typename partitionT>
 partitionT
 read_exception_information(const toml::Table& global, partitionT&& sp)
 {
-    const auto& params = detail::value_at(global, "parameters", "[forcefield.global]"
+    const auto& params = toml_value_at(global, "parameters", "[forcefield.global]"
             ).cast<toml::value_t::Array>();
     for(const auto& tab : params)
     {
         const auto& info = tab.cast<toml::value_t::Table>();
-        const auto  idx = toml::get<std::size_t>(detail::value_at(
+        const auto  idx = toml::get<std::size_t>(toml_value_at(
                     info, "index", "<anonymous> in parameters"));
-        sp.chain_index(idx) = toml::get<std::size_t>(detail::value_at(
+        sp.chain_index(idx) = toml::get<std::size_t>(toml_value_at(
                     info, "chain", "<anonymous> in parameters"));
 
         for(auto exc : toml::get<std::vector<std::size_t>>(
-                    detail::value_at(info, "except_chains",
+                    toml_value_at(info, "except_chains",
                         "<anonymous> in parameters")))
         {
             sp.except_chains(idx).push_back(exc);
         }
         for(auto exb : toml::get<std::vector<std::size_t>>(
-                    detail::value_at(info, "except_beads",
+                    toml_value_at(info, "except_beads",
                         "<anonymous> in parameters")))
         {
             sp.except_indices(idx).push_back(exb);
@@ -75,11 +75,11 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT&& pot)
 {
     typedef typename traitsT::real_type real_type;
 
-    const auto& sp = detail::value_at(
+    const auto& sp = toml_value_at(
             global, "spatial_partition", "[forcefield.global]"
             ).cast<toml::value_t::Table>();
     const auto  type = toml::get<std::string>(
-            detail::value_at(sp, "type", "[forcefield.global]"));
+            toml_value_at(sp, "type", "[forcefield.global]"));
     if(type == "CellList")
     {
         typedef typename traitsT::boundary_type boundary_type;
@@ -87,7 +87,7 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT&& pot)
                 celllist_type;
 
         const auto co = pot.max_cutoff_length();
-        const auto mg = toml::get<real_type>(detail::value_at(
+        const auto mg = toml::get<real_type>(toml_value_at(
                     sp, "mergin", "[forcefield.global]"));
         return make_unique<GlobalDistanceInteraction<
             traitsT, potentialT, celllist_type>>(std::move(pot),
@@ -96,7 +96,7 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT&& pot)
     else if(type == "VerletList")
     {
         const auto cutoff = pot.max_cutoff_length();
-        const auto mergin = toml::get<real_type>(detail::value_at(
+        const auto mergin = toml::get<real_type>(toml_value_at(
                     sp, "mergin", "[forcefield.global]"));
         return make_unique<GlobalDistanceInteraction<
             traitsT, potentialT, VerletList<traitsT>>

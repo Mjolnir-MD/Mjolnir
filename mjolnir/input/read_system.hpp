@@ -26,9 +26,9 @@ struct read_boundary_impl<CubicPeriodicBoundary<realT, coordT>>
     invoke(const toml::Table& boundary)
     {
         const coordT upper(toml::get<std::array<realT, 3>>(
-                    detail::value_at(boundary, "upper", "[boundary]")));
+                    toml_value_at(boundary, "upper", "[boundary]")));
         const coordT lower(toml::get<std::array<realT, 3>>(
-                    detail::value_at(boundary, "lower", "[boundary]")));
+                    toml_value_at(boundary, "lower", "[boundary]")));
         return CubicPeriodicBoundary<realT, coordT>(lower, upper);
     }
 };
@@ -48,7 +48,7 @@ read_particles(const toml::Table& system)
     typedef typename traitsT::coordinate_type coordinate_type;
 
     std::vector<typename System<traitsT>::particle_type> ps;
-    const auto& particles = detail::value_at(system, "particles", "[system]"
+    const auto& particles = toml_value_at(system, "particles", "[system]"
             ).cast<toml::value_t::Array>();
     ps.reserve(particles.size());
 
@@ -56,11 +56,11 @@ read_particles(const toml::Table& system)
     {
         const auto& params = p.cast<toml::value_t::Table>();
         const auto  mass = toml::get<real_type>(
-                detail::value_at(params, "mass", "<anonymous> in particles"));
+                toml_value_at(params, "mass", "<anonymous> in particles"));
         const coordinate_type pos = toml::get<std::array<real_type, 3>>(
-                detail::value_at(params, "position", "<anonymous> in particles"));
+                toml_value_at(params, "position", "<anonymous> in particles"));
         const coordinate_type vel = toml::get<std::array<real_type, 3>>(
-                detail::value_at(params, "velocity", "<anonymous> in particles"));
+                toml_value_at(params, "velocity", "<anonymous> in particles"));
         const coordinate_type f(0.,0.,0.);
         ps.emplace_back(make_particle(mass, pos, vel, f));
     }
@@ -72,7 +72,7 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
 {
     typedef typename traitsT::real_type real_type;
 
-    const auto& system_params = detail::value_at(data, "systems", "<root>"
+    const auto& system_params = toml_value_at(data, "systems", "<root>"
             ).cast<toml::value_t::Array>();
     if(system_params.size() <= N)
     {
@@ -82,7 +82,7 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
     const auto& system = system_params.at(N).cast<toml::value_t::Table>();
 
     System<traitsT> sys(read_particles<traitsT>(system),
-        read_boundary<traitsT>(detail::value_at(system, "boundary"
+        read_boundary<traitsT>(toml_value_at(system, "boundary"
                 ).cast<toml::value_t::Table>()));
 
     if(system.count("temperature") == 1)

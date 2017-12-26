@@ -17,17 +17,17 @@ std::unique_ptr<SimulatorBase>
 read_parameter(const toml::Table& data)
 {
     typedef typename traitsT::real_type real_type;
-    const auto& parameter = detail::value_at(data, "parameter", "<root>"
+    const auto& parameter = toml_value_at(data, "parameter", "<root>"
             ).template cast<toml::value_t::Table>();
 
     physics<real_type>::kB = toml::get<real_type>(
-            detail::value_at(parameter, "kB", "[parameter]"));
+            toml_value_at(parameter, "kB", "[parameter]"));
     physics<real_type>::NA = toml::get<real_type>(
-            detail::value_at(parameter, "NA", "[parameter]"));
+            toml_value_at(parameter, "NA", "[parameter]"));
     physics<real_type>::e  = toml::get<real_type>(
-            detail::value_at(parameter, "e",  "[parameter]"));
+            toml_value_at(parameter, "e",  "[parameter]"));
     physics<real_type>::vacuum_permittivity = toml::get<real_type>(
-            detail::value_at(parameter, "vacuum_permittivity", "[parameter]"));
+            toml_value_at(parameter, "ε0", "[parameter]"));
 
     return read_simulator<traitsT>(data);
 }
@@ -36,10 +36,10 @@ template<typename realT>
 std::unique_ptr<SimulatorBase>
 read_boundary(const toml::Table& data)
 {
-    const auto& general = detail::value_at(data, "general", "<root>"
+    const auto& general = toml_value_at(data, "general", "<root>"
             ).template cast<toml::value_t::Table>();
     const auto boundary = toml::get<std::string>(
-            detail::value_at(general, "boundary", "[general]"));
+            toml_value_at(general, "boundary", "[general]"));
 
     if(boundary == "Unlimited")
     {
@@ -61,10 +61,10 @@ read_boundary(const toml::Table& data)
 inline std::unique_ptr<SimulatorBase>
 read_precision(const toml::Table& data)
 {
-    const auto& general = detail::value_at(data, "general", "<root>"
+    const auto& general = toml_value_at(data, "general", "<root>"
             ).template cast<toml::value_t::Table>();
     const auto prec = toml::get<std::string>(
-            detail::value_at(general, "precision", "[general]"));
+            toml_value_at(general, "precision", "[general]"));
     if(prec == "double")
     {
         return read_boundary<double>(data);

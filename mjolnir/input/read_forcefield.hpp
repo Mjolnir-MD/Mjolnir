@@ -39,7 +39,7 @@ template<typename traitsT>
 ForceField<traitsT>
 read_forcefield(const toml::Table& data, std::size_t N)
 {
-    const auto& ffs = detail::value_at(data, "forcefields", "<root>"
+    const auto& ffs = toml_value_at(data, "forcefields", "<root>"
             ).cast<toml::value_t::Array>();
 
     if(ffs.size() <= N)

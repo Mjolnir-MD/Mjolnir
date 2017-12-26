@@ -7,11 +7,10 @@ file_name   = "sh3_domain_unlim" # file prefix.
 output_path = "./"               # output path
 
 [parameter]
-# You can change the units if you guarantee a consistency of forcefield parameters.
-kB = 1.986231313e-3    # Boltzmann constant [kcal/mol]
-NA = 6.0221417930e23   # Avogadro constant  [/mol]
-e  = 1.0               # elementary charge  [1.60217648740e-19C]
-vacuum_permittivity = 8.854187817e-12 #     []
+kB   = 1.986231313e-3  # Boltzmann constant
+NA   = 6.0221417930e23 # Avogadro constant
+e    = 1.0             # elementary charge
+"ε0" = 8.854187817e-12 # permittivity of vaccum
 
 [[systems]]
 temperature    = 300.0 # [K]
@@ -144,7 +143,6 @@ register = [ # particle indices that is managed by this simulator {{{
 {index = 55, gamma = 9.686495e-3},
 ]
 # }}}
-
 
 [[forcefields]]
 [[forcefields.local]]
