@@ -38,14 +38,14 @@ int geninp(int argc, char **argv)
 
     /* output general information */{
         std::cout << "[general]\n";
-        std::cout << "file_name   = "
-                  << toml::get<std::string>(general.at("file_prefix")) << '\n';
-        std::cout << "output_path = "
-                  << toml::get_or(general, "output_path", "./"_str) << '\n';
-        std::cout << "precision = "
-                  << toml::get_or(general, "precision", "double"_str) << '\n';
-        std::cout << "boundary  = "
-                  << toml::get_or(general, "boundary", "Unlimited"_str) << '\n';
+        std::cout << "file_name   = \""
+                  << toml::get<std::string>(general.at("file_prefix")) << '"' << '\n';
+        std::cout << "output_path = \""
+                  << toml::get_or(general, "output_path", "./"_str) << '"' << '\n';
+        std::cout << "precision = \""
+                  << toml::get_or(general, "precision", "double"_str) << '"' << '\n';
+        std::cout << "boundary  = \""
+                  << toml::get_or(general, "boundary", "Unlimited"_str) << '"' << '\n';
         std::cout << "thread    = " << std::boolalpha
                   << toml::get_or(general, "thread", false) << '\n';
         std::cout << "GPU       = " << std::boolalpha
