@@ -55,14 +55,21 @@ int geninp(int argc, char **argv)
                   << toml::get_or(general, "seed", default_seed) << '\n';
     }
 
-
     const auto parameters =
         toml::parse(toml::get<std::string>(general.at("parameters")));
+    const auto& phys =
+        toml::get<toml::Table>(parameters.at("physical_constants"));
+
+    /* output parameters */ {
+        std::cout << "[parameters]\n";
+        std::cout << "kB = "     << std::setprecision(10) << toml::get<double>(phys.at("kB")) << '\n';
+        std::cout << "NA = "     << std::setprecision(10) << toml::get<double>(phys.at("NA")) << '\n';
+        std::cout << "e  = "     << std::setprecision(10) << toml::get<double>(phys.at("e"))  << '\n';
+        std::cout << "\"ε0\" = " << std::setprecision(10) << toml::get<double>(phys.at("ε0")) << '\n';
+    }
 
     const auto& mass =
         toml::get<toml::Table>(parameters.at("mass"));
-    const auto& phys =
-        toml::get<toml::Table>(parameters.at("physical_constants"));
 
     const auto system_config =
         toml::get<std::vector<toml::Table>>(input_data.at("systems"));
