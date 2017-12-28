@@ -6,7 +6,7 @@ GPU         = false              # enable GPU parallelization       (not impled 
 file_name   = "sh3_domain_unlim" # file prefix.
 output_path = "./"               # output path
 
-[parameter]
+[parameters]
 # You can change the units if you guarantee a consistency of forcefield parameters.
 kB = 1.986231313e-3    # Boltzmann constant [kcal/mol]
 NA = 6.0221417930e23   # Avogadro constant  [/mol]

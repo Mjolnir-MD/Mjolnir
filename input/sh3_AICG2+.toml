@@ -6,7 +6,7 @@ GPU         = false              # enable GPU parallelization       (not impled 
 file_name   = "sh3_domain_unlim" # file prefix.
 output_path = "./"               # output path
 
-[parameter]
+[parameters]
 kB   = 1.986231313e-3  # Boltzmann constant
 NA   = 6.0221417930e23 # Avogadro constant
 e    = 1.0             # elementary charge
