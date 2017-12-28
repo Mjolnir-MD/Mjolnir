@@ -17,17 +17,17 @@ std::unique_ptr<SimulatorBase>
 read_parameter(const toml::Table& data)
 {
     typedef typename traitsT::real_type real_type;
-    const auto& parameter = toml_value_at(data, "parameter", "<root>"
+    const auto& parameter = toml_value_at(data, "parameters", "<root>"
             ).template cast<toml::value_t::Table>();
 
     physics<real_type>::kB = toml::get<real_type>(
-            toml_value_at(parameter, "kB", "[parameter]"));
+            toml_value_at(parameter, "kB", "[parameters]"));
     physics<real_type>::NA = toml::get<real_type>(
-            toml_value_at(parameter, "NA", "[parameter]"));
+            toml_value_at(parameter, "NA", "[parameters]"));
     physics<real_type>::e  = toml::get<real_type>(
-            toml_value_at(parameter, "e",  "[parameter]"));
+            toml_value_at(parameter, "e",  "[parameters]"));
     physics<real_type>::vacuum_permittivity = toml::get<real_type>(
-            toml_value_at(parameter, "ε0", "[parameter]"));
+            toml_value_at(parameter, "ε0", "[parameters]"));
 
     return read_simulator<traitsT>(data);
 }
