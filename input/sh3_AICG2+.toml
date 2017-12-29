@@ -80,11 +80,11 @@ particles = [
 [simulator]
 simulator_type          = "Molecular Dynamics"
 time_integration_scheme = "Underdamped Langevin"
-seed                    = 2374    # seed. 32-bit unsigned integer.
+seed                    = 2374
 delta_t                 = 0.1
 total_step              = 50_000
 observe_interval        = 100
-register = [ # particle indices that is managed by this simulator {{{
+parameters = [ # {{{
 {index =  0, gamma = 8.342399e-3},
 {index =  1, gamma = 5.731078e-3},
 {index =  2, gamma = 8.508170e-3},

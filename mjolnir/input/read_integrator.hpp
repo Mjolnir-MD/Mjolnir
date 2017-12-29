@@ -27,16 +27,16 @@ read_underdamped_langevin_stepper(const toml::Table& data)
 {
     typedef typename traitsT::real_type real_type;
 
-    const auto& simulator   = toml_value_at(data, "simulator", "<root>"
+    const auto& simulator  = toml_value_at(data, "simulator", "<root>"
             ).cast<toml::value_t::Table>();
-    const auto& registrator = toml_value_at(
-            simulator, "register", "[[simulator]]").cast<toml::value_t::Array>();
+    const auto& parameters = toml_value_at(
+            simulator, "parameters", "[[simulator]]").cast<toml::value_t::Array>();
 
     const std::uint32_t seed = toml::get<std::uint32_t>(
             toml_value_at(simulator, "seed", "[[simulator]]"));
 
-    std::vector<real_type> gamma(registrator.size());
-    for(const auto& tab : registrator)
+    std::vector<real_type> gamma(parameters.size());
+    for(const auto& tab : parameters)
     {
         const auto& params = tab.cast<toml::value_t::Table>();
         const std::size_t idx = toml::get<std::size_t>(toml_value_at(
