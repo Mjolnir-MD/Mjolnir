@@ -1,7 +1,7 @@
 # this file is for jarngreipr.
 
 [general]
-file_prefix = "result_file_prefix"
+file_prefix = "example1"
 output_path = "./"
 parameters  = "./parameter/parameters.toml"
 boundary    = "Unlimited"
@@ -11,14 +11,13 @@ gpu         = false
 seed        = 2374
 
 [[structures]]
+# A-D means [A, B, C, D]. A&C means [A, C].
 A-D = {file = "./data/pdb/example.pdb", model = "CarbonAlpha"}
 # or
 # A = {file = "./data/pdb/something1.pdb", model = "CarbonAlpha"}
 # B = {file = "./data/pdb/something2.pdb", model = "CarbonAlpha"}
 # C = {file = "./data/pdb/something3.pdb", model = "CarbonAlpha"}
 # D = {file = "./data/pdb/something4.pdb", model = "CarbonAlpha"}
-# This means the same thing. `A-D` means `from A to D`. the alphabets correspond
-# to chain IDs in the pdb file.
 #
 # To specify the initial conformation that is differrent from reference
 # structure, define `initial`.
@@ -34,15 +33,14 @@ save_step  = 100    # each 40 [tau], the configurations are saved.
 temperature    = 300.0       # [K]
 ionic_strength = 0.1         # [mol/L]
 boundary       = {}
-# boundary       = {lower = [0.0, 0.0, 0.0], upper = [10.0, 10.0, 10.0]}
+# boundary     = {lower = [0.0, 0.0, 0.0], upper = [10.0, 10.0, 10.0]}
 
 [[forcefields]]
 
 [forcefields.local] # contains local forcefield.
 
-# If you set multiple local forcefield in this array, all the forcefields
-# are applied simultaneously (so the energy become the sum of those).
-A-D = [{name = "ClementiGo"}]
+# the energy become the sum of these.
+A-D = [{name = "ClementiGo"},]
 # or
 # A = ["AICG_2_plus"]
 # B = ["AICG_2_plus"]
@@ -51,11 +49,10 @@ A-D = [{name = "ClementiGo"}]
 
 [forcefields.global] # contains global forcefield.
 A-D = [{name = "GoContact"}, {name = "ExcludedVolume"}]
-# to specify one-by-one, you can do this.
-# "A&B" = [{name = "GoContact", scale = 1.0}, {name = "ExcludedVolume"}]
-# "A&C" = [{name = "GoContact", scale = 0.5}, {name = "ExcludedVolume"}]
-# "A&D" = [{name = "GoContact", scale = 0.5}, {name = "ExcludedVolume"}]
-# "B&C" = [{name = "GoContact", scale = 0.5}, {name = "ExcludedVolume"}]
-# "B&D" = [{name = "GoContact", scale = 0.5}, {name = "ExcludedVolume"}]
-# "C&D" = [{name = "GoContact", scale = 1.0}, {name = "ExcludedVolume"}]
-# the strength of potential will be scaled by the value of `scale`.
+# or
+# "A&B" = [{name = "GoContact"}, {name = "ExcludedVolume"}]
+# "A&C" = [{name = "GoContact"}, {name = "ExcludedVolume"}]
+# "A&D" = [{name = "GoContact"}, {name = "ExcludedVolume"}]
+# "B&C" = [{name = "GoContact"}, {name = "ExcludedVolume"}]
+# "B&D" = [{name = "GoContact"}, {name = "ExcludedVolume"}]
+# "C&D" = [{name = "GoContact"}, {name = "ExcludedVolume"}]
