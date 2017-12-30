@@ -11,8 +11,9 @@ gpu         = false
 seed        = 2374
 
 [[structures]]
-# A-D means [A, B, C, D]. A&C means [A, C].
+# A-D means [A, B, C, D]. A&C&E means [A, C, E]. A&C-E means [A, C, D, E].
 A-D = {file = "./data/pdb/example.pdb", model = "CarbonAlpha"}
+# A-D = {file = "./data/pdb/example.pdb", model = "CarbonAlpha"}
 # or
 # A = {file = "./data/pdb/something1.pdb", model = "CarbonAlpha"}
 # B = {file = "./data/pdb/something2.pdb", model = "CarbonAlpha"}
