@@ -1,14 +1,16 @@
 #ifndef JARNGREIPR_UTIL_SPLIT_CHAIN_IDS
 #define JARNGREIPR_UTIL_SPLIT_CHAIN_IDS
+#include <jarngreipr/util/split_string.hpp>
 #include <stdexcept>
-#include <algorithm>
 #include <vector>
 #include <cctype>
 
 namespace mjolnir
 {
 
-inline std::vector<char> split_chain_ids(const std::string& key)
+template<typename charT, typename traits, typename alloc>
+std::vector<charT>
+split_chain_ids(const std::basic_string<charT, traits, alloc>& key)
 {
     if(key.size() == 1)
     {
@@ -20,25 +22,26 @@ inline std::vector<char> split_chain_ids(const std::string& key)
         return std::vector<char>{key.front()};
     }
 
-    if(not (key.size() == 3 && (key.at(1) == '-' || key.at(1) == '&') &&
-            std::isupper(key.front()) && std::isupper(key.back())))
-    {
-        throw std::runtime_error("jarngreipr::split_chain_ids: "
-                "chain ID must be upper case and supplied in this way: "
-                "'A', 'A-C', or 'A&D'");
-    }
-
-    if(key.at(1) == '&')
-    {
-        // "A&D" -> {A, D}
-        return std::vector<char>{key.front(), key.back()};
-    }
-
-    // "A-D" -> {A, B, C, D}
     std::vector<char> ids;
-    for(char c = key.front(); c <= key.back(); ++c)
+    for(auto&& elem : split_string(key, '&'))
     {
-        ids.push_back(c);
+        if(elem.size() == 3 && elem.at(1) == '-')
+        {
+            for(char c = std::toupper(elem.front()),
+                    e = std::toupper(elem.back()); c <= e; ++c)
+            {
+                ids.push_back(c);
+            }
+        }
+        else if(elem.size() == 1)
+        {
+            ids.push_back(std::toupper(elem.front()));
+        }
+        else
+        {
+            throw std::runtime_error("jarngreipr::split_chain_ids: "
+                    "invalid chain ID input: " + elem);
+        }
     }
     return ids;
 }
