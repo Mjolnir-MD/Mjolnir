@@ -19,14 +19,12 @@ matrix:
   - os: linux
     language: cpp
     compiler: clang
-    env: COMPILER="clang++-3.7"
+    env: COMPILER="clang++"
     addons:
       apt:
         sources:
         - ubuntu-toolchain-r-test
-        - llvm-toolchain-precise-3.7
         packages:
-        - clang-3.7
         - build-essential
         - cmake
         - libboost-test-dev
