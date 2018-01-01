@@ -18,7 +18,7 @@ ionic_strength = 100.0 # [mM]
 boundary       = {}    # for Unlimited Boundary
 # boundary = {upper = [0.0, 0.0, 0.0], lower = [100.0, 100.0, 100.0]}
 
-particles = [
+particles = [ # {{{
 {mass = 101.11, position = [15.308,   14.18,  -2.955], velocity = [ 0.1224933,  -0.04235889,  -1.671052e-1]},
 {mass = 147.18, position = [13.365,   10.96,  -3.638], velocity = [ 0.06587243, -0.002927513, -2.150324e-2]},
 {mass = 99.140, position = [11.955,   8.304,  -1.278], velocity = [-0.02848868, -0.06710242,   4.847997e-2]},
@@ -75,7 +75,7 @@ particles = [
 {mass = 71.090, position = [9.2   ,   8.091,  -5.691], velocity = [ 0.01275701, -0.09959116,  -1.313448e-1]},
 {mass = 97.120, position = [10.073,  11.79 ,  -6.056], velocity = [ 0.04999502, -0.01409165,   5.024480e-2]},
 {mass = 87.080, position = [9.02  ,  12.876,  -2.544], velocity = [ 0.06163922, -0.03540277,   4.426636e-2]},
-]
+] # }}}
 
 [simulator]
 type       = "Molecular Dynamics"
@@ -84,6 +84,7 @@ seed       = 2374
 delta_t    = 0.1
 total_step = 50_000
 save_step  = 100
+# XXX: assuming that particle doesn't mutate while simulation...
 parameters = [ # {{{
 {index =  0, gamma = 8.342399e-3},
 {index =  1, gamma = 5.731078e-3},
