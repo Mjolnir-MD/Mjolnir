@@ -1,3 +1,8 @@
+# Length = [Å]        = 1e-10      [m]
+# Mass   = [amu]      = 1.6605e-27 [kg]
+# Energy = [kcal/mol] = 6.9478e-21 [J]
+# Charge = [e]        = 1.6021e-19 [C]
+
 [mass]
 H =  1.0080
 P = 30.9738
@@ -26,8 +31,36 @@ TRP = 186.21
 TYR = 163.18
 VAL =  99.14
 
+[stokes_radius]
+ALA = 3.8
+ARG = 3.8
+ASN = 3.8
+ASP = 3.8
+CYS = 3.8
+GLN = 3.8
+GLU = 3.8
+GLY = 3.8
+HIS = 3.8
+ILE = 3.8
+LEU = 3.8
+LYS = 3.8
+MET = 3.8
+PHE = 3.8
+PRO = 3.8
+SER = 3.8
+THR = 3.8
+TRP = 3.8
+TYR = 3.8
+VAL = 3.8
+
 [physical_constants]
-kB   = 1.986231313e-3
-NA   = 6.022141793e23
-e    = 1.602176487e-19
-"ε0" = 8.854187817e-12
+# 1 Energy [kcal/mol] = 6.9478e-21 [kg  m^2/s^2] (= [J])
+#                     = 6.9478e-1  [kg  Å^2/s^2] (1e+10[Å] = 1[m])
+#                     = 4.1842e+26 [amu Å^2/s^2] (1 / 1.6605e-27[amu] = 1 [kg])
+# 1 Time := 1.0 / sqrt(4.1842e+26) [s] = 4.8887e-14 ~ 49 [fs]
+"τ"  = 4.8887e-14 # timestep               [s]
+e    = 1.6021e-19 # elementaly charge      [C]
+kB   = 1.9871e-3  # Boltzmann constant     [kcal/mol/K]
+NA   = 6.0221e+23 # Avogadro's number      [/mol]
+"ε0" = 2.3964e-4  # permittivity of vacuum [e^2/((kcal/mol)Å)]
+"μ"  = 2.3553     # viscosity of water     [amu/(Å.τ)]
