@@ -50,9 +50,6 @@ int geninp(int argc, char **argv)
                   << toml::get_or(general, "thread", false) << '\n';
         std::cout << "GPU       = " << std::boolalpha
                   << toml::get_or(general, "GPU",    false) << '\n';
-        const std::int64_t default_seed = devrand();
-        std::cout << "seed      = "
-                  << toml::get_or(general, "seed", default_seed) << '\n';
     }
 
     const auto parameters =
@@ -67,9 +64,12 @@ int geninp(int argc, char **argv)
         std::cout << "e  = "     << std::setprecision(10) << toml::get<double>(phys.at("e"))  << '\n';
         std::cout << "\"ε0\" = " << std::setprecision(10) << toml::get<double>(phys.at("ε0")) << '\n';
     }
+    std::cout << std::setprecision(6);
 
     const auto& mass =
         toml::get<toml::Table>(parameters.at("mass"));
+    const auto& stokes_radius =
+        toml::get<toml::Table>(parameters.at("stokes_radius"));
 
     const auto system_config =
         toml::get<std::vector<toml::Table>>(input_data.at("systems"));
@@ -149,6 +149,47 @@ int geninp(int argc, char **argv)
             const auto connect = ffgen->generate(std::cout, ch);
         }
     }
+
+    const auto sim = toml::get<toml::Table>(input_data.at("simulator"));
+    const auto sim_type   = toml::get<std::string>(
+            toml_value_at(sim, "type", "[simulator]"));
+    const auto sim_scheme = toml::get<std::string>(
+            toml_value_at(sim, "scheme", "[simulator]"));
+    const auto sim_dt     = toml::get<double>(
+            toml_value_at(sim, "delta_t", "[simulator]"));
+    const auto sim_t_tot  = toml::get<std::size_t>(
+            toml_value_at(sim, "total_step", "[simulator]"));
+    const auto sim_t_sav  = toml::get<std::size_t>(
+            toml_value_at(sim, "save_step", "[simulator]"));
+
+    std::cout << "[simulator]\n";
+    std::cout << "type       = \"" << sim_type   << "\"\n";
+    std::cout << "scheme     = \"" << sim_scheme << "\"\n";
+    std::cout << "delta_t    = " << sim_dt     << '\n';
+    std::cout << "total_step = " << sim_t_tot  << '\n';
+    std::cout << "save_step  = " << sim_t_sav  << '\n';
+    std::cout << "seed       = " << mt()       << '\n';
+
+    //XXX ...
+    if(sim_scheme == "Underdamped Langevin")
+    {
+        std::cout << "parameters = [\n";
+        const auto& chain_table = ini_cgss.front();
+        for(const auto& id_chain_pair : chain_table)
+        {
+            for(std::size_t i=0; i<id_chain_pair.second.size(); ++i)
+            {
+                const auto& bead = id_chain_pair.second.at(i);
+                const auto m  = toml::get<double>(mass.at(bead->name()));
+                const auto a  = toml::get<double>(stokes_radius.at(bead->name()));
+                const auto mu = toml::get<double>(phys.at("μ"));
+                const auto gamma = 6.0 * 3.14159265358979 * mu * a / m;
+                std::cout << "{index = " << i << ", gamma = " << gamma << "},\n";
+            }
+        }
+        std::cout << "]\n";
+    }
+    std::cout << std::flush;
 
     return 0;
 }
