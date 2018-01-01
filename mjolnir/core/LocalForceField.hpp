@@ -42,7 +42,6 @@ class LocalForceField
         {
             if(typeid(*(item.get())) == typeid(*(interaction.get())))
             {
-                std::cout << std::endl;
                 item->append(std::move(interaction));
                 found = true;
                 break;
