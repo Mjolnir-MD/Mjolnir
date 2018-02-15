@@ -18,13 +18,9 @@ BOOST_AUTO_TEST_CASE(EXV_double)
     constexpr static std::size_t       N    = 10000;
     constexpr static traits::real_type h    = 1e-6;
 
-    mjolnir::ExcludedVolumePotential<traits> exv;
-
     const traits::real_type sigma   = 3.0;
     const traits::real_type epsilon = 1.0;
-    exv.epsilon() = epsilon;
-    exv.emplace(sigma);
-    exv.emplace(sigma);
+    mjolnir::ExcludedVolumePotential<traits> exv{epsilon, {sigma, sigma}};
 
     const traits::real_type x_min = 0.8 * sigma;
     const traits::real_type x_max =
@@ -54,13 +50,10 @@ BOOST_AUTO_TEST_CASE(EXV_float)
     constexpr static std::size_t       N    = 1000;
     constexpr static traits::real_type h    = 1e-3;
 
-    mjolnir::ExcludedVolumePotential<traits> exv;
-
     const traits::real_type sigma   = 3.0;
     const traits::real_type epsilon = 1.0;
-    exv.epsilon() = epsilon;
-    exv.emplace(sigma);
-    exv.emplace(sigma);
+
+    mjolnir::ExcludedVolumePotential<traits> exv{epsilon, {sigma, sigma}};
 
     const traits::real_type x_min = 0.8 * sigma;
     const traits::real_type x_max =

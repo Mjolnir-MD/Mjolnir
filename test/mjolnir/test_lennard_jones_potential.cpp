@@ -18,12 +18,9 @@ BOOST_AUTO_TEST_CASE(LennardJones_double)
     constexpr static std::size_t       N    = 10000;
     constexpr static traits::real_type h    = 1e-6;
 
-    mjolnir::LennardJonesPotential<traits> lj;
-
     const traits::real_type sigma   = 3.0;
     const traits::real_type epsilon = 1.0;
-    lj.emplace({sigma, epsilon});
-    lj.emplace({sigma, epsilon});
+    mjolnir::LennardJonesPotential<traits> lj{{{sigma, epsilon}, {sigma, epsilon}}};
 
     const traits::real_type x_min = 0.8 * sigma;
     const traits::real_type x_max =
@@ -55,12 +52,9 @@ BOOST_AUTO_TEST_CASE(LennardJones_float)
     constexpr static traits::real_type h    = 1e-3;
     constexpr static traits::real_type tol  = 5e-3;
 
-    mjolnir::LennardJonesPotential<traits> lj;
-
     const traits::real_type sigma   = 3.0;
     const traits::real_type epsilon = 1.0;
-    lj.emplace({sigma, epsilon});
-    lj.emplace({sigma, epsilon});
+    mjolnir::LennardJonesPotential<traits> lj{{{sigma, epsilon}, {sigma, epsilon}}};
 
     const traits::real_type x_min = 0.8 * sigma;
     const traits::real_type x_max =

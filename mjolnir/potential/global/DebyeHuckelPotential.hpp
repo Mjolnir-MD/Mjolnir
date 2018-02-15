@@ -22,6 +22,7 @@ class DebyeHuckelPotential
     constexpr static real_type cutoff_ratio = 5.5;
 
   public:
+
     DebyeHuckelPotential() = default;
     DebyeHuckelPotential(const container_type& charges)
         : charges_(charges)
@@ -31,41 +32,73 @@ class DebyeHuckelPotential
     {}
     ~DebyeHuckelPotential() = default;
 
-    std::size_t size() const {return charges_.size();}
-    void resize(const std::size_t i){charges_.resize(i);}
-    void reserve(const std::size_t i){charges_.reserve(i);}
-    void clear(){charges_.clear();}
-
-    real_type&       operator[](std::size_t i)       noexcept {return charges_[i];}
-    real_type const& operator[](std::size_t i) const noexcept {return charges_[i];}
-    real_type&       at(std::size_t i)       {return charges_.at(i);}
-    real_type const& at(std::size_t i) const {return charges_.at(i);}
-
-    void update(const System<traitsT>& sys)
+    real_type potential(const std::size_t i, const std::size_t j,
+                        const real_type r) const noexcept
     {
-        if(temperature_ == sys.temperature() &&
-           ionic_strength_ == sys.ionic_strength()) return;
+        return this->inv_4_pi_eps0_epsk_ *
+               this->charges_[i] * this->charges_[j] *
+               std::exp(-r * this->inv_debye_length_);
+    }
 
+    real_type derivative(const std::size_t i, const std::size_t j,
+                         const real_type r) const noexcept
+    {
+        return this->inv_4_pi_eps0_epsk_ * this->inv_debye_length_ *
+               this->charges_[i] * this->charges_[j] *
+               std::exp(-r * this->inv_debye_length_) / (r * r);
+    }
+
+    real_type max_cutoff_length() const noexcept
+    {
+        return debye_length_ * cutoff_ratio;
+    }
+
+    // for temperature/ionic concentration changes...
+    void update(const System<traitsT>& sys) noexcept
+    {
+        if(temperature_    == sys.temperature() &&
+           ionic_strength_ == sys.ionic_strength())
+        {
+            return;
+        }
+
+        // TODO: it can be a shared resource, which is better to manage?
         temperature_    = sys.temperature();
         ionic_strength_ = sys.ionic_strength();
-        calc_parameters();
+        this->calc_parameters();
         return;
     }
 
-    real_type potential(const std::size_t i, const std::size_t j,
-                        const real_type r) const;
-
-    real_type derivative(const std::size_t i, const std::size_t j,
-                         const real_type r) const;
-
-    real_type max_cutoff_length() const;
-
     std::string name() const noexcept {return "DebyeHuckel";}
+
+    // access to the parameters
+    std::vector<real_type>&       charges()       noexcept {return charges_;}
+    std::vector<real_type> const& charges() const noexcept {return charges_;}
 
   private:
 
-    void      calc_parameters();
-    real_type calc_dielectric_water(const real_type T, const real_type c) const;
+    void calc_parameters() noexcept
+    {
+        const real_type kB   = physics<real_type>::kB;
+        const real_type e    = physics<real_type>::e;
+        const real_type NA   = physics<real_type>::NA;
+        const real_type eps0 = physics<real_type>::vacuum_permittivity;
+        const real_type epsk = calc_dielectric_water(temperature_, ionic_strength_);
+        const real_type pi   = constants<real_type>::pi;
+
+        this->inv_4_pi_eps0_epsk_ = 1. / (4 * pi * eps0 * epsk);
+        this->debye_length_ = std::sqrt(eps0 * epsk * kB * temperature_ /
+                                        (2 * NA * e * e * ionic_strength_));
+        this->inv_debye_length_ = 1. / this->debye_length_;
+        return;
+    }
+
+    real_type calc_dielectric_water(
+            const real_type T, const real_type c) const noexcept
+    {
+        return (249.4 - 0.788 * T + 7.2e-4 * T * T) *
+               (1. - 2.551 * c + 5.151e-2 * c * c - 6.889e-3 * c * c * c);
+    }
 
   private:
 
@@ -77,57 +110,9 @@ class DebyeHuckelPotential
     container_type charges_;
 };
 
-
 template<typename traitsT>
-inline typename DebyeHuckelPotential<traitsT>::real_type
-DebyeHuckelPotential<traitsT>::potential(
-        const std::size_t i, const std::size_t j, const real_type r) const
-{
-    return inv_4_pi_eps0_epsk_ * charges_[i] * charges_[j] *
-           std::exp(-r * inv_debye_length_);
-}
-
-template<typename traitsT>
-inline typename DebyeHuckelPotential<traitsT>::real_type
-DebyeHuckelPotential<traitsT>::derivative(
-        const std::size_t i, const std::size_t j, const real_type r) const
-{
-    return inv_4_pi_eps0_epsk_ * inv_debye_length_ * charges_[i] * charges_[j] *
-           std::exp(-r * inv_debye_length_) / (r * r);
-}
-
-template<typename traitsT>
-inline typename DebyeHuckelPotential<traitsT>::real_type
-DebyeHuckelPotential<traitsT>::max_cutoff_length() const
-{
-    return debye_length_ * cutoff_ratio;
-}
-
-template<typename traitsT>
-void DebyeHuckelPotential<traitsT>::calc_parameters()
-{
-    const real_type kB   = physics<real_type>::kB;
-    const real_type e    = physics<real_type>::e;
-    const real_type NA   = physics<real_type>::NA;
-    const real_type eps0 = physics<real_type>::vacuum_permittivity;
-    const real_type epsk = calc_dielectric_water(temperature_, ionic_strength_);
-    const real_type pi   = constants<real_type>::pi;
-
-    this->inv_4_pi_eps0_epsk_ = 1. / (4 * pi * eps0 * epsk);
-    this->debye_length_ = std::sqrt(eps0 * epsk * kB * temperature_ /
-                                    (2 * NA * e * e * ionic_strength_));
-    this->inv_debye_length_ = 1. / this->debye_length_;
-    return;
-}
-
-template<typename traitsT>
-typename DebyeHuckelPotential<traitsT>::real_type
-DebyeHuckelPotential<traitsT>::calc_dielectric_water(
-        const real_type T, const real_type c) const
-{
-    return (249.4 - 0.788 * T + 7.2e-4 * T * T) *
-           (1. - 2.551 * c + 5.151e-2 * c * c - 6.889e-3 * c * c * c);
-}
+constexpr typename DebyeHuckelPotential<traitsT>::real_type
+DebyeHuckelPotential<traitsT>::cutoff_ratio;
 
 } // mjolnir
 #endif /* MJOLNIR_DEBYE_HUCKEL_POTENTIAL */
