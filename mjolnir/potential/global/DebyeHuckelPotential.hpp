@@ -62,15 +62,15 @@ class DebyeHuckelPotential
     // for temperature/ionic concentration changes...
     void update(const System<traitsT>& sys) noexcept
     {
-        if(temperature_    == sys.temperature() &&
-           ionic_strength_ == sys.ionic_strength())
+        if(temperature_ == sys.temperature() &&
+           ion_conc_    == sys.ionic_strength())
         {
             return;
         }
 
         // TODO: it can be a shared resource, which is better to manage?
-        temperature_    = sys.temperature();
-        ionic_strength_ = sys.ionic_strength();
+        this->temperature_ = sys.temperature();
+        this->ion_conc_    = sys.ionic_strength();
         this->calc_parameters();
         return;
     }
@@ -81,6 +81,9 @@ class DebyeHuckelPotential
     std::vector<real_type>&       charges()       noexcept {return charges_;}
     std::vector<real_type> const& charges() const noexcept {return charges_;}
 
+    //XXX this one is calculated parameter, shouldn't be changed!
+    real_type debye_length() const noexcept {return this->debye_length_;}
+
   private:
 
     void calc_parameters() noexcept
@@ -89,12 +92,14 @@ class DebyeHuckelPotential
         const real_type e    = physics<real_type>::e;
         const real_type NA   = physics<real_type>::NA;
         const real_type eps0 = physics<real_type>::vacuum_permittivity;
-        const real_type epsk = calc_dielectric_water(temperature_, ionic_strength_);
+        const real_type epsk = calc_dielectric_water(temperature_, ion_conc_);
         const real_type pi   = constants<real_type>::pi;
+
+        const real_type I = 0.5 * 1000 * ion_conc_;
 
         this->inv_4_pi_eps0_epsk_ = 1. / (4 * pi * eps0 * epsk);
         this->debye_length_ = std::sqrt(eps0 * epsk * kB * temperature_ /
-                                        (2 * NA * e * e * ionic_strength_));
+                                        (2 * NA * e * e * I));
         this->inv_debye_length_ = 1. / this->debye_length_;
         return;
     }
@@ -108,8 +113,8 @@ class DebyeHuckelPotential
 
   private:
 
-    real_type temperature_;
-    real_type ionic_strength_;
+    real_type temperature_;  // [K]
+    real_type ion_conc_; // [M]
     real_type inv_4_pi_eps0_epsk_;
     real_type debye_length_;
     real_type inv_debye_length_;
