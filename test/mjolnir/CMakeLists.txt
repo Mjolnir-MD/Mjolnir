@@ -10,6 +10,7 @@ set(TEST_NAMES
     test_go1012_potential
     test_lennard_jones_potential
     test_excluded_volume_potential
+    test_debye_huckel_potential
     test_bond_length_interaction
     test_bond_angle_interaction
     test_dihedral_angle_interaction
