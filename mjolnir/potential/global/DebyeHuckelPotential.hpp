@@ -41,17 +41,20 @@ class DebyeHuckelPotential
     real_type potential(const std::size_t i, const std::size_t j,
                         const real_type r) const noexcept
     {
+        if(this->max_cutoff_length() <= r) {return 0.0;}
         return this->inv_4_pi_eps0_epsk_ *
                this->charges_[i] * this->charges_[j] *
-               std::exp(-r * this->inv_debye_length_);
+               std::exp(-r * this->inv_debye_length_) / r;
     }
 
     real_type derivative(const std::size_t i, const std::size_t j,
                          const real_type r) const noexcept
     {
-        return this->inv_4_pi_eps0_epsk_ * this->inv_debye_length_ *
+        if(this->max_cutoff_length() <= r) {return 0.0;}
+        return -(this->inv_4_pi_eps0_epsk_) *
+               (debye_length_ + r) * this->inv_debye_length_ / (r * r) *
                this->charges_[i] * this->charges_[j] *
-               std::exp(-r * this->inv_debye_length_) / (r * r);
+               std::exp(-r * this->inv_debye_length_);
     }
 
     real_type max_cutoff_length() const noexcept
