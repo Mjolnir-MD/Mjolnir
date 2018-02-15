@@ -25,11 +25,17 @@ class DebyeHuckelPotential
 
     DebyeHuckelPotential() = default;
     DebyeHuckelPotential(const container_type& charges)
-        : charges_(charges)
-    {}
+      : charges_(charges), temperature_(300.0), ion_conc_(0.1)
+    {
+        // XXX should be updated before use because T and ion conc are default!
+        this->calc_parameters();
+    }
     DebyeHuckelPotential(container_type&& charges)
-        : charges_(std::move(charges))
-    {}
+      : charges_(std::move(charges)), temperature_(300.0), ion_conc_(0.1)
+    {
+        // XXX should be updated before use because T and ion conc are default!
+        this->calc_parameters();
+    }
     ~DebyeHuckelPotential() = default;
 
     real_type potential(const std::size_t i, const std::size_t j,
