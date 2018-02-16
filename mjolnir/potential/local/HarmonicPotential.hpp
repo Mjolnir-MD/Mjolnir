@@ -21,13 +21,13 @@ class HarmonicPotential
     {}
     ~HarmonicPotential() = default;
 
-    real_type potential(const real_type r) const
+    real_type potential(const real_type r) const noexcept
     {
         const real_type dr = r - r0_;
         return this->k_ * dr * dr;
     }
 
-    real_type derivative(const real_type r) const
+    real_type derivative(const real_type r) const noexcept
     {
         return  2 * this->k_ * (r - r0_);
     }

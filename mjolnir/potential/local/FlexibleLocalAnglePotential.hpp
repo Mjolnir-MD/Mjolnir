@@ -59,7 +59,7 @@ class FlexibleLocalAnglePotential
 
     ~FlexibleLocalAnglePotential() = default;
 
-    real_type potential(const real_type th) const
+    real_type potential(const real_type th) const noexcept
     {
         if(th < min_theta)
         {
@@ -75,7 +75,7 @@ class FlexibleLocalAnglePotential
             return k_ * (spline_interpolate(th) - min_energy);
     }
 
-    real_type derivative(const real_type th) const
+    real_type derivative(const real_type th) const noexcept
     {
              if(th < min_theta) return min_force;
         else if(th >= max_theta) return max_force;
@@ -86,7 +86,7 @@ class FlexibleLocalAnglePotential
 
   private:
 
-    real_type spline_interpolate(const real_type th) const
+    real_type spline_interpolate(const real_type th) const noexcept
     {
         const std::size_t n = std::floor((th - min_theta) * inv_dtheta);
         assert(n < 9);
@@ -101,7 +101,7 @@ class FlexibleLocalAnglePotential
         return e1 + e2;
     }
 
-    real_type spline_derivative(const real_type th) const
+    real_type spline_derivative(const real_type th) const noexcept
     {
         const std::size_t n = std::floor((th - min_theta) * inv_dtheta);
         assert(n < 9);

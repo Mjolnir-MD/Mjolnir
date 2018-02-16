@@ -18,18 +18,18 @@ class GaussianPotential
 
   public:
     GaussianPotential(const real_type e, const real_type w,
-                      const real_type native_val)
+                      const real_type native_val) noexcept
         : epsilon_(e), inv_w2_(-1./(2*w*w)), native_val_(native_val)
     {}
     ~GaussianPotential() = default;
 
-    real_type potential(const real_type val) const
+    real_type potential(const real_type val) const noexcept
     {
         const real_type dval = val - this->native_val_;
         return epsilon_ * std::exp(inv_w2_ * dval * dval);
     }
 
-    real_type derivative(const real_type val) const
+    real_type derivative(const real_type val) const noexcept
     {
         const real_type dval = val - this->native_val_;
         return 2*inv_w2_ * dval * epsilon_ * std::exp(inv_w2_ * dval * dval);

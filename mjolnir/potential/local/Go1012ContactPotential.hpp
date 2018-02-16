@@ -18,12 +18,12 @@ class Go1012ContactPotential
     constexpr static real_type rcutoff_ratio = 1. / cutoff_ratio;
 
   public:
-    Go1012ContactPotential(const real_type e, const real_type r0)
+    Go1012ContactPotential(const real_type e, const real_type r0) noexcept
         : epsilon_(e), r0_(r0)
     {}
     ~Go1012ContactPotential() = default;
 
-    real_type potential(const real_type r) const
+    real_type potential(const real_type r) const noexcept
     {
         const real_type rd   = this->r0_ / r;
         if(rd < rcutoff_ratio) return 0.0;
@@ -37,7 +37,7 @@ class Go1012ContactPotential
         return this->epsilon_ * (5. * rd12 - 6. * rd10);
     }
 
-    real_type derivative(const real_type r) const
+    real_type derivative(const real_type r) const noexcept
     {
         const real_type invr = 1. / r;
         const real_type rd   = this->r0_ * invr;

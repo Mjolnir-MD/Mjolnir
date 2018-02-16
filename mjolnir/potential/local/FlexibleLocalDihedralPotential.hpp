@@ -23,7 +23,7 @@ class FlexibleLocalDihedralPotential
   public:
 
     FlexibleLocalDihedralPotential(const real_type k,
-            const std::array<real_type, 7>& term)
+            const std::array<real_type, 7>& term) noexcept
         : k_(k), term_(term)
     {
         real_type phi = -constants<real_type>::pi;
@@ -38,8 +38,9 @@ class FlexibleLocalDihedralPotential
             phi += 1e-4;
         }
     }
+    ~FlexibleLocalDihedralPotential() = default;
 
-    real_type potential(const real_type phi) const
+    real_type potential(const real_type phi) const noexcept
     {
         const real_type sin1 = std::sin(phi); // expecting compiler replaces
         const real_type cos1 = std::cos(phi); // this with __sincos.
@@ -56,7 +57,7 @@ class FlexibleLocalDihedralPotential
                      term_[0] - min_energy);
     }
 
-    real_type derivative(const real_type phi) const
+    real_type derivative(const real_type phi) const noexcept
     {
         const real_type sin1 = std::sin(phi); // expecting compiler replaces
         const real_type cos1 = std::cos(phi); // this with __sincos.
