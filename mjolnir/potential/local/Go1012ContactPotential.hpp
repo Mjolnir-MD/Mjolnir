@@ -59,5 +59,13 @@ class Go1012ContactPotential
     const real_type r0_;
 };
 
-}
+template<typename traitsT>
+constexpr typename Go1012ContactPotential<traitsT>::real_type
+Go1012ContactPotential<traitsT>::cutoff_ratio;
+
+template<typename traitsT>
+constexpr typename Go1012ContactPotential<traitsT>::real_type
+Go1012ContactPotential<traitsT>::rcutoff_ratio;
+
+} // mjolnir
 #endif /* MJOLNIR_GO_10_12_CONTACT_POTENTIAL */
