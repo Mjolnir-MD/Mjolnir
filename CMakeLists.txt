@@ -12,8 +12,7 @@ else(DEBUG)
     add_definitions(-DMJOLNIR_NO_DEBUG)
 endif(DEBUG)
 
-add_definitions(-march=native)
-add_definitions(-mtune=native)
+add_definitions("-std=c++11 -Ofast -march=native -mtune=native")
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     execute_process(COMMAND cat /proc/cpuinfo OUTPUT_FILE "cpuinfo.dat")
