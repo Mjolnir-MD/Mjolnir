@@ -24,16 +24,21 @@ class ClementiDihedralPotential
     {}
     ~ClementiDihedralPotential() = default;
 
-    real_type potential(const real_type val) const
+    real_type potential(const real_type val) const noexcept
     {
         const real_type dphi = val - native_val_;
-        return k1_ * (1. - std::cos(dphi)) + k3_ * (1. - std::cos(3. * dphi));
+        const real_type cos1 = std::cos(dphi);
+        const real_type cos3 = cos1 * (4 * cos1 * cos1 - 3.0);
+        return this->k1_ * (1.0 - cos1) + k3_ * (1.0 - cos3);
     }
 
-    real_type derivative(const real_type val) const
+    real_type derivative(const real_type val) const noexcept
     {
         const real_type dphi = val - native_val_;
-        return k1_ * std::sin(dphi) + 3. * k3_ * std::sin(3. * dphi);
+        const real_type sin1 = std::sin(dphi);
+        const real_type sin3 = sin1 * (3.0 - 4 * sin1 * sin1);
+
+        return this->k1_ * sin1 + 3.0 * this->k3_ * sin3;
     }
 
     std::string name() const noexcept {return "ClementiDihedral";}
