@@ -13,6 +13,12 @@ struct constants
 };
 
 template<typename realT>
+constexpr typename constants<realT>::real_type tolerance;
+template<typename realT>
+constexpr typename constants<realT>::real_type pi;
+
+
+template<typename realT>
 struct physics
 {
     typedef realT real_type;
