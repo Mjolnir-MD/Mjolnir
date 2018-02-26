@@ -14,6 +14,15 @@ endif(DEBUG)
 
 add_definitions("-std=c++11 -Ofast -march=native -mtune=native")
 
+find_package(Boost)
+if(${Boost_FOUND})
+    include_directories(${Boost_INCLUDE_DIRS})
+else()
+    message(STATUS "Boost couldn't be found. some functionalities are disabled.")
+    message(STATUS "If you have Boost somewhere cmake didn't look (e.g. /opt/boost-1.??.??), try")
+    message(STATUS "`cmake path/to/CMakeLists.txt -DBOOST_ROOT=/path/to/boost`")
+endif()
+
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     execute_process(COMMAND cat /proc/cpuinfo OUTPUT_FILE "cpuinfo.dat")
     execute_process(COMMAND grep flags "cpuinfo.dat" OUTPUT_FILE "flags.dat")
