@@ -13,9 +13,9 @@ struct constants
 };
 
 template<typename realT>
-constexpr typename constants<realT>::real_type tolerance;
+constexpr typename constants<realT>::real_type constants<realT>::tolerance;
 template<typename realT>
-constexpr typename constants<realT>::real_type pi;
+constexpr typename constants<realT>::real_type constants<realT>::pi;
 
 
 template<typename realT>
