@@ -21,16 +21,18 @@ set(TEST_NAMES
 
 add_definitions("-O3 -std=c++11")
 
-set(test_library_dependencies)
-find_library(BOOST_UNITTEST_FRAMEWORK_LIBRARY boost_unit_test_framework)
-if (BOOST_UNITTEST_FRAMEWORK_LIBRARY)
+find_library(BOOST_UNIT_TEST_FRAMEWORK_LIBRARY boost_unit_test_framework
+             PATHS ${Boost_LIBRARY_DIRS} NO_DEFAULT_PATH)
+if (BOOST_UNIT_TEST_FRAMEWORK_LIBRARY)
+    message(STATUS "boost_unit_test_framework found @ ${BOOST_UNIT_TEST_FRAMEWORK_LIBRARY}")
     add_definitions(-DBOOST_TEST_DYN_LINK)
     add_definitions(-DUNITTEST_FRAMEWORK_LIBRARY_EXIST)
-    set(test_library_dependencies boost_unit_test_framework)
+else()
+    message(STATUS "boost_unit_test_framework could not be found.")
 endif()
 
 foreach(TEST_NAME ${TEST_NAMES})
     add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
-    target_link_libraries(${TEST_NAME} ${test_library_dependencies})
+    target_link_libraries(${TEST_NAME} ${BOOST_UNIT_TEST_FRAMEWORK_LIBRARY})
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 endforeach(TEST_NAME)
