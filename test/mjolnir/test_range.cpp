@@ -1,5 +1,12 @@
 #define BOOST_TEST_MODULE "test_range"
+
+#ifdef UNITTEST_FRAMEWORK_LIBRARY_EXIST
+#include <boost/test/unit_test.hpp>
+#else
+#define BOOST_TEST_NO_LIB
 #include <boost/test/included/unit_test.hpp>
+#endif
+
 #include <mjolnir/util/range.hpp>
 
 BOOST_AUTO_TEST_CASE(test_range)
