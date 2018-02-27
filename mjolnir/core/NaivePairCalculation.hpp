@@ -41,7 +41,7 @@ class NaivePairCalculation
     index_array& except_indices(std::size_t i);
     index_array& except_chains (std::size_t i);
 
-    void initialize(const system_type& sys) const noexcept {return;}
+    void initialize(const system_type& sys) noexcept {this->make(sys); return;}
     void make  (const system_type& sys);
     void update(const system_type& sys) noexcept {return;}
     void update(const system_type& sys, const real_type dt) noexcept {return;}
@@ -84,10 +84,15 @@ template<typename traitsT>
 void NaivePairCalculation<traitsT>::make(const system_type& sys)
 {
     this->partners_.resize(sys.size());
-    for(auto& partner : this->partners) partner.clear();
+    for(auto& partner : this->partners_)
+    {
+        partner.clear();
+    }
 
     if(informations_.size() < sys.size())
+    {
         informations_.resize(sys.size());
+    }
 
     for(std::size_t i=0, sz = sys.size()-1; i < sz; ++i)
     {
@@ -100,8 +105,8 @@ void NaivePairCalculation<traitsT>::make(const system_type& sys)
         for(std::size_t j=i+1; j<sys.size(); ++j)
         {
             const std::size_t j_chain = informations_.at(j).chain_idx;
-            if(std::find(chain_begin, chain_end, j_chain) != chain_end) continue;
-            if(std::find(index_begin, index_end, j)       != index_end) continue;
+            if(std::find(chain_begin, chain_end, j_chain) != chain_end){continue;}
+            if(std::find(index_begin, index_end, j)       != index_end){continue;}
             this->partners_.at(i).push_back(j);
         }
     }
