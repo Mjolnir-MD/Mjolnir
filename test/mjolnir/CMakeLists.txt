@@ -3,6 +3,7 @@ set(TEST_NAMES
     test_vector
     test_range
     test_index_sequence
+    test_zip_iterator
     test_fast_inv_sqrt
     test_harmonic_potential
     test_gaussian_potential
