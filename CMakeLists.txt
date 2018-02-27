@@ -14,7 +14,7 @@ endif(DEBUG)
 
 add_definitions("-std=c++11 -Ofast -march=native -mtune=native")
 
-find_package(Boost)
+find_package(Boost COMPONENTS unit_test_framework)
 if(${Boost_FOUND})
     message(STATUS "Boost include dir = ${Boost_INCLUDE_DIRS}")
     message(STATUS "Boost library dir = ${Boost_LIBRARY_DIRS}")
