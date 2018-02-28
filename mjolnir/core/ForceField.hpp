@@ -52,6 +52,15 @@ class ForceField
     {
         return local_.dump_energy(sys);
     }
+    std::string list_global_energy() const
+    {
+        return global_.list_energy();
+    }
+    std::string dump_global_energy(const system_type& sys) const
+    {
+        return global_.dump_energy(sys);
+    }
+
 
   private:
 
