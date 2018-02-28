@@ -27,7 +27,9 @@ class Observer
         {
             std::ofstream ofs(xyz);
             if(not ofs.good())
+            {
                 throw std::invalid_argument("file open error: " + xyz);
+            }
             ofs.close();
         }
         {
@@ -36,6 +38,7 @@ class Observer
             {
                 throw std::invalid_argument("file open error: " + ene);
             }
+            ofs << ff.list_local_energy() << ' ' << ff.list_global_energy() << '\n';
             ofs.close();
         }
     }
@@ -92,8 +95,8 @@ inline void Observer<traitsT>::output(
 
     // TODO separate energy terms
     ofs.open(ene_name_, std::ios::app);
-    ofs << ff.list_local_energy() << '\n';
-    ofs << time << ' ' << ff.dump_local_energy(sys) << ' '
+    ofs << time << ' ' << ff.dump_local_energy(sys)
+        << ' ' << ff.dump_global_energy(sys)
         << this->calc_kinetic_energy(sys) << '\n';
     ofs.close();
 
