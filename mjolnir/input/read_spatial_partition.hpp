@@ -91,7 +91,8 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT&& pot)
                     sp, "mergin", "[forcefield.global]"));
         return make_unique<GlobalDistanceInteraction<
             traitsT, potentialT, celllist_type>>(std::move(pot),
-                celllist_dispatcher<boundary_type, traitsT>::invoke(co, mg));
+                read_exception_information(global,
+                    celllist_dispatcher<boundary_type, traitsT>::invoke(co, mg)));
     }
     else if(type == "VerletList")
     {
@@ -99,14 +100,16 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT&& pot)
         const auto mergin = toml::get<real_type>(toml_value_at(
                     sp, "mergin", "[forcefield.global]"));
         return make_unique<GlobalDistanceInteraction<
-            traitsT, potentialT, VerletList<traitsT>>
-            >(std::move(pot), VerletList<traitsT>{cutoff, mergin});
+            traitsT, potentialT, VerletList<traitsT>>>(std::move(pot),
+                read_exception_information(
+                    global, VerletList<traitsT>{cutoff, mergin}));
     }
     else if(type == "Naive")
     {
         return make_unique<GlobalDistanceInteraction<
             traitsT, potentialT, NaivePairCalculation<traitsT>>
-            >(std::move(pot), NaivePairCalculation<traitsT>{});
+            >(std::move(pot), read_exception_information(
+                    global, NaivePairCalculation<traitsT>{}));
     }
     else
     {
