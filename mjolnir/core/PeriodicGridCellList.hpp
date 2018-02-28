@@ -49,13 +49,17 @@ class PeriodicGridCellList
 
     PeriodicGridCellList(const real_type cutoff, const real_type mergin)
         : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
-          inv_cell_size_(1. / (cutoff * (1+mergin) + mesh_epsilon))
+          r_x_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon)),
+          r_y_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon)),
+          r_z_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon))
     {}
 
     PeriodicGridCellList(const real_type cutoff, const real_type mergin,
                          const real_type dt)
         : dt_(dt), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
-          inv_cell_size_(1. / (cutoff * (1+mergin) + mesh_epsilon))
+          r_x_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon)),
+          r_y_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon)),
+          r_z_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon))
     {}
 
     bool valid() const noexcept
@@ -93,7 +97,9 @@ class PeriodicGridCellList
     real_type   cutoff_;
     real_type   mergin_;
     real_type   current_mergin_;
-    real_type   inv_cell_size_;
+    real_type   r_x_;
+    real_type   r_y_;
+    real_type   r_z_;
     std::size_t dim_x_;
     std::size_t dim_y_;
     std::size_t dim_z_;
@@ -266,9 +272,9 @@ inline std::size_t
 PeriodicGridCellList<traitsT>::index(const coordinate_type& pos) const
 {
     return index(std::array<int, 3>{{
-        static_cast<int>(std::floor((pos[0]-lower_bound_[0])*inv_cell_size_)),
-        static_cast<int>(std::floor((pos[1]-lower_bound_[1])*inv_cell_size_)),
-        static_cast<int>(std::floor((pos[2]-lower_bound_[2])*inv_cell_size_))}});
+        static_cast<int>(std::floor((pos[0]-lower_bound_[0])*r_x_)),
+        static_cast<int>(std::floor((pos[1]-lower_bound_[1])*r_y_)),
+        static_cast<int>(std::floor((pos[2]-lower_bound_[2])*r_z_))}});
 }
 
 template<typename traitsT>
@@ -299,9 +305,16 @@ void PeriodicGridCellList<traitsT>::initialize(const system_type& sys)
     MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::initialize CALLED");
     this->lower_bound_ = sys.boundary().lower_bound();
     const auto system_size = sys.boundary().range();
-    this->dim_x_ = std::max<std::size_t>(3, std::floor(system_size[0] * inv_cell_size_));
-    this->dim_y_ = std::max<std::size_t>(3, std::floor(system_size[1] * inv_cell_size_));
-    this->dim_z_ = std::max<std::size_t>(3, std::floor(system_size[2] * inv_cell_size_));
+
+    this->dim_x_ = std::max<std::size_t>(3, std::floor(system_size[0] * r_x_));
+    this->dim_y_ = std::max<std::size_t>(3, std::floor(system_size[1] * r_y_));
+    this->dim_z_ = std::max<std::size_t>(3, std::floor(system_size[2] * r_z_));
+
+    // it may expand cell a bit (to fit system range)
+    this->r_x_ = system_size[0] / this->dim_x_;
+    this->r_y_ = system_size[1] / this->dim_y_;
+    this->r_z_ = system_size[2] / this->dim_z_;
+
     this->cell_list_.resize(dim_x_ * dim_y_ * dim_z_);
 
     for(int x = 0; x < dim_x_; ++x)
