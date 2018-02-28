@@ -299,9 +299,9 @@ void PeriodicGridCellList<traitsT>::initialize(const system_type& sys)
     MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::initialize CALLED");
     this->lower_bound_ = sys.boundary().lower_bound();
     const auto system_size = sys.boundary().range();
-    this->dim_x_ = system_size[0] * inv_cell_size_ + 1;
-    this->dim_y_ = system_size[1] * inv_cell_size_ + 1;
-    this->dim_z_ = system_size[2] * inv_cell_size_ + 1;
+    this->dim_x_ = std::max<std::size_t>(3, std::floor(system_size[0] * inv_cell_size_));
+    this->dim_y_ = std::max<std::size_t>(3, std::floor(system_size[1] * inv_cell_size_));
+    this->dim_z_ = std::max<std::size_t>(3, std::floor(system_size[2] * inv_cell_size_));
     this->cell_list_.resize(dim_x_ * dim_y_ * dim_z_);
 
     for(int x = 0; x < dim_x_; ++x)
