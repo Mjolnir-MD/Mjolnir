@@ -40,7 +40,7 @@ struct celllist_dispatcher<CubicPeriodicBoundary<realT, coordT>, traitsT>
 
 template<typename partitionT>
 partitionT
-read_exception_information(const toml::Table& global, partitionT&& sp)
+read_exception_information(const toml::Table& global, partitionT sp)
 {
     const auto& params = toml_value_at(global, "parameters", "[forcefield.global]"
             ).cast<toml::value_t::Array>();
@@ -71,7 +71,7 @@ read_exception_information(const toml::Table& global, partitionT&& sp)
 
 template<typename traitsT, typename potentialT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_spatial_partition_for_distance(const toml::Table& global, potentialT&& pot)
+read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
 {
     typedef typename traitsT::real_type real_type;
 
@@ -119,7 +119,7 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT&& pot)
 
 template<typename traitsT, typename potentialT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_spatial_partition_for_implicit_membrane(const toml::Table& global, potentialT&& pot)
+read_spatial_partition_for_implicit_membrane(const toml::Table& global, potentialT pot)
 {
     const auto cutoff = pot.max_cutoff_length();
     return make_unique<ZaxisExternalForceInteraction<
