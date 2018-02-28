@@ -311,9 +311,9 @@ void PeriodicGridCellList<traitsT>::initialize(const system_type& sys)
     this->dim_z_ = std::max<std::size_t>(3, std::floor(system_size[2] * r_z_));
 
     // it may expand cell a bit (to fit system range)
-    this->r_x_ = system_size[0] / this->dim_x_;
-    this->r_y_ = system_size[1] / this->dim_y_;
-    this->r_z_ = system_size[2] / this->dim_z_;
+    this->r_x_ = 1.0 / (system_size[0] / this->dim_x_);
+    this->r_y_ = 1.0 / (system_size[1] / this->dim_y_);
+    this->r_z_ = 1.0 / (system_size[2] / this->dim_z_);
 
     this->cell_list_.resize(dim_x_ * dim_y_ * dim_z_);
 
