@@ -677,7 +677,7 @@ parameters = [
 interaction = "Distance"
 potential = "ExcludedVolume"
 spatial_partition = {type = "CellList", mergin = 1.0}
-epsilon = 0.6
+epsilon = 0.2
 # params{{{
 parameters = [
 {index =  0, chain = 0, sigma = 2.0, except_chains = [], except_beads = [0,1,2,3,22,23,24,25,53,54,55]},
