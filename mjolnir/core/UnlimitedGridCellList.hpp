@@ -76,6 +76,10 @@ class UnlimitedGridCellList
     void set_cutoff(const real_type c);
     void set_mergin(const real_type m);
 
+    std::size_t& chain_index   (std::size_t i);
+    index_array& except_indices(std::size_t i);
+    index_array& except_chains (std::size_t i);
+
     index_array const& partners(std::size_t i) const noexcept {return partners_[i];}
 
   private:
@@ -103,6 +107,32 @@ class UnlimitedGridCellList
 template<typename traitsT, std::size_t N>
 Logger& UnlimitedGridCellList<traitsT, N>::logger_ =
         LoggerManager<char>::get_logger("UnlimitedGridCellList");
+
+template<typename traitsT, std::size_t N>
+std::size_t& UnlimitedGridCellList<traitsT, N>::chain_index(std::size_t i)
+{
+    if(this->informations_.size() <= i)
+        this->informations_.resize(i+1);
+    return this->informations_.at(i).chain_idx;
+}
+
+template<typename traitsT, std::size_t N>
+typename UnlimitedGridCellList<traitsT, N>::index_array&
+UnlimitedGridCellList<traitsT, N>::except_indices(std::size_t i)
+{
+    if(this->informations_.size() <= i)
+        this->informations_.resize(i+1);
+    return this->informations_.at(i).except_indices;
+}
+
+template<typename traitsT, std::size_t N>
+typename UnlimitedGridCellList<traitsT, N>::index_array&
+UnlimitedGridCellList<traitsT, N>::except_chains(std::size_t i)
+{
+    if(this->informations_.size() <= i)
+        this->informations_.resize(i+1);
+    return this->informations_.at(i).except_chains;
+}
 
 template<typename traitsT, std::size_t N>
 inline void UnlimitedGridCellList<traitsT, N>::set_cutoff(const real_type c)
