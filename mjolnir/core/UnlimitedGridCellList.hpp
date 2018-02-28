@@ -197,7 +197,9 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
 
             const std::size_t j_chain = informations_.at(j).chain_idx;
             if(std::find(chain_begin, chain_end, j_chain) != chain_end)
+            {
                 continue;
+            }
 
             if(length_sq(sys.adjust_direction(sys.at(j).position - ri)) < r_c2)
             {
@@ -245,9 +247,11 @@ template<typename traitsT, std::size_t N>
 void UnlimitedGridCellList<traitsT, N>::update(const system_type& sys)
 {
     this->current_mergin_ -= sys.max_speed() * dt_ * 2.;
-    if(this->current_mergin_ < 0.)
-        this->make(sys);
 
+    if(this->current_mergin_ < 0.)
+    {
+        this->make(sys);
+    }
     return ;
 }
 
