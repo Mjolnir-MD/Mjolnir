@@ -213,8 +213,10 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
         }
     }
 
-    for(auto partner : this->partners_)
+    for(auto& partner : this->partners_)
+    {
         std::sort(partner.begin(), partner.end());
+    }
 
     this->current_mergin_ = cutoff_ * mergin_;
 
