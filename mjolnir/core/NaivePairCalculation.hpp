@@ -108,7 +108,7 @@ void NaivePairCalculation<traitsT>::make(const system_type& sys)
             const std::size_t j_chain = informations_.at(j).chain_idx;
             if(std::find(chain_begin, chain_end, j_chain) != chain_end){continue;}
             if(std::find(index_begin, index_end, j)       != index_end){continue;}
-            this->partners_.at(i).push_back(j);
+            this->partners_[i].push_back(j);
         }
     }
     return;
