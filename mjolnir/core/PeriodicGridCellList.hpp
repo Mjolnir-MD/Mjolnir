@@ -42,6 +42,10 @@ class PeriodicGridCellList
 
     PeriodicGridCellList() = default;
     ~PeriodicGridCellList() = default;
+    PeriodicGridCellList(PeriodicGridCellList const&) = default;
+    PeriodicGridCellList(PeriodicGridCellList &&)     = default;
+    PeriodicGridCellList& operator=(PeriodicGridCellList const&) = default;
+    PeriodicGridCellList& operator=(PeriodicGridCellList &&)     = default;
 
     PeriodicGridCellList(const real_type cutoff, const real_type mergin)
         : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),

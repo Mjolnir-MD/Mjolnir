@@ -34,6 +34,10 @@ class VerletList
 
     VerletList() = default;
     ~VerletList() = default;
+    VerletList(VerletList const&) = default;
+    VerletList(VerletList &&)     = default;
+    VerletList& operator=(VerletList const&) = default;
+    VerletList& operator=(VerletList &&)     = default;
 
     VerletList(const real_type cutoff, const real_type mergin)
         : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.)

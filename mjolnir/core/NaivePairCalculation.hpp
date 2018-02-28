@@ -31,9 +31,10 @@ class NaivePairCalculation
 
     NaivePairCalculation() = default;
     ~NaivePairCalculation() = default;
-
-    NaivePairCalculation(NaivePairCalculation&&)            = default;
-    NaivePairCalculation& operator=(NaivePairCalculation&&) = default;
+    NaivePairCalculation(NaivePairCalculation const&)            = default;
+    NaivePairCalculation& operator=(NaivePairCalculation const&) = default;
+    NaivePairCalculation(NaivePairCalculation&&)                 = default;
+    NaivePairCalculation& operator=(NaivePairCalculation&&)      = default;
 
     bool valid() const noexcept {return true;}
 

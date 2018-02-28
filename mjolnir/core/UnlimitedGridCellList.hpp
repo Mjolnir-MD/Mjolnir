@@ -45,6 +45,10 @@ class UnlimitedGridCellList
 
     UnlimitedGridCellList() = default;
     ~UnlimitedGridCellList() = default;
+    UnlimitedGridCellList(UnlimitedGridCellList const&) = default;
+    UnlimitedGridCellList(UnlimitedGridCellList &&)     = default;
+    UnlimitedGridCellList& operator=(UnlimitedGridCellList const&) = default;
+    UnlimitedGridCellList& operator=(UnlimitedGridCellList &&)     = default;
 
     UnlimitedGridCellList(const real_type cutoff, const real_type mergin)
         : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
