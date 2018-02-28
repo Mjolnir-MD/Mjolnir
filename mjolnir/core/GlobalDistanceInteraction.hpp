@@ -59,8 +59,11 @@ void GlobalDistanceInteraction<traitsT, potT, spaceT>::calc_force(
         {
             const coordinate_type rij =
                 sys.adjust_direction(sys[j].position - sys[i].position);
-            const real_type       l = length(rij);
-            const coordinate_type f = rij * (potential_.derivative(i, j, l) / l);
+            const real_type l = length(rij);
+            const real_type f_mag = potential_.derivative(i, j, l);
+            if(f_mag == 0.0){continue;}
+
+            const coordinate_type f = rij * (f_mag / l);
             sys[i].force += f;
             sys[j].force -= f;
         }
