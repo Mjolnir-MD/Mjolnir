@@ -20,13 +20,26 @@ class UnderdampedLangevinStepper
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
+    struct parameter_set
+    {
+        real_type       gamma;
+        real_type       r_mass;
+        real_type       sqrt_gamma_over_mass;
+        coordinate_type accel;
+    };
+
   public:
 
     UnderdampedLangevinStepper(const real_type dt,
             std::vector<real_type>&& gamma, rng_type&& rng)
-        : dt_(dt), halfdt_(dt * 0.5), halfdt2_(dt * dt * 0.5), rng_(std::move(rng)),
-          gamma_(std::move(gamma)), noise_(gamma_.size()), accel_(gamma_.size())
-    {}
+        : dt_(dt), halfdt_(dt * 0.5), halfdt2_(dt * dt * 0.5),
+          rng_(std::move(rng)), parameters_(gamma.size())
+    {
+        for(std::size_t i=0; i<gamma.size(); ++i)
+        {
+            parameters_[i].gamma = gamma[i];
+        }
+    }
     ~UnderdampedLangevinStepper() = default;
 
     void initialize(const system_type& sys);
@@ -43,9 +56,9 @@ class UnderdampedLangevinStepper
 
   private:
 
-    coordinate_type gen_random_accel(const real_type m, const real_type g)
+    coordinate_type gen_random_accel(const real_type sqrt_g_over_m)
     {
-        const real_type coef = this->noise_coef_ * std::sqrt(g / m);
+        const real_type coef = this->noise_coef_ * sqrt_g_over_m;
         return coordinate_type(this->rng_.gaussian(0., coef),
                                this->rng_.gaussian(0., coef),
                                this->rng_.gaussian(0., coef));
@@ -56,23 +69,27 @@ class UnderdampedLangevinStepper
     real_type halfdt_;
     real_type halfdt2_;
     real_type noise_coef_;
+    real_type temperature_; // cache
     rng_type  rng_;
-    std::vector<real_type>       gamma_;
-    std::vector<coordinate_type> noise_;
-    std::vector<coordinate_type> accel_;
+
+    std::vector<parameter_set> parameters_;
 };
 
 template<typename traitsT>
 void UnderdampedLangevinStepper<traitsT>::initialize(
         const system_type& system)
 {
+    this->temperature_ = system.temperature();
     this->noise_coef_ =
-        std::sqrt(2 * physics<real_type>::kB * system.temperature() / dt_);
+        std::sqrt(2 * physics<real_type>::kB * this->temperature_ / dt_);
 
     for(std::size_t i=0; i<system.size(); ++i)
     {
-        accel_[i] = system[i].force / system[i].mass;
-        noise_[i] = this->gen_random_accel(system[i].mass, gamma_[i]);
+        auto& p = parameters_[i];
+        p.r_mass = 1.0 / system[i].mass;
+        p.sqrt_gamma_over_mass = std::sqrt(p.gamma * p.r_mass);
+        p.accel = system[i].force * p.r_mass +
+                  this->gen_random_accel(p.sqrt_gamma_over_mass);
     }
     return;
 }
@@ -82,8 +99,12 @@ typename UnderdampedLangevinStepper<traitsT>::real_type
 UnderdampedLangevinStepper<traitsT>::step(
         const real_type time, system_type& sys, forcefield_type& ff)
 {
-    this->noise_coef_ =
-        std::sqrt(2 * physics<real_type>::kB * sys.temperature() / dt_);
+    if(this->temperature_ != sys.temperature())
+    {
+        this->temperature_ = sys.temperature();
+        this->noise_coef_ =
+            std::sqrt(2 * physics<real_type>::kB * this->temperature_ / dt_);
+    }
 
     real_type max_speed2(0.);
     for(std::size_t i=0; i<sys.size(); ++i)
@@ -91,17 +112,20 @@ UnderdampedLangevinStepper<traitsT>::step(
         // max of v(t)
         max_speed2 = std::max(max_speed2, length_sq(sys[i].velocity));
 
-        const real_type hgdt   = gamma_[i] * halfdt_;
-        const real_type o_hgdt = 1. - hgdt;
+        const auto& param = this->parameters_[i];
 
-        const coordinate_type noisy_force = noise_[i] + accel_[i];
+        const real_type gamma_dt_over_2           = param.gamma * halfdt_;
+        const real_type one_minus_gamma_dt_over_2 = 1. - gamma_dt_over_2;
 
         sys[i].position = sys.adjust_position(sys[i].position +
-                (dt_ * o_hgdt) * (sys[i].velocity) +
-                halfdt2_ * noisy_force);
+                (dt_ * one_minus_gamma_dt_over_2) * (sys[i].velocity) +
+                halfdt2_ * param.accel);
 
-        sys[i].velocity *= o_hgdt * (o_hgdt * o_hgdt + hgdt);
-        sys[i].velocity += (halfdt_ * o_hgdt) * noisy_force;
+        sys[i].velocity *= one_minus_gamma_dt_over_2 *
+            (one_minus_gamma_dt_over_2 * one_minus_gamma_dt_over_2 +
+             gamma_dt_over_2);
+
+        sys[i].velocity += (halfdt_ * one_minus_gamma_dt_over_2) * param.accel;
         // here, v comes v(t+h/2)
     }
 
@@ -113,15 +137,11 @@ UnderdampedLangevinStepper<traitsT>::step(
     // calc a(t+dt) and v(t+dt), generate noise
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        // consider cash 1/m
-        const coordinate_type acc = sys[i].force / sys[i].mass;
-        accel_[i] = acc;
+        auto& param = this->parameters_[i];
+        param.accel = sys[i].force * param.r_mass +
+                      this->gen_random_accel(param.sqrt_gamma_over_mass);
 
-        const coordinate_type noise =
-            this->gen_random_accel(sys[i].mass, gamma_[i]);
-        noise_[i] = noise;
-
-        sys[i].velocity += halfdt_ * (1. - gamma_[i] * halfdt_) * (acc + noise);
+        sys[i].velocity += halfdt_ * (1. - param.gamma * halfdt_) * param.accel;
         sys[i].force = coordinate_type(0., 0., 0.);
     }
 
