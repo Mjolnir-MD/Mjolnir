@@ -31,6 +31,7 @@ if (BOOST_UNIT_TEST_FRAMEWORK_LIBRARY)
     add_definitions(-DUNITTEST_FRAMEWORK_LIBRARY_EXIST)
 else()
     message(STATUS "boost_unit_test_framework could not be found.")
+    message(STATUS "boost library dirs = ${Boost_LIBRARY_DIRS}")
 endif()
 
 foreach(TEST_NAME ${TEST_NAMES})
