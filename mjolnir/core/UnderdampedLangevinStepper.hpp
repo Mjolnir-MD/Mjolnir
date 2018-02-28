@@ -69,18 +69,12 @@ void UnderdampedLangevinStepper<traitsT>::initialize(
     this->noise_coef_ =
         std::sqrt(2 * physics<real_type>::kB * system.temperature() / dt_);
 
-    for(auto iter = make_zip(system.cbegin(), gamma_.cbegin(),
-                             noise_.begin(),  accel_.begin());
-            iter != make_zip(system.cend(),   gamma_.cend(),
-                             noise_.end(),    accel_.end()); ++iter)
+    for(std::size_t i=0; i<system.size(); ++i)
     {
-        *get<3>(iter) = get<0>(iter)->force / get<0>(iter)->mass;
-        *get<2>(iter) = gen_random_accel(get<0>(iter)->mass,
-                            /*gamma = */*get<1>(iter));
+        accel_[i] = system[i].force / system[i].mass;
+        noise_[i] = this->gen_random_accel(system[i].mass, gamma_[i]);
     }
-
     return;
-
 }
 
 template<typename traitsT>
@@ -92,26 +86,23 @@ UnderdampedLangevinStepper<traitsT>::step(
         std::sqrt(2 * physics<real_type>::kB * sys.temperature() / dt_);
 
     real_type max_speed2(0.);
-    for(auto iter(make_zip(sys.begin(),     gamma_.cbegin(),
-                           noise_.cbegin(), accel_.cbegin())),
-             end_(make_zip(sys.end(),       gamma_.cend(),
-                           noise_.cend(),   accel_.cend()));
-            iter != end_; ++iter)
+    for(std::size_t i=0; i<sys.size(); ++i)
     {
-        max_speed2 = std::max(max_speed2, length_sq(get<0>(iter)->velocity));
+        // max of v(t)
+        max_speed2 = std::max(max_speed2, length_sq(sys[i].velocity));
 
-        const real_type hgdt   = (*get<1>(iter) * halfdt_);
+        const real_type hgdt   = gamma_[i] * halfdt_;
         const real_type o_hgdt = 1. - hgdt;
 
-        const coordinate_type noisy_force = (*get<2>(iter)) + (*get<3>(iter));
+        const coordinate_type noisy_force = noise_[i] + accel_[i];
 
-        get<0>(iter)->position = sys.adjust_position(
-                get<0>(iter)->position +
-                (dt_ * o_hgdt) * (get<0>(iter)->velocity) +
+        sys[i].position = sys.adjust_position(sys[i].position +
+                (dt_ * o_hgdt) * (sys[i].velocity) +
                 halfdt2_ * noisy_force);
 
-        get<0>(iter)->velocity *= o_hgdt * (o_hgdt * o_hgdt + hgdt);
-        get<0>(iter)->velocity += (halfdt_ * o_hgdt) * noisy_force;
+        sys[i].velocity *= o_hgdt * (o_hgdt * o_hgdt + hgdt);
+        sys[i].velocity += (halfdt_ * o_hgdt) * noisy_force;
+        // here, v comes v(t+h/2)
     }
 
     sys.max_speed() = std::sqrt(max_speed2);
@@ -120,24 +111,18 @@ UnderdampedLangevinStepper<traitsT>::step(
     ff.calc_force(sys);
 
     // calc a(t+dt) and v(t+dt), generate noise
-    for(auto iter(make_zip(sys.begin(),    gamma_.cbegin(),
-                           noise_.begin(), accel_.begin())),
-             end_(make_zip(sys.end(),      gamma_.cend(),
-                           noise_.end(),   accel_.end()));
-            iter != end_; ++iter)
+    for(std::size_t i=0; i<sys.size(); ++i)
     {
         // consider cash 1/m
-        const coordinate_type acc = get<0>(iter)->force / (get<0>(iter)->mass);
-        *get<3>(iter) = acc;
+        const coordinate_type acc = sys[i].force / sys[i].mass;
+        accel_[i] = acc;
 
         const coordinate_type noise =
-            this->gen_random_accel(get<0>(iter)->mass, *get<1>(iter));
-        *get<2>(iter) = noise;
+            this->gen_random_accel(sys[i].mass, gamma_[i]);
+        noise_[i] = noise;
 
-        const real_type gm = (*get<1>(iter));
-        get<0>(iter)->velocity +=
-            halfdt_ * (1. - gm * halfdt_) * (acc + noise);
-        get<0>(iter)->force = coordinate_type(0., 0., 0.);
+        sys[i].velocity += halfdt_ * (1. - gamma_[i] * halfdt_) * (acc + noise);
+        sys[i].force = coordinate_type(0., 0., 0.);
     }
 
     return time + dt_;
