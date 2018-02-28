@@ -21,8 +21,8 @@ class ExcludedVolumePotential
     typedef real_type parameter_type;
     typedef std::vector<parameter_type> container_type;
 
-    // rc = 2.5 * sigma
-    constexpr static real_type cutoff_ratio = 2.5;
+    // rc = 2.0 * sigma
+    constexpr static real_type cutoff_ratio = 2.0;
 
   public:
 
