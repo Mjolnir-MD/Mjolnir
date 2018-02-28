@@ -26,7 +26,6 @@ class ExcludedVolumePotential
 
   public:
 
-    ExcludedVolumePotential() = default;
     ExcludedVolumePotential(const real_type eps, const container_type& params)
         : epsilon_(eps), radii_(params)
     {}
@@ -34,6 +33,11 @@ class ExcludedVolumePotential
         : epsilon_(eps), radii_(std::move(params))
     {}
     ~ExcludedVolumePotential() = default;
+
+    ExcludedVolumePotential(const ExcludedVolumePotential&) = default;
+    ExcludedVolumePotential(ExcludedVolumePotential&&)      = default;
+    ExcludedVolumePotential& operator=(const ExcludedVolumePotential&) = default;
+    ExcludedVolumePotential& operator=(ExcludedVolumePotential&&)      = default;
 
     real_type potential (const std::size_t i, const std::size_t j,
                          const real_type r) const noexcept
@@ -68,7 +72,7 @@ class ExcludedVolumePotential
     {
         const real_type max_sigma =
             *(std::max_element(radii_.cbegin(), radii_.cend()));
-        return max_sigma * cutoff_ratio;
+        return 2 * max_sigma * cutoff_ratio;
     }
 
     std::string name() const noexcept {return "ExcludedVolume";}
