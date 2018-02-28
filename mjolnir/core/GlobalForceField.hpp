@@ -55,6 +55,29 @@ class GlobalForceField
         return energy;
     }
 
+    // TODO simplify
+    std::string list_energy() const
+    {
+        std::string retval;
+        for(const auto& i : interactions_)
+        {
+            retval += i->name();
+            retval += ' ';
+        }
+        return retval;
+    }
+
+    std::string dump_energy(const system_type& sys) const
+    {
+        std::string retval;
+        for(const auto& i : interactions_)
+        {
+            retval += std::to_string(i->calc_energy(sys));
+            retval += ' ';
+        }
+        return retval;
+    }
+
   private:
 
     std::vector<interaction_ptr> interactions_;
