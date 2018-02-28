@@ -69,7 +69,8 @@ class LocalForceField
         return energy;
     }
 
-    std::string list_energy() const noexcept
+    // TODO simplify
+    std::string list_energy() const
     {
         std::string retval;
         for(const auto& i : interactions_)
@@ -80,7 +81,7 @@ class LocalForceField
         return retval;
     }
 
-    std::string dump_energy(const system_type& sys) const noexcept
+    std::string dump_energy(const system_type& sys) const
     {
         std::string retval;
         for(const auto& i : interactions_)
