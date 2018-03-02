@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_CORE_VERLET_LIST
 #define MJOLNIR_CORE_VERLET_LIST
-#include "System.hpp"
+#include <mjolnir/core/System.hpp>
+#include <mjolnir/core/NeighborList.hpp>
 #include <algorithm>
 #include <limits>
 
@@ -17,18 +18,18 @@ class VerletList
     typedef typename traits_type::boundary_type   boundary_type;
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
-    typedef std::vector<std::size_t> index_array;
-    typedef std::vector<index_array> partners_type;
+
+    typedef NeighborList           neighbor_list_type;
+    typedef neighbor_list_type::range_type range_type;
 
     struct information
     {
         information() : chain_idx(std::numeric_limits<std::size_t>::max()){}
         std::size_t chain_idx;
-        index_array except_chains;
-        index_array except_indices;
+        std::vector<std::size_t> except_chains;
+        std::vector<std::size_t> except_indices;
     };
     typedef std::vector<information> particle_info_type;
-
 
   public:
 
@@ -57,9 +58,9 @@ class VerletList
     void update(const system_type& sys);
     void update(const system_type& sys, const real_type dt);
 
-    std::size_t& chain_index   (std::size_t i);
-    index_array& except_indices(std::size_t i);
-    index_array& except_chains (std::size_t i);
+    std::size_t&              chain_index   (std::size_t i);
+    std::vector<std::size_t>& except_indices(std::size_t i);
+    std::vector<std::size_t>& except_chains (std::size_t i);
 
     real_type cutoff() const noexcept {return this->cutoff_;}
     real_type mergin() const noexcept {return this->mergin_;}
@@ -67,7 +68,7 @@ class VerletList
     void set_cutoff(const real_type c) noexcept {return this->cutoff_ = c;}
     void set_mergin(const real_type m) noexcept {return this->mergin_ = m;}
 
-    index_array const& partners(std::size_t i) const noexcept {return partners_[i];}
+    range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
 
   private:
 
@@ -77,7 +78,7 @@ class VerletList
     real_type      current_mergin_;
     static Logger& logger_;
 
-    partners_type      partners_;
+    neighbor_list_type neighbors_;
     particle_info_type informations_;
 };
 
@@ -93,7 +94,7 @@ std::size_t& VerletList<traitsT>::chain_index(std::size_t i)
 }
 
 template<typename traitsT>
-typename VerletList<traitsT>::index_array&
+std::vector<std::size_t>&
 VerletList<traitsT>::except_indices(std::size_t i)
 {
     if(this->informations_.size() <= i)
@@ -102,7 +103,7 @@ VerletList<traitsT>::except_indices(std::size_t i)
 }
 
 template<typename traitsT>
-typename VerletList<traitsT>::index_array&
+std::vector<std::size_t>&
 VerletList<traitsT>::except_chains(std::size_t i)
 {
     if(this->informations_.size() <= i)
@@ -113,32 +114,38 @@ VerletList<traitsT>::except_chains(std::size_t i)
 template<typename traitsT>
 void VerletList<traitsT>::make(const system_type& sys)
 {
-    this->partners_.resize(sys.size());
-    for(auto& partner : this->partners_) partner.clear();
+    this->neighbors_.clear();
 
-    if(informations_.size() < sys.size()) informations_.resize(sys.size());
+    if(informations_.size() < sys.size()){informations_.resize(sys.size());}
+
+    std::vector<std::size_t> tmp;
 
     const real_type rc = cutoff_ * (1. + mergin_);
     const real_type rc2 = rc * rc;
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        const coordinate_type& ri = sys[i].position;
-        const auto& info       = informations_.at(i);
+        const auto& ri = sys[i].position;
+        const auto& info = informations_.at(i);
         const auto index_begin = info.except_indices.cbegin();
         const auto index_end   = info.except_indices.cend();
         const auto chain_begin = info.except_chains.cbegin();
         const auto chain_end   = info.except_chains.cend();
 
+        tmp.clear();
         for(std::size_t j=i+1; j<sys.size(); ++j)
         {
-            if(std::find(index_begin, index_end, j)       != index_end) continue;
+            if(std::find(index_begin, index_end, j) != index_end){continue;}
 
             const std::size_t j_chain = informations_.at(j).chain_idx;
-            if(std::find(chain_begin, chain_end, j_chain) != chain_end) continue;
+            if(std::find(chain_begin, chain_end, j_chain) != chain_end)
+            {continue;}
 
             if(length_sq(sys.adjust_direction(sys[j].position - ri)) < rc2)
-                this->partners_[i].push_back(j);
+            {
+                tmp.push_back(j);
+            }
         }
+        this->neighbors_.add_list_for(i, tmp);
     }
 
     this->current_mergin_ = cutoff_ * mergin_;
