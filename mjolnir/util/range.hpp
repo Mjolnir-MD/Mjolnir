@@ -14,6 +14,8 @@ struct range
     range(iterator b, iterator e) noexcept
         : begin_(b), end_(e), sz_(std::distance(b, e))
     {}
+
+    range() noexcept : sz_(0){}
     ~range() = default;
     range(const range&) = default;
     range(range&&)      = default;
