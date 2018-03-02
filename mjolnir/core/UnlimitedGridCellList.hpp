@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_UNLIMITED_GRID_CELL_LIST
 #define MJOLNIR_UNLIMITED_GRID_CELL_LIST
-#include "BoundaryCondition.hpp"
+#include <mjolnir/core/NeighborList.hpp>
+#include <mjolnir/util/range.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <functional>
 #include <algorithm>
@@ -11,7 +12,7 @@
 namespace mjolnir
 {
 
-template<typename traitsT, std::size_t dimI = 16>
+template<typename traitsT, std::size_t dimI = 8> // its good to use 2^N as dimI
 class UnlimitedGridCellList
 {
   public:
@@ -20,24 +21,29 @@ class UnlimitedGridCellList
     typedef System<traits_type> system_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
-    typedef std::vector<std::size_t> index_array;
-    typedef std::vector<index_array> partners_type;
 
-    constexpr static std::size_t dim_size   = dimI;
-    constexpr static int         dim        = dim_size;
+    typedef NeighborList           neighbor_list_type;
+    typedef neighbor_list_type::range_type range_type;
+
+    constexpr static std::size_t  dim_size  = dimI;
+    constexpr static std::int64_t dim       = static_cast<std::int64_t>(dimI);
     constexpr static std::size_t total_size = dim_size * dim_size * dim_size;
     constexpr static real_type mesh_epsilon = 1e-6;
-    typedef std::array<int, 3>                        cell_index_type;
-    typedef std::array<std::size_t, 26>               neighbor_cell_idx;
-    typedef std::pair<index_array, neighbor_cell_idx> unit_cell_type;
-    typedef std::array<unit_cell_type, total_size>    cell_list_type;
+
+    typedef std::pair<std::size_t, std::size_t> particle_cell_idx_pair;
+    typedef std::vector<particle_cell_idx_pair> cell_index_container_type;
+
+    typedef std::array<std::size_t, 27> adjacent_cell_idx;
+    typedef std::pair<range<typename cell_index_container_type::const_iterator>,
+                      adjacent_cell_idx> cell_type;
+    typedef std::array<cell_type, total_size> cell_list_type;
 
     struct information
     {
         information() : chain_idx(std::numeric_limits<std::size_t>::max()){}
         std::size_t chain_idx;
-        index_array except_chains;
-        index_array except_indices;
+        std::vector<std::size_t> except_chains;
+        std::vector<std::size_t> except_indices;
     };
     typedef std::vector<information> particle_info_type;
 
@@ -52,12 +58,12 @@ class UnlimitedGridCellList
 
     UnlimitedGridCellList(const real_type cutoff, const real_type mergin)
         : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
-          inv_cell_size_(1. / (cutoff * (1. + mergin) + mesh_epsilon))
+          r_cell_size_(1. / (cutoff * (1. + mergin) + mesh_epsilon))
     {}
     UnlimitedGridCellList(const real_type cutoff, const real_type mergin,
                           const real_type dt)
         : dt_(dt), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
-          inv_cell_size_(1. / (cutoff * (1. + mergin) + mesh_epsilon))
+          r_cell_size_(1. / (cutoff * (1. + mergin) + mesh_epsilon))
     {}
 
     bool valid() const noexcept
@@ -76,19 +82,17 @@ class UnlimitedGridCellList
     void set_cutoff(const real_type c);
     void set_mergin(const real_type m);
 
-    std::size_t& chain_index   (std::size_t i);
-    index_array& except_indices(std::size_t i);
-    index_array& except_chains (std::size_t i);
+    std::size_t&              chain_index   (std::size_t i);
+    std::vector<std::size_t>& except_indices(std::size_t i);
+    std::vector<std::size_t>& except_chains (std::size_t i);
 
-    index_array const& partners(std::size_t i) const noexcept {return partners_[i];}
+    range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
 
   private:
 
-
-    std::size_t index(const coordinate_type& pos) const;
-    std::size_t index(const cell_index_type& pos) const;
-    cell_index_type add(const int x, const int y, const int z,
-                        const cell_index_type&) const;
+    std::size_t calc_index(const coordinate_type& pos) const noexcept;
+    std::size_t calc_index(const std::size_t i, const std::size_t j,
+                           const std::size_t k) const noexcept;
 
   private:
 
@@ -96,12 +100,15 @@ class UnlimitedGridCellList
     real_type cutoff_;
     real_type mergin_;
     real_type current_mergin_;
-    real_type inv_cell_size_;
+    real_type r_cell_size_;
     static Logger& logger_;
 
-    partners_type      partners_;
     particle_info_type informations_;
+    neighbor_list_type neighbors_;
     cell_list_type     cell_list_;
+    cell_index_container_type index_by_cell_;
+    // index_by_cell_ has {particle idx, cell idx} and sorted by cell idx
+    // first term of cell list contains first and last idx of index_by_cell
 };
 
 template<typename traitsT, std::size_t N>
@@ -117,7 +124,7 @@ std::size_t& UnlimitedGridCellList<traitsT, N>::chain_index(std::size_t i)
 }
 
 template<typename traitsT, std::size_t N>
-typename UnlimitedGridCellList<traitsT, N>::index_array&
+std::vector<std::size_t>&
 UnlimitedGridCellList<traitsT, N>::except_indices(std::size_t i)
 {
     if(this->informations_.size() <= i)
@@ -126,7 +133,7 @@ UnlimitedGridCellList<traitsT, N>::except_indices(std::size_t i)
 }
 
 template<typename traitsT, std::size_t N>
-typename UnlimitedGridCellList<traitsT, N>::index_array&
+std::vector<std::size_t>&
 UnlimitedGridCellList<traitsT, N>::except_chains(std::size_t i)
 {
     if(this->informations_.size() <= i)
@@ -138,7 +145,7 @@ template<typename traitsT, std::size_t N>
 inline void UnlimitedGridCellList<traitsT, N>::set_cutoff(const real_type c)
 {
     this->cutoff_ = c;
-    this->inv_cell_size_ = 1. / (cutoff_ * (1. + mergin_) + mesh_epsilon);
+    this->r_cell_size_ = 1. / (cutoff_ * (1. + mergin_) + mesh_epsilon);
     return;
 }
 
@@ -146,7 +153,7 @@ template<typename traitsT, std::size_t N>
 inline void UnlimitedGridCellList<traitsT, N>::set_mergin(const real_type m)
 {
     this->mergin_ = m;
-    this->inv_cell_size_ = 1. / (cutoff_ * (1. + mergin_) + mesh_epsilon);
+    this->r_cell_size_ = 1. / (cutoff_ * (1. + mergin_) + mesh_epsilon);
     return;
 }
 
@@ -155,29 +162,55 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
 {
     MJOLNIR_LOG_DEBUG("UnlimitedGridCellList<traitsT>::make CALLED");
 
-    this->partners_.resize(sys.size());
-    for(auto& partner : this->partners_) partner.clear();
-    for(auto& cell : this->cell_list_) cell.first.clear();
-    MJOLNIR_LOG_DEBUG("cell_list and verlet_list are cleared");
+    neighbors_.clear();
+    index_by_cell_.clear();
 
-    if(informations_.size() < sys.size()) informations_.resize(sys.size());
-
-    std::size_t idx = 0;
-    for(const auto& particle : sys)
+    if(informations_.size() < sys.size())
     {
-        MJOLNIR_LOG_DEBUG("set", idx, "-th particle at", index(particle.position));
-        cell_list_[index(particle.position)].first.push_back(idx);
-        ++idx;
+        informations_.resize(sys.size());
     }
-    MJOLNIR_LOG_DEBUG("cell list is updated");
-
-    const real_type r_c = cutoff_ * (1. + mergin_);
-    const real_type r_c2 = r_c * r_c;
 
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        const coordinate_type ri   = sys[i].position;
-        const unit_cell_type& cell = cell_list_.at(index(ri));
+        MJOLNIR_LOG_DEBUG(i, "-th particle in", calc_index(sys[i].position));
+        index_by_cell_.push_back(
+                std::make_pair(i, calc_index(sys[i].position)));
+    }
+    std::sort(this->index_by_cell_.begin(), this->index_by_cell_.end(),
+        [](const std::pair<std::size_t, std::size_t>& lhs,
+           const std::pair<std::size_t, std::size_t>& rhs) -> bool
+        {// sort by cell-id. if lhs and rhs are in the same cell, sort by index.
+            return (lhs.second == rhs.second) ? lhs.first < rhs.first :
+                    lhs.second <  rhs.second;
+        });
+
+    { // assign first and last iterator for each cells
+        auto iter = index_by_cell_.cbegin();
+        for(std::size_t i=0; i<cell_list_.size(); ++i)
+        {
+            if(i != iter->second)
+            {
+                cell_list_[i].first = make_range(iter, iter);
+                continue;
+            }
+            const auto first = iter;
+            while(i == iter->second)
+            {
+                ++iter;
+            }
+            cell_list_[i].first = make_range(first, iter);
+        }
+    }
+
+    MJOLNIR_LOG_DEBUG("cell list is updated");
+
+    std::vector<std::size_t> tmp;
+    const real_type r_c  = cutoff_ * (1. + mergin_);
+    const real_type r_c2 = r_c * r_c;
+    for(std::size_t i=0; i<sys.size(); ++i)
+    {
+        const auto& ri   = sys[i].position;
+        const auto& cell = cell_list_.at(this->calc_index(ri));
 
         MJOLNIR_LOG_DEBUG("particle position", sys[i].position);
         MJOLNIR_LOG_DEBUG("cell index", index(ri));
@@ -189,56 +222,35 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
         const auto chain_begin = info.except_chains.cbegin();
         const auto chain_end   = info.except_chains.cend();
 
-        // same cells
-        for(std::size_t j : cell.first)
+        tmp.clear();
+        for(std::size_t cidx : cell.second) // for all adjacent cells...
         {
-            if(j <= i || std::find(index_begin, index_end, j) != index_end)
-                continue;
-
-            const std::size_t j_chain = informations_.at(j).chain_idx;
-            if(std::find(chain_begin, chain_end, j_chain) != chain_end)
+            for(auto pici : cell_list_[cidx].first)
             {
-                continue;
-            }
-
-            if(length_sq(sys.adjust_direction(sys.at(j).position - ri)) < r_c2)
-            {
-                MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
-                this->partners_[i].push_back(j);
-            }
-        }
-
-        // neighbor cells
-        for(std::size_t cidx : cell.second)
-        {
-            MJOLNIR_LOG_DEBUG("neighboring cell index", cidx);
-
-            for(std::size_t j : cell_list_[cidx].first)
-            {
+                const auto j = pici.first;
                 MJOLNIR_LOG_DEBUG("looking particle", j);
                 if(j <= i || std::find(index_begin, index_end, j) != index_end)
+                {
                     continue;
+                }
 
                 const std::size_t j_chain = informations_.at(j).chain_idx;
                 if(std::find(chain_begin, chain_end, j_chain) != chain_end)
+                {
                     continue;
+                }
 
                 if(length_sq(sys.adjust_direction(sys.at(j).position - ri)) < r_c2)
                 {
                     MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
-                    this->partners_[i].push_back(j);
+                    tmp.push_back(j);
                 }
             }
         }
-    }
-
-    for(auto& partner : this->partners_)
-    {
-        std::sort(partner.begin(), partner.end());
+        this->neighbors_.add_list_for(i, tmp);
     }
 
     this->current_mergin_ = cutoff_ * mergin_;
-
     MJOLNIR_LOG_DEBUG("UnlimitedGridCellList::make() RETURNED");
     return ;
 }
@@ -265,36 +277,21 @@ inline void UnlimitedGridCellList<traitsT, N>::update(
 
 template<typename traitsT, std::size_t N>
 inline std::size_t
-UnlimitedGridCellList<traitsT, N>::index(const coordinate_type& pos) const
+UnlimitedGridCellList<traitsT, N>::calc_index(
+        const coordinate_type& pos) const noexcept
 {
-    const int x = static_cast<int>(std::floor(pos[0]*inv_cell_size_)) % dim;
-    const int y = static_cast<int>(std::floor(pos[1]*inv_cell_size_)) % dim;
-    const int z = static_cast<int>(std::floor(pos[2]*inv_cell_size_)) % dim;
-    return index(cell_index_type{{(x < 0) ? x + dim : x,
-                                  (y < 0) ? y + dim : y,
-                                  (z < 0) ? z + dim : z}});
+    const auto x = static_cast<int>(std::floor(pos[0]*r_cell_size_)) % dim;
+    const auto y = static_cast<int>(std::floor(pos[1]*r_cell_size_)) % dim;
+    const auto z = static_cast<int>(std::floor(pos[2]*r_cell_size_)) % dim;
+    return calc_index((x<0) ? x+dim : x, (y<0) ? y+dim : y, (z<0) ? z+dim : z);
 }
 
 template<typename traitsT, std::size_t N>
 inline std::size_t
-UnlimitedGridCellList<traitsT, N>::index(const cell_index_type& idx) const
+UnlimitedGridCellList<traitsT, N>::calc_index(const std::size_t x,
+        const std::size_t y, std::size_t z) const noexcept
 {
-    return idx[0] + dim_size * idx[1] + dim_size * dim_size * idx[2];
-}
-
-
-template<typename traitsT, std::size_t N>
-inline typename UnlimitedGridCellList<traitsT, N>::cell_index_type
-UnlimitedGridCellList<traitsT, N>::add(const int x, const int y, const int z,
-        const cell_index_type& idx) const
-{
-    int ret_x = (idx[0] + x);
-    int ret_y = (idx[1] + y);
-    int ret_z = (idx[2] + z);
-    if(ret_x < 0) ret_x += dim; else if(ret_x >= dim) ret_x -= dim;
-    if(ret_y < 0) ret_y += dim; else if(ret_y >= dim) ret_y -= dim;
-    if(ret_z < 0) ret_z += dim; else if(ret_z >= dim) ret_z -= dim;
-    return cell_index_type{{ret_x, ret_y, ret_z}};
+    return x + dim_size * y + dim_size * dim_size * z;
 }
 
 template<typename traitsT, std::size_t N>
@@ -302,77 +299,51 @@ void UnlimitedGridCellList<traitsT, N>::initialize(const system_type& sys)
 {
     MJOLNIR_LOG_DEBUG("UnlimitedGridCellList<traitsT>::initialize CALLED");
 
-    for(auto& cell : this->cell_list_)
-    {
-        cell.first.reserve(20);
-        cell.second.fill(std::numeric_limits<std::size_t>::max());
-    }
-
     for(int x = 0; x < dim; ++x)
     for(int y = 0; y < dim; ++y)
     for(int z = 0; z < dim; ++z)
     {
-        const cell_index_type idx{{x, y, z}};
-        auto& cell = this->cell_list_[index(idx)];
+        auto& cell = this->cell_list_[calc_index(x, y, z)];
 
-        MJOLNIR_LOG_DEBUG("cell", x, y, z, "index", index(idx));
-        cell.second[ 0] = index(add( 1,  0,  0, idx));
-        cell.second[ 1] = index(add( 0,  1,  0, idx));
-        cell.second[ 2] = index(add( 0,  0,  1, idx));
-        cell.second[ 3] = index(add(-1,  0,  0, idx));
-        cell.second[ 4] = index(add( 0, -1,  0, idx));
-        cell.second[ 5] = index(add( 0,  0, -1, idx));
-        cell.second[ 6] = index(add( 1,  1,  0, idx));
-        cell.second[ 7] = index(add( 0,  1,  1, idx));
-        cell.second[ 8] = index(add( 1,  0,  1, idx));
-        cell.second[ 9] = index(add(-1, -1,  0, idx));
-        cell.second[10] = index(add( 0, -1, -1, idx));
-        cell.second[11] = index(add(-1,  0, -1, idx));
-        cell.second[12] = index(add( 1, -1,  0, idx));
-        cell.second[13] = index(add( 0,  1, -1, idx));
-        cell.second[14] = index(add(-1,  0,  1, idx));
-        cell.second[15] = index(add(-1,  1,  0, idx));
-        cell.second[16] = index(add( 0, -1,  1, idx));
-        cell.second[17] = index(add( 1,  0, -1, idx));
-        cell.second[18] = index(add(-1,  1,  1, idx));
-        cell.second[19] = index(add( 1, -1,  1, idx));
-        cell.second[20] = index(add( 1,  1, -1, idx));
-        cell.second[21] = index(add(-1, -1,  1, idx));
-        cell.second[22] = index(add( 1, -1, -1, idx));
-        cell.second[23] = index(add(-1,  1, -1, idx));
-        cell.second[24] = index(add( 1,  1,  1, idx));
-        cell.second[25] = index(add(-1, -1, -1, idx));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 1,  0,  0, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 0,  1,  0, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 0,  0,  1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add(-1,  0,  0, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 0, -1,  0, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 0,  0, -1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 1,  1,  0, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 0,  1,  1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 1,  0,  1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add(-1, -1,  0, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 0, -1, -1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add(-1,  0, -1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 1, -1,  0, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 0,  1, -1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add(-1,  0,  1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add(-1,  1,  0, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 0, -1,  1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 1,  0, -1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add(-1,  1,  1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 1, -1,  1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 1,  1, -1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add(-1, -1,  1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 1, -1, -1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add(-1,  1, -1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add( 1,  1,  1, idx)));
-        MJOLNIR_LOG_DEBUG("neighbors", index(add(-1, -1, -1, idx)));
+        const std::size_t x_prev = (x ==     0) ? dim-1 : x-1;
+        const std::size_t x_next = (x == dim-1) ?     0 : x+1;
+        const std::size_t y_prev = (y ==     0) ? dim-1 : y-1;
+        const std::size_t y_next = (y == dim-1) ?     0 : y+1;
+        const std::size_t z_prev = (z ==     0) ? dim-1 : z-1;
+        const std::size_t z_next = (z == dim-1) ?     0 : z+1;
+
+        cell.second[ 0] = calc_index(x_prev, y_prev, z_prev);
+        cell.second[ 1] = calc_index(x,      y_prev, z_prev);
+        cell.second[ 2] = calc_index(x_next, y_prev, z_prev);
+        cell.second[ 3] = calc_index(x_prev, y,      z_prev);
+        cell.second[ 4] = calc_index(x,      y,      z_prev);
+        cell.second[ 5] = calc_index(x_next, y,      z_prev);
+        cell.second[ 6] = calc_index(x_prev, y_next, z_prev);
+        cell.second[ 7] = calc_index(x,      y_next, z_prev);
+        cell.second[ 8] = calc_index(x_next, y_next, z_prev);
+
+        cell.second[ 9] = calc_index(x_prev, y_prev, z);
+        cell.second[10] = calc_index(x,      y_prev, z);
+        cell.second[11] = calc_index(x_next, y_prev, z);
+        cell.second[12] = calc_index(x_prev, y,      z);
+        cell.second[13] = calc_index(x,      y,      z);
+        cell.second[14] = calc_index(x_next, y,      z);
+        cell.second[15] = calc_index(x_prev, y_next, z);
+        cell.second[16] = calc_index(x,      y_next, z);
+        cell.second[17] = calc_index(x_next, y_next, z);
+
+        cell.second[18] = calc_index(x_prev, y_prev, z_next);
+        cell.second[19] = calc_index(x,      y_prev, z_next);
+        cell.second[20] = calc_index(x_next, y_prev, z_next);
+        cell.second[21] = calc_index(x_prev, y,      z_next);
+        cell.second[22] = calc_index(x,      y,      z_next);
+        cell.second[23] = calc_index(x_next, y,      z_next);
+        cell.second[24] = calc_index(x_prev, y_next, z_next);
+        cell.second[25] = calc_index(x,      y_next, z_next);
+        cell.second[26] = calc_index(x_next, y_next, z_next);
     }
     return;
 }
-
-
 
 } // mjolnir
 #endif/* MJOLNIR_UNLIMITED_GRID_CELL_LIST */
