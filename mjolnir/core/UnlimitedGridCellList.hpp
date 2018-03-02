@@ -246,12 +246,11 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
 template<typename traitsT, std::size_t N>
 void UnlimitedGridCellList<traitsT, N>::update(const system_type& sys)
 {
-    this->current_mergin_ -= sys.max_speed() * dt_ * 2.;
-
     if(this->current_mergin_ < 0.)
     {
         this->make(sys);
     }
+    this->current_mergin_ -= sys.max_speed() * dt_ * 2.;
     return ;
 }
 
