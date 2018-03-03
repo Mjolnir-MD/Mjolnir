@@ -3,6 +3,7 @@
 #include <mjolnir/core/NeighborList.hpp>
 #include <mjolnir/util/range.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <iostream>
 #include <vector>
 #include <cmath>
 #include <cassert>
@@ -182,10 +183,9 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
 
     std::sort(this->index_by_cell_.begin(), this->index_by_cell_.end(),
         [](const std::pair<std::size_t, std::size_t>& lhs,
-           const std::pair<std::size_t, std::size_t>& rhs) -> bool
-        {// sort by cell-id. if lhs and rhs are in the same cell, sort by index.
-            return (lhs.second == rhs.second) ? lhs.first < rhs.first :
-                    lhs.second <  rhs.second;
+           const std::pair<std::size_t, std::size_t>& rhs) noexcept -> bool
+        {
+            return lhs.second < rhs.second;
         });
 
     { // assign first and last iterator for each cells
@@ -251,6 +251,8 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
                 }
             }
         }
+        // make the result consistent with NaivePairCalculation...
+        std::sort(tmp.begin(), tmp.end());
         this->neighbors_.add_list_for(i, tmp);
     }
 
