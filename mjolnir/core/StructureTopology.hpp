@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_STRUCTURE_TOPOLOGY_H
 #define MJOLNIR_STRUCTURE_TOPOLOGY_H
+#include <mjolnir/util/throw_exception.hpp>
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
@@ -48,24 +49,35 @@ class StructureTopology
                         const connection_kind kind);
 
     std::vector<std::size_t>
-    list_adjacent_within(const std::size_t node_idx, const std::size_t dist) const;
+    list_adjacent_within(const std::size_t node_idx, const std::size_t dist
+                         ) const;
     std::vector<std::size_t>
     list_adjacent_within(const std::size_t node_idx, const std::size_t dist,
                          const connection_kind kind) const;
 
   private:
+
+    void
+    list_adjacent_within(const std::size_t node_idx, const std::size_t dist,
+                         std::vector<std::size_t>& out) const;
+    void
+    list_adjacent_within(const std::size_t node_idx, const std::size_t dist,
+                         const connection_kind kind,
+                         std::vector<std::size_t>& out) const;
+
+  private:
     std::vector<node> nodes_;
 };
 
-inline void StructureTopology::add_connection(const std::size_t i, const std::size_t j,
+inline void StructureTopology::add_connection(
+        const std::size_t i, const std::size_t j,
         const StructureTopology::connection_kind kind)
 {
     if(nodes_.size() <= std::max(i, j))
     {
-        throw std::out_of_range(
-            std::string("mjolnir::StructureTopology::add_connection: size of nodes = ") +
-            std::to_string(nodes_.size()) + std::string(", i = ") +
-            std::to_string(i) + std::string(", j = ") + std::to_string(j));
+        throw_exception<std::out_of_range>(
+            "mjolnir::StructureTopology::add_connection: size of nodes = ",
+            nodes_.size(), ", i = ", i, ", j = ", j);
     }
 
     {
@@ -87,14 +99,14 @@ inline void StructureTopology::add_connection(const std::size_t i, const std::si
     return ;
 }
 
-inline void StructureTopology::erase_connection(const std::size_t i, const std::size_t j)
+inline void StructureTopology::erase_connection(
+        const std::size_t i, const std::size_t j)
 {
     if(nodes_.size() <= std::max(i, j))
     {
-        throw std::out_of_range(
-            std::string("mjolnir::StructureTopology::erase_connection: size of nodes = ") +
-            std::to_string(nodes_.size()) + std::string(", i = ") +
-            std::to_string(i) + std::string(", j = ") + std::to_string(j));
+        throw_exception<std::out_of_range>(
+            "mjolnir::StructureTopology::erase_connection: size of nodes = ",
+            nodes_.size(), ", i = ", i, ", j = ", j);
     }
 
     {
@@ -123,30 +135,30 @@ inline void StructureTopology::erase_connection(const std::size_t i, const std::
 }
 
 
-inline void StructureTopology::erase_connection(const std::size_t i, const std::size_t j,
+inline void StructureTopology::erase_connection(
+        const std::size_t i, const std::size_t j,
         const StructureTopology::connection_kind kind)
 {
     if(nodes_.size() <= std::max(i, j))
     {
-        throw std::out_of_range(
-            std::string("mjolnir::StructureTopology::erase_connection: size of nodes = ") +
-            std::to_string(nodes_.size()) + std::string(", i = ") +
-            std::to_string(i) + std::string(", j = ") + std::to_string(j));
+        throw_exception<std::out_of_range>(
+            "mjolnir::StructureTopology::erase_connection: size of nodes = ",
+            nodes_.size(), ", i = ", i, ", j = ", j);
     }
 
     {
-        const auto elem = std::make_pair(j, kind);
         auto& adjs = nodes_[i].adjacents;
-        const auto found = std::find(adjs.cbegin(), adjs.cend(), elem);
+        const auto found = std::find(
+                adjs.cbegin(), adjs.cend(), std::make_pair(j, kind));
         if(found != adjs.cend())
         {
             adjs.erase(found);
         }
     }
     {
-        const auto elem = std::make_pair(i, kind);
         auto& adjs = nodes_[j].adjacents;
-        const auto found = std::find(adjs.cbegin(), adjs.cend(), elem);
+        const auto found = std::find(
+                adjs.cbegin(), adjs.cend(), std::make_pair(i, kind));
         if(found != adjs.cend())
         {
             adjs.erase(found);
@@ -155,17 +167,18 @@ inline void StructureTopology::erase_connection(const std::size_t i, const std::
     return ;
 }
 
-inline bool StructureTopology::has_connection(const std::size_t i, const std::size_t j)
+inline bool StructureTopology::has_connection(
+        const std::size_t i, const std::size_t j)
 {
     if(nodes_.size() <= std::max(i, j))
     {
-        throw std::out_of_range(
-            std::string("mjolnir::StructureTopology::has_connection: size of nodes = ") +
-            std::to_string(nodes_.size()) + std::string(", i = ") +
-            std::to_string(i) + std::string(", j = ") + std::to_string(j));
+        throw_exception<std::out_of_range>(
+            "mjolnir::StructureTopology::has_connection: size of nodes = ",
+            nodes_.size(), ", i = ", i, ", j = ", j);
     }
+    if(i == j) {return true;} // XXX
 
-    auto& adjs = nodes_[i].adjacents;
+    const auto& adjs = nodes_[i].adjacents;
     const auto found = std::find_if(adjs.cbegin(), adjs.cend(),
         [j](const std::pair<std::size_t, connection_kind>& x){
             return x.first == j;
@@ -174,18 +187,19 @@ inline bool StructureTopology::has_connection(const std::size_t i, const std::si
     return found != adjs.cend();
 }
 
-inline bool StructureTopology::has_connection(const std::size_t i, const std::size_t j,
-                    const connection_kind kind)
+inline bool StructureTopology::has_connection(
+        const std::size_t i, const std::size_t j,
+        const StructureTopology::connection_kind kind)
 {
     if(nodes_.size() <= std::max(i, j))
     {
-        throw std::out_of_range(
-            std::string("mjolnir::StructureTopology::has_connection: size of nodes = ") +
-            std::to_string(nodes_.size()) + std::string(", i = ") +
-            std::to_string(i) + std::string(", j = ") + std::to_string(j));
+        throw_exception<std::out_of_range>(
+            "mjolnir::StructureTopology::has_connection: size of nodes = ",
+            nodes_.size(), ", i = ", i, ", j = ", j);
     }
+    if(i == j) {return true;} // XXX
 
-    auto& adjs = nodes_[i].adjacents;
+    const auto& adjs = nodes_[i].adjacents;
     const auto found = std::find(adjs.cbegin(), adjs.cend(),
                                  std::make_pair(j, kind));
     return found != adjs.cend();
@@ -195,17 +209,17 @@ inline std::vector<std::size_t>
 StructureTopology::list_adjacent_within(
         const std::size_t node_idx, const std::size_t dist) const
 {
-    if(dist == 0) {return std::vector<std::size_t>{};}
+    std::vector<std::size_t> retval = {node_idx};
+    if(dist == 0) {return retval;}
 
-    std::vector<std::size_t> retval;
     for(auto ik : this->nodes_.at(node_idx).adjacents)
     {
-        retval.push_back(ik.first);
-        if(dist > 1)
+        if(std::find(retval.cbegin(), retval.cend(), ik.first) != retval.cend())
         {
-            const auto tmp = this->list_adjacent_within(ik.first, dist - 1);
-            std::copy(tmp.begin(), tmp.end(), std::back_inserter(retval));
+            continue; // already assigned. ignore it.
         }
+        retval.push_back(ik.first);
+        this->list_adjacent_within(ik.first, dist - 1, retval);
     }
     std::sort(retval.begin(), retval.end());
     const auto new_end = std::unique(retval.begin(), retval.end());
@@ -218,26 +232,75 @@ StructureTopology::list_adjacent_within(
         const std::size_t node_idx, const std::size_t dist,
         const connection_kind kind) const
 {
-    if(dist == 0) {return std::vector<std::size_t>{};}
+    std::vector<std::size_t> retval = {node_idx};
+    if(dist == 0) {return retval;}
 
-    std::vector<std::size_t> retval;
     for(auto ik : this->nodes_.at(node_idx).adjacents)
     {
-        if(ik.second == kind)
+        if(ik.second != kind ||
+           std::find(retval.cbegin(), retval.cend(), ik.first) != retval.cend())
         {
             continue;
         }
         retval.push_back(ik.first);
-        if(dist > 1)
-        {
-            const auto tmp = this->list_adjacent_within(ik.first, dist - 1, kind);
-            std::copy(tmp.begin(), tmp.end(), std::back_inserter(retval));
-        }
+        this->list_adjacent_within(ik.first, dist - 1, kind, retval);
     }
     std::sort(retval.begin(), retval.end());
     const auto new_end = std::unique(retval.begin(), retval.end());
     retval.erase(new_end, retval.end());
     return retval;
+}
+
+inline void StructureTopology::list_adjacent_within(
+        const std::size_t node_idx, const std::size_t dist,
+        std::vector<std::size_t>& out) const
+{
+    if(dist == 0)
+    {
+        if(std::find(out.cbegin(), out.cend(), node_idx) != out.cend())
+        {
+            out.push_back(node_idx);
+        }
+        return ;
+    }
+
+    for(auto ik : this->nodes_.at(node_idx).adjacents)
+    {
+        if(std::find(out.cbegin(), out.cend(), ik.first) != out.cend())
+        {
+            continue;
+        }
+        out.push_back(ik.first);
+        this->list_adjacent_within(ik.first, dist - 1, out);
+    }
+    return;
+}
+
+inline void
+StructureTopology::list_adjacent_within(
+        const std::size_t node_idx, const std::size_t dist,
+        const connection_kind kind, std::vector<std::size_t>& out) const
+{
+    if(dist == 0)
+    {
+        if(std::find(out.cbegin(), out.cend(), node_idx) != out.cend())
+        {
+            out.push_back(node_idx);
+        }
+        return;
+    }
+
+    for(auto ik : this->nodes_.at(node_idx).adjacents)
+    {
+        if(ik.second != kind ||
+           std::find(out.cbegin(), out.cend(), ik.first) != out.cend())
+        {
+            continue;
+        }
+        out.push_back(ik.first);
+        this->list_adjacent_within(ik.first, dist-1, kind, out);
+    }
+    return;
 }
 
 } // mjolnir
