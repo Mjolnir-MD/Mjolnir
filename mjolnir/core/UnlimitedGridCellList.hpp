@@ -163,7 +163,7 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
     MJOLNIR_LOG_DEBUG("UnlimitedGridCellList<traitsT>::make CALLED");
 
     neighbors_.clear();
-    index_by_cell_.clear();
+    index_by_cell_.resize(sys.size());
 
     if(informations_.size() < sys.size())
     {
@@ -172,9 +172,7 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
 
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        MJOLNIR_LOG_DEBUG(i, "-th particle in", calc_index(sys[i].position));
-        index_by_cell_.push_back(
-                std::make_pair(i, calc_index(sys[i].position)));
+        index_by_cell_[i] = std::make_pair(i, calc_index(sys[i].position));
     }
     std::sort(this->index_by_cell_.begin(), this->index_by_cell_.end(),
         [](const std::pair<std::size_t, std::size_t>& lhs,
@@ -187,13 +185,13 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
         auto iter = index_by_cell_.cbegin();
         for(std::size_t i=0; i<cell_list_.size(); ++i)
         {
-            if(i != iter->second)
+            if(iter == index_by_cell_.cend() || i != iter->second)
             {
                 cell_list_[i].first = make_range(iter, iter);
                 continue;
             }
             const auto first = iter;
-            while(i == iter->second)
+            while(iter != index_by_cell_.cend() || i == iter->second)
             {
                 ++iter;
             }
