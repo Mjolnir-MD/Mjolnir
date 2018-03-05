@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_STRUCTURE_GRAPH_H
-#define MJOLNIR_STRUCTURE_GRAPH_H
+#ifndef MJOLNIR_STRUCTURE_TOPOLOGY_H
+#define MJOLNIR_STRUCTURE_TOPOLOGY_H
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
@@ -8,7 +8,7 @@
 namespace mjolnir
 {
 
-class StructureGraph
+class StructureTopology
 {
   public:
 
@@ -25,14 +25,14 @@ class StructureGraph
     };
 
   public:
-    StructureGraph()  = default;
-    ~StructureGraph() = default;
-    StructureGraph(const StructureGraph&) = default;
-    StructureGraph(StructureGraph&&)      = default;
-    StructureGraph& operator=(const StructureGraph&) = default;
-    StructureGraph& operator=(StructureGraph&&)      = default;
+    StructureTopology()  = default;
+    ~StructureTopology() = default;
+    StructureTopology(const StructureTopology&) = default;
+    StructureTopology(StructureTopology&&)      = default;
+    StructureTopology& operator=(const StructureTopology&) = default;
+    StructureTopology& operator=(StructureTopology&&)      = default;
 
-    StructureGraph(const std::size_t N): nodes_(N){};
+    StructureTopology(const std::size_t N): nodes_(N){};
 
     void resize(const std::size_t N) {nodes_.resize(N); return;}
 
@@ -57,13 +57,13 @@ class StructureGraph
     std::vector<node> nodes_;
 };
 
-inline void StructureGraph::add_connection(const std::size_t i, const std::size_t j,
-        const StructureGraph::connection_kind kind)
+inline void StructureTopology::add_connection(const std::size_t i, const std::size_t j,
+        const StructureTopology::connection_kind kind)
 {
     if(nodes_.size() <= std::max(i, j))
     {
         throw std::out_of_range(
-            std::string("mjolnir::StructureGraph::add_connection: size of nodes = ") +
+            std::string("mjolnir::StructureTopology::add_connection: size of nodes = ") +
             std::to_string(nodes_.size()) + std::string(", i = ") +
             std::to_string(i) + std::string(", j = ") + std::to_string(j));
     }
@@ -87,12 +87,12 @@ inline void StructureGraph::add_connection(const std::size_t i, const std::size_
     return ;
 }
 
-inline void StructureGraph::erase_connection(const std::size_t i, const std::size_t j)
+inline void StructureTopology::erase_connection(const std::size_t i, const std::size_t j)
 {
     if(nodes_.size() <= std::max(i, j))
     {
         throw std::out_of_range(
-            std::string("mjolnir::StructureGraph::erase_connection: size of nodes = ") +
+            std::string("mjolnir::StructureTopology::erase_connection: size of nodes = ") +
             std::to_string(nodes_.size()) + std::string(", i = ") +
             std::to_string(i) + std::string(", j = ") + std::to_string(j));
     }
@@ -123,13 +123,13 @@ inline void StructureGraph::erase_connection(const std::size_t i, const std::siz
 }
 
 
-inline void StructureGraph::erase_connection(const std::size_t i, const std::size_t j,
-        const StructureGraph::connection_kind kind)
+inline void StructureTopology::erase_connection(const std::size_t i, const std::size_t j,
+        const StructureTopology::connection_kind kind)
 {
     if(nodes_.size() <= std::max(i, j))
     {
         throw std::out_of_range(
-            std::string("mjolnir::StructureGraph::erase_connection: size of nodes = ") +
+            std::string("mjolnir::StructureTopology::erase_connection: size of nodes = ") +
             std::to_string(nodes_.size()) + std::string(", i = ") +
             std::to_string(i) + std::string(", j = ") + std::to_string(j));
     }
@@ -155,12 +155,12 @@ inline void StructureGraph::erase_connection(const std::size_t i, const std::siz
     return ;
 }
 
-inline bool StructureGraph::has_connection(const std::size_t i, const std::size_t j)
+inline bool StructureTopology::has_connection(const std::size_t i, const std::size_t j)
 {
     if(nodes_.size() <= std::max(i, j))
     {
         throw std::out_of_range(
-            std::string("mjolnir::StructureGraph::has_connection: size of nodes = ") +
+            std::string("mjolnir::StructureTopology::has_connection: size of nodes = ") +
             std::to_string(nodes_.size()) + std::string(", i = ") +
             std::to_string(i) + std::string(", j = ") + std::to_string(j));
     }
@@ -174,13 +174,13 @@ inline bool StructureGraph::has_connection(const std::size_t i, const std::size_
     return found != adjs.cend();
 }
 
-inline bool StructureGraph::has_connection(const std::size_t i, const std::size_t j,
+inline bool StructureTopology::has_connection(const std::size_t i, const std::size_t j,
                     const connection_kind kind)
 {
     if(nodes_.size() <= std::max(i, j))
     {
         throw std::out_of_range(
-            std::string("mjolnir::StructureGraph::has_connection: size of nodes = ") +
+            std::string("mjolnir::StructureTopology::has_connection: size of nodes = ") +
             std::to_string(nodes_.size()) + std::string(", i = ") +
             std::to_string(i) + std::string(", j = ") + std::to_string(j));
     }
@@ -192,7 +192,7 @@ inline bool StructureGraph::has_connection(const std::size_t i, const std::size_
 }
 
 inline std::vector<std::size_t>
-StructureGraph::list_adjacent_within(
+StructureTopology::list_adjacent_within(
         const std::size_t node_idx, const std::size_t dist) const
 {
     if(dist == 0) {return std::vector<std::size_t>{};}
@@ -214,7 +214,7 @@ StructureGraph::list_adjacent_within(
 }
 
 inline std::vector<std::size_t>
-StructureGraph::list_adjacent_within(
+StructureTopology::list_adjacent_within(
         const std::size_t node_idx, const std::size_t dist,
         const connection_kind kind) const
 {
@@ -241,4 +241,4 @@ StructureGraph::list_adjacent_within(
 }
 
 } // mjolnir
-#endif// MJOLNIR_STRUCTURE_GRAPH_H
+#endif// MJOLNIR_STRUCTURE_TOPOLOGY_H
