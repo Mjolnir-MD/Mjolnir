@@ -111,22 +111,22 @@ inline void StructureTopology::erase_connection(
 
     {
         auto& adjs = nodes_[i].adjacents;
-        const auto found = std::find_if(adjs.cbegin(), adjs.cend(),
+        const auto found = std::find_if(adjs.begin(), adjs.end(),
             [j](const std::pair<std::size_t, connection_kind>& x){
                 return x.first == j;
             });
-        if(found != adjs.cend())
+        if(found != adjs.end())
         {
             adjs.erase(found);
         }
     }
     {
         auto& adjs = nodes_[j].adjacents;
-        const auto found = std::find_if(adjs.cbegin(), adjs.cend(),
+        const auto found = std::find_if(adjs.begin(), adjs.end(),
             [i](const std::pair<std::size_t, connection_kind>& x){
                 return x.first == i;
             });
-        if(found != adjs.cend())
+        if(found != adjs.end())
         {
             adjs.erase(found);
         }
@@ -149,8 +149,8 @@ inline void StructureTopology::erase_connection(
     {
         auto& adjs = nodes_[i].adjacents;
         const auto found = std::find(
-                adjs.cbegin(), adjs.cend(), std::make_pair(j, kind));
-        if(found != adjs.cend())
+                adjs.begin(), adjs.end(), std::make_pair(j, kind));
+        if(found != adjs.end())
         {
             adjs.erase(found);
         }
@@ -158,8 +158,8 @@ inline void StructureTopology::erase_connection(
     {
         auto& adjs = nodes_[j].adjacents;
         const auto found = std::find(
-                adjs.cbegin(), adjs.cend(), std::make_pair(i, kind));
-        if(found != adjs.cend())
+                adjs.begin(), adjs.end(), std::make_pair(i, kind));
+        if(found != adjs.end())
         {
             adjs.erase(found);
         }
