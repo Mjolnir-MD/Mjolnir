@@ -13,19 +13,14 @@ class StructureTopology
 {
   public:
 
-    enum connection_kind
-    {
-        bond,   // bond interaction
-        contact // other kinds of contacts
-    };
-
     // using adjacency-list
     struct node
     {
-        std::vector<std::pair<std::size_t, connection_kind>> adjacents;
+        std::vector<std::pair<std::size_t, std::string>> adjacents;
     };
 
   public:
+
     StructureTopology()  = default;
     ~StructureTopology() = default;
     StructureTopology(const StructureTopology&) = default;
@@ -38,22 +33,22 @@ class StructureTopology
     void resize(const std::size_t N) {nodes_.resize(N); return;}
 
     void add_connection(const std::size_t i, const std::size_t j,
-                        const connection_kind kind);
+                        std::string kind);
 
     void erase_connection(const std::size_t i, const std::size_t j);
     void erase_connection(const std::size_t i, const std::size_t j,
-                          const connection_kind kind);
+                          const std::string& kind);
 
     bool has_connection(const std::size_t i, const std::size_t j);
     bool has_connection(const std::size_t i, const std::size_t j,
-                        const connection_kind kind);
+                        const std::string& kind);
 
     std::vector<std::size_t>
     list_adjacent_within(const std::size_t node_idx, const std::size_t dist
                          ) const;
     std::vector<std::size_t>
     list_adjacent_within(const std::size_t node_idx, const std::size_t dist,
-                         const connection_kind kind) const;
+                         const std::string& kind) const;
 
   private:
 
@@ -62,16 +57,15 @@ class StructureTopology
                          std::vector<std::size_t>& out) const;
     void
     list_adjacent_within(const std::size_t node_idx, const std::size_t dist,
-                         const connection_kind kind,
-                         std::vector<std::size_t>& out) const;
+                         const std::string& kind, std::vector<std::size_t>& out
+                         ) const;
 
   private:
     std::vector<node> nodes_;
 };
 
 inline void StructureTopology::add_connection(
-        const std::size_t i, const std::size_t j,
-        const StructureTopology::connection_kind kind)
+        const std::size_t i, const std::size_t j, std::string kind)
 {
     if(nodes_.size() <= std::max(i, j))
     {
@@ -112,7 +106,7 @@ inline void StructureTopology::erase_connection(
     {
         auto& adjs = nodes_[i].adjacents;
         const auto found = std::find_if(adjs.begin(), adjs.end(),
-            [j](const std::pair<std::size_t, connection_kind>& x){
+            [j](const std::pair<std::size_t, std::string>& x){
                 return x.first == j;
             });
         if(found != adjs.end())
@@ -123,7 +117,7 @@ inline void StructureTopology::erase_connection(
     {
         auto& adjs = nodes_[j].adjacents;
         const auto found = std::find_if(adjs.begin(), adjs.end(),
-            [i](const std::pair<std::size_t, connection_kind>& x){
+            [i](const std::pair<std::size_t, std::string>& x){
                 return x.first == i;
             });
         if(found != adjs.end())
@@ -137,7 +131,7 @@ inline void StructureTopology::erase_connection(
 
 inline void StructureTopology::erase_connection(
         const std::size_t i, const std::size_t j,
-        const StructureTopology::connection_kind kind)
+        const std::string& kind)
 {
     if(nodes_.size() <= std::max(i, j))
     {
@@ -180,7 +174,7 @@ inline bool StructureTopology::has_connection(
 
     const auto& adjs = nodes_[i].adjacents;
     const auto found = std::find_if(adjs.cbegin(), adjs.cend(),
-        [j](const std::pair<std::size_t, connection_kind>& x){
+        [j](const std::pair<std::size_t, std::string>& x){
             return x.first == j;
         });
 
@@ -189,7 +183,7 @@ inline bool StructureTopology::has_connection(
 
 inline bool StructureTopology::has_connection(
         const std::size_t i, const std::size_t j,
-        const StructureTopology::connection_kind kind)
+        const std::string& kind)
 {
     if(nodes_.size() <= std::max(i, j))
     {
@@ -230,7 +224,7 @@ StructureTopology::list_adjacent_within(
 inline std::vector<std::size_t>
 StructureTopology::list_adjacent_within(
         const std::size_t node_idx, const std::size_t dist,
-        const connection_kind kind) const
+        const std::string& kind) const
 {
     std::vector<std::size_t> retval = {node_idx};
     if(dist == 0) {return retval;}
@@ -279,7 +273,7 @@ inline void StructureTopology::list_adjacent_within(
 inline void
 StructureTopology::list_adjacent_within(
         const std::size_t node_idx, const std::size_t dist,
-        const connection_kind kind, std::vector<std::size_t>& out) const
+        const std::string& kind, std::vector<std::size_t>& out) const
 {
     if(dist == 0)
     {
