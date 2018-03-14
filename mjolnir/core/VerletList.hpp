@@ -155,11 +155,11 @@ void VerletList<traitsT>::make(const system_type& sys)
 template<typename traitsT>
 void VerletList<traitsT>::update(const system_type& sys)
 {
+    this->current_mergin_ -= sys.max_speed() * dt_ * 2.;
     if(this->current_mergin_ < 0.)
     {
         this->make(sys);
     }
-    this->current_mergin_ -= sys.max_speed() * dt_ * 2.;
     return ;
 }
 

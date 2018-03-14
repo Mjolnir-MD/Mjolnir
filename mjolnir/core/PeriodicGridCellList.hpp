@@ -281,11 +281,11 @@ template<typename traitsT>
 void PeriodicGridCellList<traitsT>::update(const system_type& sys)
 {
     // TODO consider boundary size
+    this->current_mergin_ -= sys.max_speed() * dt_ * 2.;
     if(this->current_mergin_ < 0.)
     {
         this->make(sys);
     }
-    this->current_mergin_ -= sys.max_speed() * dt_ * 2.;
     return ;
 }
 
