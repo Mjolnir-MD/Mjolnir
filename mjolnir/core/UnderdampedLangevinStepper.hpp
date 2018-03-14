@@ -124,9 +124,9 @@ UnderdampedLangevinStepper<traitsT>::step(
         sys[i].velocity *= one_minus_gamma_dt_over_2 *
             (one_minus_gamma_dt_over_2 * one_minus_gamma_dt_over_2 +
              gamma_dt_over_2);
-
         sys[i].velocity += (halfdt_ * one_minus_gamma_dt_over_2) * param.accel;
-        // here, v comes v(t+h/2)
+
+        sys[i].force = coordinate_type(0., 0., 0.);
     }
 
     sys.max_speed() = std::sqrt(max_speed2);
@@ -142,7 +142,6 @@ UnderdampedLangevinStepper<traitsT>::step(
                       this->gen_random_accel(param.sqrt_gamma_over_mass);
 
         sys[i].velocity += halfdt_ * (1. - param.gamma * halfdt_) * param.accel;
-        sys[i].force = coordinate_type(0., 0., 0.);
     }
 
     return time + dt_;
