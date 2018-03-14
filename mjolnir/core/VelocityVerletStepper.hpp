@@ -34,7 +34,7 @@ class VelocityVerletStepper
     {}
     ~VelocityVerletStepper() = default;
 
-    void initialize(const system_type& sys){return;}
+    void initialize(system_type& sys, forcefield_type& ff);
 
     real_type step(const real_type time, system_type& sys, forcefield_type& ff);
 
@@ -48,6 +48,21 @@ class VelocityVerletStepper
     real_type dt_;      //!< dt
     real_type halfdt_;  //!< dt/2
 };
+
+template<typename traitsT, typename rescalingT>
+void VelocityVerletStepper<traitsT, rescalingT>::initialize(
+        system_type& system, forcefield_type& ff)
+{
+    real_type max_speed2(0.);
+    for(std::size_t i=0; i<system.size(); ++i)
+    {
+        max_speed2 = std::max(max_speed2, length_sq(system[i].velocity));
+        system[i].force = coordinate_type(0.0, 0.0, 0.0);
+    }
+    system.max_speed() = std::sqrt(max_speed2);
+    ff.calc_force(system);
+    return;
+}
 
 template<typename traitsT, typename rescalingT>
 typename VelocityVerletStepper<traitsT, rescalingT>::real_type

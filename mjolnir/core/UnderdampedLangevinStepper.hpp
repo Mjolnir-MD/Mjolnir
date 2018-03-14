@@ -42,7 +42,7 @@ class UnderdampedLangevinStepper
     }
     ~UnderdampedLangevinStepper() = default;
 
-    void initialize(const system_type& sys);
+    void initialize(system_type& sys, forcefield_type& ff);
     real_type step(const real_type time, system_type& sys, forcefield_type& ff);
 
     real_type delta_t() const noexcept {return dt_;}
@@ -77,11 +77,20 @@ class UnderdampedLangevinStepper
 
 template<typename traitsT>
 void UnderdampedLangevinStepper<traitsT>::initialize(
-        const system_type& system)
+        system_type& system, forcefield_type& ff)
 {
     this->temperature_ = system.temperature();
     this->noise_coef_ =
         std::sqrt(2 * physics<real_type>::kB * this->temperature_ / dt_);
+
+    real_type max_speed2(0.);
+    for(std::size_t i=0; i<system.size(); ++i)
+    {
+        max_speed2 = std::max(max_speed2, length_sq(system[i].velocity));
+        system[i].force = coordinate_type(0.0, 0.0, 0.0);
+    }
+    system.max_speed() = std::sqrt(max_speed2);
+    ff.calc_force(system);
 
     for(std::size_t i=0; i<system.size(); ++i)
     {
