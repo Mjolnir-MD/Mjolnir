@@ -12,10 +12,17 @@ namespace mjolnir
 class StructureTopology
 {
   public:
-
-    // using adjacency-list
+    // each node corresponds to the particle having same idx in a system.
     struct node
     {
+        node(): group_id(std::numeric_limits<std::size_t>::max()) {}
+        ~node() = default;
+        node(node const&) = default;
+        node(node&&)      = default;
+        node& operator=(node const&) = default;
+        node& operator=(node&&)      = default;
+
+        std::size_t group_id;
         std::vector<std::pair<std::size_t, std::string>> adjacents;
     };
 
@@ -50,8 +57,12 @@ class StructureTopology
     list_adjacent_within(const std::size_t node_idx, const std::size_t dist,
                          const std::string& kind) const;
 
-  private:
+    std::size_t  group_of(const std::size_t idx) const
+    {return nodes_.at(idx).group_id;}
+    std::size_t& group_of(const std::size_t idx)
+    {return nodes_.at(idx).group_id;}
 
+  private:
     void
     list_adjacent_within(const std::size_t node_idx, const std::size_t dist,
                          std::vector<std::size_t>& out) const;
@@ -59,7 +70,6 @@ class StructureTopology
     list_adjacent_within(const std::size_t node_idx, const std::size_t dist,
                          const std::string& kind, std::vector<std::size_t>& out
                          ) const;
-
   private:
     std::vector<node> nodes_;
 };
