@@ -303,7 +303,7 @@ void PeriodicGridCellList<traitsT>::initialize(const system_type& sys)
 {
     MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::initialize CALLED");
     this->lower_bound_ = sys.boundary().lower_bound();
-    const auto system_size = sys.boundary().range();
+    const auto system_size = sys.boundary().width();
 
     this->dim_x_ = std::max<std::size_t>(3, std::floor(system_size[0] * r_x_));
     this->dim_y_ = std::max<std::size_t>(3, std::floor(system_size[1] * r_y_));
