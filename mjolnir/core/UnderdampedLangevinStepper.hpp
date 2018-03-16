@@ -48,7 +48,14 @@ class UnderdampedLangevinStepper
     real_type delta_t() const noexcept {return dt_;}
     void  set_delta_t(const real_type dt) noexcept
     {
-        dt_ = dt; halfdt_ = dt * 0.5; halfdt2_ = dt*dt*0.5;
+        dt_ = dt; halfdt_ = dt * 0.5; halfdt2_ = dt * dt * 0.5;
+    }
+
+    void set_temperature(const real_type T)
+    {
+        this->noise_coef_ =
+            std::sqrt(2 * physics<real_type>::kB * T / dt_);
+        return;
     }
 
     rng_type&       random_number_generator()       noexcept {return rng_;}
@@ -69,7 +76,6 @@ class UnderdampedLangevinStepper
     real_type halfdt_;
     real_type halfdt2_;
     real_type noise_coef_;
-    real_type temperature_; // cache
     rng_type  rng_;
 
     std::vector<parameter_set> parameters_;
@@ -79,9 +85,8 @@ template<typename traitsT>
 void UnderdampedLangevinStepper<traitsT>::initialize(
         system_type& system, forcefield_type& ff)
 {
-    this->temperature_ = system.temperature();
-    this->noise_coef_ =
-        std::sqrt(2 * physics<real_type>::kB * this->temperature_ / dt_);
+    this->noise_coef_ = std::sqrt(
+        2 * physics<real_type>::kB * system.attribute("temperature") / dt_);
 
     real_type max_speed2(0.);
     for(std::size_t i=0; i<system.size(); ++i)
@@ -108,13 +113,6 @@ typename UnderdampedLangevinStepper<traitsT>::real_type
 UnderdampedLangevinStepper<traitsT>::step(
         const real_type time, system_type& sys, forcefield_type& ff)
 {
-    if(this->temperature_ != sys.temperature())
-    {
-        this->temperature_ = sys.temperature();
-        this->noise_coef_ =
-            std::sqrt(2 * physics<real_type>::kB * this->temperature_ / dt_);
-    }
-
     real_type max_speed2(0.);
     for(std::size_t i=0; i<sys.size(); ++i)
     {

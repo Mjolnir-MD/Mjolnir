@@ -1,6 +1,8 @@
 #ifndef MJOLNIR_SYSTEM
 #define MJOLNIR_SYSTEM
+#include "StructureTopology.hpp"
 #include <vector>
+#include <map>
 
 namespace mjolnir
 {
@@ -14,8 +16,9 @@ class System
     typedef typename traits_type::coordinate_type   coordinate_type;
     typedef typename traits_type::boundary_type     boundary_type;
     typedef typename traits_type::particle_type     particle_type;
-    typedef std::vector<particle_type>              container_type;
     typedef StructureTopology                       topology_type;
+    typedef std::map<std::string, real_type>        attribute_type;
+    typedef std::vector<particle_type>              container_type;
     typedef typename container_type::iterator       iterator;
     typedef typename container_type::const_iterator const_iterator;
 
@@ -23,36 +26,22 @@ class System
     ~System() = default;
 
     System(container_type&& pcon, boundary_type&& bound)
-        : temperature_(0.), pressure_(0.), ionic_strength_(0.),
-          boundary_(bound), particles_(pcon)
+        : boundary_(bound), particles_(pcon)
     {
         this->topology_.resize(this->particles_.size());
     }
-
-    std::size_t size() const noexcept {return particles_.size();}
-
-    //XXX! these parameters are 'reference's. these are not a calculated values
-    //     but set by input to be used in thermostat, barostat, etc.
-    real_type& pressure()             noexcept {return pressure_;}
-    real_type  pressure()       const noexcept {return pressure_;}
-    real_type& temperature()          noexcept {return temperature_;}
-    real_type  temperature()    const noexcept {return temperature_;}
-    real_type& ionic_strength()       noexcept {return ionic_strength_;}
-    real_type  ionic_strength() const noexcept {return ionic_strength_;}
 
     coordinate_type adjust_direction(coordinate_type dr) const noexcept
     {return boundary_.adjust_direction(dr);}
     coordinate_type  adjust_position(coordinate_type dr) const noexcept
     {return boundary_.adjust_position(dr);}
 
-    particle_type &      operator[](std::size_t i)       noexcept
-    {return particles_[i];}
-    particle_type const& operator[](std::size_t i) const noexcept
-    {return particles_[i];}
-    particle_type &      at(std::size_t i)
-    {return particles_.at(i);}
-    particle_type const& at(std::size_t i) const
-    {return particles_.at(i);}
+    std::size_t size() const noexcept {return particles_.size();}
+
+    particle_type &      operator[](std::size_t i)       noexcept {return particles_[i];}
+    particle_type const& operator[](std::size_t i) const noexcept {return particles_[i];}
+    particle_type &      at(std::size_t i)       {return particles_.at(i);}
+    particle_type const& at(std::size_t i) const {return particles_.at(i);}
 
     iterator       begin()        noexcept {return particles_.begin();}
     iterator       end()          noexcept {return particles_.end();}
@@ -66,17 +55,20 @@ class System
     topology_type&       topology()       noexcept {return topology_;}
     topology_type const& topology() const noexcept {return topology_;}
 
+    // system attributes like `reference temperature`, `ionic strength`, ...
+    // assuming it will not be called so often.
+    real_type  attribute(const std::string& key) const {return attributes_.at(key);}
+    real_type& attribute(const std::string& key)       {return attributes_[key];}
+
     real_type& max_speed()       noexcept {return max_speed_;}
     real_type  max_speed() const noexcept {return max_speed_;}
 
   private:
-    real_type      temperature_;
-    real_type      pressure_;
-    real_type      ionic_strength_;
     real_type      max_speed_;
     boundary_type  boundary_;
     container_type particles_;
     topology_type  topology_;
+    attribute_type attributes_;
 };
 
 } // mjolnir

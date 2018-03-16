@@ -65,15 +65,8 @@ class DebyeHuckelPotential
     // for temperature/ionic concentration changes...
     void update(const System<traitsT>& sys) noexcept
     {
-        if(temperature_ == sys.temperature() &&
-           ion_conc_    == sys.ionic_strength())
-        {
-            return;
-        }
-
-        // TODO: it can be a shared resource, which is better to manage?
-        this->temperature_ = sys.temperature();
-        this->ion_conc_    = sys.ionic_strength();
+        this->temperature_ = sys.attribute("temperature");
+        this->ion_conc_    = sys.attribute("ionic_strength");
         this->calc_parameters();
         return;
     }
