@@ -15,6 +15,7 @@ class System
     typedef typename traits_type::boundary_type     boundary_type;
     typedef typename traits_type::particle_type     particle_type;
     typedef std::vector<particle_type>              container_type;
+    typedef StructureTopology                       topology_type;
     typedef typename container_type::iterator       iterator;
     typedef typename container_type::const_iterator const_iterator;
 
@@ -22,9 +23,11 @@ class System
     ~System() = default;
 
     System(container_type&& pcon, boundary_type&& bound)
-        : boundary_(bound), particles_(pcon), temperature_(0.), pressure_(0.),
-          ionic_strength_(0.)
-    {}
+        : temperature_(0.), pressure_(0.), ionic_strength_(0.),
+          boundary_(bound), particles_(pcon)
+    {
+        this->topology_.resize(this->particles_.size());
+    }
 
     std::size_t size() const noexcept {return particles_.size();}
 
@@ -58,23 +61,23 @@ class System
     const_iterator cbegin() const noexcept {return particles_.cbegin();}
     const_iterator cend()   const noexcept {return particles_.cend();}
 
+    boundary_type&       boundary()       noexcept {return boundary_;}
     boundary_type const& boundary() const noexcept {return boundary_;}
+    topology_type&       topology()       noexcept {return topology_;}
+    topology_type const& topology() const noexcept {return topology_;}
 
     real_type& max_speed()       noexcept {return max_speed_;}
     real_type  max_speed() const noexcept {return max_speed_;}
 
   private:
-
     real_type      temperature_;
     real_type      pressure_;
     real_type      ionic_strength_;
     real_type      max_speed_;
     boundary_type  boundary_;
     container_type particles_;
+    topology_type  topology_;
 };
-
-
-
 
 } // mjolnir
 #endif// MJOLNIR_SYSTEM
