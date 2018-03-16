@@ -13,11 +13,9 @@ e    = 1.0             # elementary charge
 "ε0" = 8.854187817e-12 # permittivity of vaccum
 
 [[systems]]
-temperature    = 300.0 # [K]
-ionic_strength = 100.0 # [mM]
-boundary       = {}    # for Unlimited Boundary
+attributes = {temperature = 300.0, ionic_strength = 100.0}
+boundary = {} # Unlimited
 # boundary = {upper = [0.0, 0.0, 0.0], lower = [100.0, 100.0, 100.0]}
-
 particles = [ # {{{
 {mass = 101.11, position = [15.308,   14.18,  -2.955], velocity = [ 0.1224933,  -0.04235889,  -1.671052e-1]},
 {mass = 147.18, position = [13.365,   10.96,  -3.638], velocity = [ 0.06587243, -0.002927513, -2.150324e-2]},
@@ -76,6 +74,7 @@ particles = [ # {{{
 {mass = 97.120, position = [10.073,  11.79 ,  -6.056], velocity = [ 0.04999502, -0.01409165,   5.024480e-2]},
 {mass = 87.080, position = [9.02  ,  12.876,  -2.544], velocity = [ 0.06163922, -0.03540277,   4.426636e-2]},
 ] # }}}
+
 
 [simulator]
 type       = "Molecular Dynamics"

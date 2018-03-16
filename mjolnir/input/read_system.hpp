@@ -85,17 +85,11 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
         read_boundary<traitsT>(toml_value_at(system, "boundary"
                 ).cast<toml::value_t::Table>()));
 
-    if(system.count("temperature") == 1)
+    const auto& attributes = toml_value_at(system, "attributes", "[[systems]]"
+            ).cast<toml::value_t::Table>();
+    for(const auto& attr : attributes)
     {
-        sys.temperature() = toml::get<real_type>(system.at("temperature"));
-    }
-    if(system.count("ionic_strength") == 1)
-    {
-        sys.ionic_strength() = toml::get<real_type>(system.at("ionic_strength"));
-    }
-    if(system.count("pressure") == 1)
-    {
-        sys.pressure() = toml::get<real_type>(system.at("pressure"));
+        sys.attribute(attr.first) = toml::get<real_type>(attr.second);
     }
     return sys;
 }

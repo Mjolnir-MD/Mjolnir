@@ -14,8 +14,7 @@ e  = 1.0               # elementary charge  [1.60217648740e-19C]
 "ε0" = 8.854187817e-12 #     []
 
 [[systems]]
-temperature    = 300.0 # [K]
-ionic_strength = 100.0 # [mM]
+attributes = {temperature = 300.0, ionic_strength = 100.0}
 boundary = {upper = [30.0, 15.0, 10.0], lower = [0.0, -15.0, -20.0]}
 
 particles = [
