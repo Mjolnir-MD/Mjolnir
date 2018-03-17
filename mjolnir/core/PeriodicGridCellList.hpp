@@ -56,15 +56,7 @@ class PeriodicGridCellList
     PeriodicGridCellList& operator=(PeriodicGridCellList &&)     = default;
 
     PeriodicGridCellList(const real_type cutoff, const real_type mergin)
-        : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
-          r_x_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon)),
-          r_y_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon)),
-          r_z_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon))
-    {}
-
-    PeriodicGridCellList(const real_type cutoff, const real_type mergin,
-                         const real_type dt)
-        : dt_(dt), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
+        : cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
           r_x_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon)),
           r_y_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon)),
           r_z_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon))
@@ -72,13 +64,12 @@ class PeriodicGridCellList
 
     bool valid() const noexcept
     {
-        return current_mergin_ >= 0. || dt_ == 0.;
+        return current_mergin_ >= 0.0;
     }
 
     void initialize(const system_type&);
     void make  (const system_type& sys);
     void update(const system_type& sys);
-    void update(const system_type& sys, const real_type dt);
 
     real_type cutoff() const {return this->cutoff_;}
     real_type mergin() const {return this->mergin_;}
@@ -110,7 +101,6 @@ class PeriodicGridCellList
 
   private:
 
-    real_type   dt_;
     real_type   cutoff_;
     real_type   mergin_;
     real_type   current_mergin_;
@@ -281,20 +271,11 @@ template<typename traitsT>
 void PeriodicGridCellList<traitsT>::update(const system_type& sys)
 {
     // TODO consider boundary size
-    this->current_mergin_ -= sys.max_speed() * dt_ * 2.;
+    this->current_mergin_ -= sys.largest_displacement() * 2.;
     if(this->current_mergin_ < 0.)
     {
         this->make(sys);
     }
-    return ;
-}
-
-template<typename traitsT>
-inline void
-PeriodicGridCellList<traitsT>::update(const system_type& sys, const real_type dt)
-{
-    this->dt_ = dt;
-    this->update(sys);
     return ;
 }
 

@@ -57,24 +57,18 @@ class UnlimitedGridCellList
     UnlimitedGridCellList& operator=(UnlimitedGridCellList &&)     = default;
 
     UnlimitedGridCellList(const real_type cutoff, const real_type mergin)
-        : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
-          r_cell_size_(1. / (cutoff * (1. + mergin) + mesh_epsilon))
-    {}
-    UnlimitedGridCellList(const real_type cutoff, const real_type mergin,
-                          const real_type dt)
-        : dt_(dt), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
+        : cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
           r_cell_size_(1. / (cutoff * (1. + mergin) + mesh_epsilon))
     {}
 
     bool valid() const noexcept
     {
-        return current_mergin_ >= 0. || dt_ == 0.;
+        return current_mergin_ >= 0.;
     }
 
     void initialize(const system_type& sys);
     void make  (const system_type& sys);
     void update(const system_type& sys);
-    void update(const system_type& sys, const real_type dt);
 
     real_type cutoff() const {return this->cutoff_;}
     real_type mergin() const {return this->mergin_;}
@@ -96,7 +90,6 @@ class UnlimitedGridCellList
 
   private:
 
-    real_type dt_;
     real_type cutoff_;
     real_type mergin_;
     real_type current_mergin_;
@@ -257,21 +250,11 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
 template<typename traitsT, std::size_t N>
 void UnlimitedGridCellList<traitsT, N>::update(const system_type& sys)
 {
-    //XXX max_speed returns max(v(t)), now calculating f(t+dt) by using r(t+dt).
-    this->current_mergin_ -= sys.max_speed() * dt_ * 2.;
+    this->current_mergin_ -= sys.largest_displacement() * 2;
     if(this->current_mergin_ < 0.)
     {
         this->make(sys);
     }
-    return ;
-}
-
-template<typename traitsT, std::size_t N>
-inline void UnlimitedGridCellList<traitsT, N>::update(
-        const system_type& sys, const real_type dt)
-{
-    this->dt_ = dt;
-    this->update(sys);
     return ;
 }
 

@@ -41,22 +41,17 @@ class VerletList
     VerletList& operator=(VerletList &&)     = default;
 
     VerletList(const real_type cutoff, const real_type mergin)
-        : dt_(0.), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.)
-    {}
-    VerletList(const real_type cutoff, const real_type mergin,
-               const real_type dt)
-        : dt_(dt), cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.)
+        : cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.)
     {}
 
     bool valid() const noexcept
     {
-        return current_mergin_ >= 0. || dt_ == 0.;
+        return current_mergin_ >= 0.0;
     }
 
     void initialize(const system_type&) const noexcept {return;}
     void make  (const system_type& sys);
     void update(const system_type& sys);
-    void update(const system_type& sys, const real_type dt);
 
     std::size_t&              chain_index   (std::size_t i);
     std::vector<std::size_t>& except_indices(std::size_t i);
@@ -72,7 +67,6 @@ class VerletList
 
   private:
 
-    real_type      dt_;
     real_type      cutoff_;
     real_type      mergin_;
     real_type      current_mergin_;
@@ -155,23 +149,13 @@ void VerletList<traitsT>::make(const system_type& sys)
 template<typename traitsT>
 void VerletList<traitsT>::update(const system_type& sys)
 {
-    this->current_mergin_ -= sys.max_speed() * dt_ * 2.;
-    if(this->current_mergin_ < 0.)
+    this->current_mergin_ -= sys.largest_displacement() * 2;
+    if(this->current_mergin_ < 0)
     {
         this->make(sys);
     }
     return ;
 }
-
-
-template<typename traitsT>
-void VerletList<traitsT>::update(const system_type& sys, const real_type dt)
-{
-    this->dt_ = dt;
-    this->update(sys);
-    return ;
-}
-
 
 } // mjolnir
 #endif/* MJOLNIR_CORE_VERLET_LIST */
