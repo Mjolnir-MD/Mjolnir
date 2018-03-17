@@ -53,13 +53,11 @@ template<typename traitsT, typename rescalingT>
 void VelocityVerletStepper<traitsT, rescalingT>::initialize(
         system_type& system, forcefield_type& ff)
 {
-    real_type max_speed2(0.);
     for(std::size_t i=0; i<system.size(); ++i)
     {
-        max_speed2 = std::max(max_speed2, length_sq(system[i].velocity));
         system[i].force = coordinate_type(0.0, 0.0, 0.0);
     }
-    system.max_speed() = std::sqrt(max_speed2);
+    system.largest_displacement() = 0;
     ff.calc_force(system);
     return;
 }
@@ -69,21 +67,26 @@ typename VelocityVerletStepper<traitsT, rescalingT>::real_type
 VelocityVerletStepper<traitsT, rescalingT>::step(
         const real_type time, system_type& system, forcefield_type& ff)
 {
-    real_type max_speed2(0.);
+    real_type largest_disp2(0);
     for(std::size_t i=0; i<system.size(); ++i)
     {
         auto& particle = system[i];
-        max_speed2 = std::max(max_speed2, length_sq(particle.velocity));
 
         particle.velocity += (halfdt_ / particle.mass) * particle.force;
-        particle.position = system.adjust_position(particle.position +
-                                             dt_ * particle.velocity);
-        particle.force    = coordinate_type(0.0, 0.0, 0.0);
-    }
-    system.max_speed() = std::sqrt(max_speed2);
 
+        const auto disp = dt_ * particle.velocity;
+
+        particle.position = system.adjust_position(particle.position + disp);
+        particle.force    = coordinate_type(0.0, 0.0, 0.0);
+
+        largest_disp2 = std::max(largest_disp2, length_sq(disp));
+    }
+    system.largest_displacement() = std::sqrt(largest_disp2);
+
+    // calc f(t+dt)
     ff.calc_force(system);
 
+    // calc v(t+dt)
     for(std::size_t i=0; i<system.size(); ++i)
     {
         auto& particle = system[i];

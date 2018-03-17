@@ -88,13 +88,11 @@ void UnderdampedLangevinStepper<traitsT>::initialize(
     this->noise_coef_ = std::sqrt(
         2 * physics<real_type>::kB * system.attribute("temperature") / dt_);
 
-    real_type max_speed2(0.);
     for(std::size_t i=0; i<system.size(); ++i)
     {
-        max_speed2 = std::max(max_speed2, length_sq(system[i].velocity));
         system[i].force = coordinate_type(0.0, 0.0, 0.0);
     }
-    system.max_speed() = std::sqrt(max_speed2);
+    system.largest_displacement() = 0;
     ff.calc_force(system);
 
     for(std::size_t i=0; i<system.size(); ++i)
@@ -113,20 +111,18 @@ typename UnderdampedLangevinStepper<traitsT>::real_type
 UnderdampedLangevinStepper<traitsT>::step(
         const real_type time, system_type& sys, forcefield_type& ff)
 {
-    real_type max_speed2(0.);
+    real_type largest_disp2(0);
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        // max of v(t)
-        max_speed2 = std::max(max_speed2, length_sq(sys[i].velocity));
-
         const auto& param = this->parameters_[i];
 
         const real_type gamma_dt_over_2           = param.gamma * halfdt_;
         const real_type one_minus_gamma_dt_over_2 = 1. - gamma_dt_over_2;
 
-        sys[i].position = sys.adjust_position(sys[i].position +
-                (dt_ * one_minus_gamma_dt_over_2) * (sys[i].velocity) +
-                halfdt2_ * param.accel);
+        const auto disp = (dt_ * one_minus_gamma_dt_over_2) * (sys[i].velocity) +
+                halfdt2_ * param.accel;
+
+        sys[i].position = sys.adjust_position(sys[i].position + disp);
 
         sys[i].velocity *= one_minus_gamma_dt_over_2 *
             (one_minus_gamma_dt_over_2 * one_minus_gamma_dt_over_2 +
@@ -134,9 +130,10 @@ UnderdampedLangevinStepper<traitsT>::step(
         sys[i].velocity += (halfdt_ * one_minus_gamma_dt_over_2) * param.accel;
 
         sys[i].force = coordinate_type(0., 0., 0.);
-    }
 
-    sys.max_speed() = std::sqrt(max_speed2);
+        largest_disp2 = std::max(largest_disp2, length_sq(disp));
+    }
+    sys.largest_displacement() = std::sqrt(largest_disp2);
 
     // calc f(t+dt)
     ff.calc_force(sys);

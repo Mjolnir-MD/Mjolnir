@@ -32,13 +32,13 @@ class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
     void initialize(const system_type& sys, const real_type dt) override
     {
         this->partition_.initialize(sys);
-        this->partition_.update(sys, dt);
+        this->partition_.update(sys);
     }
 
     void update(const system_type& sys, const real_type dt) override
     {
         this->potential_.update(sys);
-        this->partition_.update(sys, dt);
+        this->partition_.update(sys);
     }
 
     void      calc_force (system_type&)             override;
