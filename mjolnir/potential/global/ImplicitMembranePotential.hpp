@@ -1,9 +1,11 @@
 #ifndef MJOLNIR_IMPLICIT_MEMBRANE_POTENTIAL
 #define MJOLNIR_IMPLICIT_MEMBRANE_POTENTIAL
+#include <mjolnir/core/System.hpp>
 #include <cmath>
 
 namespace mjolnir
 {
+
 
 /* Implicit membrane potential & derivative           *
  * potential field dependent on z coordinate.         *
@@ -11,11 +13,11 @@ namespace mjolnir
  *  V(z) = ma * tanh(be * (|z| - th/2))               *
  * dV/dr = (z/|z|) * ma * (cosh^2(be * (|z| - th/2))) *
  * Cutoff ratio ensure 1/1000 accuracy.               */
-template<typename traitT>
+template<typename traitsT>
 class ImplicitMembranePotential
 {
   public:
-    typedef traitT traits_type;
+    typedef traitsT traits_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef real_type parameter_type;
