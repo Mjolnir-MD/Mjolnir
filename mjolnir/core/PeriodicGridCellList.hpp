@@ -196,7 +196,7 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
                 continue;
             }
             const auto first = iter;
-            while(iter != index_by_cell_.cend() || i == iter->second)
+            while(iter != index_by_cell_.cend() && i == iter->second)
             {
                 ++iter;
             }
