@@ -60,11 +60,12 @@ class System
     real_type  attribute(const std::string& key) const {return attributes_.at(key);}
     real_type& attribute(const std::string& key)       {return attributes_[key];}
 
-    real_type& max_speed()       noexcept {return max_speed_;}
-    real_type  max_speed() const noexcept {return max_speed_;}
+    // store largest displacement in a step to decrease mergin of verlet list.
+    real_type& largest_displacement()       noexcept {return largest_disp_;}
+    real_type  largest_displacement() const noexcept {return largest_disp_;}
 
   private:
-    real_type      max_speed_;
+    real_type      largest_disp_;
     boundary_type  boundary_;
     container_type particles_;
     topology_type  topology_;
