@@ -54,8 +54,8 @@ class ImplicitMembranePotential
     void set_hydrophobicities(std::vector<parameter_type>&&);
 
     std::size_t size() const noexcept {return hydrophobicities_.size();}
-    void resize (const std::size_t i){hydrophobicities_.resize();}
-    void reserve(const std::size_t i){hydrophobicities_.reserve();}
+    void resize (const std::size_t i){hydrophobicities_.resize(i);}
+    void reserve(const std::size_t i){hydrophobicities_.reserve(i);}
     void clear() {hydrophobicities_.clear();}
 
     parameter_type&       operator[](const std::size_t i) noexcept
