@@ -4,12 +4,14 @@
 
 namespace mjolnir
 {
+template<typename T> class System;
 
 template<typename traitsT, template<typename>class ... Ts>
 class MultipleLocalPotential
 {
   public:
     typedef traitsT traits_type;
+    typedef System<traits_type> system_type;
     typedef typename traits_type::real_type real_type;
     constexpr static std::size_t multiplicity = sizeof...(Ts);
 
@@ -32,6 +34,8 @@ class MultipleLocalPotential
     {
         return accumurate_derivatives<0, multiplicity>::invoke(potentials_, x);
     }
+
+    void update(const system_type&, const real_type) const noexcept {return;}
 
   private:
 

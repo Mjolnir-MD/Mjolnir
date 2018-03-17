@@ -5,6 +5,8 @@
 namespace mjolnir
 {
 
+template<typename T> class System;
+
 /*! @brief cosine-potential for 3SPN.1 dihedral potential *
  *  V(phi) = k * (1 - cos(phi - phi0))                    *
  * dV(phi) = k * sin(phi - phi0))                         */
@@ -13,6 +15,7 @@ class CosinePotential
 {
   public:
     typedef traitsT traits_type;
+    typedef System<traits_type> system_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
@@ -31,6 +34,9 @@ class CosinePotential
     {
         return this->k_ * std::sin(phi - phi0_);
     }
+
+    void update(const system_type&, const real_type) const noexcept {return;}
+    std::string name() const noexcept {return "Cosine";}
 
   private:
 

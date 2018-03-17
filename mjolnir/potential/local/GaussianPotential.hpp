@@ -4,6 +4,7 @@
 
 namespace mjolnir
 {
+template<typename T> class System;
 
 /*! @brief gaussian potential for AICG2+                     *
  * V(r)  = epsilon * exp(-(r-r0)^2 / 2W^2)                   *
@@ -13,6 +14,7 @@ class GaussianPotential
 {
   public:
     typedef traitsT traits_type;
+    typedef System<traits_type> system_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
@@ -34,6 +36,8 @@ class GaussianPotential
         const real_type dval = val - this->native_val_;
         return 2*inv_w2_ * dval * epsilon_ * std::exp(inv_w2_ * dval * dval);
     }
+
+    void update(const system_type&, const real_type) const noexcept {return;}
 
     std::string name() const noexcept {return "Gaussian";}
 

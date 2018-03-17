@@ -4,6 +4,8 @@
 namespace mjolnir
 {
 
+template<typename T> class System;
+
 /*! @brief Go contact 10-12 potential *
  *  V(r) = epsilon * (5 * (r0/r)^12 - 6 * (r0/r)^10)  *
  * dV/dr = 60 * epsilon * ((r0/r)^10 - (r0/r)^12) / r */
@@ -12,6 +14,7 @@ class Go1012ContactPotential
 {
   public:
     typedef traitsT traits_type;
+    typedef System<traits_type> system_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
     constexpr static real_type cutoff_ratio = 2.5;
@@ -50,6 +53,8 @@ class Go1012ContactPotential
         const real_type rd12 = rd8 * rd4;
         return this->epsilon_ * 60. * (rd10 - rd12) * invr;
     }
+
+    void update(const system_type&, const real_type) const noexcept {return;}
 
     std::string name() const noexcept {return "Go1012Contact";}
 

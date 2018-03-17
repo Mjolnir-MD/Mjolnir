@@ -4,6 +4,8 @@
 namespace mjolnir
 {
 
+template<typename T> class System;
+
 /*! @brief harmonic potential *
  *  V(r) = K * (r - r0)^2     *
  * dV/dr = 2 * K * (r - r0)   */
@@ -12,6 +14,7 @@ class HarmonicPotential
 {
   public:
     typedef traitsT traits_type;
+    typedef System<traits_type> system_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
@@ -31,6 +34,8 @@ class HarmonicPotential
     {
         return  2 * this->k_ * (r - r0_);
     }
+
+    void update(const system_type&, const real_type) const noexcept {return;}
 
     std::string name() const noexcept {return "Harmonic";}
 

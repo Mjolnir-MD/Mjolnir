@@ -8,6 +8,8 @@
 namespace mjolnir
 {
 
+template<typename T> class System;
+
 /*! @brief Default FLP angle                                               *
  * NOTE: It assumes that each theta value in histogram is same as default. */
 template<typename traitsT>
@@ -15,6 +17,7 @@ class FlexibleLocalAnglePotential
 {
   public:
     typedef traitsT traits_type;
+    typedef System<traits_type> system_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
     constexpr static real_type max_force  =  30.0;
@@ -25,7 +28,7 @@ class FlexibleLocalAnglePotential
             const std::array<real_type, 10>& term1,
             const std::array<real_type, 10>& term2)
         : min_theta(1.30900), max_theta(2.87979),
-          dtheta((max_theta - min_theta) / 9.0), inv_dtheta(1. / dtheta), k_(k), 
+          dtheta((max_theta - min_theta) / 9.0), inv_dtheta(1. / dtheta), k_(k),
           thetas{{1.30900, 1.48353, 1.65806, 1.83260, 2.00713,
                   2.18166, 2.35619, 2.53073, 2.70526, 2.87979}},
           term1_(term1), term2_(term2)
@@ -82,6 +85,7 @@ class FlexibleLocalAnglePotential
         else return spline_derivative(th) * k_;
     }
 
+    void update(const system_type&, const real_type) const noexcept {return;}
     std::string name() const noexcept {return "FlexibleLocalAngle";}
 
   private:

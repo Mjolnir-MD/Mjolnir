@@ -9,6 +9,8 @@
 namespace mjolnir
 {
 
+template<typename T> class System;
+
 /* @brief Flexible Local dihedral potential
  * V(phi) = \sum_m^3 k_m^s sin(mphi) + \sum_m^3 k_n^c cos(nphi) + C
  * NOTE: term := {C, k_1^s, k_1^c, k_2^s, k_2^c, k_3^s, k_3^c} */
@@ -17,6 +19,7 @@ class FlexibleLocalDihedralPotential
 {
   public:
     typedef traitsT traits_type;
+    typedef System<traits_type> system_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
@@ -72,6 +75,8 @@ class FlexibleLocalDihedralPotential
                    -2*term_[3] * sin2 + 2*term_[4] * cos2
                    -3*term_[5] * sin3 + 3*term_[6] * cos3);
     }
+
+    void update(const system_type&, const real_type) const noexcept {return;}
 
     std::string name() const noexcept {return "FlexibleLocalDihedral";}
 

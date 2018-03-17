@@ -3,6 +3,7 @@
 
 namespace mjolnir
 {
+template<typename T> class System;
 
 /*! @brief quartic potential for 3SPN            *
  *  V(r) =     k1 * (r-r0)^2 +     k2 * (r-r0)^4 *
@@ -12,6 +13,7 @@ class QuarticPotential
 {
   public:
     typedef traitsT traits_type;
+    typedef System<traits_type> system_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
@@ -34,6 +36,10 @@ class QuarticPotential
         const real_type dr = val - this->native_val_;
         return  2 * this->k1_ * dr + 4 * this->k2_ * dr * dr * dr;
     }
+
+    void update(const system_type&, const real_type) const noexcept {return;}
+
+    std::string name() const noexcept {return "Quartic";}
 
   private:
 

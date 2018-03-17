@@ -5,6 +5,7 @@
 
 namespace mjolnir
 {
+template<typename T> class System;
 
 /*! @brief Clementi-Go dihedral modified-triple-cosine potential *
  *  V(phi) = k1 * (1-cos(phi-phi0)) + k3 * (1-cos(3(phi-phi0)))  *
@@ -14,12 +15,13 @@ class ClementiDihedralPotential
 {
   public:
     typedef traitsT traits_type;
+    typedef System<traits_type> system_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
   public:
-    ClementiDihedralPotential(
-            const real_type k1, const real_type k3, const real_type native_val)
+    ClementiDihedralPotential(const real_type k1, const real_type k3,
+                              const real_type native_val)
         : k1_(k1), k3_(k3), native_val_(native_val)
     {}
     ~ClementiDihedralPotential() = default;
@@ -40,6 +42,8 @@ class ClementiDihedralPotential
 
         return this->k1_ * sin1 + 3.0 * this->k3_ * sin3;
     }
+
+    void update(const system_type&, const real_type) const noexcept {return;}
 
     std::string name() const noexcept {return "ClementiDihedral";}
 
