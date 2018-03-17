@@ -41,8 +41,8 @@ class HarmonicPotential
 
   private:
 
-    const real_type k_;
-    const real_type r0_;
+    real_type k_;
+    real_type r0_;
 };
 
 }

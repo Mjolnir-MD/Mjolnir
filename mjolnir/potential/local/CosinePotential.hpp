@@ -40,8 +40,8 @@ class CosinePotential
 
   private:
 
-    const real_type k_;
-    const real_type phi0_;
+    real_type k_;
+    real_type phi0_;
 };
 
 } // mjolnir

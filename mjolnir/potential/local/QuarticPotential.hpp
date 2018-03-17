@@ -43,9 +43,9 @@ class QuarticPotential
 
   private:
 
-    const real_type k1_;
-    const real_type k2_;
-    const real_type native_val_; //!< most stable length
+    real_type k1_;
+    real_type k2_;
+    real_type native_val_; //!< most stable length
 };
 
 }

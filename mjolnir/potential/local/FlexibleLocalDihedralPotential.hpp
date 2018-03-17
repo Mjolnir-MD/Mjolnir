@@ -82,8 +82,8 @@ class FlexibleLocalDihedralPotential
 
   private:
     real_type min_energy;
-    const real_type k_;
-    const std::array<real_type, 7> term_;
+    real_type k_;
+    std::array<real_type, 7> term_;
 };
 
 

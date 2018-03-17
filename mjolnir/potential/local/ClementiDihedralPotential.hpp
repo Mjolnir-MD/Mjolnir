@@ -49,9 +49,9 @@ class ClementiDihedralPotential
 
   private:
 
-    const real_type k1_;
-    const real_type k3_;
-    const real_type native_val_;
+    real_type k1_;
+    real_type k3_;
+    real_type native_val_;
 };
 
 } // mjolnir

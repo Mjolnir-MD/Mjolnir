@@ -43,8 +43,8 @@ class GaussianPotential
 
   private:
 
-    const real_type epsilon_, inv_w2_;
-    const real_type native_val_;
+    real_type epsilon_, inv_w2_;
+    real_type native_val_;
 };
 
 } // mjolnir

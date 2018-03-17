@@ -127,12 +127,12 @@ class FlexibleLocalAnglePotential
     real_type min_theta;
     real_type max_theta;
 
-    const real_type dtheta;
-    const real_type inv_dtheta;
-    const real_type k_;
-    const std::array<real_type, 10> thetas;
-    const std::array<real_type, 10> term1_;
-    const std::array<real_type, 10> term2_;
+    real_type dtheta;
+    real_type inv_dtheta;
+    real_type k_;
+    std::array<real_type, 10> thetas;
+    std::array<real_type, 10> term1_;
+    std::array<real_type, 10> term2_;
 };
 
 } // mjolnir

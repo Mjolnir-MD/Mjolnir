@@ -60,8 +60,8 @@ class Go1012ContactPotential
 
   private:
 
-    const real_type epsilon_;
-    const real_type r0_;
+    real_type epsilon_;
+    real_type r0_;
 };
 
 template<typename traitsT>
