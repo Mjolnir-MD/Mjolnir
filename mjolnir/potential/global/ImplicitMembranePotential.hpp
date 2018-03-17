@@ -71,6 +71,9 @@ class ImplicitMembranePotential
     real_type derivative(const std::size_t i, const real_type z) const;
     real_type max_cutoff_length() const noexcept;
 
+    // nothing to be done if system parameter (e.g. temperature) changes
+    void update(const System<traitsT>&) const noexcept {return;}
+
   private:
 
     real_type half_thick_;//membrane half of thickness.
