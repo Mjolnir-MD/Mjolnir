@@ -53,6 +53,15 @@ class LocalForceField
         }
     }
 
+    // to re-calculate parameters like temperature, ionic concentration, etc...
+    void update(const system_type& sys, const real_type dt)
+    {
+        for(auto& item : this->interactions_)
+        {
+            item->update(sys, dt);
+        }
+    }
+
     void calc_force(system_type& sys) const
     {
         for(const auto& item : this->interactions_)

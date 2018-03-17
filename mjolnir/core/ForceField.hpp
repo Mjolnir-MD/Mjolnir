@@ -34,9 +34,16 @@ class ForceField
         global_.initialize(sys, dt);
     }
 
+    // update parameters like delta t, temperature, ionic concentration, etc...
+    void update(const system_type& sys, const real_type dt)
+    {
+         local_.update(sys, dt);
+        global_.update(sys, dt);
+    }
+
     void calc_force(system_type& sys)
     {
-        local_.calc_force(sys);
+         local_.calc_force(sys);
         global_.calc_force(sys);
     }
     real_type calc_energy(const system_type& sys) const
@@ -60,7 +67,6 @@ class ForceField
     {
         return global_.dump_energy(sys);
     }
-
 
   private:
 

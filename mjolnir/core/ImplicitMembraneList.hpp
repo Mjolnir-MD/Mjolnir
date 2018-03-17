@@ -24,6 +24,10 @@ class ImplicitMembraneList
 
     void initialize(const system_type& sys);
     void update    (const system_type& sys);
+    void update    (const system_type& sys, const real_type dt)
+    {
+        return this->update(sys);
+    }
 
     obj_index_array const& obj_indices() const noexcept {return obj_indices_;}
 

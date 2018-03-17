@@ -37,6 +37,14 @@ class BondAngleInteraction : public LocalInteractionBase<traitsT>
     void      calc_force (system_type&)        const noexcept override;
     real_type calc_energy(const system_type& ) const noexcept override;
 
+    void update(const system_type& sys, const real_type dt) override
+    {
+        for(auto& item : potentials)
+        {
+            item.second.update(sys, dt);
+        }
+    }
+
     std::size_t size() const noexcept {return potentials.size();}
 
     const_iterator begin()  const noexcept {return potentials.begin();}

@@ -30,8 +30,14 @@ class ZaxisExternalForceInteraction final : public GlobalInteractionBase<traitsT
 
     void initialize(const system_type& sys, const real_type dt) override
     {
-        partition_.initialize(sys);
+        this->partition_.initialize(sys);
         return;
+    }
+
+    void update(const system_type& sys, const real_type dt) override
+    {
+        this->potential_.update(sys);
+        this->partition_.update(sys, dt);
     }
 
     void      calc_force(system_type&)              override;
