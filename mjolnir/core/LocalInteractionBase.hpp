@@ -23,19 +23,16 @@ class LocalInteractionBase
 
     virtual ~LocalInteractionBase() = default;
 
-    virtual void
-    update(const system_type&, const real_type dt) = 0;
+    virtual void initialize(const system_type&, const real_type dt) = 0;
+    virtual void update    (const system_type&, const real_type dt) = 0;
 
-    virtual void
-    calc_force(system_type&) const noexcept = 0;
+    virtual void      calc_force (system_type&)       const noexcept = 0;
+    virtual real_type calc_energy(const system_type&) const noexcept = 0;
 
-    virtual real_type
-    calc_energy(const system_type&) const noexcept = 0;
+    virtual std::string name() const = 0;
 
     virtual void
     append(std::unique_ptr<LocalInteractionBase<traitsT>>&& other) = 0;
-
-    virtual std::string name() const = 0;
 };
 
 } // mjolnir

@@ -36,6 +36,9 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
     void      calc_force (system_type&)       const noexcept override;
     real_type calc_energy(const system_type&) const noexcept override;
 
+    void initialize(const system_type& sys, const real_type dt) override
+    {return;}
+
     void update(const system_type& sys, const real_type dt) override
     {
         for(auto& item : potentials)
