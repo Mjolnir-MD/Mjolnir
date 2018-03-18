@@ -12,6 +12,10 @@ namespace mjolnir
 class StructureTopology
 {
   public:
+
+    typedef std::size_t group_id_type;
+    typedef std::string connection_name_type;
+
     // each node corresponds to the particle having same idx in a system.
     struct node
     {
@@ -36,6 +40,9 @@ class StructureTopology
     StructureTopology& operator=(StructureTopology&&)      = default;
 
     StructureTopology(const std::size_t N): nodes_(N){};
+
+    bool        empty() const noexcept {return nodes_.empty();}
+    std::size_t size()  const noexcept {return nodes_.size();}
 
     void resize(const std::size_t N) {nodes_.resize(N); return;}
 
