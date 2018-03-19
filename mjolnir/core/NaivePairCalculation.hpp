@@ -47,6 +47,8 @@ class NaivePairCalculation
     void update(const system_type& sys) noexcept {return;}
     void update(const system_type& sys, const real_type dt) noexcept {return;}
 
+    void set_cutoff(const real_type) noexcept {return;}
+
     index_array const& partners(std::size_t i) const noexcept {return partners_[i];}
 
   private:
