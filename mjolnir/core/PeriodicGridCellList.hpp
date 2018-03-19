@@ -74,6 +74,7 @@ class PeriodicGridCellList
     real_type cutoff() const {return this->cutoff_;}
     real_type mergin() const {return this->mergin_;}
 
+    // after calling this, neighbor list should be reconstructed!
     void set_cutoff(const real_type c);
     void set_mergin(const real_type m);
 
@@ -255,7 +256,9 @@ template<typename traitsT>
 inline void PeriodicGridCellList<traitsT>::set_cutoff(const real_type c)
 {
     this->cutoff_ = c;
-    this->inv_cell_size_ = 1. / (cutoff_ * (1. + mergin_) + mesh_epsilon);
+    this->r_x_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
+    this->r_y_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
+    this->r_z_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
     return;
 }
 
@@ -263,7 +266,9 @@ template<typename traitsT>
 inline void PeriodicGridCellList<traitsT>::set_mergin(const real_type m)
 {
     this->mergin_ = m;
-    this->inv_cell_size_ = 1. / (cutoff_ * (1. + mergin_) + mesh_epsilon);
+    this->r_x_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
+    this->r_y_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
+    this->r_z_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
     return;
 }
 
