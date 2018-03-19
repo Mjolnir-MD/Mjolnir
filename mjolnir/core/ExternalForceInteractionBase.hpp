@@ -1,12 +1,12 @@
-#ifndef MJOLNIR_EXTERNAL_INTEARACTION_BASE
-#define MJOLNIR_EXTERNAL_INTEARACTION_BASE
+#ifndef MJOLNIR_EXTERNAL_FORCE_INTEARACTION_BASE
+#define MJOLNIR_EXTERNAL_FORCE_INTEARACTION_BASE
 #include <mjolnir/core/System.hpp>
 
 namespace mjolnir
 {
 
 template<typename traitsT>
-class ExternalInteractionBase
+class ExternalForceInteractionBase
 {
   public:
 
@@ -19,7 +19,7 @@ class ExternalInteractionBase
 
   public:
 
-    virtual ~ExternalInteractionBase() = default;
+    virtual ~ExternalForceInteractionBase() = default;
 
     virtual void initialize(const system_type& sys, const real_type dt) = 0;
     virtual void update    (const system_type& sys, const real_type dt) = 0;
@@ -31,4 +31,4 @@ class ExternalInteractionBase
 };
 
 } // mjolnir
-#endif/* MJOLNIR_GLOBAL_INTEARACTION_BASE */
+#endif/* MJOLNIR_EXTERNAL_FORCE_INTEARACTION_BASE */

@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_EXTERNAL_FORCE_FIELD
 #define MJOLNIR_EXTERNAL_FORCE_FIELD
-#include "ExternalForceInteractionBase.hpp"
+#include <mjolnir/core/ExternalForceInteractionBase.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <utility>
 #include <vector>
@@ -19,7 +19,7 @@ class ExternalForceField
     typedef typename traits_type::coordinate_type   coordinate_type;
     typedef System<traits_type>                     system_type;
     typedef typename system_type::particle_type     particle_type;
-    typedef ExternalInteractionBase<traitsT>        interaction_type;
+    typedef ExternalForceInteractionBase<traitsT>   interaction_type;
     typedef std::unique_ptr<interaction_type>       interaction_ptr;
     typedef std::vector<interaction_ptr>            container_type;
     typedef typename container_type::iterator       iterator;
