@@ -29,15 +29,23 @@ class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
         : potential_(std::move(pot)), partition_(std::move(part))
     {}
 
+    /*! @brief initialize spatial partition (e.g. CellList)                   *
+     *  @details before calling `calc_(force|energy)`, this should be called. */
     void initialize(const system_type& sys, const real_type dt) override
     {
         this->partition_.initialize(sys);
         this->partition_.update(sys);
     }
 
+    /*! @brief update parameters (e.g. dt, temperature, ionic strength, ...)  *
+     *  @details A method that change system parameters (e.g. Annealing),     *
+     *           the method is bound to call this function after changing     *
+     *           parameters.                                                  */
     void update(const system_type& sys, const real_type dt) override
     {
         this->potential_.update(sys);
+        // potential update may change the cutoff length!
+        this->partition_.set_cutoff(potential_.max_cutoff_length());
         this->partition_.update(sys);
     }
 
@@ -57,7 +65,6 @@ template<typename traitsT, typename potT, typename spaceT>
 void GlobalDistanceInteraction<traitsT, potT, spaceT>::calc_force(
         system_type& sys)
 {
-    potential_.update(sys);
     partition_.update(sys);
     for(std::size_t i=0; i<sys.size(); ++i)
     {
