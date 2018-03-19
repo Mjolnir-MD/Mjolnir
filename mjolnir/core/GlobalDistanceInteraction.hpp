@@ -65,7 +65,7 @@ template<typename traitsT, typename potT, typename spaceT>
 void GlobalDistanceInteraction<traitsT, potT, spaceT>::calc_force(
         system_type& sys)
 {
-    partition_.update(sys);
+    partition_.update(sys); // reduce mergin and reconstruct pair-list if needed
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         for(auto j : this->partition_.partners(i))
@@ -74,6 +74,8 @@ void GlobalDistanceInteraction<traitsT, potT, spaceT>::calc_force(
                 sys.adjust_direction(sys[j].position - sys[i].position);
             const real_type l = length(rij);
             const real_type f_mag = potential_.derivative(i, j, l);
+
+            // if length exceeds cutoff, potential returns just 0.
             if(f_mag == 0.0){continue;}
 
             const coordinate_type f = rij * (f_mag / l);
