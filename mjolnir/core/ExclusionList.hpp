@@ -85,7 +85,7 @@ class ExclusionList
         // make ignored_particle_idxs
         // excluded_connection := pair{connection kind, distance}
         {
-            const auto& excluded_connection = pot.excluded_connections();
+            const auto& excluded_connection = pot.ignored_connections();
             std::size_t idx = 0;
             for(std::size_t i=0; i<N; ++i)
             {
