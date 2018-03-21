@@ -21,6 +21,11 @@ class ExcludedVolumePotential
     typedef real_type parameter_type;
     typedef std::vector<parameter_type> container_type;
 
+    // topology stuff
+    typedef StructureTopology topology_type;
+    typedef typename topology_type::group_id_type        group_id_type;
+    typedef typename topology_type::connection_name_type connection_name_type;
+
     // rc = 2.0 * sigma
     constexpr static real_type cutoff_ratio = 2.0;
 
@@ -75,6 +80,22 @@ class ExcludedVolumePotential
         return 2 * max_sigma * cutoff_ratio;
     }
 
+    // e.g. {"bond", 3} means ignore particles connected within 3 "bond"s
+    std::vector<std::pair<connection_name_type, std::size_t>>&
+    ignored_connections()       noexcept {return this->ignored_connections_;};
+    std::vector<std::pair<connection_name_type, std::size_t>> const&
+    ignored_connections() const noexcept {return this->ignored_connections_;};
+
+    bool is_ignored_group(const group_id_type& i, const group_id_type& j) const
+    {
+        if     (this->ignored_group_.empty())     {return false;}
+        else if(this->ignored_group_ == "self")   {return i == j;}
+        else if(this->ignored_group_ == "others") {return i != j;}
+
+        throw std::runtime_error(
+                "unknown group ignoration option: " + this->ignored_group_);
+    }
+
     std::string name() const noexcept {return "ExcludedVolume";}
 
     // access to the parameters
@@ -87,6 +108,9 @@ class ExcludedVolumePotential
 
     real_type epsilon_;
     std::vector<parameter_type> radii_;
+
+    std::string ignored_group_;
+    std::vector<std::pair<connection_name_type, std::size_t>> ignored_connections_;
 };
 
 template<typename traitsT>
