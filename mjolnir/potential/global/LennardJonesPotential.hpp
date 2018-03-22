@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_LENNARD_JONES_POTENTIAL
 #define MJOLNIR_LENNARD_JONES_POTENTIAL
 #include <mjolnir/core/System.hpp>
+#include <mjolnir/potential/global/GroupIgnoration.hpp>
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -12,7 +13,7 @@ namespace mjolnir
  * designed for global force field. so it doesn't have its own parameters. *
  * V(r)  =  4. * epsilon * ((r/sigma)^12 - (r/sigma)^6))                   *
  * dV/dr = 24. * epsilon / r * ((r/sigma)^6 - 2 * (r/sigma)^12)            */
-template<typename traitsT>
+template<typename traitsT, template<typename GID> class GroupIgnoration>
 class LennardJonesPotential
 {
   public:
@@ -20,6 +21,12 @@ class LennardJonesPotential
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef std::pair<real_type, real_type> parameter_type;
+
+    // topology stuff
+    typedef StructureTopology topology_type;
+    typedef typename topology_type::group_id_type        group_id_type;
+    typedef typename topology_type::connection_name_type connection_name_type;
+    typedef GroupIgnoration<group_id_type> group_ignoration_type;
 
     // rc = 2.5 * sigma
     constexpr static real_type cutoff_ratio = 2.5;
@@ -80,6 +87,18 @@ class LennardJonesPotential
     // nothing to do when system parameters change.
     void update(const System<traitsT>& sys) const noexcept {return;}
 
+    // e.g. {"bond", 3} means ignore particles connected within 3 "bond"s
+    std::vector<std::pair<connection_name_type, std::size_t>>&
+    ignored_connections()       noexcept {return this->ignored_connections_;};
+    std::vector<std::pair<connection_name_type, std::size_t>> const&
+    ignored_connections() const noexcept {return this->ignored_connections_;};
+
+    bool is_ignored_group(const group_id_type& i, const group_id_type& j
+                          ) const noexcept
+    {
+        return ignored_group_.is_ignored(i, j);
+    }
+
     std::string name() const noexcept {return "LennardJones";}
 
     // access to the parameters...
@@ -89,10 +108,13 @@ class LennardJonesPotential
   private:
 
     std::vector<parameter_type> radii_;
+
+    group_ignoration_type ignored_group_;
+    std::vector<std::pair<connection_name_type, std::size_t>> ignored_connections_;
 };
-template<typename traitsT>
-constexpr typename LennardJonesPotential<traitsT>::real_type
-LennardJonesPotential<traitsT>::cutoff_ratio;
+template<typename traitsT, template<typename> class ignoreT>
+constexpr typename LennardJonesPotential<traitsT, ignoreT>::real_type
+LennardJonesPotential<traitsT, ignoreT>::cutoff_ratio;
 
 } // mjolnir
 #endif /* MJOLNIR_LENNARD_JONES_POTENTIAL */

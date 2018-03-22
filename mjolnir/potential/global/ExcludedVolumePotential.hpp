@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
 #define MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
 #include <mjolnir/core/System.hpp>
+#include <mjolnir/potential/global/GroupIgnoration.hpp>
 #include <algorithm>
 #include <cmath>
 
@@ -10,7 +11,7 @@ namespace mjolnir
 /*! @brief excluded volume potential        *
  *  V(r) = epsilon * (sigma/r)^12           *
  * dV/dr = -12 * epsilon * (sigma/r)^12 / r */
-template<typename traitsT>
+template<typename traitsT, template<typename GID> class GroupIgnoration>
 class ExcludedVolumePotential
 {
   public:
@@ -25,6 +26,7 @@ class ExcludedVolumePotential
     typedef StructureTopology topology_type;
     typedef typename topology_type::group_id_type        group_id_type;
     typedef typename topology_type::connection_name_type connection_name_type;
+    typedef GroupIgnoration<group_id_type> group_ignoration_type;
 
     // rc = 2.0 * sigma
     constexpr static real_type cutoff_ratio = 2.0;
@@ -86,14 +88,10 @@ class ExcludedVolumePotential
     std::vector<std::pair<connection_name_type, std::size_t>> const&
     ignored_connections() const noexcept {return this->ignored_connections_;};
 
-    bool is_ignored_group(const group_id_type& i, const group_id_type& j) const
+    bool is_ignored_group(const group_id_type& i, const group_id_type& j
+                          ) const noexcept
     {
-        if     (this->ignored_group_.empty())     {return false;}
-        else if(this->ignored_group_ == "self")   {return i == j;}
-        else if(this->ignored_group_ == "others") {return i != j;}
-
-        throw std::runtime_error(
-                "unknown group ignoration option: " + this->ignored_group_);
+        return ignored_group_.is_ignored(i, j);
     }
 
     std::string name() const noexcept {return "ExcludedVolume";}
@@ -109,13 +107,13 @@ class ExcludedVolumePotential
     real_type epsilon_;
     std::vector<parameter_type> radii_;
 
-    std::string ignored_group_;
+    group_ignoration_type ignored_group_;
     std::vector<std::pair<connection_name_type, std::size_t>> ignored_connections_;
 };
 
-template<typename traitsT>
-constexpr typename ExcludedVolumePotential<traitsT>::real_type
-ExcludedVolumePotential<traitsT>::cutoff_ratio;
+template<typename traitsT, template<typename> class ignoreT>
+constexpr typename ExcludedVolumePotential<traitsT, ignoreT>::real_type
+ExcludedVolumePotential<traitsT, ignoreT>::cutoff_ratio;
 
 } // mjolnir
 #endif /* MJOLNIR_EXCLUDED_VOLUME_POTENTIAL */

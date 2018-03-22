@@ -2,13 +2,14 @@
 #define MJOLNIR_DEBYE_HUCKEL_POTENTIAL
 #include <mjolnir/core/constants.hpp>
 #include <mjolnir/core/System.hpp>
+#include <mjolnir/potential/global/GroupIgnoration.hpp>
 #include <vector>
 #include <cmath>
 
 namespace mjolnir
 {
 
-template<typename traitsT>
+template<typename traitsT, template<typename GID> class GroupIgnoration>
 class DebyeHuckelPotential
 {
   public:
@@ -17,6 +18,12 @@ class DebyeHuckelPotential
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef real_type parameter_type;
     typedef std::vector<parameter_type> container_type;
+
+    // topology stuff
+    typedef StructureTopology topology_type;
+    typedef typename topology_type::group_id_type        group_id_type;
+    typedef typename topology_type::connection_name_type connection_name_type;
+    typedef GroupIgnoration<group_id_type> group_ignoration_type;
 
     // r_cutoff = cutoff_ratio * debye_length
     constexpr static real_type cutoff_ratio = 5.5;
@@ -71,6 +78,18 @@ class DebyeHuckelPotential
         return;
     }
 
+    // e.g. {"bond", 3} means ignore particles connected within 3 "bond"s
+    std::vector<std::pair<connection_name_type, std::size_t>>&
+    ignored_connections()       noexcept {return this->ignored_connections_;}
+    std::vector<std::pair<connection_name_type, std::size_t>> const&
+    ignored_connections() const noexcept {return this->ignored_connections_;}
+
+    bool is_ignored_group(const group_id_type& i, const group_id_type& j
+                          ) const noexcept
+    {
+        return ignored_group_.is_ignored(i, j);
+    }
+
     std::string name() const noexcept {return "DebyeHuckel";}
 
     // access to the parameters
@@ -115,11 +134,14 @@ class DebyeHuckelPotential
     real_type debye_length_;
     real_type inv_debye_length_;
     container_type charges_;
+
+    group_ignoration_type ignored_group_;
+    std::vector<std::pair<connection_name_type, std::size_t>> ignored_connections_;
 };
 
-template<typename traitsT>
-constexpr typename DebyeHuckelPotential<traitsT>::real_type
-DebyeHuckelPotential<traitsT>::cutoff_ratio;
+template<typename traitsT, template<typename> class ignoreT>
+constexpr typename DebyeHuckelPotential<traitsT, ignoreT>::real_type
+DebyeHuckelPotential<traitsT, ignoreT>::cutoff_ratio;
 
 } // mjolnir
 #endif /* MJOLNIR_DEBYE_HUCKEL_POTENTIAL */
