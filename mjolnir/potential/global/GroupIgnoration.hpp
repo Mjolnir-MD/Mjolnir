@@ -18,6 +18,7 @@ struct IgnoreNothing final : public GroupIgnorationBase<group_idT>
 {
     typedef GroupIgnorationBase<group_idT> base_type;
     typedef typename base_type::group_id_type group_id_type;
+    IgnoreNothing() = default;
     ~IgnoreNothing() override = default;
     bool is_ignored(const group_id_type& i, const group_id_type& j
                     ) const noexcept override
@@ -31,6 +32,7 @@ struct IgnoreSelf final : public GroupIgnorationBase<group_idT>
 {
     typedef GroupIgnorationBase<group_idT> base_type;
     typedef typename base_type::group_id_type group_id_type;
+    IgnoreSelf() = default;
     ~IgnoreSelf() override = default;
     bool is_ignored(const group_id_type& i, const group_id_type& j
                     ) const noexcept override
@@ -44,6 +46,7 @@ struct IgnoreOthers final : public GroupIgnorationBase<group_idT>
 {
     typedef GroupIgnorationBase<group_idT> base_type;
     typedef typename base_type::group_id_type group_id_type;
+    IgnoreOthers() = default;
     ~IgnoreOthers() override = default;
     bool is_ignored(const group_id_type& i, const group_id_type& j
                     ) const noexcept override
