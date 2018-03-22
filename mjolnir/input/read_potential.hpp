@@ -195,8 +195,8 @@ read_flexible_local_dihedral_potential(const toml::Table& local)
     return retval;
 }
 
-template<typename traitsT>
-ExcludedVolumePotential<traitsT>
+template<typename traitsT, template<typename> class ignoreT>
+ExcludedVolumePotential<traitsT, ignoreT>
 read_excluded_volume_potential(const toml::Table& global)
 {
     typedef typename traitsT::real_type real_type;
@@ -218,11 +218,11 @@ read_excluded_volume_potential(const toml::Table& global)
                 toml_value_at(tab, "sigma", "<anonymous> in parameters"));
     }
 
-    return ExcludedVolumePotential<traitsT>(eps, std::move(params));
+    return ExcludedVolumePotential<traitsT, ignoreT>(eps, std::move(params));
 }
 
-template<typename traitsT>
-LennardJonesPotential<traitsT>
+template<typename traitsT, template<typename> class ignoreT>
+LennardJonesPotential<traitsT, ignoreT>
 read_lennard_jones_potential(const toml::Table& global)
 {
     typedef typename traitsT::real_type real_type;
@@ -247,11 +247,11 @@ read_lennard_jones_potential(const toml::Table& global)
                 toml_value_at(tab, "epsilon", "<anonymous> in parameters")));
     }
 
-    return LennardJonesPotential<traitsT>(std::move(params));
+    return LennardJonesPotential<traitsT, ignoreT>(std::move(params));
 }
 
-template<typename traitsT>
-DebyeHuckelPotential<traitsT>
+template<typename traitsT, template<typename> class ignoreT>
+DebyeHuckelPotential<traitsT, ignoreT>
 read_debye_huckel_potential(const toml::Table& global)
 {
     typedef typename traitsT::real_type real_type;
@@ -267,7 +267,7 @@ read_debye_huckel_potential(const toml::Table& global)
         params.at(idx) = toml::get<real_type>(tab.at("charge"));
     }
 
-    return DebyeHuckelPotential<traitsT>(std::move(params));
+    return DebyeHuckelPotential<traitsT, ignoreT>(std::move(params));
 }
 
 template<typename traitsT>

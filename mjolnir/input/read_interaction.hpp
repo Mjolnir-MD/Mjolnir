@@ -107,7 +107,7 @@ read_dihedral_angle_interaction(const toml::Table& local)
     }
 }
 
-template<typename traitsT>
+template<typename traitsT, template<typename> class ignoreT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_global_distance_interaction(const toml::Table& global)
 {
@@ -116,20 +116,20 @@ read_global_distance_interaction(const toml::Table& global)
     if(potential == "ExcludedVolume")
     {
         return read_spatial_partition_for_distance<
-            traitsT, ExcludedVolumePotential<traitsT>>(
-		global, read_excluded_volume_potential<traitsT>(global));
+            traitsT, ExcludedVolumePotential<traitsT, ignoreT>>(global,
+                read_excluded_volume_potential<traitsT, ignoreT>(global));
     }
     else if(potential == "DebyeHuckel")
     {
         return read_spatial_partition_for_distance<
-            traitsT, DebyeHuckelPotential<traitsT>>(
-		global, read_debye_huckel_potential<traitsT>(global));
+            traitsT, DebyeHuckelPotential<traitsT, ignoreT>>(global,
+		        read_debye_huckel_potential<traitsT, ignoreT>(global));
     }
     else if(potential == "LennardJones")
     {
         return read_spatial_partition_for_distance<
-            traitsT, LennardJonesPotential<traitsT>>(
-		global, read_lennard_jones_potential<traitsT>(global));
+            traitsT, LennardJonesPotential<traitsT, ignoreT>>(global,
+                read_lennard_jones_potential<traitsT, ignoreT>(global));
     }
     else
     {
@@ -186,9 +186,30 @@ read_global_interaction(const toml::Table& global)
 {
     const auto interaction = toml::get<std::string>(
             toml_value_at(global, "interaction", "[forcefields.global]"));
+    const auto ignored_group = toml::get<std::string>(
+            toml_value_at(global, "ignored_group", "[forcefields.global]"));
     if(interaction == "Distance")
     {
-        return read_global_distance_interaction<traitsT>(global);
+        if(ignored_group == "Nothing")
+        {
+            return read_global_distance_interaction<
+                traitsT, IgnoreNothing>(global);
+        }
+        else if(ignored_group == "Self")
+        {
+            return read_global_distance_interaction<
+                traitsT, IgnoreSelf>(global);
+        }
+        else if(ignored_group == "Others")
+        {
+            return read_global_distance_interaction<
+                traitsT, IgnoreOthers>(global);
+        }
+        else
+        {
+            throw std::runtime_error(
+                    "invalid `ignored_group`: " + ignored_group);
+        }
     }
     else if(interaction == "External")
     {
