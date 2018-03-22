@@ -675,6 +675,7 @@ parameters = [
 [[forcefields.global]]
 interaction = "Distance"
 potential = "ExcludedVolume"
+ignored_group = "Nothing"
 spatial_partition = {type = "CellList", mergin = 1.0}
 epsilon = 0.2
 # params{{{
