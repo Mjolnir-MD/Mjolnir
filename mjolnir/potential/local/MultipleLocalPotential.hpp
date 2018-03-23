@@ -37,6 +37,11 @@ class MultipleLocalPotential
 
     void update(const system_type&, const real_type) const noexcept {return;}
 
+    std::string name() const
+    {
+        return collect_names<0, multiplicity>::invoke(this->potentials_);
+    }
+
   private:
 
     template<std::size_t I, std::size_t N>
@@ -79,9 +84,41 @@ class MultipleLocalPotential
         }
     };
 
+    template<std::size_t I, std::size_t N>
+    struct collect_names
+    {
+        static std::string
+        invoke(const std::tuple<Ts<traits_type>...>& pots)
+        {
+            return std::string(":") + std::string(std::get<I>(pots).name()) +
+                   accumurate_potentials<I+1, N>::invoke(pots);
+        }
+    };
+    template<std::size_t N>
+    struct collect_names<0, N>
+    {
+        static std::string
+        invoke(const std::tuple<Ts<traits_type>...>& pots)
+        {
+            return std::string(std::get<I>(pots).name()) +
+                   accumurate_potentials<I+1, N>::invoke(pots);
+        }
+    };
+    template<std::size_t N>
+    struct collect_names<N, N>
+    {
+        static std::string
+        invoke(const std::tuple<Ts<traits_type>...>& pots)
+        {
+            return "";
+        }
+    };
+
   private:
     std::tuple<Ts<traits_type>...> potentials_;
 };
+template<typename traitsT, template<typename>class ... Ts>
+constexpr std::size_t MultipleLocalPotential<traitsT, Ts...>::multiplicity;
 
-}
+} // mjolnir
 #endif//MJOLNIR_MULTIPLE_LOCAL_POTENTIAL
