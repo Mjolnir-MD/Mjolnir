@@ -57,7 +57,7 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
     void append(std::unique_ptr<LocalInteractionBase<traitsT>>&& other) override;
 
     std::string name() const override
-    {return "DihedralAngle:" + potentials.front().second.name();}
+    {return "DihedralAngle:" + std::string(potentials.front().second.name());}
 
    private:
     container_type potentials;
