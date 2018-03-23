@@ -10,13 +10,15 @@
 #include <mjolnir/core/StructureTopology.hpp>
 #include <cstdint>
 
+typedef mjolnir::StructureTopology::connection_kind_type kind_t;
+
 BOOST_AUTO_TEST_CASE(topology_list_adjacent_is_unique)
 {
     std::size_t N = 100;
     mjolnir::StructureTopology top(N);
     for(std::size_t i=0; i<N-1; ++i)
     {
-        top.add_connection(i, i+1, "bond");
+        top.add_connection(i, i+1, kind_t::bond);
     }
 
     for(std::size_t i=0; i<N; ++i)
@@ -34,7 +36,7 @@ BOOST_AUTO_TEST_CASE(topology_list_within)
     mjolnir::StructureTopology top(100);
     for(std::size_t i=0; i<N-1; ++i)
     {
-        top.add_connection(i, i+1, "bond");
+        top.add_connection(i, i+1, kind_t::bond);
     }
 
     for(std::size_t i=0; i<N; ++i)
@@ -54,7 +56,7 @@ BOOST_AUTO_TEST_CASE(topology_list_within)
             BOOST_CHECK_EQUAL(adj3.size(), 7);
         }
 
-        const auto adj_b3 = top.list_adjacent_within(i, 3, "bond");
+        const auto adj_b3 = top.list_adjacent_within(i, 3, kind_t::bond);
         BOOST_CHECK_EQUAL(adj3.size(), adj_b3.size());
 
         if(adj3.size() == adj_b3.size())
@@ -64,7 +66,7 @@ BOOST_AUTO_TEST_CASE(topology_list_within)
             BOOST_CHECK(adj3_is_equal_to_adj_b3);
         }
 
-        const auto adj_c3 = top.list_adjacent_within(i, 3, "different");
+        const auto adj_c3 = top.list_adjacent_within(i, 3, kind_t::contact);
         BOOST_CHECK_EQUAL(adj_c3.size(), 1);
         if(!adj_c3.empty())
         {
@@ -79,16 +81,16 @@ BOOST_AUTO_TEST_CASE(topology_contacts_list_within)
     mjolnir::StructureTopology top(100);
     for(std::size_t i=0; i<N-1; ++i)
     {
-        top.add_connection(i, i+1, "bond");
+        top.add_connection(i, i+1, kind_t::bond);
     }
     for(std::size_t i=0; i<N-4; ++i)
     {
-        top.add_connection(i, i+4, "contact");
+        top.add_connection(i, i+4, kind_t::contact);
     }
 
     for(std::size_t i=0; i<N; ++i)
     {
-        const auto adj3 = top.list_adjacent_within(i, 3, "bond");
+        const auto adj3 = top.list_adjacent_within(i, 3, kind_t::bond);
         for(const auto t : adj3)
         {
             BOOST_CHECK(0 <= t && t < N);
@@ -105,29 +107,29 @@ BOOST_AUTO_TEST_CASE(topology_contacts_list_within)
     }
     for(std::size_t i=0; i<N; ++i)
     {
-        const auto bd = top.list_adjacent_within(i, 1, "bond");
+        const auto bd = top.list_adjacent_within(i, 1, kind_t::bond);
 
         for(const auto a : bd)
         {
             BOOST_CHECK((top.has_connection(i, a)));
-            BOOST_CHECK(a == i ||  (top.has_connection(i, a, "bond")));
-            BOOST_CHECK(a == i || !(top.has_connection(i, a, "contact")));
+            BOOST_CHECK(a == i ||  (top.has_connection(i, a, kind_t::bond)));
+            BOOST_CHECK(a == i || !(top.has_connection(i, a, kind_t::contact)));
         }
 
-        const auto ct = top.list_adjacent_within(i, 1, "contact");
+        const auto ct = top.list_adjacent_within(i, 1, kind_t::contact);
         for(const auto a : ct)
         {
             BOOST_CHECK((top.has_connection(i, a)));
-            BOOST_CHECK(a == i || !(top.has_connection(i, a, "bond")));
-            BOOST_CHECK(a == i ||  (top.has_connection(i, a, "contact")));
+            BOOST_CHECK(a == i || !(top.has_connection(i, a, kind_t::bond)));
+            BOOST_CHECK(a == i ||  (top.has_connection(i, a, kind_t::contact)));
         }
 
         const auto all = top.list_adjacent_within(i, 1);
         for(const auto a : all)
         {
             BOOST_CHECK((top.has_connection(i, a)));
-            BOOST_CHECK(a == i || (top.has_connection(i, a, "bond")) ||
-                                  (top.has_connection(i, a, "contact")));
+            BOOST_CHECK(a == i || (top.has_connection(i, a, kind_t::bond)) ||
+                                  (top.has_connection(i, a, kind_t::contact)));
         }
     }
 }
@@ -139,7 +141,7 @@ BOOST_AUTO_TEST_CASE(topology_consistency_has_connection_and_list_within)
     mjolnir::StructureTopology top(N);
     for(std::size_t i=0; i<N-1; ++i)
     {
-        top.add_connection(i, i+1, "bond");
+        top.add_connection(i, i+1, kind_t::bond);
     }
 
     for(std::size_t i=0; i<N; ++i)
@@ -159,7 +161,7 @@ BOOST_AUTO_TEST_CASE(topology_erase_connection)
     mjolnir::StructureTopology top(N);
     for(std::size_t i=0; i<N-1; ++i)
     {
-        top.add_connection(i, i+1, "bond");
+        top.add_connection(i, i+1, kind_t::bond);
     }
 
     for(std::size_t i=0; i<N-1; ++i)
