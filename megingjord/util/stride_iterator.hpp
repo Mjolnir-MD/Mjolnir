@@ -5,161 +5,107 @@
 namespace megingjord
 {
 
-template<typename iterT, typename containerT, std::size_t strideN>
+template<typename Iterator, std::size_t Stride>
 struct stride_iterator
 {
-    typedef iterT iterator_type;
-    typedef std::iterator_traits<iterator_type> traits;
-    typedef typename traits::difference_type    difference_type;
-    typedef typename traits::value_type         value_type;
-    typedef typename traits::pointer            pointer;
-    typedef typename traits::reference          reference;
-    typedef typename traits::iterator_category  iterator_category;
-    constexpr static std::size_t stride = strideN;
+    typedef Iterator iterator_type;
+    static constexpr std::size_t stride = Stride;
+
+    typedef std::iterator_traits<iterator_type>    traits;
+    typedef typename traits::difference_type       difference_type;
+    typedef typename traits::value_type            value_type;
+    typedef typename traits::pointer               pointer;
+    typedef typename traits::reference             reference;
+    typedef typename traits::iterator_category     iterator_category;
+    typedef stride_iterator<iterator_type, stride> self_type;
 
     static_assert(std::is_same<iterator_category,
                                std::random_access_iterator_tag>::value,
                   "stride_iterator takes only random access iterator");
 
-    iterator_type value;
+    stride_iterator() = default;
+    ~stride_iterator() = default;
+    stride_iterator(stride_iterator const&) = default;
+    stride_iterator(stride_iterator&&)      = default;
+    stride_iterator& operator=(stride_iterator const&) = default;
+    stride_iterator& operator=(stride_iterator&&)      = default;
 
-    stride_iterator() noexcept : value(iterator_type()){}
-    stride_iterator(iterator_type iter) noexcept : value(iter){}
+    stride_iterator(const iterator_type iter) noexcept : base_(iter){}
 
-    reference operator*()  const noexcept {return *value;}
-    pointer   operator->() const noexcept {return value;}
-    reference operator[](difference_type n) const noexcept;
+    reference operator* () const noexcept {return base_.operator*();}
+    pointer   operator->() const noexcept {return base_.operator->();}
+    reference operator[](difference_type n) const noexcept {return base_[n];}
 
-    iterator_type raw() const noexcept {return value;}
+    self_type& operator++()    noexcept {this->base_ += stride; return *this;}
+    self_type& operator--()    noexcept {this->base_ -= stride; return *this;}
+    self_type  operator++(int) noexcept
+    {const auto tmp = *this; ++(*this); return tmp;}
+    self_type  operator--(int) noexcept
+    {const auto tmp = *this; --(*this); return tmp;}
 
-    stride_iterator& operator++()    noexcept;
-    stride_iterator  operator++(int) noexcept;
-    stride_iterator& operator--()    noexcept;
-    stride_iterator  operator--(int) noexcept;
+    stride_iterator& operator+=(const difference_type d) noexcept
+    {this->base_ += d * stride; return *this;}
+    stride_iterator& operator-=(const difference_type d) noexcept
+    {this->base_ -= d * stride; return *this;}
 
-    stride_iterator& operator+=(std::size_t d) noexcept;
-    stride_iterator& operator-=(std::size_t d) noexcept;
-    stride_iterator  operator+(std::size_t d) noexcept;
-    stride_iterator  operator-(std::size_t d) noexcept;
+    stride_iterator operator+(const difference_type d) const noexcept;
+    {auto tmp = *this; tmp += d; return tmp;}
+    stride_iterator operator-(const difference_type d) const noexcept;
+    {auto tmp = *this; tmp -= d; return tmp;}
+
+    differnce_type operator-(const self_type rhs) const noexcept;
+    {return *this - rhs;}
+
+    iterator_type const& base() const noexcept {return base_;}
+
+  private:
+
+    iterator_type base_;
 };
 
-template<typename ptrT, typename ctrT, std::size_t S>
-inline typename stride_iterator<ptrT, ctrT, S>::reference
-stride_iterator<ptrT, ctrT, S>::operator[](difference_type n) const noexcept
+template<typename I, std::size_t S>
+constexpr std::size_t stride_iterator<I, S>::stride;
+
+template<typename I, std::size_t S>
+inline bool operator==(const stride_iterator<I, S>& lhs,
+                       const stride_iterator<I, S>& rhs) noexcept
 {
-    return *(value + n);
+    return lhs.base() == rhs.base();
 }
 
-template<typename ptrT, typename ctrT, std::size_t S>
-inline stride_iterator<ptrT, ctrT, S>&
-stride_iterator<ptrT, ctrT, S>::operator++() noexcept
+template<typename I, std::size_t S>
+inline bool operator!=(const stride_iterator<I, S>& lhs,
+                       const stride_iterator<I, S>& rhs) noexcept
 {
-    value += stride;
-    return *this;
+    return lhs.base() != rhs.base();
 }
 
-template<typename ptrT, typename ctrT, std::size_t S>
-inline stride_iterator<ptrT, ctrT, S>
-stride_iterator<ptrT, ctrT, S>::operator++(int) noexcept
+template<typename I, std::size_t S>
+inline bool operator<(const stride_iterator<I, S>& lhs,
+                      const stride_iterator<I, S>& rhs) noexcept
 {
-    stride_iterator tmp(value);
-    value += stride;
-    return tmp;
+    return lhs.base() < rhs.base();
 }
 
-template<typename ptrT, typename ctrT, std::size_t S>
-inline stride_iterator<ptrT, ctrT, S>&
-stride_iterator<ptrT, ctrT, S>::operator--() noexcept
+template<typename I, std::size_t S>
+inline bool operator<=(const stride_iterator<I, S>& lhs,
+                       const stride_iterator<I, S>& rhs) noexcept
 {
-    value -= stride;
-    return *this;
+    return lhs.base() <= rhs.base();
 }
 
-template<typename ptrT, typename ctrT, std::size_t S>
-inline stride_iterator<ptrT, ctrT, S>
-stride_iterator<ptrT, ctrT, S>::operator--(int) noexcept
+template<typename I, std::size_t S>
+inline bool operator>(const stride_iterator<I, S>& lhs,
+                      const stride_iterator<I, S>& rhs) noexcept
 {
-    stride_iterator tmp(value);
-    value -= stride;
-    return tmp;
+    return lhs.base() > rhs.base();
 }
 
-template<typename ptrT, typename ctrT, std::size_t S>
-inline stride_iterator<ptrT, ctrT, S>&
-stride_iterator<ptrT, ctrT, S>::operator+=(std::size_t d) noexcept
+template<typename I, std::size_t S>
+inline bool operator>=(const stride_iterator<I, S>& lhs,
+                       const stride_iterator<I, S>& rhs) noexcept
 {
-    value += stride * d;
-    return *this;
-}
-
-template<typename ptrT, typename ctrT, std::size_t S>
-inline stride_iterator<ptrT, ctrT, S>&
-stride_iterator<ptrT, ctrT, S>::operator-=(std::size_t d) noexcept
-{
-    value -= stride * d;
-    return *this;
-}
-
-template<typename ptrT, typename ctrT, std::size_t S>
-inline stride_iterator<ptrT, ctrT, S>
-stride_iterator<ptrT, ctrT, S>::operator+(std::size_t d) noexcept
-{
-    return stride_iterator(value + stride * d);
-}
-
-template<typename ptrT, typename ctrT, std::size_t S>
-inline stride_iterator<ptrT, ctrT, S>
-stride_iterator<ptrT, ctrT, S>::operator-(std::size_t d) noexcept
-{
-    return stride_iterator(value - stride * d);
-}
-
-template<typename ptrT, typename ctrT, std::size_t S>
-inline bool
-operator==(const stride_iterator<ptrT, ctrT, S>& lhs,
-           const stride_iterator<ptrT, ctrT, S>& rhs) noexcept
-{
-    return lhs.value == rhs.value;
-}
-
-template<typename ptrT, typename ctrT, std::size_t S>
-inline bool
-operator!=(const stride_iterator<ptrT, ctrT, S>& lhs,
-           const stride_iterator<ptrT, ctrT, S>& rhs) noexcept
-{
-    return lhs.value != rhs.value;
-}
-
-template<typename ptrT, typename ctrT, std::size_t S>
-inline bool
-operator<(const stride_iterator<ptrT, ctrT, S>& lhs,
-          const stride_iterator<ptrT, ctrT, S>& rhs) noexcept
-{
-    return lhs.value < rhs.value;
-}
-
-template<typename ptrT, typename ctrT, std::size_t S>
-inline bool
-operator<=(const stride_iterator<ptrT, ctrT, S>& lhs,
-           const stride_iterator<ptrT, ctrT, S>& rhs) noexcept
-{
-    return lhs.value <= rhs.value;
-}
-
-template<typename ptrT, typename ctrT, std::size_t S>
-inline bool
-operator>(const stride_iterator<ptrT, ctrT, S>& lhs,
-          const stride_iterator<ptrT, ctrT, S>& rhs) noexcept
-{
-    return lhs.value > rhs.value;
-}
-
-template<typename ptrT, typename ctrT, std::size_t S>
-inline bool
-operator>=(const stride_iterator<ptrT, ctrT, S>& lhs,
-           const stride_iterator<ptrT, ctrT, S>& rhs) noexcept
-{
-    return lhs.value >= rhs.value;
+    return lhs.base() >= rhs.base();
 }
 
 } // megingjord
