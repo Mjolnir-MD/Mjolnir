@@ -86,7 +86,7 @@ class FlexibleLocalAnglePotential
     }
 
     void update(const system_type&, const real_type) const noexcept {return;}
-    std::string name() const noexcept {return "FlexibleLocalAngle";}
+    const char* name() const noexcept {return "FlexibleLocalAngle";}
 
   private:
 

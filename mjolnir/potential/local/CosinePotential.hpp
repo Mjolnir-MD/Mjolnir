@@ -36,7 +36,7 @@ class CosinePotential
     }
 
     void update(const system_type&, const real_type) const noexcept {return;}
-    std::string name() const noexcept {return "Cosine";}
+    const char* name() const noexcept {return "Cosine";}
 
   private:
 

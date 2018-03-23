@@ -45,7 +45,7 @@ class ClementiDihedralPotential
 
     void update(const system_type&, const real_type) const noexcept {return;}
 
-    std::string name() const noexcept {return "ClementiDihedral";}
+    const char* name() const noexcept {return "ClementiDihedral";}
 
   private:
 

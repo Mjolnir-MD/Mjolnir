@@ -78,7 +78,7 @@ class FlexibleLocalDihedralPotential
 
     void update(const system_type&, const real_type) const noexcept {return;}
 
-    std::string name() const noexcept {return "FlexibleLocalDihedral";}
+    const char* name() const noexcept {return "FlexibleLocalDihedral";}
 
   private:
     real_type min_energy;
