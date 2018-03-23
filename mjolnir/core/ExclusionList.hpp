@@ -14,6 +14,7 @@ class ExclusionList
   public:
     typedef StructureTopology topology_type;
     typedef topology_type::group_id_type group_id_type;
+    typedef topology_type::connection_kind_type connection_kind_type;
 
   public:
 
@@ -29,14 +30,11 @@ class ExclusionList
      *  @param j particle id */
     bool is_excluded(const std::size_t i, const std::size_t j) const
     {
-        const group_id_type i_grp = this->group_ids_[i];
-        const group_id_type j_grp = this->group_ids_[j];
-
-        for(const auto ignoring_grp : this->ignored_grp_of(i_grp))
+        for(const auto& ignoring_grp : this->ignored_grp_of(this->group_ids_[i]))
         {
-            if(ignoring_grp == j_grp) {return true;}
+            if(ignoring_grp == this->group_ids_[j]) {return true;}
         }
-        for(const auto ignoring_idx : this->ignored_idxs_of(i))
+        for(const auto& ignoring_idx : this->ignored_idxs_of(i))
         {
             if(ignoring_idx == j) {return true;}
         }
@@ -85,18 +83,23 @@ class ExclusionList
         // make ignored_particle_idxs
         // excluded_connection := pair{connection kind, distance}
         {
-            const auto& excluded_connection = pot.ignored_connections();
             std::size_t idx = 0;
             for(std::size_t i=0; i<N; ++i)
             {
                 const std::size_t first = idx;
-                for(const auto& connection_kind : excluded_connection)
                 {
-                    const auto&       name = connection_kind.first;
-                    const std::size_t dist = connection_kind.second;
-
-                    for(const auto j :
-                            topol.list_adjacent_within(i, dist, name))
+                    const std::size_t dist = pot.ignored_bonds();
+                    for(const auto j : topol.list_adjacent_within(
+                                i, dist, connection_kind_type::bond))
+                    {
+                        this->ignored_idxs_.push_back(j);
+                        ++idx;
+                    }
+                }
+                {
+                    const std::size_t dist = pot.ignored_contacts();
+                    for(const auto j : topol.list_adjacent_within(
+                                i, dist, connection_kind_type::contact))
                     {
                         this->ignored_idxs_.push_back(j);
                         ++idx;
