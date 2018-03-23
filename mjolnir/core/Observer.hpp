@@ -24,19 +24,20 @@ class Observer
         : interval_(interval), observe_count_(0),
           xyz_name_(xyz), ene_name_(ene)
     {
+        // clear the contents
         {
-            std::ofstream ofs(xyz);
+            std::ofstream ofs(this->xyz_name_);
             if(not ofs.good())
             {
-                throw std::invalid_argument("file open error: " + xyz);
+                throw std::runtime_error("file open error: " + this->xyz_name_);
             }
             ofs.close();
         }
         {
-            std::ofstream ofs(ene);
+            std::ofstream ofs(this->ene_name_);
             if(not ofs.good())
             {
-                throw std::invalid_argument("file open error: " + ene);
+                throw std::runtime_error("file open error: " + this->ene_name_);
             }
             ofs.close();
         }
@@ -52,6 +53,13 @@ class Observer
             return true;
         }
         return false;
+    }
+
+    void initialize(const system_type& sys, const forcefield_type& ff) const
+    {
+        std::ofstream ofs(this->ene_name_, std::ios::app);
+        ofs << '#' << ff.list_energy_name() << "kinetic energy\n";
+        return;
     }
 
     void output(const real_type time, const system_type& sys,
@@ -92,9 +100,7 @@ inline void Observer<traitsT>::output(
     }
     ofs.close();
 
-    // TODO separate energy terms
     ofs.open(ene_name_, std::ios::app);
-    ofs << ff.list_energy_name() << "kinetic energy\n";
     ofs << time << ' ' << ff.dump_energy(sys) << ' '
         << this->calc_kinetic_energy(sys) << '\n';
     ofs.close();

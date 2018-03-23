@@ -57,6 +57,8 @@ inline void MDSimulator<traitsT, integratorT>::initialize()
 {
     this->ff_.initialize(this->system_, integrator_.delta_t());
     this->integrator_.initialize(this->system_, this->ff_);
+
+    observer_.initialize(this->system_, this->ff_);
     observer_.output(0., this->system_, this->ff_);
     return;
 }
