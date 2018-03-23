@@ -25,7 +25,7 @@ class LennardJonesPotential
     // topology stuff
     typedef StructureTopology topology_type;
     typedef typename topology_type::group_id_type        group_id_type;
-    typedef typename topology_type::connection_name_type connection_name_type;
+    typedef typename topology_type::connection_kind_type connection_kind_type;
     typedef GroupIgnoration<group_id_type> group_ignoration_type;
 
     // rc = 2.5 * sigma
@@ -87,11 +87,11 @@ class LennardJonesPotential
     // nothing to do when system parameters change.
     void update(const System<traitsT>& sys) const noexcept {return;}
 
-    // e.g. {"bond", 3} means ignore particles connected within 3 "bond"s
-    std::vector<std::pair<connection_name_type, std::size_t>>&
-    ignored_connections()       noexcept {return this->ignored_connections_;};
-    std::vector<std::pair<connection_name_type, std::size_t>> const&
-    ignored_connections() const noexcept {return this->ignored_connections_;};
+    // e.g. `3` means ignore particles connected within 3 "bond"s
+    std::size_t  ignored_bonds()    const noexcept {return ignored_bonds_;}
+    std::size_t& ignored_bonds()          noexcept {return ignored_bonds_;}
+    std::size_t  ignored_contacts() const noexcept {return ignored_contacts_;}
+    std::size_t& ignored_contacts()       noexcept {return ignored_contacts_;}
 
     bool is_ignored_group(const group_id_type& i, const group_id_type& j
                           ) const noexcept
@@ -110,7 +110,8 @@ class LennardJonesPotential
     std::vector<parameter_type> radii_;
 
     group_ignoration_type ignored_group_;
-    std::vector<std::pair<connection_name_type, std::size_t>> ignored_connections_;
+    std::size_t ignored_bonds_;
+    std::size_t ignored_contacts_;
 };
 template<typename traitsT, template<typename> class ignoreT>
 constexpr typename LennardJonesPotential<traitsT, ignoreT>::real_type
