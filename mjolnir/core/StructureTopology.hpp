@@ -329,7 +329,7 @@ StructureTopology::list_adjacent_within(
 }
 
 inline void
-StructureTopology::construct_chain()
+StructureTopology::construct_chains()
 {
     if(this->nodes_.empty()){return;}
     for(auto& node : nodes_)
