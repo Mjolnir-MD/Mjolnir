@@ -60,18 +60,11 @@ class Plane
     {
         const auto& topol = sys.topology();
 
-        // update group ids
-        this->group_id_.clear();
-        this->group_id_.resize(sys.size());
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            this->group_id_[i] = topol.group_of(i);
-        }
-
         // update potential parameter
-        this->ignored_groups_ = pot.ignored_group();    // these functions are
-        this->exclusion_      = pot.ignored_particle(); // required by External
-        this->cutoff_         = pot.cutoff_length();    // Potential Concept.
+        this->exclusion_ = pot.ignored_particle(); // these are required by
+        this->cutoff_    = pot.cutoff_length();    // ExternalPotential concept.
+        // to use binary_search in this->make(), firstly sort this list.
+        std::sort(this->exclusion_.begin(), this->exclusion_.end());
 
         // reconstruct neighbor list
         this->make(sys);
@@ -84,10 +77,8 @@ class Plane
         const real_type threshold = cutoff_ * (1 + mergin_);
         for(std::size_t i=0; i<sys.size(); ++i)
         {
-            if(std::find(ignored_groups_.cbegin(), ignored_groups_.cend(),
-                         group_id_[i]) != ignored_groups_.cend()) {continue;}
-            if(std::find(exclusion_.cbegin(), exclusion_.cend(), i) !=
-                         exclusion_.cend()) {continue;}
+            if(std::binary_search(exclusion_.cbegin(), exclusion_.cend(), i))
+            {continue;}
 
             const real_type dist =
                 this->calc_distance(sys[i].position, sys.boundary());
@@ -129,8 +120,6 @@ class Plane
     real_type cutoff_, mergin_, current_mergin_;
     std::vector<std::size_t> neighbors_; // particle that interacts with
     std::vector<std::size_t> exclusion_; // particle that should be ignored
-    std::vector<std::size_t> group_id_;  // group id of particle (same as topol)
-    std::vector<std::size_t> ignored_groups_; // same as pot.ignored_group()
 };
 
 } // mjolnir
