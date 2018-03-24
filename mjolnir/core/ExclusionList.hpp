@@ -13,7 +13,7 @@ class ExclusionList
 {
   public:
     typedef StructureTopology topology_type;
-    typedef topology_type::group_id_type group_id_type;
+    typedef topology_type::chain_id_type chain_id_type;
     typedef topology_type::connection_kind_type connection_kind_type;
 
   public:
@@ -30,9 +30,10 @@ class ExclusionList
      *  @param j particle id */
     bool is_excluded(const std::size_t i, const std::size_t j) const
     {
-        for(const auto& ignoring_grp : this->ignored_grp_of(this->group_ids_[i]))
+        // assuming both list is enough small (< 20 or so)
+        for(const auto& ignoring_chn : this->ignored_chn_of(this->chain_ids_[i]))
         {
-            if(ignoring_grp == this->group_ids_[j]) {return true;}
+            if(ignoring_chn == this->chain_ids_[j]) {return true;}
         }
         for(const auto& ignoring_idx : this->ignored_idxs_of(i))
         {
@@ -47,36 +48,29 @@ class ExclusionList
         const auto& topol = sys.topology();
         const std::size_t N = sys.size();
 
-        // copy group ids from topol to this
-        std::vector<group_id_type> group_kind;
-        this->group_ids_.resize(N);
+        // copy chain_ids from topol to this
+        const std::size_t Nchain = topol.number_of_chains();
+        this->chain_ids_.resize(N);
         for(std::size_t i=0; i<N; ++i)
         {
-            const auto grp = topol.group_of(i);
-            this->group_ids_[i] = grp;
-
-            if(std::find(group_kind.begin(), group_kind.end(), grp) ==
-                    group_kind.end())
-            {
-                group_kind.push_back(grp);
-            }
+            this->chain_ids_[i] = topol.chain_of(i);
         }
 
-        // make ignored_group_idxs
+        // make ignored_chain_idxs
         {
             std::size_t idx = 0;
-            for(std::size_t i=0; i<group_kind.size(); ++i)
+            for(std::size_t i=0; i<Nchain; ++i)
             {
                 const std::size_t first = idx;
-                for(std::size_t j=0; j<group_kind.size(); ++j)
+                for(std::size_t j=0; j<Nchain; ++j)
                 {
-                    if(pot.is_ignored_group(i, j))
+                    if(pot.is_ignored_chain(i, j))
                     {
-                        this->ignored_grps_.push_back(i);
+                        this->ignored_chns_.push_back(i);
                         ++idx;
                     }
                 }
-                this->grp_ranges_.emplace_back(first, idx);
+                this->chn_ranges_.emplace_back(first, idx);
             }
         }
 
@@ -122,20 +116,21 @@ class ExclusionList
         };
     }
     range<typename std::vector<std::size_t>::const_iterator>
-    ignored_grp_of(const std::size_t i) const noexcept
+    ignored_chn_of(const std::size_t i) const noexcept
     {
         return range_type{
-            this->ignored_grps_.begin() + this->grp_ranges_[i].first,
-            this->ignored_grps_.begin() + this->grp_ranges_[i].second
+            this->ignored_chns_.begin() + this->chn_ranges_[i].first,
+            this->ignored_chns_.begin() + this->chn_ranges_[i].second
         };
     }
 
   private:
 
-    std::vector<group_id_type> group_ids_; // same as {topol.nodes_.group_id};
+    std::vector<chain_id_type> chain_ids_; // same as {topol.nodes_.chain_id};
 
-    std::vector<std::size_t> ignored_grps_;
-    std::vector<std::pair<std::size_t, std::size_t>> grp_ranges_;
+    // ignored chains...
+    std::vector<std::size_t> ignored_chns_;
+    std::vector<std::pair<std::size_t, std::size_t>> chn_ranges_;
 
     std::vector<std::size_t> ignored_idxs_;
     std::vector<std::pair<std::size_t, std::size_t>> idx_ranges_;
