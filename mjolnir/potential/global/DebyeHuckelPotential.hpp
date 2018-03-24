@@ -140,7 +140,7 @@ class DebyeHuckelPotential
     std::size_t ignored_contacts_;
 };
 
-template<typename traitsT, template<typename> class ignoreT>
+template<typename traitsT, typename ignoreT>
 constexpr typename DebyeHuckelPotential<traitsT, ignoreT>::real_type
 DebyeHuckelPotential<traitsT, ignoreT>::cutoff_ratio;
 

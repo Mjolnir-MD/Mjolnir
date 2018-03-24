@@ -113,7 +113,7 @@ class LennardJonesPotential
     std::size_t ignored_bonds_;
     std::size_t ignored_contacts_;
 };
-template<typename traitsT, template<typename> class ignoreT>
+template<typename traitsT, typename ignoreT>
 constexpr typename LennardJonesPotential<traitsT, ignoreT>::real_type
 LennardJonesPotential<traitsT, ignoreT>::cutoff_ratio;
 

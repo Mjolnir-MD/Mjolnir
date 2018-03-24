@@ -112,7 +112,7 @@ class ExcludedVolumePotential
     std::size_t ignored_contacts_;
 };
 
-template<typename traitsT, template<typename> class ignoreT>
+template<typename traitsT, typename ignoreT>
 constexpr typename ExcludedVolumePotential<traitsT, ignoreT>::real_type
 ExcludedVolumePotential<traitsT, ignoreT>::cutoff_ratio;
 
