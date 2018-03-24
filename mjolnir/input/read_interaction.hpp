@@ -107,7 +107,7 @@ read_dihedral_angle_interaction(const toml::Table& local)
     }
 }
 
-template<typename traitsT, template<typename> class ignoreT>
+template<typename traitsT, typename ignoreT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_global_distance_interaction(const toml::Table& global)
 {
@@ -186,21 +186,21 @@ read_global_interaction(const toml::Table& global)
 {
     const auto interaction = toml::get<std::string>(
             toml_value_at(global, "interaction", "[forcefields.global]"));
-    const auto ignored_group = toml::get<std::string>(
-            toml_value_at(global, "ignored_group", "[forcefields.global]"));
+    const auto ignored_chain = toml::get<std::string>(
+            toml_value_at(global, "ignored_chain", "[forcefields.global]"));
     if(interaction == "Distance")
     {
-        if(ignored_group == "Nothing")
+        if(ignored_chain == "Nothing")
         {
             return read_global_distance_interaction<
                 traitsT, IgnoreNothing>(global);
         }
-        else if(ignored_group == "Self")
+        else if(ignored_chain == "Self")
         {
             return read_global_distance_interaction<
                 traitsT, IgnoreSelf>(global);
         }
-        else if(ignored_group == "Others")
+        else if(ignored_chain == "Others")
         {
             return read_global_distance_interaction<
                 traitsT, IgnoreOthers>(global);
@@ -208,7 +208,7 @@ read_global_interaction(const toml::Table& global)
         else
         {
             throw std::runtime_error(
-                    "invalid `ignored_group`: " + ignored_group);
+                    "invalid `ignored_chain`: " + ignored_chain);
         }
     }
     else if(interaction == "External")

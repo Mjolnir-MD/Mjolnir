@@ -195,7 +195,7 @@ read_flexible_local_dihedral_potential(const toml::Table& local)
     return retval;
 }
 
-template<typename traitsT, template<typename> class ignoreT>
+template<typename traitsT, typename ignoreT>
 ExcludedVolumePotential<traitsT, ignoreT>
 read_excluded_volume_potential(const toml::Table& global)
 {
@@ -221,7 +221,7 @@ read_excluded_volume_potential(const toml::Table& global)
     return ExcludedVolumePotential<traitsT, ignoreT>(eps, std::move(params));
 }
 
-template<typename traitsT, template<typename> class ignoreT>
+template<typename traitsT, typename ignoreT>
 LennardJonesPotential<traitsT, ignoreT>
 read_lennard_jones_potential(const toml::Table& global)
 {
@@ -250,7 +250,7 @@ read_lennard_jones_potential(const toml::Table& global)
     return LennardJonesPotential<traitsT, ignoreT>(std::move(params));
 }
 
-template<typename traitsT, template<typename> class ignoreT>
+template<typename traitsT, typename ignoreT>
 DebyeHuckelPotential<traitsT, ignoreT>
 read_debye_huckel_potential(const toml::Table& global)
 {
