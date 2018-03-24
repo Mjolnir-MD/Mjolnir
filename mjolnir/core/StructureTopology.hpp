@@ -12,24 +12,29 @@ class StructureTopology
 {
   public:
 
-    typedef std::size_t group_id_type;
+    typedef std::size_t chain_id_type;
     enum class connection_kind_type
     {
-        bond,    //! define chains
-        contact, //! does not have effect on the definition of chain
+        bond,    //! define chain
+        contact, //! does not have effect on the chain (nonbonded contact)
     };
+
+    static constexpr chain_id_type uninitialized() noexcept
+    {
+        return std::numeric_limits<chain_id_type>::max();
+    }
 
     // each node corresponds to the particle having same idx in a system.
     struct node
     {
-        node(): group_id(std::numeric_limits<std::size_t>::max()) {}
+        node(): chain_id(uninitialized()) {}
         ~node() = default;
         node(node const&) = default;
         node(node&&)      = default;
         node& operator=(node const&) = default;
         node& operator=(node&&)      = default;
 
-        std::size_t group_id;
+        std::size_t chain_id;
         std::vector<std::pair<std::size_t, connection_kind_type>> adjacents;
     };
 
@@ -56,6 +61,9 @@ class StructureTopology
     void erase_connection(const std::size_t i, const std::size_t j,
                           const connection_kind_type kind);
 
+    //! reset chain_id of all the particles
+    void construct_chains();
+
     bool has_connection(const std::size_t i, const std::size_t j);
     bool has_connection(const std::size_t i, const std::size_t j,
                         const connection_kind_type kind);
@@ -67,10 +75,12 @@ class StructureTopology
     list_adjacent_within(const std::size_t node_idx, const std::size_t dist,
                          const connection_kind_type kind) const;
 
-    std::size_t  group_of(const std::size_t idx) const
-    {return nodes_.at(idx).group_id;}
-    std::size_t& group_of(const std::size_t idx)
-    {return nodes_.at(idx).group_id;}
+    chain_id_type number_of_chains() const noexcept {return this->num_chains_;}
+
+    chain_id_type  chain_of(const std::size_t idx) const
+    {return nodes_.at(idx).chain_id;}
+    chain_id_type& chain_of(const std::size_t idx)
+    {return nodes_.at(idx).chain_id;}
 
   private:
     void
@@ -81,6 +91,7 @@ class StructureTopology
                          const connection_kind_type kind, std::vector<std::size_t>& out
                          ) const;
   private:
+    std::size_t  num_chains_;
     std::vector<node> nodes_;
 };
 
@@ -314,6 +325,36 @@ StructureTopology::list_adjacent_within(
         out.push_back(ik.first);
         this->list_adjacent_within(ik.first, dist-1, kind, out);
     }
+    return;
+}
+
+inline void
+StructureTopology::construct_chain()
+{
+    if(this->nodes_.empty()){return;}
+    for(auto& node : nodes_)
+    {
+        node.chain_id = uninitialized();
+    }
+
+    std::size_t next_chain_id = 0;
+    for(auto& node : nodes_)
+    {
+//         node.chain_id = uninitialized(); // already set as `uninit`
+        for(const auto& edge : node.adjacents)
+        {
+            if(edge.second == connection_kind_type::contact) {continue;}
+
+            node.chain_id = this->nodes_.at(edge.first).chain_id;
+            if(node.chain_id != uninitialized()) {break;}
+        }
+        if(node.chain_id == uninitialized())
+        {
+            node.chain_id = next_chain_id++;
+        }
+    }
+
+    this->num_chains_ = ++next_chain_id;
     return;
 }
 
