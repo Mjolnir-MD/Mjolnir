@@ -31,13 +31,17 @@ class ExclusionList
     bool is_excluded(const std::size_t i, const std::size_t j) const
     {
         // assuming both list is enough small (< 20 or so)
+        const auto chain_of_j = this->chain_ids_[j];
         for(const auto& ignoring_chn : this->ignored_chn_of(this->chain_ids_[i]))
         {
-            if(ignoring_chn == this->chain_ids_[j]) {return true;}
+            // already sorted like ignoring_chn = [4,5,6]
+            if     (chain_of_j <  ignoring_chn) {break;}
+            else if(chain_of_j == ignoring_chn) {return true;}
         }
         for(const auto& ignoring_idx : this->ignored_idxs_of(i))
         {
-            if(ignoring_idx == j) {return true;}
+            if     (ignoring_idx >  j) {break;}
+            else if(ignoring_idx == j) {return true;}
         }
         return false;
     }
@@ -70,6 +74,8 @@ class ExclusionList
                         ++idx;
                     }
                 }
+                const auto beg = ignored_chns_.begin();
+                std::sort(beg + first, beg + idx);
                 this->chn_ranges_.emplace_back(first, idx);
             }
         }
@@ -99,6 +105,8 @@ class ExclusionList
                         ++idx;
                     }
                 }
+                const auto beg = ignored_idxs_.begin();
+                std::sort(beg + first, beg + idx);
                 this->idx_ranges_.emplace_back(first, idx);
             }
         }
