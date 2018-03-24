@@ -2,14 +2,14 @@
 #define MJOLNIR_DEBYE_HUCKEL_POTENTIAL
 #include <mjolnir/core/constants.hpp>
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/potential/global/GroupIgnoration.hpp>
+#include <mjolnir/potential/global/ChainIgnoration.hpp>
 #include <vector>
 #include <cmath>
 
 namespace mjolnir
 {
 
-template<typename traitsT, template<typename GID> class GroupIgnoration>
+template<typename traitsT, typename ChainIgnoration>
 class DebyeHuckelPotential
 {
   public:
@@ -21,9 +21,9 @@ class DebyeHuckelPotential
 
     // topology stuff
     typedef StructureTopology topology_type;
-    typedef typename topology_type::group_id_type        group_id_type;
+    typedef typename topology_type::chain_id_type        chain_id_type;
     typedef typename topology_type::connection_kind_type connection_kind_type;
-    typedef GroupIgnoration<group_id_type> group_ignoration_type;
+    typedef ChainIgnoration chain_ignoration_type;
 
     // r_cutoff = cutoff_ratio * debye_length
     constexpr static real_type cutoff_ratio = 5.5;
@@ -84,10 +84,10 @@ class DebyeHuckelPotential
     std::size_t  ignored_contacts() const noexcept {return ignored_contacts_;}
     std::size_t& ignored_contacts()       noexcept {return ignored_contacts_;}
 
-    bool is_ignored_group(
-            const group_id_type& i, const group_id_type& j) const noexcept
+    bool is_ignored_chain(
+            const chain_id_type& i, const chain_id_type& j) const noexcept
     {
-        return ignored_group_.is_ignored(i, j);
+        return ignored_chain_.is_ignored(i, j);
     }
 
     std::string name() const noexcept {return "DebyeHuckel";}
@@ -135,7 +135,7 @@ class DebyeHuckelPotential
     real_type inv_debye_length_;
     container_type charges_;
 
-    group_ignoration_type ignored_group_;
+    chain_ignoration_type ignored_chain_;
     std::size_t ignored_bonds_;
     std::size_t ignored_contacts_;
 };

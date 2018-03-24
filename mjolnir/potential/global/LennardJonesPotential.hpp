@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_LENNARD_JONES_POTENTIAL
 #define MJOLNIR_LENNARD_JONES_POTENTIAL
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/potential/global/GroupIgnoration.hpp>
+#include <mjolnir/potential/global/ChainIgnoration.hpp>
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -13,7 +13,7 @@ namespace mjolnir
  * designed for global force field. so it doesn't have its own parameters. *
  * V(r)  =  4. * epsilon * ((r/sigma)^12 - (r/sigma)^6))                   *
  * dV/dr = 24. * epsilon / r * ((r/sigma)^6 - 2 * (r/sigma)^12)            */
-template<typename traitsT, template<typename GID> class GroupIgnoration>
+template<typename traitsT, typename ChainIgnoration>
 class LennardJonesPotential
 {
   public:
@@ -24,9 +24,9 @@ class LennardJonesPotential
 
     // topology stuff
     typedef StructureTopology topology_type;
-    typedef typename topology_type::group_id_type        group_id_type;
+    typedef typename topology_type::chain_id_type        chain_id_type;
     typedef typename topology_type::connection_kind_type connection_kind_type;
-    typedef GroupIgnoration<group_id_type> group_ignoration_type;
+    typedef ChainIgnoration chain_ignoration_type;
 
     // rc = 2.5 * sigma
     constexpr static real_type cutoff_ratio = 2.5;
@@ -93,10 +93,10 @@ class LennardJonesPotential
     std::size_t  ignored_contacts() const noexcept {return ignored_contacts_;}
     std::size_t& ignored_contacts()       noexcept {return ignored_contacts_;}
 
-    bool is_ignored_group(const group_id_type& i, const group_id_type& j
-                          ) const noexcept
+    bool is_ignored_chain(
+            const chain_id_type& i, const chain_id_type& j) const noexcept
     {
-        return ignored_group_.is_ignored(i, j);
+        return ignored_chain_.is_ignored(i, j);
     }
 
     std::string name() const noexcept {return "LennardJones";}
@@ -109,7 +109,7 @@ class LennardJonesPotential
 
     std::vector<parameter_type> radii_;
 
-    group_ignoration_type ignored_group_;
+    chain_ignoration_type ignored_chain_;
     std::size_t ignored_bonds_;
     std::size_t ignored_contacts_;
 };
