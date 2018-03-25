@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_EXCLUSION_LIST_HPP
 #define MJOLNIR_EXCLUSION_LIST_HPP
+#include <mjolnir/core/System.hpp>
 #include <mjolnir/util/range.hpp>
 #include <algorithm>
 #include <iterator>
@@ -38,7 +39,7 @@ class ExclusionList
             if     (chain_of_j <  ignoring_chn) {break;}
             else if(chain_of_j == ignoring_chn) {return true;}
         }
-        for(const auto& ignoring_idx : this->ignored_idxs_of(i))
+        for(const auto& ignoring_idx : this->ignored_idx_of(i))
         {
             if     (ignoring_idx >  j) {break;}
             else if(ignoring_idx == j) {return true;}
@@ -46,8 +47,8 @@ class ExclusionList
         return false;
     }
 
-    template<typename PotentialT>
-    void make(const System& sys, const PotentialT& pot)
+    template<typename traitsT, typename PotentialT>
+    void make(const System<traitsT>& sys, const PotentialT& pot)
     {
         const auto& topol = sys.topology();
         const std::size_t N = sys.size();
@@ -118,7 +119,7 @@ class ExclusionList
     range<typename std::vector<std::size_t>::const_iterator>
     ignored_idx_of(const std::size_t i) const noexcept
     {
-        return range_type{
+        return range<typename std::vector<std::size_t>::const_iterator>{
             this->ignored_idxs_.begin() + this->idx_ranges_[i].first,
             this->ignored_idxs_.begin() + this->idx_ranges_[i].second
         };
@@ -126,7 +127,7 @@ class ExclusionList
     range<typename std::vector<std::size_t>::const_iterator>
     ignored_chn_of(const std::size_t i) const noexcept
     {
-        return range_type{
+        return range<typename std::vector<std::size_t>::const_iterator>{
             this->ignored_chns_.begin() + this->chn_ranges_[i].first,
             this->ignored_chns_.begin() + this->chn_ranges_[i].second
         };
