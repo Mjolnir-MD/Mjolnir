@@ -61,8 +61,8 @@ class Plane
         const auto& topol = sys.topology();
 
         // update potential parameter
-        this->exclusion_ = pot.ignored_particle(); // these are required by
-        this->cutoff_    = pot.cutoff_length();    // ExternalPotential concept.
+        this->exclusion_ = pot.ignored_particle();  // these are required by
+        this->cutoff_    = pot.max_cutoff_length(); // ExternalPotential concept
         // to use binary_search in this->make(), firstly sort this list.
         std::sort(this->exclusion_.begin(), this->exclusion_.end());
 
