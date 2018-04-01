@@ -17,6 +17,7 @@ class StructureTopology
     {
         bond,    //! define chain
         contact, //! does not have effect on the chain (nonbonded contact)
+        none,    //! none of them, ignored...
     };
 
     static constexpr chain_id_type uninitialized() noexcept
