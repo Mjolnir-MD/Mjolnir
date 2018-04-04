@@ -19,10 +19,10 @@ struct celllist_dispatcher<UnlimitedBoundary<realT, coordT>, traitsT>
 {
     typedef UnlimitedGridCellList<traitsT> type;
     typedef realT real_type;
-    static UnlimitedGridCellList<traitsT>
-    invoke(const real_type cutoff, const real_type mergin)
+
+    static UnlimitedGridCellList<traitsT> invoke(const real_type mergin)
     {
-        return UnlimitedGridCellList<traitsT>{cutoff, mergin};
+        return UnlimitedGridCellList<traitsT>(mergin);
     }
 };
 
@@ -31,43 +31,12 @@ struct celllist_dispatcher<CubicPeriodicBoundary<realT, coordT>, traitsT>
 {
     typedef PeriodicGridCellList<traitsT> type;
     typedef realT real_type;
-    static PeriodicGridCellList<traitsT>
-    invoke(const real_type cutoff, const real_type mergin)
+
+    static PeriodicGridCellList<traitsT> invoke(const real_type mergin)
     {
-        return PeriodicGridCellList<traitsT>{cutoff, mergin};
+        return PeriodicGridCellList<traitsT>(mergin);
     }
 };
-
-template<typename partitionT>
-partitionT
-read_exception_information(const toml::Table& global, partitionT sp)
-{
-    const auto& params = toml_value_at(global, "parameters", "[forcefield.global]"
-            ).cast<toml::value_t::Array>();
-    for(const auto& tab : params)
-    {
-        const auto& info = tab.cast<toml::value_t::Table>();
-        const auto  idx = toml::get<std::size_t>(toml_value_at(
-                    info, "index", "<anonymous> in parameters"));
-        sp.chain_index(idx) = toml::get<std::size_t>(toml_value_at(
-                    info, "chain", "<anonymous> in parameters"));
-
-        for(auto exc : toml::get<std::vector<std::size_t>>(
-                    toml_value_at(info, "except_chains",
-                        "<anonymous> in parameters")))
-        {
-            sp.except_chains(idx).push_back(exc);
-        }
-        for(auto exb : toml::get<std::vector<std::size_t>>(
-                    toml_value_at(info, "except_beads",
-                        "<anonymous> in parameters")))
-        {
-            sp.except_indices(idx).push_back(exb);
-        }
-    }
-    return sp;
-}
-
 
 template<typename traitsT, typename potentialT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
@@ -80,36 +49,33 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
             ).cast<toml::value_t::Table>();
     const auto  type = toml::get<std::string>(
             toml_value_at(sp, "type", "[forcefield.global]"));
+
     if(type == "CellList")
     {
-        typedef typename traitsT::boundary_type boundary_type;
-        typedef typename celllist_dispatcher<boundary_type, traitsT>::type
-                celllist_type;
+        using boundary_type = typename traitsT::boundary_type;
+        using dispatcher    = celllist_dispatcher<boundary_type, traitsT>;
+        using celllist_type = typename dispatcher::type;
 
-        const auto co = pot.max_cutoff_length();
-        const auto mg = toml::get<real_type>(toml_value_at(
-                    sp, "mergin", "[forcefield.global]"));
+        const auto mg = toml::get<real_type>(
+                toml_value_at(sp, "mergin", "[forcefield.global]"));
+
         return make_unique<GlobalDistanceInteraction<
-            traitsT, potentialT, celllist_type>>(std::move(pot),
-                read_exception_information(global,
-                    celllist_dispatcher<boundary_type, traitsT>::invoke(co, mg)));
+            traitsT, potentialT, celllist_type>>(
+                std::move(pot), dispatcher::invoke(mg));
     }
     else if(type == "VerletList")
     {
-        const auto cutoff = pot.max_cutoff_length();
         const auto mergin = toml::get<real_type>(toml_value_at(
                     sp, "mergin", "[forcefield.global]"));
         return make_unique<GlobalDistanceInteraction<
-            traitsT, potentialT, VerletList<traitsT>>>(std::move(pot),
-                read_exception_information(
-                    global, VerletList<traitsT>{cutoff, mergin}));
+            traitsT, potentialT, VerletList<traitsT>>>(
+                std::move(pot), VerletList<traitsT>(mergin));
     }
     else if(type == "Naive")
     {
         return make_unique<GlobalDistanceInteraction<
             traitsT, potentialT, NaivePairCalculation<traitsT>>
-            >(std::move(pot), read_exception_information(
-                    global, NaivePairCalculation<traitsT>{}));
+                >(std::move(pot), NaivePairCalculation<traitsT>());
     }
     else
     {
