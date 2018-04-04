@@ -33,7 +33,7 @@ class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
      *  @details before calling `calc_(force|energy)`, this should be called. */
     void initialize(const system_type& sys, const real_type dt) override
     {
-        this->partition_.initialize(sys);
+        this->partition_.initialize(sys, this->potential_);
         this->partition_.update(sys);
     }
 
@@ -45,8 +45,7 @@ class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
     {
         this->potential_.update(sys);
         // potential update may change the cutoff length!
-        this->partition_.set_cutoff(potential_.max_cutoff_length());
-        this->partition_.update(sys);
+        this->partition_.reconstruct(sys, this->potential_);
     }
 
     void      calc_force (system_type&)             override;
