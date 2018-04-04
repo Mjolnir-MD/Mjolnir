@@ -44,7 +44,7 @@ class VerletList
     {
         this->set_cutoff(pot.max_cutoff_length());
         this->exclusion_.make(sys, pot);
-        this->make();
+        this->make(sys);
         return;
     }
 
