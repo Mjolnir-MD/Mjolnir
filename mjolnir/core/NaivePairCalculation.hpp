@@ -15,17 +15,10 @@ class NaivePairCalculation
     typedef typename traits_type::boundary_type   boundary_type;
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
-    typedef std::vector<std::size_t> index_array;
-    typedef std::vector<index_array> partners_type;
 
-    struct information
-    {
-        information() : chain_idx(std::numeric_limits<std::size_t>::max()){}
-        std::size_t chain_idx;
-        index_array except_chains;
-        index_array except_indices;
-    };
-    typedef std::vector<information> particle_info_type;
+    typedef ExclusionList exclusion_list_type;
+    typedef NeighborList  neighbor_list_type;
+    typedef neighbor_list_type::range_type range_type;
 
   public:
 
@@ -38,49 +31,38 @@ class NaivePairCalculation
 
     bool valid() const noexcept {return true;}
 
-    std::size_t& chain_index   (std::size_t i);
-    index_array& except_indices(std::size_t i);
-    index_array& except_chains (std::size_t i);
+    template<typename PotentialT>
+    void initialize (const system_type& sys, const PotentialT& pot);
 
-    void initialize(const system_type& sys) noexcept {this->make(sys); return;}
+    template<typename PotentialT>
+    void reconstruct(const system_type& sys, const PotentialT& pot)
+    {
+        this->initialize(sys, pot); // do the same thing as `initialize`
+        return;
+    }
+
     void make  (const system_type& sys);
     void update(const system_type& sys) noexcept {return;}
-    void update(const system_type& sys, const real_type dt) noexcept {return;}
 
+    // it does not have cutoff stuff
     void set_cutoff(const real_type) noexcept {return;}
+    void set_mergin(const real_type) noexcept {return;}
 
-    index_array const& partners(std::size_t i) const noexcept {return partners_[i];}
+    range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
 
   private:
 
-    partners_type      partners_;
-    particle_info_type informations_;
+    exclusion_list_type exclusion_;
+    neighbor_list_type  neighbors_;
 };
 
 template<typename traitsT>
-std::size_t& NaivePairCalculation<traitsT>::chain_index(std::size_t i)
+template<typename PotentialT>
+void NaivePairCalculation<traitsT>::initialize(
+        const system_type& sys, const PotentialT& pot)
 {
-    if(this->informations_.size() <= i)
-        this->informations_.resize(i+1);
-    return this->informations_.at(i).chain_idx;
-}
-
-template<typename traitsT>
-typename NaivePairCalculation<traitsT>::index_array&
-NaivePairCalculation<traitsT>::except_indices(std::size_t i)
-{
-    if(this->informations_.size() <= i)
-        this->informations_.resize(i+1);
-    return this->informations_.at(i).except_indices;
-}
-
-template<typename traitsT>
-typename NaivePairCalculation<traitsT>::index_array&
-NaivePairCalculation<traitsT>::except_chains(std::size_t i)
-{
-    if(this->informations_.size() <= i)
-        this->informations_.resize(i+1);
-    return this->informations_.at(i).except_chains;
+    this->exclusion_.make(sys, pot);
+    return;
 }
 
 template<typename traitsT>
@@ -92,24 +74,14 @@ void NaivePairCalculation<traitsT>::make(const system_type& sys)
         partner.clear();
     }
 
-    if(informations_.size() < sys.size())
-    {
-        informations_.resize(sys.size());
-    }
-
     for(std::size_t i=0, sz = sys.size()-1; i < sz; ++i)
     {
-        const auto& info = informations_.at(i);
-        const auto index_begin = info.except_indices.cbegin();
-        const auto index_end   = info.except_indices.cend();
-        const auto chain_begin = info.except_chains.cbegin();
-        const auto chain_end   = info.except_chains.cend();
-
         for(std::size_t j=i+1; j<sys.size(); ++j)
         {
-            const std::size_t j_chain = informations_.at(j).chain_idx;
-            if(std::find(chain_begin, chain_end, j_chain) != chain_end){continue;}
-            if(std::find(index_begin, index_end, j)       != index_end){continue;}
+            if(this->exclusion_.is_excluded(i, j))
+            {
+                continue;
+            }
             this->partners_[i].push_back(j);
         }
     }

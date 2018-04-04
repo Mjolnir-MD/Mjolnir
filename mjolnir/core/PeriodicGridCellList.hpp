@@ -1,6 +1,8 @@
 #ifndef MJOLNIR_PERIODIC_GRID_CELL_LIST
 #define MJOLNIR_PERIODIC_GRID_CELL_LIST
+#include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
+#include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/util/range.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <iostream>
@@ -24,7 +26,8 @@ class PeriodicGridCellList
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
-    typedef NeighborList           neighbor_list_type;
+    typedef ExclusionList exclusion_list_type;
+    typedef NeighborList  neighbor_list_type;
     typedef neighbor_list_type::range_type range_type;
 
     constexpr static real_type mesh_epsilon = 1e-6;
@@ -37,29 +40,19 @@ class PeriodicGridCellList
                       adjacent_cell_idx> cell_type;
     typedef std::vector<cell_type> cell_list_type;
 
-    struct information
-    {
-        information() : chain_idx(std::numeric_limits<std::size_t>::max()){}
-        std::size_t chain_idx;
-        std::vector<std::size_t> except_chains;
-        std::vector<std::size_t> except_indices;
-    };
-    typedef std::vector<information> particle_info_type;
-
   public:
 
-    PeriodicGridCellList() = default;
+    PeriodicGridCellList()
+        : mergin_(1), current_mergin_(-1), r_x_(-1), r_y_(-1), r_z_(-1)
+    {}
     ~PeriodicGridCellList() = default;
     PeriodicGridCellList(PeriodicGridCellList const&) = default;
     PeriodicGridCellList(PeriodicGridCellList &&)     = default;
     PeriodicGridCellList& operator=(PeriodicGridCellList const&) = default;
     PeriodicGridCellList& operator=(PeriodicGridCellList &&)     = default;
 
-    PeriodicGridCellList(const real_type cutoff, const real_type mergin)
-        : cutoff_(cutoff), mergin_(mergin), current_mergin_(-1.),
-          r_x_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon)),
-          r_y_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon)),
-          r_z_(1.0 / (cutoff * (1.0 + mergin) + mesh_epsilon))
+    PeriodicGridCellList(const real_type mergin)
+        : mergin_(mergin), current_mergin_(-1), r_x_(-1), r_y_(-1), r_z_(-1)
     {}
 
     bool valid() const noexcept
@@ -67,7 +60,16 @@ class PeriodicGridCellList
         return current_mergin_ >= 0.0;
     }
 
-    void initialize(const system_type&);
+    template<typename PotentialT>
+    void initialize(const system_type& sys, const PotentialT& pot);
+
+    template<typename PotentialT>
+    void reconstruct(const system_type& sys, const PotentialT& pot)
+    {
+        this->initialize(sys, pot); // do the same thing as `initialize`
+        return;
+    }
+
     void make  (const system_type& sys);
     void update(const system_type& sys);
 
@@ -77,10 +79,6 @@ class PeriodicGridCellList
     // after calling this, neighbor list should be reconstructed!
     void set_cutoff(const real_type c);
     void set_mergin(const real_type m);
-
-    std::size_t& chain_index   (std::size_t i);
-    std::vector<std::size_t>& except_indices(std::size_t i);
-    std::vector<std::size_t>& except_chains (std::size_t i);
 
     range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
 
@@ -113,10 +111,10 @@ class PeriodicGridCellList
     std::size_t dim_z_;
     static Logger& logger_;
 
-    coordinate_type    lower_bound_;
-    neighbor_list_type neighbors_;
-    particle_info_type informations_;
-    cell_list_type     cell_list_;
+    coordinate_type     lower_bound_;
+    neighbor_list_type  neighbors_;
+    exclusion_list_type exclusion_;
+    cell_list_type      cell_list_;
     cell_index_container_type index_by_cell_;
     // index_by_cell_ has {particle idx, cell idx} and sorted by cell idx
     // first term of cell list contains first and last idx of index_by_cell
@@ -127,43 +125,12 @@ Logger& PeriodicGridCellList<traitsT>::logger_ =
         LoggerManager<char>::get_logger("PeriodicGridCellList");
 
 template<typename traitsT>
-std::size_t& PeriodicGridCellList<traitsT>::chain_index(std::size_t i)
-{
-    if(this->informations_.size() <= i)
-        this->informations_.resize(i+1);
-    return this->informations_.at(i).chain_idx;
-}
-
-template<typename traitsT>
-std::vector<std::size_t>&
-PeriodicGridCellList<traitsT>::except_indices(std::size_t i)
-{
-    if(this->informations_.size() <= i)
-        this->informations_.resize(i+1);
-    return this->informations_.at(i).except_indices;
-}
-
-template<typename traitsT>
-std::vector<std::size_t>&
-PeriodicGridCellList<traitsT>::except_chains(std::size_t i)
-{
-    if(this->informations_.size() <= i)
-        this->informations_.resize(i+1);
-    return this->informations_.at(i).except_chains;
-}
-
-template<typename traitsT>
 void PeriodicGridCellList<traitsT>::make(const system_type& sys)
 {
     MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::make CALLED");
 
     neighbors_.clear();
     index_by_cell_.resize(sys.size());
-
-    if(informations_.size() < sys.size())
-    {
-        informations_.resize(sys.size());
-    }
 
     for(std::size_t i=0; i<sys.size(); ++i)
     {
@@ -197,7 +164,6 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
 
     MJOLNIR_LOG_DEBUG("cell list is updated");
 
-    std::vector<std::size_t> tmp;
     const real_type r_c  = cutoff_ * (1. + mergin_);
     const real_type r_c2 = r_c * r_c;
     for(std::size_t i=0; i<sys.size(); ++i)
@@ -209,26 +175,14 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
         MJOLNIR_LOG_DEBUG("making verlet list for index", i);
         MJOLNIR_LOG_DEBUG("except list for ", i, "-th value");
 
-        const auto& info       = informations_[i];
-        const auto index_begin = info.except_indices.cbegin();
-        const auto index_end   = info.except_indices.cend();
-        const auto chain_begin = info.except_chains.cbegin();
-        const auto chain_end   = info.except_chains.cend();
-
-        tmp.clear();
+        std::vector<std::size_t> partner;
         for(std::size_t cidx : cell.second) // for all adjacent cells...
         {
             for(auto pici : cell_list_[cidx].first)
             {
                 const auto j = pici.first;
                 MJOLNIR_LOG_DEBUG("looking particle", j);
-                if(j <= i || std::find(index_begin, index_end, j) != index_end)
-                {
-                    continue;
-                }
-
-                const std::size_t j_chain = informations_.at(j).chain_idx;
-                if(std::find(chain_begin, chain_end, j_chain) != chain_end)
+                if(j <= i || this->exclusion_.is_excluded(i, j))
                 {
                     continue;
                 }
@@ -236,13 +190,13 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
                 if(length_sq(sys.adjust_direction(sys.at(j).position - ri)) < r_c2)
                 {
                     MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
-                    tmp.push_back(j);
+                    partner.push_back(j);
                 }
             }
         }
         // make the result consistent with NaivePairCalculation...
-        std::sort(tmp.begin(), tmp.end());
-        this->neighbors_.add_list_for(i, tmp);
+        std::sort(partner.begin(), partner.end());
+        this->neighbors_.add_list_for(i, partner);
     }
 
     this->current_mergin_ = cutoff_ * mergin_;
@@ -285,9 +239,14 @@ void PeriodicGridCellList<traitsT>::update(const system_type& sys)
 }
 
 template<typename traitsT>
-void PeriodicGridCellList<traitsT>::initialize(const system_type& sys)
+template<typename PotentialT>
+void PeriodicGridCellList<traitsT>::initialize(
+        const system_type& sys, const PotentialT& pot)
 {
     MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::initialize CALLED");
+    this->set_cutoff(pot.max_cutoff_length());
+    this->exclusion_.make(sys, pot);
+
     this->lower_bound_ = sys.boundary().lower_bound();
     const auto system_size = sys.boundary().width();
 
@@ -358,6 +317,7 @@ void PeriodicGridCellList<traitsT>::initialize(const system_type& sys)
             assert(0 <= i && i <= cell_list_.size());
         }
     }
+    this->make(sys);
     MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::initialize end");
     return;
 }
