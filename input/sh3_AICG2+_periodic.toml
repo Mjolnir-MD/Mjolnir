@@ -148,6 +148,7 @@ parameters = [ # {{{
 [[forcefields.local]]
 interaction = "BondLength"
 potential = "Harmonic"
+topology  = "bond"
 # params{{{
 parameters = [
 {indices = [ 0,  1], native = 3.822321, k = 110.4},
@@ -210,6 +211,7 @@ parameters = [
 [[forcefields.local]]
 interaction = "BondLength"
 potential = "Go1012Contact"
+topology  = "contact"
 # params{{{
 parameters = [
 {indices = [ 0, 22], native =  7.2644, k = 0.1600},
@@ -494,6 +496,7 @@ parameters = [
 [[forcefields.local]]
 interaction = "DihedralAngle"
 potential = "AICG2PlusDihedral"
+topology  = "none"
 # params{{{
 parameters = [
 {indices = [ 0,  1,  2,  3], native = -2.208936,   epsilon = -0.4350, w = 0.15},
@@ -554,6 +557,7 @@ parameters = [
 [[forcefields.local]]
 interaction = "BondAngle"
 potential = "FlexibleLocalAngle"
+topology  = "none"
 # params{{{
 parameters = [
 {indices = [ 0,  1,  2], k = 1.0, term1 = [5.0, 1.66, 0.92, 0.99, 0.91, 0.97, 1.01, 1.39, 3.23, 10.0], term2 = [0.0, 125.03,  12.00, -13.47,  12.34,  -8.31,  16.96,   7.43, 240.91, 0.0]},
@@ -615,6 +619,7 @@ parameters = [
 [[forcefields.local]]
 interaction = "DihedralAngle"
 potential = "FlexibleLocalDihedral"
+topology  = "none"
 # params{{{
 parameters = [
 {indices = [ 0,  1,  2,  3], k = 1.0, term = [2.2356,  0.4119, -0.1283,  0.0229, -0.2708, -0.0085, -0.0641]},
@@ -675,7 +680,9 @@ parameters = [
 [[forcefields.global]]
 interaction = "Distance"
 potential = "ExcludedVolume"
-ignored_chain = "Nothing"
+ignored_chain    = "Nothing"
+ignored_bonds    = 3
+ignored_contacts = 1
 spatial_partition = {type = "CellList", mergin = 1.0}
 epsilon = 0.2
 # params{{{
