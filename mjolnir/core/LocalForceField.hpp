@@ -34,23 +34,9 @@ class LocalForceField
     LocalForceField& operator=(LocalForceField const&) = delete;
     LocalForceField& operator=(LocalForceField&&)      = default;
 
-    void append(interaction_ptr&& interaction)
+    void emplace(interaction_ptr&& interaction)
     {
-        //XXX to reduce the number of LocalInteractions
-        bool found = false;
-        for(auto& item : interactions_)
-        {
-            if(typeid(*(item.get())) == typeid(*(interaction.get())))
-            {
-                item->append(std::move(interaction));
-                found = true;
-                break;
-            }
-        }
-        if(not found)
-        {
-            interactions_.emplace_back(std::move(interaction));
-        }
+        interactions_.emplace_back(std::move(interaction));
     }
 
     // to re-calculate parameters like temperature, ionic concentration, etc...

@@ -15,7 +15,7 @@ read_local_forcefield(std::vector<toml::Table> interactions)
     LocalForceField<traitsT> lff;
     for(const auto& interaction : interactions)
     {
-        lff.append(read_local_interaction<traitsT>(interaction));
+        lff.emplace(read_local_interaction<traitsT>(interaction));
     }
     return lff;
 }
@@ -26,8 +26,6 @@ GlobalForceField<traitsT>
 read_global_forcefield(std::vector<toml::Table> interactions)
 {
     GlobalForceField<traitsT> gff;
-    //XXX: TODO?
-    // by using typeid(), merge interactions if the types are same.
     for(const auto& interaction : interactions)
     {
         gff.emplace(read_global_interaction<traitsT>(interaction));
