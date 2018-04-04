@@ -17,6 +17,7 @@ class StructureTopology
     {
         bond,    //! define chain
         contact, //! does not have effect on the chain (nonbonded contact)
+        none,    //! none of them, ignored...
     };
 
     static constexpr chain_id_type uninitialized() noexcept
@@ -27,13 +28,6 @@ class StructureTopology
     // each node corresponds to the particle having same idx in a system.
     struct node
     {
-        node(): chain_id(uninitialized()) {}
-        ~node() = default;
-        node(node const&) = default;
-        node(node&&)      = default;
-        node& operator=(node const&) = default;
-        node& operator=(node&&)      = default;
-
         std::size_t chain_id;
         std::vector<std::pair<std::size_t, connection_kind_type>> adjacents;
     };
@@ -47,8 +41,12 @@ class StructureTopology
     StructureTopology& operator=(const StructureTopology&) = default;
     StructureTopology& operator=(StructureTopology&&)      = default;
 
-    StructureTopology(const std::size_t N): nodes_(N){};
+    StructureTopology(const std::size_t N): nodes_(N)
+    {
+        for(auto& n : this->nodes_) {n.chain_id = uninitialized();}
+    }
 
+    void        clear() {return nodes_.clear();}
     bool        empty() const noexcept {return nodes_.empty();}
     std::size_t size()  const noexcept {return nodes_.size();}
 
