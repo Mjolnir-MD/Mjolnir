@@ -435,6 +435,7 @@ parameters = [
 # AICG2+ angle
 interaction = "BondLength"
 potential = "AICG2PlusAngle"
+topology  = "none"
 # params{{{
 parameters = [
 {indices = [ 0,  2], native = 6.9701, epsilon = -1.3709, w = 0.1500},
