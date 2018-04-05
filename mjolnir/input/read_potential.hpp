@@ -200,7 +200,13 @@ ExcludedVolumePotential<traitsT, ignoreT>
 read_excluded_volume_potential(const toml::Table& global)
 {
     typedef typename traitsT::real_type real_type;
-    real_type eps = toml::get<real_type>(global.at("epsilon"));
+
+    const std::size_t bonds = toml::get<std::size_t>(
+            toml_value_at(global, "ignored_bonds", "[forcefield.global]"));
+    const std::size_t contacts = toml::get<std::size_t>(
+            toml_value_at(global, "ignored_contacts", "[forcefield.global]"));
+    const real_type eps = toml::get<real_type>(global.at("epsilon"));
+
     const auto& ps = toml_value_at(global, "parameters", "[forcefield.global]"
             ).cast<toml::value_t::Array>();
 
@@ -218,7 +224,8 @@ read_excluded_volume_potential(const toml::Table& global)
                 toml_value_at(tab, "sigma", "<anonymous> in parameters"));
     }
 
-    return ExcludedVolumePotential<traitsT, ignoreT>(eps, std::move(params));
+    return ExcludedVolumePotential<traitsT, ignoreT>(
+            eps, std::move(params), bonds, contacts);
 }
 
 template<typename traitsT, typename ignoreT>
@@ -226,6 +233,12 @@ LennardJonesPotential<traitsT, ignoreT>
 read_lennard_jones_potential(const toml::Table& global)
 {
     typedef typename traitsT::real_type real_type;
+
+    const std::size_t bonds = toml::get<std::size_t>(
+            toml_value_at(global, "ignored_bonds", "[forcefield.global]"));
+    const std::size_t contacts = toml::get<std::size_t>(
+            toml_value_at(global, "ignored_contacts", "[forcefield.global]"));
+
     const auto& ps = toml_value_at(global, "parameters", "[forcefield.global]"
             ).cast<toml::value_t::Array>();
 
@@ -247,7 +260,8 @@ read_lennard_jones_potential(const toml::Table& global)
                 toml_value_at(tab, "epsilon", "<anonymous> in parameters")));
     }
 
-    return LennardJonesPotential<traitsT, ignoreT>(std::move(params));
+    return LennardJonesPotential<traitsT, ignoreT>(
+            std::move(params), bonds, contacts);
 }
 
 template<typename traitsT, typename ignoreT>
@@ -255,6 +269,12 @@ DebyeHuckelPotential<traitsT, ignoreT>
 read_debye_huckel_potential(const toml::Table& global)
 {
     typedef typename traitsT::real_type real_type;
+
+    const std::size_t bonds = toml::get<std::size_t>(
+            toml_value_at(global, "ignored_bonds", "[forcefield.global]"));
+    const std::size_t contacts = toml::get<std::size_t>(
+            toml_value_at(global, "ignored_contacts", "[forcefield.global]"));
+
     const auto& ps = global.at("parameters").cast<toml::value_t::Array>();
 
     std::vector<real_type> params; params.reserve(ps.size());
@@ -267,7 +287,8 @@ read_debye_huckel_potential(const toml::Table& global)
         params.at(idx) = toml::get<real_type>(tab.at("charge"));
     }
 
-    return DebyeHuckelPotential<traitsT, ignoreT>(std::move(params));
+    return DebyeHuckelPotential<traitsT, ignoreT>(
+            std::move(params), bonds, contacts);
 }
 
 template<typename traitsT>
