@@ -49,14 +49,13 @@ $ mjolnir input/sh3_AICG2+.toml
 ```
 
 ## Author
-----------
 
 * Toru Niina
   * the original designer and implementer.
 * Yutaka Murata
   * adds implicit membrane potential.
 
-### Licensing terms
+## Licensing terms
 
 This product is licensed under the terms of the [MIT License](LICENSE).
 
