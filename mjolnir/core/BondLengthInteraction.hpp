@@ -21,6 +21,9 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
     typedef typename base_type::coordinate_type coordinate_type;
     typedef typename base_type::system_type     system_type;
     typedef typename base_type::particle_type   particle_type;
+    typedef typename base_type::topology_type   topology_type;
+    typedef typename topology_type::connection_kind_type connection_kind_type;
+
     typedef std::array<std::size_t, 2>          indices_type;
     typedef std::pair<indices_type, potentialT> potential_index_pair;
     typedef std::vector<potential_index_pair>   container_type;
@@ -52,13 +55,16 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
     std::string name() const override
     {return "BondLength:" + std::string(potentials.front().second.name());}
 
+    void write_topology(topology_type&) const override;
+
   private:
+    connection_kind_type kind_;
     container_type potentials;
 };
 
 template<typename traitsT, typename potentialT>
-void
-BondLengthInteraction<traitsT, potentialT>::calc_force(system_type& sys) const noexcept
+void BondLengthInteraction<traitsT, potentialT>::calc_force(
+        system_type& sys) const noexcept
 {
     for(const auto& idxp : this->potentials)
     {
@@ -92,6 +98,21 @@ BondLengthInteraction<traitsT, potentialT>::calc_energy(
                 sys[idxp.first[1]].position - sys[idxp.first[0]].position)));
     }
     return E;
+}
+
+template<typename traitsT, typename potentialT>
+void BondLengthInteraction<traitsT, potentialT>::write_topology(
+        topology_type& topol) const
+{
+    if(this->kind_ == connection_kind_type::none) {return;}
+
+    for(const auto& idxp : this->potentials)
+    {
+        const auto i = idxp.first[0];
+        const auto j = idxp.first[1];
+        topol.add_connection(i, j, this->kind_);
+    }
+    return;
 }
 
 } // mjolnir

@@ -19,6 +19,9 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
     typedef typename base_type::coordinate_type coordinate_type;
     typedef typename base_type::system_type     system_type;
     typedef typename base_type::particle_type   particle_type;
+    typedef typename base_type::topology_type   topology_type;
+    typedef typename topology_type::connection_kind_type connection_kind_type;
+
     typedef std::array<std::size_t, 4>          indices_type;
     typedef std::pair<indices_type, potentialT> potential_index_pair;
     typedef std::vector<potential_index_pair>   container_type;
@@ -50,7 +53,10 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
     std::string name() const override
     {return "DihedralAngle:" + std::string(potentials.front().second.name());}
 
+    void write_topology(topology_type&) const override;
+
    private:
+    connection_kind_type kind_;
     container_type potentials;
 };
 
@@ -149,6 +155,25 @@ DihedralAngleInteraction<traitsT, potentialT>::calc_energy(
         E += idxp.second.potential(phi);
     }
     return E;
+}
+
+template<typename traitsT, typename potentialT>
+void DihedralAngleInteraction<traitsT, potentialT>::write_topology(
+        topology_type& topol) const
+{
+    if(this->kind_ == connection_kind_type::none) {return;}
+
+    for(const auto& idxp : this->potentials)
+    {
+        const auto i = idxp.first[0];
+        const auto j = idxp.first[1];
+        const auto k = idxp.first[2];
+        const auto l = idxp.first[3];
+        topol.add_connection(i, j, this->kind_);
+        topol.add_connection(j, k, this->kind_);
+        topol.add_connection(k, l, this->kind_);
+    }
+    return;
 }
 
 }// mjolnir
