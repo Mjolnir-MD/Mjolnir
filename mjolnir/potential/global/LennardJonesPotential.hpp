@@ -32,15 +32,18 @@ class LennardJonesPotential
     constexpr static real_type cutoff_ratio = 2.5;
 
   public:
-    LennardJonesPotential() = default;
-    LennardJonesPotential(const std::vector<parameter_type>& radii)
-        : radii_(radii)
+
+    LennardJonesPotential(const std::vector<parameter_type>& radii,
+        const std::size_t ex_bonds, const std::size_t ex_contacts)
+        : radii_(radii), ignored_chain_(),
+          ignored_bonds_(ex_bonds), ignored_contacts_(ex_contacts)
     {}
-    LennardJonesPotential(std::vector<parameter_type>&& radii)
-        : radii_(std::forward<std::vector<parameter_type>>(radii))
+    LennardJonesPotential(std::vector<parameter_type>&& radii,
+        const std::size_t ex_bonds, const std::size_t ex_contacts)
+        : radii_(std::move(radii)), ignored_chain_(),
+          ignored_bonds_(ex_bonds), ignored_contacts_(ex_contacts)
     {}
     ~LennardJonesPotential() = default;
-
 
     real_type potential(const std::size_t i, const std::size_t j,
                         const real_type r) const noexcept
@@ -88,10 +91,8 @@ class LennardJonesPotential
     void update(const System<traitsT>& sys) const noexcept {return;}
 
     // e.g. `3` means ignore particles connected within 3 "bond"s
-    std::size_t  ignored_bonds()    const noexcept {return ignored_bonds_;}
-    std::size_t& ignored_bonds()          noexcept {return ignored_bonds_;}
-    std::size_t  ignored_contacts() const noexcept {return ignored_contacts_;}
-    std::size_t& ignored_contacts()       noexcept {return ignored_contacts_;}
+    std::size_t ignored_bonds()    const noexcept {return ignored_bonds_;}
+    std::size_t ignored_contacts() const noexcept {return ignored_contacts_;}
 
     bool is_ignored_chain(
             const chain_id_type& i, const chain_id_type& j) const noexcept

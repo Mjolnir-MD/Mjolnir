@@ -30,15 +30,18 @@ class DebyeHuckelPotential
 
   public:
 
-    DebyeHuckelPotential() = default;
-    DebyeHuckelPotential(const container_type& charges)
-      : charges_(charges), temperature_(300.0), ion_conc_(0.1)
+    DebyeHuckelPotential(const container_type& charges,
+        const std::size_t ex_bonds, const std::size_t ex_contacts)
+      : charges_(charges), temperature_(300.0), ion_conc_(0.1),
+        ignored_bonds_(ex_bonds), ignored_contacts_(ex_contacts)
     {
         // XXX should be updated before use because T and ion conc are default!
         this->calc_parameters();
     }
-    DebyeHuckelPotential(container_type&& charges)
-      : charges_(std::move(charges)), temperature_(300.0), ion_conc_(0.1)
+    DebyeHuckelPotential(container_type&& charges,
+        const std::size_t ex_bonds, const std::size_t ex_contacts)
+      : charges_(std::move(charges)), temperature_(300.0), ion_conc_(0.1),
+        ignored_bonds_(ex_bonds), ignored_contacts_(ex_contacts)
     {
         // XXX should be updated before use because T and ion conc are default!
         this->calc_parameters();
@@ -79,10 +82,8 @@ class DebyeHuckelPotential
     }
 
     // e.g. {"bond", 3} means ignore particles connected within 3 "bond"s
-    std::size_t  ignored_bonds()    const noexcept {return ignored_bonds_;}
-    std::size_t& ignored_bonds()          noexcept {return ignored_bonds_;}
-    std::size_t  ignored_contacts() const noexcept {return ignored_contacts_;}
-    std::size_t& ignored_contacts()       noexcept {return ignored_contacts_;}
+    std::size_t ignored_bonds()    const noexcept {return ignored_bonds_;}
+    std::size_t ignored_contacts() const noexcept {return ignored_contacts_;}
 
     bool is_ignored_chain(
             const chain_id_type& i, const chain_id_type& j) const noexcept

@@ -33,11 +33,15 @@ class ExcludedVolumePotential
 
   public:
 
-    ExcludedVolumePotential(const real_type eps, const container_type& params)
-        : epsilon_(eps), radii_(params)
+    ExcludedVolumePotential(const real_type eps, const container_type& params,
+        const std::size_t ex_bonds, const std::size_t ex_contacts)
+        : epsilon_(eps), radii_(params), ignored_chain_(),
+          ignored_bonds_(ex_bonds), ignored_contacts_(ex_contacts)
     {}
-    ExcludedVolumePotential(const real_type eps, container_type&& params)
-        : epsilon_(eps), radii_(std::move(params))
+    ExcludedVolumePotential(const real_type eps, container_type&& params,
+        const std::size_t ex_bonds, const std::size_t ex_contacts)
+        : epsilon_(eps), radii_(std::move(params)), ignored_chain_(),
+          ignored_bonds_(ex_bonds), ignored_contacts_(ex_contacts)
     {}
     ~ExcludedVolumePotential() = default;
 
@@ -58,6 +62,7 @@ class ExcludedVolumePotential
         const real_type dr12 = dr6 * dr6;
         return this->epsilon_ * dr12;
     }
+
     real_type derivative(const std::size_t i, const std::size_t j,
                          const real_type r) const noexcept
     {
@@ -83,10 +88,8 @@ class ExcludedVolumePotential
     }
 
     // e.g. {"bond", 3} means ignore particles connected within 3 "bond"s
-    std::size_t  ignored_bonds()    const noexcept {return ignored_bonds_;}
-    std::size_t& ignored_bonds()          noexcept {return ignored_bonds_;}
-    std::size_t  ignored_contacts() const noexcept {return ignored_contacts_;}
-    std::size_t& ignored_contacts()       noexcept {return ignored_contacts_;}
+    std::size_t ignored_bonds()    const noexcept {return ignored_bonds_;}
+    std::size_t ignored_contacts() const noexcept {return ignored_contacts_;}
 
     bool is_ignored_chain(
             const chain_id_type& i, const chain_id_type& j) const noexcept
