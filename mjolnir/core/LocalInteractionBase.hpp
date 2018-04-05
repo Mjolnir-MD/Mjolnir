@@ -18,6 +18,7 @@ class LocalInteractionBase
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef typename traits_type::boundary_type   boundary_type;
     typedef typename system_type::particle_type   particle_type;
+    typedef typename system_type::topology_type   topology_type;
 
   public:
 
@@ -30,6 +31,7 @@ class LocalInteractionBase
     virtual real_type calc_energy(const system_type&) const noexcept = 0;
 
     virtual std::string name() const = 0;
+    virtual void write_topology(topology_type&) const = 0;
 };
 
 } // mjolnir
