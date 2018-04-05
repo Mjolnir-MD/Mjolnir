@@ -54,7 +54,6 @@ class ExclusionList
         const std::size_t N = sys.size();
 
         // copy chain_ids from topol to this
-        const std::size_t Nchain = topol.number_of_chains();
         this->chain_ids_.resize(N);
         for(std::size_t i=0; i<N; ++i)
         {
@@ -63,6 +62,7 @@ class ExclusionList
 
         // make ignored_chain_idxs
         {
+            const std::size_t Nchain = topol.number_of_chains();
             std::size_t idx = 0;
             for(std::size_t i=0; i<Nchain; ++i)
             {
