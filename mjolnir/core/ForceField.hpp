@@ -38,8 +38,13 @@ class ForceField
     ForceField& operator=(const ForceField&) = delete;
     ForceField& operator=(ForceField&&)      = default;
 
-    void initialize(const system_type& sys, const real_type dt)
+    // this modify system::topology by using local interaction info.
+    void initialize(system_type& sys, const real_type dt)
     {
+        // first, fetch current topology
+        local_.write_topology(sys.topology());
+
+        // based on the topology, make exclusion list
         global_.initialize(sys, dt);
     }
 

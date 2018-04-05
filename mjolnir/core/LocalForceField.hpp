@@ -46,12 +46,25 @@ class LocalForceField
         {
             item->update(sys, dt);
         }
+        return;
+    }
+
+    // Topology is defined based on LocalForceField.
+    void write_topology(topology_type& topol)
+    {
+        for(auto& item : this->interactions_)
+        {
+            item->write_topology(topol);
+        }
+        return;
     }
 
     void calc_force(system_type& sys) const
     {
         for(const auto& item : this->interactions_)
+        {
             item->calc_force(sys);
+        }
         return;
     }
     real_type calc_energy(const system_type& sys) const
