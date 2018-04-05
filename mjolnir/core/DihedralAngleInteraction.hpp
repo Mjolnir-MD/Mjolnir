@@ -30,11 +30,15 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
 
   public:
 
-    DihedralAngleInteraction() = default;
+    DihedralAngleInteraction(const connection_kind_type kind,
+                             const container_type& pot)
+        : kind_(kind), potentials(pot)
+    {}
+    DihedralAngleInteraction(const connection_kind_type kind,
+                             container_type&& pot)
+        : kind_(kind), potentials(std::move(pot))
+    {}
     ~DihedralAngleInteraction() = default;
-
-    DihedralAngleInteraction(const container_type& pot): potentials(pot){}
-    DihedralAngleInteraction(container_type&& pot): potentials(std::move(pot)){}
 
     void      calc_force (system_type&)       const noexcept override;
     real_type calc_energy(const system_type&) const noexcept override;

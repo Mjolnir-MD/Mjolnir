@@ -32,11 +32,15 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
 
   public:
 
-    BondLengthInteraction() = default;
+    BondLengthInteraction(const connection_kind_type kind,
+                          const container_type& pot)
+        : kind_(kind), potentials(pot)
+    {}
+    BondLengthInteraction(const connection_kind_type kind,
+                          container_type&& pot)
+        : kind_(kind), potentials(std::move(pot))
+    {}
     ~BondLengthInteraction() override = default;
-
-    BondLengthInteraction(const container_type& pot): potentials(pot){}
-    BondLengthInteraction(container_type&& pot): potentials(std::move(pot)){}
 
     void      calc_force (system_type&)       const noexcept override;
     real_type calc_energy(const system_type&) const noexcept override;

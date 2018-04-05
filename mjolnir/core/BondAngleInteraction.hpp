@@ -31,11 +31,15 @@ class BondAngleInteraction : public LocalInteractionBase<traitsT>
 
   public:
 
-    BondAngleInteraction() = default;
-    ~BondAngleInteraction() = default;
-
-    BondAngleInteraction(const container_type& pot): potentials(pot){}
-    BondAngleInteraction(container_type&& pot): potentials(std::move(pot)){}
+    BondAngleInteraction(const connection_kind_type kind,
+                         const container_type& pot)
+        : kind_(kind), potentials(pot)
+    {}
+    BondAngleInteraction(const connection_kind_type kind,
+                         container_type&& pot)
+        : kind_(kind), potentials(std::move(pot))
+    {}
+    ~BondAngleInteraction() override = default;
 
     void      calc_force (system_type&)        const noexcept override;
     real_type calc_energy(const system_type& ) const noexcept override;
