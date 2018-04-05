@@ -49,15 +49,6 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
         }
     }
 
-    std::size_t size() const noexcept {return potentials.size();}
-
-    const_iterator begin()  const noexcept {return potentials.begin();}
-    const_iterator end()    const noexcept {return potentials.end();}
-    const_iterator cbegin() const noexcept {return potentials.begin();}
-    const_iterator cend()   const noexcept {return potentials.end();}
-
-    void append(std::unique_ptr<LocalInteractionBase<traitsT>>&& other) override;
-
     std::string name() const override
     {return "BondLength:" + std::string(potentials.front().second.name());}
 
@@ -101,23 +92,6 @@ BondLengthInteraction<traitsT, potentialT>::calc_energy(
                 sys[idxp.first[1]].position - sys[idxp.first[0]].position)));
     }
     return E;
-}
-
-template<typename traitsT, typename potentialT>
-void BondLengthInteraction<traitsT, potentialT>::append(
-        std::unique_ptr<LocalInteractionBase<traitsT>>&& other)
-{
-    const BondLengthInteraction<traitsT, potentialT>* rptr =
-        dynamic_cast<BondLengthInteraction<traitsT, potentialT>*>(other.get());
-    if(rptr == nullptr)
-    {
-        throw std::invalid_argument("mjolnir::BondLengthInteraction::append: "
-                "non-subclass appears!");
-    }
-    this->potentials.reserve(this->potentials.size() + rptr->size());
-    std::copy(rptr->begin(), rptr->end(), std::back_inserter(this->potentials));
-    other.release();
-    return;
 }
 
 } // mjolnir
