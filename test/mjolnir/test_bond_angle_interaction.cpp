@@ -26,6 +26,7 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
     typedef mjolnir::System<traits>            system_type;
     typedef mjolnir::HarmonicPotential<traits> harmonic_type;
     typedef mjolnir::BondAngleInteraction<traits, harmonic_type> bond_angle_type;
+    typedef bond_angle_type::connection_kind_type connection_kind_type;
 
     auto normalize = [](const coord_type& v){return v / mjolnir::length(v);};
 
@@ -33,7 +34,7 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
     const real_type native(mjolnir::constants<real_type>::pi * 2.0 / 3.0); // 120 degree
 
     harmonic_type potential{k, native};
-    bond_angle_type interaction({{ {{0,1,2}}, potential}});
+    bond_angle_type interaction(connection_kind_type::none, {{ {{0,1,2}}, potential}});
 
     const coord_type pos1(1., 0., 0.);
     const coord_type pos2(0., 0., 0.);

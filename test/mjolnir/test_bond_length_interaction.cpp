@@ -25,14 +25,15 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
     typedef mjolnir::System<traits>            system_type;
     typedef mjolnir::HarmonicPotential<traits> harmonic_type;
     typedef mjolnir::BondLengthInteraction<traits, harmonic_type> bond_length_type;
+    typedef bond_length_type::connection_kind_type connection_kind_type;
 
     auto normalize = [](const coord_type& v){return v / mjolnir::length(v);};
 
     const real_type k(100.);
     const real_type native(2.0);
 
-    harmonic_type potential{k, native};
-    bond_length_type interaction({{ {{0,1}}, potential}});
+    harmonic_type    potential(k, native);
+    bond_length_type interaction(connection_kind_type::none, {{ {{0,1}}, potential}});
 
     std::vector<particle_type> ps{
         {1., coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)},

@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE(DH_double)
     constexpr static traits::real_type h = 1e-6;
 
     const traits::real_type charge = 1.0;
-    mjolnir::DebyeHuckelPotential<traits, mjolnir::IgnoreNothing> dh({charge, charge});
+    mjolnir::DebyeHuckelPotential<traits, mjolnir::IgnoreNothing> dh({charge, charge}, 0, 0);
 
     const traits::real_type x_min = 0.5 * dh.debye_length();
     const traits::real_type x_max = dh.max_cutoff_length();
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(DH_float)
     constexpr static traits::real_type h    = 1e-2;
 
     const traits::real_type charge = 1.0;
-    mjolnir::DebyeHuckelPotential<traits, mjolnir::IgnoreNothing> dh({charge, charge});
+    mjolnir::DebyeHuckelPotential<traits, mjolnir::IgnoreNothing> dh({charge, charge}, 0, 0);
 
     const traits::real_type x_min = 0.5 * dh.debye_length();
     const traits::real_type x_max = dh.max_cutoff_length();

@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE(LennardJones_double)
 
     const traits::real_type sigma   = 3.0;
     const traits::real_type epsilon = 1.0;
-    mjolnir::LennardJonesPotential<traits, mjolnir::IgnoreNothing> lj{{{sigma, epsilon}, {sigma, epsilon}}};
+    mjolnir::LennardJonesPotential<traits, mjolnir::IgnoreNothing> lj{{{sigma, epsilon}, {sigma, epsilon}}, 0, 0};
 
     const traits::real_type x_min = 0.8 * sigma;
     const traits::real_type x_max =
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(LennardJones_float)
 
     const traits::real_type sigma   = 3.0;
     const traits::real_type epsilon = 1.0;
-    mjolnir::LennardJonesPotential<traits, mjolnir::IgnoreNothing> lj{{{sigma, epsilon}, {sigma, epsilon}}};
+    mjolnir::LennardJonesPotential<traits, mjolnir::IgnoreNothing> lj{{{sigma, epsilon}, {sigma, epsilon}}, 0, 0};
 
     const traits::real_type x_min = 0.8 * sigma;
     const traits::real_type x_max =
