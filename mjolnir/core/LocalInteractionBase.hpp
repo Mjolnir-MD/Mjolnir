@@ -19,6 +19,7 @@ class LocalInteractionBase
     typedef typename traits_type::boundary_type   boundary_type;
     typedef typename system_type::particle_type   particle_type;
     typedef typename system_type::topology_type   topology_type;
+    typedef typename topology_type::connection_kind_type connection_kind_type;
 
   public:
 

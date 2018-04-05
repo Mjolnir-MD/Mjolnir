@@ -21,7 +21,7 @@ class BondAngleInteraction : public LocalInteractionBase<traitsT>
     typedef typename base_type::system_type     system_type;
     typedef typename base_type::particle_type   particle_type;
     typedef typename base_type::topology_type   topology_type;
-    typedef typename topology_type::connection_kind_type connection_kind_type;
+    typedef typename base_type::connection_kind_type connection_kind_type;
 
     typedef std::array<std::size_t, 3>          indices_type;
     typedef std::pair<indices_type, potentialT> potential_index_pair;
