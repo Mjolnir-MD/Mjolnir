@@ -20,22 +20,28 @@ template<typename traitsT, std::size_t N>
 std::vector<std::pair<std::array<std::size_t, N>, HarmonicPotential<traitsT>>>
 read_harmonic_potential(const toml::Table& local)
 {
-    const auto& params = toml_value_at(local, "parameters", "[forcefield.local]"
-            ).cast<toml::value_t::Array>();
-    std::vector<
-        std::pair<std::array<std::size_t, N>, HarmonicPotential<traitsT>>
-        > retval;
+    using indices_t = std::array<std::size_t, N>;
+    using indices_potential_pair_t =
+        std::pair<indices_t, HarmonicPotential<traitsT>>;
+
+    const auto& params = toml_value_at(local, "parameters",
+        "[forcefield.local] for Harmonic potential"
+        ).cast<toml::value_t::Array>();
+
+    std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
 
     for(const auto& item : params)
     {
+        using real_type = typename traitsT::real_type;
+
         const auto& parameter = item.cast<toml::value_t::Table>();
-        auto indices = toml::get<std::array<std::size_t, N>>(toml_value_at(
-                parameter, "indices", "<anonymous> in [parameters]"));
-        auto r0 = toml::get<typename traitsT::real_type>(toml_value_at(
-                parameter, "native",  "<anonymous> in [parameters]"));
-        auto k  = toml::get<typename traitsT::real_type>(toml_value_at(
-                parameter, "k",       "<anonymous> in [parameters]"));
+        auto indices = toml::get<indices_t>(toml_value_at(parameter, "indices",
+                "element of [[parameters]] in harmonic potential"));
+        auto r0 = toml::get<real_type>(toml_value_at(parameter, "native",
+                "element of [[parameters]] in harmonic potential"));
+        auto k  = toml::get<real_type>(toml_value_at(parameter, "k",
+                "element of [[parameters]] in harmonic potential"));
 
         retval.emplace_back(indices, HarmonicPotential<traitsT>(k, r0));
     }
@@ -48,22 +54,28 @@ std::vector<
     >
 read_go1012_contact_potential(const toml::Table& local)
 {
-    const auto& params = toml_value_at(local, "parameters", "[forcefield.local]"
+    using indices_t = std::array<std::size_t, N>;
+    using indices_potential_pair_t =
+        std::pair<indices_t, Go1012ContactPotential<traitsT>>;
+
+    const auto& params = toml_value_at(local, "parameters",
+            "[forcefield.local] for Go-10-12 potential"
             ).cast<toml::value_t::Array>();
-    std::vector<
-        std::pair<std::array<std::size_t, N>, Go1012ContactPotential<traitsT>>
-        > retval;
+
+    std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
 
     for(const auto& item : params)
     {
+        using real_type = typename traitsT::real_type;
         const auto& parameter = item.cast<toml::value_t::Table>();
-        auto indices = toml::get<std::array<std::size_t, N>>(toml_value_at(
-                parameter, "indices", "<anonymous in [parameters]>"));
-        auto r0 = toml::get<typename traitsT::real_type>(toml_value_at(
-                parameter, "native",  "<anonymous in [parameters]>"));
-        auto k  = toml::get<typename traitsT::real_type>(toml_value_at(
-                parameter, "k",       "<anonymous in [parameters]>"));
+
+        auto indices = toml::get<indices_t>(toml_value_at(parameter, "indices",
+                "element of [[parameters]] in Go-10-12 potential"));
+        auto r0 = toml::get<real_type>(toml_value_at(parameter, "native",
+                "element of [[parameters]] in Go-10-12 potential"));
+        auto k  = toml::get<real_type>(toml_value_at(parameter, "k",
+                "element of [[parameters]] in Go-10-12 potential"));
 
         retval.emplace_back(indices, Go1012ContactPotential<traitsT>(k, r0));
     }
@@ -74,28 +86,33 @@ template<typename traitsT, std::size_t N>
 std::vector<std::pair<std::array<std::size_t, N>, GaussianPotential<traitsT>>>
 read_gaussian_potential(const toml::Table& local)
 {
-    typedef typename traitsT::real_type real_type;
-    const auto& params = toml_value_at(local, "parameters", "[forcefield.local]"
-            ).cast<toml::value_t::Array>();
-    std::vector<
-        std::pair<std::array<std::size_t, N>, GaussianPotential<traitsT>>
-        > retval;
+    using indices_t = std::array<std::size_t, N>;
+    using indices_potential_pair_t =
+        std::pair<indices_t, GaussianPotential<traitsT>>;
+
+    const auto& params = toml_value_at(local, "parameters",
+        "[forcefield.local] for Gaussian potential"
+        ).cast<toml::value_t::Array>();
+
+    std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
 
     for(const auto& item : params)
     {
+        using real_type = typename traitsT::real_type;
         const auto& parameter = item.cast<toml::value_t::Table>();
-        auto indices = toml::get<std::array<std::size_t, N>>(toml_value_at(
-                parameter, "indices", "<anonymous> in [[parameters]]"));
-        auto native  = toml::get<real_type>(toml_value_at(
-                parameter, "native" , "<anonymous> in [[parameters]]"));
-        auto epsilon = toml::get<real_type>(toml_value_at(
-                parameter, "epsilon", "<anonymous> in [[parameters]]"));
-        auto w       = toml::get<real_type>(toml_value_at(
-                parameter, "w", "<anonymous> in [[parameters]]"));
 
-        retval.emplace_back(indices,
-                            GaussianPotential<traitsT>(epsilon, w, native));
+        auto indices = toml::get<indices_t>(toml_value_at(parameter, "indices",
+                "element of [[parameters]] in Gaussian potential"));
+        auto native  = toml::get<real_type>(toml_value_at(parameter, "native",
+                "element of [[parameters]] in Gaussian potential"));
+        auto epsilon = toml::get<real_type>(toml_value_at(parameter, "epsilon",
+                "element of [[parameters]] in Gaussian potential"));
+        auto w       = toml::get<real_type>(toml_value_at(parameter, "w",
+                "element of [[parameters]] in Gaussian potential"));
+
+        retval.emplace_back(
+                indices, GaussianPotential<traitsT>(epsilon, w, native));
     }
     return retval;
 }
@@ -105,30 +122,34 @@ std::vector<
     std::pair<std::array<std::size_t, N>, FlexibleLocalAnglePotential<traitsT>>>
 read_flexible_local_angle_potential(const toml::Table& local)
 {
-    typedef typename traitsT::real_type real_type;
+    using indices_t = std::array<std::size_t, N>;
+    using indices_potential_pair_t =
+        std::pair<indices_t, FlexibleLocalAnglePotential<traitsT>>;
 
-    const auto& params = toml_value_at(local, "parameters", "[forcefield.local]"
-            ).cast<toml::value_t::Array>();
-    std::vector<
-        std::pair<std::array<std::size_t, N>,
-                  FlexibleLocalAnglePotential<traitsT>>
-        > retval;
+    const auto& params = toml_value_at(local, "parameters",
+        "[forcefield.local] for FlexibleLocalAngle potential"
+        ).cast<toml::value_t::Array>();
+
+    std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
 
     for(const auto& item : params)
     {
+        using real_type  = typename traitsT::real_type;
+        using table_type = std::array<real_type, 10>;
         const auto& parameter = item.cast<toml::value_t::Table>();
-        auto indices = toml::get<std::array<std::size_t, N>>(toml_value_at(
-                parameter, "indices", "<anonymous> in [[parameters]]"));
-        auto k     = toml::get<real_type>(toml_value_at(
-                parameter, "k", "<anonymous> in [[parameters]]"));
-        auto term1 = toml::get<std::array<real_type, 10>>(toml_value_at(
-                parameter, "term1", "<anonymous> in [[parameters]]"));
-        auto term2 = toml::get<std::array<real_type, 10>>(toml_value_at(
-                parameter, "term2", "<anonymous> in [[parameters]]"));
 
-        retval.emplace_back(std::move(indices),
-                FlexibleLocalAnglePotential<traitsT>(k, term1, term2));
+        auto indices = toml::get<indices_t>(toml_value_at(parameter, "indices",
+                "element of [[parameters]] in FlexibleLocal potential"));
+        auto k     = toml::get<real_type>(toml_value_at(parameter, "k",
+                "element of [[parameters]] in FlexibleLocal potential"));
+        auto term1 = toml::get<table_type>(toml_value_at(parameter, "term1",
+                "element of [[parameters]] in FlexibleLocal potential"));
+        auto term2 = toml::get<table_type>(toml_value_at(parameter, "term2",
+                "element of [[parameters]] in FlexibleLocal potential"));
+
+        retval.emplace_back(
+                indices, FlexibleLocalAnglePotential<traitsT>(k, term1, term2));
     }
     return retval;
 }
@@ -138,29 +159,33 @@ std::vector<std::pair<std::array<std::size_t, N>,
                       ClementiDihedralPotential<traitsT>>>
 read_clementi_dihedral_potential(const toml::Table& local)
 {
-    typedef typename traitsT::real_type real_type;
-    const auto& params = toml_value_at(local, "parameters", "[forcefield.local]"
-            ).cast<toml::value_t::Array>();
-    std::vector<
-        std::pair<std::array<std::size_t, N>,
-                  ClementiDihedralPotential<traitsT>>
-        > retval;
+    using indices_t = std::array<std::size_t, N>;
+    using indices_potential_pair_t =
+        std::pair<indices_t, ClementiDihedralPotential<traitsT>>;
+
+    const auto& params = toml_value_at(local, "parameters",
+        "[forcefield.local] for ClementiDihedral potential"
+        ).cast<toml::value_t::Array>();
+
+    std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
 
     for(const auto& item : params)
     {
+        using real_type  = typename traitsT::real_type;
         const auto& parameter = item.cast<toml::value_t::Table>();
-        auto indices = toml::get<std::array<std::size_t, N>>(toml_value_at(
-                parameter, "indices", "<anonymous> in [[parameters]]"));
-        auto native = toml::get<real_type>(toml_value_at(
-                parameter, "native", "<anonymous> in [[parameters]]"));
-        auto k1     = toml::get<real_type>(toml_value_at(
-                parameter, "k1", "<anonymous> in [[parameters]]"));
-        auto k3     = toml::get<real_type>(toml_value_at(
-                parameter, "k3", "<anonymous> in [[parameters]]"));
 
-        retval.emplace_back(std::move(indices),
-                            ClementiDihedralPotential<traitsT>(k1, k3, native));
+        auto indices = toml::get<indices_t>(toml_value_at(parameter, "indices",
+                "element of [[parameters]] in ClementiDihedral potential"));
+        auto native = toml::get<real_type>(toml_value_at(parameter, "native",
+                "element of [[parameters]] in ClementiDihedral potential"));
+        auto k1     = toml::get<real_type>(toml_value_at(parameter, "k1",
+                "element of [[parameters]] in ClementiDihedral potential"));
+        auto k3     = toml::get<real_type>(toml_value_at(parameter, "k3",
+                "element of [[parameters]] in ClementiDihedral potential"));
+
+        retval.emplace_back(
+                indices, ClementiDihedralPotential<traitsT>(k1, k3, native));
     }
     return retval;
 }
@@ -170,27 +195,31 @@ std::vector<std::pair<std::array<std::size_t, N>,
                       FlexibleLocalDihedralPotential<traitsT>>>
 read_flexible_local_dihedral_potential(const toml::Table& local)
 {
-    typedef typename traitsT::real_type real_type;
-    const auto& params = toml_value_at(local, "parameters", "[forcefield.local]"
-            ).cast<toml::value_t::Array>();
-    std::vector<
-        std::pair<std::array<std::size_t, N>,
-                  FlexibleLocalDihedralPotential<traitsT>>
-        > retval;
+    using indices_t = std::array<std::size_t, N>;
+    using indices_potential_pair_t =
+        std::pair<indices_t, FlexibleLocalDihedralPotential<traitsT>>;
+
+    const auto& params = toml_value_at(local, "parameters",
+        "[forcefield.local] for FlexibleLocalDihedral potential"
+        ).cast<toml::value_t::Array>();
+    std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
 
     for(const auto& item : params)
     {
-        const auto& parameter = item.cast<toml::value_t::Table>();
-        auto indices = toml::get<std::array<std::size_t, N>>(toml_value_at(
-                parameter, "indices", "<anonymous> in [[parameters]]"));
-        auto k    = toml::get<real_type>(toml_value_at(
-                parameter, "k", "<anonymous> in [[parameters]]"));
-        auto term = toml::get<std::array<real_type, 7>>(toml_value_at(
-                parameter, "term", "<anonymous> in [[parameters]]"));
+        using real_type  = typename traitsT::real_type;
+        using table_type = std::array<real_type, 7>;
 
-        retval.emplace_back(std::move(indices),
-                            FlexibleLocalDihedralPotential<traitsT>(k, term));
+        const auto& parameter = item.cast<toml::value_t::Table>();
+        auto indices = toml::get<indices_t>(toml_value_at(parameter, "indices",
+            "element of [[parameters]] in FlexibleLocalDihedral potential"));
+        auto k    = toml::get<real_type>(toml_value_at(parameter, "k",
+            "element of [[parameters]] in FlexibleLocalDihedral potential"));
+        auto term = toml::get<table_type>(toml_value_at(parameter, "term",
+            "element of [[parameters]] in FlexibleLocalDihedral potential"));
+
+        retval.emplace_back(
+                indices, FlexibleLocalDihedralPotential<traitsT>(k, term));
     }
     return retval;
 }
@@ -201,27 +230,30 @@ read_excluded_volume_potential(const toml::Table& global)
 {
     typedef typename traitsT::real_type real_type;
 
-    const std::size_t bonds = toml::get<std::size_t>(
-            toml_value_at(global, "ignored_bonds", "[forcefield.global]"));
-    const std::size_t contacts = toml::get<std::size_t>(
-            toml_value_at(global, "ignored_contacts", "[forcefield.global]"));
-    const real_type eps = toml::get<real_type>(global.at("epsilon"));
+    const std::size_t bonds = toml::get<std::size_t>(toml_value_at(
+        global, "ignored_bonds", "[forcefield.global] for ExcludedVolume"));
+    const std::size_t contacts = toml::get<std::size_t>(toml_value_at(
+        global, "ignored_contacts", "[forcefield.global] for ExcludedVolume"));
+    const real_type eps = toml::get<real_type>(toml_value_at(
+        global, "epsilon", "[forcefield.global] for ExcludedVolume"));
 
-    const auto& ps = toml_value_at(global, "parameters", "[forcefield.global]"
+    const auto& ps = toml_value_at(global, "parameters",
+            "[forcefield.global] for ExcludedVolume potential"
             ).cast<toml::value_t::Array>();
+    std::vector<real_type> params;
+    params.reserve(ps.size());
 
-    std::vector<real_type> params; params.reserve(ps.size());
     for(const auto& param : ps)
     {
         const auto& tab = param.cast<toml::value_t::Table>();
-        const auto idx = toml::get<std::size_t>(
-                toml_value_at(tab, "index", "<anonymous> in parameters"));
+        const auto idx = toml::get<std::size_t>(toml_value_at(tab, "index",
+            "element of [[forcefield.global.parameters]] for Excluded Volume"));
         if(params.size() <= idx)
         {
             params.resize(idx+1, 0.);
         }
-        params.at(idx) = toml::get<real_type>(
-                toml_value_at(tab, "sigma", "<anonymous> in parameters"));
+        params.at(idx) = toml::get<real_type>(toml_value_at(tab, "sigma",
+            "element of [[forcefield.global.parameters]] for Excluded Volume"));
     }
 
     return ExcludedVolumePotential<traitsT, ignoreT>(
@@ -234,30 +266,34 @@ read_lennard_jones_potential(const toml::Table& global)
 {
     typedef typename traitsT::real_type real_type;
 
-    const std::size_t bonds = toml::get<std::size_t>(
-            toml_value_at(global, "ignored_bonds", "[forcefield.global]"));
-    const std::size_t contacts = toml::get<std::size_t>(
-            toml_value_at(global, "ignored_contacts", "[forcefield.global]"));
+    const std::size_t bonds = toml::get<std::size_t>(toml_value_at(
+        global, "ignored_bonds", "[forcefield.global] for Lennard-Jones"));
+    const std::size_t contacts = toml::get<std::size_t>(toml_value_at(
+        global, "ignored_contacts", "[forcefield.global] for Lennard-Jones"));
 
-    const auto& ps = toml_value_at(global, "parameters", "[forcefield.global]"
-            ).cast<toml::value_t::Array>();
+    const auto& ps = toml_value_at(global, "parameters",
+        "[forcefield.global] for Lennard-Jones potential"
+        ).cast<toml::value_t::Array>();
 
-    std::vector<std::pair<real_type, real_type>> params; params.reserve(ps.size());
+    std::vector<std::pair<real_type, real_type>> params;
+    params.reserve(ps.size());
     for(const auto& param : ps)
     {
         const auto& tab = param.cast<toml::value_t::Table>();
-        const auto idx = toml::get<std::size_t>(
-                toml_value_at(tab, "index", "<anonymous> in parameters"));
+        const auto idx = toml::get<std::size_t>(toml_value_at(tab, "index",
+            "element of [[forcefield.global.parameters]] for Lennard-Jones"));
         if(params.size() <= idx)
         {
             const std::pair<real_type, real_type> dummy{0., 0.};
             params.resize(idx+1, dummy);
         }
-        params.at(idx) = std::make_pair(
-            toml::get<real_type>(
-                toml_value_at(tab, "sigma",   "<anonymous> in parameters")),
-            toml::get<real_type>(
-                toml_value_at(tab, "epsilon", "<anonymous> in parameters")));
+
+        const auto sigma   = toml::get<real_type>(toml_value_at(tab, "sigma",
+            "element of [[forcefield.global.parameters]] for Lennard-Jones"));
+        const auto epsilon = toml::get<real_type>(toml_value_at(tab, "epsilon",
+            "element of [[forcefield.global.parameters]] for Lennard-Jones"));
+
+        params.at(idx) = std::make_pair(sigma, epsilon);
     }
 
     return LennardJonesPotential<traitsT, ignoreT>(
@@ -270,21 +306,29 @@ read_debye_huckel_potential(const toml::Table& global)
 {
     typedef typename traitsT::real_type real_type;
 
-    const std::size_t bonds = toml::get<std::size_t>(
-            toml_value_at(global, "ignored_bonds", "[forcefield.global]"));
-    const std::size_t contacts = toml::get<std::size_t>(
-            toml_value_at(global, "ignored_contacts", "[forcefield.global]"));
+    const std::size_t bonds = toml::get<std::size_t>(toml_value_at(
+        global, "ignored_bonds",    "[forcefield.global] for Debye-Huckel"));
+    const std::size_t contacts = toml::get<std::size_t>(toml_value_at(
+        global, "ignored_contacts", "[forcefield.global] for Debye-Huckel"));
 
-    const auto& ps = global.at("parameters").cast<toml::value_t::Array>();
+    const auto& ps = toml_value_at(global, "parameters",
+        "[forcefield.global] for Debye-Huckel"
+        ).cast<toml::value_t::Array>();
 
-    std::vector<real_type> params; params.reserve(ps.size());
+    std::vector<real_type> params;
+    params.reserve(ps.size());
     for(const auto& param : ps)
     {
         const auto& tab = param.cast<toml::value_t::Table>();
-        const auto idx = toml::get<std::size_t>(tab.at("index"));
+        const auto idx = toml::get<std::size_t>(toml_value_at(tab, "index",
+            "element of [[forcefield.global.parameters]] for Debye-Huckel"));
         if(params.size() <= idx)
+        {
             params.resize(idx+1, 0.);
-        params.at(idx) = toml::get<real_type>(tab.at("charge"));
+        }
+        const auto charge = toml::get<real_type>(toml_value_at(tab, "charge",
+            "element of [[forcefield.global.parameters]] for Debye-Huckel"));
+        params.at(idx) = charge;
     }
 
     return DebyeHuckelPotential<traitsT, ignoreT>(

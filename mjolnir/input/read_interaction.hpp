@@ -9,6 +9,7 @@
 #include <mjolnir/core/GlobalDistanceInteraction.hpp>
 #include <mjolnir/core/ZaxisExternalForceInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
+#include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/input/get_toml_value.hpp>
 #include <mjolnir/input/read_potential.hpp>
 #include <mjolnir/input/read_spatial_partition.hpp>
@@ -32,25 +33,29 @@ read_bond_length_interaction(
 
     if(potential == "Harmonic")
     {
-        return make_unique<BondLengthInteraction<
-            traitsT, HarmonicPotential<traitsT>>>(kind,
-                read_harmonic_potential<traitsT, 2>(local));
+        using potential_t = HarmonicPotential<traitsT>;
+
+        return make_unique<BondLengthInteraction<traitsT, potential_t>>(
+            kind, read_harmonic_potential<traitsT, 2>(local));
     }
     else if(potential == "Go1012Contact")
     {
-        return make_unique<BondLengthInteraction<
-            traitsT, Go1012ContactPotential<traitsT>>>(kind,
-                read_go1012_contact_potential<traitsT, 2>(local));
+        using potential_t = Go1012ContactPotential<traitsT>;
+
+        return make_unique<BondLengthInteraction<traitsT, potential_t>>(
+            kind, read_go1012_contact_potential<traitsT, 2>(local));
     }
     else if(potential == "AICG2PlusAngle")
     {
-        return make_unique<BondLengthInteraction<
-            traitsT, GaussianPotential<traitsT>>>(kind,
-                read_gaussian_potential<traitsT, 2>(local));
+        using potential_t = GaussianPotential<traitsT>;
+
+        return make_unique<BondLengthInteraction<traitsT, potential_t>>(
+            kind, read_gaussian_potential<traitsT, 2>(local));
     }
     else
     {
-        throw std::runtime_error("invalid length potential: " + potential);
+        throw_exception<std::runtime_error>(
+                "invalid potential as BondLengthInteraction: ", potential);
     }
 }
 
@@ -64,19 +69,22 @@ read_bond_angle_interaction(
             toml_value_at(local, "potential", "[[forcefield.local]]"));
     if(potential == "Harmonic")
     {
-        return make_unique<BondAngleInteraction<
-            traitsT, HarmonicPotential<traitsT>>>(kind,
-                read_harmonic_potential<traitsT, 3>(local));
+        using potential_t = HarmonicPotential<traitsT>;
+
+        return make_unique<BondAngleInteraction<traitsT, potential_t>>(
+            kind, read_harmonic_potential<traitsT, 3>(local));
     }
     else if(potential == "FlexibleLocalAngle")
     {
-        return make_unique<BondAngleInteraction<
-            traitsT, FlexibleLocalAnglePotential<traitsT>>>(kind,
-                read_flexible_local_angle_potential<traitsT, 3>(local));
+        using potential_t = FlexibleLocalAnglePotential<traitsT>;
+
+        return make_unique<BondAngleInteraction<traitsT, potential_t>>(
+            kind, read_flexible_local_angle_potential<traitsT, 3>(local));
     }
     else
     {
-        throw std::runtime_error("invalid angle potential: " + potential);
+        throw_exception<std::runtime_error>(
+                "invalid potential as BondAngleInteraction: " + potential);
     }
 }
 
@@ -90,31 +98,36 @@ read_dihedral_angle_interaction(
             toml_value_at(local, "potential", "[forcefield.local]"));
     if(potential == "Harmonic")
     {
-        return make_unique<DihedralAngleInteraction<
-            traitsT, HarmonicPotential<traitsT>>>(kind,
-                read_harmonic_potential<traitsT, 4>(local));
+        using potential_t = HarmonicPotential<traitsT>;
+
+        return make_unique<DihedralAngleInteraction<traitsT, potential_t>>(
+            kind, read_harmonic_potential<traitsT, 4>(local));
     }
     else if(potential == "ClementiDihedral")
     {
-        return make_unique<DihedralAngleInteraction<
-            traitsT, ClementiDihedralPotential<traitsT>>>(kind,
-                read_clementi_dihedral_potential<traitsT, 4>(local));
+        using potential_t = ClementiDihedralPotential<traitsT>;
+
+        return make_unique<DihedralAngleInteraction<traitsT, potential_t>>(
+            kind, read_clementi_dihedral_potential<traitsT, 4>(local));
     }
     else if(potential == "AICG2PlusDihedral")
     {
-        return make_unique<DihedralAngleInteraction<
-            traitsT, GaussianPotential<traitsT>>>(kind,
-                read_gaussian_potential<traitsT, 4>(local));
+        using potential_t = GaussianPotential<traitsT>;
+
+        return make_unique<DihedralAngleInteraction<traitsT, potential_t>>(
+            kind, read_gaussian_potential<traitsT, 4>(local));
     }
     else if(potential == "FlexibleLocalDihedral")
     {
-        return make_unique<DihedralAngleInteraction<
-            traitsT, FlexibleLocalDihedralPotential<traitsT>>>(kind,
-                read_flexible_local_dihedral_potential<traitsT, 4>(local));
+        using potential_t = FlexibleLocalDihedralPotential<traitsT>;
+
+        return make_unique<DihedralAngleInteraction<traitsT, potential_t>>(
+            kind, read_flexible_local_dihedral_potential<traitsT, 4>(local));
     }
     else
     {
-        throw std::runtime_error("invalid dihedral potential: " + potential);
+        throw_exception<std::runtime_error>(
+                "invalid potential as DihedralAngleInteraction: " + potential);
     }
 }
 
@@ -130,25 +143,29 @@ read_global_distance_interaction(const toml::Table& global)
             toml_value_at(global, "potential", "[forcefield.local]"));
     if(potential == "ExcludedVolume")
     {
-        return read_spatial_partition_for_distance<
-            traitsT, ExcludedVolumePotential<traitsT, ignoreT>>(global,
-                read_excluded_volume_potential<traitsT, ignoreT>(global));
+        using potential_t = ExcludedVolumePotential<traitsT, ignoreT>;
+
+        return read_spatial_partition_for_distance<traitsT, potential_t>(
+            global, read_excluded_volume_potential<traitsT, ignoreT>(global));
     }
     else if(potential == "DebyeHuckel")
     {
-        return read_spatial_partition_for_distance<
-            traitsT, DebyeHuckelPotential<traitsT, ignoreT>>(global,
-                read_debye_huckel_potential<traitsT, ignoreT>(global));
+        using potential_t = DebyeHuckelPotential<traitsT, ignoreT>;
+
+        return read_spatial_partition_for_distance<traitsT, potential_t>(
+            global, read_debye_huckel_potential<traitsT, ignoreT>(global));
     }
     else if(potential == "LennardJones")
     {
-        return read_spatial_partition_for_distance<
-            traitsT, LennardJonesPotential<traitsT, ignoreT>>(global,
-                read_lennard_jones_potential<traitsT, ignoreT>(global));
+        using potential_t = LennardJonesPotential<traitsT, ignoreT>;
+
+        return read_spatial_partition_for_distance<traitsT, potential_t>(
+            global, read_lennard_jones_potential<traitsT, ignoreT>(global));
     }
     else
     {
-        throw std::runtime_error("invalid distance potential: " + potential);
+        throw_exception<std::runtime_error>(
+                "invalid potential as GlobalDistanceInteraction: " + potential);
     }
 }
 
@@ -220,27 +237,24 @@ read_global_interaction(const toml::Table& global)
             toml_value_at(global, "interaction", "[forcefields.global]"));
     const auto ignored_chain = toml::get<std::string>(
             toml_value_at(global, "ignored_chain", "[forcefields.global]"));
+
     if(interaction == "Distance")
     {
         if(ignored_chain == "Nothing")
         {
-            return read_global_distance_interaction<
-                traitsT, IgnoreNothing>(global);
+            return read_global_distance_interaction<traitsT, IgnoreNothing>(global);
         }
         else if(ignored_chain == "Self")
         {
-            return read_global_distance_interaction<
-                traitsT, IgnoreSelf>(global);
+            return read_global_distance_interaction<traitsT, IgnoreSelf>(global);
         }
         else if(ignored_chain == "Others")
         {
-            return read_global_distance_interaction<
-                traitsT, IgnoreOthers>(global);
+            return read_global_distance_interaction<traitsT, IgnoreOthers>(global);
         }
         else
         {
-            throw std::runtime_error(
-                    "invalid `ignored_chain`: " + ignored_chain);
+            throw std::runtime_error("invalid `ignored_chain`: " + ignored_chain);
         }
     }
     else if(interaction == "External")
