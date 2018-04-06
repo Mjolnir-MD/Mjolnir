@@ -2,8 +2,6 @@
 #define MJOLNIR_UNDERDAMPED_LANGEVIN_INTEGRATOR
 #include "constants.hpp"
 #include "RandomNumberGenerator.hpp"
-#include <mjolnir/util/zip_iterator.hpp>
-#include <mjolnir/util/make_zip.hpp>
 
 namespace mjolnir
 {
