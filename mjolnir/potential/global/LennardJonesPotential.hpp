@@ -20,6 +20,7 @@ class LennardJonesPotential
     typedef traitsT traits_type;
     typedef typename traits_type::real_type real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
+    // pair of {sigma, epsilon}
     typedef std::pair<real_type, real_type> parameter_type;
 
     // topology stuff
