@@ -54,7 +54,7 @@ read_boundary(const toml::Table& data)
     else
     {
         throw std::runtime_error(
-                "invalid boundary setting (double|float): " + boundary);
+                "invalid boundary setting (Unlimited|PeriodicCube): " + boundary);
     }
 }
 
@@ -65,6 +65,7 @@ read_precision(const toml::Table& data)
             ).template cast<toml::value_t::Table>();
     const auto prec = toml::get<std::string>(
             toml_value_at(general, "precision", "[general]"));
+
     if(prec == "double")
     {
         return read_boundary<double>(data);
