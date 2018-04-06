@@ -1,10 +1,13 @@
 #ifndef MJOLNIR_READ_SYSTEM
 #define MJOLNIR_READ_SYSTEM
+#include <extlib/toml/toml.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
-#include <extlib/toml/toml.hpp>
+#include <mjolnir/util/throw_exception.hpp>
 
 namespace mjolnir
+{
+namespace detail
 {
 
 template<typename boundaryT> struct read_boundary_impl;
@@ -33,36 +36,41 @@ struct read_boundary_impl<CubicPeriodicBoundary<realT, coordT>>
     }
 };
 
+} // detail
+
 template<typename traitsT>
 typename traitsT::boundary_type
 read_boundary(const toml::Table& boundary)
 {
-    return read_boundary_impl<typename traitsT::boundary_type>::invoke(boundary);
+    using boundary_t = typename traitsT::boundary_type;
+    return detail::read_boundary_impl<boundary_t>::invoke(boundary);
 }
 
 template<typename traitsT>
 std::vector<typename System<traitsT>::particle_type>
 read_particles(const toml::Table& system)
 {
-    typedef typename traitsT::real_type real_type;
-    typedef typename traitsT::coordinate_type coordinate_type;
+    using real_type  = typename traitsT::real_type;
+    using coord_type = typename traitsT::coordinate_type;
 
-    std::vector<typename System<traitsT>::particle_type> ps;
     const auto& particles = toml_value_at(system, "particles", "[system]"
             ).cast<toml::value_t::Array>();
+
+    std::vector<typename System<traitsT>::particle_type> ps;
     ps.reserve(particles.size());
 
     for(const auto& p : particles)
     {
         const auto& params = p.cast<toml::value_t::Table>();
-        const auto  mass = toml::get<real_type>(
-                toml_value_at(params, "mass", "<anonymous> in particles"));
-        const coordinate_type pos = toml::get<std::array<real_type, 3>>(
-                toml_value_at(params, "position", "<anonymous> in particles"));
-        const coordinate_type vel = toml::get<std::array<real_type, 3>>(
-                toml_value_at(params, "velocity", "<anonymous> in particles"));
-        const coordinate_type f(0.,0.,0.);
-        ps.emplace_back(make_particle(mass, pos, vel, f));
+
+        const real_type  mass = toml::get<real_type>(toml_value_at(
+                params, "mass",     "element of [[system.particles]]"));
+        const coord_type pos(toml::get<std::array<real_type, 3>>(toml_value_at(
+                params, "position", "element of [[system.particles]]")));
+        const coord_type vel(toml::get<std::array<real_type, 3>>(toml_value_at(
+                params, "velocity", "element of [[system.particles]]")));
+
+        ps.push_back(make_particle(mass, pos, vel, coord_type(0.0, 0.0, 0.0)));
     }
     return ps;
 }
@@ -76,14 +84,15 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
             ).cast<toml::value_t::Array>();
     if(system_params.size() <= N)
     {
-        throw std::out_of_range("no enough systems: " + std::to_string(N));
+        throw_exception<std::out_of_range>("no enough system definitions: ", N);
     }
 
-    const auto& system = system_params.at(N).cast<toml::value_t::Table>();
+    const auto& system   = system_params.at(N).cast<toml::value_t::Table>();
+    const auto& boundary = toml_value_at(system, "boundary","[systems.boundary]"
+            ).cast<toml::value_t::Table>();
 
     System<traitsT> sys(read_particles<traitsT>(system),
-        read_boundary<traitsT>(toml_value_at(system, "boundary"
-                ).cast<toml::value_t::Table>()));
+                        read_boundary<traitsT>(boundary));
 
     const auto& attributes = toml_value_at(system, "attributes", "[[systems]]"
             ).cast<toml::value_t::Table>();
