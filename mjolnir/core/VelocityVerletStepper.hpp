@@ -1,19 +1,12 @@
 #ifndef MJOLNIR_NVE_NEWTONIAN_INTEGRATOR
 #define MJOLNIR_NVE_NEWTONIAN_INTEGRATOR
 #include <mjolnir/core/System.hpp>
-// #include <mjolnir/core/Rescaler.hpp>
 #include <mjolnir/core/SystemMotionRemover.hpp>
 
 namespace mjolnir
 {
 
 template<typename traitsT>
-struct NVE
-{
-    // currently, empty
-};
-
-template<typename traitsT, typename rescalingT = NVE<traitsT>>
 class VelocityVerletStepper
 {
   public:
@@ -21,7 +14,6 @@ class VelocityVerletStepper
     typedef typename traits_type::boundary_type   boundary_type;
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
-    typedef rescalingT          rescaler_type;
     typedef System<traitsT>     system_type;
     typedef ForceField<traitsT> forcefield_type;
     typedef typename system_type::particle_type particle_type;
@@ -48,8 +40,8 @@ class VelocityVerletStepper
     real_type halfdt_;  //!< dt/2
 };
 
-template<typename traitsT, typename rescalingT>
-void VelocityVerletStepper<traitsT, rescalingT>::initialize(
+template<typename traitsT>
+void VelocityVerletStepper<traitsT>::initialize(
         system_type& system, forcefield_type& ff)
 {
     for(std::size_t i=0; i<system.size(); ++i)
@@ -61,9 +53,9 @@ void VelocityVerletStepper<traitsT, rescalingT>::initialize(
     return;
 }
 
-template<typename traitsT, typename rescalingT>
-typename VelocityVerletStepper<traitsT, rescalingT>::real_type
-VelocityVerletStepper<traitsT, rescalingT>::step(
+template<typename traitsT>
+typename VelocityVerletStepper<traitsT>::real_type
+VelocityVerletStepper<traitsT>::step(
         const real_type time, system_type& system, forcefield_type& ff)
 {
     real_type largest_disp2(0);
