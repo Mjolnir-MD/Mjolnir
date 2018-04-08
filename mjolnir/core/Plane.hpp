@@ -33,6 +33,8 @@ class Plane
         : position_(pos), normal_(n), mergin_(mergin), current_mergin_(-1)
     {}
 
+    //XXX   can be negative! because normal vector can define the direction...
+    //TODO: consider more clear name
     real_type calc_distance(
             const coordinate_type& pos, const boundary_type& bd) const
     {
@@ -46,51 +48,17 @@ class Plane
         // calculate `f` that will be used in this form `F = -dV * f`;
         const real_type sign = std::copysign(real_type(1.0), dot_product(
                 this->normal_, bd.adjust_direction(pos - this->position_)));
+
         return sign * normal_;
     }
 
     template<typename Potential>
     void initialize(const system_type& sys, const Potential& pot)
     {
-        const auto& topol = sys.topology();
-
         // update potential parameter
-        this->exclusion_ = pot.ignored_particle();  // these are required by
-        this->cutoff_    = pot.max_cutoff_length(); // ExternalPotential concept
-        // to use binary_search in this->make(), firstly sort this list.
-        std::sort(this->exclusion_.begin(), this->exclusion_.end());
-
-        // reconstruct neighbor list
+        this->cutoff_      = pot.max_cutoff_length();
+        this->participant_ = pot.participants();
         this->make(sys);
-        return;
-    }
-
-    void make(const system_type& sys)
-    {
-        this->neighbors_.clear();
-        const real_type threshold = cutoff_ * (1 + mergin_);
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            if(std::binary_search(exclusion_.cbegin(), exclusion_.cend(), i))
-            {continue;}
-
-            const real_type dist =
-                this->calc_distance(sys[i].position, sys.boundary());
-            if(dist < threshold)
-            {
-                this->neighbors_.push_back(i);
-            }
-        }
-        this->current_mergin_ = cutoff_ * mergin_;
-        return;
-    }
-    void update(const system_type& sys)
-    {
-        this->current_mergin_ -= sys.largest_displacement();
-        if(this->current_mergin_ < 0)
-        {
-            this->make(sys);
-        }
         return;
     }
 
@@ -98,10 +66,12 @@ class Plane
     template<typename Potential>
     void reconstruct(const system_type& sys, const Potential& pot)
     {
-        // do the same thing as the initialization
         this->initialize(sys, pot);
         return;
     }
+
+    void make  (const system_type& sys);
+    void update(const system_type& sys);
 
     std::vector<std::size_t> const& neighbors() const noexcept
     {return this->negihbors_;}
@@ -112,9 +82,39 @@ class Plane
     coordinate_type normal_;   // normal vector
 
     real_type cutoff_, mergin_, current_mergin_;
-    std::vector<std::size_t> neighbors_; // particle that interacts with
-    std::vector<std::size_t> exclusion_; // particle that should be ignored
+    std::vector<std::size_t> neighbors_;   // being inside of cutoff range
+    std::vector<std::size_t> participant_; // particle that interacts with
 };
+
+template<typename traitsT>
+void Plane<traitsT>::make(const system_type& sys)
+{
+    this->neighbors_.clear();
+    const real_type threshold = this->cutoff_ * (1 + this->mergin_);
+
+    for(std::size_t i : this->participant_)
+    {
+        const auto d = this->calc_distance(sys[i].position, sys.boundary());
+        if(dist < threshold)
+        {
+            this->neighbors_.push_back(i);
+        }
+    }
+
+    this->current_mergin_ = this->cutoff_ * this->mergin_;
+    return;
+}
+
+template<typename traitsT>
+void Plane<traitsT>::update(const system_type& sys)
+{
+    this->current_mergin_ -= sys.largest_displacement();
+    if(this->current_mergin_ < 0)
+    {
+        this->make(sys);
+    }
+    return;
+}
 
 } // mjolnir
 #endif // MJOLNIR_PLANE_HPP
