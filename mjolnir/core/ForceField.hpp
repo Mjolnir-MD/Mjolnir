@@ -25,7 +25,8 @@ class ForceField
         : local_(std::move(local)), global_(std::move(global))
     {}
 
-    ForceField(local_forcefield_type&& local, global_forcefield_type&& global,
+    ForceField(local_forcefield_type&&    local,
+               global_forcefield_type&&   global,
                external_forcefield_type&& external)
         : local_(std::move(local)), global_(std::move(global)),
           external_(std::move(external))
@@ -46,7 +47,8 @@ class ForceField
         sys.topology().construct_chains();
 
         // based on the topology, make exclusion list
-        global_.initialize(sys, dt);
+          global_.initialize(sys, dt);
+        external_.initialize(sys, dt);
     }
 
     // update parameters like delta t, temperature, ionic concentration, etc...
