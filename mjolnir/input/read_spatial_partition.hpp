@@ -4,7 +4,6 @@
 #include <mjolnir/core/PeriodicGridCellList.hpp>
 #include <mjolnir/core/NaivePairCalculation.hpp>
 #include <mjolnir/core/VerletList.hpp>
-#include <mjolnir/core/ImplicitMembraneList.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/input/get_toml_value.hpp>
 
@@ -83,14 +82,5 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
     }
 }
 
-template<typename traitsT, typename potentialT>
-std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_spatial_partition_for_implicit_membrane(const toml::Table& global, potentialT pot)
-{
-    const auto cutoff = pot.max_cutoff_length();
-    return make_unique<ZaxisExternalForceInteraction<
-      traitsT, potentialT, ImplicitMembraneList<traitsT>>
-		       >(std::move(pot), ImplicitMembraneList<traitsT>{cutoff});
-}
-}
+} // mjolnir
 #endif// MJOLNIR_READ_SPATIAL_PARTITION
