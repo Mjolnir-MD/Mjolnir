@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_BOX_INTEARACTION_BASE
 #define MJOLNIR_BOX_INTEARACTION_BASE
-#include <mjolnir/core/ExternalInteractionBase.hpp>
+#include <mjolnir/core/ExternalForceInteractionBase.hpp>
 
 namespace mjolnir
 {
@@ -18,7 +18,7 @@ class ExternalDistanceInteraction final
     typedef traitsT    traits_type;
     typedef potentialT potential_type;
     typedef shapeT     shape_type;
-    typedef ExternalInteractionBase<traits_type> base_type;
+    typedef ExternalForceInteractionBase<traits_type> base_type;
     typedef typename base_type::real_type        real_type;
     typedef typename base_type::coordinate_type  coordinate_type;
     typedef typename base_type::system_type      system_type;
@@ -41,8 +41,7 @@ class ExternalDistanceInteraction final
     void initialize(const system_type& sys, const real_type dt) override
     {
         this->potential_.update(sys); // update system parameters
-        this->shape_.set_cutoff(potential_.max_cutoff_length());
-        this->shape_.initialize(sys);
+        this->shape_.initialize(sys, this->potential_);
         this->shape_.update(sys);
     }
 
@@ -54,9 +53,10 @@ class ExternalDistanceInteraction final
     {
         this->potential_.update(sys); // update system parameters
         this->shape_.reconstruct(sys, this->potential_);
+        this->shape_.update(sys);
     }
 
-    std::string name() const noexcept {return "ExternalDistance";}
+    std::string name() const {return "ExternalDistance:" + potential_.name();}
 
   private:
 
@@ -85,7 +85,8 @@ void ExternalDistanceInteraction<traitsT, potT, spaceT>::calc_force(
 }
 
 template<typename traitsT, typename potT, typename spaceT>
-real_type ExternalDistanceInteraction<traitsT, potT, spaceT>::calc_energy(
+typename ExternalDistanceInteraction<traitsT, potT, spaceT>::real_type
+ExternalDistanceInteraction<traitsT, potT, spaceT>::calc_energy(
         const system_type& sys) const
 {
     real_type E = 0.0;
