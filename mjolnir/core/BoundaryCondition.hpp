@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_BOUNDARY_CONDITION
 #define MJOLNIR_BOUNDARY_CONDITION
-#include <cassert>
+#include <cstddef>
 
 namespace mjolnir
 {
@@ -26,12 +26,12 @@ struct CubicPeriodicBoundary
     typedef coordT coordinate_type;
 
   public:
-    CubicPeriodicBoundary() = default;
-    ~CubicPeriodicBoundary() = default;
+
     CubicPeriodicBoundary(
             const coordinate_type& lw, const coordinate_type& up) noexcept
-        : lower_(lw), upper_(up), width_(up - lw), halfw_(0.5 * (up - lw))
+        : lower_(lw), upper_(up), width_(up - lw), halfw_((up - lw) / 2)
     {}
+    ~CubicPeriodicBoundary() = default;
 
     coordinate_type adjust_direction(coordinate_type dr) const noexcept
     {
@@ -59,14 +59,14 @@ struct CubicPeriodicBoundary
     coordinate_type const& upper_bound() const noexcept {return upper_;}
     coordinate_type const& width()       const noexcept {return width_;}
 
-    void set_lower_bound(const coordinate_type& lw)
+    void set_lower_bound(const coordinate_type& lw) noexcept
     {
         this->lower_ = lw;
         this->width_ = this->upper_ - this->lower_;
         this->halfw_ = this->width_ * 0.5;
         return;
     }
-    void set_upper_bound(const coordinate_type& up)
+    void set_upper_bound(const coordinate_type& up) noexcept
     {
         this->upper_ = up;
         this->width_ = this->upper_ - this->lower_;
