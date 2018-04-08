@@ -78,17 +78,6 @@ class UnlimitedGridCellList
     real_type cutoff() const noexcept {return this->cutoff_;}
     real_type mergin() const noexcept {return this->mergin_;}
 
-    void set_cutoff(const real_type c) noexcept
-    {
-        this->cutoff_ = c;
-        this->r_cell_size_ = 1 / (cutoff_ * (1 + mergin_) * (1+mesh_epsilon));
-    }
-    void set_mergin(const real_type m) noexcept
-    {
-        this->mergin_ = m;
-        this->r_cell_size_ = 1 / (cutoff_ * (1 + mergin_) * (1+mesh_epsilon));
-    }
-
     range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
 
   private:
@@ -112,6 +101,17 @@ class UnlimitedGridCellList
                            const std::size_t z) const noexcept
     {
         return x + dim_size * y + dim_size * dim_size * z;
+    }
+
+    void set_cutoff(const real_type c) noexcept
+    {
+        this->cutoff_ = c;
+        this->r_cell_size_ = 1 / (cutoff_ * (1 + mergin_) * (1+mesh_epsilon));
+    }
+    void set_mergin(const real_type m) noexcept
+    {
+        this->mergin_ = m;
+        this->r_cell_size_ = 1 / (cutoff_ * (1 + mergin_) * (1+mesh_epsilon));
     }
 
   private:

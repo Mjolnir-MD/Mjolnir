@@ -49,12 +49,6 @@ class Plane
         return sign * normal_;
     }
 
-    //! after calling it, update() should be called!
-    void set_cutoff(const real_type rc) noexcept
-    {this->cutoff_ = rc; this->current_mergin_ = -1;}
-    void set_mergin(const real_type mg) noexcept
-    {this->mergin_ = mg; this->current_mergin_ = -1;}
-
     template<typename Potential>
     void initialize(const system_type& sys, const Potential& pot)
     {

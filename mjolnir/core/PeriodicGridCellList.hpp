@@ -76,10 +76,6 @@ class PeriodicGridCellList
     real_type cutoff() const {return this->cutoff_;}
     real_type mergin() const {return this->mergin_;}
 
-    // after calling this, neighbor list should be reconstructed!
-    void set_cutoff(const real_type c);
-    void set_mergin(const real_type m);
-
     range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
 
   private:
@@ -96,6 +92,23 @@ class PeriodicGridCellList
                            const std::size_t k) const noexcept
     {
         return i + this->dim_x_ * j + this->dim_x_ * this->dim_y_ * k;
+    }
+
+    void set_cutoff(const real_type c) noexcept
+    {
+        this->cutoff_ = c;
+        this->r_x_ = 1 / (this->cutoff_ * (1 + this->mergin_) + mesh_epsilon);
+        this->r_y_ = 1 / (this->cutoff_ * (1 + this->mergin_) + mesh_epsilon);
+        this->r_z_ = 1 / (this->cutoff_ * (1 + this->mergin_) + mesh_epsilon);
+        return;
+    }
+    void set_mergin(const real_type m) noexcept
+    {
+        this->mergin_ = m;
+        this->r_x_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
+        this->r_y_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
+        this->r_z_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
+        return;
     }
 
   private:
@@ -202,28 +215,6 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
     this->current_mergin_ = cutoff_ * mergin_;
     MJOLNIR_LOG_DEBUG("PeriodicGridCellList::make() RETURNED");
     return ;
-}
-
-
-
-template<typename traitsT>
-inline void PeriodicGridCellList<traitsT>::set_cutoff(const real_type c)
-{
-    this->cutoff_ = c;
-    this->r_x_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
-    this->r_y_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
-    this->r_z_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
-    return;
-}
-
-template<typename traitsT>
-inline void PeriodicGridCellList<traitsT>::set_mergin(const real_type m)
-{
-    this->mergin_ = m;
-    this->r_x_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
-    this->r_y_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
-    this->r_z_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
-    return;
 }
 
 template<typename traitsT>

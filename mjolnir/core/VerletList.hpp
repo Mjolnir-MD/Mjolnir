@@ -61,11 +61,12 @@ class VerletList
     real_type cutoff() const noexcept {return this->cutoff_;}
     real_type mergin() const noexcept {return this->mergin_;}
 
-    //XXX after these, list must be updated!
+    range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
+
+  private:
+
     void set_cutoff(const real_type c) noexcept {this->cutoff_ = c;}
     void set_mergin(const real_type m) noexcept {this->mergin_ = m;}
-
-    range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
 
   private:
 

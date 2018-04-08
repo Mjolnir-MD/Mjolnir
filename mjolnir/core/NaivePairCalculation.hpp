@@ -44,10 +44,6 @@ class NaivePairCalculation
     void make  (const system_type& sys);
     void update(const system_type& sys) noexcept {return;}
 
-    // it does not have cutoff stuff
-    void set_cutoff(const real_type) noexcept {return;}
-    void set_mergin(const real_type) noexcept {return;}
-
     range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
 
   private:
