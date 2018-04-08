@@ -10,7 +10,7 @@
 #include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
-#include <mjolnir/potential/global/ImplicitMembranePotential.hpp>
+#include <mjolnir/potential/external/ImplicitMembranePotential.hpp>
 #include <mjolnir/input/get_toml_value.hpp>
 
 namespace mjolnir
@@ -337,16 +337,19 @@ read_debye_huckel_potential(const toml::Table& global)
 
 template<typename traitsT>
 ImplicitMembranePotential<traitsT>
-read_implicit_membrane_potential(const toml::Table& global)
+read_implicit_membrane_potential(const toml::Table& external)
 {
     typedef typename traitsT::real_type real_type;
-    const auto thickness = toml::get<real_type>(toml_value_at(
-            global, "thickness", "[forcefield.global]"));
-    const auto interaction_magnitude = toml::get<real_type>(toml_value_at(
-            global, "interaction_magnitude", "[forcefield.global]"));
-    const auto bend = toml::get<real_type>(toml_value_at(
-            global, "bend", "[forcefield.global]"));
-    const auto& ps = toml_value_at(global, "parameters", "[forcefield.global]"
+
+    const auto thickness = toml::get<real_type>(toml_value_at(external,
+        "thickness", "[forcefield.external] for ImplicitMembrane"));
+    const auto magnitude = toml::get<real_type>(toml_value_at(external,
+        "interaction_magnitude", "[forcefield.external] for ImplicitMembrane"));
+    const auto bend = toml::get<real_type>(toml_value_at(external,
+        "bend", "[forcefield.external] for ImplicitMembrane"));
+
+    const auto& ps = toml_value_at(external, "parameters",
+            "[forcefield.external] for ImplicitMembrane"
             ).cast<toml::value_t::Array>();
 
     std::vector<real_type> params;
@@ -354,18 +357,22 @@ read_implicit_membrane_potential(const toml::Table& global)
     for(const auto& param : ps)
     {
         const auto& tab = param.cast<toml::value_t::Table>();
-        const auto idx = toml::get<std::size_t>(toml_value_at(
-                    tab, "index", "<anonymous> in parameters"));
+        const auto idx = toml::get<std::size_t>(toml_value_at(tab, "index",
+            "element of [[forcefield.external.parameters]] for ImplicitMembrane"
+            ));
+
         if(params.size() <= idx)
         {
             params.resize(idx+1, 0.);
         }
-        params.at(idx) = toml::get<real_type>(toml_value_at(
-                    tab, "hydrophobicity", "<anonymous> in parameters"));
+        const auto h = toml::get<real_type>(toml_value_at(tab, "hydrophobicity",
+            "element of [[forcefield.external.parameters]] for ImplicitMembrane"
+            ));
+        params.at(idx) = h;
     }
 
-    return ImplicitMembranePotential<traitsT>(thickness, interaction_magnitude,
-            bend, std::move(params));
+    return ImplicitMembranePotential<traitsT>(
+            thickness, magnitude, bend, std::move(params));
 }
 
 } // mjolnir
