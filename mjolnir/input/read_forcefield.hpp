@@ -20,7 +20,6 @@ read_local_forcefield(std::vector<toml::Table> interactions)
     return lff;
 }
 
-
 template<typename traitsT>
 GlobalForceField<traitsT>
 read_global_forcefield(std::vector<toml::Table> interactions)
@@ -31,6 +30,18 @@ read_global_forcefield(std::vector<toml::Table> interactions)
         gff.emplace(read_global_interaction<traitsT>(interaction));
     }
     return gff;
+}
+
+template<typename traitsT>
+ExternalForceField<traitsT>
+read_external_forcefield(std::vector<toml::Table> interactions)
+{
+    ExternalForceField<traitsT> eff;
+    for(const auto& interaction : interactions)
+    {
+        eff.emplace(read_external_interaction<traitsT>(interaction));
+    }
+    return eff;
 }
 
 template<typename traitsT>
@@ -46,20 +57,27 @@ read_forcefield(const toml::Table& data, std::size_t N)
     }
     const auto& ff = ffs.at(N).cast<toml::value_t::Table>();
 
-    std::vector<toml::Table> fflocal;
-    std::vector<toml::Table> ffglobal;
+    std::vector<toml::Table> fflocal, ffglobal, ffexternal;
 
     if(ff.count("local") == 1)
     {
-        fflocal  = toml::get<std::vector<toml::Table>>(ff.at("local"));
+        fflocal = toml::get<std::vector<toml::Table>>(
+                toml_value_at(ff, "local", "[forcefields]"));
     }
     if(ff.count("global") == 1)
     {
-        ffglobal = toml::get<std::vector<toml::Table>>(ff.at("global"));
+        ffglobal = toml::get<std::vector<toml::Table>>(
+                toml_value_at(ff, "global", "[forcefields]"));
+    }
+    if(ff.count("external") == 1)
+    {
+        ffexternal = toml::get<std::vector<toml::Table>>(
+                toml_value_at(ff, "external", "[forcefields]"));
     }
     return ForceField<traitsT>(
             read_local_forcefield<traitsT>(std::move(fflocal)),
-            read_global_forcefield<traitsT>(std::move(ffglobal)));
+            read_global_forcefield<traitsT>(std::move(ffglobal)),
+            read_external_forcefield<traitsT>(std::move(ffexternal)));
 }
 
 
