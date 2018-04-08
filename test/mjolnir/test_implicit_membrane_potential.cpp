@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "test_excluded_volume_potential"
+#define BOOST_TEST_MODULE "test_implicit_membrane_potential"
 
 #ifdef UNITTEST_FRAMEWORK_LIBRARY_EXIST
 #include <boost/test/unit_test.hpp>
