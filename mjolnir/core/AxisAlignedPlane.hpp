@@ -96,21 +96,17 @@ constexpr std::size_t AxisAlignedPlane<traitsT, NormalAxis>::axis;
 template<typename traitsT, std::size_t NormalAxis>
 void AxisAlignedPlane<traitsT, NormalAxis>::make(const system_type& sys)
 {
-    std::cerr << "AAPlane::make called\n";
     this->neighbors_.clear();
     const real_type threshold = this->cutoff_ * (1 + this->mergin_);
 
-    std::cerr << "particles = \n";
     for(std::size_t i : this->participant_)
     {
         const auto d = this->calc_distance(sys[i].position, sys.boundary());
-        std::cerr << "i = " << i << ", dist = " << d << '\n';
         if(d < threshold)
         {
             this->neighbors_.push_back(i);
         }
     }
-    std::cerr << std::endl;
 
     this->current_mergin_ = this->cutoff_ * this->mergin_;
     return;
