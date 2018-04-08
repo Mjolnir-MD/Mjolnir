@@ -34,9 +34,17 @@ class ExternalForceField
     ExternalForceField& operator=(ExternalForceField const&) = delete;
     ExternalForceField& operator=(ExternalForceField&&)      = default;
 
-    void append(interaction_ptr&& interaction)
+    void emplace(interaction_ptr&& interaction)
     {
         interactions_.push_back(std::move(interaction));
+    }
+
+    void initialize(const system_type& sys, const real_type dt)
+    {
+        for(auto& item : this->interactions_)
+        {
+            item->initialize(sys, dt);
+        }
     }
 
     // to re-calculate parameters like temperature, ionic concentration, etc...
