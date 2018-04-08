@@ -1,13 +1,12 @@
 #ifndef MJOLNIR_READ_INTERACTION
 #define MJOLNIR_READ_INTERACTION
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/core/BondLengthInteraction.hpp>
 #include <mjolnir/core/BondAngleInteraction.hpp>
 #include <mjolnir/core/DihedralAngleInteraction.hpp>
-#include <mjolnir/core/GlobalInteractionBase.hpp>
 #include <mjolnir/core/GlobalDistanceInteraction.hpp>
-#include <mjolnir/core/ZaxisExternalForceInteraction.hpp>
+#include <mjolnir/core/AxisAlignedPlane.hpp>
+#include <mjolnir/core/ExternalDistanceInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/input/get_toml_value.hpp>
@@ -140,7 +139,7 @@ std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_global_distance_interaction(const toml::Table& global)
 {
     const auto potential = toml::get<std::string>(
-            toml_value_at(global, "potential", "[forcefield.local]"));
+            toml_value_at(global, "potential", "[forcefield.global]"));
     if(potential == "ExcludedVolume")
     {
         using potential_t = ExcludedVolumePotential<traitsT, ignoreT>;
@@ -165,30 +164,89 @@ read_global_distance_interaction(const toml::Table& global)
     else
     {
         throw_exception<std::runtime_error>(
-                "invalid potential as GlobalDistanceInteraction: " + potential);
-    }
-}
-
-template<typename traitsT>
-std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_zaxis_external_force_interaction(const toml::Table& global)
-{
-    const auto potential = toml::get<std::string>(
-            toml_value_at(global, "potential", "[forcefield.local]"));
-    if(potential == "ImplicitMembrane")
-    {
-        return read_spatial_partition_for_implicit_membrane<
-            traitsT, ImplicitMembranePotential<traitsT>>(
-                global, read_implicit_membrane_potential<traitsT>(global));
-    }
-    else
-    {
-        throw std::runtime_error("invalid distance potential: " + potential);
+                "invalid potential as GlobalDistanceInteraction: ", potential);
     }
 }
 
 // ----------------------------------------------------------------------------
-// general read_(local|global)_interaction function
+// external interaction
+// ----------------------------------------------------------------------------
+
+template<typename traitsT, typename shapeT>
+std::unique_ptr<ExternalForceInteractionBase<traitsT>>
+read_external_distance_interaction(const toml::Table& external, shapeT&& shape)
+{
+    using real_type = typename traitsT::real_type;
+    const auto potential = toml::get<std::string>(toml_value_at(external,
+                "potential", "[forcefield.external]"));
+
+    if(potential == "ImplicitMembrane")
+    {
+        using potential_t   = ImplicitMembranePotential<traitsT>;
+        using interaction_t = ExternalDistanceInteraction<
+                                    traitsT, potential_t, shapeT>;
+
+        return make_unique<interaction_t>(std::move(shape),
+             read_implicit_membrane_potential<traitsT>(external));
+    }
+    else
+    {
+        throw_exception<std::runtime_error>(
+            "invalid potential as ExternalDistanceInteraction: ", potential);
+    }
+}
+
+template<typename traitsT>
+std::unique_ptr<ExternalForceInteractionBase<traitsT>>
+read_external_distance_interaction_shape(const toml::Table& external)
+{
+    using real_type = typename traitsT::real_type;
+
+    const auto shape = toml::get<toml::Table>(toml_value_at(external, "shape",
+            "[forcefield.external] for ExternalDistance"));
+    const auto name  = toml::get<std::string>(toml_value_at(shape, "name",
+            "[forcefield.external.shape] for ExternalDistance"));
+
+    if(name == "AxisAlignedPlane")
+    {
+        const auto pos = toml::get<real_type>(toml_value_at(shape, "position",
+            "[forcefield.external.shape] for ExternalDistance"));
+        const auto mergin = toml::get<real_type>(toml_value_at(shape, "mergin",
+            "[forcefield.external.shape] for ExternalDistance"));
+
+        const auto axis = toml::get<std::string>(toml_value_at(shape, "axis",
+            "[forcefield.external.shape] for ExternalDistance"));
+        if(axis == "X")
+        {
+            using shape_t = AxisAlignedPlane<traitsT, 0>;
+            return read_external_distance_interaction<traitsT, shape_t>(
+                    external, shape_t(pos, mergin));
+        }
+        else if(axis == "Y")
+        {
+            using shape_t = AxisAlignedPlane<traitsT, 1>;
+            return read_external_distance_interaction<traitsT, shape_t>(
+                    external, shape_t(pos, mergin));
+        }
+        else if(axis == "Z")
+        {
+            using shape_t = AxisAlignedPlane<traitsT, 2>;
+            return read_external_distance_interaction<traitsT, shape_t>(
+                    external, shape_t(pos, mergin));
+        }
+        else
+        {
+            throw std::runtime_error("invalid axis name: " + axis);
+        }
+    }
+    else
+    {
+        throw std::runtime_error("invalid external forcefield shape: " + name);
+    }
+}
+
+// ----------------------------------------------------------------------------
+// general read_(local|global|external)_interaction function
 // ----------------------------------------------------------------------------
 
 template<typename traitsT>
@@ -257,9 +315,23 @@ read_global_interaction(const toml::Table& global)
             throw std::runtime_error("invalid `ignored_chain`: " + ignored_chain);
         }
     }
-    else if(interaction == "External")
+    else
     {
-        return read_zaxis_external_force_interaction<traitsT>(global);
+        throw std::runtime_error(
+                "invalid global interaction type: " + interaction);
+    }
+}
+
+template<typename traitsT>
+std::unique_ptr<ExternalForceInteractionBase<traitsT>>
+read_external_interaction(const toml::Table& external)
+{
+    const auto interaction = toml::get<std::string>(
+            toml_value_at(external, "interaction", "[forcefields.external]"));
+
+    if(interaction == "Distance")
+    {
+        return read_external_distance_interaction_shape<traitsT>(external);
     }
     else
     {
