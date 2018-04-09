@@ -98,11 +98,12 @@ void AxisAlignedPlane<traitsT, NormalAxis>::make(const system_type& sys)
 {
     this->neighbors_.clear();
     const real_type threshold = this->cutoff_ * (1 + this->mergin_);
+    const real_type thr2 = threshold * threshold;
 
     for(std::size_t i : this->participant_)
     {
         const auto d = this->calc_distance(sys[i].position, sys.boundary());
-        if(d < threshold)
+        if(d * d <= thr2)
         {
             this->neighbors_.push_back(i);
         }
