@@ -2,8 +2,6 @@ set(TEST_NAMES
     test_matrix
     test_vector
     test_range
-    test_index_sequence
-    test_zip_iterator
     test_throw_exception
     test_topology
     test_fast_inv_sqrt
