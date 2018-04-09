@@ -59,8 +59,6 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
         const real_type force_strength1 = mjolnir::length(sys[0].force);
         const real_type force_strength2 = mjolnir::length(sys[1].force);
 
-        BOOST_CHECK_CLOSE_FRACTION(coef, force_strength1, tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(coef, force_strength2, tolerance);
 
         // direction
         if(i == 1000) // most stable point
@@ -70,6 +68,9 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
         }
         else if(i < 1000) // repulsive
         {
+            BOOST_CHECK_CLOSE_FRACTION(coef, force_strength1, tolerance);
+            BOOST_CHECK_CLOSE_FRACTION(coef, force_strength2, tolerance);
+
             const real_type dir1 =
                 mjolnir::dot_product(normalize(sys[0].force),
                                      normalize(sys[0].position - sys[1].position));
@@ -82,6 +83,9 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
         }
         else if(i > 1000) // attractive
         {
+            BOOST_CHECK_CLOSE_FRACTION(coef, force_strength1, tolerance);
+            BOOST_CHECK_CLOSE_FRACTION(coef, force_strength2, tolerance);
+
             const real_type dir1 =
                 mjolnir::dot_product(normalize(sys[0].force),
                                      normalize(sys[1].position - sys[0].position));
