@@ -1,7 +1,6 @@
 #ifndef MJOLNIR_MATH_MATRIX
 #define MJOLNIR_MATH_MATRIX
 #include <mjolnir/util/type_traits.hpp>
-#include <mjolnir/util/scalar_type_of.hpp>
 #include <iostream>
 #include <array>
 
@@ -301,13 +300,5 @@ Matrix<realT, 3, 3> inverse(const Matrix<realT, 3, 3>& mat) noexcept
     inv(2,1) = det_inv * (mat(2,0) * mat(0,1) - mat(0,0) * mat(2,1));
     return inv;
 }
-
-template<typename T, std::size_t S1, std::size_t S2>
-struct scalar_type_of<Matrix<T, S1, S2>>
-{
-    typedef T type;
-};
-
-
 } // mjolnir
 #endif /* MJOLNIR_MATH_MATRIX */

@@ -3,7 +3,6 @@
 #include <mjolnir/math/Matrix.hpp>
 #include <mjolnir/math/quaternion.hpp>
 #include <mjolnir/math/rsqrt.hpp>
-#include <mjolnir/util/scalar_type_of.hpp>
 #include <cmath>
 
 namespace mjolnir
