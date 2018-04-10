@@ -1,25 +1,26 @@
 #ifndef MJOLNIR_PARTICLE
 #define MJOLNIR_PARTICLE
-#include <mjolnir/util/scalar_type_of.hpp>
 
 namespace mjolnir
 {
 
-template<typename coordT>
+template<typename realT, typename coordT>
 struct Particle
 {
-    scalar_type<coordT> mass;
+    typedef realT  real_type;
+    typedef coordT coordinate_type;
+    realT  mass;
     coordT position;
     coordT velocity;
     coordT force;
 };
 
-template<typename coordT>
-constexpr inline Particle<coordT>
-make_particle(const scalar_type<coordT> mass, const coordT& pos,
+template<typename realT, typename coordT>
+constexpr inline Particle<realT, coordT>
+make_particle(const realT  mass, const coordT& pos,
               const coordT& vel, const coordT& f)
 {
-    return Particle<coordT>{mass, pos, vel, f};
+    return Particle<realT, coordT>{mass, pos, vel, f};
 }
 
 
