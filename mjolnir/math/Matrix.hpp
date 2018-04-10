@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_MATH_MATRIX
 #define MJOLNIR_MATH_MATRIX
-#include <mjolnir/util/is_all.hpp>
+#include <mjolnir/util/type_traits.hpp>
 #include <mjolnir/util/scalar_type_of.hpp>
 #include <iostream>
 #include <array>
