@@ -7,7 +7,7 @@ Mjolnir
 
 Molecular Dynamics Simulation Software written in c++11.
 
-## Purpose
+## Description
 
 Flexible, well-organized, and modern molecular dynamics simulation code.
 
@@ -15,13 +15,13 @@ Mainly focused on Coarse-Grained MD simulation.
 
 ### Goals
 
-1. Make it easy to implement new forcefield.
-2. Do everything that a user wants and nothing more than that.
-3. Be fast whenever possible without breaking the above goals.
+1. Flexibility: To make it easy to implement new forcefields.
+2. Reliability: To do everything that a user wants and nothing more than that.
+3. Efficiency: To be fast whenever possible without breaking the above goals.
 
 ## Build
 
-Testing code depends on Boost.unittest framework.
+Testing code depends on the Boost.unittest framework.
 If you want to run test codes, please install boost.
 
 ```sh
@@ -38,11 +38,11 @@ $ make test # optional
 
 ## Example
 
-__NOTE__: Specification of this project is currently unstable.
+__NOTE__: Specifications of this project is currently unstable.
 Most of the following procedures may be changed.
 
-Example input files are in `input` directory.
-You can run it with the command below.
+Example input files are in the `input` directory.
+You can run them with the command below.
 
 ```console
 $ mjolnir input/sh3_AICG2+.toml
