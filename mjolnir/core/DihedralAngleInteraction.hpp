@@ -2,6 +2,7 @@
 #define MJOLNIR_CORE_DIHEDRAL_ANGLE_INTERACTION
 #include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/math/rsqrt.hpp>
+#include <mjolnir/util/string.hpp>
 #include <cmath>
 
 namespace mjolnir
@@ -55,7 +56,7 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
     }
 
     std::string name() const override
-    {return "DihedralAngle:" + std::string(potentials.front().second.name());}
+    {return "DihedralAngle:"_str + potentials.front().second.name();}
 
     void write_topology(topology_type&) const override;
 

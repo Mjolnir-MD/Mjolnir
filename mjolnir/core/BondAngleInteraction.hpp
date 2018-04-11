@@ -4,6 +4,7 @@
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/constants.hpp>
 #include <mjolnir/math/rsqrt.hpp>
+#include <mjolnir/util/string.hpp>
 #include <cmath>
 
 namespace mjolnir
@@ -55,7 +56,7 @@ class BondAngleInteraction : public LocalInteractionBase<traitsT>
     }
 
     std::string name() const override
-    {return "BondAngle:" + std::string(potentials.front().second.name());}
+    {return "BondAngle:"_str + potentials.front().second.name();}
 
     void write_topology(topology_type&) const override;
 

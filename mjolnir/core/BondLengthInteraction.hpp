@@ -2,6 +2,7 @@
 #define MJOLNIR_BOND_LENGTH_INTERACTION
 #include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/math/rsqrt.hpp>
+#include <mjolnir/util/string.hpp>
 #include <cmath>
 #include <iostream>
 
@@ -57,7 +58,7 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
     }
 
     std::string name() const override
-    {return "BondLength:" + std::string(potentials.front().second.name());}
+    {return "BondLength:"_str + potentials.front().second.name();}
 
     void write_topology(topology_type&) const override;
 

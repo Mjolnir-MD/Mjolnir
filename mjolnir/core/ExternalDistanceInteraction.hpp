@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_BOX_INTEARACTION_BASE
 #define MJOLNIR_BOX_INTEARACTION_BASE
 #include <mjolnir/core/ExternalForceInteractionBase.hpp>
+#include <mjolnir/util/string.hpp>
 
 namespace mjolnir
 {
@@ -56,7 +57,8 @@ class ExternalDistanceInteraction final
         this->shape_.update(sys);
     }
 
-    std::string name() const {return "ExternalDistance:" + potential_.name();}
+    std::string name() const override
+    {return "ExternalDistance:"_str + potential_.name();}
 
   private:
 
