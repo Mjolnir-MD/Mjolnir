@@ -101,7 +101,7 @@ class LennardJonesPotential
         return ignored_chain_.is_ignored(i, j);
     }
 
-    std::string name() const noexcept {return "LennardJones";}
+    const char* name() const noexcept {return "LennardJones";}
 
     // access to the parameters...
     std::vector<parameter_type>&       radii()       noexcept {return radii_;}
