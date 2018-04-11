@@ -5,11 +5,14 @@
 
 namespace mjolnir
 {
-
-
 /* Implicit membrane potential                                                *
- *  V(z) = ma * tanh(be * (|z| - th/2))                                       *
- * dV/dr = (z/|z|) * ma * (cosh^2(be * (|z| - th/2)))                         *
+ *  V(z) = k * tanh(bend * (|z| - thick/2))                                   *
+ * dV/dr = (z/|z|) * k * (cosh^2(bend * (|z| - thick/2)))                     *
+ *                 y                                                          *
+ *  _________      ^      _______                                             *
+ *  _________\_____|_____/______x                                             *
+ *  -thick/2  \____|____/ thick/2                                             *
+ *               -k|                                                          *
  * Cutoff ratio ensure 1/1000 accuracy.                                       */
 template<typename traitsT>
 class ImplicitMembranePotential
@@ -70,7 +73,7 @@ class ImplicitMembranePotential
         return retval;
     }
 
-    std::string name() const {return "ImplicitMembrane";}
+    const char* name() const noexcept {return "ImplicitMembrane";}
 
     real_type  half_thick() const noexcept {return half_thick_;}
     real_type& half_thick()       noexcept {return half_thick_;}
