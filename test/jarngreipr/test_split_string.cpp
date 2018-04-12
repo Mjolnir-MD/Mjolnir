@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE "test_split_string"
 #include <boost/test/included/unit_test.hpp>
-#include <jarngreipr/util/string.hpp>
+#include <mjolnir/util/string.hpp>
 #include <jarngreipr/util/split_string.hpp>
 
 using mjolnir::operator"" _str;
