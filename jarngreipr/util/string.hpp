@@ -18,11 +18,5 @@ remove_whitespace(const std::basic_string<charT, traitsT, allocT>& str)
     return retval;
 }
 
-// this is re-definition of C++14 std::literals::string_literals::operator""s.
-inline std::string operator"" _str(const char* str, std::size_t len)
-{
-    return std::string{str, len};
-}
-
 } // mjolnir
 #endif /*JARNGREIPR_STRING*/
