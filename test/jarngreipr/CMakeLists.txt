@@ -1,5 +1,5 @@
 set(TEST_NAMES
-    test_split_string
+    test_split_chainIDs
     )
 
 add_definitions("-O3 -std=c++11")
