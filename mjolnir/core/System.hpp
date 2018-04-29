@@ -23,14 +23,19 @@ class System
     typedef typename container_type::iterator       iterator;
     typedef typename container_type::const_iterator const_iterator;
 
-    System()  = default;
-    ~System() = default;
-
-    System(container_type&& pcon, boundary_type&& bound)
-        : boundary_(bound), particles_(pcon)
+  public:
+    System(const std::size_t num_particles, const boundary_type& bound)
+        : boundary_(bound), particles_(num_particles)
     {
-        this->topology_.resize(this->particles_.size());
+        this->topology_.resize(num_particles);
     }
+    System(std::vector<particle_type>&& ps, const boundary_type& bound)
+        : boundary_(bound), particles_(ps)
+    {
+        this->topology_.resize(particles_.size());
+    }
+
+    ~System() = default;
 
     coordinate_type adjust_direction(coordinate_type dr) const noexcept
     {return boundary_.adjust_direction(dr);}
