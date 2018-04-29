@@ -22,7 +22,6 @@ class AxisAlignedPlane
     typedef typename traits_type::real_type        real_type;
     typedef typename traits_type::coordinate_type  coordinate_type;
     typedef typename traits_type::boundary_type    boundary_type;
-    typedef typename traits_type::particle_type    particle_type;
     constexpr static std::size_t axis = NormalAxis;
     static_assert(axis < 3, "0 <= AxisAlignedPlane::axis < 3");
 

@@ -107,8 +107,8 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_neighbors_unlimited)
     using real_type     = typename traits::real_type;
     using coord_type    = typename traits::coordinate_type;
     using boundary_type = typename traits::boundary_type;
-    using particle_type = typename traits::particle_type;
     using system_type   = mjolnir::System<traits>;
+    using particle_type = typename system_type::particle_type;
 
     static constexpr traits::real_type tolerance = 1e-8;
 

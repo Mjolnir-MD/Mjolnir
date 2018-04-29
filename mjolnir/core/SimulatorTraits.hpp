@@ -1,7 +1,6 @@
 #ifndef MJOLNIR_DEFAULT_TRAITS
 #define MJOLNIR_DEFAULT_TRAITS
 #include <mjolnir/math/Vector.hpp>
-#include <mjolnir/core/Particle.hpp>
 
 namespace mjolnir
 {
@@ -14,7 +13,6 @@ struct SimulatorTraitsBase
     template<std::size_t N, std::size_t M>
     using matrix_type = Matrix<real_type, N, M>;
     typedef coordinate_type                       position_type;
-    typedef Particle<real_type, coordinate_type>  particle_type;
     typedef boundaryT<real_type, coordinate_type> boundary_type;
 };
 

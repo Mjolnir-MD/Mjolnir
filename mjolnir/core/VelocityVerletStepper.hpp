@@ -16,7 +16,6 @@ class VelocityVerletStepper
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef System<traitsT>     system_type;
     typedef ForceField<traitsT> forcefield_type;
-    typedef typename system_type::particle_type particle_type;
 
   public:
 

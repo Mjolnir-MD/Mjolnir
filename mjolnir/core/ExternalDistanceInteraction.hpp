@@ -24,7 +24,6 @@ class ExternalDistanceInteraction final
     typedef typename base_type::coordinate_type  coordinate_type;
     typedef typename base_type::system_type      system_type;
     typedef typename base_type::boundary_type    boundary_type;
-    typedef typename base_type::particle_type    particle_type;
 
   public:
 

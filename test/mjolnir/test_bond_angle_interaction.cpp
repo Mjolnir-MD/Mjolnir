@@ -22,8 +22,8 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
     typedef traits::real_type real_type;
     typedef traits::coordinate_type            coord_type;
     typedef traits::boundary_type              boundary_type;
-    typedef traits::particle_type              particle_type;
     typedef mjolnir::System<traits>            system_type;
+    typedef system_type::particle_type         particle_type;
     typedef mjolnir::HarmonicPotential<traits> harmonic_type;
     typedef mjolnir::BondAngleInteraction<traits, harmonic_type> bond_angle_type;
     typedef bond_angle_type::connection_kind_type connection_kind_type;

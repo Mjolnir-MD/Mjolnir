@@ -18,7 +18,6 @@ class ExternalForceField
     typedef typename traits_type::real_type         real_type;
     typedef typename traits_type::coordinate_type   coordinate_type;
     typedef System<traits_type>                     system_type;
-    typedef typename system_type::particle_type     particle_type;
     typedef ExternalForceInteractionBase<traitsT>   interaction_type;
     typedef std::unique_ptr<interaction_type>       interaction_ptr;
     typedef std::vector<interaction_ptr>            container_type;

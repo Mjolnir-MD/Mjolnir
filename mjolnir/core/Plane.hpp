@@ -20,7 +20,6 @@ class Plane
     typedef typename traits_type::real_type        real_type;
     typedef typename traits_type::coordinate_type  coordinate_type;
     typedef typename traits_type::boundary_type    boundary_type;
-    typedef typename traits_type::particle_type    particle_type;
 
     static_assert(!std::is_same<boundary_type,
             CubicPeriodicBoundary<real_type, coordinate_type>>::value,

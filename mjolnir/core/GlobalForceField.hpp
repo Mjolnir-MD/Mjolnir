@@ -18,7 +18,6 @@ class GlobalForceField
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef typename traits_type::boundary_type   boundary_type;
-    typedef typename system_type::particle_type   particle_type;
     typedef GlobalInteractionBase<traitsT>    interaction_base;
     typedef std::unique_ptr<interaction_base> interaction_ptr;
 

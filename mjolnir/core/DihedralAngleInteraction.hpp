@@ -19,7 +19,6 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
     typedef typename base_type::real_type       real_type;
     typedef typename base_type::coordinate_type coordinate_type;
     typedef typename base_type::system_type     system_type;
-    typedef typename base_type::particle_type   particle_type;
     typedef typename base_type::topology_type   topology_type;
     typedef typename base_type::connection_kind_type connection_kind_type;
 

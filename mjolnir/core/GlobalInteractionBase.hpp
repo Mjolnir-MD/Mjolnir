@@ -15,7 +15,6 @@ class GlobalInteractionBase
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef typename traits_type::boundary_type   boundary_type;
-    typedef typename system_type::particle_type   particle_type;
 
   public:
 

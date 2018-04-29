@@ -18,7 +18,6 @@ class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
     typedef typename base_type::real_type       real_type;
     typedef typename base_type::coordinate_type coordinate_type;
     typedef typename base_type::system_type     system_type;
-    typedef typename base_type::particle_type   particle_type;
     typedef typename base_type::boundary_type   boundary_type;
 
   public:
