@@ -47,38 +47,10 @@ read_boundary(const toml::Table& boundary)
 }
 
 template<typename traitsT>
-std::vector<typename System<traitsT>::particle_type>
-read_particles(const toml::Table& system)
-{
-    using real_type  = typename traitsT::real_type;
-    using coord_type = typename traitsT::coordinate_type;
-
-    const auto& particles = toml_value_at(system, "particles", "[system]"
-            ).cast<toml::value_t::Array>();
-
-    std::vector<typename System<traitsT>::particle_type> ps;
-    ps.reserve(particles.size());
-
-    for(const auto& p : particles)
-    {
-        const auto& params = p.cast<toml::value_t::Table>();
-
-        const real_type  mass = toml::get<real_type>(toml_value_at(
-                params, "mass",     "element of [[system.particles]]"));
-        const coord_type pos(toml::get<std::array<real_type, 3>>(toml_value_at(
-                params, "position", "element of [[system.particles]]")));
-        const coord_type vel(toml::get<std::array<real_type, 3>>(toml_value_at(
-                params, "velocity", "element of [[system.particles]]")));
-
-        ps.push_back(make_particle(mass, pos, vel, coord_type(0.0, 0.0, 0.0)));
-    }
-    return ps;
-}
-
-template<typename traitsT>
 System<traitsT> read_system(const toml::Table& data, std::size_t N)
 {
-    typedef typename traitsT::real_type real_type;
+    using real_type  = typename traitsT::real_type;
+    using coordinate_type = typename traitsT::coordinate_type;
 
     const auto& system_params = toml_value_at(data, "systems", "<root>"
             ).cast<toml::value_t::Array>();
@@ -90,9 +62,20 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
     const auto& system   = system_params.at(N).cast<toml::value_t::Table>();
     const auto& boundary = toml_value_at(system, "boundary","[systems.boundary]"
             ).cast<toml::value_t::Table>();
+    const auto& particles = toml_value_at(system, "particles", "[system]"
+            ).cast<toml::value_t::Array>();
 
-    System<traitsT> sys(read_particles<traitsT>(system),
-                        read_boundary<traitsT>(boundary));
+    System<traitsT> sys(particles.size(), read_boundary<traitsT>(boundary));
+    for(std::size_t i=0; i<particles.size(); ++i)
+    {
+        using vec_type = std::array<real_type, 3>;
+        const auto& params = particles[i].cast<toml::value_t::Table>();
+
+        sys[i].mass     = toml::get<real_type>(toml_value_at(params, "mass", "element of [[system.particles]]"));
+        sys[i].position = toml::get< vec_type>(toml_value_at(params, "position", "element of [[system.particles]]"));
+        sys[i].velocity = toml::get< vec_type>(toml_value_at(params, "velocity", "element of [[system.particles]]"));
+        sys[i].force    = coordinate_type(0, 0, 0);
+    }
 
     const auto& attributes = toml_value_at(system, "attributes", "[[systems]]"
             ).cast<toml::value_t::Table>();
