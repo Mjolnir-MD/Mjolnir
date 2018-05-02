@@ -7,11 +7,11 @@
 namespace jarngreipr
 {
 
-template<typename realT, typename coordT>
+template<typename realT>
 class PDBChain
 {
   public:
-    typedef PDBAtom<realT, coordT> atom_type;
+    typedef PDBAtom<realT> atom_type;
     typedef std::vector<atom_type> container_type;
     typedef typename container_type::iterator       iterator;
     typedef typename container_type::const_iterator const_iterator;

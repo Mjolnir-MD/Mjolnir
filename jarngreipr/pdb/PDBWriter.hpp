@@ -9,12 +9,12 @@
 namespace jarngreipr
 {
 
-template<typename realT, typename coordT>
+template<typename realT>
 class PDBWriter
 {
   public:
-    typedef PDBAtom<realT, coordT>  atom_type;
-    typedef PDBChain<realT, coordT> chain_type;
+    typedef PDBAtom<realT>  atom_type;
+    typedef PDBChain<realT> chain_type;
     typedef std::vector<chain_type> model_type;
 
   public:

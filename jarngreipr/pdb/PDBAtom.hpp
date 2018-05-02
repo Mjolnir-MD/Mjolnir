@@ -1,5 +1,6 @@
 #ifndef JARNGREIPR_PDB_ATOM_HPP
 #define JARNGREIPR_PDB_ATOM_HPP
+#include <mjolnir/math/Vector.hpp>
 #include <ostream>
 #include <istream>
 #include <iomanip>
@@ -9,11 +10,11 @@
 namespace jarngreipr
 {
 
-template<typename realT, typename vecT>
+template<typename realT>
 struct PDBAtom
 {
     using real_type   = realT;
-    using vector_type = vecT;
+    using vector_type = mjolnir::Vector<realT, 3>;
 
     char         altloc;
     char         icode;
@@ -29,19 +30,19 @@ struct PDBAtom
     vector_type  position;
 };
 
-template<typename realT, typename vecT>
-PDBAtom<realT, vecT> make_pdb_atom(const vecT& pos,
+template<typename realT>
+PDBAtom<realT> make_pdb_atom(const mjolnir::Vector<realT, 3>& pos,
     const std::int32_t atm_id =   0, const std::string& atm_name = " X  ",
     const std::int32_t res_id =   0, const std::string& res_name = "XXX",
     const char         chn_id = 'A', const std::string& elm_name = "X")
 {
-    return PDBAtom<realT, vecT>{' ', ' ', chn_id, atm_id, res_id, 0.0, 0.0,
-                                atm_name, res_name, elm_name, "", pos};
+    return PDBAtom<realT>{' ', ' ', chn_id, atm_id, res_id, 0.0, 0.0,
+                          atm_name, res_name, elm_name, "", pos};
 }
 
-template<typename charT, typename traits, typename realT, typename vecT>
+template<typename charT, typename traits, typename realT>
 std::basic_ostream<charT, traits>& operator<<(
-    std::basic_ostream<charT, traits>& os, const PDBAtom<realT, vecT>& atm)
+    std::basic_ostream<charT, traits>& os, const PDBAtom<realT>& atm)
 {
     os << "ATOM  ";
     os << std::right << std::setw(5) << atm.atom_id;
@@ -70,9 +71,9 @@ std::basic_ostream<charT, traits>& operator<<(
     return os;
 }
 
-template<typename charT, typename traits, typename realT, typename vecT>
+template<typename charT, typename traits, typename realT>
 std::basic_istream<charT, traits>& operator>>(
-    std::basic_istream<charT, traits>& is, PDBAtom<realT, vecT>& atm)
+    std::basic_istream<charT, traits>& is, PDBAtom<realT>& atm)
 {
     std::string line;
     std::getline(is, line);
