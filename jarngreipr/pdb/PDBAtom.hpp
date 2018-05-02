@@ -14,7 +14,7 @@ template<typename realT>
 struct PDBAtom
 {
     using real_type   = realT;
-    using vector_type = mjolnir::Vector<realT, 3>;
+    using coordinate_type = mjolnir::Vector<realT, 3>;
 
     char         altloc;
     char         icode;
@@ -27,7 +27,7 @@ struct PDBAtom
     std::string  residue_name;
     std::string  element;
     std::string  charge;
-    vector_type  position;
+    coordinate_type position;
 };
 
 template<typename realT>
