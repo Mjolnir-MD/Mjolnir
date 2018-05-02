@@ -1,96 +1,72 @@
-#ifndef JARNGREIPR_IO_XYZ_READER
-#define JARNGREIPR_IO_XYZ_READER
-#include <jarngreipr/io/XYZData.hpp>
-#include <jarngreipr/util/string.hpp>
+#ifndef JARNGREIPR_XYZ_READER_HPP
+#define JARNGREIPR_XYZ_READER_HPP
+#include <jarngreipr/xyz/XYZLine.hpp>
+#include <jarngreipr/xyz/XYZFrame.hpp>
+#include <mjolnir/util/throw_exception.hpp>
 #include <stdexcept>
-#include <istream>
 #include <fstream>
 #include <sstream>
 
-namespace mjolnir
+namespace jarngreipr
 {
-
-template<typename coordT>
-XYZLine<coordT> read_xyz_line(const std::string& line)
-{
-    XYZLine<coordT> l;
-    std::istringstream iss(line);
-    iss >> l.name >> l.position[0] >> l.position[1] >> l.position[2];
-    return l;
-}
-
-template<typename coordT>
-XYZFrame<coordT> read_xyz_frame(std::istream& istrm)
-{
-    XYZFrame<coordT> f;
-    std::string line;
-
-    std::getline(istrm, line);
-    std::size_t N;
-    try
-    {
-        N = std::stoull(line);
-    }
-    catch(...)
-    {
-        throw std::runtime_error("mjolnir::io::read_xyz_frame: "_str +
-                "found invalid line: "_str + line);
-    }
-    f.lines.reserve(N);
-
-    std::getline(istrm, f.comment);
-    while(!istrm.eof() || N != 0)
-    {
-        std::getline(istrm, line);
-        f.push_back(read_xyz_line(line));
-        istrm.peek();
-        --N;
-    }
-    if(N != 0)
-    {
-        throw std::runtime_error("mjolnir::io::read_xyz_frame: "
-                "eof while reading a frame");
-    }
-    return f;
-}
-
-template<typename coordT>
-std::vector<XYZFrame<coordT>> read_xyz_file(std::istream& istrm)
-{
-    std::vector<XYZFrame<coordT>> fs;
-    try
-    {
-        while(!istrm.eof())
-        {
-            fs.push_back(read_xyz_frame(istrm));
-            istrm.peek();
-        }
-    }
-    catch(const std::runtime_error& rte)
-    {
-        std::cerr << "mjolnir::io::read_xyz_file: Error in reading frames; ";
-        std::cerr << "read only first " << fs.size() << "frames\n";
-        std::cerr << "What: " << rte.what() << std::endl;
-    }
-    return fs;
-}
 
 // lazy XYZ file reader
-template<typename coordT>
-struct XYZReader
+template<typename realT, typename coordT>
+class XYZReader
 {
-    typedef XYZLine<coordT>  line_type;
-    typedef XYZFrame<coordT> frame_type;
+  public:
+    typedef XYZLine<realT, coordT>  line_type;
+    typedef XYZFrame<realT, coordT> frame_type;
 
-    explicit XYZReader(const std::string& fname): ifstrm_(fname){}
+  public:
+    explicit XYZReader(const std::string& fname)
+        : filename_(fname), ifstrm_(fname)
+    {
+        if(!ifstrm_.good())
+        {
+            throw std::runtime_error("jarngreipr::XYZReader: file open error: "
+                    + filename_);
+        }
+    }
     ~XYZReader() = default;
 
     frame_type read_next_frame()
     {
-        return read_xyz_frame(this->ifstrm_);
+        std::string line;
+        std::getline(ifstrm_, line);
+        std::size_t n;
+        try
+        {
+            n = std::stoull(line);
+        }
+        catch(std::invalid_argument const& iva)
+        {
+            mjolnir::throw_exception<std::runtime_error>(
+                "jarngreipr::XYZReader: in ", filename_,
+                " invalid first line(not a number) appeared: ", line);
+        }
+        catch(std::out_of_range const& iva)
+        {
+            mjolnir::throw_exception<std::runtime_error>(
+                "jarngreipr::XYZReader: in ", filename_,
+                " invalid first line(not a number) appeared: ", line);
+        }
+
+        frame_type frame;
+        std::getline(ifstrm_, frame.comment);
+        for(std::size_t i=0; i<n; ++i)
+        {
+            std::getline(ifstrm_, line);
+            std::istringstream iss(line);
+            line_type xyz;
+            iss >> xyz;
+            frame.lines.push_back(xyz);
+        }
+        return frame;
     }
 
   private:
+    std::string filename_;
     std::ifstream ifstrm_;
 };
 

@@ -1,47 +1,49 @@
-#ifndef JARNGREIPR_IO_XYZ_WRITER
-#define JARNGREIPR_IO_XYZ_WRITER
-#include <jarngreipr/io/XYZData.hpp>
+#ifndef JARNGREIPR_XYZ_WRITER_HPP
+#define JARNGREIPR_XYZ_WRITER_HPP
+#include <jarngreipr/xyz/XYZLine.hpp>
+#include <jarngreipr/xyz/XYZFrame.hpp>
 #include <stdexcept>
 #include <ostream>
 #include <fstream>
 #include <sstream>
 
-namespace mjolnir
+namespace jarngreipr
 {
 
-template<typename coordT>
-std::ostream& operator<<(std::ostream& ostrm, const XYZLine<coordT>& line)
+template<typename realT, typename coordT>
+class XYZWriter
 {
-    ostrm << std::setw(8)  << std::left << line.name
-          << std::fixed << std::showpoint << std::setprecision(5) << std::right
-          << std::setw(10) << line.position[0] << ' '
-          << std::setw(10) << line.position[1] << ' '
-          << std::setw(10) << line.position[2];
-    return ostrm;
-}
+  public:
+    typedef XYZLine<realT, coordT>  line_type;
+    typedef XYZFrame<realT, coordT> frame_type;
 
-template<typename coordT>
-std::ostream& operator<<(std::ostream& ostrm, const XYZFrame<coordT>& frame)
-{
-    ostrm << frame.lines.size() << '\n';
-    ostrm << frame.comment      << '\n';
-    for(const auto& line : frame.lines)
+  public:
+    explicit XYZWriter(const std::string& fname)
+        : filename_(fname), ofstrm_(fname)
     {
-        ostrm << line << '\n';
+        if(!ofstrm_.good())
+        {
+            throw std::runtime_error("jarngreipr::XYZWriter: file open error: "
+                    + filename_);
+        }
     }
-    return ostrm;
-}
+    ~XYZWriter() = default;
 
-template<typename coordT>
-void
-write_xyz_file(std::ostream& ostrm, const std::vector<XYZFrame<coordT>>& traj)
-{
-    for(const auto& frame : traj)
+    void write_frame(const frame_type& frame)
     {
-        ostrm << frame;
+        ofstrm_ << frame.lines.size() << '\n';
+        ofstrm_ << frame.comment      << '\n';
+        for(const auto& line : frame.lines)
+        {
+            ofstrm_ << line << '\n';
+        }
+        return;
     }
-    return;
-}
+
+  private:
+    std::string filename_;
+    std::ofstream ofstrm_;
+};
 
 } // mjolnir
 #endif// JARNGREIPR_IO_XYZ_WRITER
