@@ -23,7 +23,7 @@ class PDBChain
 
   public:
 
-    PDBChain(std::vector<atom_type> atoms): atoms_(std::move(atoms))
+    explicit PDBChain(std::vector<atom_type> atoms): atoms_(std::move(atoms))
     {
         std::int32_t residue_id = this->atoms_.front().residue_id;
         const_iterator    first = this->atoms_.begin();

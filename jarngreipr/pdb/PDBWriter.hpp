@@ -19,7 +19,7 @@ class PDBWriter
 
   public:
 
-    PDBWriter(const std::string& fname): filename_(fname), ofstrm_(fname)
+    explicit PDBWriter(const std::string& fname): filename_(fname), ofstrm_(fname)
     {
         if(!ofstrm_.good())
         {

@@ -20,7 +20,7 @@ class PDBReader
 
   public:
 
-    PDBReader(const std::string& fname): filename_(fname), ifstrm_(fname)
+    explicit PDBReader(const std::string& fname): filename_(fname), ifstrm_(fname)
     {
         if(!ifstrm_.good())
         {
