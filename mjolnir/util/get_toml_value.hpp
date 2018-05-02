@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_INPUT_GET_TOML_VALUE
-#define MJOLNIR_INPUT_GET_TOML_VALUE
+#ifndef MJOLNIR_UTIL_GET_TOML_VALUE
+#define MJOLNIR_UTIL_GET_TOML_VALUE
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <string>

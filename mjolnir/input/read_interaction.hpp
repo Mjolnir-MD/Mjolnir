@@ -9,7 +9,7 @@
 #include <mjolnir/core/ExternalDistanceInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
-#include <mjolnir/input/get_toml_value.hpp>
+#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/input/read_potential.hpp>
 #include <mjolnir/input/read_spatial_partition.hpp>
 #include <memory>

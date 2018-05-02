@@ -5,7 +5,7 @@
 #include <mjolnir/core/NaivePairCalculation.hpp>
 #include <mjolnir/core/VerletList.hpp>
 #include <mjolnir/util/make_unique.hpp>
-#include <mjolnir/input/get_toml_value.hpp>
+#include <mjolnir/util/get_toml_value.hpp>
 
 namespace mjolnir
 {

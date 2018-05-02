@@ -5,8 +5,8 @@
 #include <mjolnir/core/constants.hpp>
 #include <mjolnir/core/SimulatorBase.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/input/read_simulator.hpp>
-#include <mjolnir/input/get_toml_value.hpp>
 #include <memory>
 
 namespace mjolnir

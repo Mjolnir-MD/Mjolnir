@@ -4,7 +4,7 @@
 #include <mjolnir/core/MDSimulator.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
-#include <mjolnir/input/get_toml_value.hpp>
+#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/input/read_system.hpp>
 #include <mjolnir/input/read_forcefield.hpp>
 #include <mjolnir/input/read_integrator.hpp>

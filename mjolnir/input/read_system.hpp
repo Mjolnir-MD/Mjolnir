@@ -4,6 +4,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/util/throw_exception.hpp>
+#include <mjolnir/util/get_toml_value.hpp>
 
 namespace mjolnir
 {

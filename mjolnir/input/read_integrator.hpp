@@ -3,7 +3,7 @@
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/VelocityVerletStepper.hpp>
 #include <mjolnir/core/UnderdampedLangevinStepper.hpp>
-#include <mjolnir/input/get_toml_value.hpp>
+#include <mjolnir/util/get_toml_value.hpp>
 
 namespace mjolnir
 {

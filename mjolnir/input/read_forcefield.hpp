@@ -2,7 +2,7 @@
 #define MJOLNIR_READ_FORCEFIELD
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/ForceField.hpp>
-#include <mjolnir/input/get_toml_value.hpp>
+#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/input/read_interaction.hpp>
 
 namespace mjolnir

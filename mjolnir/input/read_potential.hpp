@@ -11,7 +11,7 @@
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/potential/external/ImplicitMembranePotential.hpp>
-#include <mjolnir/input/get_toml_value.hpp>
+#include <mjolnir/util/get_toml_value.hpp>
 
 namespace mjolnir
 {
