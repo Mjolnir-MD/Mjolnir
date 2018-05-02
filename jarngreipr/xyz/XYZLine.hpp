@@ -1,5 +1,6 @@
 #ifndef JARNGREIPR_IO_XYZ_LINE_HPP
 #define JARNGREIPR_IO_XYZ_LINE_HPP
+#include <mjolnir/math/Vector.hpp>
 #include <utility>
 #include <ostream>
 #include <istream>
@@ -10,25 +11,26 @@
 namespace jarngreipr
 {
 
-template<typename realT, typename coordT>
+template<typename realT>
 struct XYZLine
 {
     typedef realT  real_type;
-    typedef coordT coordinate_type;
+    typedef mjolnir::Vector<real_type, 3> coordinate_type;
 
     std::string     name;
     coordinate_type position;
 };
 
-template<typename realT, typename coordT>
-XYZLine<realT, coordT> make_xyz_line(std::string name, const coordT& pos)
+template<typename realT>
+inline XYZLine<realT>
+make_xyz_line(std::string name, const mjolnir::Vector<realT, 3>& pos)
 {
     return XYZLine<realT, coordT>{std::move(name), pos};
 }
 
-template<typename charT, typename traits, typename realT, typename coordT>
+template<typename charT, typename traits, typename realT>
 std::basic_ostream<charT, traits>& operator<<(
-    std::basic_ostream<charT, traits>& os, const XYZLine<realT, coordT>& xyz)
+    std::basic_ostream<charT, traits>& os, const XYZLine<realT>& xyz)
 {
     os << std::setw(6)  << std::left << xyz.name
        << std::fixed << std::showpoint << std::setprecision(5) << std::right
@@ -38,9 +40,9 @@ std::basic_ostream<charT, traits>& operator<<(
     return os;
 }
 
-template<typename charT, typename traits, typename realT, typename coordT>
+template<typename charT, typename traits, typename realT>
 std::basic_istream<charT, traits>& operator>>(
-    std::basic_istream<charT, traits>& is, XYZLine<realT, coordT>& xyz)
+    std::basic_istream<charT, traits>& is, XYZLine<realT>& xyz)
 {
     std::string line;
     std::getline(is, line);

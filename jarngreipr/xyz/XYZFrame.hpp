@@ -6,12 +6,11 @@
 namespace jarngreipr
 {
 
-template<typename realT, typename coordT>
+template<typename realT>
 struct XYZFrame
 {
     typedef realT  real_type;
-    typedef coordT coordinate_type;
-    typedef XYZLine<realT, coordT> line_type;
+    typedef XYZLine<realT> line_type;
 
     std::string            comment;
     std::vector<line_type> lines;

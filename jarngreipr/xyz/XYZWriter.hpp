@@ -10,12 +10,12 @@
 namespace jarngreipr
 {
 
-template<typename realT, typename coordT>
+template<typename realT>
 class XYZWriter
 {
   public:
-    typedef XYZLine<realT, coordT>  line_type;
-    typedef XYZFrame<realT, coordT> frame_type;
+    typedef XYZLine<realT>  line_type;
+    typedef XYZFrame<realT> frame_type;
 
   public:
     explicit XYZWriter(const std::string& fname)
