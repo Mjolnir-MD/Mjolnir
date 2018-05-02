@@ -1,57 +1,38 @@
 #ifndef JARNGREIPR_MODEL_BEAD
 #define JARNGREIPR_MODEL_BEAD
-#include <jarngreipr/io/PDBAtom.hpp>
+#include <jarngreipr/pdb/PDBAtom.hpp>
 #include <vector>
-#include <string>
 
 namespace mjolnir
 {
 
-template<typename coordT>
+template<typename realT, typename coordT>
 class Bead
 {
   public:
-    typedef coordT                   coordinate_type;
-    typedef PDBAtom<coordinate_type> atom_type;
-    typedef std::vector<atom_type>   container_type;
+    typedef realT  real_type;
+    typedef coordT coordinate_type;
+    typedef PDBAtom<real_type, coordinate_type> atom_type;
+    typedef std::vector<atom_type> container_type;
 
   public:
     Bead() = default;
     virtual ~Bead() = default;
 
-    explicit Bead(const container_type& atoms) : atoms_(atoms){}
-    explicit Bead(container_type&&      atoms) : atoms_(std::move(atoms)){}
-    explicit Bead(const std::string& name)     : name_(name){}
-    explicit Bead(std::string&& name)          : name_(std::move(name)){}
+    explicit Bead(container_type atoms) : atoms_(std::move(atoms)){}
+    explicit Bead(std::string    name)  : name_ (std::move(name)) {}
 
-    Bead(const container_type& atoms, const std::string& name)
-        : atoms_(atoms), name_(name)
-    {}
-    Bead(const container_type& atoms, std::string&& name)
-        : atoms_(atoms), name_(std::move(name))
-    {}
-    Bead(container_type&& atoms, const std::string& name)
-        : atoms_(std::move(atoms)), name_(name)
-    {}
-    Bead(container_type&& atoms, std::string&& name)
+    Bead(container_type atoms, std::string name)
         : atoms_(std::move(atoms)), name_(std::move(name))
     {}
 
     virtual coordinate_type position() const = 0;
     virtual std::string attribute(const std::string& attr_name) const = 0;
-
-    void assign(const atom_type& atom) {atoms_.push_back(atom);}
+    virtual std::string kind() const = 0;
 
     container_type const& atoms() const noexcept {return atoms_;}
-    container_type &      atoms()       noexcept {return atoms_;}
-
-    std::string const& name() const noexcept {return name_;}
-    std::string &      name()       noexcept {return name_;}
-
-    std::size_t const& index() const noexcept {return index_;}
-    std::size_t &      index()       noexcept {return index_;}
-
-    virtual std::string kind() const = 0;
+    std::string    const& name()  const noexcept {return name_;}
+    std::size_t    const& index() const noexcept {return index_;}
 
   protected:
 

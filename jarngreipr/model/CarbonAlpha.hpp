@@ -1,88 +1,69 @@
-#ifndef JARNGREIPR_MODEL_CARBON_ALPHA
-#define JARNGREIPR_MODEL_CARBON_ALPHA
+#ifndef JARNGREIPR_MODEL_CARBON_ALPHA_HPP
+#define JARNGREIPR_MODEL_CARBON_ALPHA_HPP
 #include <jarngreipr/model/Bead.hpp>
-#include <jarngreipr/io/PDBResidue.hpp>
-#include <jarngreipr/util/string.hpp>
+#include <mjolnir/util/throw_exception.hpp>
 #include <algorithm>
 #include <stdexcept>
 #include <string>
 
-namespace mjolnir
+namespace jarngreipr
 {
 
 /*! @brief carbon alpha 1 beads per amino acid model */
-template<typename coordT>
-class CarbonAlpha final : public Bead<coordT>
+template<typename realT, typename coordT>
+class CarbonAlpha final : public Bead<realT, coordT>
 {
   public:
 
-    typedef Bead<coordT> base_type;
+    typedef Bead<realT, coordT> base_type;
+    typedef typename base_type::real_type       real_type;
     typedef typename base_type::coordinate_type coordinate_type;
     typedef typename base_type::atom_type       atom_type;
     typedef typename base_type::container_type  container_type;
 
-    typedef PDBResidue<coordT> residue_type;
-
   public:
 
-    CarbonAlpha() = default;
+    CarbonAlpha(container_type atoms, std::string name)
+        : base_type(std::move(atoms), std::move(name))
+    {
+        if(!this->atoms_.empty())
+        {
+            const auto is_ca =
+                [](const atom_type& a){return a.atom_name==" CA ";};
+            const std::size_t num_ca = std::count_if(
+                this->atoms_.cbegin(), this->atoms_.cend(), is_ca);
+            if(num_ca == 0)
+            {
+                mjolnir::throw_exception<std::runtime_error>("jarngreipr::"
+                    "model::CarbonAlpha: no c-alpha atom in this residue: \n",
+                    this->atoms_.front());
+            }
+            if(num_ca > 1)
+            {
+                mjolnir::throw_exception<std::runtime_error>("jarngreipr::"
+                    "model::CarbonAlpha: multiple c-alpha in this residue: \n",
+                    this->atoms_.front());
+            }
+            this->position_ = std::find_if(
+                this->atoms_.cbegin(), this->atoms_.cend(), is_ca)->position;
+        }
+    }
     ~CarbonAlpha() override = default;
 
-    explicit CarbonAlpha(const residue_type& residue)
-        : base_type(residue.atoms(), residue.residue_name())
-    {}
+    CarbonAlpha(const CarbonAlpha&) = default;
+    CarbonAlpha(CarbonAlpha&&)      = default;
+    CarbonAlpha& operator=(const CarbonAlpha&) = default;
+    CarbonAlpha& operator=(CarbonAlpha&&)      = default;
 
-    explicit CarbonAlpha(const container_type& atoms): base_type(atoms){}
-    explicit CarbonAlpha(container_type&& atoms) : base_type(std::move(atoms)){}
-    explicit CarbonAlpha(const std::string& name): base_type(name){}
-    explicit CarbonAlpha(std::string&& name)     : base_type(std::move(name)){}
+    std::string attribute(const std::string& n) const override {return "";}
+    std::string kind() const override {return "CarbonAlpha";}
 
-    CarbonAlpha(const residue_type& residue, const std::string& name)
-        : base_type(residue.atoms(), name)
-    {}
-    CarbonAlpha(const container_type&& atoms, const std::string& name)
-        : base_type(atoms, name)
-    {}
-    CarbonAlpha(container_type&& atoms, const std::string& name)
-        : base_type(std::move(atoms), name)
-    {}
-    CarbonAlpha(const container_type& atoms, std::string&& name)
-        : base_type(atoms, std::move(name))
-    {}
-    CarbonAlpha(container_type&& atoms, std::string&& name)
-        : base_type(std::move(atoms), std::move(name))
-    {}
+    coordinate_type position() const override {return this->position_;}
 
-    coordinate_type position() const override;
+  private:
 
-    std::string     attribute(const std::string& n) const override
-    {return ""_str;}
-
-    std::string kind() const override {return "CarbonAlpha"_str;}
+    coordinate_type position_;
 };
 
-template<typename coordT>
-typename CarbonAlpha<coordT>::coordinate_type
-CarbonAlpha<coordT>::position() const
-{
-    const auto finder = [](const atom_type& a){return a.atom_name == "CA"_str;};
-    const std::size_t num_ca =
-        std::count_if(this->atoms_.cbegin(), this->atoms_.cend(), finder);
-    if(num_ca == 0)
-    {
-        throw std::runtime_error("mjolnir::model::CarbonAlpha::position: "
-                "no c-alpha atom in this residue");
-    }
-    else if(num_ca != 1)
-    {
-        throw std::runtime_error("mjolnir::model::CarbonAlpha::position: "_str +
-                "multiple ("_str + std::to_string(num_ca) +
-                ") C-alphas exist in this beads "_str + this->name_);
-    }
-    const auto ca =
-        std::find_if(this->atoms_.cbegin(), this->atoms_.cend(), finder);
-    return ca->position;
-}
-
-}//jarngreipr
+} // jarngreipr
 #endif /*JARNGREIPR_CARBON_ALPHA*/
