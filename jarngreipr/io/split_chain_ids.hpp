@@ -6,7 +6,7 @@
 #include <vector>
 #include <cctype>
 
-namespace mjolnir
+namespace jarngreipr
 {
 
 template<typename charT, typename traits, typename alloc>
@@ -72,5 +72,5 @@ split_chain_ids(const std::basic_string<charT, traits, alloc>& key)
     return ids;
 }
 
-} // mjolnir
+} // jarngreipr
 #endif //JARNGREIPR_UTIL_SPLIT_CHAIN_IDS
