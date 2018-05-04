@@ -10,12 +10,11 @@ namespace jarngreipr
 {
 
 /*! @brief carbon alpha 1 beads per amino acid model */
-template<typename realT, typename coordT>
-class CarbonAlpha final : public Bead<realT, coordT>
+template<typename realT>
+class CarbonAlpha final : public Bead<realT>
 {
   public:
-
-    typedef Bead<realT, coordT> base_type;
+    typedef Bead<realT> base_type;
     typedef typename base_type::real_type       real_type;
     typedef typename base_type::coordinate_type coordinate_type;
     typedef typename base_type::atom_type       atom_type;

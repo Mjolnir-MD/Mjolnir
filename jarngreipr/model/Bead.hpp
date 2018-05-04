@@ -6,13 +6,13 @@
 namespace mjolnir
 {
 
-template<typename realT, typename coordT>
+template<typename realT>
 class Bead
 {
   public:
     typedef realT  real_type;
-    typedef coordT coordinate_type;
-    typedef PDBAtom<real_type, coordinate_type> atom_type;
+    typedef PDBAtom<real_type> atom_type;
+    typedef typename atom_type::coordinate_type coordinate_type;
     typedef std::vector<atom_type> container_type;
 
   public:
