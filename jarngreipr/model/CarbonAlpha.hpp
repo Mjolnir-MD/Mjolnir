@@ -64,5 +64,21 @@ class CarbonAlpha final : public Bead<realT>
     coordinate_type position_;
 };
 
+template<typename realT>
+std::vector<std::unique_ptr<Bead<realT>>>
+make_carbon_alpha(const PDBChain<realT>& chain)
+{
+    std::vector<std::unique_ptr<Bead<realT>>> retval;
+    for(std::size_t i=0; i<chain.residues_size(); ++i)
+    {
+        const auto res = chain.residue_at(i);
+        std::vector<PDBAtom<realT>> atoms(res.begin(), res.end());
+        const auto name = atoms.front().residue_name;
+        retval.push_back(
+            mjolnir::make_unique<CarbonAlpha<realT>>(std::move(atoms), name));
+    }
+    return retval;
+}
+
 } // jarngreipr
 #endif /*JARNGREIPR_CARBON_ALPHA*/
