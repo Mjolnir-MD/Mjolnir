@@ -57,11 +57,19 @@ class ClementiGo final : public IntraChainForceFieldGenerator<realT>
             const typename bead_type::container_type& rhs) const
     {
         real_type dist2 = std::numeric_limits<real_type>::max();
-        // TODO ignore hydrogens
         for(const auto& l : lhs)
         {
+            if(l.atom_name.substr(0, 2) == " H" || l.atom_name.front() == 'H')
+            {
+                continue;
+            }
             for(const auto& r : rhs)
             {
+                if(r.atom_name.substr(0, 2) == " H" ||
+                   r.atom_name.front() == 'H')
+                {
+                    continue;
+                }
                 const auto d2 = distance(l.position, r.position);
                 dist2 = std::min(dist2, d2);
             }
