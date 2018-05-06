@@ -11,18 +11,13 @@
 namespace mjolnir
 {
 
-template<typename coordT>
-class ClementiGo final : public IntraChainForceFieldGenerator<coordT>
+template<typename realT>
+class ClementiGo final : public IntraChainForceFieldGenerator<realT>
 {
   public:
-    typedef coordT coordinate_type;
-    typedef IntraChainForceFieldGenerator<coordT> base_type;
-    typedef typename base_type::atom_type         atom_type;
-    typedef typename base_type::residue_type      residue_type;
-    typedef typename base_type::chain_type        chain_type;
-    typedef typename base_type::cg_chain_type     cg_chain_type;
-    typedef typename base_type::connection_info   connection_info;
-    typedef typename scalar_type_of<coordinate_type>::type real_type;
+    typedef IntraChainForceFieldGenerator<realT> base_type;
+    typedef typename base_type::real_type real_type;
+    typedef typename base_type::bead_type bead_type;
 
   public:
 
@@ -37,22 +32,42 @@ class ClementiGo final : public IntraChainForceFieldGenerator<coordT>
           k_dihedral_angle_1_(1.0), k_dihedral_angle_3_(0.5), k_intra_go_(0.3)
     {}
 
-    ClementiGo(const real_type conth,
-            const real_type k_bl, const real_type k_ba, const real_type k_dih1,
-            const real_type k_dih3, const real_type k_igo)
-        : contact_threshold_(conth), k_bond_length_(k_bl), k_bond_angle_(k_ba),
+    ClementiGo(const real_type threshold,
+        const real_type k_bl,   const real_type k_ba,
+        const real_type k_dih1, const real_type k_dih3, const real_type k_igo)
+        : contact_threshold_(threshold), k_bond_length_(k_bl), k_bond_angle_(k_ba),
           k_dihedral_angle_1_(k_dih1), k_dihedral_angle_3_(k_dih3),
           k_intra_go_(k_igo)
     {}
 
     // generate parameters and write out to `ostrm`.
-    connection_info
-    generate(std::ostream& ostrm, const cg_chain_type& chain) const override;
+    void generate(toml::Table& out,
+        const std::vector<std::unique_ptr<bead_type>>& chain) const override;
 
-    bool check_beads_kind(const cg_chain_type& chain) const override;
+    bool check_beads_kind(
+        const std::vector<std::unique_ptr<bead_type>>& chain) const override;
 
     real_type& contact_threshold()       noexcept {return contact_threshold_;}
     real_type  contact_threshold() const noexcept {return contact_threshold_;}
+
+  private:
+
+    real_type min_distance_sq(
+            const typename bead_type::container_type& lhs,
+            const typename bead_type::container_type& rhs) const
+    {
+        real_type dist2 = std::numeric_limits<real_type>::max();
+        // TODO ignore hydrogens
+        for(const auto& l : lhs)
+        {
+            for(const auto& r : rhs)
+            {
+                const auto d2 = distance(l.position, r.position);
+                dist2 = std::min(dist2, d2);
+            }
+        }
+        return dist2;
+    }
 
   private:
     real_type contact_threshold_;
@@ -63,152 +78,145 @@ class ClementiGo final : public IntraChainForceFieldGenerator<coordT>
     real_type k_intra_go_;
 };
 
-template<typename coordT>
-typename ClementiGo<coordT>::connection_info
-ClementiGo<coordT>::generate(
-        std::ostream& ostrm, const cg_chain_type& chain) const
+template<typename realT>
+void ClementiGo<realT>::generate(toml::Table& ff,
+        const std::vector<std::unique_ptr<bead_type>>& chain) const
 {
-    if(false == this->check_beads_kind(chain))
+    if(!this->check_beads_kind(chain))
     {
-        throw std::invalid_argument("jarngreipr::ClementiGo::generate: "
-                "invalid bead kind appear in argument `chain`.");
-    }
-    connection_info connections;
-    for(const auto& b : chain)
-    {
-        connections[b->index()].insert(b->index());
+        std::cerr << "ClementiGo: stop generating forcefield..." << std::endl;
+        return ;
     }
 
-    const real_type th2 = this->contact_threshold_ * this->contact_threshold_;
+    if(ff.count("local") == 0)
+    {
+        ff["local"] = toml::Array();
+    }
 
     /* bond-length */ {
-        ostrm << "[[forcefields.local]]\n";
-        ostrm << "interaction = \"BondLength\"\n";
-        ostrm << "potential   = \"Harmonic\"\n";
-        ostrm << "parameters  = [\n";
+        toml::Table bond_length;
+        bond_length["interaction"] = toml::String("BondLength");
+        bond_length["potential"]   = toml::String("Harmonic");
+
+        toml::Array params;
         for(std::size_t i=0, sz = chain.size() - 1; i<sz; ++i)
         {
             const auto& bead1 = chain.at(i);
             const auto& bead2 = chain.at(i+1);
-            const std::size_t index1 = bead1->index();
-            const std::size_t index2 = bead2->index();
-
-            connections[index1].insert(index2);
-            connections[index2].insert(index1);
-
-            ostrm << "{indices = [" << index1 << ", " << index2 << "], ";
-            ostrm << "native = " << std::fixed << std::showpoint
-                  << distance(bead1, bead2) << ", ";
-            ostrm << "k = " << std::fixed << std::showpoint
-                  << this->k_bond_length_;
-            ostrm << "},\n";
+            const std::size_t i1 = bead1->index();
+            const std::size_t i2 = bead2->index();
+            toml::Table para;
+            para["indices"] = toml::value{toml::value(i1), toml::value(i2)};
+            para["native"]  = distance(bead1->position(), bead2->position());
+            para["k"]       = this->k_bond_length_;
+            params.push_back(std::move(para));
         }
-        ostrm << "]\n";
+        bond_length["parameters"] = std::move(params);
+        ff["local"].push_back(std::move(bond_length));
     }
     /* bond-angle */{
-        ostrm << "[[forcefields.local]]\n";
-        ostrm << "interaction = \"BondAngle\"\n";
-        ostrm << "potential   = \"Harmonic\"\n";
-        ostrm << "parameters  = [\n";
+        toml::Table bond_angle;
+        bond_angle["interaction"] = toml::String("BondAngle");
+        bond_angle["potential"]   = toml::String("Harmonic");
+
+        toml::Array params;
         for(std::size_t i=0, sz = chain.size() - 2; i<sz; ++i)
         {
             const auto& bead1 = chain.at(i);
             const auto& bead2 = chain.at(i+1);
             const auto& bead3 = chain.at(i+2);
-            const std::size_t index1 = bead1->index();
-            const std::size_t index2 = bead2->index();
-            const std::size_t index3 = bead3->index();
+            const std::size_t i1 = bead1->index();
+            const std::size_t i2 = bead2->index();
+            const std::size_t i3 = bead3->index();
 
-            ostrm << "{indices = [" << index1 << ", " << index2
-                  << ", " << index3 << "], ";
-            ostrm << "native = " << std::fixed << std::showpoint
-                  << angle(bead1, bead2, bead3) << ", ";
-            ostrm << "k = " << std::fixed << std::showpoint
-                  << this->k_bond_angle_;
-            ostrm << "},\n";
+            toml::Table para;
+            para["indices"] = toml::value{i1, i2, i3};
+            para["native"]  = angle(bead1->position(), bead2->position(),
+                                    bead3->position());
+            para["k"]  = this->k_bond_angle_;
+            params.push_back(std::move(para));
         }
-        ostrm << "]\n";
+        bond_angle["parameters"] = std::move(params);
+        ff["local"].push_back(std::move(bond_angle));
     }
     /* dihedral-angle */{
-        ostrm << "[[forcefields.local]]\n";
-        ostrm << "interaction = \"DihedralAngle\"\n";
-        ostrm << "potential   = \"ClementiDihedral\"\n";
-        ostrm << "parameters  = [\n";
+        toml::Table dihd_angle;
+        dihd_angle["interaction"] = toml::String("DihedralAngle");
+        dihd_angle["potential"]   = toml::String("ClementiDihedral");
+
+        toml::Array params;
         for(std::size_t i=0, sz = chain.size() - 3; i<sz; ++i)
         {
             const auto& bead1 = chain.at(i);
             const auto& bead2 = chain.at(i+1);
             const auto& bead3 = chain.at(i+2);
             const auto& bead4 = chain.at(i+3);
-            const std::size_t index1 = bead1->index();
-            const std::size_t index2 = bead2->index();
-            const std::size_t index3 = bead3->index();
-            const std::size_t index4 = bead4->index();
+            const std::size_t i1 = bead1->index();
+            const std::size_t i2 = bead2->index();
+            const std::size_t i3 = bead3->index();
+            const std::size_t i4 = bead4->index();
 
-            ostrm << "{indices = [" << index1 << ", " << index2
-                  << ", " << index3 << ", " << index4 << "], ";
-            ostrm << "native = " << std::fixed << std::showpoint
-                  << dihedral_angle(bead1, bead2, bead3, bead4) << ", ";
-            ostrm << "k1 = " << std::fixed << std::showpoint
-                  << this->k_dihedral_angle_1_;
-            ostrm << ", k3 = " << std::fixed << std::showpoint
-                  << this->k_dihedral_angle_3_;
-            ostrm << "},\n";
+            toml::Table para;
+            para["indices"] = toml::value{i1, i2, i3, i4};
+            para["native"]  = dihedral_angle(bead1->position(),
+                    bead2->position(), bead3->position(), bead4->position());
+            para["k1"]  = this->k_dihedral_angle_1_;
+            para["k3"]  = this->k_dihedral_angle_3_;
+            params.push_back(std::move(para));
         }
-        ostrm << "]\n";
+        dihd_angle["parameters"] = std::move(params);
+        ff["local"].push_back(std::move(dihd_angle));
     }
+
+    const real_type th2 = this->contact_threshold_ * this->contact_threshold_;
     /* intra-chain-go-contacts */{
-        ostrm << "[[forcefields.local]]\n";
-        ostrm << "interaction = \"BondLength\"\n";
-        ostrm << "potential = \"Go1012Contact\"\n";
-        ostrm << "parameters  = [\n";
+        toml::Table go_contact;
+        go_contact["interaction"] = toml::String("BondLength");
+        go_contact["potential"]   = toml::String("Go1012Contact");
+
+        toml::Array params;
         for(std::size_t i=0, sz_i = chain.size()-4; i<sz_i; ++i)
         {
+            const auto& group1 = chain.at(i)->atoms();
             for(std::size_t j=i+4, sz_j = chain.size(); j<sz_j; ++j)
             {
-                if(th2 > min_distance_sq_if(
-                    chain.at(i)->atoms(), chain.at(j)->atoms(),
-                    [](const PDBAtom<coordT>& atom){// ignore hydrogens
-                        return atom.atom_name.front() != 'H';
-                    }))
+                const auto& group2 = chain.at(j)->atoms();
+                if(this->min_distance_sq(group1, group2))
                 {
                     const auto& bead1 = chain.at(i);
                     const auto& bead2 = chain.at(j);
-                    const std::size_t index1 = bead1->index();
-                    const std::size_t index2 = bead2->index();
-                    connections[index1].insert(index2);
-                    connections[index2].insert(index1);
+                    const std::size_t i1 = bead1->index();
+                    const std::size_t i2 = bead2->index();
 
-                    ostrm << "{indices = [" << index1 << ", " << index2 << "], ";
-                    ostrm << "native = " << std::fixed << std::showpoint
-                          << distance(bead1, bead2) << ", ";
-                    ostrm << "k = " << std::fixed << std::showpoint
-                          << this->k_intra_go_;
-                    ostrm << "},\n";
+                    toml::Table para;
+                    para["indices"] = toml::value{i1, i2};
+                    para["native"]  = distance(bead1->position(), bead2->position());
+                    para["k"]       = this->k_intra_go_;
+                    params.push_back(std::move(para));
                 }
             }
         }
-        ostrm << "]\n";
+        go_contact["parameters"]  = std::move(params);
+        ff["local"].push_back(std::move(go_contact));
     }
     return connections;
 }
 
-template<typename coordT>
-bool ClementiGo<coordT>::check_beads_kind(const cg_chain_type& chain) const
+template<typename realT>
+bool ClementiGo<realT>::check_beads_kind(
+        const std::vector<std::unique_ptr<bead_type>>& chain) const
 {
-    bool result = true;
     for(const auto& bead : chain)
     {
-        if(bead->kind() != "CarbonAlpha"_str)
+        if(bead->kind() != "CarbonAlpha")
         {
-            std::cerr << "jarngreipr::ClementiGo::check_beads_kind: Error: \n";
-            std::cerr << "    invalid coarse-grained bead kind: "
+            std::cerr << "ClementiGo: invalid coarse-grained bead kind: "
                       << bead->kind() << '\n';
-            std::cerr << "    ClementiGo contains only CarbonAlpha beads.\n";
-            result = false;
+            std::cerr << "it allows only CarbonAlpha beads.\n";
+            return false;
         }
     }
-    return result;
+    return true;
 }
 
 }//jarngreipr
