@@ -1,67 +1,50 @@
 #ifndef JARNGREIPR_FORCEFIELD_GENERATOR
 #define JARNGREIPR_FORCEFIELD_GENERATOR
-#include <jarngreipr/io/PDBAtom.hpp>
-#include <jarngreipr/io/PDBResidue.hpp>
-#include <jarngreipr/io/PDBChain.hpp>
 #include <jarngreipr/model/Bead.hpp>
-#include <jarngreipr/model/CGChain.hpp>
-#include <jarngreipr/model/CarbonAlpha.hpp>
-#include <jarngreipr/forcefield/ConnectionInfo.hpp>
-#include <ostream>
+#include <extlib/toml/toml.hpp>
 
 namespace mjolnir
 {
 
-template<typename coordT>
+template<typename realT>
 class IntraChainForceFieldGenerator
 {
   public:
-    typedef coordT                      coordinate_type;
-    typedef PDBAtom<coordinate_type>    atom_type;
-    typedef PDBResidue<coordinate_type> residue_type;
-    typedef PDBChain<coordinate_type>   chain_type;
-    typedef Bead<coordinate_type>       bead_type;
-    typedef CGChain<coordinate_type>    cg_chain_type;
-    typedef std::map<std::size_t, ConnectionIndices> connection_info;
+    typedef realT real_type;
+    typedef Bead<real_type> bead_type;
 
   public:
     virtual ~IntraChainForceFieldGenerator() = default;
 
     //!@brief generate parameter values and write out to ostream.
     //@return connection_information. for scaling or ignoring Global interaction
-    virtual connection_info
-    generate(std::ostream& ostrm, const cg_chain_type& chain) const = 0;
+    virtual void generate(toml::Table& out,
+            const std::vector<std::unique_ptr<bead_type>>& chain) const = 0;
 
     //!@brief if chain contains invalid bead, return false.
-    virtual bool
-    check_beads_kind(const cg_chain_type& chain) const = 0;
+    virtual bool check_beads_kind(
+            const std::vector<std::unique_ptr<bead_type>>& chain) const = 0;
 };
 
-// mainly for GoContact.
-template<typename coordT>
+template<typename realT>
 class InterChainForceFieldGenerator
 {
   public:
-    typedef coordT                      coordinate_type;
-    typedef PDBAtom<coordinate_type>    atom_type;
-    typedef PDBResidue<coordinate_type> residue_type;
-    typedef PDBChain<coordinate_type>   chain_type;
-    typedef Bead<coordinate_type>       bead_type;
-    typedef CGChain<coordinate_type>    cg_chain_type;
-    typedef std::map<std::size_t, ConnectionIndices> connection_info;
+    typedef realT real_type;
+    typedef Bead<real_type> bead_type;
+    typedef std::unique_ptr<bead_type> baed_ptr;
 
   public:
     virtual ~InterChainForceFieldGenerator() = default;
 
     //!@brief generate parameter values and write out to ostream.
     //@return connection_information. for scaling or ignoring Global interaction
-    virtual connection_info
-    generate(std::ostream& ostrm,
-        const std::vector<cg_chain_type>& chain_offset) const = 0;
+    virtual void generate(toml::Table& out,
+        const std::vector<std::vector<bead_ptr>>& chain) const = 0;
 
     //!@brief if chain contains invalid bead, return false.
-    virtual bool
-    check_beads_kind(const cg_chain_type& chain) const = 0;
+    virtual bool check_beads_kind(
+        const std::vector<std::vector<bead_type>>& chain) const = 0;
 };
 
 } // mjolnir
