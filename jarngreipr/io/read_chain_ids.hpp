@@ -1,5 +1,5 @@
-#ifndef JARNGREIPR_UTIL_SPLIT_CHAIN_IDS
-#define JARNGREIPR_UTIL_SPLIT_CHAIN_IDS
+#ifndef JARNGREIPR_READ_CHAIN_IDS
+#define JARNGREIPR_READ_CHAIN_IDS
 #include <stdexcept>
 #include <sstream>
 #include <string>
@@ -26,7 +26,7 @@ split_string(const std::basic_string<charT, traits, alloc>& str,
 
 template<typename charT, typename traits, typename alloc>
 std::vector<charT>
-split_chain_ids(const std::basic_string<charT, traits, alloc>& key)
+read_chain_ids(const std::basic_string<charT, traits, alloc>& key)
 {
     if(key.size() == 1)
     {
@@ -73,4 +73,4 @@ split_chain_ids(const std::basic_string<charT, traits, alloc>& key)
 }
 
 } // jarngreipr
-#endif //JARNGREIPR_UTIL_SPLIT_CHAIN_IDS
+#endif //JARNGREIPR_READ_CHAIN_IDS
