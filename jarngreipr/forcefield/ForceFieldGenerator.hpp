@@ -17,7 +17,6 @@ class IntraChainForceFieldGenerator
     virtual ~IntraChainForceFieldGenerator() = default;
 
     //!@brief generate parameter values and write out to ostream.
-    //@return connection_information. for scaling or ignoring Global interaction
     virtual void generate(toml::Table& out,
             const std::vector<std::unique_ptr<bead_type>>& chain) const = 0;
 
@@ -38,7 +37,6 @@ class InterChainForceFieldGenerator
     virtual ~InterChainForceFieldGenerator() = default;
 
     //!@brief generate parameter values and write out to ostream.
-    //@return connection_information. for scaling or ignoring Global interaction
     virtual void generate(toml::Table& out,
         const std::vector<std::vector<bead_ptr>>& chain) const = 0;
 
