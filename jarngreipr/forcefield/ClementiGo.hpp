@@ -192,7 +192,7 @@ void ClementiGo<realT>::generate(toml::Table& ff,
             for(std::size_t j=i+4, sz_j = chain.size(); j<sz_j; ++j)
             {
                 const auto& group2 = chain.at(j)->atoms();
-                if(this->min_distance_sq(group1, group2))
+                if(this->min_distance_sq(group1, group2) < th2)
                 {
                     const auto& bead1 = chain.at(i);
                     const auto& bead2 = chain.at(j);
