@@ -16,15 +16,11 @@ class Bead
     typedef std::vector<atom_type> container_type;
 
   public:
-    Bead() = default;
-    virtual ~Bead() = default;
 
-    explicit Bead(container_type atoms) : atoms_(std::move(atoms)){}
-    explicit Bead(std::string    name)  : name_ (std::move(name)) {}
-
-    Bead(container_type atoms, std::string name)
-        : atoms_(std::move(atoms)), name_(std::move(name))
+    Bead(std::size_t index, container_type atoms, std::string name)
+        : index_(index), atoms_(std::move(atoms)), name_(std::move(name))
     {}
+    virtual ~Bead() = default;
 
     virtual coordinate_type position() const = 0;
     virtual std::string attribute(const std::string& attr_name) const = 0;

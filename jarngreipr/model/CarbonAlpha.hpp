@@ -24,8 +24,8 @@ class CarbonAlpha final : public Bead<realT>
 
   public:
 
-    CarbonAlpha(container_type atoms, std::string name)
-        : base_type(std::move(atoms), std::move(name))
+    CarbonAlpha(std::size_t idx, container_type atoms, std::string name)
+        : base_type(idx, std::move(atoms), std::move(name))
     {
         if(!this->atoms_.empty())
         {
@@ -68,7 +68,7 @@ class CarbonAlpha final : public Bead<realT>
 
 template<typename realT>
 std::vector<std::unique_ptr<Bead<realT>>>
-make_carbon_alpha(const PDBChain<realT>& chain)
+make_carbon_alpha(const PDBChain<realT>& chain, const std::size_t offset)
 {
     std::vector<std::unique_ptr<Bead<realT>>> retval;
     for(std::size_t i=0; i<chain.residues_size(); ++i)
@@ -76,8 +76,8 @@ make_carbon_alpha(const PDBChain<realT>& chain)
         const auto res = chain.residue_at(i);
         std::vector<PDBAtom<realT>> atoms(res.begin(), res.end());
         const auto name = atoms.front().residue_name;
-        retval.push_back(
-            mjolnir::make_unique<CarbonAlpha<realT>>(std::move(atoms), name));
+        retval.push_back(mjolnir::make_unique<
+            CarbonAlpha<realT>>(i + offset, std::move(atoms), name));
     }
     return retval;
 }
