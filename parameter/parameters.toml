@@ -3,6 +3,18 @@
 # Energy = [kcal/mol] = 6.9478e-21 [J]
 # Charge = [e]        = 1.6021e-19 [C]
 
+[physical_constants]
+# 1 Energy [kcal/mol] = 6.9478e-21 [kg  m^2/s^2] (= [J])
+#                     = 6.9478e-1  [kg  Å^2/s^2] (1e+10[Å] = 1[m])
+#                     = 4.1842e+26 [amu Å^2/s^2] (1 / 1.6605e-27[amu] = 1 [kg])
+# 1 Time := 1.0 / sqrt(4.1842e+26) [s] = 4.8887e-14 ~ 49 [fs]
+"τ"  = 4.8887e-14 # timestep               [s]
+e    = 1.6021e-19 # elementaly charge      [C]
+kB   = 1.9871e-3  # Boltzmann constant     [kcal/mol/K]
+NA   = 6.0221e+23 # Avogadro's number      [/mol]
+"ε0" = 2.3964e-4  # permittivity of vacuum [e^2/((kcal/mol)Å)]
+"μ"  = 2.3553     # viscosity of water     [amu/(Å.τ)]
+
 [mass]
 H =  1.0080
 P = 30.9738
@@ -53,14 +65,25 @@ TRP = 3.8
 TYR = 3.8
 VAL = 3.8
 
-[physical_constants]
-# 1 Energy [kcal/mol] = 6.9478e-21 [kg  m^2/s^2] (= [J])
-#                     = 6.9478e-1  [kg  Å^2/s^2] (1e+10[Å] = 1[m])
-#                     = 4.1842e+26 [amu Å^2/s^2] (1 / 1.6605e-27[amu] = 1 [kg])
-# 1 Time := 1.0 / sqrt(4.1842e+26) [s] = 4.8887e-14 ~ 49 [fs]
-"τ"  = 4.8887e-14 # timestep               [s]
-e    = 1.6021e-19 # elementaly charge      [C]
-kB   = 1.9871e-3  # Boltzmann constant     [kcal/mol/K]
-NA   = 6.0221e+23 # Avogadro's number      [/mol]
-"ε0" = 2.3964e-4  # permittivity of vacuum [e^2/((kcal/mol)Å)]
-"μ"  = 2.3553     # viscosity of water     [amu/(Å.τ)]
+[excluded_volume_radius]
+ALA = 2.0
+ARG = 2.0
+ASN = 2.0
+ASP = 2.0
+CYS = 2.0
+GLN = 2.0
+GLU = 2.0
+GLY = 2.0
+HIS = 2.0
+ILE = 2.0
+LEU = 2.0
+LYS = 2.0
+MET = 2.0
+PHE = 2.0
+PRO = 2.0
+SER = 2.0
+THR = 2.0
+TRP = 2.0
+TYR = 2.0
+VAL = 2.0
+
