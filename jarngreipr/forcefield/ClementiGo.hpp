@@ -8,7 +8,7 @@
 #include <iostream>
 #include <vector>
 
-namespace mjolnir
+namespace jarngreipr
 {
 
 template<typename realT>

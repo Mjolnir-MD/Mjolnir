@@ -3,7 +3,7 @@
 #include <jarngreipr/model/Bead.hpp>
 #include <extlib/toml/toml.hpp>
 
-namespace mjolnir
+namespace jarngreipr
 {
 
 template<typename realT>
@@ -32,7 +32,7 @@ class InterChainForceFieldGenerator
   public:
     typedef realT real_type;
     typedef Bead<real_type> bead_type;
-    typedef std::unique_ptr<bead_type> baed_ptr;
+    typedef std::unique_ptr<bead_type> bead_ptr;
 
   public:
     virtual ~InterChainForceFieldGenerator() = default;

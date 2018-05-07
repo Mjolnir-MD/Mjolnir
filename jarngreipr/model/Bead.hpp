@@ -3,7 +3,7 @@
 #include <jarngreipr/pdb/PDBAtom.hpp>
 #include <vector>
 
-namespace mjolnir
+namespace jarngreipr
 {
 
 template<typename realT>
