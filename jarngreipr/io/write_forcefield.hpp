@@ -50,7 +50,7 @@ void write_global_forcefield(
     {
         if(kv.first == "parameters") {continue;}
         os << kv.first << " = ";
-        write_toml_value(os, p);
+        write_toml_value(os, kv.second);
         os << '\n';
     }
 

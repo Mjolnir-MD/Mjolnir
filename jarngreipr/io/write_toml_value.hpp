@@ -21,14 +21,14 @@ void write_toml_value(
             os << toml::get<toml::Integer>(v);
             return;
         }
-        case toml::value_t::Floating:
+        case toml::value_t::Float:
         {
-            os << std::fixed << toml::get<toml::Floating>(v);
+            os << std::fixed << toml::get<toml::Float>(v);
             return;
         }
         case toml::value_t::String:
         {
-            os << '"' << toml::get<toml::Floating>(v) << '"';
+            os << '"' << toml::get<toml::String>(v) << '"';
             return;
         }
         case toml::value_t::Array:
