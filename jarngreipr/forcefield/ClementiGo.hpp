@@ -105,6 +105,7 @@ void ClementiGo<realT>::generate(toml::Table& ff,
         toml::Table bond_length;
         bond_length["interaction"] = toml::String("BondLength");
         bond_length["potential"]   = toml::String("Harmonic");
+        bond_length["topology"]    = toml::String("bond");
 
         toml::Array params;
         for(std::size_t i=0, sz = chain.size() - 1; i<sz; ++i)
@@ -114,18 +115,19 @@ void ClementiGo<realT>::generate(toml::Table& ff,
             const std::size_t i1 = bead1->index();
             const std::size_t i2 = bead2->index();
             toml::Table para;
-            para["indices"] = toml::value{toml::value(i1), toml::value(i2)};
+            para["indices"] = toml::value{i1, i2};
             para["native"]  = distance(bead1->position(), bead2->position());
             para["k"]       = this->k_bond_length_;
             params.push_back(std::move(para));
         }
         bond_length["parameters"] = std::move(params);
-        ff["local"].push_back(std::move(bond_length));
+        ff["local"].cast<toml::value_t::Array>().push_back(std::move(bond_length));
     }
     /* bond-angle */{
         toml::Table bond_angle;
         bond_angle["interaction"] = toml::String("BondAngle");
         bond_angle["potential"]   = toml::String("Harmonic");
+        bond_angle["topology"]    = toml::String("none");
 
         toml::Array params;
         for(std::size_t i=0, sz = chain.size() - 2; i<sz; ++i)
@@ -145,12 +147,13 @@ void ClementiGo<realT>::generate(toml::Table& ff,
             params.push_back(std::move(para));
         }
         bond_angle["parameters"] = std::move(params);
-        ff["local"].push_back(std::move(bond_angle));
+        ff["local"].cast<toml::value_t::Array>().push_back(std::move(bond_angle));
     }
     /* dihedral-angle */{
         toml::Table dihd_angle;
         dihd_angle["interaction"] = toml::String("DihedralAngle");
         dihd_angle["potential"]   = toml::String("ClementiDihedral");
+        dihd_angle["topology"]    = toml::String("none");
 
         toml::Array params;
         for(std::size_t i=0, sz = chain.size() - 3; i<sz; ++i)
@@ -173,7 +176,7 @@ void ClementiGo<realT>::generate(toml::Table& ff,
             params.push_back(std::move(para));
         }
         dihd_angle["parameters"] = std::move(params);
-        ff["local"].push_back(std::move(dihd_angle));
+        ff["local"].cast<toml::value_t::Array>().push_back(std::move(dihd_angle));
     }
 
     const real_type th2 = this->contact_threshold_ * this->contact_threshold_;
@@ -181,6 +184,7 @@ void ClementiGo<realT>::generate(toml::Table& ff,
         toml::Table go_contact;
         go_contact["interaction"] = toml::String("BondLength");
         go_contact["potential"]   = toml::String("Go1012Contact");
+        go_contact["topology"]    = toml::String("contact");
 
         toml::Array params;
         for(std::size_t i=0, sz_i = chain.size()-4; i<sz_i; ++i)
@@ -205,9 +209,9 @@ void ClementiGo<realT>::generate(toml::Table& ff,
             }
         }
         go_contact["parameters"]  = std::move(params);
-        ff["local"].push_back(std::move(go_contact));
+        ff["local"].cast<toml::value_t::Array>().push_back(std::move(go_contact));
     }
-    return connections;
+    return;
 }
 
 template<typename realT>
