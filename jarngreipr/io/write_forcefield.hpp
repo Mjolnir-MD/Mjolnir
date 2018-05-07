@@ -55,7 +55,7 @@ void write_global_forcefield(
     }
 
     const auto& params = mjolnir::toml_value_at(
-        ff, "parameters", "write_local_forcefield").cast<toml::value_t::Array>();
+        ff, "parameters", "write_global_forcefield").cast<toml::value_t::Array>();
 
     os << "parameters = [\n";
     for(const auto& p : params)
