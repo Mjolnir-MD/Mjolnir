@@ -1,6 +1,8 @@
 #ifndef JARNGREIPR_MODEL_CARBON_ALPHA_HPP
 #define JARNGREIPR_MODEL_CARBON_ALPHA_HPP
 #include <jarngreipr/model/Bead.hpp>
+#include <jarngreipr/pdb/PDBChain.hpp>
+#include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <algorithm>
 #include <stdexcept>
