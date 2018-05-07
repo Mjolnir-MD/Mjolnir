@@ -1,7 +1,7 @@
 #define BOOST_TEST_MODULE "test_split_string"
 #include <boost/test/included/unit_test.hpp>
 #include <mjolnir/util/string.hpp>
-#include <jarngreipr/io/split_chain_ids.hpp>
+#include <jarngreipr/io/read_chain_ids.hpp>
 
 BOOST_AUTO_TEST_CASE(test_split_string)
 {
@@ -23,25 +23,25 @@ BOOST_AUTO_TEST_CASE(test_split_string)
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_split_chain_ids)
+BOOST_AUTO_TEST_CASE(test_read_chain_ids)
 {
     using mjolnir::operator"" _str;
 
     {
-        const auto splitted = jarngreipr::split_chain_ids("D"_str);
+        const auto splitted = jarngreipr::read_chain_ids("D"_str);
         BOOST_CHECK_EQUAL(splitted.size(), 1);
         BOOST_CHECK_EQUAL(splitted.at(0), 'D');
     }
 
     {
-        const auto splitted = jarngreipr::split_chain_ids("B-C"_str);
+        const auto splitted = jarngreipr::read_chain_ids("B-C"_str);
         BOOST_CHECK_EQUAL(splitted.size(), 2);
         BOOST_CHECK_EQUAL(splitted.at(0), 'B');
         BOOST_CHECK_EQUAL(splitted.at(1), 'C');
     }
 
     {
-        const auto splitted = jarngreipr::split_chain_ids("B-D"_str);
+        const auto splitted = jarngreipr::read_chain_ids("B-D"_str);
         BOOST_CHECK_EQUAL(splitted.size(), 3);
         BOOST_CHECK_EQUAL(splitted.at(0), 'B');
         BOOST_CHECK_EQUAL(splitted.at(1), 'C');
@@ -49,14 +49,14 @@ BOOST_AUTO_TEST_CASE(test_split_chain_ids)
     }
 
     {
-        const auto splitted = jarngreipr::split_chain_ids("B&D"_str);
+        const auto splitted = jarngreipr::read_chain_ids("B&D"_str);
         BOOST_CHECK_EQUAL(splitted.size(), 2);
         BOOST_CHECK_EQUAL(splitted.at(0), 'B');
         BOOST_CHECK_EQUAL(splitted.at(1), 'D');
     }
 
     {
-        const auto splitted = jarngreipr::split_chain_ids("A-C&F-G"_str);
+        const auto splitted = jarngreipr::read_chain_ids("A-C&F-G"_str);
         BOOST_CHECK_EQUAL(splitted.size(), 5);
         BOOST_CHECK_EQUAL(splitted.at(0), 'A');
         BOOST_CHECK_EQUAL(splitted.at(1), 'B');
@@ -65,4 +65,3 @@ BOOST_AUTO_TEST_CASE(test_split_chain_ids)
         BOOST_CHECK_EQUAL(splitted.at(4), 'G');
     }
 }
-
