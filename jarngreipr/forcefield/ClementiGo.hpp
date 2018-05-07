@@ -61,17 +61,15 @@ class ClementiGo final : public IntraChainForceFieldGenerator<realT>
         {
             if(l.element == " H")
             {
-                std::cerr << "ignore atom: " << l << std::endl;
                 continue;
             }
             for(const auto& r : rhs)
             {
                 if(r.element == " H")
                 {
-                    std::cerr << "ignore atom: " << r << std::endl;
                     continue;
                 }
-                const auto d2 = distance(l.position, r.position);
+                const auto d2 = distance_sq(l.position, r.position);
                 dist2 = std::min(dist2, d2);
             }
         }
