@@ -1,7 +1,7 @@
 #ifndef JARNGREIPR_MODEL_CARBON_ALPHA_HPP
 #define JARNGREIPR_MODEL_CARBON_ALPHA_HPP
 #include <jarngreipr/model/Bead.hpp>
-#include <jarngreipr/pdb/PDBChain.hpp>
+#include <jarngreipr/model/Grainer.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <algorithm>
@@ -67,20 +67,32 @@ class CarbonAlpha final : public Bead<realT>
 };
 
 template<typename realT>
-std::vector<std::unique_ptr<Bead<realT>>>
-make_carbon_alpha(const PDBChain<realT>& chain, const std::size_t offset)
+class CarbonAlphaGrainer final : public GrainerBase<realT>
 {
-    std::vector<std::unique_ptr<Bead<realT>>> retval;
-    for(std::size_t i=0; i<chain.residues_size(); ++i)
+  public:
+    typedef realT           real_type;
+    typedef Bead<real_type> bead_type;
+
+  public:
+
+    CarbonAlphaGrainer() = default;
+    ~CarbonAlphaGrainer() override = default;
+
+    std::vector<std::unique_ptr<bead_type>>
+    grain(const PDBChain<realT>& pdb, const std::size_t offset) const override
     {
-        const auto res = chain.residue_at(i);
-        std::vector<PDBAtom<realT>> atoms(res.begin(), res.end());
-        const auto name = atoms.front().residue_name;
-        retval.push_back(mjolnir::make_unique<
-            CarbonAlpha<realT>>(i + offset, std::move(atoms), name));
+        std::vector<std::unique_ptr<Bead<realT>>> retval;
+        for(std::size_t i=0; i<pdb.residues_size(); ++i)
+        {
+            const auto res = pdb.residue_at(i);
+            std::vector<PDBAtom<realT>> atoms(res.begin(), res.end());
+            const auto name = atoms.front().residue_name;
+            retval.push_back(mjolnir::make_unique<
+                CarbonAlpha<realT>>(i + offset, std::move(atoms), name));
+        }
+        return retval;
     }
-    return retval;
-}
+};
 
 } // jarngreipr
 #endif /*JARNGREIPR_CARBON_ALPHA*/
