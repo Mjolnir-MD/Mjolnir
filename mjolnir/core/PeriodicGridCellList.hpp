@@ -43,7 +43,7 @@ class PeriodicGridCellList
   public:
 
     PeriodicGridCellList()
-        : mergin_(1), current_mergin_(-1), r_x_(-1), r_y_(-1), r_z_(-1)
+        : margin_(1), current_margin_(-1), r_x_(-1), r_y_(-1), r_z_(-1)
     {}
     ~PeriodicGridCellList() = default;
     PeriodicGridCellList(PeriodicGridCellList const&) = default;
@@ -51,13 +51,13 @@ class PeriodicGridCellList
     PeriodicGridCellList& operator=(PeriodicGridCellList const&) = default;
     PeriodicGridCellList& operator=(PeriodicGridCellList &&)     = default;
 
-    PeriodicGridCellList(const real_type mergin)
-        : mergin_(mergin), current_mergin_(-1), r_x_(-1), r_y_(-1), r_z_(-1)
+    PeriodicGridCellList(const real_type margin)
+        : margin_(margin), current_margin_(-1), r_x_(-1), r_y_(-1), r_z_(-1)
     {}
 
     bool valid() const noexcept
     {
-        return current_mergin_ >= 0.0;
+        return current_margin_ >= 0.0;
     }
 
     template<typename PotentialT>
@@ -74,7 +74,7 @@ class PeriodicGridCellList
     void update(const system_type& sys);
 
     real_type cutoff() const {return this->cutoff_;}
-    real_type mergin() const {return this->mergin_;}
+    real_type margin() const {return this->margin_;}
 
     range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
 
@@ -97,25 +97,25 @@ class PeriodicGridCellList
     void set_cutoff(const real_type c) noexcept
     {
         this->cutoff_ = c;
-        this->r_x_ = 1 / (this->cutoff_ * (1 + this->mergin_) + mesh_epsilon);
-        this->r_y_ = 1 / (this->cutoff_ * (1 + this->mergin_) + mesh_epsilon);
-        this->r_z_ = 1 / (this->cutoff_ * (1 + this->mergin_) + mesh_epsilon);
+        this->r_x_ = 1 / (this->cutoff_ * (1 + this->margin_) + mesh_epsilon);
+        this->r_y_ = 1 / (this->cutoff_ * (1 + this->margin_) + mesh_epsilon);
+        this->r_z_ = 1 / (this->cutoff_ * (1 + this->margin_) + mesh_epsilon);
         return;
     }
-    void set_mergin(const real_type m) noexcept
+    void set_margin(const real_type m) noexcept
     {
-        this->mergin_ = m;
-        this->r_x_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
-        this->r_y_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
-        this->r_z_ = 1.0 / (this->cutoff_ * (1.0 + this->mergin_) + mesh_epsilon);
+        this->margin_ = m;
+        this->r_x_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + mesh_epsilon);
+        this->r_y_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + mesh_epsilon);
+        this->r_z_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + mesh_epsilon);
         return;
     }
 
   private:
 
     real_type   cutoff_;
-    real_type   mergin_;
-    real_type   current_mergin_;
+    real_type   margin_;
+    real_type   current_margin_;
     real_type   r_x_;
     real_type   r_y_;
     real_type   r_z_;
@@ -177,7 +177,7 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
 
     MJOLNIR_LOG_DEBUG("cell list is updated");
 
-    const real_type r_c  = cutoff_ * (1. + mergin_);
+    const real_type r_c  = cutoff_ * (1. + margin_);
     const real_type r_c2 = r_c * r_c;
     for(std::size_t i=0; i<sys.size(); ++i)
     {
@@ -212,7 +212,7 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
         this->neighbors_.add_list_for(i, partner);
     }
 
-    this->current_mergin_ = cutoff_ * mergin_;
+    this->current_margin_ = cutoff_ * margin_;
     MJOLNIR_LOG_DEBUG("PeriodicGridCellList::make() RETURNED");
     return ;
 }
@@ -221,8 +221,8 @@ template<typename traitsT>
 void PeriodicGridCellList<traitsT>::update(const system_type& sys)
 {
     // TODO consider boundary size
-    this->current_mergin_ -= sys.largest_displacement() * 2.;
-    if(this->current_mergin_ < 0.)
+    this->current_margin_ -= sys.largest_displacement() * 2.;
+    if(this->current_margin_ < 0.)
     {
         this->make(sys);
     }

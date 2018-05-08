@@ -19,9 +19,9 @@ struct celllist_dispatcher<UnlimitedBoundary<realT, coordT>, traitsT>
     typedef UnlimitedGridCellList<traitsT> type;
     typedef realT real_type;
 
-    static UnlimitedGridCellList<traitsT> invoke(const real_type mergin)
+    static UnlimitedGridCellList<traitsT> invoke(const real_type margin)
     {
-        return UnlimitedGridCellList<traitsT>(mergin);
+        return UnlimitedGridCellList<traitsT>(margin);
     }
 };
 
@@ -31,9 +31,9 @@ struct celllist_dispatcher<CubicPeriodicBoundary<realT, coordT>, traitsT>
     typedef PeriodicGridCellList<traitsT> type;
     typedef realT real_type;
 
-    static PeriodicGridCellList<traitsT> invoke(const real_type mergin)
+    static PeriodicGridCellList<traitsT> invoke(const real_type margin)
     {
-        return PeriodicGridCellList<traitsT>(mergin);
+        return PeriodicGridCellList<traitsT>(margin);
     }
 };
 
@@ -56,7 +56,7 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
         using celllist_type = typename dispatcher::type;
 
         const auto mg = toml::get<real_type>(
-                toml_value_at(sp, "mergin", "[forcefield.global]"));
+                toml_value_at(sp, "margin", "[forcefield.global]"));
 
         return make_unique<GlobalDistanceInteraction<
             traitsT, potentialT, celllist_type>>(
@@ -64,11 +64,11 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
     }
     else if(type == "VerletList")
     {
-        const auto mergin = toml::get<real_type>(toml_value_at(
-                    sp, "mergin", "[forcefield.global]"));
+        const auto margin = toml::get<real_type>(toml_value_at(
+                    sp, "margin", "[forcefield.global]"));
         return make_unique<GlobalDistanceInteraction<
             traitsT, potentialT, VerletList<traitsT>>>(
-                std::move(pot), VerletList<traitsT>(mergin));
+                std::move(pot), VerletList<traitsT>(margin));
     }
     else if(type == "Naive")
     {

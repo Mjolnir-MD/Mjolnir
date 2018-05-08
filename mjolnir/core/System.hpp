@@ -66,7 +66,7 @@ class System
     real_type  attribute(const std::string& key) const {return attributes_.at(key);}
     real_type& attribute(const std::string& key)       {return attributes_[key];}
 
-    // store largest displacement in a step to decrease mergin of verlet list.
+    // store largest displacement in a step to decrease margin of verlet list.
     real_type& largest_displacement()       noexcept {return largest_disp_;}
     real_type  largest_displacement() const noexcept {return largest_disp_;}
 

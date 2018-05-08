@@ -28,8 +28,8 @@ class Plane
   public:
 
     Plane(const coordinate_type& pos, const coordinate_type& n,
-          const real_type mergin = 1)
-        : position_(pos), normal_(n), mergin_(mergin), current_mergin_(-1)
+          const real_type margin = 1)
+        : position_(pos), normal_(n), margin_(margin), current_margin_(-1)
     {}
 
     //XXX   can be negative! because normal vector can define the direction...
@@ -80,7 +80,7 @@ class Plane
     coordinate_type position_; // representative position.
     coordinate_type normal_;   // normal vector
 
-    real_type cutoff_, mergin_, current_mergin_;
+    real_type cutoff_, margin_, current_margin_;
     std::vector<std::size_t> neighbors_;   // being inside of cutoff range
     std::vector<std::size_t> participant_; // particle that interacts with
 };
@@ -89,7 +89,7 @@ template<typename traitsT>
 void Plane<traitsT>::make(const system_type& sys)
 {
     this->neighbors_.clear();
-    const real_type threshold = this->cutoff_ * (1 + this->mergin_);
+    const real_type threshold = this->cutoff_ * (1 + this->margin_);
 
     for(std::size_t i : this->participant_)
     {
@@ -100,15 +100,15 @@ void Plane<traitsT>::make(const system_type& sys)
         }
     }
 
-    this->current_mergin_ = this->cutoff_ * this->mergin_;
+    this->current_margin_ = this->cutoff_ * this->margin_;
     return;
 }
 
 template<typename traitsT>
 void Plane<traitsT>::update(const system_type& sys)
 {
-    this->current_mergin_ -= sys.largest_displacement();
-    if(this->current_mergin_ < 0)
+    this->current_margin_ -= sys.largest_displacement();
+    if(this->current_margin_ < 0)
     {
         this->make(sys);
     }

@@ -684,7 +684,7 @@ potential = "ExcludedVolume"
 ignored_chain    = "Nothing"
 ignored_bonds    = 3
 ignored_contacts = 1
-spatial_partition = {type = "CellList", mergin = 1.0}
+spatial_partition = {type = "CellList", margin = 1.0}
 epsilon = 0.2
 # params{{{
 parameters = [

@@ -32,7 +32,7 @@ class ExternalDistanceInteraction final
     {}
     ~ExternalDistanceInteraction() override = default;
 
-    // calculate force, update spatial partition (reduce mergin) inside.
+    // calculate force, update spatial partition (reduce margin) inside.
     void      calc_force (system_type&)             override;
     real_type calc_energy(system_type const&) const override;
 

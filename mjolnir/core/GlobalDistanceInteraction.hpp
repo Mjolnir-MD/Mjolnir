@@ -63,7 +63,7 @@ template<typename traitsT, typename potT, typename spaceT>
 void GlobalDistanceInteraction<traitsT, potT, spaceT>::calc_force(
         system_type& sys)
 {
-    partition_.update(sys); // reduce mergin and reconstruct pair-list if needed
+    partition_.update(sys); // reduce margin and reconstruct pair-list if needed
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         for(auto j : this->partition_.partners(i))

@@ -27,8 +27,8 @@ class AxisAlignedPlane
 
   public:
 
-    AxisAlignedPlane(const real_type position, const real_type mergin = 1)
-        : position_(position), mergin_(mergin), current_mergin_(-1)
+    AxisAlignedPlane(const real_type position, const real_type margin = 1)
+        : position_(position), margin_(margin), current_margin_(-1)
     {}
 
     //XXX can be negative! because normal vector can define the direction...
@@ -61,7 +61,7 @@ class AxisAlignedPlane
         // assuming pot is already initialized!
         this->cutoff_         = pot.max_cutoff_length();
         this->participant_    = pot.participants();
-        this->current_mergin_ = 0.0;
+        this->current_margin_ = 0.0;
         this->make(sys);
         return;
     }
@@ -84,7 +84,7 @@ class AxisAlignedPlane
   private:
 
     real_type position_; // position in the axis.
-    real_type cutoff_, mergin_, current_mergin_;
+    real_type cutoff_, margin_, current_margin_;
     std::vector<std::size_t> neighbors_;   // being inside of cutoff range
     std::vector<std::size_t> participant_; // particle that interacts with
 };
@@ -96,7 +96,7 @@ template<typename traitsT, std::size_t NormalAxis>
 void AxisAlignedPlane<traitsT, NormalAxis>::make(const system_type& sys)
 {
     this->neighbors_.clear();
-    const real_type threshold = this->cutoff_ * (1 + this->mergin_);
+    const real_type threshold = this->cutoff_ * (1 + this->margin_);
     const real_type thr2 = threshold * threshold;
 
     for(std::size_t i : this->participant_)
@@ -108,15 +108,15 @@ void AxisAlignedPlane<traitsT, NormalAxis>::make(const system_type& sys)
         }
     }
 
-    this->current_mergin_ = this->cutoff_ * this->mergin_;
+    this->current_margin_ = this->cutoff_ * this->margin_;
     return;
 }
 
 template<typename traitsT, std::size_t NormalAxis>
 void AxisAlignedPlane<traitsT, NormalAxis>::update(const system_type& sys)
 {
-    this->current_mergin_ -= sys.largest_displacement();
-    if(this->current_mergin_ < 0)
+    this->current_margin_ -= sys.largest_displacement();
+    if(this->current_margin_ < 0)
     {
         this->make(sys);
     }

@@ -25,8 +25,8 @@ class VerletList
 
   public:
 
-    VerletList() : mergin_(0.5), current_mergin_(-1.0){}
-    VerletList(const real_type mgn): mergin_(mgn), current_mergin_(-1.0){}
+    VerletList() : margin_(0.5), current_margin_(-1.0){}
+    VerletList(const real_type mgn): margin_(mgn), current_margin_(-1.0){}
 
     ~VerletList() = default;
     VerletList(VerletList const&) = default;
@@ -36,7 +36,7 @@ class VerletList
 
     bool valid() const noexcept
     {
-        return current_mergin_ >= 0.0;
+        return current_margin_ >= 0.0;
     }
 
     template<typename PotentialT>
@@ -59,20 +59,20 @@ class VerletList
     void update(const system_type& sys);
 
     real_type cutoff() const noexcept {return this->cutoff_;}
-    real_type mergin() const noexcept {return this->mergin_;}
+    real_type margin() const noexcept {return this->margin_;}
 
     range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
 
   private:
 
     void set_cutoff(const real_type c) noexcept {this->cutoff_ = c;}
-    void set_mergin(const real_type m) noexcept {this->mergin_ = m;}
+    void set_margin(const real_type m) noexcept {this->margin_ = m;}
 
   private:
 
     real_type      cutoff_;
-    real_type      mergin_;
-    real_type      current_mergin_;
+    real_type      margin_;
+    real_type      current_margin_;
     static Logger& logger_;
 
     exclusion_list_type exclusion_;
@@ -87,7 +87,7 @@ void VerletList<traitsT>::make(const system_type& sys)
 {
     this->neighbors_.clear();
 
-    const real_type rc = cutoff_ * (1. + mergin_);
+    const real_type rc = cutoff_ * (1. + margin_);
     const real_type rc2 = rc * rc;
     for(std::size_t i=0; i<sys.size(); ++i)
     {
@@ -109,15 +109,15 @@ void VerletList<traitsT>::make(const system_type& sys)
         }
         this->neighbors_.add_list_for(i, partners);
     }
-    this->current_mergin_ = cutoff_ * mergin_;
+    this->current_margin_ = cutoff_ * margin_;
     return ;
 }
 
 template<typename traitsT>
 void VerletList<traitsT>::update(const system_type& sys)
 {
-    this->current_mergin_ -= sys.largest_displacement() * 2;
-    if(this->current_mergin_ < 0)
+    this->current_margin_ -= sys.largest_displacement() * 2;
+    if(this->current_margin_ < 0)
     {
         this->make(sys);
     }

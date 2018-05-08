@@ -211,7 +211,7 @@ read_external_distance_interaction_shape(const toml::Table& external)
     {
         const auto pos = toml::get<real_type>(toml_value_at(shape, "position",
             "[forcefield.external.shape] for ExternalDistance"));
-        const auto mergin = toml::get<real_type>(toml_value_at(shape, "mergin",
+        const auto margin = toml::get<real_type>(toml_value_at(shape, "margin",
             "[forcefield.external.shape] for ExternalDistance"));
 
         const auto axis = toml::get<std::string>(toml_value_at(shape, "axis",
@@ -220,19 +220,19 @@ read_external_distance_interaction_shape(const toml::Table& external)
         {
             using shape_t = AxisAlignedPlane<traitsT, 0>;
             return read_external_distance_interaction<traitsT, shape_t>(
-                    external, shape_t(pos, mergin));
+                    external, shape_t(pos, margin));
         }
         else if(axis == "Y")
         {
             using shape_t = AxisAlignedPlane<traitsT, 1>;
             return read_external_distance_interaction<traitsT, shape_t>(
-                    external, shape_t(pos, mergin));
+                    external, shape_t(pos, margin));
         }
         else if(axis == "Z")
         {
             using shape_t = AxisAlignedPlane<traitsT, 2>;
             return read_external_distance_interaction<traitsT, shape_t>(
-                    external, shape_t(pos, mergin));
+                    external, shape_t(pos, margin));
         }
         else
         {
