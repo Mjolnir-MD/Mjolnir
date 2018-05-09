@@ -1,6 +1,7 @@
 #ifndef JARNGREIPR_FORCEFIELD_EXCLUDED_VOLUME
 #define JARNGREIPR_FORCEFIELD_EXCLUDED_VOLUME
 #include <jarngreipr/forcefield/ForceFieldGenerator.hpp>
+#include <mjolnir/util/get_toml_value.hpp>
 #include <extlib/toml/toml.hpp>
 
 namespace jarngreipr
@@ -67,6 +68,8 @@ void ExcludedVolume<realT>::generate(toml::Table& ff,
     }
     exv["epsilon"]    = 0.2;
     exv["parameters"] = toml::value(std::move(params));
+
+    ff["global"].cast<toml::value_t::Array>().push_back(exv);
     return;
 }
 
