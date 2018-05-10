@@ -67,6 +67,28 @@ void write_global_forcefield(
     return ;
 }
 
+template<typename charT, typename traits>
+void write_forcefield(
+        std::basic_ostream<charT, traits>& os, const toml::Table& ff)
+{
+    os << "[[forcefields]]\n";
+
+    if(ff.count("local") == 1)
+    {
+        for(const auto& local : ff["local"].cast<toml::value_t::Array>())
+        {
+            write_local_forcefield(os, local.cast<toml::value_t::Table>());
+        }
+    }
+    if(ff.count("global") == 1)
+    {
+        for(const auto& local : ff["global"].cast<toml::value_t::Array>())
+        {
+            write_local_forcefield(os, local.cast<toml::value_t::Table>());
+        }
+    }
+    return;
+}
 
 } // jarngreipr
 #endif // JARNGREIPR_WRITE_FORCEFIELD_HPP
