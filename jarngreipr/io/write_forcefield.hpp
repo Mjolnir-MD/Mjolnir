@@ -82,9 +82,9 @@ void write_forcefield(
     }
     if(ff.count("global") == 1)
     {
-        for(const auto& local : ff.at("global").cast<toml::value_t::Array>())
+        for(const auto& global : ff.at("global").cast<toml::value_t::Array>())
         {
-            write_local_forcefield(os, local.cast<toml::value_t::Table>());
+            write_global_forcefield(os, global.cast<toml::value_t::Table>());
         }
     }
     return;
