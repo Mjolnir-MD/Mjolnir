@@ -23,7 +23,8 @@ void write_toml_value(
         }
         case toml::value_t::Float:
         {
-            os << std::fixed << toml::get<toml::Float>(v);
+            os << std::setw(9) << std::fixed<< std::setprecision(4)
+               << toml::get<toml::Float>(v);
             return;
         }
         case toml::value_t::String:
