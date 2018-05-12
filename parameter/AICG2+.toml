@@ -1,4 +1,4 @@
-# parameter set for AICG2+.
+# parameter set for AICG2+ [1,2] and flexible local potential [3].
 
 cbd_aicg2       = 110.40
 wid_aicg13      =   0.15
@@ -487,3 +487,17 @@ VAL-THR = [2.2583,  0.4104, -0.0268, -0.0534, -0.3637, -0.0139, -0.0752]
 VAL-TRP = [2.2583,  0.4104, -0.0268, -0.0534, -0.3637, -0.0139, -0.0752]
 VAL-TYR = [2.2583,  0.4104, -0.0268, -0.0534, -0.3637, -0.0139, -0.0752]
 VAL-VAL = [2.2583,  0.4104, -0.0268, -0.0534, -0.3637, -0.0139, -0.0752]
+
+# References:
+# 1. Li, W., Terakawa, T., Wang, W., Takada, S., 2012.
+#    "Energy landscape and multi-route folding of topologically complex
+#    proteins: Adenylate kinase and a knotted protein."
+#    Proceedings of the National Academy of Sciences 109, 17789–17794.
+# 2. Li, W., Wang, W., Takada, S., 2014.
+#    "Energy landscape views for interplays among folding, binding, and
+#    allostey of calmodulin domains."
+#    Proceedings of the National Academy of Sciences 111, 10550–10555.
+# 3. Terakawa, T., Takada, S., 2011.
+#    "Multiscale ensemble modeling of intrinsically disordered proteins: p53 n-
+#    terminal domain."
+#    Biophysical Journal 101 (6), 1450–1458.
