@@ -1,0 +1,15 @@
+# parameter set for Clementi-Go potential [1].
+coef_bond       = 100.0
+coef_angle      =  20.0
+coef_dihedral_1 =   1.0
+coef_dihedral_3 =   0.5
+coef_contact    =   0.3
+
+contact_threshold = 6.5
+
+# Reference:
+# 1. Clementi, C., Nymeyer, H., Onuchic, J., 2000.
+#    "Topological and energetic factors: what determines the structural details
+#    of the transition state ensemble and ``en-route'' intermediates for
+#    protein folding? An investigation for small globular proteins."
+#    Journal of Molecular Biology 298 (5), 937–953.
