@@ -93,8 +93,10 @@ class AICG2Plus final : public IntraChainForceFieldGenerator<realT>
         real_type min_dist = std::numeric_limits<real_type>::max();
         for(const auto& atom1 : bead1->atoms())
         {
+            if(atom1.element == " H") {continue;}
             for(const auto& atom2 : bead2->atoms())
             {
+                if(atom2.element == " H") {continue;}
                 const real_type dist = distance_sq(atom1.position, atom2.position);
                 if(dist < min_dist) {min_dist = dist;}
             }
