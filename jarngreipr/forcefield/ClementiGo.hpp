@@ -4,6 +4,7 @@
 #include <jarngreipr/geometry/distance.hpp>
 #include <jarngreipr/geometry/angle.hpp>
 #include <jarngreipr/geometry/dihedral.hpp>
+#include <mjolnir/util/get_toml_value.hpp>
 #include <iterator>
 #include <iostream>
 #include <vector>
@@ -21,24 +22,8 @@ class ClementiGo final : public IntraChainForceFieldGenerator<realT>
 
   public:
 
-    ClementiGo()
-        : contact_threshold_(6.5), k_bond_length_(100.0), k_bond_angle_(20.0),
-          k_dihedral_angle_1_(1.0), k_dihedral_angle_3_(0.5), k_intra_go_(0.3)
-    {}
+    ClementiGo(const toml::Table& para): parameters_(para){}
     ~ClementiGo() override = default;
-
-    explicit ClementiGo(const real_type th)
-        : contact_threshold_(th), k_bond_length_(100.0), k_bond_angle_(20.0),
-          k_dihedral_angle_1_(1.0), k_dihedral_angle_3_(0.5), k_intra_go_(0.3)
-    {}
-
-    ClementiGo(const real_type threshold,
-        const real_type k_bl,   const real_type k_ba,
-        const real_type k_dih1, const real_type k_dih3, const real_type k_igo)
-        : contact_threshold_(threshold), k_bond_length_(k_bl), k_bond_angle_(k_ba),
-          k_dihedral_angle_1_(k_dih1), k_dihedral_angle_3_(k_dih3),
-          k_intra_go_(k_igo)
-    {}
 
     // generate parameters and write out to `ostrm`.
     void generate(toml::Table& out,
@@ -47,42 +32,28 @@ class ClementiGo final : public IntraChainForceFieldGenerator<realT>
     bool check_beads_kind(
         const std::vector<std::unique_ptr<bead_type>>& chain) const override;
 
-    real_type& contact_threshold()       noexcept {return contact_threshold_;}
-    real_type  contact_threshold() const noexcept {return contact_threshold_;}
-
   private:
 
-    real_type min_distance_sq(
-            const typename bead_type::container_type& lhs,
-            const typename bead_type::container_type& rhs) const
+    real_type min_distance_sq(const std::unique_ptr<bead_type>& bead1,
+                              const std::unique_ptr<bead_type>& bead2) const
     {
-        real_type dist2 = std::numeric_limits<real_type>::max();
-        for(const auto& l : lhs)
+        real_type min_dist_sq = std::numeric_limits<real_type>::max();
+        for(const auto& atom1 : bead1->atoms())
         {
-            if(l.element == " H")
+            if(atom1.element == " H"){continue;}
+            for(const auto& atom2 : bead2->atoms())
             {
-                continue;
-            }
-            for(const auto& r : rhs)
-            {
-                if(r.element == " H")
-                {
-                    continue;
-                }
-                const auto d2 = distance_sq(l.position, r.position);
-                dist2 = std::min(dist2, d2);
+                if(atom2.element == " H") {continue;}
+                const auto dsq = distance_sq(atom1.position, atom2.position);
+                min_dist_sq = std::min(dsq, min_dist_sq);
             }
         }
-        return dist2;
+        return min_dist_sq;
     }
 
   private:
-    real_type contact_threshold_;
-    real_type k_bond_length_;
-    real_type k_bond_angle_;
-    real_type k_dihedral_angle_1_;
-    real_type k_dihedral_angle_3_;
-    real_type k_intra_go_;
+
+    toml::Table parameters_;
 };
 
 template<typename realT>
@@ -116,7 +87,8 @@ void ClementiGo<realT>::generate(toml::Table& ff,
             toml::Table para;
             para["indices"] = toml::value{i1, i2};
             para["native"]  = distance(bead1->position(), bead2->position());
-            para["k"]       = this->k_bond_length_;
+            para["k"]       = toml::get<toml::Float>(mjolnir::toml_value_at(
+                    this->parameters_, "coef_bond", "[parameter.ClementiGo]"));
             params.push_back(std::move(para));
         }
         bond_length["parameters"] = std::move(params);
@@ -140,9 +112,10 @@ void ClementiGo<realT>::generate(toml::Table& ff,
 
             toml::Table para;
             para["indices"] = toml::value{i1, i2, i3};
-            para["native"]  = angle(bead1->position(), bead2->position(),
+            para["native" ] = angle(bead1->position(), bead2->position(),
                                     bead3->position());
-            para["k"]  = this->k_bond_angle_;
+            para["k"      ] = toml::get<toml::Float>(mjolnir::toml_value_at(
+                    this->parameters_, "coef_angle", "[parameter.ClementiGo]"));
             params.push_back(std::move(para));
         }
         bond_angle["parameters"] = std::move(params);
@@ -168,31 +141,35 @@ void ClementiGo<realT>::generate(toml::Table& ff,
 
             toml::Table para;
             para["indices"] = toml::value{i1, i2, i3, i4};
-            para["native"]  = dihedral_angle(bead1->position(),
+            para["native" ] = dihedral_angle(bead1->position(),
                     bead2->position(), bead3->position(), bead4->position());
-            para["k1"]  = this->k_dihedral_angle_1_;
-            para["k3"]  = this->k_dihedral_angle_3_;
+            para["k1"     ] = toml::get<toml::Float>(mjolnir::toml_value_at(
+                this->parameters_, "coef_dihedral_1", "[parameter.ClementiGo]"));
+            para["k3"     ] = toml::get<toml::Float>(mjolnir::toml_value_at(
+                this->parameters_, "coef_dihedral_3", "[parameter.ClementiGo]"));
             params.push_back(std::move(para));
         }
         dihd_angle["parameters"] = std::move(params);
         ff["local"].cast<toml::value_t::Array>().push_back(std::move(dihd_angle));
     }
 
-    const real_type th2 = this->contact_threshold_ * this->contact_threshold_;
     /* intra-chain-go-contacts */{
+        const toml::Float threshold = toml::get<toml::Float>(
+            mjolnir::toml_value_at(this->parameters_, "contact_threshold",
+                                   "[parameter.ClementiGo]"));
+        const real_type th2 = threshold * threshold;
+
         toml::Table go_contact;
         go_contact["interaction"] = toml::String("BondLength");
-        go_contact["potential"]   = toml::String("Go1012Contact");
-        go_contact["topology"]    = toml::String("contact");
+        go_contact["potential"  ] = toml::String("Go1012Contact");
+        go_contact["topology"   ] = toml::String("contact");
 
         toml::Array params;
         for(std::size_t i=0, sz_i = chain.size()-4; i<sz_i; ++i)
         {
-            const auto& group1 = chain.at(i)->atoms();
             for(std::size_t j=i+4, sz_j = chain.size(); j<sz_j; ++j)
             {
-                const auto& group2 = chain.at(j)->atoms();
-                if(this->min_distance_sq(group1, group2) < th2)
+                if(this->min_distance_sq(chain.at(i), chain.at(j)) < th2)
                 {
                     const auto& bead1 = chain.at(i);
                     const auto& bead2 = chain.at(j);
@@ -201,8 +178,9 @@ void ClementiGo<realT>::generate(toml::Table& ff,
 
                     toml::Table para;
                     para["indices"] = toml::value{i1, i2};
-                    para["native"]  = distance(bead1->position(), bead2->position());
-                    para["k"]       = this->k_intra_go_;
+                    para["native" ] = distance(bead1->position(), bead2->position());
+                    para["k"      ] = toml::get<toml::Float>(mjolnir::toml_value_at(
+                        this->parameters_, "coef_contact", "[parameter.ClementiGo]"));
                     params.push_back(std::move(para));
                 }
             }
