@@ -95,7 +95,7 @@ class AICG2Plus final : public IntraChainForceFieldGenerator<realT>
         {
             for(const auto& atom2 : bead2->atoms())
             {
-                const real_type dist = distance(atom1.position, atom2.position);
+                const real_type dist = distance_sq(atom1.position, atom2.position);
                 if(dist < min_dist) {min_dist = dist;}
             }
         }
@@ -364,7 +364,7 @@ void AICG2Plus<realT>::generate(toml::Table& ff,
                     toml::Table para;
                     para["indices"] = toml::value{i1, i2};
                     para["native" ] = distance(bead1->position(), bead2->position());
-                    para["k"      ] = this->coef_go_ * calc_contact_coef(bead1, bead2);
+                    para["k"      ] = -this->coef_go_ * calc_contact_coef(bead1, bead2);
                     params.push_back(std::move(para));
                 }
             }
