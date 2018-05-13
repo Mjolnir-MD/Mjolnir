@@ -38,7 +38,7 @@ read_harmonic_potential(const toml::Table& local)
         const auto& parameter = item.cast<toml::value_t::Table>();
         auto indices = toml::get<indices_t>(toml_value_at(parameter, "indices",
                 "element of [[parameters]] in harmonic potential"));
-        auto r0 = toml::get<real_type>(toml_value_at(parameter, "native",
+        auto r0 = toml::get<real_type>(toml_value_at(parameter, "eq",
                 "element of [[parameters]] in harmonic potential"));
         auto k  = toml::get<real_type>(toml_value_at(parameter, "k",
                 "element of [[parameters]] in harmonic potential"));
@@ -72,7 +72,7 @@ read_go1012_contact_potential(const toml::Table& local)
 
         auto indices = toml::get<indices_t>(toml_value_at(parameter, "indices",
                 "element of [[parameters]] in Go-10-12 potential"));
-        auto r0 = toml::get<real_type>(toml_value_at(parameter, "native",
+        auto r0 = toml::get<real_type>(toml_value_at(parameter, "eq",
                 "element of [[parameters]] in Go-10-12 potential"));
         auto k  = toml::get<real_type>(toml_value_at(parameter, "k",
                 "element of [[parameters]] in Go-10-12 potential"));
@@ -104,7 +104,7 @@ read_gaussian_potential(const toml::Table& local)
 
         auto indices = toml::get<indices_t>(toml_value_at(parameter, "indices",
                 "element of [[parameters]] in Gaussian potential"));
-        auto native  = toml::get<real_type>(toml_value_at(parameter, "native",
+        auto eq      = toml::get<real_type>(toml_value_at(parameter, "eq",
                 "element of [[parameters]] in Gaussian potential"));
         auto epsilon = toml::get<real_type>(toml_value_at(parameter, "epsilon",
                 "element of [[parameters]] in Gaussian potential"));
@@ -112,7 +112,7 @@ read_gaussian_potential(const toml::Table& local)
                 "element of [[parameters]] in Gaussian potential"));
 
         retval.emplace_back(
-                indices, GaussianPotential<traitsT>(epsilon, w, native));
+                indices, GaussianPotential<traitsT>(epsilon, w, eq));
     }
     return retval;
 }
@@ -177,15 +177,15 @@ read_clementi_dihedral_potential(const toml::Table& local)
 
         auto indices = toml::get<indices_t>(toml_value_at(parameter, "indices",
                 "element of [[parameters]] in ClementiDihedral potential"));
-        auto native = toml::get<real_type>(toml_value_at(parameter, "native",
+        auto eq = toml::get<real_type>(toml_value_at(parameter, "eq",
                 "element of [[parameters]] in ClementiDihedral potential"));
-        auto k1     = toml::get<real_type>(toml_value_at(parameter, "k1",
+        auto k1 = toml::get<real_type>(toml_value_at(parameter, "k1",
                 "element of [[parameters]] in ClementiDihedral potential"));
-        auto k3     = toml::get<real_type>(toml_value_at(parameter, "k3",
+        auto k3 = toml::get<real_type>(toml_value_at(parameter, "k3",
                 "element of [[parameters]] in ClementiDihedral potential"));
 
         retval.emplace_back(
-                indices, ClementiDihedralPotential<traitsT>(k1, k3, native));
+                indices, ClementiDihedralPotential<traitsT>(k1, k3, eq));
     }
     return retval;
 }

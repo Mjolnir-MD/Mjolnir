@@ -21,14 +21,14 @@ class ClementiDihedralPotential
 
   public:
     ClementiDihedralPotential(const real_type k1, const real_type k3,
-                              const real_type native_val)
-        : k1_(k1), k3_(k3), native_val_(native_val)
+                              const real_type eq_val)
+        : k1_(k1), k3_(k3), eq_val_(eq_val)
     {}
     ~ClementiDihedralPotential() = default;
 
     real_type potential(const real_type val) const noexcept
     {
-        const real_type dphi = val - native_val_;
+        const real_type dphi = val - eq_val_;
         const real_type cos1 = std::cos(dphi);
         const real_type cos3 = cos1 * (4 * cos1 * cos1 - 3.0);
         return this->k1_ * (1.0 - cos1) + k3_ * (1.0 - cos3);
@@ -36,7 +36,7 @@ class ClementiDihedralPotential
 
     real_type derivative(const real_type val) const noexcept
     {
-        const real_type dphi = val - native_val_;
+        const real_type dphi = val - eq_val_;
         const real_type sin1 = std::sin(dphi);
         const real_type sin3 = sin1 * (3.0 - 4 * sin1 * sin1);
 
@@ -51,7 +51,7 @@ class ClementiDihedralPotential
 
     real_type k1_;
     real_type k3_;
-    real_type native_val_;
+    real_type eq_val_;
 };
 
 } // mjolnir
