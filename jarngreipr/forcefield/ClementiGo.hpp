@@ -86,8 +86,8 @@ void ClementiGo<realT>::generate(toml::Table& ff,
             const std::size_t i2 = bead2->index();
             toml::Table para;
             para["indices"] = toml::value{i1, i2};
-            para["native"]  = distance(bead1->position(), bead2->position());
-            para["k"]       = toml::get<toml::Float>(mjolnir::toml_value_at(
+            para["eq"     ] = distance(bead1->position(), bead2->position());
+            para["k"      ] = toml::get<toml::Float>(mjolnir::toml_value_at(
                     this->parameters_, "coef_bond", "[parameter.ClementiGo]"));
             params.push_back(std::move(para));
         }
@@ -112,7 +112,7 @@ void ClementiGo<realT>::generate(toml::Table& ff,
 
             toml::Table para;
             para["indices"] = toml::value{i1, i2, i3};
-            para["native" ] = angle(bead1->position(), bead2->position(),
+            para["eq"     ] = angle(bead1->position(), bead2->position(),
                                     bead3->position());
             para["k"      ] = toml::get<toml::Float>(mjolnir::toml_value_at(
                     this->parameters_, "coef_angle", "[parameter.ClementiGo]"));
@@ -141,7 +141,7 @@ void ClementiGo<realT>::generate(toml::Table& ff,
 
             toml::Table para;
             para["indices"] = toml::value{i1, i2, i3, i4};
-            para["native" ] = dihedral_angle(bead1->position(),
+            para["eq"     ] = dihedral_angle(bead1->position(),
                     bead2->position(), bead3->position(), bead4->position());
             para["k1"     ] = toml::get<toml::Float>(mjolnir::toml_value_at(
                 this->parameters_, "coef_dihedral_1", "[parameter.ClementiGo]"));
@@ -178,7 +178,7 @@ void ClementiGo<realT>::generate(toml::Table& ff,
 
                     toml::Table para;
                     para["indices"] = toml::value{i1, i2};
-                    para["native" ] = distance(bead1->position(), bead2->position());
+                    para["eq"     ] = distance(bead1->position(), bead2->position());
                     para["k"      ] = toml::get<toml::Float>(mjolnir::toml_value_at(
                         this->parameters_, "coef_contact", "[parameter.ClementiGo]"));
                     params.push_back(std::move(para));

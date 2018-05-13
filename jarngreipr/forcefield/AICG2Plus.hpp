@@ -182,7 +182,7 @@ void AICG2Plus<realT>::generate(toml::Table& ff,
             const std::size_t i2 = bead2->index();
             toml::Table para;
             para["indices"] = toml::value{i1, i2};
-            para["native" ] = distance(bead1->position(), bead2->position());
+            para["eq"     ] = distance(bead1->position(), bead2->position());
             para["k"      ] = kbd;
             params.push_back(std::move(para));
         }
@@ -214,7 +214,7 @@ void AICG2Plus<realT>::generate(toml::Table& ff,
 
             toml::Table para;
             para["indices"] = toml::value{i1, i3};
-            para["native" ] = distance(bead1->position(), bead3->position());
+            para["eq"     ] = distance(bead1->position(), bead3->position());
             para["w"      ] = width;
             para["epsilon"] = this->coef_13_ * calc_contact_coef(bead1, bead3);
             params.push_back(std::move(para));
@@ -289,7 +289,7 @@ void AICG2Plus<realT>::generate(toml::Table& ff,
 
             toml::Table para;
             para["indices"] = toml::value{i1, i2, i3, i4};
-            para["native" ] = dihedral_angle(bead1->position(),
+            para["eq"     ] = dihedral_angle(bead1->position(),
                     bead2->position(), bead3->position(), bead4->position());
             para["w"      ] = width;
             para["epsilon"] = this->coef_14_ * calc_contact_coef(bead1, bead4);
@@ -365,7 +365,7 @@ void AICG2Plus<realT>::generate(toml::Table& ff,
 
                     toml::Table para;
                     para["indices"] = toml::value{i1, i2};
-                    para["native" ] = distance(bead1->position(), bead2->position());
+                    para["eq"     ] = distance(bead1->position(), bead2->position());
                     para["k"      ] = -this->coef_go_ * calc_contact_coef(bead1, bead2);
                     params.push_back(std::move(para));
                 }
