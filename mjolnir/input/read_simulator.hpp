@@ -2,6 +2,7 @@
 #define MJOLNIR_READ_SIMULATOR
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/MDSimulator.hpp>
+#include <mjolnir/core/SteepestDescentSimulator.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
@@ -56,6 +57,23 @@ read_simulator(const toml::Table& data)
             throw_exception<std::runtime_error>("invalid integration scheme: ",
                     integration, " for simulator ", type);
         }
+    }
+    else if(type == "Steepest Descent")
+    {
+        using simulator_t = SteepestDescentSimulator<traitsT>;
+        using real_type   = typename traitsT::real_type;
+        const std::size_t step_lim  = toml::get<std::size_t>(toml_value_at(
+                simulator, "step_limit", "[simulator]"));
+        const real_type   delta     = toml::get<real_type>(toml_value_at(
+                simulator, "delta", "[simulator]"));
+        const real_type   threshold = toml::get<real_type>(toml_value_at(
+                simulator, "threshold", "[simulator]"));
+
+        return make_unique<simulator_t>(
+                delta, threshold, step_lim,
+                read_system<traitsT>(data, 0),
+                read_forcefield<traitsT>(data, 0),
+                read_observer<traitsT>(data));
     }
     else
     {
