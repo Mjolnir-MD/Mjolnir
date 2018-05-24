@@ -7,7 +7,7 @@ namespace jarngreipr
 {
 
 template<typename realT>
-class IntraChainForceFieldGenerator
+class ForceFieldGenerator
 {
   public:
     typedef realT real_type;
@@ -16,33 +16,18 @@ class IntraChainForceFieldGenerator
   public:
     virtual ~IntraChainForceFieldGenerator() = default;
 
-    //!@brief generate parameter values and write out to ostream.
+    //!@brief generate intra-chain forcefield parameter values
     virtual void generate(toml::Table& out,
             const std::vector<std::unique_ptr<bead_type>>& chain) const = 0;
+
+    //!@brief generate inter-chain forcefield parameter values
+    virtual void generate(toml::Table& out,
+            const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains
+            ) const = 0;
 
     //!@brief if chain contains invalid bead, return false.
     virtual bool check_beads_kind(
             const std::vector<std::unique_ptr<bead_type>>& chain) const = 0;
-};
-
-template<typename realT>
-class InterChainForceFieldGenerator
-{
-  public:
-    typedef realT real_type;
-    typedef Bead<real_type> bead_type;
-    typedef std::unique_ptr<bead_type> bead_ptr;
-
-  public:
-    virtual ~InterChainForceFieldGenerator() = default;
-
-    //!@brief generate parameter values and write out to ostream.
-    virtual void generate(toml::Table& out,
-        const std::vector<std::vector<bead_ptr>>& chain) const = 0;
-
-    //!@brief if chain contains invalid bead, return false.
-    virtual bool check_beads_kind(
-        const std::vector<std::vector<bead_type>>& chain) const = 0;
 };
 
 } // mjolnir
