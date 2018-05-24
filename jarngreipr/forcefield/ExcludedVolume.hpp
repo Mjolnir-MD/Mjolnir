@@ -8,7 +8,7 @@ namespace jarngreipr
 {
 
 template<typename realT>
-class ExcludedVolume final : public InterChainForceFieldGenerator<realT>
+class ExcludedVolume final : public ForceFieldGenerator<realT>
 {
   public:
     typedef InterChainForceFieldGenerator<realT> base_type;
@@ -21,9 +21,8 @@ class ExcludedVolume final : public InterChainForceFieldGenerator<realT>
     ExcludedVolume(const toml::Table& para) : parameters_(para){}
     ~ExcludedVolume() override = default;
 
-
     void generate(toml::Table& out,
-        const std::vector<std::vector<bead_ptr>>& chain) const;
+        const std::vector<std::vector<bead_ptr>>& chains) const;
 
     bool check_beads_kind(
         const std::vector<std::vector<bead_type>>& chain) const {return true;}

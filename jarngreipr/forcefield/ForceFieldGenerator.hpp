@@ -16,11 +16,7 @@ class ForceFieldGenerator
   public:
     virtual ~IntraChainForceFieldGenerator() = default;
 
-    //!@brief generate intra-chain forcefield parameter values
-    virtual void generate(toml::Table& out,
-            const std::vector<std::unique_ptr<bead_type>>& chain) const = 0;
-
-    //!@brief generate inter-chain forcefield parameter values
+    //!@brief generate forcefield parameter values
     virtual void generate(toml::Table& out,
             const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains
             ) const = 0;

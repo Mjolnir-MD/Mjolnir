@@ -25,10 +25,6 @@ class ClementiGo final : public ForceFieldGenerator<realT>
     ClementiGo(const toml::Table& para): parameters_(para){}
     ~ClementiGo() override = default;
 
-    // generate parameters and write out to `ostrm`.
-    void generate(toml::Table& out,
-        const std::vector<std::unique_ptr<bead_type>>& chain) const override;
-
     void generate(toml::Table& out,
         const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains
         ) const override;
@@ -37,6 +33,10 @@ class ClementiGo final : public ForceFieldGenerator<realT>
         const std::vector<std::unique_ptr<bead_type>>& chain) const override;
 
   private:
+
+    // generate parameters and write out to `ostrm`.
+    void generate_local(toml::Table& out,
+        const std::vector<std::unique_ptr<bead_type>>& chain) const;
 
     real_type min_distance_sq(const std::unique_ptr<bead_type>& bead1,
                               const std::unique_ptr<bead_type>& bead2) const
@@ -62,6 +62,67 @@ class ClementiGo final : public ForceFieldGenerator<realT>
 
 template<typename realT>
 void ClementiGo<realT>::generate(toml::Table& ff,
+    const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains) const
+{
+    if(ff.count("local") == 0)
+    {
+        ff["local"] = toml::Array();
+    }
+
+    // ------------------- generate intra-chain parameters -------------------
+
+    for(const auto& chain : chains)
+    {
+        this->generate_local(ff, chain);
+    }
+
+    // -------------------- generate inter-chain contacts --------------------
+    if(chains.size() > 2)
+    {
+        const toml::Float threshold = toml::get<toml::Float>(
+            mjolnir::toml_value_at(this->parameters_, "contact_threshold",
+                                   "[parameter.ClementiGo]"));
+        const real_type th2 = threshold * threshold;
+
+        toml::Table go_contact;
+        go_contact["interaction"] = toml::String("BondLength");
+        go_contact["potential"  ] = toml::String("Go1012Contact");
+        go_contact["topology"   ] = toml::String("contact");
+
+        toml::Array params;
+        for(std::size_t i=0, ei(chains.size()-1); i<ei; ++i)
+        {
+            for(std::size_t j=i+1, ej(chains.size()); j<ej; ++j)
+            {
+                for(const auto& bead1 : chains.at(i))
+                {
+                    for(const auto& bead2 : chains.at(j))
+                    {
+                        if(this->min_distance_sq(bead1, bead2) < th2)
+                        {
+                            const std::size_t i1 = bead1->index();
+                            const std::size_t i2 = bead2->index();
+
+                            toml::Table para;
+                            para["indices"] = toml::value{i1, i2};
+                            para["eq"     ] = distance(bead1->position(), bead2->position());
+                            para["k"      ] = toml::get<toml::Float>(
+                                mjolnir::toml_value_at(this->parameters_,
+                                    "coef_contact", "[parameter.ClementiGo]"));
+                            params.push_back(std::move(para));
+                        }
+                    }
+                }
+            }
+        }
+        go_contact["parameters"]  = std::move(params);
+        ff["local"].cast<toml::value_t::Array>().push_back(std::move(go_contact));
+    }
+    return;
+}
+
+template<typename realT>
+void ClementiGo<realT>::generate_local(toml::Table& ff,
         const std::vector<std::unique_ptr<bead_type>>& chain) const
 {
     if(!this->check_beads_kind(chain))
@@ -192,62 +253,6 @@ void ClementiGo<realT>::generate(toml::Table& ff,
         go_contact["parameters"]  = std::move(params);
         ff["local"].cast<toml::value_t::Array>().push_back(std::move(go_contact));
     }
-    return;
-}
-
-template<typename realT>
-void ClementiGo<realT>::generate(toml::Table& ff,
-    const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains) const
-{
-    for(const auto& chain : chains)
-    {
-        if(!this->check_beads_kind(chain))
-        {
-            std::cerr << "ClementiGo: Invalid Bead Kind. "
-                         "stop generating forcefield..." << std::endl;
-            return ;
-        }
-    }
-
-    /* intra-chain-go-contacts */
-    const toml::Float threshold = toml::get<toml::Float>(
-        mjolnir::toml_value_at(this->parameters_, "contact_threshold",
-                               "[parameter.ClementiGo]"));
-    const real_type th2 = threshold * threshold;
-
-    toml::Table go_contact;
-    go_contact["interaction"] = toml::String("BondLength");
-    go_contact["potential"  ] = toml::String("Go1012Contact");
-    go_contact["topology"   ] = toml::String("contact");
-
-    toml::Array params;
-    for(std::size_t i=0, ei(chains.size()-1); i<ei; ++i)
-    {
-        for(std::size_t j=i+1, ej(chains.size()); j<ej; ++j)
-        {
-            for(const auto& bead1 : chains.at(i))
-            {
-                for(const auto& bead2 : chains.at(j))
-                {
-                    if(this->min_distance_sq(bead1, bead2) < th2)
-                    {
-                        const std::size_t i1 = bead1->index();
-                        const std::size_t i2 = bead2->index();
-
-                        toml::Table para;
-                        para["indices"] = toml::value{i1, i2};
-                        para["eq"     ] = distance(bead1->position(), bead2->position());
-                        para["k"      ] = toml::get<toml::Float>(
-                            mjolnir::toml_value_at(this->parameters_,
-                                "coef_contact", "[parameter.ClementiGo]"));
-                        params.push_back(std::move(para));
-                    }
-                }
-            }
-        }
-    }
-    go_contact["parameters"]  = std::move(params);
-    ff["local"].cast<toml::value_t::Array>().push_back(std::move(go_contact));
     return;
 }
 

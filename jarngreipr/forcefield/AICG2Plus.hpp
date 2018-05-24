@@ -27,11 +27,7 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
     AICG2Plus(const toml::Table& para, const std::vector<std::size_t>& flex);
     ~AICG2Plus() override = default;
 
-    //XXX generate local parameters.
-    void generate(toml::Table& out,
-        const std::vector<std::unique_ptr<bead_type>>& chain) const override;
-
-    //XXX generate (contact) parameters.
+    //XXX generate local parameters and inter-chain contact parameters.
     void generate(toml::Table& out,
         const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains
         ) const override;
@@ -40,6 +36,10 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
         const std::vector<std::unique_ptr<bead_type>>& chain) const override;
 
   private:
+
+    //XXX generate local parameters (including intra-chain contacts).
+    void generate_local(toml::Table& out,
+        const std::vector<std::unique_ptr<bead_type>>& chain) const;
 
     bool is_flexible_region(const std::size_t bead_idx) const
     {
@@ -155,6 +155,68 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
 
 template<typename realT>
 void AICG2Plus<realT>::generate(toml::Table& ff,
+        const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains) const
+{
+    if(ff.count("local") == 0)
+    {
+        ff["local"] = toml::Array();
+    }
+
+    // ------------------- generate intra-chain parameters -------------------
+
+    for(const auto& chain : chains)
+    {
+        this->generate_local(ff, chain);
+    }
+
+    // -------------------- generate inter-chain contacts --------------------
+
+    if(chains.size() > 1)
+    {
+        const real_type th2 =
+            this->go_contact_threshold_ * this->go_contact_threshold_;
+
+        toml::Table go_contact;
+        go_contact["interaction"] = toml::String("BondLength");
+        go_contact["potential"  ] = toml::String("Go1012Contact");
+        go_contact["topology"   ] = toml::String("contact");
+
+        toml::Array params;
+        for(std::size_t i=0, ei(chains.size()-1); i<ei; ++i)
+        {
+            for(std::size_t j=i+1, ej(chains.size()); j<ej; ++j)
+            {
+                for(const auto& bead1 : chains.at(i))
+                {
+                    for(const auto& bead2 : chains.at(j))
+                    {
+                        if(this->min_distance_sq(bead1, bead2) < th2)
+                        {
+                            const std::size_t i1 = bead1->index();
+                            const std::size_t i2 = bead2->index();
+
+                            // if one of the bead is flexible region, continue.
+                            if(is_flexible_region(i1) || is_flexible_region(i2))
+                            {continue;}
+
+                            toml::Table para;
+                            para["indices"] = toml::value{i1, i2};
+                            para["eq"     ] = distance(bead1->position(), bead2->position());
+                            para["k"      ] = -coef_go_ * calc_contact_coef(bead1, bead2);
+                            params.push_back(std::move(para));
+                        }
+                    }
+                }
+            }
+        }
+        go_contact["parameters"] = std::move(params);
+        ff["local"].cast<toml::value_t::Array>().push_back(std::move(go_contact));
+    }
+    return;
+}
+
+template<typename realT>
+void AICG2Plus<realT>::generate_local(toml::Table& ff,
         const std::vector<std::unique_ptr<bead_type>>& chain) const
 {
     if(!this->check_beads_kind(chain))
@@ -379,66 +441,6 @@ void AICG2Plus<realT>::generate(toml::Table& ff,
         go_contact["parameters"]  = std::move(params);
         ff["local"].cast<toml::value_t::Array>().push_back(std::move(go_contact));
     }
-    return;
-}
-
-template<typename realT>
-void AICG2Plus<realT>::generate(toml::Table& ff,
-        const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains) const
-{
-    for(const auto& chain : chains)
-    {
-        if(!this->check_beads_kind(chain))
-        {
-            std::cerr << "AICG2+: Invalid Bead Kind(not a CarbonAlpha).\n"
-                         "stop generating forcefield..." << std::endl;
-            return ;
-        }
-    }
-
-    if(ff.count("local") == 0)
-    {
-        ff["local"] = toml::Array();
-    }
-
-    const real_type th2 =
-        this->go_contact_threshold_ * this->go_contact_threshold_;
-
-    toml::Table go_contact;
-    go_contact["interaction"] = toml::String("BondLength");
-    go_contact["potential"  ] = toml::String("Go1012Contact");
-    go_contact["topology"   ] = toml::String("contact");
-
-    toml::Array params;
-    for(std::size_t i=0, ei(chains.size()-1); i<ei; ++i)
-    {
-        for(std::size_t j=i+1, ej(chains.size()); j<ej; ++j)
-        {
-            for(const auto& bead1 : chains.at(i))
-            {
-                for(const auto& bead2 : chains.at(j))
-                {
-                    if(this->min_distance_sq(bead1, bead2) < th2)
-                    {
-                        const std::size_t i1 = bead1->index();
-                        const std::size_t i2 = bead2->index();
-
-                        // if one of the bead is flexible region, continue.
-                        if(is_flexible_region(i1) || is_flexible_region(i2))
-                        {continue;}
-
-                        toml::Table para;
-                        para["indices"] = toml::value{i1, i2};
-                        para["eq"     ] = distance(bead1->position(), bead2->position());
-                        para["k"      ] = -coef_go_ * calc_contact_coef(bead1, bead2);
-                        params.push_back(std::move(para));
-                    }
-                }
-            }
-        }
-    }
-    go_contact["parameters"] = std::move(params);
-    ff["local"].cast<toml::value_t::Array>().push_back(std::move(go_contact));
     return;
 }
 
