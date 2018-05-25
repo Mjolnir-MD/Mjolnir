@@ -154,3 +154,44 @@ BOOST_AUTO_TEST_CASE(multi_matrix_3x4_4x2)
     }
 }
 
+BOOST_AUTO_TEST_CASE(multi_matrix_inverse33)
+{
+    std::mt19937 mt(seed);
+    std::uniform_real_distribution<double> uni(-1.0, 1.0);
+    for(std::size_t test_times=0; test_times<N; ++test_times)
+    {
+        mjolnir::Matrix<double, 3, 3> lhs;
+        for(std::size_t i=0; i<3; ++i)
+        {
+            for(std::size_t j=0; j<3; ++j)
+            {
+                lhs(i, j) = uni(mt);
+            }
+        }
+        const mjolnir::Matrix<double, 3, 3> inv = mjolnir::inverse(lhs);
+
+        const auto unit1 = inv * lhs;
+        const auto unit2 = lhs * inv;
+
+        BOOST_CHECK_CLOSE_FRACTION(unit1(0, 0), 1.0, 1e-10);
+        BOOST_CHECK_CLOSE_FRACTION(unit1(1, 1), 1.0, 1e-10);
+        BOOST_CHECK_CLOSE_FRACTION(unit1(2, 2), 1.0, 1e-10);
+        BOOST_CHECK_SMALL(unit1(0, 1), 1e-10);
+        BOOST_CHECK_SMALL(unit1(0, 2), 1e-10);
+        BOOST_CHECK_SMALL(unit1(1, 0), 1e-10);
+        BOOST_CHECK_SMALL(unit1(1, 2), 1e-10);
+        BOOST_CHECK_SMALL(unit1(2, 0), 1e-10);
+        BOOST_CHECK_SMALL(unit1(2, 1), 1e-10);
+
+        BOOST_CHECK_CLOSE_FRACTION(unit2(0, 0), 1.0, 1e-10);
+        BOOST_CHECK_CLOSE_FRACTION(unit2(1, 1), 1.0, 1e-10);
+        BOOST_CHECK_CLOSE_FRACTION(unit2(2, 2), 1.0, 1e-10);
+        BOOST_CHECK_SMALL(unit2(0, 1), 1e-10);
+        BOOST_CHECK_SMALL(unit2(0, 2), 1e-10);
+        BOOST_CHECK_SMALL(unit2(1, 0), 1e-10);
+        BOOST_CHECK_SMALL(unit2(1, 2), 1e-10);
+        BOOST_CHECK_SMALL(unit2(2, 0), 1e-10);
+        BOOST_CHECK_SMALL(unit2(2, 1), 1e-10);
+    }
+}
+

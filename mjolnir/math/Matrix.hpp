@@ -282,9 +282,10 @@ inline realT determinant(const Matrix<realT, 3, 3>& mat) noexcept
 }
 
 template<typename realT>
-Matrix<realT, 3, 3> inverse(const Matrix<realT, 3, 3>& mat) noexcept
+Matrix<realT, 3, 3>
+inverse(const Matrix<realT, 3, 3>& mat, const realT det) noexcept
 {
-    const auto det_inv = 1e0 / determinant(mat);
+    const auto det_inv = realT(1) / det;
 
     Matrix<realT, 3, 3> inv;
     inv(0,0) = det_inv * (mat(1,1) * mat(2,2) - mat(1,2) * mat(2,1));
@@ -300,5 +301,12 @@ Matrix<realT, 3, 3> inverse(const Matrix<realT, 3, 3>& mat) noexcept
     inv(2,1) = det_inv * (mat(2,0) * mat(0,1) - mat(0,0) * mat(2,1));
     return inv;
 }
+
+template<typename realT>
+inline Matrix<realT, 3, 3> inverse(const Matrix<realT, 3, 3>& mat) noexcept
+{
+    return inverse(mat, determinant(mat));
+}
+
 } // mjolnir
 #endif /* MJOLNIR_MATH_MATRIX */
