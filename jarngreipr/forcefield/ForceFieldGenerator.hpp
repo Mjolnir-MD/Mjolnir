@@ -14,7 +14,7 @@ class ForceFieldGenerator
     typedef Bead<real_type> bead_type;
 
   public:
-    virtual ~IntraChainForceFieldGenerator() = default;
+    virtual ~ForceFieldGenerator() = default;
 
     //!@brief generate forcefield parameter values
     virtual void generate(toml::Table& out,

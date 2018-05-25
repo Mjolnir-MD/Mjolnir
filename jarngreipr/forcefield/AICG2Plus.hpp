@@ -18,7 +18,7 @@ template<typename realT>
 class AICG2Plus final : public ForceFieldGenerator<realT>
 {
   public:
-    typedef IntraChainForceFieldGenerator<realT> base_type;
+    typedef ForceFieldGenerator<realT> base_type;
     typedef typename base_type::real_type real_type;
     typedef typename base_type::bead_type bead_type;
 

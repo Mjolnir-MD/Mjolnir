@@ -11,10 +11,9 @@ template<typename realT>
 class ExcludedVolume final : public ForceFieldGenerator<realT>
 {
   public:
-    typedef InterChainForceFieldGenerator<realT> base_type;
+    typedef ForceFieldGenerator<realT> base_type;
     typedef typename base_type::real_type real_type;
     typedef typename base_type::bead_type bead_type;
-    typedef typename base_type::bead_ptr  bead_ptr;
 
   public:
 
@@ -22,10 +21,11 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
     ~ExcludedVolume() override = default;
 
     void generate(toml::Table& out,
-        const std::vector<std::vector<bead_ptr>>& chains) const;
+        const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains) const;
 
     bool check_beads_kind(
-        const std::vector<std::vector<bead_type>>& chain) const {return true;}
+        const std::vector<std::unique_ptr<bead_type>>& chain) const
+    {return true;}
 
   private:
 
@@ -34,7 +34,7 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
 
 template<typename realT>
 void ExcludedVolume<realT>::generate(toml::Table& ff,
-        const std::vector<std::vector<bead_ptr>>& chains) const
+        const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains) const
 {
     if(ff.count("global") == 0)
     {
