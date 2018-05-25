@@ -33,6 +33,9 @@ struct read_boundary_impl<CubicPeriodicBoundary<realT, coordT>>
                     toml_value_at(boundary, "upper", "[boundary]")));
         const coordT lower(toml::get<std::array<realT, 3>>(
                     toml_value_at(boundary, "lower", "[boundary]")));
+        assert(upper[0] > lower[0]);
+        assert(upper[1] > lower[1]);
+        assert(upper[2] > lower[2]);
         return CubicPeriodicBoundary<realT, coordT>(lower, upper);
     }
 };
