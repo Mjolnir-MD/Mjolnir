@@ -75,14 +75,16 @@ class FlexibleLocalAnglePotential
                      min_energy) * k_;
         }
         else
+        {
             return k_ * (spline_interpolate(th) - min_energy);
+        }
     }
 
     real_type derivative(const real_type th) const noexcept
     {
-             if(th < min_theta) return min_force;
-        else if(th >= max_theta) return max_force;
-        else return spline_derivative(th) * k_;
+             if(th <  min_theta) {return min_force;}
+        else if(th >= max_theta) {return max_force;}
+        else {return spline_derivative(th) * k_;}
     }
 
     void update(const system_type&, const real_type) const noexcept {return;}
