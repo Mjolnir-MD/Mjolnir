@@ -66,12 +66,14 @@ inline void MDSimulator<traitsT, integratorT>::initialize()
 template<typename traitsT, typename integratorT>
 inline bool MDSimulator<traitsT, integratorT>::step()
 {
-    this->time_ = integrator_.step(this->time_, system_, ff_);
+    integrator_.step(this->time_, system_, ff_);
+    ++step_count_;
+    this->time_ = this->step_count_ * integrator_.delta_t();
+
     if(observer_.is_output_time())
     {
         observer_.output(this->time_, this->system_, this->ff_);
     }
-    ++step_count_;
     return step_count_ < total_step_;
 }
 
