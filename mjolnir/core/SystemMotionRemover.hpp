@@ -65,12 +65,14 @@ void remove_rotation(System<traitsT>& sys)
     I(2, 0) = I(0, 2);
     I(2, 1) = I(1, 2);
 
-    // TODO more sophisticated way like LU decomposition is needed?
-    const coordinate_type omega = inverse(I) * L; // angular velocity
-
-    for(auto& particle : sys)
+    const real_type det = determinant(I);
+    if(det != 0.0)
     {
-        particle.velocity -= cross_product(omega, particle.position);
+        const coordinate_type omega = inverse(I, det) * L; // angular velocity
+        for(auto& particle : sys)
+        {
+            particle.velocity -= cross_product(omega, particle.position);
+        }
     }
     return;
 }
