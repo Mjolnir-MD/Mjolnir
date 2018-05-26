@@ -39,8 +39,9 @@ void remove_rotation(System<traitsT>& sys)
         L += particle.mass * cross_product(particle.position, particle.velocity);
     }
 
-    // TODO 1. SymmetricMatrix is needed
-    matrix33_type I(0,0,0,0,0,0,0,0,0);// inertia tensor
+    matrix33_type I(0, 0, 0, // inertia tensor
+                    0, 0, 0,
+                    0, 0, 0);
     for(const auto& particle : sys)
     {
         const real_type        m = particle.mass;
@@ -51,7 +52,7 @@ void remove_rotation(System<traitsT>& sys)
         const real_type izz = m * r[2] * r[2];
         const real_type ixy = m * r[0] * r[1];
         const real_type iyz = m * r[1] * r[2];
-        const real_type izx = m * r[2] * r[1];
+        const real_type izx = m * r[2] * r[0];
 
         I(0, 0) += iyy + izz;
         I(0, 1) += -ixy;
