@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
 #define MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
 #include <mjolnir/core/System.hpp>
+#include <mjolnir/math/math.hpp>
 #include <mjolnir/potential/global/ChainIgnoration.hpp>
 #include <algorithm>
 #include <cmath>
@@ -31,6 +32,10 @@ class ExcludedVolumePotential
     // rc = 2.0 * sigma
     constexpr static real_type cutoff_ratio = 2.0;
 
+    // to make the potential curve continuous at the cutoff point
+    constexpr static real_type coef_at_cutoff =
+        ::mjolnir::pow(1.0 / cutoff_ratio, 12);
+
   public:
 
     ExcludedVolumePotential(const real_type eps, const container_type& params,
@@ -60,7 +65,7 @@ class ExcludedVolumePotential
         const real_type dr3  = d_r * d_r * d_r;
         const real_type dr6  = dr3 * dr3;
         const real_type dr12 = dr6 * dr6;
-        return this->epsilon_ * dr12;
+        return this->epsilon_ * (dr12 - coef_at_cutoff);
     }
 
     real_type derivative(const std::size_t i, const std::size_t j,

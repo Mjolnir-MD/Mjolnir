@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_LENNARD_JONES_POTENTIAL
 #define MJOLNIR_LENNARD_JONES_POTENTIAL
 #include <mjolnir/core/System.hpp>
+#include <mjolnir/math/math.hpp>
 #include <mjolnir/potential/global/ChainIgnoration.hpp>
 #include <vector>
 #include <algorithm>
@@ -31,6 +32,10 @@ class LennardJonesPotential
 
     // rc = 2.5 * sigma
     constexpr static real_type cutoff_ratio = 2.5;
+    // to make the potential curve continuous at the cutoff point
+    constexpr static real_type coef_at_cutoff =
+        ::mjolnir::pow(1.0 / cutoff_ratio, 12u) -
+        ::mjolnir::pow(1.0 / cutoff_ratio,  6u);
 
   public:
 
@@ -59,7 +64,7 @@ class LennardJonesPotential
         const real_type r3s3   = r1s1 * r1s1 * r1s1;
         const real_type r6s6   = r3s3 * r3s3;
         const real_type r12s12 = r6s6 * r6s6;
-        return 4.0 * epsilon * (r12s12 - r6s6);
+        return 4.0 * epsilon * (r12s12 - r6s6 - coef_at_cutoff);
     }
 
     real_type derivative(const std::size_t i, const std::size_t j,
