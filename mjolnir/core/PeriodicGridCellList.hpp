@@ -259,7 +259,9 @@ void PeriodicGridCellList<traitsT>::initialize(
     this->cell_list_.resize(dim_x_ * dim_y_ * dim_z_);
 
     for(int x = 0; x < dim_x_; ++x)
+    {
     for(int y = 0; y < dim_y_; ++y)
+    {
     for(int z = 0; z < dim_z_; ++z)
     {
         auto& cell = this->cell_list_[calc_index(x, y, z)];
@@ -307,6 +309,8 @@ void PeriodicGridCellList<traitsT>::initialize(
         {
             assert(0 <= i && i <= cell_list_.size());
         }
+    }
+    }
     }
     this->make(sys);
     MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::initialize end");
