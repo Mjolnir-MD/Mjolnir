@@ -14,6 +14,7 @@ class VelocityVerletStepper
     typedef typename traits_type::boundary_type   boundary_type;
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
+    typedef typename traits_type::system_motion_remover system_motion_remover;
     typedef System<traitsT>     system_type;
     typedef ForceField<traitsT> forcefield_type;
 
@@ -43,6 +44,7 @@ template<typename traitsT>
 void VelocityVerletStepper<traitsT>::initialize(
         system_type& system, forcefield_type& ff)
 {
+    system_motion_remover::invoke(system);
     for(std::size_t i=0; i<system.size(); ++i)
     {
         system[i].force = coordinate_type(0.0, 0.0, 0.0);
@@ -82,10 +84,7 @@ VelocityVerletStepper<traitsT>::step(
         auto& particle = system[i];
         particle.velocity += (halfdt_ / particle.mass) * particle.force;
     }
-
-    remove_translation(system);
-    remove_rotation(system);
-
+    system_motion_remover::invoke(system);
     return time + dt_;
 }
 

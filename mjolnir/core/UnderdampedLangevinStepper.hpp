@@ -17,6 +17,7 @@ class UnderdampedLangevinStepper
     typedef typename traits_type::boundary_type   boundary_type;
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
+    typedef typename traits_type::system_motion_remover system_motion_remover;
 
     struct parameter_set
     {
@@ -83,6 +84,8 @@ template<typename traitsT>
 void UnderdampedLangevinStepper<traitsT>::initialize(
         system_type& system, forcefield_type& ff)
 {
+    system_motion_remover::invoke(system);
+
     this->noise_coef_ = std::sqrt(
         2 * physics<real_type>::kB * system.attribute("temperature") / dt_);
 
@@ -145,6 +148,8 @@ UnderdampedLangevinStepper<traitsT>::step(
 
         sys[i].velocity += halfdt_ * (1. - param.gamma * halfdt_) * param.accel;
     }
+
+    system_motion_remover::invoke(sys);
 
     return time + dt_;
 }
