@@ -35,7 +35,7 @@ class Grainer
     void push_back(std::unique_ptr<GrainerBase<real_type>>&& item)
     {
         this->grainers_.push_back(std::move(item));
-        return 0;
+        return;
     }
 
     std::vector<std::vector<std::unique_ptr<bead_type>>>
