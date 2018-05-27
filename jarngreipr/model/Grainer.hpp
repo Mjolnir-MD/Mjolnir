@@ -17,7 +17,7 @@ class GrainerBase
 
     virtual ~GrainerBase() = default;
 
-    virtual std::vector<std::unique_ptr<bead_type>>
+    virtual std::vector<std::shared_ptr<bead_type>>
     grain(const PDBChain<realT>& pdb, const std::size_t offset) const = 0;
 };
 
@@ -32,13 +32,13 @@ class Grainer
 
     Grainer() = default;
 
-    void push_back(std::unique_ptr<GrainerBase<real_type>>&& item)
+    void push_back(std::shared_ptr<GrainerBase<real_type>>&& item)
     {
         this->grainers_.push_back(std::move(item));
         return;
     }
 
-    std::vector<std::vector<std::unique_ptr<bead_type>>>
+    std::vector<std::vector<std::shared_ptr<bead_type>>>
     grain(const std::vector<PDBChain<realT>>& pdbs) const
     {
         if(pdbs.size() != grainers_.size())
@@ -48,7 +48,7 @@ class Grainer
                 this->grainers_.size());
         }
 
-        std::vector<std::vector<std::unique_ptr<bead_type>>> cg_chains;
+        std::vector<std::vector<std::shared_ptr<bead_type>>> cg_chains;
         std::size_t offset = 0;
         for(std::size_t i=0; i<pdbs.size(); ++i)
         {
@@ -62,7 +62,7 @@ class Grainer
 
   private:
 
-    std::vector<std::unique_ptr<GrainerBase<real_type>>> grainers_;
+    std::vector<std::shared_ptr<GrainerBase<real_type>>> grainers_;
 };
 
 

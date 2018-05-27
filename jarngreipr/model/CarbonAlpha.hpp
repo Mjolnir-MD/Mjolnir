@@ -2,10 +2,10 @@
 #define JARNGREIPR_MODEL_CARBON_ALPHA_HPP
 #include <jarngreipr/model/Bead.hpp>
 #include <jarngreipr/model/Grainer.hpp>
-#include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <algorithm>
 #include <stdexcept>
+#include <memory>
 #include <string>
 
 namespace jarngreipr
@@ -78,17 +78,17 @@ class CarbonAlphaGrainer final : public GrainerBase<realT>
     CarbonAlphaGrainer() = default;
     ~CarbonAlphaGrainer() override = default;
 
-    std::vector<std::unique_ptr<bead_type>>
+    std::vector<std::shared_ptr<bead_type>>
     grain(const PDBChain<realT>& pdb, const std::size_t offset) const override
     {
-        std::vector<std::unique_ptr<Bead<realT>>> retval;
+        std::vector<std::shared_ptr<Bead<realT>>> retval;
         for(std::size_t i=0; i<pdb.residues_size(); ++i)
         {
             const auto res = pdb.residue_at(i);
             std::vector<PDBAtom<realT>> atoms(res.begin(), res.end());
             const auto name = atoms.front().residue_name;
-            retval.push_back(mjolnir::make_unique<
-                CarbonAlpha<realT>>(i + offset, std::move(atoms), name));
+            retval.push_back(std::make_shared<CarbonAlpha<realT>>(
+                        i + offset, std::move(atoms), name));
         }
         return retval;
     }

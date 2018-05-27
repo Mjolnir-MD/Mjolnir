@@ -26,20 +26,20 @@ class ClementiGo final : public ForceFieldGenerator<realT>
     ~ClementiGo() override = default;
 
     void generate(toml::Table& out,
-        const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains
+        const std::vector<std::vector<std::shared_ptr<bead_type>>>& chains
         ) const override;
 
     bool check_beads_kind(
-        const std::vector<std::unique_ptr<bead_type>>& chain) const override;
+        const std::vector<std::shared_ptr<bead_type>>& chain) const override;
 
   private:
 
     // generate parameters and write out to `ostrm`.
     void generate_local(toml::Table& out,
-        const std::vector<std::unique_ptr<bead_type>>& chain) const;
+        const std::vector<std::shared_ptr<bead_type>>& chain) const;
 
-    real_type min_distance_sq(const std::unique_ptr<bead_type>& bead1,
-                              const std::unique_ptr<bead_type>& bead2) const
+    real_type min_distance_sq(const std::shared_ptr<bead_type>& bead1,
+                              const std::shared_ptr<bead_type>& bead2) const
     {
         real_type min_dist_sq = std::numeric_limits<real_type>::max();
         for(const auto& atom1 : bead1->atoms())
@@ -62,7 +62,7 @@ class ClementiGo final : public ForceFieldGenerator<realT>
 
 template<typename realT>
 void ClementiGo<realT>::generate(toml::Table& ff,
-    const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains) const
+    const std::vector<std::vector<std::shared_ptr<bead_type>>>& chains) const
 {
     if(ff.count("local") == 0)
     {
@@ -123,7 +123,7 @@ void ClementiGo<realT>::generate(toml::Table& ff,
 
 template<typename realT>
 void ClementiGo<realT>::generate_local(toml::Table& ff,
-        const std::vector<std::unique_ptr<bead_type>>& chain) const
+        const std::vector<std::shared_ptr<bead_type>>& chain) const
 {
     if(!this->check_beads_kind(chain))
     {
@@ -259,7 +259,7 @@ void ClementiGo<realT>::generate_local(toml::Table& ff,
 
 template<typename realT>
 bool ClementiGo<realT>::check_beads_kind(
-        const std::vector<std::unique_ptr<bead_type>>& chain) const
+        const std::vector<std::shared_ptr<bead_type>>& chain) const
 {
     return true;
 }

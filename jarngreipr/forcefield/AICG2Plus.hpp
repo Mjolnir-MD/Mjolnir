@@ -29,17 +29,17 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
 
     //XXX generate local parameters and inter-chain contact parameters.
     void generate(toml::Table& out,
-        const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains
+        const std::vector<std::vector<std::shared_ptr<bead_type>>>& chains
         ) const override;
 
     bool check_beads_kind(
-        const std::vector<std::unique_ptr<bead_type>>& chain) const override;
+        const std::vector<std::shared_ptr<bead_type>>& chain) const override;
 
   private:
 
     //XXX generate local parameters (including intra-chain contacts).
     void generate_local(toml::Table& out,
-        const std::vector<std::unique_ptr<bead_type>>& chain) const;
+        const std::vector<std::shared_ptr<bead_type>>& chain) const;
 
     bool is_flexible_region(const std::size_t bead_idx) const
     {
@@ -89,11 +89,11 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
         return (atom.atom_name.at(1) == 'C');
     }
 
-    real_type calc_contact_coef(const std::unique_ptr<bead_type>& bead1,
-                                const std::unique_ptr<bead_type>& bead2) const;
+    real_type calc_contact_coef(const std::shared_ptr<bead_type>& bead1,
+                                const std::shared_ptr<bead_type>& bead2) const;
 
-    real_type min_distance_sq(const std::unique_ptr<bead_type>& bead1,
-                              const std::unique_ptr<bead_type>& bead2) const
+    real_type min_distance_sq(const std::shared_ptr<bead_type>& bead1,
+                              const std::shared_ptr<bead_type>& bead2) const
     {
         real_type min_dist = std::numeric_limits<real_type>::max();
         for(const auto& atom1 : bead1->atoms())
@@ -155,7 +155,7 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
 
 template<typename realT>
 void AICG2Plus<realT>::generate(toml::Table& ff,
-        const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains) const
+        const std::vector<std::vector<std::shared_ptr<bead_type>>>& chains) const
 {
     if(ff.count("local") == 0)
     {
@@ -217,7 +217,7 @@ void AICG2Plus<realT>::generate(toml::Table& ff,
 
 template<typename realT>
 void AICG2Plus<realT>::generate_local(toml::Table& ff,
-        const std::vector<std::unique_ptr<bead_type>>& chain) const
+        const std::vector<std::shared_ptr<bead_type>>& chain) const
 {
     if(!this->check_beads_kind(chain))
     {
@@ -448,8 +448,8 @@ void AICG2Plus<realT>::generate_local(toml::Table& ff,
 template<typename realT>
 typename AICG2Plus<realT>::real_type
 AICG2Plus<realT>::calc_contact_coef(
-        const std::unique_ptr<bead_type>& bead1,
-        const std::unique_ptr<bead_type>& bead2) const
+        const std::shared_ptr<bead_type>& bead1,
+        const std::shared_ptr<bead_type>& bead2) const
 {
     std::size_t num_bb_hb = 0; // hydrogen bond
     std::size_t num_bb_da = 0; // donor-acceptor
@@ -619,7 +619,7 @@ AICG2Plus<realT>::calc_contact_coef(
 
 template<typename realT>
 bool AICG2Plus<realT>::check_beads_kind(
-        const std::vector<std::unique_ptr<bead_type>>& chain) const
+        const std::vector<std::shared_ptr<bead_type>>& chain) const
 {
     // TODO? its good to check all the beads has appropreate atoms
     for(const auto& bead : chain)

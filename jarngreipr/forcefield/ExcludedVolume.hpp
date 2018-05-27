@@ -21,10 +21,10 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
     ~ExcludedVolume() override = default;
 
     void generate(toml::Table& out,
-        const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains) const;
+        const std::vector<std::vector<std::shared_ptr<bead_type>>>& chains) const;
 
     bool check_beads_kind(
-        const std::vector<std::unique_ptr<bead_type>>& chain) const
+        const std::vector<std::shared_ptr<bead_type>>& chain) const
     {return true;}
 
   private:
@@ -34,7 +34,7 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
 
 template<typename realT>
 void ExcludedVolume<realT>::generate(toml::Table& ff,
-        const std::vector<std::vector<std::unique_ptr<bead_type>>>& chains) const
+        const std::vector<std::vector<std::shared_ptr<bead_type>>>& chains) const
 {
     if(ff.count("global") == 0)
     {
