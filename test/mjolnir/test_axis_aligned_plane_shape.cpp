@@ -7,9 +7,8 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
+#include <test/mjolnir/traits.hpp>
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <random>
@@ -17,7 +16,7 @@
 
 BOOST_AUTO_TEST_CASE(AxisAlignedPlane_geometry_unlimited)
 {
-    using traits = mjolnir::SimulatorTraitsBase<double, mjolnir::UnlimitedBoundary>;
+    using traits = mjolnir::test::traits<double>;
     using real_type     = typename traits::real_type;
     using coord_type    = typename traits::coordinate_type;
     using boundary_type = typename traits::boundary_type;
@@ -46,7 +45,7 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_geometry_unlimited)
 
 BOOST_AUTO_TEST_CASE(AxisAlignedPlane_geometry_periodic)
 {
-    using traits = mjolnir::SimulatorTraitsBase<double, mjolnir::CubicPeriodicBoundary>;
+    using traits = mjolnir::test::traits<double, mjolnir::CubicPeriodicBoundary>;
     using real_type     = typename traits::real_type;
     using coord_type    = typename traits::coordinate_type;
     using boundary_type = typename traits::boundary_type;
@@ -103,7 +102,7 @@ struct dummy_potential
 
 BOOST_AUTO_TEST_CASE(AxisAlignedPlane_neighbors_unlimited)
 {
-    using traits = mjolnir::SimulatorTraitsBase<double, mjolnir::UnlimitedBoundary>;
+    using traits = mjolnir::test::traits<double>;
     using real_type     = typename traits::real_type;
     using coord_type    = typename traits::coordinate_type;
     using boundary_type = typename traits::boundary_type;

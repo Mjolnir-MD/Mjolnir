@@ -7,15 +7,14 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
+#include <test/mjolnir/traits.hpp>
 #include <mjolnir/core/BondLengthInteraction.hpp>
-#include <mjolnir/core/BoundaryCondition.hpp>
-#include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 BOOST_AUTO_TEST_CASE(BondLength_calc_force)
 {
-    typedef mjolnir::SimulatorTraitsBase<double, mjolnir::UnlimitedBoundary> traits;
+    typedef mjolnir::test::traits<double> traits;
     constexpr static traits::real_type tolerance = 1e-8;
 
     typedef traits::real_type real_type;

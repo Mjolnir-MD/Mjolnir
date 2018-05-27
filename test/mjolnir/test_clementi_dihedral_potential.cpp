@@ -7,17 +7,14 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
+#include <test/mjolnir/traits.hpp>
 #include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
-#include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/constants.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
-
-
 BOOST_AUTO_TEST_CASE(ClementiDihedral_double)
 {
-    typedef mjolnir::SimulatorTraitsBase<double, mjolnir::UnlimitedBoundary> traits;
+    typedef mjolnir::test::traits<double> traits;
     constexpr static std::size_t       N   = 1000;
     constexpr static traits::real_type h   = 1e-6;
     constexpr static traits::real_type pi  = mjolnir::constants<traits::real_type>::pi;
@@ -53,7 +50,7 @@ BOOST_AUTO_TEST_CASE(ClementiDihedral_double)
 
 BOOST_AUTO_TEST_CASE(ClementiDihedral_float)
 {
-    typedef mjolnir::SimulatorTraitsBase<float, mjolnir::UnlimitedBoundary> traits;
+    typedef mjolnir::test::traits<float> traits;
     constexpr static std::size_t       N    = 100;
     constexpr static traits::real_type h    = 1e-3;
     constexpr static traits::real_type pi = mjolnir::constants<traits::real_type>::pi;

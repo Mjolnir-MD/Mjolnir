@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "test_excluded_volume_potential"
+#define BOOST_TEST_MODULE "test_debye_huckel_potential"
 
 #ifdef UNITTEST_FRAMEWORK_LIBRARY_EXIST
 #include <boost/test/unit_test.hpp>
@@ -7,14 +7,13 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
+#include <test/mjolnir/traits.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
-#include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 BOOST_AUTO_TEST_CASE(DH_double)
 {
-    typedef mjolnir::SimulatorTraitsBase<double, mjolnir::UnlimitedBoundary> traits;
+    typedef mjolnir::test::traits<double> traits;
     constexpr static std::size_t       N = 10000;
     constexpr static traits::real_type h = 1e-6;
 
@@ -47,7 +46,7 @@ BOOST_AUTO_TEST_CASE(DH_double)
 
 BOOST_AUTO_TEST_CASE(DH_float)
 {
-    typedef mjolnir::SimulatorTraitsBase<float, mjolnir::UnlimitedBoundary> traits;
+    typedef mjolnir::test::traits<float> traits;
     constexpr static std::size_t       N    = 1000;
     constexpr static traits::real_type h    = 1e-2;
 
