@@ -30,6 +30,15 @@ class CGChain
 
     std::size_t size() const noexcept {return beads_.size();}
 
+    void push_back(const std::shared_ptr<bead_type>& b)
+    {beads_.push_back(b);}
+    void push_back(std::shared_ptr<bead_type>&& b)
+    {beads_.push_back(std::move(b));}
+
+    template<typename ... Ts>
+    void emplace_back(Ts&& ... ts)
+    {beads_.emplace_back(std::forward<Ts>(ts)...);}
+
     bead_ptr&       operator[](const std::size_t i)       noexcept {return beads_[i];}
     bead_ptr const& operator[](const std::size_t i) const noexcept {return beads_[i];}
     bead_ptr&       at(const std::size_t i)       {return beads_.at(i);}
