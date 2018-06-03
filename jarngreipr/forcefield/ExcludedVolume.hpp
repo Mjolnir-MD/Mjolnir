@@ -12,8 +12,9 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
 {
   public:
     typedef ForceFieldGenerator<realT> base_type;
-    typedef typename base_type::real_type real_type;
-    typedef typename base_type::bead_type bead_type;
+    typedef typename base_type::real_type  real_type;
+    typedef typename base_type::bead_type  bead_type;
+    typedef typename base_type::chain_type chain_type;
 
   public:
 
@@ -21,10 +22,19 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
     ~ExcludedVolume() override = default;
 
     void generate(toml::Table& out,
-        const std::vector<std::vector<std::shared_ptr<bead_type>>>& chains) const;
+        const std::vector<chain_type>& chains
+        ) const override;
 
-    bool check_beads_kind(
-        const std::vector<std::shared_ptr<bead_type>>& chain) const
+    void generate(toml::Table& out,
+        const std::vector<chain_type>& lhs, const std::vector<chain_type>& rhs
+        ) const override
+    {
+        std::cerr << "WARNING: inter-chain(does not include intra-chain) "
+                  << "ExcludedVolume is not suppored yet." << std::endl;
+        return;
+    }
+
+    bool check_beads_kind(const chain_type& chain) const override
     {return true;}
 
   private:
@@ -34,7 +44,7 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
 
 template<typename realT>
 void ExcludedVolume<realT>::generate(toml::Table& ff,
-        const std::vector<std::vector<std::shared_ptr<bead_type>>>& chains) const
+        const std::vector<chain_type>& chains) const
 {
     if(ff.count("global") == 0)
     {
@@ -53,6 +63,10 @@ void ExcludedVolume<realT>::generate(toml::Table& ff,
     partition["margin"] = 1.0;
     exv["spatial_partition"] = partition;
 
+    const toml::Table& sigmas = mjolnir::toml_value_at(
+            this->parameters_, "sigma", "jarngreipr::ExcludedVolume"
+            ).cast<toml::value_t::Table>();
+
     toml::Array params;
     for(const auto& chain : chains)
     {
@@ -61,12 +75,13 @@ void ExcludedVolume<realT>::generate(toml::Table& ff,
             toml::Table para;
             para["index"] = bead->index();
             para["sigma"] = toml::get<toml::Float>(mjolnir::toml_value_at(
-                this->parameters_, bead->name(), "jarngreipr::ExcludedVolume"));
+                sigmas, bead->name(), "jarngreipr::ExcludedVolume"));
             params.push_back(para);
         }
     }
-    exv["epsilon"]    = 0.2;
     exv["parameters"] = toml::value(std::move(params));
+    exv["epsilon"]    = toml::get<toml::Float>(mjolnir::toml_value_at(
+                this->parameters_, "epsilon", "jarngreipr::ExcludedVolume"));
 
     ff["global"].cast<toml::value_t::Array>().push_back(exv);
     return;
