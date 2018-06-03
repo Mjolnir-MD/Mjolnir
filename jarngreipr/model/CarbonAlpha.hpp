@@ -78,10 +78,10 @@ class CarbonAlphaGrainer final : public GrainerBase<realT>
     CarbonAlphaGrainer() = default;
     ~CarbonAlphaGrainer() override = default;
 
-    std::vector<std::shared_ptr<bead_type>>
+    CGChain<realT>
     grain(const PDBChain<realT>& pdb, const std::size_t offset) const override
     {
-        std::vector<std::shared_ptr<Bead<realT>>> retval;
+        CGChain<realT> retval(std::string(1, pdb.chain_id()));
         for(std::size_t i=0; i<pdb.residues_size(); ++i)
         {
             const auto res = pdb.residue_at(i);

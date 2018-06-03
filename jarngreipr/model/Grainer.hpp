@@ -1,6 +1,7 @@
 #ifndef JARNGREIPR_MODEL_GRAINER_HPP
 #define JARNGREIPR_MODEL_GRAINER_HPP
 #include <jarngreipr/model/Bead.hpp>
+#include <jarngreipr/model/CGChain.hpp>
 #include <jarngreipr/pdb/PDBChain.hpp>
 
 namespace jarngreipr
@@ -17,7 +18,7 @@ class GrainerBase
 
     virtual ~GrainerBase() = default;
 
-    virtual std::vector<std::shared_ptr<bead_type>>
+    virtual CGChain<realT>
     grain(const PDBChain<realT>& pdb, const std::size_t offset) const = 0;
 };
 
@@ -38,7 +39,7 @@ class Grainer
         return;
     }
 
-    std::vector<std::vector<std::shared_ptr<bead_type>>>
+    std::vector<CGChain<real_type>>
     grain(const std::vector<PDBChain<realT>>& pdbs) const
     {
         if(pdbs.size() != grainers_.size())
@@ -48,7 +49,7 @@ class Grainer
                 this->grainers_.size());
         }
 
-        std::vector<std::vector<std::shared_ptr<bead_type>>> cg_chains;
+        std::vector<CGChain<realT>> cg_chains;
         std::size_t offset = 0;
         for(std::size_t i=0; i<pdbs.size(); ++i)
         {
