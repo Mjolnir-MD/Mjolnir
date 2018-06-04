@@ -12,6 +12,11 @@ else(DEBUG)
     add_definitions(-DMJOLNIR_NO_DEBUG)
 endif(DEBUG)
 
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/toml/toml.hpp")
+    execute_process(COMMAND git submodule update --init --recursive
+                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+endif()
+
 add_definitions("-std=c++11 -Ofast -march=native -mtune=native")
 
 find_package(Boost COMPONENTS unit_test_framework)
