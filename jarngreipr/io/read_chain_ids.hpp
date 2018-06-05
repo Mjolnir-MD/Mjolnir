@@ -66,7 +66,8 @@ read_chain_ids(const std::basic_string<charT, traits, alloc>& key)
         else
         {
             throw std::runtime_error("jarngreipr::split_chain_ids: "
-                "invalid chain ID input (should be `X` or `X-Y`): " + elem);
+                "invalid chain ID input (should be `X` or `X-Y` or `X&Y`): " +
+                elem);
         }
     }
     return ids;
