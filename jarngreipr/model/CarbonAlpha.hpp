@@ -1,7 +1,7 @@
 #ifndef JARNGREIPR_MODEL_CARBON_ALPHA_HPP
 #define JARNGREIPR_MODEL_CARBON_ALPHA_HPP
 #include <jarngreipr/model/Bead.hpp>
-#include <jarngreipr/model/Grainer.hpp>
+#include <jarngreipr/model/CGModelGenerator.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <algorithm>
 #include <stdexcept>
@@ -67,19 +67,21 @@ class CarbonAlpha final : public Bead<realT>
 };
 
 template<typename realT>
-class CarbonAlphaGrainer final : public GrainerBase<realT>
+class CarbonAlphaGenerator final : public CGModelGeneratorBase<realT>
 {
   public:
-    typedef realT           real_type;
-    typedef Bead<real_type> bead_type;
+    typedef CGModelGeneratorBase<realT>        base_type;
+    typedef typename base_type::real_type      real_type;
+    typedef typename base_type::cg_chain_type  cg_chain_type;
+    typedef typename base_type::pdb_chain_type pdb_chain_type;
 
   public:
 
-    CarbonAlphaGrainer() = default;
-    ~CarbonAlphaGrainer() override = default;
+    CarbonAlphaGenerator() = default;
+    ~CarbonAlphaGenerator() override = default;
 
-    CGChain<realT>
-    grain(const PDBChain<realT>& pdb, const std::size_t offset) const override
+    cg_chain_type
+    generate(const pdb_chain_type& pdb, const std::size_t offset) const override
     {
         CGChain<realT> retval(std::string(1, pdb.chain_id()));
         for(std::size_t i=0; i<pdb.residues_size(); ++i)
