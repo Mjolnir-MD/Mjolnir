@@ -11,6 +11,7 @@
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/potential/external/ImplicitMembranePotential.hpp>
+#include <mjolnir/potential/external/LennardJonesWallPotential.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
 
 namespace mjolnir
@@ -335,6 +336,10 @@ read_debye_huckel_potential(const toml::Table& global)
             std::move(params), bonds, contacts);
 }
 
+// ---------------------------------------------------------------------------
+// Potential for External Force Fields
+// ---------------------------------------------------------------------------
+
 template<typename traitsT>
 ImplicitMembranePotential<traitsT>
 read_implicit_membrane_potential(const toml::Table& external)
@@ -374,6 +379,42 @@ read_implicit_membrane_potential(const toml::Table& external)
     return ImplicitMembranePotential<traitsT>(
             thickness, magnitude, bend, std::move(params));
 }
+
+template<typename traitsT>
+LennardJonesWallPotential<traitsT>
+read_lennard_jones_wall_potential(const toml::Table& external)
+{
+    typedef typename traitsT::real_type real_type;
+
+    const auto& ps = toml_value_at(external, "parameters",
+            "[forcefield.external] for Lennard-Jones Wall"
+            ).cast<toml::value_t::Array>();
+
+    std::vector<std::pair<real_type, real_type>> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        const auto& tab = param.cast<toml::value_t::Table>();
+        const auto idx = toml::get<std::size_t>(toml_value_at(tab, "index",
+            "element of [[forcefield.external.parameters]] for LennardJonesWall"
+            ));
+        if(params.size() <= idx)
+        {
+            params.resize(idx+1, 0.);
+        }
+
+        const auto s = toml::get<real_type>(toml_value_at(tab, "sigma",
+            "element of [[forcefield.external.parameters]] for LennardJonesWall"
+            ));
+        const auto e = toml::get<real_type>(toml_value_at(tab, "epsilon",
+            "element of [[forcefield.external.parameters]] for LennardJonesWall"
+            ));
+        params.at(idx) = std::make_pair(s, e);
+    }
+    return LennardJonesWallPotential<traitsT>(std::move(params));
+}
+
+
 
 } // mjolnir
 #endif // MJOLNIR_READ_POTENTIAL
