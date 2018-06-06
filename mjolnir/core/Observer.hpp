@@ -19,10 +19,10 @@ class Observer
     typedef typename traits_type::coordinate_type coordinate_type;
 
   public:
-    Observer(const std::string& xyz, const std::string& ene,
-             const std::size_t interval)
+    Observer(const std::string& filename_prefix, const std::size_t interval)
         : interval_(interval), observe_count_(0),
-          xyz_name_(xyz), ene_name_(ene)
+          xyz_name_(filename_prefix + std::string(".xyz")),
+          ene_name_(filename_prefix + std::string(".ene"))
     {
         // clear the contents
         {

@@ -23,9 +23,7 @@ read_observer(const toml::Table& data)
     const std::size_t interval = toml::get<std::size_t>(
             toml_value_at(simulator, "save_step", "[simulator]"));
 
-    return Observer<traitsT>(path + fname + std::string(".xyz"),
-                             path + fname + std::string(".ene"),
-                             interval);
+    return Observer<traitsT>(path + fname, interval);
 }
 
 
