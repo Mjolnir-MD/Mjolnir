@@ -400,7 +400,7 @@ read_lennard_jones_wall_potential(const toml::Table& external)
             ));
         if(params.size() <= idx)
         {
-            params.resize(idx+1, 0.);
+            params.resize(idx+1, std::make_pair(real_type(0.0), real_type(0.0)));
         }
 
         const auto s = toml::get<real_type>(toml_value_at(tab, "sigma",
