@@ -20,7 +20,8 @@ class PDBReader
 
   public:
 
-    explicit PDBReader(const std::string& fname): filename_(fname), ifstrm_(fname)
+    explicit PDBReader(const std::string& fname)
+        : filename_(fname), ifstrm_(fname)
     {
         if(!ifstrm_.good())
         {
@@ -33,6 +34,28 @@ class PDBReader
 
     void rewind() {this->ifstrm_.seekg(0, std::ios::beg);}
 
+    chain_type read_chain(const char id)
+    {
+        this->rewind();
+        while(!this->ifstrm_.eof())
+        {
+            try
+            {
+                const auto chain = this->read_next_chain();
+                if(chain.chain_id() == id)
+                {
+                    return chain;
+                }
+            }
+            catch(std::runtime_error const& re)
+            {
+                break;
+            }
+        }
+        mjolnir::throw_exception<std::runtime_error>("file ",
+                this->filename_, " does not contain chain ", id);
+    }
+
     // lazy functions. throws std::runtime_error if it reaches EOF.
     atom_type read_next_atom()
     {
@@ -41,6 +64,8 @@ class PDBReader
         {
             std::string line;
             std::getline(ifstrm_, line);
+            ifstrm_.peek(); // set eof flag if it reached
+
             std::istringstream iss(line);
             try
             {
@@ -48,7 +73,6 @@ class PDBReader
             }
             catch(std::runtime_error const& re)
             {
-                ifstrm_.peek(); // set eof flag if it reached
                 continue;
             }
             return atm;
@@ -64,9 +88,9 @@ class PDBReader
             atom_type atm;
             std::string line;
             std::getline(ifstrm_, line);
-            std::istringstream iss(line);
-
             ifstrm_.peek(); // set eof flag
+
+            std::istringstream iss(line);
             try
             {
                 iss >> atm;
@@ -98,9 +122,9 @@ class PDBReader
             atom_type atm;
             std::string line;
             std::getline(ifstrm_, line);
-            std::istringstream iss(line);
-
             ifstrm_.peek(); // set eof flag
+
+            std::istringstream iss(line);
             try
             {
                 iss >> atm;
