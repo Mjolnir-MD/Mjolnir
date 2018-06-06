@@ -35,9 +35,9 @@ class LennardJonesWallPotential
 
     real_type potential(const std::size_t i, const real_type r) const noexcept
     {
-        const real_type sigma = radii_[i].first;
+        const real_type sigma = params_[i].first;
         if(sigma * cutoff_ratio < r){return 0.0;}
-        const real_type epsilon = radii_[i].second;
+        const real_type epsilon = params_[i].second;
 
         const real_type r1s1   = sigma / r;
         const real_type r3s3   = r1s1 * r1s1 * r1s1;
@@ -48,9 +48,9 @@ class LennardJonesWallPotential
 
     real_type derivative(const std::size_t i, const real_type r) const noexcept
     {
-        const real_type sigma = radii_[i].first;
+        const real_type sigma = params_[i].first;
         if(sigma * cutoff_ratio < r){return 0.0;}
-        const real_type epsilon = radii_[i].second;
+        const real_type epsilon = params_[i].second;
 
         const real_type r1s1   = sigma / r;
         const real_type r3s3   = r1s1 * r1s1 * r1s1;
@@ -62,11 +62,26 @@ class LennardJonesWallPotential
     real_type max_cutoff_length() const noexcept
     {
         const real_type max_sigma = std::max_element(
-            this->radii_.cbegin(), this->radii_.cend(),
+            this->params_.cbegin(), this->params_.cend(),
             [](const parameter_type& lhs, const parameter_type& rhs) noexcept {
                 return lhs.first < rhs.first;
             })->first;
         return max_sigma * cutoff_ratio;
+    }
+
+    // TODO
+    std::vector<std::size_t> participants() const
+    {
+        std::vector<std::size_t> retval;
+        retval.reserve(this->params_.size());
+        for(std::size_t i=0; i<this->params_.size(); ++i)
+        {
+            if(this->params_[i].second != 0.0)
+            {
+                retval.push_back(i);
+            }
+        }
+        return retval;
     }
 
     // nothing to do when system parameters change.

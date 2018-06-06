@@ -11,7 +11,7 @@ namespace mjolnir
 {
 
 /*! @brief Lennard-Jones type potential & derivative                       *
- * designed for global force field. so it doesn't have its own parameters. *
+ * designed for global force field.                                        *
  * V(r)  =  4. * epsilon * ((r/sigma)^12 - (r/sigma)^6))                   *
  * dV/dr = 24. * epsilon / r * ((r/sigma)^6 - 2 * (r/sigma)^12)            */
 template<typename traitsT, typename ChainIgnoration>
