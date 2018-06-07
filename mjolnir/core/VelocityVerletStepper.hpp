@@ -35,6 +35,8 @@ class VelocityVerletStepper
         dt_ = dt; halfdt_ = dt * 0.5;
     }
 
+    void update(const system_type& sys) const noexcept {/* do nothing */}
+
   private:
     real_type dt_;      //!< dt
     real_type halfdt_;  //!< dt/2
@@ -45,6 +47,9 @@ void VelocityVerletStepper<traitsT>::initialize(
         system_type& system, forcefield_type& ff)
 {
     system_motion_remover::invoke(system);
+
+    this->update(system);
+
     for(std::size_t i=0; i<system.size(); ++i)
     {
         system[i].force = coordinate_type(0.0, 0.0, 0.0);

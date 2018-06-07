@@ -50,11 +50,11 @@ class UnderdampedLangevinStepper
         dt_ = dt; halfdt_ = dt * 0.5; halfdt2_ = dt * dt * 0.5;
     }
 
-    void set_temperature(const real_type T)
+    void update(const system_type& sys)
     {
-        this->noise_coef_ =
-            std::sqrt(2 * physics<real_type>::kB * T / dt_);
-        return;
+        this->temperature_ = sys.attribute("temperature");
+        this->noise_coef_  =
+            std::sqrt(2 * physics<real_type>::kB * this->temperature_ / dt_);
     }
 
     rng_type&       random_number_generator()       noexcept {return rng_;}
@@ -74,6 +74,7 @@ class UnderdampedLangevinStepper
     real_type dt_;
     real_type halfdt_;
     real_type halfdt2_;
+    real_type temperature_;
     real_type noise_coef_;
     rng_type  rng_;
 
@@ -86,8 +87,7 @@ void UnderdampedLangevinStepper<traitsT>::initialize(
 {
     system_motion_remover::invoke(system);
 
-    this->noise_coef_ = std::sqrt(
-        2 * physics<real_type>::kB * system.attribute("temperature") / dt_);
+    this->update(system);
 
     for(std::size_t i=0; i<system.size(); ++i)
     {
