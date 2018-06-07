@@ -344,7 +344,7 @@ read_external_interaction(const toml::Table& external)
     else
     {
         throw std::runtime_error(
-                "invalid global interaction type: " + interaction);
+                "invalid external interaction type: " + interaction);
     }
 }
 
