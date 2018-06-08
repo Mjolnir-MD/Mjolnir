@@ -24,19 +24,19 @@ set(TEST_NAMES
 
 add_definitions("-O3 -std=c++11")
 
-find_library(BOOST_UNIT_TEST_FRAMEWORK_LIBRARY boost_unit_test_framework
-             PATHS ${Boost_LIBRARY_DIRS} NO_DEFAULT_PATH)
-if (BOOST_UNIT_TEST_FRAMEWORK_LIBRARY)
+if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
     message(STATUS "boost_unit_test_framework found @ ${BOOST_UNIT_TEST_FRAMEWORK_LIBRARY}")
     add_definitions(-DBOOST_TEST_DYN_LINK)
     add_definitions(-DUNITTEST_FRAMEWORK_LIBRARY_EXIST)
 else()
     message(STATUS "boost_unit_test_framework could not be found.")
-    message(STATUS "boost library dirs = ${Boost_LIBRARY_DIRS}")
+    message(STATUS "disabling linking. It makes compilation time longer...")
 endif()
 
 foreach(TEST_NAME ${TEST_NAMES})
     add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
-    target_link_libraries(${TEST_NAME} ${BOOST_UNIT_TEST_FRAMEWORK_LIBRARY})
+    if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
+        target_link_libraries(${TEST_NAME} ${BOOST_UNIT_TEST_FRAMEWORK_LIBRARY})
+    endif (Boost_UNIT_TEST_FRAMEWORK_FOUND)
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 endforeach(TEST_NAME)
