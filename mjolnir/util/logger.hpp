@@ -13,6 +13,19 @@
 namespace mjolnir
 {
 
+/* Here, these macros are defined.                                      *
+ * 1. MJOLNIR_LOG_DEBUG                                                 *
+ *   - just for debug purpose. the log file may become too large.       *
+ * 2. MJOLNIR_LOG_INFO                                                  *
+ *   - useful information to check the behavior. by default, on.        *
+ * 3. MJOLNIR_LOG_WARN                                                  *
+ *   - be careful with it. It can be done, but it might not make sense. *
+ * 4. MJOLNIR_LOG_ERROR                                                 *
+ *   - something wrong happen.                                          *
+ * 5. MJOLNIR_SCOPE                                                     *
+ *   - helps output format of log.                                      *
+ * 6. MJOLNIR_SCOPE_DEBUG                                               *
+ *   - helps output format of log. by default, off.                     */
 template<typename charT, typename traits = std::char_traits<charT>>
 class basic_logger
 {
@@ -26,6 +39,7 @@ class basic_logger
     enum class Level
     {
         Debug,
+        Info,
         Warn,
         Error
     };
@@ -57,8 +71,8 @@ class basic_logger
                     this->fname_);
         }
         ofs << string_type(indent_size * indent_, ' ');
-        if     (level == Level::Warn)  {ofs << "[WARNING]";}
-        else if(level == Level::Error) {ofs << "[ERROR]";}
+        if     (level == Level::Warn)  {ofs << "[WARNING] ";}
+        else if(level == Level::Error) {ofs << "[ERROR] ";}
         output_message(ofs, std::forward<Ts>(args)...);
         ofs << std::endl;
         return;
@@ -99,13 +113,38 @@ template<typename charT, typename traitsT = std::char_traits<charT>>
 class basic_logger_manager
 {
   public:
-    typedef basic_logger<charT, traitsT>     logger_type;
+    typedef basic_logger<charT, traitsT>         logger_type;
     typedef std::unique_ptr<logger_type>         resource_type;
     typedef std::map<std::string, resource_type> container_type;
 
   public:
 
-    static logger_type& get_logger(const std::string name)
+    static void set_default_logger(const std::string& fname)
+    {
+        default_ = fname;
+        if(loggers_.count(fname) == 0)
+        {
+            loggers_.emplace(fname, make_unique<logger_type>(fname));
+            return;
+        }
+        else
+        {
+            throw_exception<std::logic_error>("mjolnir::basic_logger_manager: "
+                "default logger `", fname, "` is already set");
+        }
+    }
+
+    static logger_type& get_default_logger()
+    {
+        if(loggers_.count(default_) == 0)
+        {
+            throw_exception<std::out_of_range>("mjolnir::basic_logger_manager: "
+                "default logger `", default_, "` does not exist");
+        }
+        return *(loggers_.at(default_));
+    }
+
+    static logger_type& get_logger(const std::string& name)
     {
         if(loggers_.count(name) == 0)
         {
@@ -116,12 +155,16 @@ class basic_logger_manager
 
   private:
 
+    static std::string    default_;
     static container_type loggers_;
 };
 
 template<typename charT, typename traitsT>
 typename basic_logger_manager<charT, traitsT>::container_type
 basic_logger_manager<charT, traitsT>::loggers_;
+
+template<typename charT, typename traitsT>
+std::string basic_logger_manager<charT, traitsT>::default_;
 
 template<typename charT, typename traitsT = std::char_traits<charT>>
 class basic_scope
@@ -157,21 +200,41 @@ using LoggerManager = basic_logger_manager<char>;
 using Scope         = basic_scope<char>;
 
 #ifdef MJOLNIR_DEBUG
-#  define MJOLNIR_SET_DEFAULT_LOGGER()\
-      auto& l_o_g_g_e_r_ = LoggerManager::get_logger("mjolnir.log")
-#  define MJOLNIR_SET_LOGGER(name)\
-      auto& l_o_g_g_e_r_ = LoggerManager::get_logger(name)
-#  define MJOLNIR_SCOPE(name, id)    Scope s_c_o_p_e_##id (l_o_g_g_e_r_, #name)
+#  define MJOLNIR_SET_DEFAULT_LOGGER(name)\
+    LoggerManager::set_default_logger(name)
+#  define MJOLNIR_GET_DEFAULT_LOGGER()\
+    auto& l_o_g_g_e_r_ = LoggerManager::get_default_logger()
+#  define MJOLNIR_GET_LOGGER(name)\
+    auto& l_o_g_g_e_r_ = LoggerManager::get_logger(name)
+#  define MJOLNIR_SCOPE(name, id)       Scope s_c_o_p_e_##id (l_o_g_g_e_r_, #name)
+#  define MJOLNIR_SCOPE_DEBUG(name, id) Scope s_c_o_p_e_##id (l_o_g_g_e_r_, #name)
 #  define MJOLNIR_LOG_DEBUG(args...) l_o_g_g_e_r_.log(Logger::Level::Debug, args)
+#  define MJOLNIR_LOG_INFO(args...)  l_o_g_g_e_r_.log(Logger::Level::Info,  args)
 #  define MJOLNIR_LOG_WARN(args...)  l_o_g_g_e_r_.log(Logger::Level::Warn,  args)
 #  define MJOLNIR_LOG_ERROR(args...) l_o_g_g_e_r_.log(Logger::Level::Error, args)
+#elif defined(MJOLNIR_NO_LOG)
+#  define MJOLNIR_SET_DEFAULT_LOGGER(name) /**/
+#  define MJOLNIR_GET_DEFAULT_LOGGER()     /**/
+#  define MJOLNIR_GET_LOGGER(name)         /**/
+#  define MJOLNIR_SCOPE(name, id)          /**/
+#  define MJOLNIR_SCOPE_DEBUG(name, id)    /**/
+#  define MJOLNIR_LOG_DEBUG(args...)       /**/
+#  define MJOLNIR_LOG_INFO(args...)        /**/
+#  define MJOLNIR_LOG_WARN(args...)        /**/
+#  define MJOLNIR_LOG_ERROR(args...)       /**/
 #else
-#  define MJOLNIR_SET_DEFAULT_LOGGER() /**/
-#  define MJOLNIR_SET_LOGGER(name)     /**/
-#  define MJOLNIR_SCOPE(name, id)      /**/
-#  define MJOLNIR_LOG_DEBUG(args...)   /**/
-#  define MJOLNIR_LOG_WARN(args...)    /**/
-#  define MJOLNIR_LOG_ERROR(args...)   /**/
+#  define MJOLNIR_SET_DEFAULT_LOGGER(name)\
+    LoggerManager::set_default_logger(name)
+#  define MJOLNIR_GET_DEFAULT_LOGGER()\
+    auto& l_o_g_g_e_r_ = LoggerManager::get_default_logger()
+#  define MJOLNIR_GET_LOGGER(name)\
+    auto& l_o_g_g_e_r_ = LoggerManager::get_logger(name)
+#  define MJOLNIR_SCOPE(name, id) Scope s_c_o_p_e_##id (l_o_g_g_e_r_, #name)
+#  define MJOLNIR_SCOPE_DEBUG(name, id)    /**/
+#  define MJOLNIR_LOG_DEBUG(args...) /**/
+#  define MJOLNIR_LOG_INFO(args...)  l_o_g_g_e_r_.log(Logger::Level::Info,  args)
+#  define MJOLNIR_LOG_WARN(args...)  l_o_g_g_e_r_.log(Logger::Level::Warn,  args)
+#  define MJOLNIR_LOG_ERROR(args...) l_o_g_g_e_r_.log(Logger::Level::Error, args)
 #endif // MJOLNIR_DEBUG
 
 } // mjolnir

@@ -135,8 +135,8 @@ class PeriodicGridCellList
 template<typename traitsT>
 void PeriodicGridCellList<traitsT>::make(const system_type& sys)
 {
-    MJOLNIR_SET_LOGGER("mjolnir_cell_list.log");
-    MJOLNIR_SCOPE(PeriodicGridCellList::make(), 0);
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE_DEBUG(PeriodicGridCellList::make(), 0);
 
     neighbors_.clear();
     index_by_cell_.resize(sys.size());
@@ -229,8 +229,8 @@ template<typename PotentialT>
 void PeriodicGridCellList<traitsT>::initialize(
         const system_type& sys, const PotentialT& pot)
 {
-    MJOLNIR_SET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(PeriodicGridCellList::initialize(), 0);
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE_DEBUG(PeriodicGridCellList::initialize(), 0);
     this->set_cutoff(pot.max_cutoff_length());
     this->exclusion_.make(sys, pot);
 
