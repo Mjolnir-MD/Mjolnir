@@ -49,12 +49,13 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef scheduleT<real_type> scheduler_type;
 
-    SimulatedAnnealingSimulator(
-            const std::size_t tstep,   scheduler_type&& scheduler,
-            system_type&&     sys,     forcefield_type&& ff,
-            integrator_type&& integr,  observer_type&&   obs)
+    SimulatedAnnealingSimulator(const std::size_t tstep,
+        const std::size_t each_step, scheduler_type&&  scheduler,
+        system_type&&     sys,       forcefield_type&& ff,
+        integrator_type&& integr,    observer_type&&   obs)
     : total_step_(tstep), step_count_(0), time_(0.), r_total_step_(1.0 / tstep),
-      scheduler_(scheduler), system_(std::move(sys)), ff_(std::move(ff)),
+      each_step_(each_step), scheduler_(scheduler),
+      system_(std::move(sys)), ff_(std::move(ff)),
       integrator_(std::move(integr)), observer_(std::move(obs))
     {}
     ~SimulatedAnnealingSimulator() override = default;
@@ -77,6 +78,7 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
   protected:
     std::size_t     total_step_;
     std::size_t     step_count_;
+    std::size_t     each_step_;
     real_type       time_;
     real_type       r_total_step_;
     scheduler_type  scheduler_;
@@ -91,6 +93,8 @@ template<typename traitsT, typename integratorT,
 inline void
 SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::initialize()
 {
+    system_.attribute("temperature") = this->scheduler_.current(0.0);
+
     this->ff_.initialize(this->system_, integrator_.delta_t());
     this->integrator_.initialize(this->system_, this->ff_);
 
@@ -110,10 +114,15 @@ inline bool SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::step()
     ++step_count_;
     this->time_ = this->step_count_ * integrator_.delta_t();
 
-    system_.attribute("temperature") =
-        this->scheduler_.current(step_count_ * r_total_step_);
+    if(this->step_count_ % each_step_ == 0)
+    {
+        MJOLNIR_SCOPE(if(this->step_count_ % each_step == 0), 1);
 
-    MJOLNIR_LOG_DEBUG("T = ", system_.attribute("temperature"));
+        system_.attribute("temperature") =
+            this->scheduler_.current(step_count_ * r_total_step_);
+
+        MJOLNIR_LOG_DEBUG("T = ", system_.attribute("temperature"));
+    }
 
     this->integrator_.update(system_);
 

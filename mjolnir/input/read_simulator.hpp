@@ -85,10 +85,12 @@ read_simulator(const toml::Table& data)
 
         const std::string schedule = toml::get<std::string>(toml_value_at(
                 simulator, "schedule", "[simulator]"));
-        const real_type   T_first = toml::get<real_type>(toml_value_at(
-                simulator, "first_temperature", "[simulator]"));
-        const real_type   T_last  = toml::get<real_type>(toml_value_at(
-                simulator, "last_temperature",  "[simulator]"));
+        const real_type   T_from = toml::get<real_type>(toml_value_at(
+                simulator, "temperature_from", "[simulator]"));
+        const real_type   T_to   = toml::get<real_type>(toml_value_at(
+                simulator, "temperature_to",  "[simulator]"));
+        const std::size_t each_step = toml::get<std::size_t>(toml_value_at(
+                simulator, "each_step",  "[simulator]"));
 
         if(schedule == "linear")
         {
@@ -103,8 +105,8 @@ read_simulator(const toml::Table& data)
                 using simulator_t  = SimulatedAnnealingSimulator<
                     traitsT, integrator_t, linear_schedule>;
 
-                return make_unique<simulator_t>(
-                        tstep, linear_schedule<real_type>(T_first, T_last),
+                return make_unique<simulator_t>(tstep, each_step,
+                        linear_schedule<real_type>(T_from, T_to),
                         read_system<traitsT>(data, 0),
                         read_forcefield<traitsT>(data, 0),
                         read_underdamped_langevin_stepper<traitsT>(data),
