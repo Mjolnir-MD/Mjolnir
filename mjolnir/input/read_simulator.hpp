@@ -19,6 +19,7 @@ template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_simulator(const toml::Table& data)
 {
+    using real_type   = typename traitsT::real_type;
     const auto& simulator = toml_value_at(data, "simulator", "<root>"
             ).cast<toml::value_t::Table>();
     const std::string type = toml::get<std::string>(
@@ -62,7 +63,6 @@ read_simulator(const toml::Table& data)
     else if(type == "Steepest Descent")
     {
         using simulator_t = SteepestDescentSimulator<traitsT>;
-        using real_type   = typename traitsT::real_type;
         const std::size_t step_lim  = toml::get<std::size_t>(toml_value_at(
                 simulator, "step_limit", "[simulator]"));
         const real_type   delta     = toml::get<real_type>(toml_value_at(
@@ -82,40 +82,39 @@ read_simulator(const toml::Table& data)
                 simulator, "scheme", "[simulator]"));
         const std::size_t tstep = toml::get<std::size_t>(toml_value_at(
                 simulator, "total_step", "[simulator]"));
-        const std::size_t T_first = toml::get<std::size_t>(toml_value_at(
+
+        const std::string schedule = toml::get<std::string>(toml_value_at(
+                simulator, "schedule", "[simulator]"));
+        const real_type   T_first = toml::get<real_type>(toml_value_at(
                 simulator, "first_temperature", "[simulator]"));
-        const std::size_t T_last  = toml::get<std::size_t>(toml_value_at(
+        const real_type   T_last  = toml::get<real_type>(toml_value_at(
                 simulator, "last_temperature",  "[simulator]"));
 
-        if(integration == "Newtonian")
+        if(schedule == "linear")
         {
-            std::cerr << "WARNING: with NVE Newtonian system, "
-                      << "`Simulated Annealing` has no effect!" << std::endl;
+            if(integration == "Newtonian")
+            {
+                throw_exception<std::runtime_error>("Simulated Annealing has ",
+                        "no effect for Newtonian Integrator");
+            }
+            else if(integration == "Underdamped Langevin")
+            {
+                using integrator_t = UnderdampedLangevinStepper<traitsT>;
+                using simulator_t  = SimulatedAnnealingSimulator<
+                    traitsT, integrator_t, linear_schedule>;
 
-            using integrator_t = VelocityVerletStepper<traitsT>;
-            using simulator_t  = SimulatedAnnealingSimulator<traitsT, integrator_t>;
-            return make_unique<simulator_t>(
-                    tstep, T_first, T_last,
-                    read_system<traitsT>(data, 0),
-                    read_forcefield<traitsT>(data, 0),
-                    read_velocity_verlet_stepper<traitsT>(data),
-                    read_observer<traitsT>(data));
-        }
-        else if(integration == "Underdamped Langevin")
-        {
-            using integrator_t = UnderdampedLangevinStepper<traitsT>;
-            using simulator_t  = SimulatedAnnealingSimulator<traitsT, integrator_t>;
-            return make_unique<simulator_t>(
-                    tstep, T_first, T_last,
-                    read_system<traitsT>(data, 0),
-                    read_forcefield<traitsT>(data, 0),
-                    read_underdamped_langevin_stepper<traitsT>(data),
-                    read_observer<traitsT>(data));
-        }
-        else
-        {
-            throw_exception<std::runtime_error>("invalid integration scheme: ",
-                    integration, " for simulator ", type);
+                return make_unique<simulator_t>(
+                        tstep, linear_schedule<real_type>(T_first, T_last),
+                        read_system<traitsT>(data, 0),
+                        read_forcefield<traitsT>(data, 0),
+                        read_underdamped_langevin_stepper<traitsT>(data),
+                        read_observer<traitsT>(data));
+            }
+            else
+            {
+                throw_exception<std::runtime_error>("invalid integration scheme: ",
+                        integration, " for simulator ", type);
+            }
         }
     }
 
