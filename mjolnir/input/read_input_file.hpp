@@ -32,44 +32,6 @@ read_parameter(const toml::Table& data)
     return read_simulator<traitsT>(data);
 }
 
-template<typename realT, template<typename, typename> class boundaryT>
-std::unique_ptr<SimulatorBase>
-read_remove_motion(const toml::Table& data)
-{
-    const auto& general = toml_value_at(data, "general", "<root>"
-            ).template cast<toml::value_t::Table>();
-
-    const bool remove_translation =
-        toml::get_or<bool>(general, "remove_translation", false);
-    const bool remove_rotation =
-        toml::get_or<bool>(general, "remove_rotation", false);
-
-    if(remove_translation && remove_rotation)
-    {
-        return read_parameter<SimulatorTraitsBase<realT, boundaryT,
-            SystemMotionRemover<std::true_type, std::true_type>
-            >>(data);
-    }
-    else if(remove_translation && (!remove_rotation)) // true, false
-    {
-        return read_parameter<SimulatorTraitsBase<realT, boundaryT,
-            SystemMotionRemover<std::true_type, std::false_type>
-            >>(data);
-    }
-    else if((!remove_translation) && remove_rotation) // false, true
-    {
-        return read_parameter<SimulatorTraitsBase<realT, boundaryT,
-            SystemMotionRemover<std::false_type, std::true_type>
-            >>(data);
-    }
-    else // false, false
-    {
-        return read_parameter<SimulatorTraitsBase<realT, boundaryT,
-            SystemMotionRemover<std::false_type, std::false_type>
-            >>(data);
-    }
-}
-
 template<typename realT>
 std::unique_ptr<SimulatorBase>
 read_boundary(const toml::Table& data)
@@ -81,11 +43,13 @@ read_boundary(const toml::Table& data)
 
     if(boundary == "Unlimited")
     {
-        return read_remove_motion<realT, UnlimitedBoundary>(data);
+        return read_parameter<
+            SimulatorTraitsBase<realT, UnlimitedBoundary>>(data);
     }
     else if(boundary == "PeriodicCube")
     {
-        return read_remove_motion<realT, CubicPeriodicBoundary>(data);
+        return read_parameter<
+            SimulatorTraitsBase<realT, UnlimitedBoundary>>(data);
     }
     else
     {

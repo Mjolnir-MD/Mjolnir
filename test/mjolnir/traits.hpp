@@ -11,9 +11,7 @@ namespace test
 
 template<typename realT,
          template<typename, typename> class boundaryT = UnlimitedBoundary>
-using traits = mjolnir::SimulatorTraitsBase<realT, boundaryT,
-          SystemMotionRemover<std::false_type, std::false_type>
-      >;
+using traits = mjolnir::SimulatorTraitsBase<realT, boundaryT>;
 
 } // test
 } // mjolnir

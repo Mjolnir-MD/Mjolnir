@@ -5,8 +5,7 @@
 namespace mjolnir
 {
 
-template<typename realT, template<typename, typename> class boundaryT,
-         typename motion_removerT>
+template<typename realT, template<typename, typename> class boundaryT>
 struct SimulatorTraitsBase
 {
     typedef realT                                 real_type;
@@ -15,7 +14,6 @@ struct SimulatorTraitsBase
     using matrix_type = Matrix<real_type, N, M>;
     typedef coordinate_type                       position_type;
     typedef boundaryT<real_type, coordinate_type> boundary_type;
-    typedef motion_removerT system_motion_remover;
 };
 
 } // mjolnir
