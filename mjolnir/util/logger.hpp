@@ -1,274 +1,177 @@
 #ifndef MJOLNIR_UTIL_LOGGER
 #define MJOLNIR_UTIL_LOGGER
-#include "make_unique.hpp"
-#include <map>
+#include <mjolnir/util/make_unique.hpp>
+#include <mjolnir/util/throw_exception.hpp>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <map>
 #include <chrono>
-#include <ctime>
 
 namespace mjolnir
 {
 
-template<typename charT, typename traits = std::char_traits<charT>,
-         typename alloc = std::allocator<charT>>
+template<typename charT, typename traits = std::char_traits<charT>>
 class basic_logger
 {
   public:
-    typedef std::basic_string<charT, traits, alloc>        string_type;
-    typedef std::basic_ostream<charT, traits>              ostream_type;
-    typedef std::basic_fstream<charT, traits>              fstream_type;
-    typedef std::basic_ostringstream<charT, traits, alloc> ostringstream_type;
-    constexpr static std::size_t name_length = 25;
 
+    using string_type  = std::basic_string <charT, traits>;
+    using fstream_type = std::basic_fstream<charT, traits>;
+    using ostream_type = std::basic_ostream<charT, traits>;
+
+    static constexpr std::size_t indent_size = 2;
     enum class Level
     {
         Debug,
-        Time,
-        Info,
         Warn,
-        Error,
+        Error
     };
 
   public:
 
-    explicit basic_logger(const string_type& name)
-        : name_(name.size() <= name_length ? name : name.substr(0, name_length))
-    {}
+    explicit basic_logger(const std::string& fname): indent_(0), fname_(fname)
+    {
+        // clear the contents and check the file can be opened
+        fstream_type ofs(this->fname_, std::ios_base::out);
+        if(!ofs.good())
+        {
+            std::cerr << "logger: file open error: " << fname_ << std::endl;
+            std::exit(1);
+        }
+    }
     ~basic_logger() = default;
 
-    template<typename ... T_args>
-    void log(Level level, T_args&& ... args) const
-    {
-        if(output_.count(level) == 1)
-        {
-            fstream_type ofs(output_.at(level),
-                             fstream_type::out | fstream_type::app);
-            if(!ofs.good())
-                throw std::runtime_error(
-                        "file open erorr: " + output_.at(level));
+    void indent()   noexcept {indent_ += 1; return;}
+    void unindent() noexcept {indent_ -= 1; return;}
 
-            log_(ofs, level, std::forward<T_args>(args)...);
-            ofs.close();
-            return;
-        }
-        else
+    template<typename ... Ts>
+    void log(Level level, Ts&& ... args) const
+    {
+        fstream_type ofs(this->fname_, std::ios_base::out | std::ios_base::app);
+        if(!ofs.good())
         {
-            log_(std::cerr, level, std::forward<T_args>(args)...);
-            return;
+            throw_exception<std::runtime_error>("Logger: file open error: ",
+                    this->fname_);
         }
+        ofs << string_type(indent_size * indent_, ' ');
+        if     (level == Level::Warn)  {ofs << "[WARNING]";}
+        else if(level == Level::Error) {ofs << "[ERROR]";}
+        output_message(ofs, std::forward<Ts>(args)...);
+        ofs << std::endl;
+        return;
     }
 
-    void set_output(Level lev, std::string&& fname)
+    template<typename ... Ts>
+    void write(Ts&& ... args) const
     {
-        output_[lev] = std::forward<string_type>(fname);
+        fstream_type ofs(this->fname_, std::ios_base::out | std::ios_base::app);
+        if(!ofs.good())
+        {
+            throw_exception<std::runtime_error>("Logger: file open error: ",
+                    this->fname_);
+        }
+        ofs << string_type(indent_size * indent_, ' ');
+        output_message(ofs, std::forward<Ts>(args)...);
+        ofs << std::endl;
         return;
     }
 
   private:
-
-    template<typename ... T_args>
-    void log_(ostream_type& os, const Level& level, T_args&& ...args) const
-    {
-        std::time_t t = std::chrono::system_clock::to_time_t(
-                std::chrono::system_clock::now());
-        std::tm tm = *std::localtime(&t);
-
-        os << to_string(level) << '|' << to_str(tm) << "| ";
-        os << std::setw(name_length) << std::left << name_;
-        string_type mes = gen_message(std::forward<T_args>(args)...);
-        os << mes << std::endl;
-        return;
-    }
 
     template<typename T, typename ...T_args>
-    string_type gen_message(T&& arg1, T_args&& ...args) const
+    static void output_message(ostream_type& os, T&& arg1, T_args&& ...args)
     {
-        ostringstream_type oss;
-        oss << " " << arg1;
-        return oss.str() + gen_message(std::forward<T_args>(args)...);
+        os << ' ' << arg1;
+        return output_message(os, std::forward<T_args>(args)...);
     }
-
-    template<typename T>
-    string_type gen_message(T&& arg1) const
-    {
-        ostringstream_type oss;
-        oss << " " << arg1;
-        return oss.str();
-    }
-
-    string_type to_string(Level l) const
-    {
-        switch(l)
-        {
-            case Level::Debug: return "[Debug  ]";
-            case Level::Time:  return "[Time   ]";
-            case Level::Info:  return "[Info   ]";
-            case Level::Warn:  return "[Warning]";
-            case Level::Error: return "[Error  ]";
-            default:           return "[Unknown]";
-        }
-    }
-
-    string_type to_str(const std::tm& t) const
-    {
-        ostringstream_type oss;
-        oss << t.tm_year+1900 << '/' << t.tm_mon+1 << '/' << t.tm_mday << ' ';
-        oss << t.tm_hour << ':' << t.tm_min << ':' << t.tm_sec;
-        return oss.str();
-    }
+    static void output_message(ostream_type& os) {return;}
 
   private:
 
-    const string_type name_;
-    std::map<Level, std::string> output_;
+    std::size_t indent_;
+    string_type  fname_;
 };
 
-template<typename charT, typename char_traits = std::char_traits<charT>,
-         typename alloc = std::allocator<charT>>
-class LoggerManager
+template<typename charT, typename traitsT = std::char_traits<charT>>
+class basic_logger_manager
 {
   public:
-    typedef std::basic_string<charT, char_traits, alloc> string_type;
-    typedef basic_logger<charT, char_traits, alloc>      logger_type;
-    typedef std::unique_ptr<logger_type>                 resource_type;
-    typedef std::map<string_type, resource_type>         container_type;
-    constexpr static const char* debug_file = "mjolnir_debug.log";
-    constexpr static const char* info_file  = "mjolnir_info.log";
+    typedef basic_logger<charT, traitsT>     logger_type;
+    typedef std::unique_ptr<logger_type>         resource_type;
+    typedef std::map<std::string, resource_type> container_type;
 
   public:
-    static logger_type& get_logger(const string_type& name)
+
+    static logger_type& get_logger(const std::string name)
     {
-        if(dirty)
-        {
-            std::ofstream dbg(debug_file);
-            std::ofstream info(info_file);
-            dbg.close();
-            info.close();
-            dirty = false;
-        }
         if(loggers_.count(name) == 0)
         {
-            resource_type newlogger = make_unique<logger_type>(name);
-            newlogger->set_output(logger_type::Level::Debug, debug_file);
-            newlogger->set_output(logger_type::Level::Info,  info_file);
-            loggers_.emplace(name, std::move(newlogger));
+            loggers_.emplace(name, make_unique<logger_type>(name));
         }
         return *(loggers_.at(name));
     }
 
   private:
-    static bool dirty;
+
     static container_type loggers_;
 };
 
-template<typename charT, typename traits, typename alloc>
-typename LoggerManager<charT, traits, alloc>::container_type
-LoggerManager<charT, traits, alloc>::loggers_;
+template<typename charT, typename traitsT>
+typename basic_logger_manager<charT, traitsT>::container_type
+basic_logger_manager<charT, traitsT>::loggers_;
 
-template<typename charT, typename traits, typename alloc>
-bool LoggerManager<charT, traits, alloc>::dirty = true;
-
-// duration_as_string {{{
-template<typename durationT>
-struct duration_as_string;
-
-template<>
-struct duration_as_string<std::chrono::nanoseconds>
+template<typename charT, typename traitsT = std::char_traits<charT>>
+class basic_scope
 {
-    static std::string invoke(){return "[nsec]";}
-};
+  public:
+    typedef charT   char_type;
+    typedef traitsT traits_type;
+    typedef basic_logger<char_type, traits_type> logger_type;
 
-template<>
-struct duration_as_string<std::chrono::microseconds>
-{
-    static std::string invoke(){return "[usec]";}
-};
+  public:
 
-template<>
-struct duration_as_string<std::chrono::milliseconds>
-{
-    static std::string invoke(){return "[msec]";}
-};
-
-template<>
-struct duration_as_string<std::chrono::seconds>
-{
-    static std::string invoke(){return "[sec ]";}
-};
-
-template<>
-struct duration_as_string<std::chrono::minutes>
-{
-    static std::string invoke(){return "[min ]";}
-};
-
-template<>
-struct duration_as_string<std::chrono::hours>
-{
-    static std::string invoke(){return "[hour]";}
-};
-// }}}
-
-template<typename durationT,
-         typename charT = char, typename traits = std::char_traits<charT>,
-         typename alloc = std::allocator<charT>>
-struct stopwatch
-{
-    typedef duration_as_string<durationT> as_string;
-    typedef basic_logger<charT, traits, alloc> logger_type;
-
-    stopwatch(const std::string& name, logger_type& logger)
-        : start(std::chrono::system_clock::now()), name_(name), logger_(logger)
-    {}
-    ~stopwatch()
+    basic_scope(logger_type& trc, const std::string& name)
+      : logger_(trc), name_(name)
     {
-        const auto stop = std::chrono::system_clock::now();
-        const auto dur = std::chrono::duration_cast<durationT>(stop - start);
-        logger_.log(logger_type::Time, name_, dur.count(), as_string::invoke());
+        logger_.write(name_, " {");
+        logger_.indent();
+    }
+    ~basic_scope()
+    {
+        logger_.unindent();
+        logger_.write('}');
     }
 
-  private:
+    std::string const& name() const noexcept {return name_;}
 
-    const std::chrono::system_clock::time_point start;
-    const std::string name_;
+  private:
     logger_type& logger_;
+    std::string name_;
 };
 
-typedef basic_logger<char>     Logger;
-typedef basic_logger<wchar_t>  wLogger;
-typedef basic_logger<char16_t> u16Logger;
-typedef basic_logger<char32_t> u32Logger;
-
-typedef basic_logger<char>::Level     LogLevel;
-typedef basic_logger<wchar_t>::Level  wLogLevel;
-typedef basic_logger<char16_t>::Level u16LogLevel;
-typedef basic_logger<char32_t>::Level u32LogLevel;
+using Logger        = basic_logger<char>;
+using LoggerManager = basic_logger_manager<char>;
+using Scope         = basic_scope<char>;
 
 #ifdef MJOLNIR_DEBUG
-#define MJOLNIR_SET_LOGGER(name)   auto& logger_ = LoggerManager<char>::get_logger(name);
-#define MJOLNIR_LOG(args...)       logger_.log(args);
-#define MJOLNIR_LOG_DEBUG(args...) logger_.log(LogLevel::Debug, args);
-#define MJOLNIR_LOG_INFO(args...)  logger_.log(LogLevel::Info,  args);
-#define MJOLNIR_LOG_WARN(args...)  logger_.log(LogLevel::Warn,  args);
-#define MJOLNIR_LOG_ERROR(args...) logger_.log(LogLevel::Error, args);
-#elif defined(MJOLNIR_NO_DEBUG)
-#define MJOLNIR_SET_LOGGER(name)   /*name*/
-#define MJOLNIR_LOG(args...)       /*args*/
-#define MJOLNIR_LOG_DEBUG(args...) /*args*/
-#define MJOLNIR_LOG_INFO(args...)  /*args*/
-#define MJOLNIR_LOG_WARN(args...)  /*args*/
-#define MJOLNIR_LOG_ERROR(args...) /*args*/
-#else  // normal one
-#define MJOLNIR_SET_LOGGER(name)   auto& logger_ = LoggerManager<char>::get_logger(name);
-#define MJOLNIR_LOG(args...)       /*args*/
-#define MJOLNIR_LOG_DEBUG(args...) /*args*/
-#define MJOLNIR_LOG_INFO(args...)  logger_.log(LogLevel::Info,  args);
-#define MJOLNIR_LOG_WARN(args...)  logger_.log(LogLevel::Warn,  args);
-#define MJOLNIR_LOG_ERROR(args...) logger_.log(LogLevel::Error, args);
+#  define MJOLNIR_SET_DEFAULT_LOGGER()\
+      auto& l_o_g_g_e_r_ = LoggerManager::get_logger("mjolnir.log")
+#  define MJOLNIR_SET_LOGGER(name)\
+      auto& l_o_g_g_e_r_ = LoggerManager::get_logger(name)
+#  define MJOLNIR_SCOPE(name, id)    Scope s_c_o_p_e_##id (l_o_g_g_e_r_, #name)
+#  define MJOLNIR_LOG_DEBUG(args...) l_o_g_g_e_r_.log(Logger::Level::Debug, args)
+#  define MJOLNIR_LOG_WARN(args...)  l_o_g_g_e_r_.log(Logger::Level::Warn,  args)
+#  define MJOLNIR_LOG_ERROR(args...) l_o_g_g_e_r_.log(Logger::Level::Error, args)
+#else
+#  define MJOLNIR_SET_DEFAULT_LOGGER() /**/
+#  define MJOLNIR_SET_LOGGER(name)     /**/
+#  define MJOLNIR_SCOPE(name, id)      /**/
+#  define MJOLNIR_LOG_DEBUG(args...)   /**/
+#  define MJOLNIR_LOG_WARN(args...)    /**/
+#  define MJOLNIR_LOG_ERROR(args...)   /**/
 #endif // MJOLNIR_DEBUG
 
 } // mjolnir

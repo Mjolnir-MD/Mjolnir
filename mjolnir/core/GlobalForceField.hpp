@@ -91,14 +91,7 @@ class GlobalForceField
   private:
 
     std::vector<interaction_ptr> interactions_;
-
-    static
-    Logger& logger_;
 };
-
-template<typename traitsT>
-Logger& GlobalForceField<traitsT>::logger_ =
-    LoggerManager<char>::get_logger("GlobalForceField");
 
 } // mjolnir
 #endif /* MJOLNIR_GLOBAL_FORCE_FIELD */

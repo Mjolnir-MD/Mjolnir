@@ -73,14 +73,10 @@ class VerletList
     real_type      cutoff_;
     real_type      margin_;
     real_type      current_margin_;
-    static Logger& logger_;
 
     exclusion_list_type exclusion_;
     neighbor_list_type  neighbors_;
 };
-
-template<typename traitsT>
-Logger& VerletList<traitsT>::logger_ = LoggerManager<char>::get_logger("VerletList");
 
 template<typename traitsT>
 void VerletList<traitsT>::make(const system_type& sys)

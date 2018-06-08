@@ -122,7 +122,6 @@ class PeriodicGridCellList
     std::size_t dim_x_;
     std::size_t dim_y_;
     std::size_t dim_z_;
-    static Logger& logger_;
 
     coordinate_type     lower_bound_;
     neighbor_list_type  neighbors_;
@@ -134,13 +133,10 @@ class PeriodicGridCellList
 };
 
 template<typename traitsT>
-Logger& PeriodicGridCellList<traitsT>::logger_ =
-        LoggerManager<char>::get_logger("PeriodicGridCellList");
-
-template<typename traitsT>
 void PeriodicGridCellList<traitsT>::make(const system_type& sys)
 {
-    MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::make CALLED");
+    MJOLNIR_SET_LOGGER("mjolnir_cell_list.log");
+    MJOLNIR_SCOPE(PeriodicGridCellList::make(), 0);
 
     neighbors_.clear();
     index_by_cell_.resize(sys.size());
@@ -213,7 +209,6 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
     }
 
     this->current_margin_ = cutoff_ * margin_;
-    MJOLNIR_LOG_DEBUG("PeriodicGridCellList::make() RETURNED");
     return ;
 }
 
@@ -234,7 +229,8 @@ template<typename PotentialT>
 void PeriodicGridCellList<traitsT>::initialize(
         const system_type& sys, const PotentialT& pot)
 {
-    MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::initialize CALLED");
+    MJOLNIR_SET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(PeriodicGridCellList::initialize(), 0);
     this->set_cutoff(pot.max_cutoff_length());
     this->exclusion_.make(sys, pot);
 
@@ -313,7 +309,6 @@ void PeriodicGridCellList<traitsT>::initialize(
     }
     }
     this->make(sys);
-    MJOLNIR_LOG_DEBUG("PeriodicGridCellList<traitsT>::initialize end");
     return;
 }
 

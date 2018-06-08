@@ -120,7 +120,6 @@ class UnlimitedGridCellList
     real_type margin_;
     real_type current_margin_;
     real_type r_cell_size_;
-    static Logger& logger_;
 
     exclusion_list_type       exclusion_;
     neighbor_list_type        neighbors_;
@@ -131,13 +130,10 @@ class UnlimitedGridCellList
 };
 
 template<typename traitsT, std::size_t N>
-Logger& UnlimitedGridCellList<traitsT, N>::logger_ =
-        LoggerManager<char>::get_logger("UnlimitedGridCellList");
-
-template<typename traitsT, std::size_t N>
 void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
 {
-    MJOLNIR_LOG_DEBUG("UnlimitedGridCellList<traitsT>::make CALLED");
+    MJOLNIR_SET_LOGGER("mjolnir_cell_list.log");
+    MJOLNIR_SCOPE(UnlimitedGridCellList<traitsT>::make(), 0);
 
     neighbors_.clear();
     index_by_cell_.resize(sys.size());
@@ -174,6 +170,7 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
     const real_type r_c2 = r_c * r_c;
     for(std::size_t i=0; i<sys.size(); ++i)
     {
+        MJOLNIR_SCOPE(for(std::size_t i=0; i<sys.size(); ++i), 0);
         const auto& ri   = sys[i].position;
         const auto& cell = cell_list_.at(this->calc_index(ri));
 
@@ -207,7 +204,6 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
     }
 
     this->current_margin_ = cutoff_ * margin_;
-    MJOLNIR_LOG_DEBUG("UnlimitedGridCellList::make() RETURNED");
     return ;
 }
 
@@ -227,7 +223,9 @@ template<typename PotentialT>
 void UnlimitedGridCellList<traitsT, N>::initialize(
         const system_type& sys, const PotentialT& pot)
 {
-    MJOLNIR_LOG_DEBUG("UnlimitedGridCellList<traitsT>::initialize CALLED");
+    MJOLNIR_SET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(UnlimitedGridCellList<traitsT>::initialize(), 0);
+
     this->set_cutoff(pot.max_cutoff_length());
     this->exclusion_.make(sys, pot);
 
