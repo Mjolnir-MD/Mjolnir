@@ -65,7 +65,7 @@ void ExcludedVolume<realT>::generate(toml::Table& ff,
 
     const toml::Table& sigmas = mjolnir::toml_value_at(
             this->parameters_, "sigma", "jarngreipr::ExcludedVolume"
-            ).cast<toml::value_t::Table>();
+            ).template cast<toml::value_t::Table>();
 
     toml::Array params;
     for(const auto& chain : chains)
@@ -83,7 +83,7 @@ void ExcludedVolume<realT>::generate(toml::Table& ff,
     exv["epsilon"]    = toml::get<toml::Float>(mjolnir::toml_value_at(
                 this->parameters_, "epsilon", "jarngreipr::ExcludedVolume"));
 
-    ff["global"].cast<toml::value_t::Array>().push_back(exv);
+    ff["global"].template cast<toml::value_t::Array>().push_back(exv);
     return;
 }
 
