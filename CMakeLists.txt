@@ -8,9 +8,12 @@ include_directories(${PROJECT_SOURCE_DIR}/extlib)
 option(DEBUG "dump debug information" OFF)
 if(DEBUG)
     add_definitions(-DMJOLNIR_DEBUG)
-else(DEBUG)
-    add_definitions(-DMJOLNIR_NO_DEBUG)
-endif(DEBUG)
+    # output mjolnir/build/bin
+    set(MJOLNIR_EXECUTABLE_LOCATION "${PROJECT_BINARY_DIR}/bin")
+else()
+    # output mjolnir/bin
+    set(MJOLNIR_EXECUTABLE_LOCATION "${PROJECT_SOURCE_DIR}/bin")
+endif()
 
 if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/toml/toml.hpp")
     execute_process(COMMAND git submodule update --init --recursive
