@@ -13,19 +13,27 @@
 namespace mjolnir
 {
 
-/* Here, these macros are defined.                                      *
- * 1. MJOLNIR_LOG_DEBUG                                                 *
- *   - just for debug purpose. the log file may become too large.       *
- * 2. MJOLNIR_LOG_INFO                                                  *
- *   - useful information to check the behavior. by default, on.        *
- * 3. MJOLNIR_LOG_WARN                                                  *
- *   - be careful with it. It can be done, but it might not make sense. *
- * 4. MJOLNIR_LOG_ERROR                                                 *
- *   - something wrong happen.                                          *
- * 5. MJOLNIR_SCOPE                                                     *
- *   - helps output format of log.                                      *
- * 6. MJOLNIR_SCOPE_DEBUG                                               *
- *   - helps output format of log. by default, off.                     */
+/* Here, these macros are defined.                                   *
+ *  1. MJOLNIR_LOG_DEBUG                                             *
+ *    - just for debug purpose. the log file may become too large.   *
+ *  2. MJOLNIR_LOG_INFO                                              *
+ *    - useful information to check the behavior. by default, on.    *
+ *  3. MJOLNIR_LOG_WARN                                              *
+ *    - be careful with it. It can run, but it might not make sense. *
+ *  4. MJOLNIR_LOG_ERROR                                             *
+ *    - something wrong happen.                                      *
+ *  5. MJOLNIR_SCOPE                                                 *
+ *    - helps output format of log.                                  *
+ *  6. MJOLNIR_SCOPE_DEBUG                                           *
+ *    - helps output format of log. by default, off.                 *
+ *  7. MJOLNIR_GET_DEFAULT_LOGGER                                    *
+ *    - enable logging in the scope.                                 *
+ *  8. MJOLNIR_GET_LOGGER                                            *
+ *    - make new log file and output to that file.                   *
+ *  9. MJOLNIR_GET_DEFAULT_LOGGER_DEBUG                              *
+ *    - enabled only when MJOLNIR_DEBUG flag is set.                 *
+ * 10. MJOLNIR_GET_LOGGER_DEBUG                                      *
+ *    - enabled only when MJOLNIR_DEBUG flag is set.                 */
 template<typename charT, typename traits = std::char_traits<charT>>
 class basic_logger
 {
@@ -70,7 +78,10 @@ class basic_logger
             throw_exception<std::runtime_error>("Logger: file open error: ",
                     this->fname_);
         }
-        ofs << string_type(indent_size * indent_, ' ');
+        if(indent_ != 0)
+        {
+            ofs << string_type(indent_size * indent_, ' ');
+        }
         if     (level == Level::Warn)  {ofs << "[WARNING] ";}
         else if(level == Level::Error) {ofs << "[ERROR] ";}
         output_message(ofs, std::forward<Ts>(args)...);
@@ -87,7 +98,10 @@ class basic_logger
             throw_exception<std::runtime_error>("Logger: file open error: ",
                     this->fname_);
         }
-        ofs << string_type(indent_size * indent_, ' ');
+        if(indent_ != 0)
+        {
+            ofs << string_type(indent_size * indent_, ' ');
+        }
         output_message(ofs, std::forward<Ts>(args)...);
         ofs << std::endl;
         return;
@@ -98,7 +112,7 @@ class basic_logger
     template<typename T, typename ...T_args>
     static void output_message(ostream_type& os, T&& arg1, T_args&& ...args)
     {
-        os << ' ' << arg1;
+        os << arg1;
         return output_message(os, std::forward<T_args>(args)...);
     }
     static void output_message(ostream_type& os) {return;}
@@ -204,6 +218,8 @@ using Scope         = basic_scope<char>;
     LoggerManager::set_default_logger(name)
 #  define MJOLNIR_GET_DEFAULT_LOGGER()\
     auto& l_o_g_g_e_r_ = LoggerManager::get_default_logger()
+#  define MJOLNIR_GET_DEFAULT_LOGGER_DEBUG()\
+    auto& l_o_g_g_e_r_ = LoggerManager::get_default_logger()
 #  define MJOLNIR_GET_LOGGER(name)\
     auto& l_o_g_g_e_r_ = LoggerManager::get_logger(name)
 #  define MJOLNIR_SCOPE(name, id)       Scope s_c_o_p_e_##id (l_o_g_g_e_r_, #name)
@@ -213,15 +229,16 @@ using Scope         = basic_scope<char>;
 #  define MJOLNIR_LOG_WARN(args...)  l_o_g_g_e_r_.log(Logger::Level::Warn,  args)
 #  define MJOLNIR_LOG_ERROR(args...) l_o_g_g_e_r_.log(Logger::Level::Error, args)
 #elif defined(MJOLNIR_NO_LOG)
-#  define MJOLNIR_SET_DEFAULT_LOGGER(name) /**/
-#  define MJOLNIR_GET_DEFAULT_LOGGER()     /**/
-#  define MJOLNIR_GET_LOGGER(name)         /**/
-#  define MJOLNIR_SCOPE(name, id)          /**/
-#  define MJOLNIR_SCOPE_DEBUG(name, id)    /**/
-#  define MJOLNIR_LOG_DEBUG(args...)       /**/
-#  define MJOLNIR_LOG_INFO(args...)        /**/
-#  define MJOLNIR_LOG_WARN(args...)        /**/
-#  define MJOLNIR_LOG_ERROR(args...)       /**/
+#  define MJOLNIR_SET_DEFAULT_LOGGER(name)   /**/
+#  define MJOLNIR_GET_DEFAULT_LOGGER()       /**/
+#  define MJOLNIR_GET_DEFAULT_LOGGER_DEBUG() /**/
+#  define MJOLNIR_GET_LOGGER(name)           /**/
+#  define MJOLNIR_SCOPE(name, id)            /**/
+#  define MJOLNIR_SCOPE_DEBUG(name, id)      /**/
+#  define MJOLNIR_LOG_DEBUG(args...)         /**/
+#  define MJOLNIR_LOG_INFO(args...)          /**/
+#  define MJOLNIR_LOG_WARN(args...)          /**/
+#  define MJOLNIR_LOG_ERROR(args...)         /**/
 #else
 #  define MJOLNIR_SET_DEFAULT_LOGGER(name)\
     LoggerManager::set_default_logger(name)
@@ -230,8 +247,9 @@ using Scope         = basic_scope<char>;
 #  define MJOLNIR_GET_LOGGER(name)\
     auto& l_o_g_g_e_r_ = LoggerManager::get_logger(name)
 #  define MJOLNIR_SCOPE(name, id) Scope s_c_o_p_e_##id (l_o_g_g_e_r_, #name)
-#  define MJOLNIR_SCOPE_DEBUG(name, id)    /**/
-#  define MJOLNIR_LOG_DEBUG(args...) /**/
+#  define MJOLNIR_GET_DEFAULT_LOGGER_DEBUG() /**/
+#  define MJOLNIR_SCOPE_DEBUG(name, id)      /**/
+#  define MJOLNIR_LOG_DEBUG(args...)         /**/
 #  define MJOLNIR_LOG_INFO(args...)  l_o_g_g_e_r_.log(Logger::Level::Info,  args)
 #  define MJOLNIR_LOG_WARN(args...)  l_o_g_g_e_r_.log(Logger::Level::Warn,  args)
 #  define MJOLNIR_LOG_ERROR(args...) l_o_g_g_e_r_.log(Logger::Level::Error, args)
