@@ -130,9 +130,19 @@ class UnlimitedGridCellList
 };
 
 template<typename traitsT, std::size_t N>
+constexpr std::size_t  UnlimitedGridCellList<traitsT, N>::dim_size;
+template<typename traitsT, std::size_t N>
+constexpr std::int64_t UnlimitedGridCellList<traitsT, N>::dim;
+template<typename traitsT, std::size_t N>
+constexpr std::size_t  UnlimitedGridCellList<traitsT, N>::total_size;
+template<typename traitsT, std::size_t N>
+constexpr typename UnlimitedGridCellList<traitsT, N>::real_type
+UnlimitedGridCellList<traitsT, N>::mesh_epsilon;
+
+template<typename traitsT, std::size_t N>
 void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
 {
-    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_SCOPE_DEBUG(UnlimitedGridCellList<traitsT>::make(), 0);
 
     neighbors_.clear();
@@ -224,8 +234,10 @@ void UnlimitedGridCellList<traitsT, N>::initialize(
         const system_type& sys, const PotentialT& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE_DEBUG(UnlimitedGridCellList<traitsT>::initialize(), 0);
+    MJOLNIR_SCOPE(UnlimitedGridCellList<traitsT>::initialize(), 0);
 
+    MJOLNIR_LOG_INFO(pot.name(), " cutoff = ", pot.max_cutoff_length());
+    MJOLNIR_LOG_INFO("dimension(independent from system size) = ", dim, 'x', dim, 'x', dim);
     this->set_cutoff(pot.max_cutoff_length());
     this->exclusion_.make(sys, pot);
 
