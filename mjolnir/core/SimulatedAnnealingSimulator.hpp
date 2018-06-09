@@ -107,7 +107,7 @@ template<typename traitsT, typename integratorT,
          template<typename> class scheduleT>
 inline bool SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::step()
 {
-    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_SCOPE_DEBUG(SimulatedAnnealingSimulator::step, 0);
 
     integrator_.step(this->time_, system_, ff_);
