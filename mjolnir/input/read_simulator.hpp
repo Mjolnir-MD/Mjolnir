@@ -19,6 +19,9 @@ template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_simulator(const toml::Table& data)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_simulator(const toml::Table& data), 0);
+
     using real_type   = typename traitsT::real_type;
     const auto& simulator = toml_value_at(data, "simulator", "<root>"
             ).cast<toml::value_t::Table>();
@@ -27,13 +30,17 @@ read_simulator(const toml::Table& data)
 
     if(type == "Molecular Dynamics")
     {
+        MJOLNIR_SCOPE(if(type == "Molecular Dynamics"), 1);
         const std::string integration = toml::get<std::string>(toml_value_at(
                 simulator, "scheme", "[simulator]"));
         const std::size_t tstep = toml::get<std::size_t>(toml_value_at(
                 simulator, "total_step", "[simulator]"));
 
+        MJOLNIR_LOG_INFO("total step = ", tstep);
+
         if(integration == "Newtonian")
         {
+            MJOLNIR_SCOPE(if(integration == "Newtonian"), 2);
             using integrator_t = VelocityVerletStepper<traitsT>;
             using simulator_t  = MDSimulator<traitsT, integrator_t>;
             return make_unique<simulator_t>(
@@ -45,6 +52,7 @@ read_simulator(const toml::Table& data)
         }
         else if(integration == "Underdamped Langevin")
         {
+            MJOLNIR_SCOPE(if(integration == "Underdamped Langevin"), 2);
             using integrator_t = UnderdampedLangevinStepper<traitsT>;
             using simulator_t  = MDSimulator<traitsT, integrator_t>;
             return make_unique<simulator_t>(
@@ -62,13 +70,19 @@ read_simulator(const toml::Table& data)
     }
     else if(type == "Steepest Descent")
     {
+        MJOLNIR_SCOPE(if(type == "Steepest Descent"), 1);
         using simulator_t = SteepestDescentSimulator<traitsT>;
+
         const std::size_t step_lim  = toml::get<std::size_t>(toml_value_at(
                 simulator, "step_limit", "[simulator]"));
         const real_type   delta     = toml::get<real_type>(toml_value_at(
                 simulator, "delta", "[simulator]"));
         const real_type   threshold = toml::get<real_type>(toml_value_at(
                 simulator, "threshold", "[simulator]"));
+
+        MJOLNIR_LOG_INFO("step_lim  = ", step_lim);
+        MJOLNIR_LOG_INFO("delta     = ", delta);
+        MJOLNIR_LOG_INFO("threshold = ", threshold);
 
         return make_unique<simulator_t>(
                 delta, threshold, step_lim,
@@ -78,10 +92,13 @@ read_simulator(const toml::Table& data)
     }
     else if(type == "Simulated Annealing")
     {
+        MJOLNIR_SCOPE(if(type == "Simulated Annealing"), 1);
         const std::string integration = toml::get<std::string>(toml_value_at(
                 simulator, "scheme", "[simulator]"));
         const std::size_t tstep = toml::get<std::size_t>(toml_value_at(
                 simulator, "total_step", "[simulator]"));
+
+        MJOLNIR_LOG_INFO("total step = ", tstep);
 
         const std::string schedule = toml::get<std::string>(toml_value_at(
                 simulator, "schedule", "[simulator]"));
@@ -92,10 +109,16 @@ read_simulator(const toml::Table& data)
         const std::size_t each_step = toml::get<std::size_t>(toml_value_at(
                 simulator, "each_step",  "[simulator]"));
 
+        MJOLNIR_LOG_INFO("temperature from = ", T_from);
+        MJOLNIR_LOG_INFO("temperature to   = ", T_to);
+        MJOLNIR_LOG_INFO("for each step    = ", each_step);
+
         if(schedule == "linear")
         {
             if(integration == "Newtonian")
             {
+                MJOLNIR_LOG_ERROR("Simulated Annealing + NVE Newtonian");
+                MJOLNIR_LOG_ERROR("NVE Newtonian doesn't have temperature control.");
                 throw_exception<std::runtime_error>("Simulated Annealing has ",
                         "no effect for Newtonian Integrator");
             }
@@ -105,6 +128,7 @@ read_simulator(const toml::Table& data)
                 using simulator_t  = SimulatedAnnealingSimulator<
                     traitsT, integrator_t, linear_schedule>;
 
+                MJOLNIR_LOG_INFO("Underdamped Langevin is used as a MD engine");
                 return make_unique<simulator_t>(tstep, each_step,
                         linear_schedule<real_type>(T_from, T_to),
                         read_system<traitsT>(data, 0),
@@ -119,7 +143,6 @@ read_simulator(const toml::Table& data)
             }
         }
     }
-
     else
     {
         throw_exception<std::runtime_error>("invalid simulator type: ", type);
