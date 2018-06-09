@@ -135,7 +135,7 @@ class PeriodicGridCellList
 template<typename traitsT>
 void PeriodicGridCellList<traitsT>::make(const system_type& sys)
 {
-    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_SCOPE_DEBUG(PeriodicGridCellList::make(), 0);
 
     neighbors_.clear();
@@ -230,9 +230,13 @@ void PeriodicGridCellList<traitsT>::initialize(
         const system_type& sys, const PotentialT& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE_DEBUG(PeriodicGridCellList::initialize(), 0);
-    this->set_cutoff(pot.max_cutoff_length());
+    MJOLNIR_SCOPE(PeriodicGridCellList::initialize(), 0);
+
+    const real_type max_cutoff = pot.max_cutoff_length();
+    this->set_cutoff(max_cutoff);
     this->exclusion_.make(sys, pot);
+
+    MJOLNIR_LOG_INFO(pot.name(), " cutoff = ", max_cutoff);
 
     this->lower_bound_ = sys.boundary().lower_bound();
     const auto system_size = sys.boundary().width();
@@ -241,16 +245,21 @@ void PeriodicGridCellList<traitsT>::initialize(
     this->dim_y_ = std::max<std::size_t>(3, std::floor(system_size[1] * r_y_));
     this->dim_z_ = std::max<std::size_t>(3, std::floor(system_size[2] * r_z_));
 
+    MJOLNIR_LOG_INFO("dimension = ", dim_x_, 'x', dim_y_, 'x', dim_z_);
+
     if(dim_x_ == 3 || dim_y_ == 3 || dim_z_ == 3)
     {
-        std::cerr << "WARNING: cell size might be too small: number of grids =("
-                  << dim_x_ << ", " << dim_y_ << ", " << dim_z_ << ")\n";
+        MJOLNIR_LOG_WARN("system size is too small. Cell List has no merit.");
     }
 
     // it may expand cell a bit (to fit system range)
     this->r_x_ = 1.0 / (system_size[0] / this->dim_x_);
     this->r_y_ = 1.0 / (system_size[1] / this->dim_y_);
     this->r_z_ = 1.0 / (system_size[2] / this->dim_z_);
+
+    MJOLNIR_LOG_DEBUG("reciplocal width of cells in x coordinate = ", r_x_);
+    MJOLNIR_LOG_DEBUG("reciplocal width of cells in y coordinate = ", r_y_);
+    MJOLNIR_LOG_DEBUG("reciplocal width of cells in z coordinate = ", r_z_);
 
     this->cell_list_.resize(dim_x_ * dim_y_ * dim_z_);
 
