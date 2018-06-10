@@ -19,6 +19,9 @@ struct read_boundary_impl<UnlimitedBoundary<realT, coordT>>
     static UnlimitedBoundary<realT, coordT>
     invoke(const toml::Table& boundary)
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_SCOPE(read_boundary_impl::invoke(), 0);
+        MJOLNIR_LOG_INFO("no boundary is set");
         return UnlimitedBoundary<realT, coordT>{};
     }
 };
@@ -29,6 +32,10 @@ struct read_boundary_impl<CubicPeriodicBoundary<realT, coordT>>
     static CubicPeriodicBoundary<realT, coordT>
     invoke(const toml::Table& boundary)
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_SCOPE(read_boundary_impl::invoke(), 0);
+        MJOLNIR_LOG_INFO("shape of periodic boundary is cubic");
+
         const coordT upper(toml::get<std::array<realT, 3>>(
                     toml_value_at(boundary, "upper", "[boundary]")));
         const coordT lower(toml::get<std::array<realT, 3>>(
@@ -36,6 +43,8 @@ struct read_boundary_impl<CubicPeriodicBoundary<realT, coordT>>
         assert(upper[0] > lower[0]);
         assert(upper[1] > lower[1]);
         assert(upper[2] > lower[2]);
+        MJOLNIR_LOG_INFO("upper limit of the boundary = ", upper);
+        MJOLNIR_LOG_INFO("lower limit of the boundary = ", lower);
         return CubicPeriodicBoundary<realT, coordT>(lower, upper);
     }
 };
@@ -53,6 +62,9 @@ read_boundary(const toml::Table& boundary)
 template<typename traitsT>
 System<traitsT> read_system(const toml::Table& data, std::size_t N)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_system(), 0);
+
     using real_type  = typename traitsT::real_type;
     using coordinate_type = typename traitsT::coordinate_type;
 
@@ -63,6 +75,9 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
         throw_exception<std::out_of_range>("no enough system definitions: ", N);
     }
 
+    MJOLNIR_LOG_INFO(system_params.size(), " systems are provided");
+    MJOLNIR_LOG_INFO("using ", N, "-th system");
+
     const auto& system   = system_params.at(N).cast<toml::value_t::Table>();
     const auto& boundary = toml_value_at(system, "boundary","[systems.boundary]"
             ).cast<toml::value_t::Table>();
@@ -70,6 +85,7 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
             ).cast<toml::value_t::Array>();
 
     System<traitsT> sys(particles.size(), read_boundary<traitsT>(boundary));
+    MJOLNIR_LOG_INFO(particles.size(), " particles are provided");
     for(std::size_t i=0; i<particles.size(); ++i)
     {
         using vec_type = std::array<real_type, 3>;
@@ -79,13 +95,20 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
         sys[i].position = toml::get< vec_type>(toml_value_at(params, "position", "element of [[system.particles]]"));
         sys[i].velocity = toml::get< vec_type>(toml_value_at(params, "velocity", "element of [[system.particles]]"));
         sys[i].force    = coordinate_type(0, 0, 0);
+
+        MJOLNIR_LOG_DEBUG("mass     = ", sys[i].mass    );
+        MJOLNIR_LOG_DEBUG("position = ", sys[i].position);
+        MJOLNIR_LOG_DEBUG("velocity = ", sys[i].velocity);
+        MJOLNIR_LOG_DEBUG("force    = ", sys[i].force   );
     }
 
     const auto& attributes = toml_value_at(system, "attributes", "[[systems]]"
             ).cast<toml::value_t::Table>();
     for(const auto& attr : attributes)
     {
-        sys.attribute(attr.first) = toml::get<real_type>(attr.second);
+        const real_type attribute = toml::get<real_type>(attr.second);
+        MJOLNIR_LOG_INFO("attribute.", attr.first, " = ", attribute);
+        sys.attribute(attr.first) = attribute;
     }
     return sys;
 }
