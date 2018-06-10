@@ -261,6 +261,8 @@ template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
 read_local_interaction(const toml::Table& local)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_local_forcefield(), 0);
     const auto interaction = toml::get<std::string>(
             toml_value_at(local, "interaction", "[forcefields.local]"));
 
@@ -269,6 +271,7 @@ read_local_interaction(const toml::Table& local)
         typename LocalInteractionBase<traitsT>::connection_kind_type;
     const auto connection = toml::get<std::string>(
             toml_value_at(local, "topology", "[forcefield.local]"));
+    MJOLNIR_LOG_INFO("connection kind = ", connection);
 
     connection_kind_type kind;
     if     (connection == "bond")    {kind = connection_kind_type::bond;}
@@ -299,6 +302,8 @@ template<typename traitsT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_global_interaction(const toml::Table& global)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_global_forcefield(), 0);
     const auto interaction = toml::get<std::string>(
             toml_value_at(global, "interaction", "[forcefields.global]"));
     const auto ignored_chain = toml::get<std::string>(
@@ -306,16 +311,20 @@ read_global_interaction(const toml::Table& global)
 
     if(interaction == "Distance")
     {
+        MJOLNIR_LOG_INFO("Distance interaction found");
         if(ignored_chain == "Nothing")
         {
+            MJOLNIR_LOG_INFO("all the interactions(both (inter|intra)-chain) are included");
             return read_global_distance_interaction<traitsT, IgnoreNothing>(global);
         }
         else if(ignored_chain == "Self")
         {
+            MJOLNIR_LOG_INFO("intra-chain interaction is ignored");
             return read_global_distance_interaction<traitsT, IgnoreSelf>(global);
         }
         else if(ignored_chain == "Others")
         {
+            MJOLNIR_LOG_INFO("inter-chain interaction is ignored");
             return read_global_distance_interaction<traitsT, IgnoreOthers>(global);
         }
         else
@@ -334,11 +343,14 @@ template<typename traitsT>
 std::unique_ptr<ExternalForceInteractionBase<traitsT>>
 read_external_interaction(const toml::Table& external)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_external_forcefield(), 0);
     const auto interaction = toml::get<std::string>(
             toml_value_at(external, "interaction", "[forcefields.external]"));
 
     if(interaction == "Distance")
     {
+        MJOLNIR_LOG_INFO("Distance interaction found");
         return read_external_distance_interaction_shape<traitsT>(external);
     }
     else
