@@ -20,7 +20,7 @@ std::unique_ptr<SimulatorBase>
 read_simulator(const toml::Table& data)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_simulator(const toml::Table& data), 0);
+    MJOLNIR_SCOPE(read_simulator(), 0);
 
     using real_type   = typename traitsT::real_type;
     const auto& simulator = toml_value_at(data, "simulator", "<root>"
@@ -30,7 +30,7 @@ read_simulator(const toml::Table& data)
 
     if(type == "Molecular Dynamics")
     {
-        MJOLNIR_SCOPE(if(type == "Molecular Dynamics"), 1);
+        MJOLNIR_SCOPE(type == "Molecular Dynamics", 1);
         const std::string integration = toml::get<std::string>(toml_value_at(
                 simulator, "scheme", "[simulator]"));
         const std::size_t tstep = toml::get<std::size_t>(toml_value_at(
@@ -40,7 +40,7 @@ read_simulator(const toml::Table& data)
 
         if(integration == "Newtonian")
         {
-            MJOLNIR_SCOPE(if(integration == "Newtonian"), 2);
+            MJOLNIR_SCOPE(integration == "Newtonian", 2);
             using integrator_t = VelocityVerletStepper<traitsT>;
             using simulator_t  = MDSimulator<traitsT, integrator_t>;
             return make_unique<simulator_t>(
@@ -52,7 +52,7 @@ read_simulator(const toml::Table& data)
         }
         else if(integration == "Underdamped Langevin")
         {
-            MJOLNIR_SCOPE(if(integration == "Underdamped Langevin"), 2);
+            MJOLNIR_SCOPE(integration == "Underdamped Langevin", 2);
             using integrator_t = UnderdampedLangevinStepper<traitsT>;
             using simulator_t  = MDSimulator<traitsT, integrator_t>;
             return make_unique<simulator_t>(
@@ -70,7 +70,7 @@ read_simulator(const toml::Table& data)
     }
     else if(type == "Steepest Descent")
     {
-        MJOLNIR_SCOPE(if(type == "Steepest Descent"), 1);
+        MJOLNIR_SCOPE(type == "Steepest Descent", 1);
         using simulator_t = SteepestDescentSimulator<traitsT>;
 
         const std::size_t step_lim  = toml::get<std::size_t>(toml_value_at(
@@ -92,7 +92,7 @@ read_simulator(const toml::Table& data)
     }
     else if(type == "Simulated Annealing")
     {
-        MJOLNIR_SCOPE(if(type == "Simulated Annealing"), 1);
+        MJOLNIR_SCOPE(type == "Simulated Annealing", 1);
         const std::string integration = toml::get<std::string>(toml_value_at(
                 simulator, "scheme", "[simulator]"));
         const std::size_t tstep = toml::get<std::size_t>(toml_value_at(
