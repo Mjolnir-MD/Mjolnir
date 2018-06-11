@@ -189,7 +189,7 @@ read_external_distance_interaction(const toml::Table& external, shapeT&& shape)
         return make_unique<interaction_t>(std::move(shape),
              read_implicit_membrane_potential<traitsT>(external));
     }
-    if(potential == "LennardJonesWall")
+    else if(potential == "LennardJonesWall")
     {
         using potential_t   = LennardJonesWallPotential<traitsT>;
         using interaction_t = ExternalDistanceInteraction<
