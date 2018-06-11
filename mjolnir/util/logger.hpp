@@ -2,12 +2,14 @@
 #define MJOLNIR_UTIL_LOGGER
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
+#include <array>
+#include <vector>
+#include <map>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
-#include <map>
 #include <chrono>
 
 namespace mjolnir
@@ -34,6 +36,28 @@ namespace mjolnir
  *    - enabled only when MJOLNIR_DEBUG flag is set.                 *
  * 10. MJOLNIR_GET_LOGGER_DEBUG                                      *
  *    - enabled only when MJOLNIR_DEBUG flag is set.                 */
+
+namespace logger_detail
+{
+template<typename charT, typename traits, typename T, std::size_t N>
+std::basic_ostream<charT, traits>&
+operator<<(std::basic_ostream<charT, traits>& os, const std::array<T, N>& ar)
+{
+    os << '[';
+    for(std::size_t i=0; i<N; ++i){os << ar[i] << ", ";}
+    os << ']';
+    return os;
+}
+template<typename charT, typename traits, typename T, typename Alloc>
+std::basic_ostream<charT, traits>&
+operator<<(std::basic_ostream<charT, traits>& os, const std::vector<T, Alloc>& vc)
+{
+    os << '[';
+    for(std::size_t i=0; i<vc.size(); ++i){os << vc[i] << ", ";}
+    os << ']';
+    return os;
+}
+} // logger_detail
 template<typename charT, typename traits = std::char_traits<charT>>
 class basic_logger
 {
@@ -109,12 +133,15 @@ class basic_logger
 
   private:
 
+
     template<typename T, typename ...T_args>
     static void output_message(ostream_type& os, T&& arg1, T_args&& ...args)
     {
+        using namespace logger_detail;
         os << arg1;
         return output_message(os, std::forward<T_args>(args)...);
     }
+
     static void output_message(ostream_type& os) {return;}
 
   private:
