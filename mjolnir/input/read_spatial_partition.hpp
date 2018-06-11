@@ -72,7 +72,7 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
 
         const auto margin = toml::get<real_type>(toml_value_at(
                     sp, "margin", "[forcefield.global]"));
-        MJOLNIR_LOG_INFO("margin = ", mg);
+        MJOLNIR_LOG_INFO("margin = ", margin);
 
         return make_unique<GlobalDistanceInteraction<
             traitsT, potentialT, VerletList<traitsT>>>(

@@ -27,7 +27,7 @@ read_observer(const toml::Table& data)
             ).cast<toml::value_t::Table>();
     const std::size_t interval = toml::get<std::size_t>(
             toml_value_at(simulator, "save_step", "[simulator]"));
-    MJOLNIR_LOG_INFO("interval = ", mg);
+    MJOLNIR_LOG_INFO("interval = ", interval);
 
     return Observer<traitsT>(path + fname, interval);
 }
