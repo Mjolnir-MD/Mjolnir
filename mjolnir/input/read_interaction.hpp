@@ -27,11 +27,15 @@ read_bond_length_interaction(
     const typename LocalInteractionBase<traitsT>::connection_kind_type kind,
     const toml::Table& local)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_bond_length_interaction(), 0);
+
     const auto potential = toml::get<std::string>(
             toml_value_at(local, "potential", "[forcefield.local]"));
 
     if(potential == "Harmonic")
     {
+        MJOLNIR_SCOPE(potential == "Harmonic", 1);
         using potential_t = HarmonicPotential<traitsT>;
 
         return make_unique<BondLengthInteraction<traitsT, potential_t>>(
@@ -39,6 +43,7 @@ read_bond_length_interaction(
     }
     else if(potential == "Go1012Contact")
     {
+        MJOLNIR_SCOPE(potential == "Go1012Contact", 1);
         using potential_t = Go1012ContactPotential<traitsT>;
 
         return make_unique<BondLengthInteraction<traitsT, potential_t>>(
@@ -46,6 +51,7 @@ read_bond_length_interaction(
     }
     else if(potential == "AICG2PlusAngle")
     {
+        MJOLNIR_SCOPE(potential == "AICG2PlusAngle", 1);
         using potential_t = GaussianPotential<traitsT>;
 
         return make_unique<BondLengthInteraction<traitsT, potential_t>>(
@@ -64,10 +70,14 @@ read_bond_angle_interaction(
     const typename LocalInteractionBase<traitsT>::connection_kind_type kind,
     const toml::Table& local)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_bond_angle_interaction(), 0);
+
     const auto potential = toml::get<std::string>(
             toml_value_at(local, "potential", "[[forcefield.local]]"));
     if(potential == "Harmonic")
     {
+        MJOLNIR_SCOPE(potential == "Harmonic", 1);
         using potential_t = HarmonicPotential<traitsT>;
 
         return make_unique<BondAngleInteraction<traitsT, potential_t>>(
@@ -75,6 +85,7 @@ read_bond_angle_interaction(
     }
     else if(potential == "FlexibleLocalAngle")
     {
+        MJOLNIR_SCOPE(potential == "FlexibleLocalAngle", 1);
         using potential_t = FlexibleLocalAnglePotential<traitsT>;
 
         return make_unique<BondAngleInteraction<traitsT, potential_t>>(
@@ -93,10 +104,13 @@ read_dihedral_angle_interaction(
     const typename LocalInteractionBase<traitsT>::connection_kind_type kind,
     const toml::Table& local)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_dihedral_angle_interaction(), 0);
     const auto potential = toml::get<std::string>(
             toml_value_at(local, "potential", "[forcefield.local]"));
     if(potential == "Harmonic")
     {
+        MJOLNIR_SCOPE(potential == "Harmonic", 1);
         using potential_t = HarmonicPotential<traitsT>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potential_t>>(
@@ -104,6 +118,7 @@ read_dihedral_angle_interaction(
     }
     else if(potential == "ClementiDihedral")
     {
+        MJOLNIR_SCOPE(potential == "ClementiDihedral", 1);
         using potential_t = ClementiDihedralPotential<traitsT>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potential_t>>(
@@ -111,6 +126,7 @@ read_dihedral_angle_interaction(
     }
     else if(potential == "AICG2PlusDihedral")
     {
+        MJOLNIR_SCOPE(potential == "AICG2PlusDihedral", 1);
         using potential_t = GaussianPotential<traitsT>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potential_t>>(
@@ -118,6 +134,7 @@ read_dihedral_angle_interaction(
     }
     else if(potential == "FlexibleLocalDihedral")
     {
+        MJOLNIR_SCOPE(potential == "FlexibleLocalDihedral", 1);
         using potential_t = FlexibleLocalDihedralPotential<traitsT>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potential_t>>(
@@ -138,10 +155,13 @@ template<typename traitsT, typename ignoreT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_global_distance_interaction(const toml::Table& global)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_global_distance_interaction(), 0);
     const auto potential = toml::get<std::string>(
             toml_value_at(global, "potential", "[forcefield.global]"));
     if(potential == "ExcludedVolume")
     {
+        MJOLNIR_SCOPE(potential == "ExcludedVolume", 1);
         using potential_t = ExcludedVolumePotential<traitsT, ignoreT>;
 
         return read_spatial_partition_for_distance<traitsT, potential_t>(
@@ -149,6 +169,7 @@ read_global_distance_interaction(const toml::Table& global)
     }
     else if(potential == "DebyeHuckel")
     {
+        MJOLNIR_SCOPE(potential == "DebyeHuckel", 1);
         using potential_t = DebyeHuckelPotential<traitsT, ignoreT>;
 
         return read_spatial_partition_for_distance<traitsT, potential_t>(
@@ -156,6 +177,7 @@ read_global_distance_interaction(const toml::Table& global)
     }
     else if(potential == "LennardJones")
     {
+        MJOLNIR_SCOPE(potential == "LennardJones", 1);
         using potential_t = LennardJonesPotential<traitsT, ignoreT>;
 
         return read_spatial_partition_for_distance<traitsT, potential_t>(
@@ -176,12 +198,15 @@ template<typename traitsT, typename shapeT>
 std::unique_ptr<ExternalForceInteractionBase<traitsT>>
 read_external_distance_interaction(const toml::Table& external, shapeT&& shape)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_global_distance_interaction(), 0);
     using real_type = typename traitsT::real_type;
     const auto potential = toml::get<std::string>(toml_value_at(external,
                 "potential", "[forcefield.external]"));
 
     if(potential == "ImplicitMembrane")
     {
+        MJOLNIR_SCOPE(potential == "ImplicitMembrane", 1);
         using potential_t   = ImplicitMembranePotential<traitsT>;
         using interaction_t = ExternalDistanceInteraction<
                                     traitsT, potential_t, shapeT>;
@@ -191,6 +216,7 @@ read_external_distance_interaction(const toml::Table& external, shapeT&& shape)
     }
     else if(potential == "LennardJonesWall")
     {
+        MJOLNIR_SCOPE(potential == "LnennardJonesWall", 1);
         using potential_t   = LennardJonesWallPotential<traitsT>;
         using interaction_t = ExternalDistanceInteraction<
                                     traitsT, potential_t, shapeT>;
@@ -208,6 +234,8 @@ template<typename traitsT>
 std::unique_ptr<ExternalForceInteractionBase<traitsT>>
 read_external_distance_interaction_shape(const toml::Table& external)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_global_distance_interaction(), 0);
     using real_type = typename traitsT::real_type;
 
     const auto shape = toml::get<toml::Table>(toml_value_at(external, "shape",
@@ -217,27 +245,33 @@ read_external_distance_interaction_shape(const toml::Table& external)
 
     if(name == "AxisAlignedPlane")
     {
+        MJOLNIR_SCOPE(potential == "AxisAlignedPlane", 1);
         const auto pos = toml::get<real_type>(toml_value_at(shape, "position",
             "[forcefield.external.shape] for ExternalDistance"));
         const auto margin = toml::get<real_type>(toml_value_at(shape, "margin",
             "[forcefield.external.shape] for ExternalDistance"));
+        MJOLNIR_LOG_INFO("pos    = ", pos);
+        MJOLNIR_LOG_INFO("margin = ", margin);
 
         const auto axis = toml::get<std::string>(toml_value_at(shape, "axis",
             "[forcefield.external.shape] for ExternalDistance"));
         if(axis == "X")
         {
+            MJOLNIR_LOG_INFO("axis   = X");
             using shape_t = AxisAlignedPlane<traitsT, 0>;
             return read_external_distance_interaction<traitsT, shape_t>(
                     external, shape_t(pos, margin));
         }
         else if(axis == "Y")
         {
+            MJOLNIR_LOG_INFO("axis   = Y");
             using shape_t = AxisAlignedPlane<traitsT, 1>;
             return read_external_distance_interaction<traitsT, shape_t>(
                     external, shape_t(pos, margin));
         }
         else if(axis == "Z")
         {
+            MJOLNIR_LOG_INFO("axis   = Z");
             using shape_t = AxisAlignedPlane<traitsT, 2>;
             return read_external_distance_interaction<traitsT, shape_t>(
                     external, shape_t(pos, margin));
@@ -262,7 +296,7 @@ std::unique_ptr<LocalInteractionBase<traitsT>>
 read_local_interaction(const toml::Table& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_local_forcefield(), 0);
+    MJOLNIR_SCOPE(read_local_interaction(), 0);
     const auto interaction = toml::get<std::string>(
             toml_value_at(local, "interaction", "[forcefields.local]"));
 
@@ -303,7 +337,7 @@ std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_global_interaction(const toml::Table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_global_forcefield(), 0);
+    MJOLNIR_SCOPE(read_global_interaction(), 0);
     const auto interaction = toml::get<std::string>(
             toml_value_at(global, "interaction", "[forcefields.global]"));
     const auto ignored_chain = toml::get<std::string>(
@@ -344,7 +378,7 @@ std::unique_ptr<ExternalForceInteractionBase<traitsT>>
 read_external_interaction(const toml::Table& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_external_forcefield(), 0);
+    MJOLNIR_SCOPE(read_external_interaction(), 0);
     const auto interaction = toml::get<std::string>(
             toml_value_at(external, "interaction", "[forcefields.external]"));
 
