@@ -366,6 +366,7 @@ read_excluded_volume_potential(const toml::Table& global)
 
         const auto sgm = toml::get<real_type>(toml_value_at(tab, "sigma",
             "element of [[forcefield.global.parameters]] for Excluded Volume"));
+        MJOLNIR_LOG_INFO("idx = ", idx);
         MJOLNIR_LOG_INFO("sgm = ", sgm);
         params.at(idx) = sgm;
     }
@@ -560,8 +561,12 @@ read_lennard_jones_wall_potential(const toml::Table& external)
         const auto e = toml::get<real_type>(toml_value_at(tab, "epsilon",
             "element of [[forcefield.external.parameters]] for LennardJonesWall"
             ));
+        MJOLNIR_LOG_INFO("idx     = ", idx);
+        MJOLNIR_LOG_INFO("sigma   = ", s);
+        MJOLNIR_LOG_INFO("epsilon = ", e);
         params.at(idx) = std::make_pair(s, e);
     }
+    MJOLNIR_LOG_INFO("}}}");
     return LennardJonesWallPotential<traitsT>(std::move(params));
 }
 
