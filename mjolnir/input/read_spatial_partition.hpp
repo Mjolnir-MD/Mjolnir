@@ -41,6 +41,8 @@ template<typename traitsT, typename potentialT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_spatial_partition_for_distance(), 0);
     typedef typename traitsT::real_type real_type;
 
     const auto& sp = toml_value_at(
@@ -51,12 +53,14 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
 
     if(type == "CellList")
     {
+        MJOLNIR_SCOPE(type == "CellList", 1);
         using boundary_type = typename traitsT::boundary_type;
         using dispatcher    = celllist_dispatcher<boundary_type, traitsT>;
         using celllist_type = typename dispatcher::type;
 
         const auto mg = toml::get<real_type>(
                 toml_value_at(sp, "margin", "[forcefield.global]"));
+        MJOLNIR_LOG_INFO("margin = ", mg);
 
         return make_unique<GlobalDistanceInteraction<
             traitsT, potentialT, celllist_type>>(
@@ -64,14 +68,19 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
     }
     else if(type == "VerletList")
     {
+        MJOLNIR_SCOPE(type == "VerletList", 1);
+
         const auto margin = toml::get<real_type>(toml_value_at(
                     sp, "margin", "[forcefield.global]"));
+        MJOLNIR_LOG_INFO("margin = ", mg);
+
         return make_unique<GlobalDistanceInteraction<
             traitsT, potentialT, VerletList<traitsT>>>(
                 std::move(pot), VerletList<traitsT>(margin));
     }
     else if(type == "Naive")
     {
+        MJOLNIR_SCOPE(type == "Naive", 1);
         return make_unique<GlobalDistanceInteraction<
             traitsT, potentialT, NaivePairCalculation<traitsT>>
                 >(std::move(pot), NaivePairCalculation<traitsT>());
