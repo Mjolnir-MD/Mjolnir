@@ -94,6 +94,7 @@ class basic_logger
     static constexpr std::size_t indent_size = 2;
     enum class Level
     {
+        None, // internal use only
         Debug,
         Info,
         Warn,
@@ -137,26 +138,7 @@ class basic_logger
         return;
     }
 
-    template<typename ... Ts>
-    void write(Ts&& ... args) const
-    {
-        fstream_type ofs(this->fname_, std::ios_base::out | std::ios_base::app);
-        if(!ofs.good())
-        {
-            throw_exception<std::runtime_error>("Logger: file open error: ",
-                    this->fname_);
-        }
-        if(indent_ != 0)
-        {
-            ofs << string_type(indent_size * indent_, ' ');
-        }
-        output_message(ofs, std::forward<Ts>(args)...);
-        ofs << std::endl;
-        return;
-    }
-
   private:
-
 
     template<typename T, typename ...T_args>
     static void output_message(ostream_type& os, T&& arg1, T_args&& ...args)
@@ -242,20 +224,45 @@ class basic_scope
   public:
 
     basic_scope(logger_type& trc, const std::string& name)
-      : logger_(trc), name_(name)
+      : start_(std::chrono::system_clock::now()), logger_(trc), name_(name)
     {
-        logger_.write(name_, " {");
+        logger_.log(logger_type::Level::None, this->name_, " {");
         logger_.indent();
     }
     ~basic_scope()
     {
         logger_.unindent();
-        logger_.write('}');
+        logger_.log(logger_type::Level::None, "} ", this->format_duration(
+                    std::chrono::system_clock::now() - this->start_));
     }
 
     std::string const& name() const noexcept {return name_;}
 
   private:
+
+    std::string format_duration(const std::chrono::system_clock::duration& dur)
+    {
+        const auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(dur);
+        if(ns.count() < 1000)
+        {
+            return std::to_string(ns.count()) + " [ns]";
+        }
+        else if(ns.count() < 1000000) // 10^6, less than milliseconds
+        {
+            return std::to_string(ns.count() * 1e-3) + " [us]";
+        }
+        else if(ns.count() < 1000000000) // 10^9, less than seconds
+        {
+            return std::to_string(ns.count() * 1e-6) + " [ms]";
+        }
+        else
+        {
+            return std::to_string(ns.count() * 1e-9) + " [sec]";
+        }
+    }
+
+  private:
+    std::chrono::system_clock::time_point start_;
     logger_type& logger_;
     std::string name_;
 };
