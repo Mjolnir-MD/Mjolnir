@@ -5,6 +5,7 @@
 #include <array>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -53,11 +54,34 @@ std::basic_ostream<charT, traits>&
 operator<<(std::basic_ostream<charT, traits>& os, const std::vector<T, Alloc>& vc)
 {
     os << '[';
-    for(std::size_t i=0; i<vc.size(); ++i){os << vc[i] << ", ";}
+    for(const auto item : vc){os << item << ", ";}
     os << ']';
     return os;
 }
+template<typename charT, typename traits,
+         typename K, typename V, typename Comp, typename Alloc>
+std::basic_ostream<charT, traits>&
+operator<<(std::basic_ostream<charT, traits>& os,
+           const std::map<K, V, Comp, Alloc>& mp)
+{
+    os << '{';
+    for(const auto kv : mp){os << kv.first << '=' << kv.second << ", ";}
+    os << '}';
+    return os;
+}
+template<typename charT, typename traits,
+         typename K, typename V, typename Hash, typename Pred, typename Alloc>
+std::basic_ostream<charT, traits>&
+operator<<(std::basic_ostream<charT, traits>& os,
+           const std::unordered_map<K, V, Hash, Pred, Alloc>& mp)
+{
+    os << '{';
+    for(const auto kv : mp){os << kv.first << '=' << kv.second << ", ";}
+    os << '}';
+    return os;
+}
 } // logger_detail
+
 template<typename charT, typename traits = std::char_traits<charT>>
 class basic_logger
 {
