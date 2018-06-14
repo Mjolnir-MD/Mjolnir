@@ -3,6 +3,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
 {
@@ -139,7 +140,14 @@ class AxisAlignedPlane
     AxisAlignedPlane(const real_type position, const real_type margin = 1)
         : origin_(0, 0, 0), margin_(margin), current_margin_(-1)
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_SCOPE(AxisAlignedPlane::AxisAlignedPlane, 0);
+
         this->origin_[axis_index] = position;
+
+        MJOLNIR_LOG_INFO("position        = ", position);
+        MJOLNIR_LOG_INFO("origin of plane = ", this->origin_);
+        MJOLNIR_LOG_INFO("margin          = ", this->margin_);
     }
 
     //XXX can be negative! because normal vector can define the direction...
@@ -160,11 +168,20 @@ class AxisAlignedPlane
     template<typename Potential>
     void initialize(const system_type& sys, const Potential& pot)
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_SCOPE(AxisAlignedPlane::initialize, 0);
+
         // assuming pot is already initialized!
         this->cutoff_         = pot.max_cutoff_length();
         this->participant_    = pot.participants();
-        this->current_margin_ = 0.0;
+
+        MJOLNIR_LOG_INFO("cutoff         = ", this->cutoff_);
+        MJOLNIR_LOG_INFO("margin         = ", this->margin_);
+        MJOLNIR_LOG_INFO("participant_   = ", this->origin_);
+
         this->make(sys);
+        MJOLNIR_LOG_INFO("current margin = ", this->current_margin_);
+
         return;
     }
 
