@@ -255,24 +255,45 @@ read_external_distance_interaction_shape(const toml::Table& external)
 
         const auto axis = toml::get<std::string>(toml_value_at(shape, "axis",
             "[forcefield.external.shape] for ExternalDistance"));
-        if(axis == "X")
+        if(axis == "X" || axis == "+X")
         {
-            MJOLNIR_LOG_INFO("axis   = X");
-            using shape_t = AxisAlignedPlane<traitsT, 0>;
+            MJOLNIR_LOG_INFO("axis   = +X");
+            using shape_t = AxisAlignedPlane<traitsT, PositiveXDirection>;
             return read_external_distance_interaction<traitsT, shape_t>(
                     external, shape_t(pos, margin));
         }
-        else if(axis == "Y")
+        else if(axis == "-X")
         {
-            MJOLNIR_LOG_INFO("axis   = Y");
-            using shape_t = AxisAlignedPlane<traitsT, 1>;
+            MJOLNIR_LOG_INFO("axis   = -X");
+            using shape_t = AxisAlignedPlane<traitsT, NegativeXDirection>;
             return read_external_distance_interaction<traitsT, shape_t>(
                     external, shape_t(pos, margin));
         }
-        else if(axis == "Z")
+        else if(axis == "Y" || axis == "+Y")
         {
-            MJOLNIR_LOG_INFO("axis   = Z");
-            using shape_t = AxisAlignedPlane<traitsT, 2>;
+            MJOLNIR_LOG_INFO("axis   = +Y");
+            using shape_t = AxisAlignedPlane<traitsT, PositiveYDirection>;
+            return read_external_distance_interaction<traitsT, shape_t>(
+                    external, shape_t(pos, margin));
+        }
+        else if(axis == "-Y")
+        {
+            MJOLNIR_LOG_INFO("axis   = -Y");
+            using shape_t = AxisAlignedPlane<traitsT, NegativeYDirection>;
+            return read_external_distance_interaction<traitsT, shape_t>(
+                    external, shape_t(pos, margin));
+        }
+        else if(axis == "Z" || axis == "+Z")
+        {
+            MJOLNIR_LOG_INFO("axis   = +Z");
+            using shape_t = AxisAlignedPlane<traitsT, PositiveZDirection>;
+            return read_external_distance_interaction<traitsT, shape_t>(
+                    external, shape_t(pos, margin));
+        }
+        else if(axis == "-Z")
+        {
+            MJOLNIR_LOG_INFO("axis   = -Z");
+            using shape_t = AxisAlignedPlane<traitsT, NegativeZDirection>;
             return read_external_distance_interaction<traitsT, shape_t>(
                     external, shape_t(pos, margin));
         }

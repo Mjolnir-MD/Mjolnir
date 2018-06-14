@@ -7,13 +7,121 @@
 namespace mjolnir
 {
 
+/* These classes represents Normal Vectors. (+/- * XYZ) */
+template<typename traitsT>
+class PositiveXDirection
+{
+  public:
+    using traits_type     = traitsT;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
+
+    static constexpr std::size_t index = 0; // index in coordinate_type
+    static constexpr real_type   sign  = 1.0;
+    static coordinate_type invoke(const real_type length = 1.0) noexcept
+    {return coordinate_type(length, 0, 0);}
+};
+template<typename T>
+constexpr std::size_t PositiveXDirection<T>::index;
+template<typename T>
+constexpr typename PositiveXDirection<T>::real_type PositiveXDirection<T>::sign;
+
+template<typename traitsT>
+class NegativeXDirection
+{
+  public:
+    using traits_type     = traitsT;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
+
+    static constexpr std::size_t index =  0;
+    static constexpr real_type   sign  = -1.0;
+    static coordinate_type invoke(const real_type length = 1.0) noexcept
+    {return coordinate_type(-length, 0, 0);}
+};
+template<typename T>
+constexpr std::size_t NegativeXDirection<T>::index;
+template<typename T>
+constexpr typename NegativeXDirection<T>::real_type NegativeXDirection<T>::sign;
+
+template<typename traitsT>
+class PositiveYDirection
+{
+  public:
+    using traits_type     = traitsT;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
+
+    static constexpr std::size_t index = 1; // index in coordinate_type
+    static constexpr real_type   sign  = 1.0;
+    static coordinate_type invoke(const real_type length = 1.0) noexcept
+    {return coordinate_type(0, length, 0);}
+};
+template<typename T>
+constexpr std::size_t PositiveYDirection<T>::index;
+template<typename T>
+constexpr typename PositiveYDirection<T>::real_type PositiveYDirection<T>::sign;
+
+template<typename traitsT>
+class NegativeYDirection
+{
+  public:
+    using traits_type     = traitsT;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
+
+    static constexpr std::size_t index =  1;
+    static constexpr real_type   sign  = -1.0;
+    static coordinate_type invoke(const real_type length = 1.0) noexcept
+    {return coordinate_type(0, -length, 0);}
+};
+template<typename T>
+constexpr std::size_t NegativeYDirection<T>::index;
+template<typename T>
+constexpr typename NegativeYDirection<T>::real_type NegativeYDirection<T>::sign;
+
+template<typename traitsT>
+class PositiveZDirection
+{
+  public:
+    using traits_type     = traitsT;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
+
+    static constexpr std::size_t index = 2; // index in coordinate_type
+    static constexpr real_type   sign  = 1.0;
+    static coordinate_type invoke(const real_type length = 1.0) noexcept
+    {return coordinate_type(0, 0, length);}
+};
+template<typename T>
+constexpr std::size_t PositiveZDirection<T>::index;
+template<typename T>
+constexpr typename PositiveZDirection<T>::real_type PositiveZDirection<T>::sign;
+
+template<typename traitsT>
+class NegativeZDirection
+{
+  public:
+    using traits_type     = traitsT;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
+
+    static constexpr std::size_t index =  2;
+    static constexpr real_type   sign  = -1.0;
+    static coordinate_type invoke(const real_type length = 1.0) noexcept
+    {return coordinate_type(0, 0, -length);}
+};
+template<typename T>
+constexpr std::size_t NegativeZDirection<T>::index;
+template<typename T>
+constexpr typename NegativeZDirection<T>::real_type NegativeZDirection<T>::sign;
+
 /*! @brief axis aligned Plane for ExternalDistanceInteraction.                *
  *  @details represents flat Plane. It provides a method to calculate         *
  *           a distance between particle and the plane, force direction       *
  *           a position of a particle. It also provide a functionality of     *
- *           a neighbor-list. NormalAxis means the index of axis (0 means x,  *
- *           1 means y, 2 means z).                                           */
-template<typename traitsT, std::size_t NormalAxis>
+ *           a neighbor-list.                                                 */
+template<typename traitsT, template<typename> class normal_axisT>
 class AxisAlignedPlane
 {
   public:
@@ -22,37 +130,31 @@ class AxisAlignedPlane
     typedef typename traits_type::real_type        real_type;
     typedef typename traits_type::coordinate_type  coordinate_type;
     typedef typename traits_type::boundary_type    boundary_type;
-    constexpr static std::size_t axis = NormalAxis;
-    static_assert(axis < 3, "0 <= AxisAlignedPlane::axis < 3");
+    typedef normal_axisT<traits_type>              normal_axis_type;
+    static constexpr std::size_t axis_index = normal_axis_type::index;
+    static constexpr real_type   axis_sign  = normal_axis_type::sign;
 
   public:
 
     AxisAlignedPlane(const real_type position, const real_type margin = 1)
-        : position_(position), margin_(margin), current_margin_(-1)
-    {}
-
-    //XXX can be negative! because normal vector can define the direction...
-    real_type calc_distance(
-            const coordinate_type& pos, const boundary_type& bd) const
+        : origin_(0, 0, 0), margin_(margin), current_margin_(-1)
     {
-        coordinate_type ref(0,0,0);
-        ref[axis] = this->position_;
-
-        return bd.adjust_direction(pos - ref)[axis];
+        this->origin_[axis_index] = position;
     }
 
+    //XXX can be negative! because normal vector can define the direction...
+    inline real_type
+    calc_distance(const coordinate_type& pos, const boundary_type& bd) const
+    {
+        return axis_sign * bd.adjust_direction(pos - this->origin_)[axis_index];
+    }
+
+    //XXX take care. the actual force that would be applied to a particle is
+    //    `-dV/dx * calc_force_direction()`.
     coordinate_type calc_force_direction(
             const coordinate_type& pos, const boundary_type& bd) const
     {
-        coordinate_type ref(0,0,0);
-        ref[axis] = this->position_;
-
-        const real_type sign = std::copysign(
-                real_type(1.0), bd.adjust_direction(pos - ref)[axis]);
-
-        coordinate_type f(0,0,0);
-        f[axis] = sign;
-        return f;
+        return normal_axis_type::invoke();
     }
 
     template<typename Potential>
@@ -83,16 +185,18 @@ class AxisAlignedPlane
 
   private:
 
-    real_type position_; // position in the axis.
     real_type cutoff_, margin_, current_margin_;
+    coordinate_type origin_; // representative position of a plane.
     std::vector<std::size_t> neighbors_;   // being inside of cutoff range
     std::vector<std::size_t> participant_; // particle that interacts with
 };
+template<typename traitsT, template<typename> class NormalAxis>
+constexpr std::size_t AxisAlignedPlane<traitsT, NormalAxis>::axis_index;
+template<typename traitsT, template<typename> class NormalAxis>
+constexpr typename AxisAlignedPlane<traitsT, NormalAxis>::real_type
+    AxisAlignedPlane<traitsT, NormalAxis>::axis_sign;
 
-template<typename traitsT, std::size_t NormalAxis>
-constexpr std::size_t AxisAlignedPlane<traitsT, NormalAxis>::axis;
-
-template<typename traitsT, std::size_t NormalAxis>
+template<typename traitsT, template<typename> class NormalAxis>
 void AxisAlignedPlane<traitsT, NormalAxis>::make(const system_type& sys)
 {
     this->neighbors_.clear();
@@ -112,7 +216,7 @@ void AxisAlignedPlane<traitsT, NormalAxis>::make(const system_type& sys)
     return;
 }
 
-template<typename traitsT, std::size_t NormalAxis>
+template<typename traitsT, template<typename> class NormalAxis>
 void AxisAlignedPlane<traitsT, NormalAxis>::update(const system_type& sys)
 {
     this->current_margin_ -= sys.largest_displacement();
