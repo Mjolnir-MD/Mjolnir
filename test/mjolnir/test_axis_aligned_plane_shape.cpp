@@ -14,8 +14,9 @@
 #include <random>
 #include <cmath>
 
-BOOST_AUTO_TEST_CASE(AxisAlignedPlane_geometry_unlimited)
+BOOST_AUTO_TEST_CASE(AxisAlignedPlane_PositiveZ_geometry_unlimited)
 {
+    mjolnir::LoggerManager::set_default_logger("test_AxisAlignedPlane");
     using traits = mjolnir::test::traits<double>;
     using real_type     = typename traits::real_type;
     using coord_type    = typename traits::coordinate_type;
@@ -34,17 +35,46 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_geometry_unlimited)
         const coord_type pos(uni(mt), uni(mt), uni(mt));
         const real_type  dist = xyplane.calc_distance(pos, bdry);
         const coord_type fdir = xyplane.calc_force_direction(pos, bdry);
-        const real_type  sign = std::copysign(1.0, pos[2]);
 
         BOOST_CHECK_SMALL(fdir[0], tolerance);
         BOOST_CHECK_SMALL(fdir[1], tolerance);
-        BOOST_CHECK_EQUAL(fdir[2], sign);
+        BOOST_CHECK_EQUAL(fdir[2], 1.0);
         BOOST_CHECK_CLOSE_FRACTION(dist, pos[2], tolerance);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(AxisAlignedPlane_NegativeZ_geometry_unlimited)
+{
+    mjolnir::LoggerManager::set_default_logger("test_AxisAlignedPlane");
+    using traits = mjolnir::test::traits<double>;
+    using real_type     = typename traits::real_type;
+    using coord_type    = typename traits::coordinate_type;
+    using boundary_type = typename traits::boundary_type;
+
+    static constexpr traits::real_type tolerance = 1e-8;
+
+    std::mt19937 mt(123456789);
+    std::uniform_real_distribution<double> uni(-100, 100);
+
+    boundary_type bdry;
+    mjolnir::AxisAlignedPlane<traits, mjolnir::NegativeZDirection> xyplane(0.0);
+
+    for(std::size_t i=0; i<100000; ++i)
+    {
+        const coord_type pos(uni(mt), uni(mt), uni(mt));
+        const real_type  dist = xyplane.calc_distance(pos, bdry);
+        const coord_type fdir = xyplane.calc_force_direction(pos, bdry);
+
+        BOOST_CHECK_SMALL(fdir[0], tolerance);
+        BOOST_CHECK_SMALL(fdir[1], tolerance);
+        BOOST_CHECK_EQUAL(fdir[2], -1.0);
+        BOOST_CHECK_CLOSE_FRACTION(dist, -pos[2], tolerance);
     }
 }
 
 BOOST_AUTO_TEST_CASE(AxisAlignedPlane_geometry_periodic)
 {
+    mjolnir::LoggerManager::set_default_logger("test_AxisAlignedPlane");
     using traits = mjolnir::test::traits<double, mjolnir::CubicPeriodicBoundary>;
     using real_type     = typename traits::real_type;
     using coord_type    = typename traits::coordinate_type;
@@ -70,7 +100,7 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_geometry_periodic)
 
         BOOST_CHECK_SMALL(fdir[0], tolerance);
         BOOST_CHECK_SMALL(fdir[1], tolerance);
-        BOOST_CHECK_EQUAL(fdir[2], sign);
+        BOOST_CHECK_EQUAL(fdir[2], 1.0);
 
         if(std::abs(pos[2] - 50.0) < tolerance)
         {
@@ -102,6 +132,7 @@ struct dummy_potential
 
 BOOST_AUTO_TEST_CASE(AxisAlignedPlane_neighbors_unlimited)
 {
+    mjolnir::LoggerManager::set_default_logger("test_AxisAlignedPlane");
     using traits = mjolnir::test::traits<double>;
     using real_type     = typename traits::real_type;
     using coord_type    = typename traits::coordinate_type;
