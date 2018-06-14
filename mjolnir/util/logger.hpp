@@ -168,6 +168,13 @@ class basic_logger_manager
 
     static void set_default_logger(const std::string& fname)
     {
+        if(default_ == fname)
+        {
+            std::cerr << "WARNING: Default Logger(" << fname << ") is set twice"
+                      << std::endl;
+            return;
+        }
+
         default_ = fname;
         if(loggers_.count(fname) == 0)
         {
