@@ -170,22 +170,21 @@ class basic_logger_manager
     {
         if(default_ == fname)
         {
-            std::cerr << "WARNING: Default Logger(" << fname << ") is set twice"
-                      << std::endl;
+            std::cerr << "WARNING for Developers: Default Logger("
+                      << fname << ") is set twice" << std::endl;
             return;
         }
 
         default_ = fname;
-        if(loggers_.count(fname) == 0)
+        if(loggers_.count(fname) != 0)
         {
-            loggers_.emplace(fname, make_unique<logger_type>(fname));
+            std::cerr << "WARNING for Developers: Logger(" << fname << ") is "
+                      << "already set. from now, it becomes the default logger."
+                      << std::endl;
             return;
         }
-        else
-        {
-            throw_exception<std::logic_error>("mjolnir::basic_logger_manager: "
-                "default logger `", fname, "` is already set");
-        }
+        loggers_.emplace(fname, make_unique<logger_type>(fname));
+        return;
     }
 
     static logger_type& get_default_logger()
@@ -193,7 +192,7 @@ class basic_logger_manager
         if(loggers_.count(default_) == 0)
         {
             throw_exception<std::out_of_range>("mjolnir::basic_logger_manager: "
-                "default logger `", default_, "` does not exist");
+                "default logger (", default_, ") does not exist");
         }
         return *(loggers_.at(default_));
     }
