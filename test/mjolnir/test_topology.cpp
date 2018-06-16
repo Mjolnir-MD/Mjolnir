@@ -7,15 +7,15 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/core/StructureTopology.hpp>
+#include <mjolnir/core/Topology.hpp>
 #include <cstdint>
 
-typedef mjolnir::StructureTopology::connection_kind_type kind_t;
+typedef mjolnir::Topology::connection_kind_type kind_t;
 
 BOOST_AUTO_TEST_CASE(topology_list_adjacent_is_unique)
 {
     std::size_t N = 100;
-    mjolnir::StructureTopology top(N);
+    mjolnir::Topology top(N);
     for(std::size_t i=0; i<N-1; ++i)
     {
         top.add_connection(i, i+1, kind_t::bond);
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(topology_list_adjacent_is_unique)
 BOOST_AUTO_TEST_CASE(topology_list_within)
 {
     std::size_t N = 100;
-    mjolnir::StructureTopology top(100);
+    mjolnir::Topology top(100);
     for(std::size_t i=0; i<N-1; ++i)
     {
         top.add_connection(i, i+1, kind_t::bond);
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(topology_list_within)
 BOOST_AUTO_TEST_CASE(topology_contacts_list_within)
 {
     std::size_t N = 100;
-    mjolnir::StructureTopology top(100);
+    mjolnir::Topology top(100);
     for(std::size_t i=0; i<N-1; ++i)
     {
         top.add_connection(i, i+1, kind_t::bond);
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(topology_contacts_list_within)
 BOOST_AUTO_TEST_CASE(topology_consistency_has_connection_and_list_within)
 {
     std::size_t N = 100;
-    mjolnir::StructureTopology top(N);
+    mjolnir::Topology top(N);
     for(std::size_t i=0; i<N-1; ++i)
     {
         top.add_connection(i, i+1, kind_t::bond);
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(topology_consistency_has_connection_and_list_within)
 BOOST_AUTO_TEST_CASE(topology_erase_connection)
 {
     std::size_t N = 100;
-    mjolnir::StructureTopology top(N);
+    mjolnir::Topology top(N);
     for(std::size_t i=0; i<N-1; ++i)
     {
         top.add_connection(i, i+1, kind_t::bond);

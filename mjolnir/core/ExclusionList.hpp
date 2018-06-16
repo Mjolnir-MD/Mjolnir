@@ -13,7 +13,7 @@ namespace mjolnir
 class ExclusionList
 {
   public:
-    typedef StructureTopology topology_type;
+    typedef Topology topology_type;
     typedef topology_type::chain_id_type chain_id_type;
     typedef topology_type::connection_kind_type connection_kind_type;
 

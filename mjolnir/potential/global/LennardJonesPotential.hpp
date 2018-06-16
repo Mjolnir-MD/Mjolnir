@@ -25,7 +25,7 @@ class LennardJonesPotential
     typedef std::pair<real_type, real_type> parameter_type;
 
     // topology stuff
-    typedef StructureTopology topology_type;
+    typedef Topology topology_type;
     typedef typename topology_type::chain_id_type        chain_id_type;
     typedef typename topology_type::connection_kind_type connection_kind_type;
     typedef ChainIgnoration chain_ignoration_type;

@@ -8,7 +8,7 @@
 namespace mjolnir
 {
 
-class StructureTopology
+class Topology
 {
   public:
 
@@ -34,14 +34,14 @@ class StructureTopology
 
   public:
 
-    StructureTopology()  = default;
-    ~StructureTopology() = default;
-    StructureTopology(const StructureTopology&) = default;
-    StructureTopology(StructureTopology&&)      = default;
-    StructureTopology& operator=(const StructureTopology&) = default;
-    StructureTopology& operator=(StructureTopology&&)      = default;
+    Topology()  = default;
+    ~Topology() = default;
+    Topology(const Topology&) = default;
+    Topology(Topology&&)      = default;
+    Topology& operator=(const Topology&) = default;
+    Topology& operator=(Topology&&)      = default;
 
-    StructureTopology(const std::size_t N): nodes_(N)
+    Topology(const std::size_t N): nodes_(N)
     {
         for(auto& n : this->nodes_) {n.chain_id = uninitialized();}
     }
@@ -93,13 +93,13 @@ class StructureTopology
     std::vector<node> nodes_;
 };
 
-inline void StructureTopology::add_connection(
+inline void Topology::add_connection(
         const std::size_t i, const std::size_t j, connection_kind_type kind)
 {
     if(nodes_.size() <= std::max(i, j))
     {
         throw_exception<std::out_of_range>(
-            "mjolnir::StructureTopology::add_connection: size of nodes = ",
+            "mjolnir::Topology::add_connection: size of nodes = ",
             nodes_.size(), ", i = ", i, ", j = ", j);
     }
 
@@ -122,13 +122,13 @@ inline void StructureTopology::add_connection(
     return ;
 }
 
-inline void StructureTopology::erase_connection(
+inline void Topology::erase_connection(
         const std::size_t i, const std::size_t j)
 {
     if(nodes_.size() <= std::max(i, j))
     {
         throw_exception<std::out_of_range>(
-            "mjolnir::StructureTopology::erase_connection: size of nodes = ",
+            "mjolnir::Topology::erase_connection: size of nodes = ",
             nodes_.size(), ", i = ", i, ", j = ", j);
     }
 
@@ -158,14 +158,14 @@ inline void StructureTopology::erase_connection(
 }
 
 
-inline void StructureTopology::erase_connection(
+inline void Topology::erase_connection(
         const std::size_t i, const std::size_t j,
         const connection_kind_type kind)
 {
     if(nodes_.size() <= std::max(i, j))
     {
         throw_exception<std::out_of_range>(
-            "mjolnir::StructureTopology::erase_connection: size of nodes = ",
+            "mjolnir::Topology::erase_connection: size of nodes = ",
             nodes_.size(), ", i = ", i, ", j = ", j);
     }
 
@@ -190,13 +190,13 @@ inline void StructureTopology::erase_connection(
     return ;
 }
 
-inline bool StructureTopology::has_connection(
+inline bool Topology::has_connection(
         const std::size_t i, const std::size_t j)
 {
     if(nodes_.size() <= std::max(i, j))
     {
         throw_exception<std::out_of_range>(
-            "mjolnir::StructureTopology::has_connection: size of nodes = ",
+            "mjolnir::Topology::has_connection: size of nodes = ",
             nodes_.size(), ", i = ", i, ", j = ", j);
     }
     if(i == j) {return true;} // XXX
@@ -210,14 +210,14 @@ inline bool StructureTopology::has_connection(
     return found != adjs.cend();
 }
 
-inline bool StructureTopology::has_connection(
+inline bool Topology::has_connection(
         const std::size_t i, const std::size_t j,
         const connection_kind_type kind)
 {
     if(nodes_.size() <= std::max(i, j))
     {
         throw_exception<std::out_of_range>(
-            "mjolnir::StructureTopology::has_connection: size of nodes = ",
+            "mjolnir::Topology::has_connection: size of nodes = ",
             nodes_.size(), ", i = ", i, ", j = ", j);
     }
     if(i == j) {return true;} // XXX
@@ -229,7 +229,7 @@ inline bool StructureTopology::has_connection(
 }
 
 inline std::vector<std::size_t>
-StructureTopology::list_adjacent_within(
+Topology::list_adjacent_within(
         const std::size_t node_idx, const std::size_t dist) const
 {
     std::vector<std::size_t> retval = {node_idx};
@@ -251,7 +251,7 @@ StructureTopology::list_adjacent_within(
 }
 
 inline std::vector<std::size_t>
-StructureTopology::list_adjacent_within(
+Topology::list_adjacent_within(
         const std::size_t node_idx, const std::size_t dist,
         const connection_kind_type kind) const
 {
@@ -274,7 +274,7 @@ StructureTopology::list_adjacent_within(
     return retval;
 }
 
-inline void StructureTopology::list_adjacent_within(
+inline void Topology::list_adjacent_within(
         const std::size_t node_idx, const std::size_t dist,
         std::vector<std::size_t>& out) const
 {
@@ -300,7 +300,7 @@ inline void StructureTopology::list_adjacent_within(
 }
 
 inline void
-StructureTopology::list_adjacent_within(
+Topology::list_adjacent_within(
         const std::size_t node_idx, const std::size_t dist,
         const connection_kind_type kind, std::vector<std::size_t>& out) const
 {
@@ -327,7 +327,7 @@ StructureTopology::list_adjacent_within(
 }
 
 inline void
-StructureTopology::construct_chains()
+Topology::construct_chains()
 {
     if(this->nodes_.empty()){return;}
     for(auto& node : nodes_)

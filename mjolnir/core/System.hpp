@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_SYSTEM
 #define MJOLNIR_SYSTEM
-#include "StructureTopology.hpp"
 #include <mjolnir/core/Particle.hpp>
+#include <mjolnir/core/Topology.hpp>
 #include <vector>
 #include <map>
 
@@ -17,13 +17,14 @@ class System
     typedef typename traits_type::coordinate_type   coordinate_type;
     typedef typename traits_type::boundary_type     boundary_type;
     typedef Particle<real_type, coordinate_type>    particle_type;
-    typedef StructureTopology                       topology_type;
+    typedef Topology                                topology_type;
     typedef std::map<std::string, real_type>        attribute_type;
     typedef std::vector<particle_type>              container_type;
     typedef typename container_type::iterator       iterator;
     typedef typename container_type::const_iterator const_iterator;
 
   public:
+
     System(const std::size_t num_particles, const boundary_type& bound)
         : boundary_(bound), particles_(num_particles)
     {
