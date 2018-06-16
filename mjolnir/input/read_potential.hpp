@@ -12,6 +12,7 @@
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/potential/external/ImplicitMembranePotential.hpp>
 #include <mjolnir/potential/external/LennardJonesWallPotential.hpp>
+#include <mjolnir/potential/external/ExcludedVolumeWallPotential.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
 
 namespace mjolnir
@@ -570,6 +571,46 @@ read_lennard_jones_wall_potential(const toml::Table& external)
     return LennardJonesWallPotential<traitsT>(std::move(params));
 }
 
+template<typename traitsT>
+ExcludedVolumeWallPotential<traitsT>
+read_excluded_volume_wall_potential(const toml::Table& external)
+{
+    typedef typename traitsT::real_type real_type;
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_excluded_volume_wall_potential(), 0);
+
+    const auto& ps = toml_value_at(external, "parameters",
+            "[forcefield.external] for Excluded Volume Wall"
+            ).cast<toml::value_t::Array>();
+    MJOLNIR_LOG_INFO("number of parameters = ", ps.size());
+
+    const real_type eps = toml::get<real_type>(toml_value_at(
+        external, "epsilon", "[forcefield.external] for ExcludedVolume"));
+    MJOLNIR_LOG_INFO("epsilon = ", eps);
+
+    std::vector<real_type> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        MJOLNIR_SCOPE(for each parameters, 1);
+        const auto& tab = param.cast<toml::value_t::Table>();
+        const auto idx = toml::get<std::size_t>(toml_value_at(tab, "index",
+            "element of [[forcefield.external.parameters]] for ExcludedVolumeWall"
+            ));
+        if(params.size() <= idx)
+        {
+            params.resize(idx+1, real_type(0.0));
+        }
+
+        const auto s = toml::get<real_type>(toml_value_at(tab, "sigma",
+            "element of [[forcefield.external.parameters]] for ExcludedVolumeWall"
+            ));
+        MJOLNIR_LOG_INFO("idx   = ", idx);
+        MJOLNIR_LOG_INFO("sigma = ", s);
+        params.at(idx) = s;
+    }
+    return ExcludedVolumeWallPotential<traitsT>(eps, std::move(params));
+}
 
 
 } // mjolnir

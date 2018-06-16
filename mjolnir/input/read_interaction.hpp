@@ -216,12 +216,21 @@ read_external_distance_interaction(const toml::Table& external, shapeT&& shape)
     }
     else if(potential == "LennardJonesWall")
     {
-        MJOLNIR_SCOPE(potential == "LnennardJonesWall", 1);
+        MJOLNIR_SCOPE(potential == "LennardJonesWall", 1);
         using potential_t   = LennardJonesWallPotential<traitsT>;
         using interaction_t = ExternalDistanceInteraction<
                                     traitsT, potential_t, shapeT>;
         return make_unique<interaction_t>(std::move(shape),
              read_lennard_jones_wall_potential<traitsT>(external));
+    }
+    else if(potential == "ExcludedVolumeWall")
+    {
+        MJOLNIR_SCOPE(potential == "ExcludedVolumeWall", 1);
+        using potential_t   = ExcludedVolumeWallPotential<traitsT>;
+        using interaction_t = ExternalDistanceInteraction<
+                                    traitsT, potential_t, shapeT>;
+        return make_unique<interaction_t>(std::move(shape),
+             read_excluded_volume_wall_potential<traitsT>(external));
     }
     else
     {
