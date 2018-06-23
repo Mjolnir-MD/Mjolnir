@@ -2,6 +2,7 @@
 #define MJOLNIR_EXCLUSION_LIST_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/util/range.hpp>
+#include <mjolnir/util/logger.hpp>
 #include <algorithm>
 #include <iterator>
 #include <utility>
@@ -50,6 +51,11 @@ class ExclusionList
     template<typename traitsT, typename PotentialT>
     void make(const System<traitsT>& sys, const PotentialT& pot)
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_SCOPE(ExclusionList::make(), 0);
+
+        MJOLNIR_LOG_INFO("potential = ", pot.name());
+
         const auto& topol = sys.topology();
         const std::size_t N = sys.size();
 
@@ -58,6 +64,8 @@ class ExclusionList
         for(std::size_t i=0; i<N; ++i)
         {
             this->chain_ids_[i] = topol.chain_of(i);
+            MJOLNIR_LOG_DEBUG("particle ", i, " is belonging chain ",
+                              topol.chain_of(i));
         }
 
         // make ignored_chain_idxs
@@ -71,6 +79,8 @@ class ExclusionList
                 {
                     if(pot.is_ignored_chain(i, j))
                     {
+                        MJOLNIR_LOG_INFO("chain ", i, " and chain ", j,
+                                         " will be ignored");
                         this->ignored_chns_.push_back(i);
                         ++idx;
                     }
@@ -96,15 +106,19 @@ class ExclusionList
                         topol.list_adjacent_within(i, dist, connection.first))
                     {
                         ignored_particles.push_back(j);
-                        ++idx;
                     }
                 }
-
                 std::sort(ignored_particles.begin(), ignored_particles.end());
                 const auto last = std::unique(ignored_particles.begin(),
                                               ignored_particles.end());
-                std::copy(ignored_particles.begin(), last,
-                          std::back_inserter(this->ignored_idxs_));
+                ignored_particles.erase(last, ignored_particles.end());
+                MJOLNIR_LOG_INFO("particle ", i, " ignores ", ignored_particles);
+
+                for(const auto j : ignored_particles)
+                {
+                    this->ignored_idxs_.push_back(j);
+                    ++idx;
+                }
                 this->idx_ranges_.emplace_back(first, idx);
             }
         }
