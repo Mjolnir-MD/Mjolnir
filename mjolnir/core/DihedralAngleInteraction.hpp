@@ -165,7 +165,7 @@ template<typename traitsT, typename potentialT>
 void DihedralAngleInteraction<traitsT, potentialT>::write_topology(
         topology_type& topol) const
 {
-    if(this->kind_ == connection_kind_type::none) {return;}
+    if(this->kind_.empty() || this->kind_ == "none") {return;}
 
     for(const auto& idxp : this->potentials)
     {

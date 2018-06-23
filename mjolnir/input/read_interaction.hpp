@@ -330,18 +330,9 @@ read_local_interaction(const toml::Table& local)
     const auto interaction = toml::get<std::string>(
             toml_value_at(local, "interaction", "[forcefields.local]"));
 
-    // topology stuff
-    using connection_kind_type =
-        typename LocalInteractionBase<traitsT>::connection_kind_type;
-    const auto connection = toml::get<std::string>(
+    const auto kind = toml::get<std::string>(
             toml_value_at(local, "topology", "[forcefield.local]"));
-    MJOLNIR_LOG_INFO("connection kind = ", connection);
-
-    connection_kind_type kind;
-    if     (connection == "bond")    {kind = connection_kind_type::bond;}
-    else if(connection == "contact") {kind = connection_kind_type::contact;}
-    else if(connection == "none")    {kind = connection_kind_type::none;}
-    else {throw std::runtime_error("invalid connection type: " + connection);}
+    MJOLNIR_LOG_INFO("connection kind = ", kind);
 
     if(interaction == "BondLength")
     {

@@ -26,16 +26,12 @@ class System
   public:
 
     System(const std::size_t num_particles, const boundary_type& bound)
-        : boundary_(bound), particles_(num_particles)
-    {
-        this->topology_.resize(num_particles);
-    }
+        : boundary_(bound), particles_(num_particles),
+          topology_(particles_.size())
+    {}
     System(std::vector<particle_type>&& ps, const boundary_type& bound)
-        : boundary_(bound), particles_(ps)
-    {
-        this->topology_.resize(particles_.size());
-    }
-
+        : boundary_(bound), particles_(ps), topology_(particles_.size())
+    {}
     ~System() = default;
 
     coordinate_type adjust_direction(coordinate_type dr) const noexcept

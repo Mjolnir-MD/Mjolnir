@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
     const real_type native(mjolnir::constants<real_type>::pi * 2.0 / 3.0);
 
     harmonic_type potential{k, native};
-    dihedral_angle_type interaction(connection_kind_type::none, {{ {{0,1,2,3}}, potential}});
+    dihedral_angle_type interaction("none", {{ {{0,1,2,3}}, potential}});
 
     const coord_type pos1(1e0, 0e0, 1e0);
     const coord_type pos2(0e0, 0e0, 1e0);

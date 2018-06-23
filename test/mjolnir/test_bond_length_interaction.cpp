@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
     const real_type native(2.0);
 
     harmonic_type    potential(k, native);
-    bond_length_type interaction(connection_kind_type::none, {{ {{0,1}}, potential}});
+    bond_length_type interaction("none", {{ {{0,1}}, potential}});
 
     std::vector<particle_type> ps{
         {1., coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)},

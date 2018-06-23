@@ -334,14 +334,21 @@ read_excluded_volume_potential(const toml::Table& global)
     MJOLNIR_SCOPE(read_excluded_volume_potential(), 0);
     typedef typename traitsT::real_type real_type;
 
-    const std::size_t bonds = toml::get<std::size_t>(toml_value_at(
-        global, "ignored_bonds", "[forcefield.global] for ExcludedVolume"));
-    const std::size_t contacts = toml::get<std::size_t>(toml_value_at(
-        global, "ignored_contacts", "[forcefield.global] for ExcludedVolume"));
+    const auto& ignored_connections = toml_value_at(
+        global, "ignored_connections", "[forcefield.global] for ExcludedVolume"
+        ).cast<toml::value_t::Table>();
+    std::map<std::string, std::size_t> connections;
+    for(const auto connection : ignored_connections)
+    {
+        connections[connection.first] =
+            toml::get<std::size_t>(connection.second);
+        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
+                         " within ", connections.at(connection.first), " will ",
+                         "be ignored");
+    }
+
     const real_type eps = toml::get<real_type>(toml_value_at(
         global, "epsilon", "[forcefield.global] for ExcludedVolume"));
-    MJOLNIR_LOG_INFO("particles connected less than ", bonds,    " bonds are ignored");
-    MJOLNIR_LOG_INFO("particles connected less than ", contacts, " contacts are ignored");
     MJOLNIR_LOG_INFO("epsilon = ", eps);
 
     const auto& ps = toml_value_at(global, "parameters",
@@ -374,7 +381,7 @@ read_excluded_volume_potential(const toml::Table& global)
     MJOLNIR_LOG_INFO("}}}");
 
     return ExcludedVolumePotential<traitsT, ignoreT>(
-            eps, std::move(params), bonds, contacts);
+            eps, std::move(params), connections);
 }
 
 template<typename traitsT, typename ignoreT>
@@ -385,12 +392,18 @@ read_lennard_jones_potential(const toml::Table& global)
     MJOLNIR_SCOPE(read_lennard_jones_potential(), 0);
     typedef typename traitsT::real_type real_type;
 
-    const std::size_t bonds = toml::get<std::size_t>(toml_value_at(
-        global, "ignored_bonds", "[forcefield.global] for Lennard-Jones"));
-    const std::size_t contacts = toml::get<std::size_t>(toml_value_at(
-        global, "ignored_contacts", "[forcefield.global] for Lennard-Jones"));
-    MJOLNIR_LOG_INFO("particles connected less than ", bonds,    " bonds are ignored");
-    MJOLNIR_LOG_INFO("particles connected less than ", contacts, " contacts are ignored");
+    const auto& ignored_connections = toml_value_at(
+        global, "ignored_connections", "[forcefield.global] for ExcludedVolume"
+        ).cast<toml::value_t::Table>();
+    std::map<std::string, std::size_t> connections;
+    for(const auto connection : ignored_connections)
+    {
+        connections[connection.first] =
+            toml::get<std::size_t>(connection.second);
+        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
+                         " within ", connections.at(connection.first), " will ",
+                         "be ignored");
+    }
 
     const auto& ps = toml_value_at(global, "parameters",
         "[forcefield.global] for Lennard-Jones potential"
@@ -425,7 +438,7 @@ read_lennard_jones_potential(const toml::Table& global)
     MJOLNIR_LOG_INFO("}}}");
 
     return LennardJonesPotential<traitsT, ignoreT>(
-            std::move(params), bonds, contacts);
+            std::move(params), connections);
 }
 
 template<typename traitsT, typename ignoreT>
@@ -436,12 +449,18 @@ read_debye_huckel_potential(const toml::Table& global)
     MJOLNIR_SCOPE(read_debye_huckel_potential(), 0);
     typedef typename traitsT::real_type real_type;
 
-    const std::size_t bonds = toml::get<std::size_t>(toml_value_at(
-        global, "ignored_bonds",    "[forcefield.global] for Debye-Huckel"));
-    const std::size_t contacts = toml::get<std::size_t>(toml_value_at(
-        global, "ignored_contacts", "[forcefield.global] for Debye-Huckel"));
-    MJOLNIR_LOG_INFO("particles connected less than ", bonds,    " bonds are ignored");
-    MJOLNIR_LOG_INFO("particles connected less than ", contacts, " contacts are ignored");
+    const auto& ignored_connections = toml_value_at(
+        global, "ignored_connections", "[forcefield.global] for ExcludedVolume"
+        ).cast<toml::value_t::Table>();
+    std::map<std::string, std::size_t> connections;
+    for(const auto connection : ignored_connections)
+    {
+        connections[connection.first] =
+            toml::get<std::size_t>(connection.second);
+        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
+                         " within ", connections.at(connection.first), " will ",
+                         "be ignored");
+    }
 
     const auto& ps = toml_value_at(global, "parameters",
         "[forcefield.global] for Debye-Huckel"
@@ -470,7 +489,7 @@ read_debye_huckel_potential(const toml::Table& global)
     MJOLNIR_LOG_INFO("}}}");
 
     return DebyeHuckelPotential<traitsT, ignoreT>(
-            std::move(params), bonds, contacts);
+            std::move(params), connections);
 }
 
 // ---------------------------------------------------------------------------

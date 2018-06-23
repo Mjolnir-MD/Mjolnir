@@ -40,14 +40,14 @@ class LennardJonesPotential
   public:
 
     LennardJonesPotential(const std::vector<parameter_type>& radii,
-        const std::size_t ex_bonds, const std::size_t ex_contacts)
+        const std::map<connection_kind_type, std::size_t>& exclusions)
         : radii_(radii), ignored_chain_(),
-          ignored_bonds_(ex_bonds), ignored_contacts_(ex_contacts)
+          ignore_within_(exclusions.begin(), exclusions.end())
     {}
     LennardJonesPotential(std::vector<parameter_type>&& radii,
-        const std::size_t ex_bonds, const std::size_t ex_contacts)
+        const std::map<connection_kind_type, std::size_t>& exclusions)
         : radii_(std::move(radii)), ignored_chain_(),
-          ignored_bonds_(ex_bonds), ignored_contacts_(ex_contacts)
+          ignore_within_(exclusions.begin(), exclusions.end())
     {}
     ~LennardJonesPotential() = default;
 
@@ -97,8 +97,8 @@ class LennardJonesPotential
     void update(const System<traitsT>& sys) const noexcept {return;}
 
     // e.g. `3` means ignore particles connected within 3 "bond"s
-    std::size_t ignored_bonds()    const noexcept {return ignored_bonds_;}
-    std::size_t ignored_contacts() const noexcept {return ignored_contacts_;}
+    std::vector<std::pair<connection_kind_type, std::size_t>>
+    ignore_within() const {return ignore_within_;}
 
     bool is_ignored_chain(
             const chain_id_type& i, const chain_id_type& j) const noexcept
@@ -117,8 +117,7 @@ class LennardJonesPotential
     std::vector<parameter_type> radii_;
 
     chain_ignoration_type ignored_chain_;
-    std::size_t ignored_bonds_;
-    std::size_t ignored_contacts_;
+    std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 };
 template<typename traitsT, typename ignoreT>
 constexpr typename LennardJonesPotential<traitsT, ignoreT>::real_type

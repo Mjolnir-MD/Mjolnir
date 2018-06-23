@@ -39,14 +39,14 @@ class ExcludedVolumePotential
   public:
 
     ExcludedVolumePotential(const real_type eps, const container_type& params,
-        const std::size_t ex_bonds, const std::size_t ex_contacts)
+        const std::map<connection_kind_type, std::size_t>& exclusions)
         : epsilon_(eps), radii_(params), ignored_chain_(),
-          ignored_bonds_(ex_bonds), ignored_contacts_(ex_contacts)
+          ignore_within_(exclusions.begin(), exclusions.end())
     {}
     ExcludedVolumePotential(const real_type eps, container_type&& params,
-        const std::size_t ex_bonds, const std::size_t ex_contacts)
+        const std::map<connection_kind_type, std::size_t>& exclusions)
         : epsilon_(eps), radii_(std::move(params)), ignored_chain_(),
-          ignored_bonds_(ex_bonds), ignored_contacts_(ex_contacts)
+          ignore_within_(exclusions.begin(), exclusions.end())
     {}
     ~ExcludedVolumePotential() = default;
 
@@ -92,9 +92,9 @@ class ExcludedVolumePotential
         return 2 * max_sigma * cutoff_ratio;
     }
 
-    // e.g. {"bond", 3} means ignore particles connected within 3 "bond"s
-    std::size_t ignored_bonds()    const noexcept {return ignored_bonds_;}
-    std::size_t ignored_contacts() const noexcept {return ignored_contacts_;}
+    // e.g. "bond" -> 3 means ignore particles connected within 3 "bond"s
+    std::vector<std::pair<connection_kind_type, std::size_t>>
+    ignore_within() const {return ignore_within_;}
 
     bool is_ignored_chain(
             const chain_id_type& i, const chain_id_type& j) const noexcept
@@ -116,8 +116,7 @@ class ExcludedVolumePotential
     std::vector<parameter_type> radii_;
 
     chain_ignoration_type ignored_chain_;
-    std::size_t ignored_bonds_;
-    std::size_t ignored_contacts_;
+    std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 };
 
 template<typename traitsT, typename ignoreT>

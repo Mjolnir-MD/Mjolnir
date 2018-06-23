@@ -681,10 +681,9 @@ parameters = [
 [[forcefields.global]]
 interaction = "Distance"
 potential = "ExcludedVolume"
-ignored_chain    = "Nothing"
-ignored_bonds    = 3
-ignored_contacts = 1
-spatial_partition = {type = "CellList", margin = 1.0}
+ignored_chain       = "Nothing"
+ignored_connections = {bond = 3, contact = 1}
+spatial_partition   = {type = "CellList", margin = 1.0}
 epsilon = 0.2
 # params{{{
 parameters = [

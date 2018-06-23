@@ -88,26 +88,23 @@ class ExclusionList
             for(std::size_t i=0; i<N; ++i)
             {
                 const std::size_t first = idx;
+                std::vector<std::size_t> ignored_particles;
+                for(const auto& connection : pot.ignore_within())
                 {
-                    const std::size_t dist = pot.ignored_bonds();
-                    for(const auto j : topol.list_adjacent_within(
-                                i, dist, connection_kind_type::bond))
+                    const std::size_t dist = connection.second;
+                    for(const auto j :
+                        topol.list_adjacent_within(i, dist, connection.first))
                     {
-                        this->ignored_idxs_.push_back(j);
+                        ignored_particles.push_back(j);
                         ++idx;
                     }
                 }
-                {
-                    const std::size_t dist = pot.ignored_contacts();
-                    for(const auto j : topol.list_adjacent_within(
-                                i, dist, connection_kind_type::contact))
-                    {
-                        this->ignored_idxs_.push_back(j);
-                        ++idx;
-                    }
-                }
-                const auto beg = ignored_idxs_.begin();
-                std::sort(beg + first, beg + idx);
+
+                std::sort(ignored_particles.begin(), ignored_particles.end());
+                const auto last = std::unique(ignored_particles.begin(),
+                                              ignored_particles.end());
+                std::copy(ignored_particles.begin(), last,
+                          std::back_inserter(this->ignored_idxs_));
                 this->idx_ranges_.emplace_back(first, idx);
             }
         }

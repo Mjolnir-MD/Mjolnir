@@ -31,17 +31,17 @@ class DebyeHuckelPotential
   public:
 
     DebyeHuckelPotential(const container_type& charges,
-        const std::size_t ex_bonds, const std::size_t ex_contacts)
-      : charges_(charges), temperature_(300.0), ion_conc_(0.1),
-        ignored_bonds_(ex_bonds), ignored_contacts_(ex_contacts)
+        const std::map<connection_kind_type, std::size_t>& exclusions)
+        : charges_(charges), temperature_(300.0), ion_conc_(0.1),
+          ignore_within_(exclusions.begin(), exclusions.end())
     {
         // XXX should be updated before use because T and ion conc are default!
         this->calc_parameters();
     }
     DebyeHuckelPotential(container_type&& charges,
-        const std::size_t ex_bonds, const std::size_t ex_contacts)
-      : charges_(std::move(charges)), temperature_(300.0), ion_conc_(0.1),
-        ignored_bonds_(ex_bonds), ignored_contacts_(ex_contacts)
+        const std::map<connection_kind_type, std::size_t>& exclusions)
+        : charges_(std::move(charges)), temperature_(300.0), ion_conc_(0.1),
+          ignore_within_(exclusions.begin(), exclusions.end())
     {
         // XXX should be updated before use because T and ion conc are default!
         this->calc_parameters();
@@ -82,8 +82,8 @@ class DebyeHuckelPotential
     }
 
     // e.g. {"bond", 3} means ignore particles connected within 3 "bond"s
-    std::size_t ignored_bonds()    const noexcept {return ignored_bonds_;}
-    std::size_t ignored_contacts() const noexcept {return ignored_contacts_;}
+    std::vector<std::pair<connection_kind_type, std::size_t>>
+    ignore_within() const {return ignore_within_;}
 
     bool is_ignored_chain(
             const chain_id_type& i, const chain_id_type& j) const noexcept
@@ -137,8 +137,7 @@ class DebyeHuckelPotential
     container_type charges_;
 
     chain_ignoration_type ignored_chain_;
-    std::size_t ignored_bonds_;
-    std::size_t ignored_contacts_;
+    std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 };
 
 template<typename traitsT, typename ignoreT>
