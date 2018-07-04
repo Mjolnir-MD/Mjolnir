@@ -56,9 +56,6 @@ class UnderdampedLangevinStepper
             std::sqrt(2 * physics<real_type>::kB * this->temperature_ / dt_);
     }
 
-    rng_type&       random_number_generator()       noexcept {return rng_;}
-    rng_type const& random_number_generator() const noexcept {return rng_;}
-
   private:
 
     coordinate_type gen_random_accel(const real_type sqrt_g_over_m)
