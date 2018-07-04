@@ -9,10 +9,10 @@ struct Particle
 {
     typedef realT  real_type;
     typedef coordT coordinate_type;
-    realT  mass;
-    coordT position;
-    coordT velocity;
-    coordT force;
+    real_type mass;
+    coordinate_type position;
+    coordinate_type velocity;
+    coordinate_type force;
 };
 
 template<typename realT, typename coordT>
