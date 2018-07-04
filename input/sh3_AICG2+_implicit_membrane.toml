@@ -681,8 +681,7 @@ parameters = [
 interaction = "Distance"
 potential   = "ExcludedVolume"
 ignored_chain    = "Nothing"
-ignored_bonds    = 3
-ignored_contacts = 1
+
 spatial_partition = {type = "CellList", margin = 1.0}
 epsilon = 0.2
 # params{{{
@@ -747,7 +746,8 @@ parameters = [
 #}}}
 [[forcefields.external]]
 interaction = "Distance"
-shape       = {name = "AxisAlignedPlane", axis = "Z", position =  1.0, margin = 0.5}
+ignored_connections = {bond = 3, contact = 1}
+shape       = {name = "AxisAlignedPlane", axis = "+Z", position =  1.0, margin = 0.5}
 potential = "ImplicitMembrane"
 thickness = 1.0
 interaction_magnitude = 10.0
