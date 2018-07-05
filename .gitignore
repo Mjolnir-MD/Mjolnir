@@ -3,6 +3,5 @@ build/*
 data/*
 *.ene
 *.xyz
-*.dat
 *.png
 callgrind.*
