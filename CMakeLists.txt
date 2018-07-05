@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 enable_testing()
 project(mjolnir)
 
@@ -8,31 +8,48 @@ include_directories(${PROJECT_SOURCE_DIR}/extlib)
 option(DEBUG "dump debug information" OFF)
 if(DEBUG)
     add_definitions(-DMJOLNIR_DEBUG)
-    # output mjolnir/build/bin
-    set(MJOLNIR_EXECUTABLE_LOCATION "${PROJECT_BINARY_DIR}/bin")
-else()
-    # output mjolnir/bin
-    set(MJOLNIR_EXECUTABLE_LOCATION "${PROJECT_SOURCE_DIR}/bin")
 endif()
+set(MJOLNIR_EXECUTABLE_LOCATION "${PROJECT_BINARY_DIR}/bin")
 
 if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/toml/toml.hpp")
     execute_process(COMMAND git submodule update --init --recursive
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()
 
-add_definitions("-std=c++11 -Ofast -march=native -mtune=native")
-
-find_package(Boost COMPONENTS unit_test_framework)
-if(${Boost_FOUND})
-    message(STATUS "Boost include dir = ${Boost_INCLUDE_DIRS}")
-    message(STATUS "Boost library dir = ${Boost_LIBRARY_DIRS}")
-    include_directories(${Boost_INCLUDE_DIRS})
-    link_directories(${Boost_LIBRARY_DIRS})
+if(EXISTS "${PROJECT_SOURCE_DIR}/extlib/boost_1_67_0/boost/version.hpp")
+    message(STATUS "boost 1.67.0 exists.")
+    include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_67_0)
 else()
-    message(STATUS "Boost couldn't be found. some functionalities are disabled.")
-    message(STATUS "If you have Boost somewhere cmake didn't look (e.g. /opt/boost-1.??.??), try")
-    message(STATUS "`cmake path/to/CMakeLists.txt -DBOOST_ROOT=/path/to/boost`")
+    message(STATUS "downloading Boost 1.67.0 to ./extlib/ ...")
+    execute_process(COMMAND wget https://dl.bintray.com/boostorg/release/1.67.0/source/boost_1_67_0.tar.bz2
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
+        OUTPUT_QUIET ERROR_QUIET)
+
+    execute_process(COMMAND which sha256sum RESULT_VARIABLE SHA256SUM_EXISTS)
+    execute_process(COMMAND which shasum    RESULT_VARIABLE SHASUM_EXISTS)
+    if(${SHA256SUM_EXISTS} EQUAL "0")
+        execute_process(COMMAND sha256sum --check boost_1_67_0_tar_bz2_sha256sum.dat
+            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
+            RESULT_VARIABLE   DOWNLOADED_SHA256SUM_RESULT)
+    elseif(${SHASUM_EXISTS} EQUAL "0")
+        execute_process(COMMAND shasum --algorithm 256 --check boost_1_67_0_tar_bz2_sha256sum.dat
+            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
+            RESULT_VARIABLE   DOWNLOADED_SHA256SUM_RESULT)
+    endif()
+
+    if(NOT ${DOWNLOADED_SHA256SUM_RESULT} EQUAL "0")
+        message(FATAL_ERROR "boost_1_67_0.tar.bz2 has invalid sha256sum!")
+    endif()
+
+    execute_process(COMMAND tar xf boost_1_67_0.tar.bz2
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
+        OUTPUT_QUIET ERROR_QUIET)
+
+    include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_67_0)
+    message(STATUS "done.")
 endif()
+
+add_definitions("-std=c++11 -Ofast -march=native -mtune=native")
 
 add_subdirectory(src)
 add_subdirectory(test)
