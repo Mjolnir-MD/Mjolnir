@@ -25,8 +25,8 @@ else()
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
         OUTPUT_QUIET ERROR_QUIET)
 
-    execute_process(COMMAND which sha256sum RESULT_VARIABLE SHA256SUM_EXISTS)
-    execute_process(COMMAND which shasum    RESULT_VARIABLE SHASUM_EXISTS)
+    execute_process(COMMAND which sha256sum RESULT_VARIABLE SHA256SUM_EXISTS OUTPUT_QUIET ERROR_QUIET)
+    execute_process(COMMAND which shasum    RESULT_VARIABLE SHASUM_EXISTS    OUTPUT_QUIET ERROR_QUIET)
     if(${SHA256SUM_EXISTS} EQUAL "0")
         execute_process(COMMAND sha256sum --check boost_1_67_0_tar_bz2_sha256sum.dat
             WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
