@@ -111,31 +111,31 @@ read_forcefield(const toml::Table& data, std::size_t N)
     MJOLNIR_LOG_INFO("using ", N, "-th forcefield");
 
     const auto& ff = ffs.at(N).cast<toml::value_t::Table>();
-    if(ff.count("filename") == 1)
+    if(ff.count("file_name") == 1)
     {
-        MJOLNIR_SCOPE(ff.count("filename") == 1, 1);
+        MJOLNIR_SCOPE(ff.count("file_name") == 1, 1);
         if(ff.size() != 1)
         {
-            std::cerr << "WARNING: [[forcefields]] has `filename` key.";
-            std::cerr << "When `filename` is provided, all settings will be ";
+            std::cerr << "WARNING: [[forcefields]] has `file_name` key.";
+            std::cerr << "When `file_name` is provided, all settings will be ";
             std::cerr << "read from the file, so other settings are ignored.\n";
-            MJOLNIR_LOG_WARN("[[forcefields]] has filename and other settings");
+            MJOLNIR_LOG_WARN("[[forcefields]] has file_name and other settings");
         }
 
-        const std::string filename = toml::get<std::string>(ff.at("filename"));
-        MJOLNIR_LOG_INFO("filename is ", filename);
+        const std::string file_name = toml::get<std::string>(ff.at("file_name"));
+        MJOLNIR_LOG_INFO("file_name = ", file_name);
 
-        const auto forcefield_file = toml::parse(filename);
+        const auto forcefield_file = toml::parse(file_name);
         if(forcefield_file.count("forcefields") == 1)
         {
-            MJOLNIR_LOG_INFO("`forcefields` value found in ", filename);
+            MJOLNIR_LOG_INFO("`forcefields` value found in ", file_name);
 
             const auto forcefield_toml_type =
                 forcefield_file.at("forcefields").type();
             if(forcefield_toml_type != toml::value_t::Table)
             {
                 std::cerr << "FATAL: each [forcefields] should be provided as ";
-                std::cerr << "a table in each file (" << filename <<  ").\n";
+                std::cerr << "a table in each file (" << file_name <<  ").\n";
                 std::cerr << "     : because it represents one set of ";
                 std::cerr << "forcefield. currently it is provided as ";
                 std::cerr << forcefield_toml_type << ".\n";
@@ -143,7 +143,7 @@ read_forcefield(const toml::Table& data, std::size_t N)
             }
             std::cerr << "WARNING: [forcefields] isn't necessary for splitted ";
             std::cerr << "toml file. you can define just [[local]], [[global]]";
-            std::cerr << " and [[external]] forcefields in " << filename << '\n';
+            std::cerr << " and [[external]] forcefields in " << file_name << '\n';
 
             MJOLNIR_LOG_INFO("reading `forcefields` table");
             return read_forcefield_from_table<traitsT>(forcefield_file.at(
