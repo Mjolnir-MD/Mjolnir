@@ -145,16 +145,15 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_neighbors_unlimited)
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<double> uni(-10, 10);
 
-    std::vector<particle_type> pcon(1000);
-    for(auto& p : pcon)
+    system_type sys(1000, boundary_type{});
+    for(std::size_t i=0; i<sys.size(); ++i)
     {
+        auto p = sys[i];
         p.mass     = 0.0;
         p.position = coord_type(uni(mt), uni(mt), uni(mt));
         p.velocity = coord_type(0, 0, 0);
         p.force    = coord_type(0, 0, 0);
     }
-    boundary_type bdry;
-    system_type sys(std::move(pcon), std::move(bdry));
 
     dummy_potential<double> dummy; dummy.cutoff = 1.0; dummy.N = 1000;
     mjolnir::AxisAlignedPlane<traits, mjolnir::PositiveZDirection> xyplane(0.0, 0.0); // no mergin here

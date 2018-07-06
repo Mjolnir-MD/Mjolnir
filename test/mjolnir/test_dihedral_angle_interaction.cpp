@@ -39,13 +39,11 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
     const coord_type pos2(0e0, 0e0, 1e0);
     const coord_type pos3(0e0, 0e0, 0e0);
 
-    std::vector<particle_type> ps{
-        {1., pos1,              coord_type(0,0,0), coord_type(0,0,0)},
-        {1., pos2,              coord_type(0,0,0), coord_type(0,0,0)},
-        {1., pos3,              coord_type(0,0,0), coord_type(0,0,0)},
-        {1., coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)}
-    };
-    system_type sys(std::move(ps), boundary_type{});
+    system_type sys(4, boundary_type{});
+    sys.at(0) = {1.0, pos1,              coord_type(0,0,0), coord_type(0,0,0)};
+    sys.at(1) = {1.0, pos2,              coord_type(0,0,0), coord_type(0,0,0)};
+    sys.at(2) = {1.0, pos3,              coord_type(0,0,0), coord_type(0,0,0)};
+    sys.at(3) = {1.0, coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)};
 
     const real_type dtheta = mjolnir::constants<real_type>::pi / 1800.0;
     for(int i = -1800; i < 1800; ++i)

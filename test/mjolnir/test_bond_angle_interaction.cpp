@@ -22,7 +22,6 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
     typedef traits::coordinate_type            coord_type;
     typedef traits::boundary_type              boundary_type;
     typedef mjolnir::System<traits>            system_type;
-    typedef system_type::particle_type         particle_type;
     typedef mjolnir::HarmonicPotential<traits> harmonic_type;
     typedef mjolnir::BondAngleInteraction<traits, harmonic_type> bond_angle_type;
     typedef bond_angle_type::connection_kind_type connection_kind_type;
@@ -37,12 +36,10 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
 
     const coord_type pos1(1., 0., 0.);
     const coord_type pos2(0., 0., 0.);
-    std::vector<particle_type> ps{
-        {1., pos1,              coord_type(0,0,0), coord_type(0,0,0)},
-        {1., pos2,              coord_type(0,0,0), coord_type(0,0,0)},
-        {1., coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)}
-    };
-    system_type sys(std::move(ps), boundary_type{});
+    system_type sys(3, boundary_type{});
+    sys.at(0) = {1.0, pos1,              coord_type(0,0,0), coord_type(0,0,0)};
+    sys.at(1) = {1.0, pos2,              coord_type(0,0,0), coord_type(0,0,0)};
+    sys.at(2) = {1.0, coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)};
 
     const std::size_t N = 1800;
     const real_type dtheta = mjolnir::constants<real_type>::pi  / N;
@@ -133,34 +130,3 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
         BOOST_CHECK_SMALL(sys[2].force[2], tolerance);
     }
 }
-
-// BOOST_AUTO_TEST_CASE(BondAngleInteraction_energy)
-// {
-//     const real_type k(1e0);
-//     const real_type native(M_PI * 2.0 / 3.0);
-//     LocalPotentialBaseSptr potential =
-//         std::make_shared<HarmonicPotential>(k, native);
-//
-//     InteractionBaseSptr<3> angl(new BondAngleInteraction(potential));
-//
-//     const coord_type pos1(1e0, 0e0, 0e0);
-//     const coord_type pos2(0e0, 0e0, 0e0);
-//     const real_type dtheta = M_PI / 1800.0;
-//     for(int i = 0; i < 1000; ++i)
-//     {
-//         const real_type theta = i * dtheta;
-//         const coord_type pos3(std::cos(theta), std::sin(theta), 0e0);
-//
-//         const real_type pot = potential->calc_potential(theta);
-//
-//         const real_type ene = angl->calc_energy(
-//                 std::array<coord_type, 3>{{pos1, pos2, pos3}});
-//
-//         if(i == 1200) // native
-//             BOOST_CHECK_SMALL(ene, tolerance);
-//         else 
-//             BOOST_CHECK_CLOSE_FRACTION(pot, ene, tolerance);
-//     }
-// }
-//
-
