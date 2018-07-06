@@ -16,12 +16,15 @@ read_observer(const toml::Table& data)
 
     const auto& general = toml_value_at(data, "general", "<root>"
             ).cast<toml::value_t::Table>();
-    const std::string path  = toml::get<std::string>(
+    std::string path = toml::get<std::string>(
             toml_value_at(general, "output_path", "[general]"));
-    const std::string fname = toml::get<std::string>(
-            toml_value_at(general, "file_name", "[general]"));
-    MJOLNIR_LOG_INFO("path     = ", path);
-    MJOLNIR_LOG_INFO("filename = ", fname);
+    //XXX assuming posix
+    if(path.back() != '/') {path += '/';}
+
+    const std::string prefix = toml::get<std::string>(
+            toml_value_at(general, "output_prefix", "[general]"));
+    MJOLNIR_LOG_INFO("path   = ", path);
+    MJOLNIR_LOG_INFO("prefix = ", prefix);
 
     const auto& simulator = toml_value_at(data, "simulator", "<root>"
             ).cast<toml::value_t::Table>();
@@ -29,7 +32,7 @@ read_observer(const toml::Table& data)
             toml_value_at(simulator, "save_step", "[simulator]"));
     MJOLNIR_LOG_INFO("interval = ", interval);
 
-    return Observer<traitsT>(path + fname, interval);
+    return Observer<traitsT>(path + prefix, interval);
 }
 
 

@@ -67,22 +67,20 @@ read_boundary(const toml::Table& data)
     else
     {
         throw std::runtime_error(
-                "invalid boundary setting (Unlimited|PeriodicCube): " + boundary);
+            "invalid boundary setting (Unlimited|PeriodicCube): " + boundary);
     }
 }
 
 inline std::unique_ptr<SimulatorBase>
 read_precision(const toml::Table& data)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_precision(const toml::Table& data), 0);
+
     const auto& general = toml_value_at(data, "general", "<root>"
             ).template cast<toml::value_t::Table>();
     const auto prec = toml::get<std::string>(
             toml_value_at(general, "precision", "[general]"));
-
-    MJOLNIR_SET_DEFAULT_LOGGER(std::string(toml::get<std::string>(
-            toml_value_at(general, "file_name", "[general]")) + ".log"));
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_precision(const toml::Table& data), 0);
 
     if(prec == "double")
     {
@@ -105,9 +103,23 @@ inline std::unique_ptr<SimulatorBase>
 read_input_file(const std::string& filename)
 {
     const auto data = toml::parse(filename);
+
+    // setting logger ...
+    const auto& general = toml_value_at(data, "general", "<root>"
+            ).template cast<toml::value_t::Table>();
+    std::string path = toml::get<std::string>(
+            toml_value_at(general, "output_path", "[general]"));
+    if(path.back() != '/') {path += '/';/*XXX assuming posix */}
+
+    const std::string logger_name = path + toml::get<std::string>(
+        toml_value_at(general, "output_prefix", "[general]")) + ".log";
+    MJOLNIR_SET_DEFAULT_LOGGER(logger_name);
+
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_input_file(const toml::Table& data), 0);
+
     return read_precision(data); // read all the settings recursively...
 }
-
 
 }// mjolnir
 #endif// MJOLNIR_READ_INPUT_FILE
