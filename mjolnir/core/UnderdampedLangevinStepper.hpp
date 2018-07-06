@@ -51,6 +51,13 @@ class UnderdampedLangevinStepper
 
     void update(const system_type& sys)
     {
+        if(!sys.has_attribute("temperature"))
+        {
+            throw std::out_of_range("mjolnir::UnderdampedLangevinStepper: "
+                "Langevin Integrator requires reference temperature, but "
+                "`temperature` is not found in `system.attribute`.");
+        }
+
         this->temperature_ = sys.attribute("temperature");
         this->noise_coef_  =
             std::sqrt(2 * physics<real_type>::kB * this->temperature_ / dt_);

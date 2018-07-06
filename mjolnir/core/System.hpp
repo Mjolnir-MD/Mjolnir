@@ -91,6 +91,7 @@ class System
     // assuming it will not be called so often.
     real_type  attribute(const std::string& key) const {return attributes_.at(key);}
     real_type& attribute(const std::string& key)       {return attributes_[key];}
+    bool   has_attribute(const std::string& key) const {return attributes_.count(key) == 1;}
 
     // store largest displacement in a step to decrease margin of verlet list.
     real_type& largest_displacement()       noexcept {return largest_disp_;}
