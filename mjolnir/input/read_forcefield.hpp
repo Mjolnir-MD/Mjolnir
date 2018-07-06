@@ -17,7 +17,45 @@ read_local_forcefield(std::vector<toml::Table> interactions)
     LocalForceField<traitsT> lff;
     for(const auto& interaction : interactions)
     {
-        lff.emplace(read_local_interaction<traitsT>(interaction));
+        if(interaction.count("file_name") == 1)
+        {
+            if(interaction.size() != 1)
+            {
+                std::cerr << "WARNING: [[forcefields.local]] has `file_name` ";
+                std::cerr << "key. When `file_name` is provided, all settings ";
+                std::cerr << "will be read from the file, so other settings ";
+                std::cerr << "are ignored.\n";
+                MJOLNIR_LOG_WARN("[[forcefields.local]] has file_name and "
+                                 "other settings");
+            }
+            const std::string file_name =
+                toml::get<std::string>(interaction.at("file_name"));
+            MJOLNIR_LOG_INFO("file_name = ", file_name);
+
+            const auto forcefield_file = toml::parse(file_name);
+            if(forcefield_file.count("forcefields") == 1)
+            {
+                std::cerr << "FATAL: each local forcefield should be provided ";
+                std::cerr << "as a root object of file (" << file_name <<").\n";
+                std::exit(1);
+            }
+            if(forcefield_file.count("local") == 1)
+            {
+                std::cerr << "WARNING: each local forcefield should be provided";
+                std::cerr << " as a root object of file (" << file_name <<").\n";
+
+                lff.emplace(read_local_interaction<traitsT>(
+                    toml::get<toml::Table>(forcefield_file.at("local"))));
+            }
+            else
+            {
+                lff.emplace(read_local_interaction<traitsT>(forcefield_file));
+            }
+        }
+        else
+        {
+            lff.emplace(read_local_interaction<traitsT>(interaction));
+        }
     }
     return lff;
 }
@@ -31,7 +69,47 @@ read_global_forcefield(std::vector<toml::Table> interactions)
     GlobalForceField<traitsT> gff;
     for(const auto& interaction : interactions)
     {
-        gff.emplace(read_global_interaction<traitsT>(interaction));
+        if(interaction.count("file_name") == 1)
+        {
+            MJOLNIR_SCOPE(interaction.count("file_name") == 1, 1);
+            if(interaction.size() != 1)
+            {
+                std::cerr << "WARNING: [[forcefields.global]] has `file_name` ";
+                std::cerr << "key. When `file_name` is provided, all settings ";
+                std::cerr << "will be read from the file, so other settings ";
+                std::cerr << "are ignored.\n";
+                MJOLNIR_LOG_WARN("[[forcefields.global]] has file_name and "
+                                 "other settings");
+            }
+            const std::string file_name =
+                toml::get<std::string>(interaction.at("file_name"));
+            MJOLNIR_LOG_INFO("file_name = ", file_name);
+
+            const auto forcefield_file = toml::parse(file_name);
+            if(forcefield_file.count("forcefields") == 1)
+            {
+                std::cerr << "FATAL: each global forcefield should be provided ";
+                std::cerr << "as a root object of file (" << file_name <<").\n";
+                std::exit(1);
+            }
+            if(forcefield_file.count("global") == 1)
+            {
+                MJOLNIR_LOG_INFO("key `global` found in file ", file_name);
+                std::cerr << "WARNING: each global forcefield should be provided ";
+                std::cerr << "as a root object of file (" << file_name <<").\n";
+
+                gff.emplace(read_global_interaction<traitsT>(
+                    toml::get<toml::Table>(forcefield_file.at("global"))));
+            }
+            else
+            {
+                gff.emplace(read_global_interaction<traitsT>(forcefield_file));
+            }
+        }
+        else
+        {
+            gff.emplace(read_global_interaction<traitsT>(interaction));
+        }
     }
     return gff;
 }
@@ -44,8 +122,49 @@ read_external_forcefield(std::vector<toml::Table> interactions)
     MJOLNIR_SCOPE(read_external_forcefield(), 0);
     ExternalForceField<traitsT> eff;
     for(const auto& interaction : interactions)
+
     {
-        eff.emplace(read_external_interaction<traitsT>(interaction));
+        if(interaction.count("file_name") == 1)
+        {
+            MJOLNIR_SCOPE(interaction.count("file_name") == 1, 1);
+            if(interaction.size() != 1)
+            {
+                std::cerr << "WARNING: [[forcefields.external]] has `file_name` ";
+                std::cerr << "key. When `file_name` is provided, all settings ";
+                std::cerr << "will be read from the file, so other settings ";
+                std::cerr << "are ignored.\n";
+                MJOLNIR_LOG_WARN("[[forcefields.external]] has file_name and "
+                                 "other settings");
+            }
+            const std::string file_name =
+                toml::get<std::string>(interaction.at("file_name"));
+            MJOLNIR_LOG_INFO("file_name = ", file_name);
+
+            const auto forcefield_file = toml::parse(file_name);
+            if(forcefield_file.count("forcefields") == 1)
+            {
+                std::cerr << "FATAL: each external forcefield should be provided ";
+                std::cerr << "as a root object of file (" << file_name <<").\n";
+                std::exit(1);
+            }
+            if(forcefield_file.count("external") == 1)
+            {
+                MJOLNIR_LOG_INFO("key `external` found in file ", file_name);
+                std::cerr << "WARNING: each external forcefield should be provided ";
+                std::cerr << "as a root object of file (" << file_name <<").\n";
+
+                eff.emplace(read_external_interaction<traitsT>(
+                    toml::get<toml::Table>(forcefield_file.at("external"))));
+            }
+            else
+            {
+                eff.emplace(read_external_interaction<traitsT>(forcefield_file));
+            }
+        }
+        else
+        {
+            eff.emplace(read_external_interaction<traitsT>(interaction));
+        }
     }
     return eff;
 }
