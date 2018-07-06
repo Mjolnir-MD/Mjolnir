@@ -58,7 +58,7 @@ class Observer
     void initialize(const system_type& sys, const forcefield_type& ff) const
     {
         std::ofstream ofs(this->ene_name_, std::ios::app);
-        ofs << '#' << ff.list_energy_name() << "kinetic energy\n";
+        ofs << '#' << ff.list_energy_name() << "kinetic_energy\n";
         return;
     }
 
