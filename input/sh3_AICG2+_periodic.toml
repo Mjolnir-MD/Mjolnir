@@ -3,8 +3,8 @@ precision   = "double"           # one of {"float", "double"}.
 boundary    = "PeriodicCube"     # one of {"PeriodicCube", "Unlimited"}
 thread      = false              # enable threading parallelization (not impled yet)
 GPU         = false              # enable GPU parallelization       (not impled yet)
-file_name   = "sh3_domain_peri"  # file prefix.
-output_path = "./"               # output path
+output_prefix = "sh3_domain_peri"  # file prefix.
+output_path   = "./"               # output path
 
 [parameters]
 # You can change the units if you guarantee a consistency of forcefield parameters.

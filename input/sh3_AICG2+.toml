@@ -1,10 +1,10 @@
 [general]
-precision   = "double"           # one of {"float", "double"}.
-boundary    = "Unlimited"        # one of {"PeriodicCube", "Unlimited"}
-thread      = false              # enable threading parallelization (not impled yet)
-GPU         = false              # enable GPU parallelization       (not impled yet)
-file_name   = "sh3_domain_unlim" # file prefix.
-output_path = "./"               # output path
+precision   = "double"             # one of {"float", "double"}.
+boundary    = "Unlimited"          # one of {"PeriodicCube", "Unlimited"}
+thread      = false                # enable threading parallelization (not impled yet)
+GPU         = false                # enable GPU parallelization       (not impled yet)
+output_prefix = "sh3_domain_unlim" # file prefix.
+output_path   = "./"               # output path
 
 [parameters]
 kB   = 1.986231313e-3  # Boltzmann constant

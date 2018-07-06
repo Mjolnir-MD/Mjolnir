@@ -3,8 +3,8 @@ precision   = "double"           # one of {"float", "double"}.
 boundary    = "Unlimited"        # one of {"PeriodicCube", "Unlimited"}
 thread      = false              # enable threading parallelization (not impled yet)
 GPU         = false              # enable GPU parallelization       (not impled yet)
-file_name   = "sh3_domain_implicit" # file prefix.
-output_path = "./"               # output path
+output_prefix = "sh3_domain_implicit" # file prefix.
+output_path   = "./"                  # output path
 
 [parameters]
 # You can change the units if you guarantee a consistency of forcefield parameters.
@@ -681,7 +681,7 @@ parameters = [
 interaction = "Distance"
 potential   = "ExcludedVolume"
 ignored_chain    = "Nothing"
-
+ignored_connections = {bond = 3, contact = 1}
 spatial_partition = {type = "CellList", margin = 1.0}
 epsilon = 0.2
 # params{{{
@@ -746,7 +746,6 @@ parameters = [
 #}}}
 [[forcefields.external]]
 interaction = "Distance"
-ignored_connections = {bond = 3, contact = 1}
 shape       = {name = "AxisAlignedPlane", axis = "+Z", position =  1.0, margin = 0.5}
 potential = "ImplicitMembrane"
 thickness = 1.0
