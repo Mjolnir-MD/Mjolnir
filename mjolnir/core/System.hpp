@@ -13,24 +13,23 @@ class System
 {
   public:
     typedef traitsT  traits_type;
-    typedef typename traits_type::real_type         real_type;
-    typedef typename traits_type::coordinate_type   coordinate_type;
-    typedef typename traits_type::boundary_type     boundary_type;
-    typedef Particle<real_type, coordinate_type>    particle_type;
-    typedef Topology                                topology_type;
-    typedef std::map<std::string, real_type>        attribute_type;
-    typedef std::vector<particle_type>              container_type;
-    typedef typename container_type::iterator       iterator;
-    typedef typename container_type::const_iterator const_iterator;
+    typedef typename traits_type::real_type       real_type;
+    typedef typename traits_type::coordinate_type coordinate_type;
+    typedef typename traits_type::boundary_type   boundary_type;
+    typedef Topology                              topology_type;
+    typedef std::map<std::string, real_type>      attribute_type;
+
+    typedef Particle<real_type, coordinate_type>          particle_type;
+    typedef ParticleView<real_type, coordinate_type>      particle_view_type;
+    typedef ParticleConstView<real_type, coordinate_type> particle_const_view_type;
 
   public:
 
     System(const std::size_t num_particles, const boundary_type& bound)
-        : boundary_(bound), particles_(num_particles),
-          topology_(particles_.size())
-    {}
-    System(std::vector<particle_type>&& ps, const boundary_type& bound)
-        : boundary_(bound), particles_(ps), topology_(particles_.size())
+        : largest_disp_(0.0), boundary_(bound), topology_(num_particles),
+          attributes_(), num_particles_(num_particles),
+          masses_    (num_particles), positions_(num_particles),
+          velocities_(num_particles), forces_   (num_particles)
     {}
     ~System() = default;
 
@@ -39,19 +38,49 @@ class System
     coordinate_type  adjust_position(coordinate_type dr) const noexcept
     {return boundary_.adjust_position(dr);}
 
-    std::size_t size() const noexcept {return particles_.size();}
+    std::size_t size() const noexcept {return num_particles_;}
 
-    particle_type &      operator[](std::size_t i)       noexcept {return particles_[i];}
-    particle_type const& operator[](std::size_t i) const noexcept {return particles_[i];}
-    particle_type &      at(std::size_t i)       {return particles_.at(i);}
-    particle_type const& at(std::size_t i) const {return particles_.at(i);}
+    particle_view_type       operator[](std::size_t i)       noexcept
+    {
+        return particle_view_type{
+            masses_[i], positions_[i], velocities_[i], forces_[i]
+        };
+    }
+    particle_const_view_type operator[](std::size_t i) const noexcept
+    {
+        return particle_const_view_type{
+            masses_[i], positions_[i], velocities_[i], forces_[i]
+        };
+    }
+    particle_view_type       at(std::size_t i)
+    {
+        return particle_view_type{
+            masses_.at(i), positions_.at(i), velocities_.at(i), forces_.at(i)
+        };
+    }
+    particle_const_view_type at(std::size_t i) const
+    {
+        return particle_const_view_type{
+            masses_.at(i), positions_.at(i), velocities_.at(i), forces_.at(i)
+        };
+    }
 
-    iterator       begin()        noexcept {return particles_.begin();}
-    iterator       end()          noexcept {return particles_.end();}
-    const_iterator begin()  const noexcept {return particles_.cbegin();}
-    const_iterator end()    const noexcept {return particles_.cend();}
-    const_iterator cbegin() const noexcept {return particles_.cbegin();}
-    const_iterator cend()   const noexcept {return particles_.cend();}
+    std::vector<real_type>&             masses()           noexcept {return masses_;}
+    std::vector<real_type> const&       masses()     const noexcept {return masses_;}
+    std::vector<coordinate_type>&       positions()        noexcept {return positions_;}
+    std::vector<coordinate_type> const& positions()  const noexcept {return positions_;}
+    std::vector<coordinate_type>&       velocities()       noexcept {return velocities_;}
+    std::vector<coordinate_type> const& velocities() const noexcept {return velocities_;}
+    std::vector<coordinate_type>&       forces()           noexcept {return forces_;}
+    std::vector<coordinate_type> const& forces()     const noexcept {return forces_;}
+
+    // to implement these, we need a ZipIterator. but is it really needed?
+//     iterator       begin()        noexcept {return particles_.begin();}
+//     iterator       end()          noexcept {return particles_.end();}
+//     const_iterator begin()  const noexcept {return particles_.cbegin();}
+//     const_iterator end()    const noexcept {return particles_.cend();}
+//     const_iterator cbegin() const noexcept {return particles_.cbegin();}
+//     const_iterator cend()   const noexcept {return particles_.cend();}
 
     boundary_type&       boundary()       noexcept {return boundary_;}
     boundary_type const& boundary() const noexcept {return boundary_;}
@@ -70,9 +99,14 @@ class System
   private:
     real_type      largest_disp_;
     boundary_type  boundary_;
-    container_type particles_;
     topology_type  topology_;
     attribute_type attributes_;
+
+    std::size_t num_particles_;
+    std::vector<real_type>       masses_;
+    std::vector<coordinate_type> positions_;
+    std::vector<coordinate_type> velocities_;
+    std::vector<coordinate_type> forces_;
 };
 
 } // mjolnir

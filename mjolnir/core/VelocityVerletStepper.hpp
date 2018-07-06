@@ -64,14 +64,14 @@ VelocityVerletStepper<traitsT>::step(
     real_type largest_disp2(0);
     for(std::size_t i=0; i<system.size(); ++i)
     {
-        auto& particle = system[i];
+        auto pv = system[i]; // particle_view that points i-th particle.
 
-        particle.velocity += (halfdt_ / particle.mass) * particle.force;
+        pv.velocity += (halfdt_ / pv.mass) * pv.force;
 
-        const auto disp = dt_ * particle.velocity;
+        const auto disp = dt_ * pv.velocity;
 
-        particle.position = system.adjust_position(particle.position + disp);
-        particle.force    = coordinate_type(0.0, 0.0, 0.0);
+        pv.position = system.adjust_position(pv.position + disp);
+        pv.force    = coordinate_type(0.0, 0.0, 0.0);
 
         largest_disp2 = std::max(largest_disp2, length_sq(disp));
     }
@@ -83,8 +83,8 @@ VelocityVerletStepper<traitsT>::step(
     // calc v(t+dt)
     for(std::size_t i=0; i<system.size(); ++i)
     {
-        auto& particle = system[i];
-        particle.velocity += (halfdt_ / particle.mass) * particle.force;
+        auto pv = system[i];
+        pv.velocity += (halfdt_ / pv.mass) * pv.force;
     }
     return time + dt_;
 }

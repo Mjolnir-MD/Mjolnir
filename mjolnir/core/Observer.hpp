@@ -70,9 +70,9 @@ class Observer
     real_type calc_kinetic_energy(const system_type& sys) const
     {
         real_type k = 0.0;
-        for(const auto& particle : sys)
+        for(std::size_t i=0; i<sys.size(); ++i)
         {
-            k += length_sq(particle.velocity) * particle.mass;
+            k += length_sq(sys[i].velocity) * sys[i].mass;
         }
         return k * 0.5;
     }
@@ -91,12 +91,12 @@ inline void Observer<traitsT>::output(
 {
     std::ofstream ofs(xyz_name_, std::ios::app);
     ofs << sys.size() << '\n' << time << '\n';
-    for(const auto& particle : sys)
-    {// TODO change output format
+    for(const auto& position : sys.positions())
+    {
         ofs << "CA    " << std::fixed << std::setprecision(8)
-            << particle.position[0] << ' '
-            << particle.position[1] << ' '
-            << particle.position[2] << '\n';
+            << position[0] << ' '
+            << position[1] << ' '
+            << position[2] << '\n';
     }
     ofs.close();
 
