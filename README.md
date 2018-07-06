@@ -25,16 +25,21 @@ Testing code depends on the Boost.unittest framework.
 If you want to run test codes, please install boost.
 
 ```sh
-$ git submodule init   # (if you've just cloned this repo)
-$ git submodule update # (ditto)
-$ mkdir build          # (ditto)
+$ mkdir build
 $ cd build
 $ cmake ..
 $ make
 $ make test # optional
 ```
 
-`g++-5` and `clang++-3.7` on `Ubuntu 14.04`, `clang++` on `OS X` are tested on __Travis CI__.
+`g++-5` and `clang++-3.7` on `Ubuntu`, `clang++` on `OS X` are tested on
+[Travis CI](https://travis-ci.org/ToruNiina/Mjolnir).
+
+## Dependency
+
+Mjolnir depends on Boost C++ Library and toml11.
+These libraries are automatically downloaded in the CMake script.
+You need nothing to install.
 
 ## Example
 
