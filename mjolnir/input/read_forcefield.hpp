@@ -22,9 +22,9 @@ read_local_forcefield(std::vector<toml::Table> interactions)
             if(interaction.size() != 1)
             {
                 std::cerr << "WARNING: [[forcefields.local]] has `file_name` ";
-                std::cerr << "key. When `file_name` is provided, all settings ";
-                std::cerr << "will be read from the file, so other settings ";
-                std::cerr << "are ignored.\n";
+                std::cerr << "key.\n       : When `file_name` is provided, all ";
+                std::cerr << "settings will be read from the file, so other ";
+                std::cerr << "fields are ignored.\n";
                 MJOLNIR_LOG_WARN("[[forcefields.local]] has file_name and "
                                  "other settings");
             }
@@ -82,9 +82,9 @@ read_global_forcefield(std::vector<toml::Table> interactions)
             if(interaction.size() != 1)
             {
                 std::cerr << "WARNING: [[forcefields.global]] has `file_name` ";
-                std::cerr << "key. When `file_name` is provided, all settings ";
-                std::cerr << "will be read from the file, so other settings ";
-                std::cerr << "are ignored.\n";
+                std::cerr << "key.\n       : When `file_name` is provided, all ";
+                std::cerr << "settings will be read from the file, so other ";
+                std::cerr << "fields are ignored.\n";
                 MJOLNIR_LOG_WARN("[[forcefields.global]] has file_name and "
                                  "other settings");
             }
@@ -145,9 +145,9 @@ read_external_forcefield(std::vector<toml::Table> interactions)
             if(interaction.size() != 1)
             {
                 std::cerr << "WARNING: [[forcefields.external]] has `file_name` ";
-                std::cerr << "key. When `file_name` is provided, all settings ";
-                std::cerr << "will be read from the file, so other settings ";
-                std::cerr << "are ignored.\n";
+                std::cerr << "key.\n       : When `file_name` is provided, all ";
+                std::cerr << "settings will be read from the file, so other ";
+                std::cerr << "fields are ignored.\n";
                 MJOLNIR_LOG_WARN("[[forcefields.external]] has file_name and "
                                  "other settings");
             }
@@ -257,9 +257,10 @@ read_forcefield(const toml::Table& data, std::size_t N)
         MJOLNIR_SCOPE(ff.count("file_name") == 1, 1);
         if(ff.size() != 1)
         {
-            std::cerr << "WARNING: [[forcefields]] has `file_name` key.";
-            std::cerr << "When `file_name` is provided, all settings will be ";
-            std::cerr << "read from the file, so other settings are ignored.\n";
+            std::cerr << "WARNING: [[forcefields]] has `file_name` key.\n";
+            std::cerr << "       : When `file_name` is provided, all settings ";
+            std::cerr << "are read from the file, so other settings are ignored.";
+            std::cerr << std::endl;
             MJOLNIR_LOG_WARN("[[forcefields]] has file_name and other settings");
         }
 
@@ -282,8 +283,8 @@ read_forcefield(const toml::Table& data, std::size_t N)
                 std::exit(1);
             }
             std::cerr << "WARNING: in `forcefields` file, [forcefields] table ";
-            std::cerr << "is not necessary because it is obvious. ";
-            std::cerr << "You can define just [[local]], [[global]] and ";
+            std::cerr << "is not necessary.\n";
+            std::cerr << "       : define just [[local]], [[global]] and ";
             std::cerr << "[[external]] forcefields in " << file_name << '\n';
 
             MJOLNIR_LOG_INFO("reading `forcefields` table");

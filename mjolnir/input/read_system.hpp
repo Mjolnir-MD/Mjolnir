@@ -128,8 +128,8 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
     {
         if(system.size() != 1)
         {
-            std::cerr << "WARNING: [[systems]] has `file_name` key. ";
-            std::cerr << "When `file_name` is provided, all settings ";
+            std::cerr << "WARNING: [[systems]] has `file_name` key. \n";
+            std::cerr << "       : When `file_name` is provided, all settings ";
             std::cerr << "will be read from the file, so other fields ";
             std::cerr << "are ignored.\n";
             MJOLNIR_LOG_WARN("[[systems]] has `file_name` and other settings");

@@ -8,13 +8,13 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    std::cerr << "reading input file...";
+    std::cerr << "reading input file...\n";
     auto simulator = mjolnir::read_input_file(std::string(argv[1]));
-    std::cerr << " done." << std::endl;
+    std::cerr << "done." << std::endl;
 
-    std::cerr << "initializing simulator...";
+    std::cerr << "initializing simulator...\n";
     simulator->initialize();
-    std::cerr << " done." << std::endl;
+    std::cerr << "done." << std::endl;
 
     const auto start = std::chrono::system_clock::now();
     std::cerr << "start running simulation" << std::endl;
