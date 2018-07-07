@@ -143,10 +143,7 @@ read_simulator(const toml::Table& data)
             }
         }
     }
-    else
-    {
-        throw_exception<std::runtime_error>("invalid simulator type: ", type);
-    }
+    throw_exception<std::runtime_error>("invalid simulator type: ", type);
 }
 
 }
