@@ -9,7 +9,7 @@ option(DEBUG "dump debug information" OFF)
 if(DEBUG)
     add_definitions(-DMJOLNIR_DEBUG)
 endif()
-set(MJOLNIR_EXECUTABLE_LOCATION "${PROJECT_BINARY_DIR}/bin")
+set(MJOLNIR_EXECUTABLE_LOCATION "${PROJECT_SOURCE_DIR}/bin")
 
 if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/toml/toml.hpp")
     execute_process(COMMAND git submodule update --init --recursive
