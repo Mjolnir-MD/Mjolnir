@@ -44,6 +44,13 @@ read_local_forcefield(std::vector<toml::Table> interactions)
                 std::cerr << "WARNING: each local forcefield should be provided";
                 std::cerr << " as a root object of file (" << file_name <<").\n";
 
+                if(forcefield_file.at("local").type() != toml::value_t::Table)
+                {
+                    std::cerr << "FATAL  : `local` is not a toml-table.\n";
+                    std::cerr << "       : note: [[...]] means array-of-table.";
+                    std::cerr << " please take care.\n";
+                    std::exit(1);
+                }
                 lff.emplace(read_local_interaction<traitsT>(
                     toml::get<toml::Table>(forcefield_file.at("local"))));
             }
@@ -97,6 +104,14 @@ read_global_forcefield(std::vector<toml::Table> interactions)
                 MJOLNIR_LOG_INFO("key `global` found in file ", file_name);
                 std::cerr << "WARNING: each global forcefield should be provided ";
                 std::cerr << "as a root object of file (" << file_name <<").\n";
+
+                if(forcefield_file.at("global").type() != toml::value_t::Table)
+                {
+                    std::cerr << "FATAL  : `global` is not a toml-table.\n";
+                    std::cerr << "       : note: [[...]] means array-of-table.";
+                    std::cerr << " please take care.\n";
+                    std::exit(1);
+                }
 
                 gff.emplace(read_global_interaction<traitsT>(
                     toml::get<toml::Table>(forcefield_file.at("global"))));
@@ -152,6 +167,13 @@ read_external_forcefield(std::vector<toml::Table> interactions)
                 MJOLNIR_LOG_INFO("key `external` found in file ", file_name);
                 std::cerr << "WARNING: each external forcefield should be provided ";
                 std::cerr << "as a root object of file (" << file_name <<").\n";
+                if(forcefield_file.at("external").type() != toml::value_t::Table)
+                {
+                    std::cerr << "FATAL  : `external` is not a toml-table.\n";
+                    std::cerr << "       : note: [[...]] means array-of-table.";
+                    std::cerr << " please take care.\n";
+                    std::exit(1);
+                }
 
                 eff.emplace(read_external_interaction<traitsT>(
                     toml::get<toml::Table>(forcefield_file.at("external"))));
@@ -255,14 +277,14 @@ read_forcefield(const toml::Table& data, std::size_t N)
             {
                 std::cerr << "FATAL: each [forcefields] should be provided as ";
                 std::cerr << "a table in each file (" << file_name <<  ").\n";
-                std::cerr << "     : because it represents one set of ";
-                std::cerr << "forcefield. currently it is provided as ";
-                std::cerr << forcefield_toml_type << ".\n";
+                std::cerr << "       : note: [[...]] means array-of-table. ";
+                std::cerr << "please take care.\n";
                 std::exit(1);
             }
-            std::cerr << "WARNING: [forcefields] isn't necessary for splitted ";
-            std::cerr << "toml file. you can define just [[local]], [[global]]";
-            std::cerr << " and [[external]] forcefields in " << file_name << '\n';
+            std::cerr << "WARNING: in `forcefields` file, [forcefields] table ";
+            std::cerr << "is not necessary because it is obvious. ";
+            std::cerr << "You can define just [[local]], [[global]] and ";
+            std::cerr << "[[external]] forcefields in " << file_name << '\n';
 
             MJOLNIR_LOG_INFO("reading `forcefields` table");
             return read_forcefield_from_table<traitsT>(forcefield_file.at(
@@ -273,7 +295,6 @@ read_forcefield(const toml::Table& data, std::size_t N)
     // else
     return read_forcefield_from_table<traitsT>(ff);
 }
-
 
 } // mjolnir
 #endif// MJOLNIR_READ_FORCEFIELD
