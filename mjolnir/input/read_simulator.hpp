@@ -117,9 +117,9 @@ read_simulated_annealing_simulator(
     const std::string schedule = toml::get<std::string>(toml_value_at(
             simulator, "schedule", "[simulator]"));
     const real_type   T_from = toml::get<real_type>(toml_value_at(
-            simulator, "temperature_from", "[simulator]"));
+            simulator, "T_begin", "[simulator]"));
     const real_type   T_to   = toml::get<real_type>(toml_value_at(
-            simulator, "temperature_to",  "[simulator]"));
+            simulator, "T_end",  "[simulator]"));
     const std::size_t each_step = toml::get<std::size_t>(toml_value_at(
             simulator, "each_step",  "[simulator]"));
 
