@@ -58,16 +58,16 @@ read_boundary(const toml::Table& data)
         return read_parameter<
             SimulatorTraitsBase<realT, UnlimitedBoundary>>(data);
     }
-    else if(boundary == "PeriodicCube")
+    else if(boundary == "PeriodicCuboid")
     {
-        MJOLNIR_LOG_INFO("boundary is CubicPeriodicBoudanry");
+        MJOLNIR_LOG_INFO("boundary is CuboidalPeriodicBoudanry");
         return read_parameter<
-            SimulatorTraitsBase<realT, CubicPeriodicBoundary>>(data);
+            SimulatorTraitsBase<realT, CuboidalPeriodicBoundary>>(data);
     }
     else
     {
         throw std::runtime_error(
-            "invalid boundary setting (Unlimited|PeriodicCube): " + boundary);
+            "invalid boundary setting (Unlimited|PeriodicCuboid): " + boundary);
     }
 }
 

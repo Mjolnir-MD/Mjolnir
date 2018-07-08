@@ -27,14 +27,14 @@ struct read_boundary_impl<UnlimitedBoundary<realT, coordT>>
 };
 
 template<typename realT, typename coordT>
-struct read_boundary_impl<CubicPeriodicBoundary<realT, coordT>>
+struct read_boundary_impl<CuboidalPeriodicBoundary<realT, coordT>>
 {
-    static CubicPeriodicBoundary<realT, coordT>
+    static CuboidalPeriodicBoundary<realT, coordT>
     invoke(const toml::Table& boundary)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_SCOPE(read_boundary_impl::invoke(), 0);
-        MJOLNIR_LOG_INFO("shape of periodic boundary is cubic");
+        MJOLNIR_LOG_INFO("shape of periodic boundary is cuboid");
 
         const coordT upper(toml::get<std::array<realT, 3>>(
                     toml_value_at(boundary, "upper", "[boundary]")));
@@ -45,7 +45,7 @@ struct read_boundary_impl<CubicPeriodicBoundary<realT, coordT>>
         assert(upper[2] > lower[2]);
         MJOLNIR_LOG_INFO("upper limit of the boundary = ", upper);
         MJOLNIR_LOG_INFO("lower limit of the boundary = ", lower);
-        return CubicPeriodicBoundary<realT, coordT>(lower, upper);
+        return CuboidalPeriodicBoundary<realT, coordT>(lower, upper);
     }
 };
 

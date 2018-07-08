@@ -1,12 +1,11 @@
 # vim: foldmethod=marker
 [general]
-precision     = "double"        # one of {"float", "double"}.
-boundary      = "PeriodicCube"  # one of {"PeriodicCube", "Unlimited"}
-boundary      = "Unlimited"     # one of {"PeriodicCube", "Unlimited"}
-thread        = false           # enable threading parallelization
-GPU           = false           # enable GPU parallelization
-output_prefix = "lennard-jones" # file prefix.
-output_path   = "./"            # output path
+precision     = "double"         # one of {"float", "double"}.
+boundary      = "PeriodicCuboid" # one of {"PeriodicCuboid", "Unlimited"}
+thread        = false            # enable threading parallelization
+GPU           = false            # enable GPU parallelization
+output_prefix = "lennard-jones"  # file prefix.
+output_path   = "./"             # output path
 
 [parameters]
 kB   = 1.986231313e-3  # Boltzmann constant

@@ -22,7 +22,7 @@ class Plane
     typedef typename traits_type::boundary_type    boundary_type;
 
     static_assert(!std::is_same<boundary_type,
-            CubicPeriodicBoundary<real_type, coordinate_type>>::value,
+            CuboidalPeriodicBoundary<real_type, coordinate_type>>::value,
     "Plane that is NOT aligned with axes is not suitable to PeriodicBoundary");
 
   public:

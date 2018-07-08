@@ -26,7 +26,7 @@ struct celllist_dispatcher<UnlimitedBoundary<realT, coordT>, traitsT>
 };
 
 template<typename realT, typename coordT, typename traitsT>
-struct celllist_dispatcher<CubicPeriodicBoundary<realT, coordT>, traitsT>
+struct celllist_dispatcher<CuboidalPeriodicBoundary<realT, coordT>, traitsT>
 {
     typedef PeriodicGridCellList<traitsT> type;
     typedef realT real_type;

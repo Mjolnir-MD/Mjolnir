@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_NegativeZ_geometry_unlimited)
 BOOST_AUTO_TEST_CASE(AxisAlignedPlane_geometry_periodic)
 {
     mjolnir::LoggerManager::set_default_logger("test_AxisAlignedPlane");
-    using traits = mjolnir::test::traits<double, mjolnir::CubicPeriodicBoundary>;
+    using traits = mjolnir::test::traits<double, mjolnir::CuboidalPeriodicBoundary>;
     using real_type     = typename traits::real_type;
     using coord_type    = typename traits::coordinate_type;
     using boundary_type = typename traits::boundary_type;

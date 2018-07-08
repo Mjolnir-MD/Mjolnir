@@ -19,7 +19,7 @@ struct UnlimitedBoundary
 };
 
 template<typename realT, typename coordT>
-struct CubicPeriodicBoundary
+struct CuboidalPeriodicBoundary
 {
   public:
     typedef realT  real_type;
@@ -27,11 +27,11 @@ struct CubicPeriodicBoundary
 
   public:
 
-    CubicPeriodicBoundary(
+    CuboidalPeriodicBoundary(
             const coordinate_type& lw, const coordinate_type& up) noexcept
         : lower_(lw), upper_(up), width_(up - lw), halfw_((up - lw) / 2)
     {}
-    ~CubicPeriodicBoundary() = default;
+    ~CuboidalPeriodicBoundary() = default;
 
     coordinate_type adjust_direction(coordinate_type dr) const noexcept
     {
