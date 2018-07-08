@@ -21,9 +21,10 @@ class SteepestDescentSimulator final : public SimulatorBase
     typedef typename traits_type::coordinate_type coordinate_type;
 
     SteepestDescentSimulator(const real_type h, const real_type threshold,
-            const std::size_t step_limit,
+            const std::size_t step_limit, const std::size_t save_step,
             system_type&& sys, forcefield_type&& ff, observer_type&& obs)
-    : h_(h), threshold_(threshold), step_limit_(step_limit), step_count_(0),
+    : h_(h), threshold_(threshold),
+      step_limit_(step_limit), step_count_(0), save_step_(save_step),
       system_(std::move(sys)), ff_(std::move(ff)), observer_(std::move(obs))
     {}
     ~SteepestDescentSimulator() override = default;
@@ -45,6 +46,7 @@ class SteepestDescentSimulator final : public SimulatorBase
     real_type       threshold_;
     std::size_t     step_limit_;
     std::size_t     step_count_;
+    std::size_t     save_step_;
     system_type     system_;
     forcefield_type ff_;
     observer_type   observer_;
@@ -89,7 +91,7 @@ inline bool SteepestDescentSimulator<traitsT>::step()
     }
     this->system_.largest_displacement() = std::sqrt(max_disp2);
 
-    if(observer_.is_output_time())
+    if(step_count_ % save_step_ == 0)
     {
         this->observer_.output(static_cast<real_type>(this->step_count_),
                                this->system_, this->ff_);

@@ -28,6 +28,8 @@ read_molecular_dynamics_simulator(
             simulator, "scheme", "[simulator]"));
     const std::size_t tstep = toml::get<std::size_t>(toml_value_at(
             simulator, "total_step", "[simulator]"));
+    const std::size_t sstep = toml::get<std::size_t>(toml_value_at(
+            simulator, "save_step", "[simulator]"));
 
     MJOLNIR_LOG_INFO("total step = ", tstep);
 
@@ -37,10 +39,10 @@ read_molecular_dynamics_simulator(
         using integrator_t = VelocityVerletStepper<traitsT>;
         using simulator_t  = MDSimulator<traitsT, integrator_t>;
         return make_unique<simulator_t>(
-                tstep,
+                tstep, sstep,
                 read_system<traitsT>(data, 0),
                 read_forcefield<traitsT>(data, 0),
-                read_velocity_verlet_stepper<traitsT>(data),
+                read_velocity_verlet_stepper<traitsT>(simulator),
                 read_observer<traitsT>(data));
     }
     else if(integration == "Underdamped Langevin")
@@ -49,10 +51,10 @@ read_molecular_dynamics_simulator(
         using integrator_t = UnderdampedLangevinStepper<traitsT>;
         using simulator_t  = MDSimulator<traitsT, integrator_t>;
         return make_unique<simulator_t>(
-                tstep,
+                tstep, sstep,
                 read_system<traitsT>(data, 0),
                 read_forcefield<traitsT>(data, 0),
-                read_underdamped_langevin_stepper<traitsT>(data),
+                read_underdamped_langevin_stepper<traitsT>(simulator),
                 read_observer<traitsT>(data));
     }
     else
@@ -74,17 +76,20 @@ read_steepest_descent_simulator(
 
     const std::size_t step_lim  = toml::get<std::size_t>(toml_value_at(
             simulator, "step_limit", "[simulator]"));
+    const std::size_t save_step = toml::get<std::size_t>(toml_value_at(
+            simulator, "save_step", "[simulator]"));
     const real_type   delta     = toml::get<real_type>(toml_value_at(
             simulator, "delta", "[simulator]"));
     const real_type   threshold = toml::get<real_type>(toml_value_at(
             simulator, "threshold", "[simulator]"));
 
     MJOLNIR_LOG_INFO("step_lim  = ", step_lim);
+    MJOLNIR_LOG_INFO("save_step = ", save_step);
     MJOLNIR_LOG_INFO("delta     = ", delta);
     MJOLNIR_LOG_INFO("threshold = ", threshold);
 
     return make_unique<simulator_type>(
-            delta, threshold, step_lim,
+            delta, threshold, step_lim, save_step,
             read_system<traitsT>(data, 0),
             read_forcefield<traitsT>(data, 0),
             read_observer<traitsT>(data));
@@ -103,8 +108,11 @@ read_simulated_annealing_simulator(
             simulator, "scheme", "[simulator]"));
     const std::size_t tstep = toml::get<std::size_t>(toml_value_at(
             simulator, "total_step", "[simulator]"));
+    const std::size_t sstep = toml::get<std::size_t>(toml_value_at(
+            simulator, "save_step", "[simulator]"));
 
     MJOLNIR_LOG_INFO("total step = ", tstep);
+    MJOLNIR_LOG_INFO("save  step = ", sstep);
 
     const std::string schedule = toml::get<std::string>(toml_value_at(
             simulator, "schedule", "[simulator]"));
@@ -135,11 +143,11 @@ read_simulated_annealing_simulator(
                 traitsT, integrator_t, linear_schedule>;
 
             MJOLNIR_LOG_INFO("Underdamped Langevin is used as a MD engine");
-            return make_unique<simulator_t>(tstep, each_step,
+            return make_unique<simulator_t>(tstep, sstep, each_step,
                     linear_schedule<real_type>(T_from, T_to),
                     read_system<traitsT>(data, 0),
                     read_forcefield<traitsT>(data, 0),
-                    read_underdamped_langevin_stepper<traitsT>(data),
+                    read_underdamped_langevin_stepper<traitsT>(simulator),
                     read_observer<traitsT>(data));
         }
         else

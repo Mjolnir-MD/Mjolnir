@@ -10,30 +10,25 @@ namespace mjolnir
 
 template<typename traitsT>
 VelocityVerletStepper<traitsT>
-read_velocity_verlet_stepper(const toml::Table& data)
+read_velocity_verlet_stepper(const toml::Table& simulator)
 {
     typedef typename traitsT::real_type real_type;
-
-    const auto& simulator = toml_value_at(data, "simulator", "<root>"
-            ).cast<toml::value_t::Table>();
     return VelocityVerletStepper<traitsT>(toml::get<real_type>(
-            toml_value_at(simulator, "delta_t", "[[simulator]]")));
+            toml_value_at(simulator, "delta_t", "[simulator]")));
 }
 
 
 template<typename traitsT>
 UnderdampedLangevinStepper<traitsT>
-read_underdamped_langevin_stepper(const toml::Table& data)
+read_underdamped_langevin_stepper(const toml::Table& simulator)
 {
     typedef typename traitsT::real_type real_type;
 
-    const auto& simulator  = toml_value_at(data, "simulator", "<root>"
-            ).cast<toml::value_t::Table>();
     const auto& parameters = toml_value_at(
-            simulator, "parameters", "[[simulator]]").cast<toml::value_t::Array>();
+            simulator, "parameters", "[simulator]").cast<toml::value_t::Array>();
 
     const std::uint32_t seed = toml::get<std::uint32_t>(
-            toml_value_at(simulator, "seed", "[[simulator]]"));
+            toml_value_at(simulator, "seed", "[simulator]"));
 
     std::vector<real_type> gamma(parameters.size());
     for(const auto& tab : parameters)
@@ -49,7 +44,7 @@ read_underdamped_langevin_stepper(const toml::Table& data)
     }
 
     return UnderdampedLangevinStepper<traitsT>(toml::get<real_type>(
-            toml_value_at(simulator, "delta_t", "[[simulator]]")),
+            toml_value_at(simulator, "delta_t", "[simulator]")),
             std::move(gamma), RandomNumberGenerator<traitsT>(seed));
 }
 

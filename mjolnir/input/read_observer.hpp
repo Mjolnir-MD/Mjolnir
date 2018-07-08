@@ -26,13 +26,7 @@ read_observer(const toml::Table& data)
     MJOLNIR_LOG_INFO("path   = ", path);
     MJOLNIR_LOG_INFO("prefix = ", prefix);
 
-    const auto& simulator = toml_value_at(data, "simulator", "<root>"
-            ).cast<toml::value_t::Table>();
-    const std::size_t interval = toml::get<std::size_t>(
-            toml_value_at(simulator, "save_step", "[simulator]"));
-    MJOLNIR_LOG_INFO("interval = ", interval);
-
-    return Observer<traitsT>(path + prefix, interval);
+    return Observer<traitsT>(path + prefix);
 }
 
 

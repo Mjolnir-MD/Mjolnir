@@ -20,10 +20,12 @@ class MDSimulator final : public SimulatorBase
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
-    MDSimulator(const std::size_t tstep, system_type&& sys, forcefield_type&& ff,
+    MDSimulator(const std::size_t tstep, const std::size_t save_step,
+                system_type&& sys, forcefield_type&& ff,
                 integrator_type&& integr, observer_type&& obs)
-    : total_step_(tstep), step_count_(0), time_(0.), system_(std::move(sys)),
-      ff_(std::move(ff)), integrator_(std::move(integr)), observer_(std::move(obs))
+    : total_step_(tstep), step_count_(0), save_step_(save_step), time_(0.),
+      system_(std::move(sys)), ff_(std::move(ff)),
+      integrator_(std::move(integr)), observer_(std::move(obs))
     {}
     ~MDSimulator() override = default;
 
@@ -45,6 +47,7 @@ class MDSimulator final : public SimulatorBase
   protected:
     std::size_t     total_step_;
     std::size_t     step_count_;
+    std::size_t     save_step_;
     real_type       time_;
     system_type     system_;
     forcefield_type ff_;
@@ -70,7 +73,7 @@ inline bool MDSimulator<traitsT, integratorT>::step()
     ++step_count_;
     this->time_ = this->step_count_ * integrator_.delta_t();
 
-    if(observer_.is_output_time())
+    if(step_count_ % save_step_ == 0)
     {
         observer_.output(this->time_, this->system_, this->ff_);
     }

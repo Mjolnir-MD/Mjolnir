@@ -49,11 +49,13 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef scheduleT<real_type> scheduler_type;
 
-    SimulatedAnnealingSimulator(const std::size_t tstep,
+    SimulatedAnnealingSimulator(
+        const std::size_t tstep,     const std::size_t sstep,
         const std::size_t each_step, scheduler_type&&  scheduler,
         system_type&&     sys,       forcefield_type&& ff,
         integrator_type&& integr,    observer_type&&   obs)
-    : total_step_(tstep), step_count_(0), time_(0.), r_total_step_(1.0 / tstep),
+    : total_step_(tstep), step_count_(0), save_step_(sstep),
+      time_(0.), r_total_step_(1.0 / tstep),
       each_step_(each_step), scheduler_(scheduler),
       system_(std::move(sys)), ff_(std::move(ff)),
       integrator_(std::move(integr)), observer_(std::move(obs))
@@ -78,6 +80,7 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
   protected:
     std::size_t     total_step_;
     std::size_t     step_count_;
+    std::size_t     save_step_;
     std::size_t     each_step_;
     real_type       time_;
     real_type       r_total_step_;
@@ -126,7 +129,7 @@ inline bool SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::step()
 
     this->integrator_.update(system_);
 
-    if(observer_.is_output_time())
+    if(step_count_ % save_step_ == 0)
     {
         observer_.output(this->time_, this->system_, this->ff_);
     }

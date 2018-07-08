@@ -19,10 +19,9 @@ class Observer
     typedef typename traits_type::coordinate_type coordinate_type;
 
   public:
-    Observer(const std::string& filename_prefix, const std::size_t interval)
-        : interval_(interval), observe_count_(0),
-          xyz_name_(filename_prefix + std::string(".xyz")),
-          ene_name_(filename_prefix + std::string(".ene"))
+    Observer(const std::string& filename_prefix) :
+        xyz_name_(filename_prefix + std::string(".xyz")),
+        ene_name_(filename_prefix + std::string(".ene"))
     {
         // clear the contents
         {
@@ -43,17 +42,6 @@ class Observer
         }
     }
     ~Observer() = default;
-
-    bool is_output_time()
-    {
-        ++observe_count_;
-        if(this->observe_count_ == interval_)
-        {
-            this->observe_count_ = 0;
-            return true;
-        }
-        return false;
-    }
 
     void initialize(const system_type& sys, const forcefield_type& ff) const
     {
@@ -79,8 +67,6 @@ class Observer
 
   private:
 
-    std::size_t interval_;
-    std::size_t observe_count_;
     std::string xyz_name_;
     std::string ene_name_;
 };
@@ -104,7 +90,6 @@ inline void Observer<traitsT>::output(
     ofs << time << ' ' << ff.dump_energy(sys) << ' '
         << this->calc_kinetic_energy(sys) << '\n';
     ofs.close();
-
     return ;
 }
 
