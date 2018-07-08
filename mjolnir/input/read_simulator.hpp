@@ -157,14 +157,11 @@ read_simulated_annealing_simulator(
 
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
-read_simulator(const toml::Table& data)
+read_simulator_from_table(const toml::Table& data, const toml::Table& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_simulator(), 0);
+    MJOLNIR_SCOPE(read_simulator_from_table(), 0);
 
-    using real_type   = typename traitsT::real_type;
-    const auto& simulator = toml_value_at(data, "simulator", "<root>"
-            ).cast<toml::value_t::Table>();
     const std::string type = toml::get<std::string>(
             toml_value_at(simulator, "type", "[simulator]"));
 
@@ -186,6 +183,63 @@ read_simulator(const toml::Table& data)
     else
     {
         throw_exception<std::runtime_error>("invalid simulator type: ", type);
+    }
+}
+
+template<typename traitsT>
+std::unique_ptr<SimulatorBase>
+read_simulator(const toml::Table& data)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_simulator(), 0);
+
+    using real_type   = typename traitsT::real_type;
+    const auto& simulator = toml_value_at(data, "simulator", "<root>"
+            ).cast<toml::value_t::Table>();
+
+    if(simulator.count("file_name") == 1)
+    {
+        MJOLNIR_SCOPE(simulator.count("file_name") == 1, 1);
+        if(simulator.size() != 1)
+        {
+            std::cerr << "WARNING: [simulator] has `file_name` key.\n";
+            std::cerr << "       : When `file_name` is provided, all settings ";
+            std::cerr << "are read from the file, so other fields are ignored.";
+            std::cerr << std::endl;
+            MJOLNIR_LOG_WARN("[simulator] has file_name and other settings");
+        }
+
+        const std::string file_name =
+            toml::get<std::string>(simulator.at("file_name"));
+        MJOLNIR_LOG_INFO("file_name = ", file_name);
+
+        const auto simulator_file = toml::parse(file_name);
+        if(simulator_file.count("simulator") == 1)
+        {
+            MJOLNIR_LOG_ERROR("`simulator` value found in ", file_name);
+
+            const auto simulator_toml_type =
+                simulator_file.at("simulator").type();
+            if(simulator_toml_type != toml::value_t::Table)
+            {
+                std::cerr << "FATAL: each [simulator] should be provided as ";
+                std::cerr << "a table in each file (" << file_name <<  ").\n";
+                std::cerr << "       : note: [[...]] means array-of-table. ";
+                std::cerr << "please take care.\n";
+                std::exit(1);
+            }
+            std::cerr << "WARNING: in `simulator` file, [simulator] table ";
+            std::cerr << "is not necessary.\n";
+
+            MJOLNIR_LOG_INFO("reading `[simulator]` table");
+            return read_simulator_from_table<traitsT>(data, simulator_file.at(
+                    "simulator").template cast<toml::value_t::Table>());
+        }
+        return read_simulator_from_table<traitsT>(data, simulator_file);
+    }
+    else
+    {
+        return read_simulator_from_table<traitsT>(data, simulator);
     }
 }
 
