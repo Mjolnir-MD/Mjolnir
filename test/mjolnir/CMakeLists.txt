@@ -25,12 +25,9 @@ set(TEST_NAMES
 add_definitions("-O3 -std=c++11")
 
 if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
-    message(STATUS "boost_unit_test_framework found @ ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}")
+    message(STATUS "boost_unit_test_framework precompiled library found -> ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}")
     add_definitions(-DBOOST_TEST_DYN_LINK)
     add_definitions(-DUNITTEST_FRAMEWORK_LIBRARY_EXIST)
-else()
-    message(STATUS "boost_unit_test_framework could not be found.")
-    message(STATUS "disabling linking. It makes compilation time longer...")
 endif()
 
 foreach(TEST_NAME ${TEST_NAMES})
