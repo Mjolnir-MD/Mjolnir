@@ -38,7 +38,6 @@ read_harmonic_potential(const toml::Table& local)
     std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
 
-    MJOLNIR_LOG_INFO("{{{");
     for(const auto& item : params)
     {
         using real_type = typename traitsT::real_type;
@@ -47,7 +46,7 @@ read_harmonic_potential(const toml::Table& local)
         const auto& parameter = item.cast<toml::value_t::Table>();
         auto indices = toml::get<indices_t>(toml_value_at(parameter, "indices",
                 "element of [[parameters]] in harmonic potential"));
-        auto r0 = toml::get<real_type>(toml_value_at(parameter, "eq",
+        auto r0 = toml::get<real_type>(toml_value_at(parameter, "v0",
                 "element of [[parameters]] in harmonic potential"));
         auto k  = toml::get<real_type>(toml_value_at(parameter, "k",
                 "element of [[parameters]] in harmonic potential"));
@@ -57,7 +56,6 @@ read_harmonic_potential(const toml::Table& local)
 
         retval.emplace_back(indices, HarmonicPotential<traitsT>(k, r0));
     }
-    MJOLNIR_LOG_INFO("}}}");
     return retval;
 }
 
@@ -88,7 +86,6 @@ read_go1012_contact_potential(const toml::Table& local)
     std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
 
-    MJOLNIR_LOG_INFO("{{{");
     for(const auto& item : params)
     {
         MJOLNIR_SCOPE(for each parameters, 1);
@@ -97,7 +94,7 @@ read_go1012_contact_potential(const toml::Table& local)
 
         auto indices = toml::get<indices_t>(toml_value_at(parameter, "indices",
                 "element of [[parameters]] in Go-10-12 potential"));
-        auto r0 = toml::get<real_type>(toml_value_at(parameter, "eq",
+        auto r0 = toml::get<real_type>(toml_value_at(parameter, "v0",
                 "element of [[parameters]] in Go-10-12 potential"));
         auto k  = toml::get<real_type>(toml_value_at(parameter, "k",
                 "element of [[parameters]] in Go-10-12 potential"));
@@ -108,7 +105,6 @@ read_go1012_contact_potential(const toml::Table& local)
 
         retval.emplace_back(indices, Go1012ContactPotential<traitsT>(k, r0));
     }
-    MJOLNIR_LOG_INFO("}}}");
     return retval;
 }
 
@@ -132,7 +128,6 @@ read_gaussian_potential(const toml::Table& local)
     std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
 
-    MJOLNIR_LOG_INFO("{{{");
     for(const auto& item : params)
     {
         using real_type = typename traitsT::real_type;
@@ -142,7 +137,7 @@ read_gaussian_potential(const toml::Table& local)
 
         auto indices = toml::get<indices_t>(toml_value_at(parameter, "indices",
                 "element of [[parameters]] in Gaussian potential"));
-        auto eq      = toml::get<real_type>(toml_value_at(parameter, "eq",
+        auto v0      = toml::get<real_type>(toml_value_at(parameter, "v0",
                 "element of [[parameters]] in Gaussian potential"));
         auto epsilon = toml::get<real_type>(toml_value_at(parameter, "epsilon",
                 "element of [[parameters]] in Gaussian potential"));
@@ -150,14 +145,13 @@ read_gaussian_potential(const toml::Table& local)
                 "element of [[parameters]] in Gaussian potential"));
 
         MJOLNIR_LOG_INFO("idxs    = ", indices);
-        MJOLNIR_LOG_INFO("r0      = ", eq);
+        MJOLNIR_LOG_INFO("r0      = ", v0);
         MJOLNIR_LOG_INFO("epsilon = ", epsilon);
         MJOLNIR_LOG_INFO("w       = ", w );
 
         retval.emplace_back(
-                indices, GaussianPotential<traitsT>(epsilon, w, eq));
+                indices, GaussianPotential<traitsT>(epsilon, w, v0));
     }
-    MJOLNIR_LOG_INFO("}}}");
     return retval;
 }
 
@@ -187,7 +181,6 @@ read_flexible_local_angle_potential(const toml::Table& local)
     std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
 
-    MJOLNIR_LOG_INFO("{{{");
     for(const auto& item : params)
     {
         MJOLNIR_SCOPE(for each parameters, 1);
@@ -212,7 +205,6 @@ read_flexible_local_angle_potential(const toml::Table& local)
         retval.emplace_back(
                 indices, FlexibleLocalAnglePotential<traitsT>(k, term1, term2));
     }
-    MJOLNIR_LOG_INFO("}}}");
     return retval;
 }
 
@@ -242,7 +234,6 @@ read_clementi_dihedral_potential(const toml::Table& local)
     std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
 
-    MJOLNIR_LOG_INFO("{{{");
     for(const auto& item : params)
     {
         MJOLNIR_SCOPE(for each parameters, 1);
@@ -251,7 +242,7 @@ read_clementi_dihedral_potential(const toml::Table& local)
 
         auto indices = toml::get<indices_t>(toml_value_at(parameter, "indices",
                 "element of [[parameters]] in ClementiDihedral potential"));
-        auto eq = toml::get<real_type>(toml_value_at(parameter, "eq",
+        auto v0 = toml::get<real_type>(toml_value_at(parameter, "v0",
                 "element of [[parameters]] in ClementiDihedral potential"));
         auto k1 = toml::get<real_type>(toml_value_at(parameter, "k1",
                 "element of [[parameters]] in ClementiDihedral potential"));
@@ -259,14 +250,13 @@ read_clementi_dihedral_potential(const toml::Table& local)
                 "element of [[parameters]] in ClementiDihedral potential"));
 
         MJOLNIR_LOG_INFO("idxs = ", indices);
-        MJOLNIR_LOG_INFO("phi0 = ", eq);
+        MJOLNIR_LOG_INFO("phi0 = ", v0);
         MJOLNIR_LOG_INFO("k1   = ", k1);
         MJOLNIR_LOG_INFO("k3   = ", k3);
 
         retval.emplace_back(
-                indices, ClementiDihedralPotential<traitsT>(k1, k3, eq));
+                indices, ClementiDihedralPotential<traitsT>(k1, k3, v0));
     }
-    MJOLNIR_LOG_INFO("}}}");
     return retval;
 }
 
@@ -296,7 +286,6 @@ read_flexible_local_dihedral_potential(const toml::Table& local)
     std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
 
-    MJOLNIR_LOG_INFO("{{{");
     for(const auto& item : params)
     {
         MJOLNIR_SCOPE(for each parameters, 1);
@@ -318,7 +307,6 @@ read_flexible_local_dihedral_potential(const toml::Table& local)
        retval.emplace_back(
                 indices, FlexibleLocalDihedralPotential<traitsT>(k, term));
     }
-    MJOLNIR_LOG_INFO("}}}");
     return retval;
 }
 
@@ -359,7 +347,6 @@ read_excluded_volume_potential(const toml::Table& global)
     std::vector<real_type> params;
     params.reserve(ps.size());
 
-    MJOLNIR_LOG_INFO("{{{");
     for(const auto& param : ps)
     {
         MJOLNIR_SCOPE(for each parameters, 1);
@@ -378,7 +365,6 @@ read_excluded_volume_potential(const toml::Table& global)
         MJOLNIR_LOG_INFO("sgm = ", sgm);
         params.at(idx) = sgm;
     }
-    MJOLNIR_LOG_INFO("}}}");
 
     return ExcludedVolumePotential<traitsT, ignoreT>(
             eps, std::move(params), connections);
@@ -412,7 +398,6 @@ read_lennard_jones_potential(const toml::Table& global)
 
     std::vector<std::pair<real_type, real_type>> params;
     params.reserve(ps.size());
-    MJOLNIR_LOG_INFO("{{{");
     for(const auto& param : ps)
     {
         MJOLNIR_SCOPE(for each parameters, 1);
@@ -435,7 +420,6 @@ read_lennard_jones_potential(const toml::Table& global)
 
         params.at(idx) = std::make_pair(sigma, epsilon);
     }
-    MJOLNIR_LOG_INFO("}}}");
 
     return LennardJonesPotential<traitsT, ignoreT>(
             std::move(params), connections);
@@ -469,7 +453,6 @@ read_debye_huckel_potential(const toml::Table& global)
 
     std::vector<real_type> params;
     params.reserve(ps.size());
-    MJOLNIR_LOG_INFO("{{{");
     for(const auto& param : ps)
     {
         MJOLNIR_SCOPE(for each parameters, 1);
@@ -486,7 +469,6 @@ read_debye_huckel_potential(const toml::Table& global)
         MJOLNIR_LOG_INFO("charge = ", charge);
         params.at(idx) = charge;
     }
-    MJOLNIR_LOG_INFO("}}}");
 
     return DebyeHuckelPotential<traitsT, ignoreT>(
             std::move(params), connections);
@@ -521,7 +503,6 @@ read_implicit_membrane_potential(const toml::Table& external)
 
     std::vector<real_type> params;
     params.reserve(ps.size());
-    MJOLNIR_LOG_INFO("{{{");
     for(const auto& param : ps)
     {
         MJOLNIR_SCOPE(for each parameters, 1);
@@ -541,7 +522,6 @@ read_implicit_membrane_potential(const toml::Table& external)
         MJOLNIR_LOG_INFO("h   = ", h);
         params.at(idx) = h;
     }
-    MJOLNIR_LOG_INFO("}}}");
 
     return ImplicitMembranePotential<traitsT>(
             thickness, magnitude, bend, std::move(params));
@@ -562,7 +542,6 @@ read_lennard_jones_wall_potential(const toml::Table& external)
 
     std::vector<std::pair<real_type, real_type>> params;
     params.reserve(ps.size());
-    MJOLNIR_LOG_INFO("{{{");
     for(const auto& param : ps)
     {
         MJOLNIR_SCOPE(for each parameters, 1);
@@ -586,7 +565,6 @@ read_lennard_jones_wall_potential(const toml::Table& external)
         MJOLNIR_LOG_INFO("epsilon = ", e);
         params.at(idx) = std::make_pair(s, e);
     }
-    MJOLNIR_LOG_INFO("}}}");
     return LennardJonesWallPotential<traitsT>(std::move(params));
 }
 
