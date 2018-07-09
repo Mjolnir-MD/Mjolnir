@@ -45,11 +45,10 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
     MJOLNIR_SCOPE(read_spatial_partition_for_distance(), 0);
     typedef typename traitsT::real_type real_type;
 
-    const auto& sp = toml_value_at(
-            global, "spatial_partition", "[forcefield.global]"
-            ).cast<toml::value_t::Table>();
-    const auto  type = toml::get<std::string>(
-            toml_value_at(sp, "type", "[forcefield.global]"));
+    const auto& sp   = get_toml_value<toml::Table>(
+            global, "spatial_partition", "[forcefield.global]");
+    const auto  type = get_toml_value<std::string>(
+            sp, "type", "[forcefield.global]");
 
     if(type == "CellList")
     {
@@ -58,8 +57,8 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
         using dispatcher    = celllist_dispatcher<boundary_type, traitsT>;
         using celllist_type = typename dispatcher::type;
 
-        const auto mg = toml::get<real_type>(
-                toml_value_at(sp, "margin", "[forcefield.global]"));
+        const auto mg =
+            get_toml_value<real_type>(sp, "margin", "[forcefield.global]");
         MJOLNIR_LOG_INFO("margin = ", mg);
 
         return make_unique<GlobalDistanceInteraction<
@@ -70,8 +69,8 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
     {
         MJOLNIR_SCOPE(type == "VerletList", 1);
 
-        const auto margin = toml::get<real_type>(toml_value_at(
-                    sp, "margin", "[forcefield.global]"));
+        const auto margin = get_toml_value<real_type>(
+                    sp, "margin", "[forcefield.global]");
         MJOLNIR_LOG_INFO("margin = ", margin);
 
         return make_unique<GlobalDistanceInteraction<

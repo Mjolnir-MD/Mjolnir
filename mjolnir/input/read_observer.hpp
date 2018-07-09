@@ -14,15 +14,15 @@ read_observer(const toml::Table& data)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_observer(), 0);
 
-    const auto& general = toml_value_at(data, "general", "<root>"
-            ).cast<toml::value_t::Table>();
-    std::string path = toml::get<std::string>(
-            toml_value_at(general, "output_path", "[general]"));
-    //XXX assuming posix
-    if(path.back() != '/') {path += '/';}
+    const auto& general =
+        get_toml_value<toml::Table>(data, "general", "<root>");
 
-    const std::string prefix = toml::get<std::string>(
-            toml_value_at(general, "output_prefix", "[general]"));
+    std::string path =
+        get_toml_value<std::string>(general, "output_path", "[general]");
+    if(path.back() != '/') {path += '/';} //XXX assuming posix
+
+    const std::string prefix = get_toml_value<std::string>(
+            general, "output_prefix", "[general]");
     MJOLNIR_LOG_INFO("path   = ", path);
     MJOLNIR_LOG_INFO("prefix = ", prefix);
 

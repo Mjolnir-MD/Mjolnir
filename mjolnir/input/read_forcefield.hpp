@@ -28,8 +28,8 @@ read_local_forcefield(std::vector<toml::Table> interactions)
                 MJOLNIR_LOG_WARN("[[forcefields.local]] has file_name and "
                                  "other settings");
             }
-            const std::string file_name =
-                toml::get<std::string>(interaction.at("file_name"));
+            const std::string file_name = get_toml_value<std::string>(
+                    interaction, "file_name", "[[local]]");
             MJOLNIR_LOG_INFO("file_name = ", file_name);
 
             const auto forcefield_file = toml::parse(file_name);
@@ -52,7 +52,7 @@ read_local_forcefield(std::vector<toml::Table> interactions)
                     std::exit(1);
                 }
                 lff.emplace(read_local_interaction<traitsT>(
-                    toml::get<toml::Table>(forcefield_file.at("local"))));
+                    get_toml_value<toml::Table>(forcefield_file, "local", file_name)));
             }
             else
             {
@@ -88,8 +88,8 @@ read_global_forcefield(std::vector<toml::Table> interactions)
                 MJOLNIR_LOG_WARN("[[forcefields.global]] has file_name and "
                                  "other settings");
             }
-            const std::string file_name =
-                toml::get<std::string>(interaction.at("file_name"));
+            const std::string file_name = get_toml_value<std::string>(
+                    interaction, "file_name", "[[global]]");
             MJOLNIR_LOG_INFO("file_name = ", file_name);
 
             const auto forcefield_file = toml::parse(file_name);
@@ -114,7 +114,7 @@ read_global_forcefield(std::vector<toml::Table> interactions)
                 }
 
                 gff.emplace(read_global_interaction<traitsT>(
-                    toml::get<toml::Table>(forcefield_file.at("global"))));
+                    get_toml_value<toml::Table>(forcefield_file, "global", file_name)));
             }
             else
             {
@@ -152,7 +152,7 @@ read_external_forcefield(std::vector<toml::Table> interactions)
                                  "other settings");
             }
             const std::string file_name =
-                toml::get<std::string>(interaction.at("file_name"));
+                get_toml_value<std::string>(interaction, "file_name", "[[external]]");
             MJOLNIR_LOG_INFO("file_name = ", file_name);
 
             const auto forcefield_file = toml::parse(file_name);
@@ -176,7 +176,7 @@ read_external_forcefield(std::vector<toml::Table> interactions)
                 }
 
                 eff.emplace(read_external_interaction<traitsT>(
-                    toml::get<toml::Table>(forcefield_file.at("external"))));
+                    get_toml_value<toml::Table>(forcefield_file, "external", file_name)));
             }
             else
             {
@@ -202,20 +202,20 @@ read_forcefield_from_table(const toml::Table& ff)
     if(ff.count("local") == 1)
     {
         MJOLNIR_LOG_INFO("LocalForceField found");
-        fflocal = toml::get<std::vector<toml::Table>>(
-                toml_value_at(ff, "local", "[forcefields]"));
+        fflocal = get_toml_value<std::vector<toml::Table>>(
+                ff, "local", "[forcefields]");
     }
     if(ff.count("global") == 1)
     {
         MJOLNIR_LOG_INFO("GlobalForceField found");
-        ffglobal = toml::get<std::vector<toml::Table>>(
-                toml_value_at(ff, "global", "[forcefields]"));
+        ffglobal = get_toml_value<std::vector<toml::Table>>(
+                ff, "global", "[forcefields]");
     }
     if(ff.count("external") == 1)
     {
         MJOLNIR_LOG_INFO("ExternalForceField found");
-        ffexternal = toml::get<std::vector<toml::Table>>(
-                toml_value_at(ff, "external", "[forcefields]"));
+        ffexternal = get_toml_value<std::vector<toml::Table>>(
+                ff, "external", "[forcefields]");
     }
 
     for(const auto kv: ff)
@@ -242,8 +242,7 @@ read_forcefield(const toml::Table& data, std::size_t N)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_forcefield(), 0);
 
-    const auto& ffs = toml_value_at(data, "forcefields", "<root>"
-            ).cast<toml::value_t::Array>();
+    const auto& ffs = get_toml_value<toml::Array>(data, "forcefields", "<root>");
     if(ffs.size() <= N)
     {
         throw std::out_of_range("no enough forcefields: " + std::to_string(N));
@@ -264,7 +263,8 @@ read_forcefield(const toml::Table& data, std::size_t N)
             MJOLNIR_LOG_WARN("[[forcefields]] has file_name and other settings");
         }
 
-        const std::string file_name = toml::get<std::string>(ff.at("file_name"));
+        const std::string file_name =
+            get_toml_value<std::string>(ff, "file_name", "[[forcefields]]");
         MJOLNIR_LOG_INFO("file_name = ", file_name);
 
         const auto forcefield_file = toml::parse(file_name);

@@ -24,12 +24,12 @@ read_molecular_dynamics_simulator(
     MJOLNIR_SCOPE(read_molecular_dynamics_simulator(), 0);
     using real_type = typename traitsT::real_type;
 
-    const std::string integration = toml::get<std::string>(toml_value_at(
-            simulator, "scheme", "[simulator]"));
-    const std::size_t tstep = toml::get<std::size_t>(toml_value_at(
-            simulator, "total_step", "[simulator]"));
-    const std::size_t sstep = toml::get<std::size_t>(toml_value_at(
-            simulator, "save_step", "[simulator]"));
+    const std::string integration = get_toml_value<std::string>(
+            simulator, "scheme", "[simulator]");
+    const std::size_t tstep = get_toml_value<std::size_t>(
+            simulator, "total_step", "[simulator]");
+    const std::size_t sstep = get_toml_value<std::size_t>(
+            simulator, "save_step",  "[simulator]");
 
     MJOLNIR_LOG_INFO("total step = ", tstep);
 
@@ -74,14 +74,14 @@ read_steepest_descent_simulator(
     using real_type = typename traitsT::real_type;
     using simulator_type = SteepestDescentSimulator<traitsT>;
 
-    const std::size_t step_lim  = toml::get<std::size_t>(toml_value_at(
-            simulator, "step_limit", "[simulator]"));
-    const std::size_t save_step = toml::get<std::size_t>(toml_value_at(
-            simulator, "save_step", "[simulator]"));
-    const real_type   delta     = toml::get<real_type>(toml_value_at(
-            simulator, "delta", "[simulator]"));
-    const real_type   threshold = toml::get<real_type>(toml_value_at(
-            simulator, "threshold", "[simulator]"));
+    const std::size_t step_lim  = get_toml_value<std::size_t>(
+            simulator, "step_limit", "[simulator]");
+    const std::size_t save_step = get_toml_value<std::size_t>(
+            simulator, "save_step", "[simulator]");
+    const real_type   delta     = get_toml_value<real_type>(
+            simulator, "delta", "[simulator]");
+    const real_type   threshold = get_toml_value<real_type>(
+            simulator, "threshold", "[simulator]");
 
     MJOLNIR_LOG_INFO("step_lim  = ", step_lim);
     MJOLNIR_LOG_INFO("save_step = ", save_step);
@@ -104,24 +104,24 @@ read_simulated_annealing_simulator(
     MJOLNIR_SCOPE(read_simulated_annealing_simulator(), 0);
     using real_type   = typename traitsT::real_type;
 
-    const std::string integration = toml::get<std::string>(toml_value_at(
-            simulator, "scheme", "[simulator]"));
-    const std::size_t tstep = toml::get<std::size_t>(toml_value_at(
-            simulator, "total_step", "[simulator]"));
-    const std::size_t sstep = toml::get<std::size_t>(toml_value_at(
-            simulator, "save_step", "[simulator]"));
+    const std::string integration = get_toml_value<std::string>(
+            simulator, "scheme", "[simulator]");
+    const std::size_t tstep = get_toml_value<std::size_t>(
+            simulator, "total_step", "[simulator]");
+    const std::size_t sstep = get_toml_value<std::size_t>(
+            simulator, "save_step", "[simulator]");
 
     MJOLNIR_LOG_INFO("total step = ", tstep);
     MJOLNIR_LOG_INFO("save  step = ", sstep);
 
-    const std::string schedule = toml::get<std::string>(toml_value_at(
-            simulator, "schedule", "[simulator]"));
-    const real_type   T_from = toml::get<real_type>(toml_value_at(
-            simulator, "T_begin", "[simulator]"));
-    const real_type   T_to   = toml::get<real_type>(toml_value_at(
-            simulator, "T_end",  "[simulator]"));
-    const std::size_t each_step = toml::get<std::size_t>(toml_value_at(
-            simulator, "each_step",  "[simulator]"));
+    const std::string schedule = get_toml_value<std::string>(
+            simulator, "schedule", "[simulator]");
+    const real_type   T_from = get_toml_value<real_type>(
+            simulator, "T_begin", "[simulator]");
+    const real_type   T_to   = get_toml_value<real_type>(
+            simulator, "T_end",  "[simulator]");
+    const std::size_t each_step = get_toml_value<std::size_t>(
+            simulator, "each_step",  "[simulator]");
 
     MJOLNIR_LOG_INFO("temperature from = ", T_from);
     MJOLNIR_LOG_INFO("temperature to   = ", T_to);
@@ -170,8 +170,8 @@ read_simulator_from_table(const toml::Table& data, const toml::Table& simulator)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_simulator_from_table(), 0);
 
-    const std::string type = toml::get<std::string>(
-            toml_value_at(simulator, "type", "[simulator]"));
+    const std::string type =
+        get_toml_value<std::string>(simulator, "type", "[simulator]");
 
     if(type == "Molecular Dynamics")
     {
@@ -202,8 +202,8 @@ read_simulator(const toml::Table& data)
     MJOLNIR_SCOPE(read_simulator(), 0);
 
     using real_type   = typename traitsT::real_type;
-    const auto& simulator = toml_value_at(data, "simulator", "<root>"
-            ).cast<toml::value_t::Table>();
+    const auto& simulator =
+        get_toml_value<toml::Table>(data, "simulator", "<root>");
 
     if(simulator.count("file_name") == 1)
     {
@@ -218,7 +218,7 @@ read_simulator(const toml::Table& data)
         }
 
         const std::string file_name =
-            toml::get<std::string>(simulator.at("file_name"));
+            get_toml_value<std::string>(simulator, "file_name", "[simulator]");
         MJOLNIR_LOG_INFO("file_name = ", file_name);
 
         const auto simulator_file = toml::parse(file_name);

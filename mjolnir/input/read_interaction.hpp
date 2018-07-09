@@ -30,8 +30,8 @@ read_bond_length_interaction(
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_bond_length_interaction(), 0);
 
-    const auto potential = toml::get<std::string>(
-            toml_value_at(local, "potential", "[forcefield.local]"));
+    const auto potential = get_toml_value<std::string>(
+            local, "potential", "[forcefield.local]");
 
     if(potential == "Harmonic")
     {
@@ -73,8 +73,9 @@ read_bond_angle_interaction(
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_bond_angle_interaction(), 0);
 
-    const auto potential = toml::get<std::string>(
-            toml_value_at(local, "potential", "[[forcefield.local]]"));
+    const auto potential = get_toml_value<std::string>(
+            local, "potential", "[[forcefields.local]]");
+
     if(potential == "Harmonic")
     {
         MJOLNIR_SCOPE(potential == "Harmonic", 1);
@@ -106,8 +107,10 @@ read_dihedral_angle_interaction(
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_dihedral_angle_interaction(), 0);
-    const auto potential = toml::get<std::string>(
-            toml_value_at(local, "potential", "[forcefield.local]"));
+
+    const auto potential = get_toml_value<std::string>(
+            local, "potential", "[[forcefields.local]]");
+
     if(potential == "Harmonic")
     {
         MJOLNIR_SCOPE(potential == "Harmonic", 1);
@@ -157,8 +160,10 @@ read_global_distance_interaction(const toml::Table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_global_distance_interaction(), 0);
-    const auto potential = toml::get<std::string>(
-            toml_value_at(global, "potential", "[forcefield.global]"));
+
+    const auto potential = get_toml_value<std::string>(
+            global, "potential", "[[forcefield.global]]");
+
     if(potential == "ExcludedVolume")
     {
         MJOLNIR_SCOPE(potential == "ExcludedVolume", 1);
@@ -201,8 +206,9 @@ read_external_distance_interaction(const toml::Table& external, shapeT&& shape)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_global_distance_interaction(), 0);
     using real_type = typename traitsT::real_type;
-    const auto potential = toml::get<std::string>(toml_value_at(external,
-                "potential", "[forcefield.external]"));
+
+    const auto potential = get_toml_value<std::string>(
+            external, "potential", "[forcefield.external]");
 
     if(potential == "ImplicitMembrane")
     {
@@ -247,23 +253,23 @@ read_external_distance_interaction_shape(const toml::Table& external)
     MJOLNIR_SCOPE(read_global_distance_interaction(), 0);
     using real_type = typename traitsT::real_type;
 
-    const auto shape = toml::get<toml::Table>(toml_value_at(external, "shape",
-            "[forcefield.external] for ExternalDistance"));
-    const auto name  = toml::get<std::string>(toml_value_at(shape, "name",
-            "[forcefield.external.shape] for ExternalDistance"));
+    const auto shape = get_toml_value<toml::Table>(external, "shape",
+            "[forcefield.external] for ExternalDistance");
+    const auto name  = get_toml_value<std::string>(shape, "name",
+            "[forcefield.external.shape] for ExternalDistance");
 
     if(name == "AxisAlignedPlane")
     {
         MJOLNIR_SCOPE(potential == "AxisAlignedPlane", 1);
-        const auto pos = toml::get<real_type>(toml_value_at(shape, "position",
-            "[forcefield.external.shape] for ExternalDistance"));
-        const auto margin = toml::get<real_type>(toml_value_at(shape, "margin",
-            "[forcefield.external.shape] for ExternalDistance"));
+        const auto pos = get_toml_value<real_type>(shape, "position",
+            "[forcefield.external.shape] for ExternalDistance");
+        const auto margin = get_toml_value<real_type>(shape, "margin",
+            "[forcefield.external.shape] for ExternalDistance");
         MJOLNIR_LOG_INFO("pos    = ", pos);
         MJOLNIR_LOG_INFO("margin = ", margin);
 
-        const auto axis = toml::get<std::string>(toml_value_at(shape, "axis",
-            "[forcefield.external.shape] for ExternalDistance"));
+        const auto axis = get_toml_value<std::string>(shape, "axis",
+            "[forcefield.external.shape] for ExternalDistance");
         if(axis == "X" || axis == "+X")
         {
             MJOLNIR_LOG_INFO("axis   = +X");
@@ -327,11 +333,11 @@ read_local_interaction(const toml::Table& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_local_interaction(), 0);
-    const auto interaction = toml::get<std::string>(
-            toml_value_at(local, "interaction", "[forcefields.local]"));
+    const auto interaction = get_toml_value<std::string>(
+            local, "interaction", "[forcefields.local]");
 
-    const auto kind = toml::get<std::string>(
-            toml_value_at(local, "topology", "[forcefield.local]"));
+    const auto kind = get_toml_value<std::string>(
+            local, "topology", "[forcefield.local]");
     MJOLNIR_LOG_INFO("connection kind = ", kind);
 
     if(interaction == "BondLength")
@@ -359,10 +365,10 @@ read_global_interaction(const toml::Table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_global_interaction(), 0);
-    const auto interaction = toml::get<std::string>(
-            toml_value_at(global, "interaction", "[forcefields.global]"));
-    const auto ignored_chain = toml::get<std::string>(
-            toml_value_at(global, "ignored_chain", "[forcefields.global]"));
+    const auto interaction = get_toml_value<std::string>(
+            global, "interaction", "[forcefields.global]");
+    const auto ignored_chain = get_toml_value<std::string>(
+            global, "ignored_chain", "[forcefields.global]");
 
     if(interaction == "Distance")
     {
@@ -400,8 +406,8 @@ read_external_interaction(const toml::Table& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_external_interaction(), 0);
-    const auto interaction = toml::get<std::string>(
-            toml_value_at(external, "interaction", "[forcefields.external]"));
+    const auto interaction = get_toml_value<std::string>(
+            external, "interaction", "[forcefields.external]");
 
     if(interaction == "Distance")
     {

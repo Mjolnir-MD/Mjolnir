@@ -12,9 +12,15 @@ template<typename traitsT>
 VelocityVerletStepper<traitsT>
 read_velocity_verlet_stepper(const toml::Table& simulator)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_velocity_verlet_stepper(), 0);
     typedef typename traitsT::real_type real_type;
-    return VelocityVerletStepper<traitsT>(toml::get<real_type>(
-            toml_value_at(simulator, "delta_t", "[simulator]")));
+
+    const real_type delta_t =
+        get_toml_value<real_type>(simulator, "delta_t", "[simulator]");
+    MJOLNIR_LOG_INFO("delta_t = ", delta_t);
+
+    return VelocityVerletStepper<traitsT>(delta_t);
 }
 
 
@@ -22,30 +28,35 @@ template<typename traitsT>
 UnderdampedLangevinStepper<traitsT>
 read_underdamped_langevin_stepper(const toml::Table& simulator)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_underdamped_langevin_stepper(), 0);
     typedef typename traitsT::real_type real_type;
 
-    const auto& parameters = toml_value_at(
-            simulator, "parameters", "[simulator]").cast<toml::value_t::Array>();
-
-    const std::uint32_t seed = toml::get<std::uint32_t>(
-            toml_value_at(simulator, "seed", "[simulator]"));
+    const auto& parameters = // array of tables
+        get_toml_value<toml::Array>(simulator, "parameters", "[simulator]");
+    const auto  seed =
+        get_toml_value<std::uint32_t>(simulator, "seed", "[simulator]");
 
     std::vector<real_type> gamma(parameters.size());
     for(const auto& tab : parameters)
     {
         const auto& params = tab.cast<toml::value_t::Table>();
-        const std::size_t idx = toml::get<std::size_t>(toml_value_at(
-                params, "index", "<anonymous> in register"));
-        const real_type    gm = toml::get<real_type>(toml_value_at(
-                params, "gamma", "<anonymous> in register"));
+        const std::size_t idx = get_toml_value<std::size_t>(
+                params, "index", "<anonymous> in register");
+        const real_type    gm = get_toml_value<real_type>(
+                params, "gamma", "<anonymous> in register");
 
         if(gamma.size() <= idx){gamma.resize(idx+1);}
         gamma.at(idx) = gm;
+        MJOLNIR_LOG_INFO("idx = ", idx, ", gamma = ", gamma);
     }
 
-    return UnderdampedLangevinStepper<traitsT>(toml::get<real_type>(
-            toml_value_at(simulator, "delta_t", "[simulator]")),
-            std::move(gamma), RandomNumberGenerator<traitsT>(seed));
+    const real_type delta_t =
+        get_toml_value<real_type>(simulator, "delta_t", "[simulator]");
+    MJOLNIR_LOG_INFO("delta_t = ", delta_t);
+
+    return UnderdampedLangevinStepper<traitsT>(delta_t, std::move(gamma),
+            RandomNumberGenerator<traitsT>(seed));
 }
 
 }

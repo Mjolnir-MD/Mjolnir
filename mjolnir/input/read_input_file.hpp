@@ -20,17 +20,15 @@ read_parameter(const toml::Table& data)
     MJOLNIR_SCOPE(read_parameter(const toml::Table& data), 0);
 
     typedef typename traitsT::real_type real_type;
-    const auto& parameter = toml_value_at(data, "parameters", "<root>"
-            ).template cast<toml::value_t::Table>();
 
-    physics<real_type>::kB = toml::get<real_type>(
-            toml_value_at(parameter, "kB", "[parameters]"));
-    physics<real_type>::NA = toml::get<real_type>(
-            toml_value_at(parameter, "NA", "[parameters]"));
-    physics<real_type>::e  = toml::get<real_type>(
-            toml_value_at(parameter, "e",  "[parameters]"));
-    physics<real_type>::vacuum_permittivity = toml::get<real_type>(
-            toml_value_at(parameter, "ε0", "[parameters]"));
+    const auto& parameter =
+        get_toml_value<toml::Table>(data, "parameters", "<root>");
+
+    physics<real_type>::kB = get_toml_value<real_type>(parameter, "kB", "[parameters]");
+    physics<real_type>::NA = get_toml_value<real_type>(parameter, "NA", "[parameters]");
+    physics<real_type>::e  = get_toml_value<real_type>(parameter, "e",  "[parameters]");
+    physics<real_type>::vacuum_permittivity =
+        get_toml_value<real_type>(parameter, "ε0", "[parameters]");
 
     MJOLNIR_LOG_INFO("kB = ", physics<real_type>::kB);
     MJOLNIR_LOG_INFO("NA = ", physics<real_type>::NA);
@@ -47,10 +45,9 @@ read_boundary(const toml::Table& data)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_boundary(const toml::Table& data), 0);
 
-    const auto& general = toml_value_at(data, "general", "<root>"
-            ).template cast<toml::value_t::Table>();
-    const auto boundary = toml::get<std::string>(
-            toml_value_at(general, "boundary", "[general]"));
+    const auto& general = get_toml_value<toml::Table>(data, "general", "<root>");
+    const auto boundary =
+        get_toml_value<std::string>(general, "boundary", "[general]");
 
     if(boundary == "Unlimited")
     {
@@ -77,10 +74,9 @@ read_precision(const toml::Table& data)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_precision(const toml::Table& data), 0);
 
-    const auto& general = toml_value_at(data, "general", "<root>"
-            ).template cast<toml::value_t::Table>();
-    const auto prec = toml::get<std::string>(
-            toml_value_at(general, "precision", "[general]"));
+    const auto& general = get_toml_value<toml::Table>(data, "general", "<root>");
+    const auto prec =
+        get_toml_value<std::string>(general, "precision", "[general]");
 
     if(prec == "double")
     {
@@ -105,14 +101,12 @@ read_input_file(const std::string& filename)
     const auto data = toml::parse(filename);
 
     // setting logger ...
-    const auto& general = toml_value_at(data, "general", "<root>"
-            ).template cast<toml::value_t::Table>();
-    std::string path = toml::get<std::string>(
-            toml_value_at(general, "output_path", "[general]"));
+    const auto& general = get_toml_value<toml::Table>(data, "general", "<root>");
+    std::string path = get_toml_value<std::string>(general, "output_path", "[general]");
     if(path.back() != '/') {path += '/';/*XXX assuming posix */}
 
-    const std::string logger_name = path + toml::get<std::string>(
-        toml_value_at(general, "output_prefix", "[general]")) + ".log";
+    const std::string logger_name = path + get_toml_value<std::string>(
+            general, "output_prefix", "[general]") + ".log";
     MJOLNIR_SET_DEFAULT_LOGGER(logger_name);
 
     MJOLNIR_GET_DEFAULT_LOGGER();

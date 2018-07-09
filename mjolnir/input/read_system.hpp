@@ -36,10 +36,10 @@ struct read_boundary_impl<CuboidalPeriodicBoundary<realT, coordT>>
         MJOLNIR_SCOPE(read_boundary_impl::invoke(), 0);
         MJOLNIR_LOG_INFO("shape of periodic boundary is cuboid");
 
-        const coordT upper(toml::get<std::array<realT, 3>>(
-                    toml_value_at(boundary, "upper", "[boundary]")));
-        const coordT lower(toml::get<std::array<realT, 3>>(
-                    toml_value_at(boundary, "lower", "[boundary]")));
+        const coordT upper(get_toml_value<std::array<realT, 3>>(
+                    boundary, "upper", "[boundary]"));
+        const coordT lower(get_toml_value<std::array<realT, 3>>(
+                    boundary, "lower", "[boundary]"));
         assert(upper[0] > lower[0]);
         assert(upper[1] > lower[1]);
         assert(upper[2] > lower[2]);
@@ -67,10 +67,10 @@ System<traitsT> read_system_from_table(const toml::Table& system)
     using real_type       = typename traitsT::real_type;
     using coordinate_type = typename traitsT::coordinate_type;
 
-    const auto& boundary = toml_value_at(system, "boundary","[systems.boundary]"
-            ).cast<toml::value_t::Table>();
-    const auto& particles = toml_value_at(system, "particles", "[system]"
-            ).cast<toml::value_t::Array>();
+    const auto& boundary  =
+        get_toml_value<toml::Table>(system, "boundary",  "[systems.boundary]");
+    const auto& particles =
+        get_toml_value<toml::Array>(system, "particles", "[system]");
 
     System<traitsT> sys(particles.size(), read_boundary<traitsT>(boundary));
     MJOLNIR_LOG_INFO(particles.size(), " particles are provided");
@@ -79,12 +79,12 @@ System<traitsT> read_system_from_table(const toml::Table& system)
         using vec_type = std::array<real_type, 3>;
         const auto& params = particles[i].cast<toml::value_t::Table>();
 
-        sys[i].mass     = toml::get<real_type>(
-            toml_value_at(params, "mass", "element of [[system.particles]]"));
-        sys[i].position = toml::get< vec_type>(
-            toml_value_at(params, "position", "element of [[system.particles]]"));
-        sys[i].velocity = toml::get< vec_type>(
-            toml_value_at(params, "velocity", "element of [[system.particles]]"));
+        sys[i].mass     = get_toml_value<real_type>(
+                params, "mass", "element of [[system.particles]]");
+        sys[i].position = get_toml_value< vec_type>(
+                params, "position", "element of [[system.particles]]");
+        sys[i].velocity = get_toml_value< vec_type>(
+                params, "velocity", "element of [[system.particles]]");
         sys[i].force    = coordinate_type(0, 0, 0);
 
         MJOLNIR_LOG_DEBUG("mass     = ", sys[i].mass    );
@@ -93,10 +93,16 @@ System<traitsT> read_system_from_table(const toml::Table& system)
         MJOLNIR_LOG_DEBUG("force    = ", sys[i].force   );
     }
 
-    const auto& attributes = toml_value_at(system, "attributes", "[[systems]]"
-            ).cast<toml::value_t::Table>();
+    const auto& attributes =
+        get_toml_value<toml::Table>(system, "attributes", "[[systems]]");
     for(const auto& attr : attributes)
     {
+        if(attr.second.type() != toml::value_t::Float)
+        {
+            throw_exception<std::runtime_error>("mjolnir::read_system: "
+                "attribute `", attr.first, "` has type `", attr.second.type(),
+                "`, expected type is `", toml::value_t::Float, "`.");
+        }
         const real_type attribute = toml::get<real_type>(attr.second);
         MJOLNIR_LOG_INFO("attribute.", attr.first, " = ", attribute);
         sys.attribute(attr.first) = attribute;
@@ -113,8 +119,8 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
     using real_type       = typename traitsT::real_type;
     using coordinate_type = typename traitsT::coordinate_type;
 
-    const auto& system_params = toml_value_at(data, "systems", "<root>"
-            ).cast<toml::value_t::Array>();
+    const auto& system_params =
+        get_toml_value<toml::Array>(data, "systems", "<root>");
     if(system_params.size() <= N)
     {
         throw_exception<std::out_of_range>("no enough system definitions: ", N);
@@ -134,8 +140,8 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
             std::cerr << "are ignored.\n";
             MJOLNIR_LOG_WARN("[[systems]] has `file_name` and other settings");
         }
-        const std::string file_name =
-            toml::get<std::string>(system.at("file_name"));
+        const std::string file_name = get_toml_value<std::string>(
+                system, "file_name", "[[systems]]");
         MJOLNIR_LOG_INFO("file_name = ", file_name);
 
         const auto system_file = toml::parse(file_name);
@@ -152,8 +158,8 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
                 std::cerr << "please take care.\n";
                 std::exit(1);
             }
-            return read_system_from_table<traitsT>(system_file.at("systems"
-                    ).template cast<toml::value_t::Table>());
+            return read_system_from_table<traitsT>(get_toml_value<toml::Table>(
+                    system_file, "systems", file_name));
         }
         return read_system_from_table<traitsT>(system_file);
     }
