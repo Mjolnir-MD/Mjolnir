@@ -49,9 +49,9 @@ read_bond_length_interaction(
         return make_unique<BondLengthInteraction<traitsT, potential_t>>(
             kind, read_go1012_contact_potential<traitsT, 2>(local));
     }
-    else if(potential == "AICG2PlusAngle")
+    else if(potential == "Gaussian")
     {
-        MJOLNIR_SCOPE(potential == "AICG2PlusAngle", 1);
+        MJOLNIR_SCOPE(potential == "Gaussian", 1);
         using potential_t = GaussianPotential<traitsT>;
 
         return make_unique<BondLengthInteraction<traitsT, potential_t>>(
@@ -124,9 +124,9 @@ read_dihedral_angle_interaction(
         return make_unique<DihedralAngleInteraction<traitsT, potential_t>>(
             kind, read_clementi_dihedral_potential<traitsT, 4>(local));
     }
-    else if(potential == "AICG2PlusDihedral")
+    else if(potential == "Gaussian")
     {
-        MJOLNIR_SCOPE(potential == "AICG2PlusDihedral", 1);
+        MJOLNIR_SCOPE(potential == "Gaussian", 1);
         using potential_t = GaussianPotential<traitsT>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potential_t>>(

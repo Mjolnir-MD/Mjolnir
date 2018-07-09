@@ -6,7 +6,7 @@ namespace mjolnir
 {
 template<typename T> class System;
 
-/*! @brief gaussian potential for AICG2+                     *
+/*! @brief gaussian potential                                *
  * V(r)  = epsilon * exp(-(r-r0)^2 / 2W^2)                   *
  * dV/dr = epsilon * (-(r-r0) / W^2) * exp(-(r-r0)^2 / 2W^2) */
 template<typename traitsT>

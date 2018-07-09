@@ -433,7 +433,7 @@ parameters = [
 [[forcefields.local]]
 # AICG2+ angle
 interaction = "BondLength"
-potential = "AICG2PlusAngle"
+potential = "Gaussian"
 topology  = "none"
 # params{{{
 parameters = [
@@ -495,7 +495,7 @@ parameters = [
 #}}}
 [[forcefields.local]]
 interaction = "DihedralAngle"
-potential = "AICG2PlusDihedral"
+potential = "Gaussian"
 topology  = "none"
 # params{{{
 parameters = [
