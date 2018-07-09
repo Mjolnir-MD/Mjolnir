@@ -48,7 +48,7 @@ read_underdamped_langevin_stepper(const toml::Table& simulator)
 
         if(gamma.size() <= idx){gamma.resize(idx+1);}
         gamma.at(idx) = gm;
-        MJOLNIR_LOG_INFO("idx = ", idx, ", gamma = ", gamma);
+        MJOLNIR_LOG_INFO("idx = ", idx, ", gamma = ", gm);
     }
 
     const real_type delta_t =
