@@ -40,20 +40,17 @@ read_harmonic_potential(const toml::Table& local)
     for(const auto& item : params)
     {
         using real_type = typename traitsT::real_type;
-        MJOLNIR_SCOPE(for each parameters, 1);
 
         const auto& parameter = item.cast<toml::value_t::Table>();
         auto indices = get_toml_value<indices_t>(parameter, "indices",
                 "element of [[parameters]] in harmonic potential");
-        auto r0 = get_toml_value<real_type>(parameter, "v0",
+        auto v0 = get_toml_value<real_type>(parameter, "v0",
                 "element of [[parameters]] in harmonic potential");
         auto k  = get_toml_value<real_type>(parameter, "k",
                 "element of [[parameters]] in harmonic potential");
-        MJOLNIR_LOG_INFO("idxs = ", indices);
-        MJOLNIR_LOG_INFO("r0   = ", r0);
-        MJOLNIR_LOG_INFO("k    = ", k );
+        MJOLNIR_LOG_INFO("idxs = ", indices, ", v0 = ", v0, ", k = ", k);
 
-        retval.emplace_back(indices, HarmonicPotential<traitsT>(k, r0));
+        retval.emplace_back(indices, HarmonicPotential<traitsT>(k, v0));
     }
     return retval;
 }
@@ -86,22 +83,19 @@ read_go1012_contact_potential(const toml::Table& local)
 
     for(const auto& item : params)
     {
-        MJOLNIR_SCOPE(for each parameters, 1);
         using real_type = typename traitsT::real_type;
         const auto& parameter = item.cast<toml::value_t::Table>();
 
         auto indices = get_toml_value<indices_t>(parameter, "indices",
                 "element of [[parameters]] in Go-10-12 potential");
-        auto r0 = get_toml_value<real_type>(parameter, "v0",
+        auto v0 = get_toml_value<real_type>(parameter, "v0",
                 "element of [[parameters]] in Go-10-12 potential");
         auto k  = get_toml_value<real_type>(parameter, "k",
                 "element of [[parameters]] in Go-10-12 potential");
 
-        MJOLNIR_LOG_INFO("idxs = ", indices);
-        MJOLNIR_LOG_INFO("r0   = ", r0);
-        MJOLNIR_LOG_INFO("k    = ", k );
+        MJOLNIR_LOG_INFO("idxs = ", indices, ", v0 = ", v0, ", k = ", k );
 
-        retval.emplace_back(indices, Go1012ContactPotential<traitsT>(k, r0));
+        retval.emplace_back(indices, Go1012ContactPotential<traitsT>(k, v0));
     }
     return retval;
 }
@@ -128,7 +122,6 @@ read_gaussian_potential(const toml::Table& local)
     for(const auto& item : params)
     {
         using real_type = typename traitsT::real_type;
-        MJOLNIR_SCOPE(for each parameters, 1);
 
         const auto& parameter = item.cast<toml::value_t::Table>();
 
@@ -141,10 +134,8 @@ read_gaussian_potential(const toml::Table& local)
         auto w       = get_toml_value<real_type>(parameter, "w",
                 "element of [[parameters]] in Gaussian potential");
 
-        MJOLNIR_LOG_INFO("idxs    = ", indices);
-        MJOLNIR_LOG_INFO("r0      = ", v0);
-        MJOLNIR_LOG_INFO("epsilon = ", epsilon);
-        MJOLNIR_LOG_INFO("w       = ", w );
+        MJOLNIR_LOG_INFO("idxs = ", indices, ", v0 = ", v0,
+                         ", epsilon = ", epsilon, ", w = ", w);
 
         retval.emplace_back(
                 indices, GaussianPotential<traitsT>(epsilon, w, v0));
@@ -179,7 +170,6 @@ read_flexible_local_angle_potential(const toml::Table& local)
 
     for(const auto& item : params)
     {
-        MJOLNIR_SCOPE(for each parameters, 1);
         using real_type  = typename traitsT::real_type;
         using table_type = std::array<real_type, 10>;
         const auto& parameter = item.cast<toml::value_t::Table>();
@@ -193,10 +183,8 @@ read_flexible_local_angle_potential(const toml::Table& local)
         auto term2 = get_toml_value<table_type>(parameter, "term2",
                 "element of [[parameters]] in FlexibleLocal potential");
 
-        MJOLNIR_LOG_INFO("idxs  = ", indices);
-        MJOLNIR_LOG_INFO("k     = ", k);
-        MJOLNIR_LOG_INFO("term1 = ", term1);
-        MJOLNIR_LOG_INFO("term2 = ", term2);
+        MJOLNIR_LOG_INFO("idxs  = ", indices, ", k = ", k,
+                         ", term1 = ", term1, ", term2 = ", term2);
 
         retval.emplace_back(
                 indices, FlexibleLocalAnglePotential<traitsT>(k, term1, term2));
@@ -231,7 +219,6 @@ read_clementi_dihedral_potential(const toml::Table& local)
 
     for(const auto& item : params)
     {
-        MJOLNIR_SCOPE(for each parameters, 1);
         using real_type  = typename traitsT::real_type;
         const auto& parameter = item.cast<toml::value_t::Table>();
 
@@ -244,10 +231,8 @@ read_clementi_dihedral_potential(const toml::Table& local)
         auto k3 = get_toml_value<real_type>(parameter, "k3",
                 "element of [[parameters]] in ClementiDihedral potential");
 
-        MJOLNIR_LOG_INFO("idxs = ", indices);
-        MJOLNIR_LOG_INFO("phi0 = ", v0);
-        MJOLNIR_LOG_INFO("k1   = ", k1);
-        MJOLNIR_LOG_INFO("k3   = ", k3);
+        MJOLNIR_LOG_INFO("idxs = ", indices, ", phi0 = ", v0,
+                         ", k1   = ", k1, ", k3   = ", k3);
 
         retval.emplace_back(
                 indices, ClementiDihedralPotential<traitsT>(k1, k3, v0));
@@ -282,7 +267,6 @@ read_flexible_local_dihedral_potential(const toml::Table& local)
 
     for(const auto& item : params)
     {
-        MJOLNIR_SCOPE(for each parameters, 1);
         using real_type  = typename traitsT::real_type;
         using table_type = std::array<real_type, 7>;
 
@@ -294,9 +278,7 @@ read_flexible_local_dihedral_potential(const toml::Table& local)
         auto term = get_toml_value<table_type>(parameter, "term",
             "element of [[parameters]] in FlexibleLocalDihedral potential");
 
-        MJOLNIR_LOG_INFO("idxs = ", indices);
-        MJOLNIR_LOG_INFO("k    = ", k);
-        MJOLNIR_LOG_INFO("term = ", term);
+        MJOLNIR_LOG_INFO("idxs = ", indices, ", k = ", k, ", term = ", term);
 
        retval.emplace_back(
                 indices, FlexibleLocalDihedralPotential<traitsT>(k, term));
@@ -341,8 +323,6 @@ read_excluded_volume_potential(const toml::Table& global)
 
     for(const auto& param : ps)
     {
-        MJOLNIR_SCOPE(for each parameters, 1);
-
         const auto& tab = param.cast<toml::value_t::Table>();
         const auto  idx = get_toml_value<std::size_t>(tab, "index",
             "element of [[forcefield.global.parameters]] for Excluded Volume");
@@ -353,8 +333,7 @@ read_excluded_volume_potential(const toml::Table& global)
 
         const auto sgm = get_toml_value<real_type>(tab, "sigma",
             "element of [[forcefield.global.parameters]] for Excluded Volume");
-        MJOLNIR_LOG_INFO("idx = ", idx);
-        MJOLNIR_LOG_INFO("sgm = ", sgm);
+        MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sgm);
         params.at(idx) = sgm;
     }
 
@@ -390,7 +369,6 @@ read_lennard_jones_potential(const toml::Table& global)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        MJOLNIR_SCOPE(for each parameters, 1);
         const auto& tab = param.cast<toml::value_t::Table>();
         const auto idx = get_toml_value<std::size_t>(tab, "index",
             "element of [[forcefield.global.parameters]] for Lennard-Jones");
@@ -399,14 +377,12 @@ read_lennard_jones_potential(const toml::Table& global)
             const std::pair<real_type, real_type> dummy{0., 0.};
             params.resize(idx+1, dummy);
         }
-
         const auto sigma   = get_toml_value<real_type>(tab, "sigma",
             "element of [[forcefield.global.parameters]] for Lennard-Jones");
         const auto epsilon = get_toml_value<real_type>(tab, "epsilon",
             "element of [[forcefield.global.parameters]] for Lennard-Jones");
-        MJOLNIR_LOG_INFO("idx = ", idx);
-        MJOLNIR_LOG_INFO("sgm = ", sigma);
-        MJOLNIR_LOG_INFO("eps = ", epsilon);
+        MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma,
+                         ", epsilon = ", epsilon);
 
         params.at(idx) = std::make_pair(sigma, epsilon);
     }
@@ -443,7 +419,6 @@ read_debye_huckel_potential(const toml::Table& global)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        MJOLNIR_SCOPE(for each parameters, 1);
         const auto& tab = param.cast<toml::value_t::Table>();
         const auto idx = get_toml_value<std::size_t>(tab, "index",
             "element of [[forcefield.global.parameters]] for Debye-Huckel");
@@ -453,8 +428,7 @@ read_debye_huckel_potential(const toml::Table& global)
         }
         const auto charge = get_toml_value<real_type>(tab, "charge",
             "element of [[forcefield.global.parameters]] for Debye-Huckel");
-        MJOLNIR_LOG_INFO("idx    = ", idx);
-        MJOLNIR_LOG_INFO("charge = ", charge);
+        MJOLNIR_LOG_INFO("idx    = ", idx, ", charge = ", charge);
         params.at(idx) = charge;
     }
 
@@ -492,7 +466,6 @@ read_implicit_membrane_potential(const toml::Table& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        MJOLNIR_SCOPE(for each parameters, 1);
         const auto& tab = param.cast<toml::value_t::Table>();
         const auto idx = get_toml_value<std::size_t>(tab, "index",
             "element of [[forcefield.external.parameters]] for ImplicitMembrane");
@@ -504,8 +477,7 @@ read_implicit_membrane_potential(const toml::Table& external)
         const auto h = get_toml_value<real_type>(tab, "hydrophobicity",
             "element of [[forcefield.external.parameters]] for ImplicitMembrane"
             );
-        MJOLNIR_LOG_INFO("idx = ", idx);
-        MJOLNIR_LOG_INFO("h   = ", h);
+        MJOLNIR_LOG_INFO("idx = ", idx, ", h = ", h);
         params.at(idx) = h;
     }
 
@@ -529,7 +501,6 @@ read_lennard_jones_wall_potential(const toml::Table& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        MJOLNIR_SCOPE(for each parameters, 1);
         const auto& tab = param.cast<toml::value_t::Table>();
         const auto idx = get_toml_value<std::size_t>(tab, "index",
             "element of [[forcefield.external.parameters]] for LennardJonesWall");
@@ -542,9 +513,7 @@ read_lennard_jones_wall_potential(const toml::Table& external)
             "element of [[forcefield.external.parameters]] for LennardJonesWall");
         const auto e = get_toml_value<real_type>(tab, "epsilon",
             "element of [[forcefield.external.parameters]] for LennardJonesWall");
-        MJOLNIR_LOG_INFO("idx     = ", idx);
-        MJOLNIR_LOG_INFO("sigma   = ", s);
-        MJOLNIR_LOG_INFO("epsilon = ", e);
+        MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", s, ", epsilon = ", e);
         params.at(idx) = std::make_pair(s, e);
     }
     return LennardJonesWallPotential<traitsT>(std::move(params));
@@ -570,7 +539,6 @@ read_excluded_volume_wall_potential(const toml::Table& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        MJOLNIR_SCOPE(for each parameters, 1);
         const auto& tab = param.cast<toml::value_t::Table>();
         const auto idx = get_toml_value<std::size_t>(tab, "index",
             "element of [[forcefield.external.parameters]] for ExcludedVolumeWall");
@@ -581,8 +549,7 @@ read_excluded_volume_wall_potential(const toml::Table& external)
 
         const auto s = get_toml_value<real_type>(tab, "sigma",
             "element of [[forcefield.external.parameters]] for ExcludedVolumeWall");
-        MJOLNIR_LOG_INFO("idx   = ", idx);
-        MJOLNIR_LOG_INFO("sigma = ", s);
+        MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", s);
         params.at(idx) = s;
     }
     return ExcludedVolumeWallPotential<traitsT>(eps, std::move(params));
