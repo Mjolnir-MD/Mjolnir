@@ -47,6 +47,7 @@ class ForceField
         sys.topology().construct_chains();
 
         // based on the topology, make exclusion list
+           local_.initialize(sys, dt);
           global_.initialize(sys, dt);
         external_.initialize(sys, dt);
     }
