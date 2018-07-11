@@ -1,6 +1,5 @@
 #ifndef MJOLNIR_CLEMENTI_DIHEDRAL_POTENTIAL
 #define MJOLNIR_CLEMENTI_DIHEDRAL_POTENTIAL
-#include <string>
 #include <cmath>
 
 namespace mjolnir
@@ -45,7 +44,7 @@ class ClementiDihedralPotential
 
     void update(const system_type&, const real_type) const noexcept {return;}
 
-    const char* name() const noexcept {return "ClementiDihedral";}
+    static const char* name() {return "ClementiDihedral";}
 
   private:
 

@@ -39,7 +39,7 @@ class GaussianPotential
 
     void update(const system_type&, const real_type) const noexcept {return;}
 
-    const char* name() const noexcept {return "Gaussian";}
+    static const char* name() noexcept {return "Gaussian";}
 
   private:
 

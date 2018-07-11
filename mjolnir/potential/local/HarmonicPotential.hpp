@@ -37,7 +37,7 @@ class HarmonicPotential
 
     void update(const system_type&, const real_type) const noexcept {return;}
 
-    const char* name() const noexcept {return "Harmonic";}
+    static const char* name() noexcept {return "Harmonic";}
 
   private:
 

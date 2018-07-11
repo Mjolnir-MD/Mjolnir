@@ -55,7 +55,7 @@ class BondAngleInteraction : public LocalInteractionBase<traitsT>
     }
 
     std::string name() const override
-    {return "BondAngle:"_str + potentials.front().second.name();}
+    {return "BondAngle:"_str + potential_type::name();}
 
     void write_topology(topology_type&) const override;
 

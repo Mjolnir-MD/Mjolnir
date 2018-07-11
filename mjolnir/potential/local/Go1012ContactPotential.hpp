@@ -56,7 +56,7 @@ class Go1012ContactPotential
 
     void update(const system_type&, const real_type) const noexcept {return;}
 
-    const char* name() const noexcept {return "Go1012Contact";}
+    static const char* name() noexcept {return "Go1012Contact";}
 
   private:
 
