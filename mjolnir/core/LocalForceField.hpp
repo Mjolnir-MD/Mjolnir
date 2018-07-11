@@ -38,6 +38,14 @@ class LocalForceField
         interactions_.emplace_back(std::move(interaction));
     }
 
+    void initialize(const system_type& sys, const real_type dt)
+    {
+        for(auto& item : this->interactions_)
+        {
+            item->initialize(sys, dt);
+        }
+    }
+
     // to re-calculate parameters like temperature, ionic concentration, etc...
     void update(const system_type& sys, const real_type dt)
     {
