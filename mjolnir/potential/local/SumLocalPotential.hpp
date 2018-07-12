@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_MULTIPLE_LOCAL_POTENTIAL
-#define MJOLNIR_MULTIPLE_LOCAL_POTENTIAL
+#ifndef MJOLNIR_SUM_LOCAL_POTENTIAL
+#define MJOLNIR_SUM_LOCAL_POTENTIAL
 #include <tuple>
 
 namespace mjolnir
@@ -93,7 +93,7 @@ struct collect_name_impl<Last, Last, Potentials...>
 } // detail
 
 template<typename traitsT, typename ... Potentials>
-class MultipleLocalPotential
+class SumLocalPotential
 {
   public:
     typedef traitsT traits_type;
@@ -105,13 +105,13 @@ class MultipleLocalPotential
 
   public:
 
-    MultipleLocalPotential(const Potentials& ... args)
+    SumLocalPotential(const Potentials& ... args)
         : potentials_(args...)
     {}
-    MultipleLocalPotential(Potentials&& ... args)
+    SumLocalPotential(Potentials&& ... args)
         : potentials_(std::move(args)...)
     {}
-    ~MultipleLocalPotential() = default;
+    ~SumLocalPotential() = default;
 
     real_type potential(const real_type x) const noexcept
     {
@@ -142,7 +142,7 @@ class MultipleLocalPotential
 };
 
 template<typename traitsT, template<typename>class ... Potentials>
-constexpr std::size_t MultipleLocalPotential<traitsT, Potentials...>::size;
+constexpr std::size_t SumLocalPotentials<traitsT, Potentials...>::size;
 
 } // mjolnir
-#endif//MJOLNIR_MULTIPLE_LOCAL_POTENTIAL
+#endif//MJOLNIR_SUM_LOCAL_POTENTIAL
