@@ -24,9 +24,7 @@ namespace mjolnir
 
 template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
-read_bond_length_interaction(
-    const typename LocalInteractionBase<traitsT>::connection_kind_type kind,
-    const toml::Table& local)
+read_bond_length_interaction(const std::string& kind, const toml::Table& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_bond_length_interaction(), 0);
@@ -37,26 +35,26 @@ read_bond_length_interaction(
     if(potential == "Harmonic")
     {
         MJOLNIR_SCOPE(potential == "Harmonic", 1);
-        using potential_t = HarmonicPotential<traitsT>;
+        using potentialT = HarmonicPotential<traitsT>;
 
-        return make_unique<BondLengthInteraction<traitsT, potential_t>>(
-            kind, read_harmonic_potential<traitsT, 2>(local));
+        return make_unique<BondLengthInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<potentialT, 2>(local));
     }
     else if(potential == "Go1012Contact")
     {
         MJOLNIR_SCOPE(potential == "Go1012Contact", 1);
-        using potential_t = Go1012ContactPotential<traitsT>;
+        using potentialT = Go1012ContactPotential<traitsT>;
 
-        return make_unique<BondLengthInteraction<traitsT, potential_t>>(
-            kind, read_go1012_contact_potential<traitsT, 2>(local));
+        return make_unique<BondLengthInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<potentialT, 2>(local));
     }
     else if(potential == "Gaussian")
     {
         MJOLNIR_SCOPE(potential == "Gaussian", 1);
-        using potential_t = GaussianPotential<traitsT>;
+        using potentialT = GaussianPotential<traitsT>;
 
-        return make_unique<BondLengthInteraction<traitsT, potential_t>>(
-            kind, read_gaussian_potential<traitsT, 2>(local));
+        return make_unique<BondLengthInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<potentialT, 2>(local));
     }
     else
     {
@@ -80,18 +78,26 @@ read_bond_angle_interaction(
     if(potential == "Harmonic")
     {
         MJOLNIR_SCOPE(potential == "Harmonic", 1);
-        using potential_t = HarmonicPotential<traitsT>;
+        using potentialT = HarmonicPotential<traitsT>;
 
-        return make_unique<BondAngleInteraction<traitsT, potential_t>>(
-            kind, read_harmonic_potential<traitsT, 3>(local));
+        return make_unique<BondAngleInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<potentialT, 3>(local));
     }
     else if(potential == "FlexibleLocalAngle")
     {
         MJOLNIR_SCOPE(potential == "FlexibleLocalAngle", 1);
-        using potential_t = FlexibleLocalAnglePotential<traitsT>;
+        using potentialT = FlexibleLocalAnglePotential<traitsT>;
 
-        return make_unique<BondAngleInteraction<traitsT, potential_t>>(
-            kind, read_flexible_local_angle_potential<traitsT, 3>(local));
+        return make_unique<BondAngleInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<potentialT, 3>(local));
+    }
+    else if(potential == "Gaussian")
+    {
+        MJOLNIR_SCOPE(potential == "Gaussian", 1);
+        using potentialT = GaussianPotential<traitsT>;
+
+        return make_unique<BondAngleInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<potentialT, 3>(local));
     }
     else
     {
@@ -115,34 +121,34 @@ read_dihedral_angle_interaction(
     if(potential == "Harmonic")
     {
         MJOLNIR_SCOPE(potential == "Harmonic", 1);
-        using potential_t = HarmonicPotential<traitsT>;
+        using potentialT = HarmonicPotential<traitsT>;
 
-        return make_unique<DihedralAngleInteraction<traitsT, potential_t>>(
-            kind, read_harmonic_potential<traitsT, 4>(local));
+        return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
+            kind, read_local_potential<potentialT, 4>(local));
     }
     else if(potential == "ClementiDihedral")
     {
         MJOLNIR_SCOPE(potential == "ClementiDihedral", 1);
-        using potential_t = ClementiDihedralPotential<traitsT>;
+        using potentialT = ClementiDihedralPotential<traitsT>;
 
-        return make_unique<DihedralAngleInteraction<traitsT, potential_t>>(
-            kind, read_clementi_dihedral_potential<traitsT, 4>(local));
+        return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
+            kind, read_local_potential<potentialT, 4>(local));
     }
     else if(potential == "Gaussian")
     {
         MJOLNIR_SCOPE(potential == "Gaussian", 1);
-        using potential_t = GaussianPotential<traitsT>;
+        using potentialT = GaussianPotential<traitsT>;
 
-        return make_unique<DihedralAngleInteraction<traitsT, potential_t>>(
-            kind, read_gaussian_potential<traitsT, 4>(local));
+        return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
+            kind, read_local_potential<potentialT, 4>(local));
     }
     else if(potential == "FlexibleLocalDihedral")
     {
         MJOLNIR_SCOPE(potential == "FlexibleLocalDihedral", 1);
-        using potential_t = FlexibleLocalDihedralPotential<traitsT>;
+        using potentialT = FlexibleLocalDihedralPotential<traitsT>;
 
-        return make_unique<DihedralAngleInteraction<traitsT, potential_t>>(
-            kind, read_flexible_local_dihedral_potential<traitsT, 4>(local));
+        return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
+            kind, read_local_potential<potentialT, 4>(local));
     }
     else
     {

@@ -19,277 +19,206 @@
 namespace mjolnir
 {
 
-template<typename traitsT, std::size_t N>
-std::vector<std::pair<std::array<std::size_t, N>, HarmonicPotential<traitsT>>>
-read_harmonic_potential(const toml::Table& local)
+// this reads...
+// parameters = [
+// {indices = [1, 2], k = 10.0, v0 = 1.0} <- a portion of this table, k and v0.
+// ]
+template<typename traitsT>
+HarmonicPotential<traitsT> read_harmonic_potential(const toml::Table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_harmonic_potential(), 0);
-    MJOLNIR_LOG_INFO("as ", N, "-body interaction");
+    using real_type = typename traitsT::real_type;
+    const auto location = "element of [[parameters]] in harmonic potential";
 
-    using indices_t = std::array<std::size_t, N>;
-    using indices_potential_pair_t =
-        std::pair<indices_t, HarmonicPotential<traitsT>>;
+    const auto k  = get_toml_value<real_type>(param, "k",  location);
+    const auto v0 = get_toml_value<real_type>(param, "v0", location);
 
-    const auto& params = get_toml_value<toml::Array>(local, "parameters",
-        "[forcefield.local] for Harmonic potential");
-    MJOLNIR_LOG_INFO(params.size(), " parameters are found");
-
-    std::vector<indices_potential_pair_t> retval;
-    retval.reserve(params.size());
-
-    for(const auto& item : params)
-    {
-        using real_type = typename traitsT::real_type;
-
-        const auto& parameter = item.cast<toml::value_t::Table>();
-        auto indices = get_toml_value<indices_t>(parameter, "indices",
-                "element of [[parameters]] in harmonic potential");
-        auto v0 = get_toml_value<real_type>(parameter, "v0",
-                "element of [[parameters]] in harmonic potential");
-        auto k  = get_toml_value<real_type>(parameter, "k",
-                "element of [[parameters]] in harmonic potential");
-        MJOLNIR_LOG_INFO("idxs = ", indices, ", v0 = ", v0, ", k = ", k);
-
-        retval.emplace_back(indices, HarmonicPotential<traitsT>(k, v0));
-    }
-    return retval;
+    MJOLNIR_LOG_INFO("HarmonicPotential = {v0 = ", v0, ", k = ", k, '}');
+    return HarmonicPotential<traitsT>(k, v0);
 }
 
-template<typename traitsT, std::size_t N>
-std::vector<
-    std::pair<std::array<std::size_t, N>, Go1012ContactPotential<traitsT>>
-    >
-read_go1012_contact_potential(const toml::Table& local)
+template<typename traitsT>
+Go1012ContactPotential<traitsT>
+read_go1012_contact_potential(const toml::Table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_go1012_contact_potential(), 0);
-    MJOLNIR_LOG_INFO("as ", N, "-body interaction");
-    if(N != 2)
-    {
-        MJOLNIR_LOG_WARN("Go contact potential is normally used as "
-                         "a 2-body interaction");
-    }
+    using real_type = typename traitsT::real_type;
+    const auto location = "element of [[parameters]] in Go-10-12 potential";
 
-    using indices_t = std::array<std::size_t, N>;
-    using indices_potential_pair_t =
-        std::pair<indices_t, Go1012ContactPotential<traitsT>>;
+    const auto k  = get_toml_value<real_type>(param, "k",  location);
+    const auto v0 = get_toml_value<real_type>(param, "v0", location);
 
-    const auto& params = get_toml_value<toml::Array>(local, "parameters",
-            "[forcefield.local] for Go-10-12 potential");
-    MJOLNIR_LOG_INFO(params.size(), " parameters are found");
-
-    std::vector<indices_potential_pair_t> retval;
-    retval.reserve(params.size());
-
-    for(const auto& item : params)
-    {
-        using real_type = typename traitsT::real_type;
-        const auto& parameter = item.cast<toml::value_t::Table>();
-
-        auto indices = get_toml_value<indices_t>(parameter, "indices",
-                "element of [[parameters]] in Go-10-12 potential");
-        auto v0 = get_toml_value<real_type>(parameter, "v0",
-                "element of [[parameters]] in Go-10-12 potential");
-        auto k  = get_toml_value<real_type>(parameter, "k",
-                "element of [[parameters]] in Go-10-12 potential");
-
-        MJOLNIR_LOG_INFO("idxs = ", indices, ", v0 = ", v0, ", k = ", k );
-
-        retval.emplace_back(indices, Go1012ContactPotential<traitsT>(k, v0));
-    }
-    return retval;
+    MJOLNIR_LOG_INFO("GoContactPotential = {v0 = ", v0, ", k = ", k, '}');
+    return Go1012ContactPotential<traitsT>(k, v0);
 }
 
-template<typename traitsT, std::size_t N>
-std::vector<std::pair<std::array<std::size_t, N>, GaussianPotential<traitsT>>>
-read_gaussian_potential(const toml::Table& local)
+template<typename traitsT>
+GaussianPotential<traitsT> read_gaussian_potential(const toml::Table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_gaussian_potential(), 0);
-    MJOLNIR_LOG_INFO("as ", N, "-body interaction");
+    using real_type = typename traitsT::real_type;
+    const auto location = "element of [[parameters]] in Gaussian potential";
 
-    using indices_t = std::array<std::size_t, N>;
-    using indices_potential_pair_t =
-        std::pair<indices_t, GaussianPotential<traitsT>>;
+    const auto v0      = get_toml_value<real_type>(param, "v0",      location);
+    const auto epsilon = get_toml_value<real_type>(param, "epsilon", location);
+    const auto w       = get_toml_value<real_type>(param, "w",       location);
 
-    const auto& params = get_toml_value<toml::Array>(local, "parameters",
-        "[forcefield.local] for Gaussian potential");
-    MJOLNIR_LOG_INFO(params.size(), " parameters are found");
-
-    std::vector<indices_potential_pair_t> retval;
-    retval.reserve(params.size());
-
-    for(const auto& item : params)
-    {
-        using real_type = typename traitsT::real_type;
-
-        const auto& parameter = item.cast<toml::value_t::Table>();
-
-        auto indices = get_toml_value<indices_t>(parameter, "indices",
-                "element of [[parameters]] in Gaussian potential");
-        auto v0      = get_toml_value<real_type>(parameter, "v0",
-                "element of [[parameters]] in Gaussian potential");
-        auto epsilon = get_toml_value<real_type>(parameter, "epsilon",
-                "element of [[parameters]] in Gaussian potential");
-        auto w       = get_toml_value<real_type>(parameter, "w",
-                "element of [[parameters]] in Gaussian potential");
-
-        MJOLNIR_LOG_INFO("idxs = ", indices, ", v0 = ", v0,
-                         ", epsilon = ", epsilon, ", w = ", w);
-
-        retval.emplace_back(
-                indices, GaussianPotential<traitsT>(epsilon, w, v0));
-    }
-    return retval;
+    MJOLNIR_LOG_INFO("GaussianPotential = {v0 = ", v0,
+                     ", epsilon = ", epsilon, ", w = ", w, '}');
+    return GaussianPotential<traitsT>(epsilon, w, v0);
 }
 
-template<typename traitsT, std::size_t N>
-std::vector<
-    std::pair<std::array<std::size_t, N>, FlexibleLocalAnglePotential<traitsT>>>
-read_flexible_local_angle_potential(const toml::Table& local)
+template<typename traitsT>
+FlexibleLocalAnglePotential<traitsT>
+read_flexible_local_angle_potential(const toml::Table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_flexible_local_angle_potential(), 0);
-    MJOLNIR_LOG_INFO("as ", N, "-body interaction");
-    if(N != 3)
-    {
-        MJOLNIR_LOG_WARN("FLP angle potential is normally used as "
-                         "a bond-angle interaction");
-    }
+    using real_type = typename traitsT::real_type;
+    using term_type = std::array<real_type, 10>;
+    const auto location =
+        "element of [[parameters]] in FlexibleLocal potential";
 
-    using indices_t = std::array<std::size_t, N>;
-    using indices_potential_pair_t =
-        std::pair<indices_t, FlexibleLocalAnglePotential<traitsT>>;
+    const auto k     = get_toml_value<real_type>(param, "k",     location);
+    const auto term1 = get_toml_value<term_type>(param, "term1", location);
+    const auto term2 = get_toml_value<term_type>(param, "term2", location);
 
-    const auto& params = get_toml_value<toml::Array>(local, "parameters",
-        "[forcefield.local] for FlexibleLocalAngle potential");
-    MJOLNIR_LOG_INFO(params.size(), " parameters are found");
-
-    std::vector<indices_potential_pair_t> retval;
-    retval.reserve(params.size());
-
-    for(const auto& item : params)
-    {
-        using real_type  = typename traitsT::real_type;
-        using table_type = std::array<real_type, 10>;
-        const auto& parameter = item.cast<toml::value_t::Table>();
-
-        auto indices = get_toml_value<indices_t>(parameter, "indices",
-                "element of [[parameters]] in FlexibleLocal potential");
-        auto k     = get_toml_value<real_type>(parameter, "k",
-                "element of [[parameters]] in FlexibleLocal potential");
-        auto term1 = get_toml_value<table_type>(parameter, "term1",
-                "element of [[parameters]] in FlexibleLocal potential");
-        auto term2 = get_toml_value<table_type>(parameter, "term2",
-                "element of [[parameters]] in FlexibleLocal potential");
-
-        MJOLNIR_LOG_INFO("idxs  = ", indices, ", k = ", k,
-                         ", term1 = ", term1, ", term2 = ", term2);
-
-        retval.emplace_back(
-                indices, FlexibleLocalAnglePotential<traitsT>(k, term1, term2));
-    }
-    return retval;
+    MJOLNIR_LOG_INFO("FlexibleLocalAngle = {k = ", k,
+                     ", term1 = ", term1, ", term2 = ", term2, '}');
+    return FlexibleLocalAnglePotential<traitsT>(k, term1, term2);
 }
 
-template<typename traitsT, std::size_t N>
-std::vector<std::pair<std::array<std::size_t, N>,
-                      ClementiDihedralPotential<traitsT>>>
-read_clementi_dihedral_potential(const toml::Table& local)
+template<typename traitsT>
+ClementiDihedralPotential<traitsT>
+read_clementi_dihedral_potential(const toml::Table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_clementi_dihedral_potential(), 0);
-    MJOLNIR_LOG_INFO("as ", N, "-body interaction");
-    if(N != 4)
-    {
-        MJOLNIR_LOG_WARN("Clementi-Go dihedral angle potential is normally used "
-                         "as a dihedral-angle interaction");
-    }
+    using real_type  = typename traitsT::real_type;
+    const auto location =
+        "element of [[parameters]] in ClementiDihedral potential";
 
-    using indices_t = std::array<std::size_t, N>;
-    using indices_potential_pair_t =
-        std::pair<indices_t, ClementiDihedralPotential<traitsT>>;
+    const auto v0 = get_toml_value<real_type>(param, "v0", location);
+    const auto k1 = get_toml_value<real_type>(param, "k1", location);
+    const auto k3 = get_toml_value<real_type>(param, "k3", location);
 
-    const auto& params = get_toml_value<toml::Array>(local, "parameters",
-        "[forcefield.local] for ClementiDihedral potential");
-    MJOLNIR_LOG_INFO(params.size(), " parameters are found");
-
-    std::vector<indices_potential_pair_t> retval;
-    retval.reserve(params.size());
-
-    for(const auto& item : params)
-    {
-        using real_type  = typename traitsT::real_type;
-        const auto& parameter = item.cast<toml::value_t::Table>();
-
-        auto indices = get_toml_value<indices_t>(parameter, "indices",
-                "element of [[parameters]] in ClementiDihedral potential");
-        auto v0 = get_toml_value<real_type>(parameter, "v0",
-                "element of [[parameters]] in ClementiDihedral potential");
-        auto k1 = get_toml_value<real_type>(parameter, "k1",
-                "element of [[parameters]] in ClementiDihedral potential");
-        auto k3 = get_toml_value<real_type>(parameter, "k3",
-                "element of [[parameters]] in ClementiDihedral potential");
-
-        MJOLNIR_LOG_INFO("idxs = ", indices, ", phi0 = ", v0,
-                         ", k1   = ", k1, ", k3   = ", k3);
-
-        retval.emplace_back(
-                indices, ClementiDihedralPotential<traitsT>(k1, k3, v0));
-    }
-    return retval;
+    MJOLNIR_LOG_INFO("ClementiDihedral = {v0 = ", v0,
+                     ", k1 = ", k1, ", k3 = ", k3, '}');
+    return ClementiDihedralPotential<traitsT>(k1, k3, v0);
 }
 
-template<typename traitsT, std::size_t N>
-std::vector<std::pair<std::array<std::size_t, N>,
-                      FlexibleLocalDihedralPotential<traitsT>>>
-read_flexible_local_dihedral_potential(const toml::Table& local)
+template<typename traitsT>
+FlexibleLocalDihedralPotential<traitsT>
+read_flexible_local_dihedral_potential(const toml::Table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_flexible_local_dihedral_potential(), 0);
-    MJOLNIR_LOG_INFO("as ", N, "-body interaction");
-    if(N != 4)
-    {
-        MJOLNIR_LOG_WARN("FLP angle potential is normally used as "
-                         "a bond-angle interaction");
-    }
+    using real_type = typename traitsT::real_type;
+    using term_type = std::array<real_type, 7>;
+    const auto location =
+        "element of [[parameters]] in FlexibleLocalDihedral potential";
 
-    using indices_t = std::array<std::size_t, N>;
-    using indices_potential_pair_t =
-        std::pair<indices_t, FlexibleLocalDihedralPotential<traitsT>>;
+    auto k    = get_toml_value<real_type>(param, "k",    location);
+    auto term = get_toml_value<term_type>(param, "term", location);
 
-    const auto& params = get_toml_value<toml::Array>(local, "parameters",
-        "[forcefield.local] for FlexibleLocalDihedral potential");
-    MJOLNIR_LOG_INFO(params.size(), " parameters are found");
-
-    std::vector<indices_potential_pair_t> retval;
-    retval.reserve(params.size());
-
-    for(const auto& item : params)
-    {
-        using real_type  = typename traitsT::real_type;
-        using table_type = std::array<real_type, 7>;
-
-        const auto& parameter = item.cast<toml::value_t::Table>();
-        auto indices = get_toml_value<indices_t>(parameter, "indices",
-            "element of [[parameters]] in FlexibleLocalDihedral potential");
-        auto k    = get_toml_value<real_type>(parameter, "k",
-            "element of [[parameters]] in FlexibleLocalDihedral potential");
-        auto term = get_toml_value<table_type>(parameter, "term",
-            "element of [[parameters]] in FlexibleLocalDihedral potential");
-
-        MJOLNIR_LOG_INFO("idxs = ", indices, ", k = ", k, ", term = ", term);
-
-       retval.emplace_back(
-                indices, FlexibleLocalDihedralPotential<traitsT>(k, term));
-    }
-    return retval;
+    MJOLNIR_LOG_INFO("FlexibleLocalDihedral = {k = ", k, ", term = ", term, '}');
+    return FlexibleLocalDihedralPotential<traitsT>(k, term);
 }
 
 // ----------------------------------------------------------------------------
+// utility function to read local potentials
+// ----------------------------------------------------------------------------
+
+// potential_class -> reading_function adapter
+// to enable partial specialization of function template, mjolnir uses
+// static function inside of struct. struct can be partially specialized.
+namespace detail
+{
+template<typename potentialT> struct read_local_potential_impl;
+
+template<typename traitsT>
+struct read_local_potential_impl<HarmonicPotential<traitsT>>
+{
+    static HarmonicPotential<traitsT> invoke(const toml::Table& param)
+    {
+        return read_harmonic_potential<traitsT>(param);
+    }
+};
+template<typename traitsT>
+struct read_local_potential_impl<Go1012ContactPotential<traitsT>>
+{
+    static Go1012ContactPotential<traitsT> invoke(const toml::Table& param)
+    {
+        return read_go1012_contact_potential<traitsT>(param);
+    }
+};
+template<typename traitsT>
+struct read_local_potential_impl<GaussianPotential<traitsT>>
+{
+    static GaussianPotential<traitsT> invoke(const toml::Table& param)
+    {
+        return read_gaussian_potential<traitsT>(param);
+    }
+};
+template<typename traitsT>
+struct read_local_potential_impl<FlexibleLocalAnglePotential<traitsT>>
+{
+    static FlexibleLocalAnglePotential<traitsT> invoke(const toml::Table& param)
+    {
+        return read_flexible_local_angle_potential<traitsT>(param);
+    }
+};
+template<typename traitsT>
+struct read_local_potential_impl<ClementiDihedralPotential<traitsT>>
+{
+    static ClementiDihedralPotential<traitsT> invoke(const toml::Table& param)
+    {
+        return read_clementi_dihedral_potential<traitsT>(param);
+    }
+};
+template<typename traitsT>
+struct read_local_potential_impl<FlexibleLocalDihedralPotential<traitsT>>
+{
+    static FlexibleLocalDihedralPotential<traitsT> invoke(const toml::Table& param)
+    {
+        return read_flexible_local_dihedral_potential<traitsT>(param);
+    }
+};
+} // namespace detail
+
+// this function reads particle indices on which the potential will be applied
+// and returns pairs of [indices, potential parameters].
+template<typename potentialT, std::size_t N>
+std::vector<std::pair<std::array<std::size_t, N>, potentialT>>
+read_local_potential(const toml::Table& local)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_local_potential(), 0);
+    MJOLNIR_LOG_INFO("as ", N, "-body interaction");
+
+    using indices_t                = std::array<std::size_t, N>;
+    using indices_potential_pair_t = std::pair<indices_t, potentialT>;
+
+    const auto& params = get_toml_value<toml::Array>(
+            local, "parameters", "[[forcefield.local]]");
+    MJOLNIR_LOG_INFO(params.size(), " parameters are found");
+
+    std::vector<indices_potential_pair_t> retval;
+    retval.reserve(params.size());
+    for(const auto& item : params)
+    {
+        const auto& parameter = item.cast<toml::value_t::Table>();
+
+        const auto indices = get_toml_value<indices_t>(parameter, "indices",
+                "element of [[forcefields.local.parameters]]");
+        MJOLNIR_LOG_INFO_NO_LF("idxs = ", indices, ", ");
+
+        retval.emplace_back(indices,
+            detail::read_local_potential_impl<potentialT>::invoke(parameter));
+    }
+    return retval;
+}
+
+// ============================================================================
 // global potential
-// ----------------------------------------------------------------------------
+// ============================================================================
 
 template<typename traitsT, typename ignoreT>
 ExcludedVolumePotential<traitsT, ignoreT>
