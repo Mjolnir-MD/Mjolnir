@@ -38,7 +38,7 @@ read_bond_length_interaction(const std::string& kind, const toml::Table& local)
         using potentialT = HarmonicPotential<traitsT>;
 
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
-                kind, read_local_potential<potentialT, 2>(local));
+                kind, read_local_potential<2, potentialT>(local));
     }
     else if(potential == "Go1012Contact")
     {
@@ -46,7 +46,7 @@ read_bond_length_interaction(const std::string& kind, const toml::Table& local)
         using potentialT = Go1012ContactPotential<traitsT>;
 
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
-                kind, read_local_potential<potentialT, 2>(local));
+                kind, read_local_potential<2, potentialT>(local));
     }
     else if(potential == "Gaussian")
     {
@@ -54,7 +54,7 @@ read_bond_length_interaction(const std::string& kind, const toml::Table& local)
         using potentialT = GaussianPotential<traitsT>;
 
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
-                kind, read_local_potential<potentialT, 2>(local));
+                kind, read_local_potential<2, potentialT>(local));
     }
     else
     {
@@ -81,7 +81,7 @@ read_bond_angle_interaction(
         using potentialT = HarmonicPotential<traitsT>;
 
         return make_unique<BondAngleInteraction<traitsT, potentialT>>(
-                kind, read_local_potential<potentialT, 3>(local));
+                kind, read_local_potential<3, potentialT>(local));
     }
     else if(potential == "FlexibleLocalAngle")
     {
@@ -89,7 +89,7 @@ read_bond_angle_interaction(
         using potentialT = FlexibleLocalAnglePotential<traitsT>;
 
         return make_unique<BondAngleInteraction<traitsT, potentialT>>(
-                kind, read_local_potential<potentialT, 3>(local));
+                kind, read_local_potential<3, potentialT>(local));
     }
     else if(potential == "Gaussian")
     {
@@ -97,7 +97,7 @@ read_bond_angle_interaction(
         using potentialT = GaussianPotential<traitsT>;
 
         return make_unique<BondAngleInteraction<traitsT, potentialT>>(
-                kind, read_local_potential<potentialT, 3>(local));
+                kind, read_local_potential<3, potentialT>(local));
     }
     else
     {
@@ -124,7 +124,7 @@ read_dihedral_angle_interaction(
         using potentialT = HarmonicPotential<traitsT>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
-            kind, read_local_potential<potentialT, 4>(local));
+            kind, read_local_potential<4, potentialT>(local));
     }
     else if(potential == "ClementiDihedral")
     {
@@ -132,7 +132,7 @@ read_dihedral_angle_interaction(
         using potentialT = ClementiDihedralPotential<traitsT>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
-            kind, read_local_potential<potentialT, 4>(local));
+            kind, read_local_potential<4, potentialT>(local));
     }
     else if(potential == "Gaussian")
     {
@@ -140,7 +140,7 @@ read_dihedral_angle_interaction(
         using potentialT = GaussianPotential<traitsT>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
-            kind, read_local_potential<potentialT, 4>(local));
+            kind, read_local_potential<4, potentialT>(local));
     }
     else if(potential == "FlexibleLocalDihedral")
     {
@@ -148,7 +148,7 @@ read_dihedral_angle_interaction(
         using potentialT = FlexibleLocalDihedralPotential<traitsT>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
-            kind, read_local_potential<potentialT, 4>(local));
+            kind, read_local_potential<4, potentialT>(local));
     }
     else
     {

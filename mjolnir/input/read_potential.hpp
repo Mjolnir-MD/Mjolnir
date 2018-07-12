@@ -185,7 +185,7 @@ struct read_local_potential_impl<FlexibleLocalDihedralPotential<traitsT>>
 
 // this function reads particle indices on which the potential will be applied
 // and returns pairs of [indices, potential parameters].
-template<typename potentialT, std::size_t N>
+template<std::size_t N, typename potentialT>
 std::vector<std::pair<std::array<std::size_t, N>, potentialT>>
 read_local_potential(const toml::Table& local)
 {
