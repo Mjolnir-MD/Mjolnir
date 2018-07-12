@@ -21,8 +21,7 @@ Mainly focused on Coarse-Grained MD simulation.
 
 ## Build
 
-Testing code depends on the Boost.unittest framework.
-If you want to run test codes, please install boost.
+All the depending libraries are automatically downloaded in the CMake script.
 
 ```sh
 $ mkdir build
@@ -32,12 +31,15 @@ $ make
 $ make test # optional
 ```
 
+After this, you will find executable in `bin` directory.
+
 `g++-5` and `clang++-3.7` on `Ubuntu`, `clang++` on `OS X` are tested on
 [Travis CI](https://travis-ci.org/ToruNiina/Mjolnir).
 
 ## Dependency
 
 Mjolnir depends on Boost C++ Library and toml11.
+
 These libraries are automatically downloaded in the CMake script.
 You need nothing to install.
 

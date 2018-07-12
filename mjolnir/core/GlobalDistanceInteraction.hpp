@@ -51,7 +51,7 @@ class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
     real_type calc_energy(const system_type&) const override;
 
     std::string name() const override
-    {return "Distance:"_str + potential_.name();}
+    {return "Distance:"_str + potential_type::name();}
 
   private:
 

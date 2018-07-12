@@ -91,7 +91,7 @@ class DebyeHuckelPotential
         return ignored_chain_.is_ignored(i, j);
     }
 
-    const char* name() const noexcept {return "DebyeHuckel";}
+    static const char* name() noexcept {return "DebyeHuckel";}
 
     // access to the parameters
     std::vector<real_type>&       charges()       noexcept {return charges_;}

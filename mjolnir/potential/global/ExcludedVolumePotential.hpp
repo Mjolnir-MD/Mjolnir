@@ -102,7 +102,7 @@ class ExcludedVolumePotential
         return ignored_chain_.is_ignored(i, j);
     }
 
-    const char* name() const noexcept {return "ExcludedVolume";}
+    static const char* name() noexcept {return "ExcludedVolume";}
 
     // access to the parameters
     real_type& epsilon()       noexcept {return this->epsilon_;}
