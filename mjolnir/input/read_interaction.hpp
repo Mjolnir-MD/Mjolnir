@@ -150,6 +150,20 @@ read_dihedral_angle_interaction(
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
             kind, read_local_potential<4, potentialT>(local));
     }
+    // XXX generalization of this feature is too difficult (technically, it's
+    // not so difficult, but practically, it makes the code messy...).
+    else if(potential == "Gaussian+FlexibleLocalDihedral")
+    {
+        MJOLNIR_SCOPE(potential == "Gaussian+FlexibleLocalDihedral", 1);
+        using potential_1_T = GaussianPotential<traitsT>;
+        using potential_2_T = FlexibleLocalDihedralPotential<traitsT>;
+        using potentialT    =
+            SumLocalPotential<traitsT, potential_1_T, potential_2_T>;
+
+        return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(kind,
+            read_local_potentials<4, traitsT, potential_1_T, potential_2_T>(
+                local, "Gaussian", "FlexibleLocalDihedral"));
+    }
     else
     {
         throw_exception<std::runtime_error>(

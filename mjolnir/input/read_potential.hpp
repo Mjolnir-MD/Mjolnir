@@ -7,6 +7,7 @@
 #include <mjolnir/potential/local/GaussianPotential.hpp>
 #include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
 #include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
+#include <mjolnir/potential/local/SumLocalPotential.hpp>
 #include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
@@ -215,6 +216,50 @@ read_local_potential(const toml::Table& local)
     }
     return retval;
 }
+
+template<std::size_t N, typename traitsT,
+         typename potentialT1, typename potentialT2>
+std::vector<std::pair<std::array<std::size_t, N>,
+            SumLocalPotential<traitsT, potentialT1, potentialT2>>>
+read_local_potentials(const toml::Table& local,
+                      const std::string& p1, const std::string& p2)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_local_potentials(), 0);
+    MJOLNIR_LOG_INFO("as ", N, "-body interaction");
+
+    using indices_t                = std::array<std::size_t, N>;
+    using indices_potential_pair_t = std::pair<indices_t,
+        SumLocalPotential<traitsT, potentialT1, potentialT2>>;
+
+    const auto& params = get_toml_value<toml::Array>(
+            local, "parameters", "[[forcefield.local]]");
+    MJOLNIR_LOG_INFO(params.size(), " parameters are found");
+
+    std::vector<indices_potential_pair_t> retval;
+    retval.reserve(params.size());
+    for(const auto& item : params)
+    {
+        const auto& parameter = item.cast<toml::value_t::Table>();
+
+        const auto indices = get_toml_value<indices_t>(parameter, "indices",
+                "element of [[forcefields.local.parameters]]");
+        MJOLNIR_LOG_INFO("idxs = ", indices);
+
+        const auto& pot1 =
+            get_toml_value<toml::Table>(parameter, p1, "[[forcefield.local]]");
+        const auto& pot2 =
+            get_toml_value<toml::Table>(parameter, p2, "[[forcefield.local]]");
+
+        retval.emplace_back(indices,
+            SumLocalPotential<traitsT, potentialT1, potentialT2>(
+                detail::read_local_potential_impl<potentialT1>::invoke(pot1),
+                detail::read_local_potential_impl<potentialT2>::invoke(pot2)
+            ));
+    }
+    return retval;
+}
+
 
 // ============================================================================
 // global potential
