@@ -5,6 +5,7 @@
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
+#include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
 {
@@ -132,30 +133,32 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
     const auto& system = system_params.at(N).cast<toml::value_t::Table>();
     if(system.count("file_name") == 1)
     {
+        const auto file_name =
+            get_toml_value<std::string>(system, "file_name", "[[systems]]");
+        MJOLNIR_LOG_INFO("file_name = ", file_name);
+
         if(system.size() != 1)
         {
-            std::cerr << "WARNING: [[systems]] has `file_name` key. \n";
-            std::cerr << "       : When `file_name` is provided, all settings ";
-            std::cerr << "will be read from the file, so other fields ";
-            std::cerr << "are ignored.\n";
-            MJOLNIR_LOG_WARN("[[systems]] has `file_name` and other settings");
+            MJOLNIR_LOG_WARN("[[systems]] has `file_name` key and other keys.");
+            MJOLNIR_LOG_WARN("When `file_name` is provided, other values are "
+                             "ignored because those are read from the specified"
+                             " file (", file_name, ").");
         }
-        const std::string file_name = get_toml_value<std::string>(
-                system, "file_name", "[[systems]]");
-        MJOLNIR_LOG_INFO("file_name = ", file_name);
 
         const auto system_file = toml::parse(file_name);
         if(system_file.count("systems") == 1)
         {
-            std::cerr << "WARNING: each [system] should be provided as a root ";
-            std::cerr << "object of file (" << file_name <<").\n";
+            MJOLNIR_LOG_WARN("in `system` file, root object is treated as "
+                             "one of the [systems] tables.");
+            MJOLNIR_LOG_WARN("but in ", file_name, ", [systems] table found."
+                             "trying to read it as a system setup.");
 
             if(system_file.at("systems").type() != toml::value_t::Table)
             {
-                std::cerr << "FATAL  : [systems] in file `" << file_name;
-                std::cerr << "` is not a toml-table.\n";
-                std::cerr << "       : note: [[...]] means array-of-table. ";
-                std::cerr << "please take care.\n";
+                MJOLNIR_LOG_ERROR("type of `systems` is different from "
+                                  "toml::Table in file (", file_name, ").");
+                MJOLNIR_LOG_ERROR("note: [[...]] means Array-of-Tables. "
+                                  "please take care.");
                 std::exit(1);
             }
             return read_system_from_table<traitsT>(get_toml_value<toml::Table>(
@@ -167,4 +170,4 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
 }
 
 }//mjolnir
-#endif //MJOLNIR_READ_SIMULATOR
+#endif //MJOLNIR_READ_SYSTEM

@@ -7,6 +7,7 @@
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
+#include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_system.hpp>
 #include <mjolnir/input/read_forcefield.hpp>
 #include <mjolnir/input/read_integrator.hpp>
@@ -208,36 +209,35 @@ read_simulator(const toml::Table& data)
     if(simulator.count("file_name") == 1)
     {
         MJOLNIR_SCOPE(simulator.count("file_name") == 1, 1);
-        if(simulator.size() != 1)
-        {
-            std::cerr << "WARNING: [simulator] has `file_name` key.\n";
-            std::cerr << "       : When `file_name` is provided, all settings ";
-            std::cerr << "are read from the file, so other fields are ignored.";
-            std::cerr << std::endl;
-            MJOLNIR_LOG_WARN("[simulator] has file_name and other settings");
-        }
 
         const std::string file_name =
             get_toml_value<std::string>(simulator, "file_name", "[simulator]");
         MJOLNIR_LOG_INFO("file_name = ", file_name);
 
+        if(simulator.size() != 1)
+        {
+            MJOLNIR_LOG_WARN("[simulator] has `file_name` key and other keys.");
+            MJOLNIR_LOG_WARN("When `file_name` is provided, other values are "
+                             "ignored because those are read from the specified"
+                             " file (", file_name, ").");
+        }
+
         const auto simulator_file = toml::parse(file_name);
         if(simulator_file.count("simulator") == 1)
         {
-            MJOLNIR_LOG_ERROR("`simulator` value found in ", file_name);
+            MJOLNIR_LOG_WARN("in `simulator` file, root object is treated as "
+                             "a [simulator] table.");
+            MJOLNIR_LOG_WARN("but in ", file_name, ", `simulator` key found. "
+                             "trying to read it as a simulator setup.");
 
-            const auto simulator_toml_type =
-                simulator_file.at("simulator").type();
-            if(simulator_toml_type != toml::value_t::Table)
+            if(simulator_file.at("simulator").type() != toml::value_t::Table)
             {
-                std::cerr << "FATAL: each [simulator] should be provided as ";
-                std::cerr << "a table in each file (" << file_name <<  ").\n";
-                std::cerr << "       : note: [[...]] means array-of-table. ";
-                std::cerr << "please take care.\n";
+                MJOLNIR_LOG_ERROR("type of `simulator` is different from "
+                                  "toml::Table in file (", file_name, ").");
+                MJOLNIR_LOG_ERROR("note: [[...]] means Array-of-Tables. "
+                                  "please take care.");
                 std::exit(1);
             }
-            std::cerr << "WARNING: in `simulator` file, [simulator] table ";
-            std::cerr << "is not necessary.\n";
 
             MJOLNIR_LOG_INFO("reading `[simulator]` table");
             return read_simulator_from_table<traitsT>(data, simulator_file.at(

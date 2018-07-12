@@ -14,6 +14,7 @@
 #include <mjolnir/potential/external/LennardJonesWallPotential.hpp>
 #include <mjolnir/potential/external/ExcludedVolumeWallPotential.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
+#include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
 {

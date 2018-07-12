@@ -131,9 +131,31 @@ class basic_logger
         {
             ofs << string_type(indent_size * indent_, ' ');
         }
-        if     (level == Level::Warn)  {ofs << "[WARNING] ";}
-        else if(level == Level::Error) {ofs << "[ERROR] ";}
-        output_message(ofs, std::forward<Ts>(args)...);
+
+        if(level == Level::Warn)
+        {
+            ofs << "[WARNING] ";
+            output_message(ofs, std::forward<Ts>(args)...);
+
+            // warning message is also printed to stderr
+            std::cerr << "[WARNING] ";
+            output_message(std::cerr, std::forward<Ts>(args)...);
+            std::cerr << std::endl;
+        }
+        else if(level == Level::Error)
+        {
+            ofs << "[ERROR] ";
+            output_message(ofs, std::forward<Ts>(args)...);
+
+            // error message is also printed to stderr
+            std::cerr << "[ERROR] ";
+            output_message(std::cerr, std::forward<Ts>(args)...);
+            std::cerr << std::endl;
+        }
+        else
+        {
+            output_message(ofs, std::forward<Ts>(args)...);
+        }
         ofs << std::endl;
         return;
     }

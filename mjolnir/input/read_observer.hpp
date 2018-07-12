@@ -3,6 +3,7 @@
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/Observer.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
+#include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
 {

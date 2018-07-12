@@ -6,6 +6,7 @@
 #include <mjolnir/core/SimulatorBase.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
+#include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_simulator.hpp>
 #include <memory>
 
