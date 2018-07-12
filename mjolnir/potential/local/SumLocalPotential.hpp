@@ -9,50 +9,57 @@ template<typename T> class System;
 namespace detail
 {
 
-template<std::size_t Idx, std::size_t Last, typename ... Potentials>
+template<std::size_t Idx, std::size_t Last,
+         typename traitsT, typename ... Potentials>
 struct sumup_potential_impl
 {
+    using real_type = typename traitsT::real_type;
     inline static real_type
     invoke(const real_type x, const std::tuple<Potentials...>& pots) noexcept
     {
         return std::get<Idx>(pots).potential(x) +
-            sumup_potential_impl<Idx+1, Last, Potentials...>::invoke(x, pots);
+            sumup_potential_impl<Idx+1, Last, traitsT, Potentials...>::invoke(x, pots);
     }
-}
-template<std::size_t Last, typename ... Potentials>
-struct sumup_potential_impl<Last, Last, Potentials ...>
+};
+template<std::size_t Last, typename traitsT, typename ... Potentials>
+struct sumup_potential_impl<Last, Last, traitsT, Potentials ...>
 {
+    using real_type = typename traitsT::real_type;
     inline static real_type
     invoke(const real_type x, const std::tuple<Potentials...>& pots) noexcept
     {
         return 0.0;
     }
-}
+};
 
-template<std::size_t Idx, std::size_t Last, typename ... Potentials>
+template<std::size_t Idx, std::size_t Last,
+         typename traitsT, typename ... Potentials>
 struct sumup_derivative_impl
 {
+    using real_type = typename traitsT::real_type;
     inline static real_type
     invoke(const real_type x, const std::tuple<Potentials...>& pots) noexcept
     {
         return std::get<Idx>(pots).derivative(x) +
-            sumup_derivative_impl<Idx+1, Last, Potentials...>::invoke(x, pots);
+            sumup_derivative_impl<Idx+1, Last, traitsT,  Potentials...>::invoke(x, pots);
     }
-}
-template<std::size_t Last, typename ... Potentials>
-struct sumup_derivative_impl<Last, Last, Potentials ...>
+};
+template<std::size_t Last, typename traitsT, typename ... Potentials>
+struct sumup_derivative_impl<Last, Last, traitsT, Potentials ...>
 {
+    using real_type = typename traitsT::real_type;
     inline static real_type
     invoke(const real_type x, const std::tuple<Potentials...>& pots) noexcept
     {
         return 0.0;
     }
-}
+};
 
 template<std::size_t Idx, std::size_t Last,
          typename traitsT, typename ... Potentials>
 struct update_all_impl
 {
+    using real_type = typename traitsT::real_type;
     inline static void
     invoke(const System<traitsT>& sys, const real_type dt,
            const std::tuple<Potentials...>& pots) noexcept
@@ -61,35 +68,37 @@ struct update_all_impl
         return update_all_impl<Idx+1, Last, traitsT, Potentials...
             >::invoke(sys, dt, pots);
     }
-}
+};
 template<std::size_t Last, typename traitsT, typename ... Potentials>
 struct update_all_impl<Last, Last, traitsT, Potentials...>
 {
+    using real_type = typename traitsT::real_type;
     inline static void
     invoke(const System<traitsT>& sys, const real_type dt,
            const std::tuple<Potentials...>& pots) noexcept
     {
         return;
     }
-}
+};
 
 template<std::size_t Idx, std::size_t Last, typename ... Potentials>
 struct collect_name_impl
 {
-    inline static std::string invoke(const std::tuple<Potentials...>& pots)
+    inline static std::string invoke()
     {
-        return std::string(std::get<Idx>(pots).name()) + std::string("+") +
-            collect_name_impl<Idx+1, Last, Potentials...>::invoke(pots);
+        return std::string(std::tuple_element<Idx, std::tuple<Potentials...>
+            >::type::name()) + std::string("+") +
+            collect_name_impl<Idx+1, Last, Potentials...>::invoke();
     }
-}
+};
 template<std::size_t Last, typename ... Potentials>
 struct collect_name_impl<Last, Last, Potentials...>
 {
-    inline static std::string invoke(const std::tuple<Potentials...>& pots)
+    inline static std::string invoke()
     {
         return "";
     }
-}
+};
 } // detail
 
 template<typename traitsT, typename ... Potentials>
@@ -115,34 +124,32 @@ class SumLocalPotential
 
     real_type potential(const real_type x) const noexcept
     {
-        return detail::sumup_potential_impl<0, size, Potentials ...>::invoke(
-                0.0, x, this->potentials_);
+        return detail::sumup_potential_impl<0, size, traitsT, Potentials ...
+            >::invoke(x, this->potentials_);
     }
 
     real_type derivative(const real_type x) const noexcept
     {
-        return detail::sumup_derivative_impl<0, size, Potentials ...>::invoke(
-                0.0, x, this->potentials_);
+        return detail::sumup_derivative_impl<0, size, traitsT, Potentials ...
+            >::invoke(x, this->potentials_);
     }
 
     void update(const system_type& sys, const real_type dt) const noexcept
     {
         return detail::update_all_impl<0, size, traitsT, Potentials...>::invoke(
-                sys, dt, this->potentials);
+                sys, dt, this->potentials_);
     }
 
-    std::string name() const
+    static std::string name()
     {
-        return collect_name_impl<0, size, Potentials...>::invoke(
-                this->potentials_);
+        return detail::collect_name_impl<0, size, Potentials...>::invoke();
     }
 
   private:
     potentials_type potentials_;
 };
-
-template<typename traitsT, template<typename>class ... Potentials>
-constexpr std::size_t SumLocalPotentials<traitsT, Potentials...>::size;
+template<typename traitsT, typename ... Potentials>
+constexpr std::size_t SumLocalPotential<traitsT, Potentials...>::size;
 
 } // mjolnir
 #endif//MJOLNIR_SUM_LOCAL_POTENTIAL
