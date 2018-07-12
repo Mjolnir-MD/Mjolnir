@@ -3,6 +3,7 @@
 #include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/math/rsqrt.hpp>
 #include <mjolnir/util/string.hpp>
+#include <mjolnir/util/logger.hpp>
 #include <cmath>
 #include <iostream>
 
@@ -46,7 +47,13 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
     real_type calc_energy(const system_type&) const noexcept override;
 
     void initialize(const system_type& sys, const real_type dt) override
-    {return;}
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_SCOPE(BondLengthInteraction::initialize(), 0);
+        MJOLNIR_LOG_INFO("potential = ", potential_type::name(),
+                         ", N = ", potentials.size());
+        return;
+    }
 
     void update(const system_type& sys, const real_type dt) override
     {
