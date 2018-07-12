@@ -6,119 +6,143 @@ namespace mjolnir
 {
 template<typename T> class System;
 
-template<typename traitsT, template<typename>class ... Ts>
+namespace detail
+{
+
+template<std::size_t Idx, std::size_t Last, typename ... Potentials>
+struct sumup_potential_impl
+{
+    inline static real_type
+    invoke(const real_type x, const std::tuple<Potentials...>& pots) noexcept
+    {
+        return std::get<Idx>(pots).potential(x) +
+            sumup_potential_impl<Idx+1, Last, Potentials...>::invoke(x, pots);
+    }
+}
+template<std::size_t Last, typename ... Potentials>
+struct sumup_potential_impl<Last, Last, Potentials ...>
+{
+    inline static real_type
+    invoke(const real_type x, const std::tuple<Potentials...>& pots) noexcept
+    {
+        return 0.0;
+    }
+}
+
+template<std::size_t Idx, std::size_t Last, typename ... Potentials>
+struct sumup_derivative_impl
+{
+    inline static real_type
+    invoke(const real_type x, const std::tuple<Potentials...>& pots) noexcept
+    {
+        return std::get<Idx>(pots).derivative(x) +
+            sumup_derivative_impl<Idx+1, Last, Potentials...>::invoke(x, pots);
+    }
+}
+template<std::size_t Last, typename ... Potentials>
+struct sumup_derivative_impl<Last, Last, Potentials ...>
+{
+    inline static real_type
+    invoke(const real_type x, const std::tuple<Potentials...>& pots) noexcept
+    {
+        return 0.0;
+    }
+}
+
+template<std::size_t Idx, std::size_t Last,
+         typename traitsT, typename ... Potentials>
+struct update_all_impl
+{
+    inline static void
+    invoke(const System<traitsT>& sys, const real_type dt,
+           const std::tuple<Potentials...>& pots) noexcept
+    {
+        std::get<Idx>(pots).update(sys, dt);
+        return update_all_impl<Idx+1, Last, traitsT, Potentials...
+            >::invoke(sys, dt, pots);
+    }
+}
+template<std::size_t Last, typename traitsT, typename ... Potentials>
+struct update_all_impl<Last, Last, traitsT, Potentials...>
+{
+    inline static void
+    invoke(const System<traitsT>& sys, const real_type dt,
+           const std::tuple<Potentials...>& pots) noexcept
+    {
+        return;
+    }
+}
+
+template<std::size_t Idx, std::size_t Last, typename ... Potentials>
+struct collect_name_impl
+{
+    inline static std::string invoke(const std::tuple<Potentials...>& pots)
+    {
+        return std::string(std::get<Idx>(pots).name()) + std::string("+") +
+            collect_name_impl<Idx+1, Last, Potentials...>::invoke(pots);
+    }
+}
+template<std::size_t Last, typename ... Potentials>
+struct collect_name_impl<Last, Last, Potentials...>
+{
+    inline static std::string invoke(const std::tuple<Potentials...>& pots)
+    {
+        return "";
+    }
+}
+} // detail
+
+template<typename traitsT, typename ... Potentials>
 class MultipleLocalPotential
 {
   public:
     typedef traitsT traits_type;
     typedef System<traits_type> system_type;
     typedef typename traits_type::real_type real_type;
-    constexpr static std::size_t multiplicity = sizeof...(Ts);
+    typedef std::tuple<Potentials...> potentials_type;
+
+    static constexpr std::size_t size = sizeof...(Potentials);
 
   public:
 
-    MultipleLocalPotential(Ts<traits_type> const& ... args)
+    MultipleLocalPotential(const Potentials& ... args)
         : potentials_(args...)
     {}
-    MultipleLocalPotential(Ts<traits_type>&& ... args)
+    MultipleLocalPotential(Potentials&& ... args)
         : potentials_(std::move(args)...)
     {}
     ~MultipleLocalPotential() = default;
 
-    real_type potential(const real_type x) const
+    real_type potential(const real_type x) const noexcept
     {
-        return accumurate_potentials<0, multiplicity>::invoke(potentials_, x);
+        return detail::sumup_potential_impl<0, size, Potentials ...>::invoke(
+                0.0, x, this->potentials_);
     }
 
-    real_type derivative(const real_type x) const
+    real_type derivative(const real_type x) const noexcept
     {
-        return accumurate_derivatives<0, multiplicity>::invoke(potentials_, x);
+        return detail::sumup_derivative_impl<0, size, Potentials ...>::invoke(
+                0.0, x, this->potentials_);
     }
 
-    void update(const system_type&, const real_type) const noexcept {return;}
+    void update(const system_type& sys, const real_type dt) const noexcept
+    {
+        return detail::update_all_impl<0, size, traitsT, Potentials...>::invoke(
+                sys, dt, this->potentials);
+    }
 
     std::string name() const
     {
-        return collect_names<0, multiplicity>::invoke(this->potentials_);
+        return collect_name_impl<0, size, Potentials...>::invoke(
+                this->potentials_);
     }
 
   private:
-
-    template<std::size_t I, std::size_t N>
-    struct accumurate_potentials
-    {
-        static constexpr real_type
-        invoke(const std::tuple<Ts<traits_type>...>& pots, const real_type x)
-        {
-            return std::get<I>(pots).potential(x) +
-                   accumurate_potentials<I+1, N>::invoke(pots, x);
-        }
-    };
-    template<std::size_t N>
-    struct accumurate_potentials<N, N>
-    {
-        static constexpr real_type
-        invoke(const std::tuple<Ts<traits_type>...>& pots, const real_type x)
-        {
-            return 0.;
-        }
-    };
-
-    template<std::size_t I, std::size_t N>
-    struct accumurate_derivatives
-    {
-        static constexpr real_type
-        invoke(const std::tuple<Ts<traits_type>...>& pots, const real_type x)
-        {
-            return std::get<I>(pots).derivative(x) +
-                   accumurate_derivatives<I+1, N>::invoke(pots, x);
-        }
-    };
-    template<std::size_t N>
-    struct accumurate_derivatives<N, N>
-    {
-        static constexpr real_type
-        invoke(const std::tuple<Ts<traits_type>...>& pots, const real_type x)
-        {
-            return 0.;
-        }
-    };
-
-    template<std::size_t I, std::size_t N>
-    struct collect_names
-    {
-        static std::string
-        invoke(const std::tuple<Ts<traits_type>...>& pots)
-        {
-            return std::string(":") + std::string(std::get<I>(pots).name()) +
-                   accumurate_potentials<I+1, N>::invoke(pots);
-        }
-    };
-    template<std::size_t N>
-    struct collect_names<0, N>
-    {
-        static std::string
-        invoke(const std::tuple<Ts<traits_type>...>& pots)
-        {
-            return std::string(std::get<I>(pots).name()) +
-                   accumurate_potentials<I+1, N>::invoke(pots);
-        }
-    };
-    template<std::size_t N>
-    struct collect_names<N, N>
-    {
-        static std::string
-        invoke(const std::tuple<Ts<traits_type>...>& pots)
-        {
-            return "";
-        }
-    };
-
-  private:
-    std::tuple<Ts<traits_type>...> potentials_;
+    potentials_type potentials_;
 };
-template<typename traitsT, template<typename>class ... Ts>
-constexpr std::size_t MultipleLocalPotential<traitsT, Ts...>::multiplicity;
+
+template<typename traitsT, template<typename>class ... Potentials>
+constexpr std::size_t MultipleLocalPotential<traitsT, Potentials...>::size;
 
 } // mjolnir
 #endif//MJOLNIR_MULTIPLE_LOCAL_POTENTIAL
