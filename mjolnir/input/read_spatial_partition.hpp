@@ -40,10 +40,10 @@ struct celllist_dispatcher<CuboidalPeriodicBoundary<realT, coordT>, traitsT>
 
 template<typename traitsT, typename potentialT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
+read_spatial_partition(const toml::Table& global, potentialT pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_spatial_partition_for_distance(), 0);
+    MJOLNIR_SCOPE(read_spatial_partition(), 0);
     typedef typename traitsT::real_type real_type;
 
     const auto& sp   = get_toml_value<toml::Table>(
@@ -62,7 +62,7 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
             get_toml_value<real_type>(sp, "margin", "[forcefield.global]");
         MJOLNIR_LOG_INFO("margin = ", mg);
 
-        return make_unique<GlobalDistanceInteraction<
+        return make_unique<GlobalPairInteraction<
             traitsT, potentialT, celllist_type>>(
                 std::move(pot), dispatcher::invoke(mg));
     }
@@ -74,14 +74,14 @@ read_spatial_partition_for_distance(const toml::Table& global, potentialT pot)
                     sp, "margin", "[forcefield.global]");
         MJOLNIR_LOG_INFO("margin = ", margin);
 
-        return make_unique<GlobalDistanceInteraction<
+        return make_unique<GlobalPairInteraction<
             traitsT, potentialT, VerletList<traitsT>>>(
                 std::move(pot), VerletList<traitsT>(margin));
     }
     else if(type == "Naive")
     {
         MJOLNIR_SCOPE(type == "Naive", 1);
-        return make_unique<GlobalDistanceInteraction<
+        return make_unique<GlobalPairInteraction<
             traitsT, potentialT, NaivePairCalculation<traitsT>>
                 >(std::move(pot), NaivePairCalculation<traitsT>());
     }

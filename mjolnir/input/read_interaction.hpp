@@ -4,7 +4,7 @@
 #include <mjolnir/core/BondLengthInteraction.hpp>
 #include <mjolnir/core/BondAngleInteraction.hpp>
 #include <mjolnir/core/DihedralAngleInteraction.hpp>
-#include <mjolnir/core/GlobalDistanceInteraction.hpp>
+#include <mjolnir/core/GlobalPairInteraction.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>
 #include <mjolnir/core/ExternalDistanceInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
@@ -177,10 +177,10 @@ read_dihedral_angle_interaction(
 
 template<typename traitsT, typename ignoreT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_global_distance_interaction(const toml::Table& global)
+read_global_pair_interaction(const toml::Table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_global_distance_interaction(), 0);
+    MJOLNIR_SCOPE(read_global_pair_interaction(), 0);
 
     const auto potential = get_toml_value<std::string>(
             global, "potential", "[[forcefield.global]]");
@@ -190,7 +190,7 @@ read_global_distance_interaction(const toml::Table& global)
         MJOLNIR_SCOPE(potential == "ExcludedVolume", 1);
         using potential_t = ExcludedVolumePotential<traitsT, ignoreT>;
 
-        return read_spatial_partition_for_distance<traitsT, potential_t>(
+        return read_spatial_partition<traitsT, potential_t>(
             global, read_excluded_volume_potential<traitsT, ignoreT>(global));
     }
     else if(potential == "DebyeHuckel")
@@ -198,7 +198,7 @@ read_global_distance_interaction(const toml::Table& global)
         MJOLNIR_SCOPE(potential == "DebyeHuckel", 1);
         using potential_t = DebyeHuckelPotential<traitsT, ignoreT>;
 
-        return read_spatial_partition_for_distance<traitsT, potential_t>(
+        return read_spatial_partition<traitsT, potential_t>(
             global, read_debye_huckel_potential<traitsT, ignoreT>(global));
     }
     else if(potential == "LennardJones")
@@ -206,13 +206,13 @@ read_global_distance_interaction(const toml::Table& global)
         MJOLNIR_SCOPE(potential == "LennardJones", 1);
         using potential_t = LennardJonesPotential<traitsT, ignoreT>;
 
-        return read_spatial_partition_for_distance<traitsT, potential_t>(
+        return read_spatial_partition<traitsT, potential_t>(
             global, read_lennard_jones_potential<traitsT, ignoreT>(global));
     }
     else
     {
         throw_exception<std::runtime_error>(
-                "invalid potential as GlobalDistanceInteraction: ", potential);
+                "invalid potential as GlobalPairInteraction: ", potential);
     }
 }
 
@@ -391,23 +391,23 @@ read_global_interaction(const toml::Table& global)
     const auto ignored_chain = get_toml_value<std::string>(
             global, "ignored_chain", "[forcefields.global]");
 
-    if(interaction == "Distance")
+    if(interaction == "Pair")
     {
-        MJOLNIR_LOG_INFO("Distance interaction found");
+        MJOLNIR_LOG_INFO("Pair interaction found");
         if(ignored_chain == "Nothing")
         {
             MJOLNIR_LOG_INFO("all the interactions(both (inter|intra)-chain) are included");
-            return read_global_distance_interaction<traitsT, IgnoreNothing>(global);
+            return read_global_pair_interaction<traitsT, IgnoreNothing>(global);
         }
         else if(ignored_chain == "Self")
         {
             MJOLNIR_LOG_INFO("intra-chain interaction is ignored");
-            return read_global_distance_interaction<traitsT, IgnoreSelf>(global);
+            return read_global_pair_interaction<traitsT, IgnoreSelf>(global);
         }
         else if(ignored_chain == "Others")
         {
             MJOLNIR_LOG_INFO("inter-chain interaction is ignored");
-            return read_global_distance_interaction<traitsT, IgnoreOthers>(global);
+            return read_global_pair_interaction<traitsT, IgnoreOthers>(global);
         }
         else
         {

@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_GLOBAL_DISTANCE_INTEARACTION
-#define MJOLNIR_GLOBAL_DISTANCE_INTEARACTION
+#ifndef MJOLNIR_GLOBAL_PAIR_INTEARACTION
+#define MJOLNIR_GLOBAL_PAIR_INTEARACTION
 #include "GlobalInteractionBase.hpp"
 #include <memory>
 
@@ -7,7 +7,7 @@ namespace mjolnir
 {
 
 template<typename traitsT, typename potentialT, typename partitionT>
-class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
+class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
 {
   public:
 
@@ -21,10 +21,10 @@ class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
     typedef typename base_type::boundary_type   boundary_type;
 
   public:
-    GlobalDistanceInteraction()  = default;
-    ~GlobalDistanceInteraction() = default;
+    GlobalPairInteraction()  = default;
+    ~GlobalPairInteraction() = default;
 
-    GlobalDistanceInteraction(potential_type&& pot, partition_type&& part)
+    GlobalPairInteraction(potential_type&& pot, partition_type&& part)
         : potential_(std::move(pot)), partition_(std::move(part))
     {}
 
@@ -51,7 +51,7 @@ class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
     real_type calc_energy(const system_type&) const override;
 
     std::string name() const override
-    {return "Distance:"_str + potential_type::name();}
+    {return "Pair:"_str + potential_type::name();}
 
   private:
 
@@ -60,7 +60,7 @@ class GlobalDistanceInteraction final : public GlobalInteractionBase<traitsT>
 };
 
 template<typename traitsT, typename potT, typename spaceT>
-void GlobalDistanceInteraction<traitsT, potT, spaceT>::calc_force(
+void GlobalPairInteraction<traitsT, potT, spaceT>::calc_force(
         system_type& sys)
 {
     partition_.update(sys); // reduce margin and reconstruct pair-list if needed
@@ -85,8 +85,8 @@ void GlobalDistanceInteraction<traitsT, potT, spaceT>::calc_force(
 }
 
 template<typename traitsT, typename potT, typename spaceT>
-typename GlobalDistanceInteraction<traitsT, potT, spaceT>::real_type
-GlobalDistanceInteraction<traitsT, potT, spaceT>::calc_energy(
+typename GlobalPairInteraction<traitsT, potT, spaceT>::real_type
+GlobalPairInteraction<traitsT, potT, spaceT>::calc_energy(
         const system_type& sys) const
 {
     real_type e = 0.0;
@@ -103,4 +103,4 @@ GlobalDistanceInteraction<traitsT, potT, spaceT>::calc_energy(
 }
 
 } // mjolnir
-#endif /* MJOLNIR_GLOBAL_DISTANCE_INTEARACTION */
+#endif /* MJOLNIR_GLOBAL_PAIR_INTEARACTION */
