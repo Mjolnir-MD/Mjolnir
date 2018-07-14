@@ -679,7 +679,7 @@ parameters = [
 ]
 #}}}
 [[forcefields.global]]
-interaction = "Distance"
+interaction = "Pair"
 potential = "ExcludedVolume"
 ignored_chain    = "Nothing"
 ignored_connections = {bond = 3, contact = 1}

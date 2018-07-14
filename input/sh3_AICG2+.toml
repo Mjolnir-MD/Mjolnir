@@ -597,7 +597,7 @@ parameters = [ #{{{
 {indices = [52, 53, 54, 55], Gaussian = {v0 = -1.8176, epsilon = -0.4350, w = 0.15}, FlexibleLocalDihedral = {k = 1.0, term = [2.7098,  0.4850,  0.7700,  0.0948, -0.7474,  0.1875, -0.3699]}},
 ] #}}}
 [[forcefields.global]]
-interaction = "Distance"
+interaction = "Pair"
 potential = "ExcludedVolume"
 ignored_chain       = "Nothing"
 ignored_connections = {bond = 3, contact = 1}
