@@ -82,6 +82,7 @@ System<traitsT> read_system_from_table(const toml::Table& system)
 
         sys[i].mass     = get_toml_value<real_type>(
                 params, "mass", "element of [[system.particles]]");
+        sys[i].rmass    = 1.0 / sys[i].mass;
         sys[i].position = get_toml_value< vec_type>(
                 params, "position", "element of [[system.particles]]");
         sys[i].velocity = get_toml_value< vec_type>(
