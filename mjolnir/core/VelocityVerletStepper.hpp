@@ -66,7 +66,7 @@ VelocityVerletStepper<traitsT>::step(
     {
         auto pv = system[i]; // particle_view that points i-th particle.
 
-        pv.velocity += (halfdt_ / pv.mass) * pv.force;
+        pv.velocity += (halfdt_ * pv.rmass) * pv.force;
 
         const auto disp = dt_ * pv.velocity;
 
@@ -84,7 +84,7 @@ VelocityVerletStepper<traitsT>::step(
     for(std::size_t i=0; i<system.size(); ++i)
     {
         auto pv = system[i];
-        pv.velocity += (halfdt_ / pv.mass) * pv.force;
+        pv.velocity += (halfdt_ * pv.rmass) * pv.force;
     }
     return time + dt_;
 }

@@ -21,7 +21,6 @@ class UnderdampedLangevinStepper
     struct parameter_set
     {
         real_type       gamma;
-        real_type       r_mass;
         real_type       sqrt_gamma_over_mass;
         coordinate_type accel;
     };
@@ -98,10 +97,11 @@ void UnderdampedLangevinStepper<traitsT>::initialize(
 
     for(std::size_t i=0; i<system.size(); ++i)
     {
+        auto pv = system[i];
+
         auto& p = parameters_[i];
-        p.r_mass = 1.0 / system[i].mass;
-        p.sqrt_gamma_over_mass = std::sqrt(p.gamma * p.r_mass);
-        p.accel = system[i].force * p.r_mass + this->gen_gaussian_vec(
+        p.sqrt_gamma_over_mass = std::sqrt(p.gamma * pv.rmass);
+        p.accel = pv.force * pv.rmass + this->gen_gaussian_vec(
                   this->noise_coef_ * p.sqrt_gamma_over_mass);
     }
     return;
@@ -145,7 +145,7 @@ UnderdampedLangevinStepper<traitsT>::step(
     {
         auto pv = sys[i]; // particle_view that points i-th particle.
         auto& param = this->parameters_[i];
-        param.accel = pv.force * param.r_mass + this->gen_gaussian_vec(
+        param.accel = pv.force * pv.rmass + this->gen_gaussian_vec(
                       this->noise_coef_ * param.sqrt_gamma_over_mass);
         pv.velocity += halfdt_ * (1. - param.gamma * halfdt_) * param.accel;
     }
