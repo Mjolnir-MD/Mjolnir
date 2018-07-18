@@ -28,8 +28,9 @@ class System
     System(const std::size_t num_particles, const boundary_type& bound)
         : largest_disp_(0.0), boundary_(bound), topology_(num_particles),
           attributes_(), num_particles_(num_particles),
-          masses_    (num_particles), positions_(num_particles),
-          velocities_(num_particles), forces_   (num_particles)
+          masses_   (num_particles), rmasses_   (num_particles),
+          positions_(num_particles), velocities_(num_particles),
+          forces_   (num_particles)
     {}
     ~System() = default;
 
@@ -40,33 +41,35 @@ class System
 
     std::size_t size() const noexcept {return num_particles_;}
 
-    particle_view_type       operator[](std::size_t i)       noexcept
+    particle_view_type operator[](std::size_t i) noexcept
     {
         return particle_view_type{
-            masses_[i], positions_[i], velocities_[i], forces_[i]
+            masses_[i], rmasses_[i], positions_[i], velocities_[i], forces_[i]
         };
     }
     particle_const_view_type operator[](std::size_t i) const noexcept
     {
         return particle_const_view_type{
-            masses_[i], positions_[i], velocities_[i], forces_[i]
+            masses_[i], rmasses_[i], positions_[i], velocities_[i], forces_[i]
         };
     }
-    particle_view_type       at(std::size_t i)
+    particle_view_type at(std::size_t i)
     {
-        return particle_view_type{
-            masses_.at(i), positions_.at(i), velocities_.at(i), forces_.at(i)
+        return particle_view_type{masses_.at(i), rmasses_.at(i),
+            positions_.at(i), velocities_.at(i), forces_.at(i)
         };
     }
     particle_const_view_type at(std::size_t i) const
     {
-        return particle_const_view_type{
-            masses_.at(i), positions_.at(i), velocities_.at(i), forces_.at(i)
+        return particle_const_view_type{masses_.at(i), rmasses_.at(i),
+            positions_.at(i), velocities_.at(i), forces_.at(i)
         };
     }
 
     std::vector<real_type>&             masses()           noexcept {return masses_;}
     std::vector<real_type> const&       masses()     const noexcept {return masses_;}
+    std::vector<real_type>&             rmasses()          noexcept {return masses_;}
+    std::vector<real_type> const&       rmasses()    const noexcept {return masses_;}
     std::vector<coordinate_type>&       positions()        noexcept {return positions_;}
     std::vector<coordinate_type> const& positions()  const noexcept {return positions_;}
     std::vector<coordinate_type>&       velocities()       noexcept {return velocities_;}
@@ -105,6 +108,7 @@ class System
 
     std::size_t num_particles_;
     std::vector<real_type>       masses_;
+    std::vector<real_type>       rmasses_; // r for reciprocal
     std::vector<coordinate_type> positions_;
     std::vector<coordinate_type> velocities_;
     std::vector<coordinate_type> forces_;

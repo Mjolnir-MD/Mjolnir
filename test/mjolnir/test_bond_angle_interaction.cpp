@@ -37,9 +37,9 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
     const coord_type pos1(1., 0., 0.);
     const coord_type pos2(0., 0., 0.);
     system_type sys(3, boundary_type{});
-    sys.at(0) = {1.0, pos1,              coord_type(0,0,0), coord_type(0,0,0)};
-    sys.at(1) = {1.0, pos2,              coord_type(0,0,0), coord_type(0,0,0)};
-    sys.at(2) = {1.0, coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)};
+    sys.at(0) = {1.0, 1.0, pos1,              coord_type(0,0,0), coord_type(0,0,0)};
+    sys.at(1) = {1.0, 1.0, pos2,              coord_type(0,0,0), coord_type(0,0,0)};
+    sys.at(2) = {1.0, 1.0, coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)};
 
     const std::size_t N = 1800;
     const real_type dtheta = mjolnir::constants<real_type>::pi  / N;

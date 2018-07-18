@@ -35,8 +35,8 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
     bond_length_type interaction("none", {{ {{0,1}}, potential}});
 
     system_type sys(2, boundary_type{});
-    sys.at(0) = {1.0, coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)};
-    sys.at(1) = {1.0, coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)};
+    sys.at(0) = {1.0, 1.0, coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)};
+    sys.at(1) = {1.0, 1.0, coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)};
 
     const real_type dr = 1e-3;
     real_type dist = 1e0;

@@ -10,6 +10,7 @@ struct Particle
     typedef realT  real_type;
     typedef coordT coordinate_type;
     real_type       mass;
+    real_type       rmass; // r is for reciprocal
     coordinate_type position;
     coordinate_type velocity;
     coordinate_type force;
@@ -18,6 +19,7 @@ struct Particle
 // To use SoA data structure
 // class System {
 //     std::vector<Real>  masses;
+//     std::vector<Real>  rmasses;
 //     std::vector<Coord> positions;
 //     std::vector<Coord> velocities;
 //     std::vector<Coord> forces;
@@ -38,14 +40,15 @@ class ParticleView
     ParticleView& operator=(const ParticleView&) = default;
     ParticleView& operator=(ParticleView&&)      = default;
 
-    ParticleView(real_type&       m, coordinate_type& p,
-                 coordinate_type& v, coordinate_type& f) noexcept
-        : mass(m), position(p), velocity(v), force(f)
+    ParticleView(real_type& m, real_type& rm,
+        coordinate_type& p, coordinate_type& v, coordinate_type& f) noexcept
+        : mass(m), rmass(rm), position(p), velocity(v), force(f)
     {}
 
     ParticleView& operator=(const Particle<real_type, coordinate_type>& p)
     {
         mass     = p.mass;
+        rmass    = p.rmass;
         position = p.position;
         velocity = p.velocity;
         force    = p.force;
@@ -53,6 +56,7 @@ class ParticleView
     }
 
     real_type&       mass;
+    real_type&       rmass;
     coordinate_type& position;
     coordinate_type& velocity;
     coordinate_type& force;
@@ -72,12 +76,14 @@ class ParticleConstView
     ParticleConstView& operator=(const ParticleConstView&) = default;
     ParticleConstView& operator=(ParticleConstView&&)      = default;
 
-    ParticleConstView(const real_type&       m, const coordinate_type& p,
-                      const coordinate_type& v, const coordinate_type& f) noexcept
-        : mass(m), position(p), velocity(v), force(f)
+    ParticleConstView(const real_type& m, const real_type& rm,
+        const coordinate_type& p, const coordinate_type& v,
+        const coordinate_type& f) noexcept
+        : mass(m), rmass(rm), position(p), velocity(v), force(f)
     {}
 
     real_type       const& mass;
+    real_type       const& rmass;
     coordinate_type const& position;
     coordinate_type const& velocity;
     coordinate_type const& force;
