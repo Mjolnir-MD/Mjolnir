@@ -54,7 +54,7 @@ class Go1012ContactPotential
         return this->epsilon_ * 60. * (rd10 - rd12) * invr;
     }
 
-    void update(const system_type&, const real_type) const noexcept {return;}
+    void update(const system_type&) const noexcept {return;}
 
     static const char* name() noexcept {return "Go1012Contact";}
 

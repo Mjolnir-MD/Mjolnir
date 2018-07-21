@@ -37,7 +37,7 @@ class QuarticPotential
         return  2 * this->k1_ * dr + 4 * this->k2_ * dr * dr * dr;
     }
 
-    void update(const system_type&, const real_type) const noexcept {return;}
+    void update(const system_type&) const noexcept {return;}
 
     static const char* name() noexcept {return "Quartic";}
 

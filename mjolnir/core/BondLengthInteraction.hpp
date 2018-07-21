@@ -55,11 +55,11 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
         return;
     }
 
-    void update(const system_type& sys, const real_type dt) override
+    void update(const system_type& sys) override
     {
         for(auto& item : potentials)
         {
-            item.second.update(sys, dt);
+            item.second.update(sys);
         }
     }
 

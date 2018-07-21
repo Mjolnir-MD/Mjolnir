@@ -35,7 +35,7 @@ class HarmonicPotential
         return  2 * this->k_ * (r - r0_);
     }
 
-    void update(const system_type&, const real_type) const noexcept {return;}
+    void update(const system_type&) const noexcept {return;}
 
     static const char* name() noexcept {return "Harmonic";}
 

@@ -52,12 +52,12 @@ class ForceField
         external_.initialize(sys, dt);
     }
 
-    // update parameters like delta t, temperature, ionic concentration, etc...
-    void update(const system_type& sys, const real_type dt)
+    // update parameters like temperature, ionic concentration, etc...
+    void update(const system_type& sys)
     {
-           local_.update(sys, dt);
-          global_.update(sys, dt);
-        external_.update(sys, dt);
+           local_.update(sys);
+          global_.update(sys);
+        external_.update(sys);
     }
 
     void calc_force(system_type& sys)

@@ -61,12 +61,12 @@ struct update_all_impl
 {
     using real_type = typename traitsT::real_type;
     inline static void
-    invoke(const System<traitsT>& sys, const real_type dt,
+    invoke(const System<traitsT>& sys,
            const std::tuple<Potentials...>& pots) noexcept
     {
-        std::get<Idx>(pots).update(sys, dt);
-        return update_all_impl<Idx+1, Last, traitsT, Potentials...
-            >::invoke(sys, dt, pots);
+        std::get<Idx>(pots).update(sys);
+        return update_all_impl<Idx+1, Last, traitsT, Potentials...>::invoke(
+                sys, pots);
     }
 };
 template<std::size_t Last, typename traitsT, typename ... Potentials>
@@ -74,7 +74,7 @@ struct update_all_impl<Last, Last, traitsT, Potentials...>
 {
     using real_type = typename traitsT::real_type;
     inline static void
-    invoke(const System<traitsT>& sys, const real_type dt,
+    invoke(const System<traitsT>& sys,
            const std::tuple<Potentials...>& pots) noexcept
     {
         return;
@@ -134,10 +134,10 @@ class SumLocalPotential
             >::invoke(x, this->potentials_);
     }
 
-    void update(const system_type& sys, const real_type dt) const noexcept
+    void update(const system_type& sys) const noexcept
     {
         return detail::update_all_impl<0, size, traitsT, Potentials...>::invoke(
-                sys, dt, this->potentials_);
+                sys, this->potentials_);
     }
 
     static std::string name()

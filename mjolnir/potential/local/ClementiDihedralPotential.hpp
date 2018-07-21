@@ -42,7 +42,7 @@ class ClementiDihedralPotential
         return this->k1_ * sin1 + 3.0 * this->k3_ * sin3;
     }
 
-    void update(const system_type&, const real_type) const noexcept {return;}
+    void update(const system_type&) const noexcept {return;}
 
     static const char* name() {return "ClementiDihedral";}
 

@@ -87,7 +87,7 @@ class FlexibleLocalAnglePotential
         else {return spline_derivative(th) * k_;}
     }
 
-    void update(const system_type&, const real_type) const noexcept {return;}
+    void update(const system_type&) const noexcept {return;}
     static const char* name() noexcept {return "FlexibleLocalAngle";}
 
   private:

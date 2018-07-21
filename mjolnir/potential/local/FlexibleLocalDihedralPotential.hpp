@@ -76,7 +76,7 @@ class FlexibleLocalDihedralPotential
                    -3*term_[5] * sin3 + 3*term_[6] * cos3);
     }
 
-    void update(const system_type&, const real_type) const noexcept {return;}
+    void update(const system_type&) const noexcept {return;}
 
     static const char* name() noexcept {return "FlexibleLocalDihedral";}
 

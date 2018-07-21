@@ -43,11 +43,11 @@ class GlobalForceField
     }
 
     // to re-calculate parameters like temperature, ionic concentration, etc...
-    void update(const system_type& sys, const real_type dt)
+    void update(const system_type& sys)
     {
         for(auto& item : this->interactions_)
         {
-            item->update(sys, dt);
+            item->update(sys);
         }
     }
 

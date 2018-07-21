@@ -40,7 +40,7 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
      *  @details A method that change system parameters (e.g. Annealing),     *
      *           the method is bound to call this function after changing     *
      *           parameters.                                                  */
-    void update(const system_type& sys, const real_type dt) override
+    void update(const system_type& sys) override
     {
         this->potential_.update(sys);
         // potential update may change the cutoff length!

@@ -35,7 +35,7 @@ class CosinePotential
         return this->k_ * std::sin(phi - phi0_);
     }
 
-    void update(const system_type&, const real_type) const noexcept {return;}
+    void update(const system_type&) const noexcept {return;}
     static const char* name() noexcept {return "Cosine";}
 
   private:
