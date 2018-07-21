@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_READ_SIMULATOR
 #define MJOLNIR_READ_SIMULATOR
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/core/MDSimulator.hpp>
+#include <mjolnir/core/MolecularDynamicsSimulator.hpp>
 #include <mjolnir/core/SteepestDescentSimulator.hpp>
 #include <mjolnir/core/SimulatedAnnealingSimulator.hpp>
 #include <mjolnir/util/make_unique.hpp>
@@ -38,7 +38,7 @@ read_molecular_dynamics_simulator(
     {
         MJOLNIR_SCOPE(integration == "Newtonian", 2);
         using integrator_t = VelocityVerletStepper<traitsT>;
-        using simulator_t  = MDSimulator<traitsT, integrator_t>;
+        using simulator_t  = MolecularDynamicsSimulator<traitsT, integrator_t>;
         return make_unique<simulator_t>(
                 tstep, sstep,
                 read_system<traitsT>(data, 0),
@@ -50,7 +50,7 @@ read_molecular_dynamics_simulator(
     {
         MJOLNIR_SCOPE(integration == "Underdamped Langevin", 2);
         using integrator_t = UnderdampedLangevinStepper<traitsT>;
-        using simulator_t  = MDSimulator<traitsT, integrator_t>;
+        using simulator_t  = MolecularDynamicsSimulator<traitsT, integrator_t>;
         return make_unique<simulator_t>(
                 tstep, sstep,
                 read_system<traitsT>(data, 0),

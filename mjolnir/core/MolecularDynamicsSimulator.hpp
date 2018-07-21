@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_MD_SIMULATOR
-#define MJOLNIR_MD_SIMULATOR
+#ifndef MJOLNIR_MOLECULAR_DYNAMICS_SIMULATOR
+#define MJOLNIR_MOLECULAR_DYNAMICS_SIMULATOR
 #include "SimulatorBase.hpp"
 #include "System.hpp"
 #include "ForceField.hpp"
@@ -9,7 +9,7 @@ namespace mjolnir
 {
 
 template<typename traitsT, typename integratorT>
-class MDSimulator final : public SimulatorBase
+class MolecularDynamicsSimulator final : public SimulatorBase
 {
   public:
     typedef traitsT     traits_type;
@@ -20,14 +20,14 @@ class MDSimulator final : public SimulatorBase
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
 
-    MDSimulator(const std::size_t tstep, const std::size_t save_step,
+    MolecularDynamicsSimulator(const std::size_t tstep, const std::size_t save_step,
                 system_type&& sys, forcefield_type&& ff,
                 integrator_type&& integr, observer_type&& obs)
     : total_step_(tstep), step_count_(0), save_step_(save_step), time_(0.),
       system_(std::move(sys)), ff_(std::move(ff)),
       integrator_(std::move(integr)), observer_(std::move(obs))
     {}
-    ~MDSimulator() override = default;
+    ~MolecularDynamicsSimulator() override = default;
 
     void initialize() override;
     bool step()       override;
@@ -56,7 +56,7 @@ class MDSimulator final : public SimulatorBase
 };
 
 template<typename traitsT, typename integratorT>
-inline void MDSimulator<traitsT, integratorT>::initialize()
+inline void MolecularDynamicsSimulator<traitsT, integratorT>::initialize()
 {
     this->ff_.initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_);
@@ -67,7 +67,7 @@ inline void MDSimulator<traitsT, integratorT>::initialize()
 }
 
 template<typename traitsT, typename integratorT>
-inline bool MDSimulator<traitsT, integratorT>::step()
+inline bool MolecularDynamicsSimulator<traitsT, integratorT>::step()
 {
     integrator_.step(this->time_, system_, ff_);
     ++step_count_;
@@ -81,11 +81,11 @@ inline bool MDSimulator<traitsT, integratorT>::step()
 }
 
 template<typename traitsT, typename integratorT>
-inline void MDSimulator<traitsT, integratorT>::finalize()
+inline void MolecularDynamicsSimulator<traitsT, integratorT>::finalize()
 {
 //     observer_.output(time_, this->system_);
     return;
 }
 
 } // mjolnir
-#endif /* MJOLNIR_MD_SIMULATOR */
+#endif /* MJOLNIR_MOLECULAR_DYNAMICS_SIMULATOR */
