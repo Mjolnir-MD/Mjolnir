@@ -20,7 +20,7 @@ class GlobalInteractionBase
 
     virtual ~GlobalInteractionBase() = default;
 
-    virtual void initialize(const system_type& sys, const real_type dt) = 0;
+    virtual void initialize(const system_type& sys) = 0;
     virtual void update    (const system_type& sys) = 0;
 
     virtual void      calc_force (system_type&)             = 0;

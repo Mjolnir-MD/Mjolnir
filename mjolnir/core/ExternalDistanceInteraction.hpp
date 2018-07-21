@@ -38,18 +38,18 @@ class ExternalDistanceInteraction final
 
     /*! @brief initialize spatial partition (e.g. CellList)                   *
      *  @details before calling `calc_(force|energy)`, this should be called. */
-    void initialize(const system_type& sys, const real_type dt) override
+    void initialize(const system_type& sys) override
     {
         this->potential_.update(sys); // update system parameters
         this->shape_.initialize(sys, this->potential_);
         this->shape_.update(sys);
     }
 
-    /*! @brief update parameters (e.g. dt, temperature, ionic strength, ...)  *
-     *  @details A method that change system parameters (e.g. Annealing),     *
-     *           the method is bound to call this function after changing     *
-     *           parameters.                                                  */
-    void reconstruct(const system_type& sys, const real_type dt) override
+    /*! @brief update parameters (e.g. temperature, ionic strength, ...)  *
+     *  @details A method that change system parameters (e.g. Annealing), *
+     *           the method is bound to call this function after changing *
+     *           parameters.                                              */
+    void reconstruct(const system_type& sys) override
     {
         this->potential_.update(sys); // update system parameters
         this->shape_.reconstruct(sys, this->potential_);

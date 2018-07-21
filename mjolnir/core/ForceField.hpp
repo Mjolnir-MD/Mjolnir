@@ -40,16 +40,16 @@ class ForceField
     ForceField& operator=(ForceField&&)      = default;
 
     // this modify system::topology by using local interaction info.
-    void initialize(system_type& sys, const real_type dt)
+    void initialize(system_type& sys)
     {
         // first, fetch current topology
         local_.write_topology(sys.topology());
         sys.topology().construct_chains();
 
         // based on the topology, make exclusion list
-           local_.initialize(sys, dt);
-          global_.initialize(sys, dt);
-        external_.initialize(sys, dt);
+           local_.initialize(sys);
+          global_.initialize(sys);
+        external_.initialize(sys);
     }
 
     // update parameters like temperature, ionic concentration, etc...

@@ -38,11 +38,11 @@ class LocalForceField
         interactions_.emplace_back(std::move(interaction));
     }
 
-    void initialize(const system_type& sys, const real_type dt)
+    void initialize(const system_type& sys)
     {
         for(auto& item : this->interactions_)
         {
-            item->initialize(sys, dt);
+            item->initialize(sys);
         }
     }
 

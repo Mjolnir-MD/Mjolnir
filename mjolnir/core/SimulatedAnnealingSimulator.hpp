@@ -98,7 +98,7 @@ SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::initialize()
 {
     system_.attribute("temperature") = this->scheduler_.current(0.0);
 
-    this->ff_.initialize(this->system_, integrator_.delta_t());
+    this->ff_.initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_);
 
     observer_.initialize(this->system_, this->ff_);

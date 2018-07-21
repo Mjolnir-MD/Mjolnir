@@ -58,7 +58,7 @@ class MDSimulator final : public SimulatorBase
 template<typename traitsT, typename integratorT>
 inline void MDSimulator<traitsT, integratorT>::initialize()
 {
-    this->ff_.initialize(this->system_, integrator_.delta_t());
+    this->ff_.initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_);
 
     observer_.initialize(this->system_, this->ff_);

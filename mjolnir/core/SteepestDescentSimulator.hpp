@@ -55,7 +55,7 @@ class SteepestDescentSimulator final : public SimulatorBase
 template<typename traitsT>
 inline void SteepestDescentSimulator<traitsT>::initialize()
 {
-    this->ff_.initialize(this->system_, this->h_);
+    this->ff_.initialize(this->system_);
 
     this->observer_.initialize(this->system_, this->ff_);
     this->observer_.output(0.0, this->system_, this->ff_);
