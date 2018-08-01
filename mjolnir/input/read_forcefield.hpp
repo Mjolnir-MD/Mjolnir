@@ -154,7 +154,7 @@ read_external_forcefield(std::vector<toml::Table> interactions)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_external_forcefield(), 0);
     MJOLNIR_LOG_INFO(interactions.size(),
-                     " kinds of local interactions are found.");
+                     " kinds of external interactions are found.");
 
     ExternalForceField<traitsT> eff;
     for(const auto& interaction : interactions)
