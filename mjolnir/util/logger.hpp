@@ -40,6 +40,13 @@ namespace mjolnir
 
 namespace logger_detail
 {
+template<typename charT, typename traits, typename T1, typename T2>
+std::basic_ostream<charT, traits>&
+operator<<(std::basic_ostream<charT, traits>& os, const std::pair<T1, T2>& pr)
+{
+    os << '[' << pr.first << ", " << pr.second << ']';
+    return os;
+}
 template<typename charT, typename traits, typename T, std::size_t N>
 std::basic_ostream<charT, traits>&
 operator<<(std::basic_ostream<charT, traits>& os, const std::array<T, N>& ar)
