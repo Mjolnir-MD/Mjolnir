@@ -215,7 +215,7 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
 template<typename traitsT>
 void PeriodicGridCellList<traitsT>::update(const system_type& sys)
 {
-    // TODO consider boundary size
+    // TODO if boundary changes, cell list should also reconstructed
     this->current_margin_ -= sys.largest_displacement() * 2.;
     if(this->current_margin_ < 0.)
     {
