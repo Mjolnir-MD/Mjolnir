@@ -7,14 +7,16 @@ namespace mjolnir
 // there are 2 objective to have this class. one is to manage special values
 // (e.g. pi) and widely-used variants of them (e.g. 2pi, 1/pi).
 // another objective is to deal with templatized codes. literal 1.0 becomes
-// double. it causes ambiguous template specialization/overload resolution.
-// to avoid it, use `constants<real>::two` instead of `2.0`.
+// double. it causes ambiguous template specialization/overload resolution
+// when used with `float` values. to avoid it, use `constants<real>::two`
+// instead of literal `2.0`.
 template<typename realT>
 struct constants
 {
     typedef realT real_type;
     static constexpr real_type tolerance = static_cast<real_type>(1e-8);
 
+    static constexpr real_type zero           = static_cast<real_type>(0.0);
     static constexpr real_type one            = static_cast<real_type>(1.0);
     static constexpr real_type two            = static_cast<real_type>(2.0);
     static constexpr real_type three          = static_cast<real_type>(3.0);
