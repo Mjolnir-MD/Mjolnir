@@ -1,9 +1,10 @@
 #ifndef MJOLNIR_STEEPEST_DESCENT_SIMULATOR
 #define MJOLNIR_STEEPEST_DESCENT_SIMULATOR
-#include "SimulatorBase.hpp"
-#include "System.hpp"
-#include "ForceField.hpp"
-#include "Observer.hpp"
+#include <mjolnir/core/SimulatorBase.hpp>
+#include <mjolnir/core/System.hpp>
+#include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/Observer.hpp>
+#include <mjolnir/core/constants.hpp>
 #include <limits>
 
 namespace mjolnir
@@ -19,6 +20,7 @@ class SteepestDescentSimulator final : public SimulatorBase
     typedef Observer<traits_type>   observer_type;
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
+    typedef constants<real_type> constant;
 
     SteepestDescentSimulator(const real_type h, const real_type threshold,
             const std::size_t step_limit, const std::size_t save_step,
@@ -58,7 +60,7 @@ inline void SteepestDescentSimulator<traitsT>::initialize()
     this->ff_.initialize(this->system_);
 
     this->observer_.initialize(this->system_, this->ff_);
-    this->observer_.output(0.0, this->system_, this->ff_);
+    this->observer_.output(constant::zero, this->system_, this->ff_);
     return;
 }
 
@@ -68,8 +70,8 @@ inline bool SteepestDescentSimulator<traitsT>::step()
     // calculate negative derivatives (-dV/dr)
     this->ff_.calc_force(this->system_);
 
-    real_type max_disp2 = 0.0; // to update cell list and check the convergence
-    real_type max_diff  = 0.0; // to check the convergence
+    real_type max_disp2 = constant::zero; // to update cell list and check the convergence
+    real_type max_diff  = constant::zero; // to check the convergence
     for(std::size_t i=0; i<this->system_.size(); ++i)
     {
         const coordinate_type disp = this->h_ * this->system_[i].force;
@@ -80,7 +82,7 @@ inline bool SteepestDescentSimulator<traitsT>::step()
 
         max_disp2 = std::max(max_disp2, length_sq(disp));
         system_[i].position = system_.adjust_position(system_[i].position + disp);
-        system_[i].force    = coordinate_type(0.0, 0.0, 0.0);
+        system_[i].force    = coordinate_type(constant::zero, constant::zero, constant::zero);
     }
 
     if(max_diff < this->threshold_)

@@ -16,11 +16,12 @@ class VelocityVerletStepper
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef System<traitsT>     system_type;
     typedef ForceField<traitsT> forcefield_type;
+    typedef constants<real_type> constant;
 
   public:
 
     VelocityVerletStepper(const real_type dt) noexcept
-        : dt_(dt), halfdt_(dt * 0.5)
+        : dt_(dt), halfdt_(dt * constant::half)
     {}
     ~VelocityVerletStepper() = default;
 
@@ -31,7 +32,7 @@ class VelocityVerletStepper
     real_type delta_t() const noexcept {return dt_;}
     void  set_delta_t(const real_type dt) noexcept
     {
-        dt_ = dt; halfdt_ = dt * 0.5;
+        dt_ = dt; halfdt_ = dt * constant::half;
     }
 
     void update(const system_type& sys) const noexcept {/* do nothing */}
@@ -49,7 +50,7 @@ void VelocityVerletStepper<traitsT>::initialize(
 
     for(std::size_t i=0; i<system.size(); ++i)
     {
-        system[i].force = coordinate_type(0.0, 0.0, 0.0);
+        system[i].force = coordinate_type(constant::zero, constant::zero, constant::zero);
     }
     system.largest_displacement() = 0;
     ff.calc_force(system);
@@ -71,7 +72,7 @@ VelocityVerletStepper<traitsT>::step(
         const auto disp = dt_ * pv.velocity;
 
         pv.position = system.adjust_position(pv.position + disp);
-        pv.force    = coordinate_type(0.0, 0.0, 0.0);
+        pv.force    = coordinate_type(constant::zero, constant::zero, constant::zero);
 
         largest_disp2 = std::max(largest_disp2, length_sq(disp));
     }

@@ -17,6 +17,7 @@ class UnderdampedLangevinStepper
     typedef typename traits_type::boundary_type   boundary_type;
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
+    typedef constants<real_type> constant;
 
     struct parameter_set
     {
@@ -29,7 +30,7 @@ class UnderdampedLangevinStepper
 
     UnderdampedLangevinStepper(const real_type dt,
             std::vector<real_type>&& gamma, rng_type&& rng)
-        : dt_(dt), halfdt_(dt * 0.5), halfdt2_(dt * dt * 0.5),
+        : dt_(dt), halfdt_(dt * constant::half), halfdt2_(dt * dt * constant::half),
           rng_(std::move(rng)), parameters_(gamma.size())
     {
         for(std::size_t i=0; i<gamma.size(); ++i)
@@ -45,7 +46,7 @@ class UnderdampedLangevinStepper
     real_type delta_t() const noexcept {return dt_;}
     void  set_delta_t(const real_type dt) noexcept
     {
-        dt_ = dt; halfdt_ = dt * 0.5; halfdt2_ = dt * dt * 0.5;
+        dt_ = dt; halfdt_ = dt * constant::half; halfdt2_ = dt * dt * constant::half;
     }
 
     void update(const system_type& sys)
@@ -90,9 +91,9 @@ void UnderdampedLangevinStepper<traitsT>::initialize(
 
     for(std::size_t i=0; i<system.size(); ++i)
     {
-        system[i].force = coordinate_type(0.0, 0.0, 0.0);
+        system[i].force = coordinate_type(constant::zero, constant::zero, constant::zero);
     }
-    system.largest_displacement() = 0;
+    system.largest_displacement() = constant::zero;
     ff.calc_force(system);
 
     for(std::size_t i=0; i<system.size(); ++i)
@@ -112,14 +113,14 @@ typename UnderdampedLangevinStepper<traitsT>::real_type
 UnderdampedLangevinStepper<traitsT>::step(
         const real_type time, system_type& sys, forcefield_type& ff)
 {
-    real_type largest_disp2(0);
+    real_type largest_disp2 = constant::zero;
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         auto pv = sys[i]; // particle_view that points i-th particle.
         const auto& param = this->parameters_[i];
 
         const real_type gamma_dt_over_2           = param.gamma * halfdt_;
-        const real_type one_minus_gamma_dt_over_2 = 1. - gamma_dt_over_2;
+        const real_type one_minus_gamma_dt_over_2 = constant::one - gamma_dt_over_2;
 
         const auto disp = (dt_ * one_minus_gamma_dt_over_2) * (pv.velocity) +
                 halfdt2_ * param.accel;
@@ -131,7 +132,7 @@ UnderdampedLangevinStepper<traitsT>::step(
              gamma_dt_over_2);
         pv.velocity += (halfdt_ * one_minus_gamma_dt_over_2) * param.accel;
 
-        pv.force = coordinate_type(0., 0., 0.);
+        pv.force = coordinate_type(constant::zero, constant::zero, constant::zero);
 
         largest_disp2 = std::max(largest_disp2, length_sq(disp));
     }
@@ -147,7 +148,7 @@ UnderdampedLangevinStepper<traitsT>::step(
         auto& param = this->parameters_[i];
         param.accel = pv.force * pv.rmass + this->gen_gaussian_vec(
                       this->noise_coef_ * param.sqrt_gamma_over_mass);
-        pv.velocity += halfdt_ * (1. - param.gamma * halfdt_) * param.accel;
+        pv.velocity += halfdt_ * (constant::one - param.gamma * halfdt_) * param.accel;
     }
 
     return time + dt_;
