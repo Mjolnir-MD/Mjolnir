@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_CORE_DIHEDRAL_ANGLE_INTERACTION
 #define MJOLNIR_CORE_DIHEDRAL_ANGLE_INTERACTION
 #include <mjolnir/core/LocalInteractionBase.hpp>
+#include <mjolnir/core/constants.hpp>
 #include <mjolnir/math/rsqrt.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -22,12 +23,14 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
     typedef typename base_type::system_type     system_type;
     typedef typename base_type::topology_type   topology_type;
     typedef typename base_type::connection_kind_type connection_kind_type;
+    typedef constants<real_type> constant;
 
     typedef std::array<std::size_t, 4>          indices_type;
     typedef std::pair<indices_type, potentialT> potential_index_pair;
     typedef std::vector<potential_index_pair>   container_type;
     typedef typename container_type::iterator       iterator;
     typedef typename container_type::const_iterator const_iterator;
+
 
   public:
 
@@ -89,7 +92,7 @@ DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const noexce
             sys.adjust_direction(sys[idx2].position - sys[idx1].position);
         const coordinate_type r_lk =
             sys.adjust_direction(sys[idx3].position - sys[idx2].position);
-        const coordinate_type r_kl = -1e0 * r_lk;
+        const coordinate_type r_kl = constant::minus_one * r_lk;
 
         const real_type r_kj_lensq  = length_sq(r_kj);
         const real_type r_kj_rlen   = rsqrt(r_kj_lensq);
@@ -110,8 +113,9 @@ DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const noexce
         const real_type S_lensq = length_sq(S);
 
         const real_type dot_RS  = dot_product(R, S) * rsqrt(R_lensq * S_lensq);
-        const real_type cos_phi = (-1. <= dot_RS && dot_RS <= 1.)
-                                  ? dot_RS : std::copysign(1.0, dot_RS);
+        const real_type cos_phi =
+            (-constant::one <= dot_RS && dot_RS <= constant::one) ? dot_RS :
+            std::copysign(constant::one, dot_RS);
         const real_type phi =
             std::copysign(std::acos(cos_phi), dot_product(r_ij, n));
 
@@ -125,8 +129,8 @@ DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const noexce
         const real_type coef_jkl = dot_product(r_kl, r_kj) * r_kj_rlensq;
 
         sys[idx0].force += Fi;
-        sys[idx1].force += (coef_ijk - 1.0) * Fi - coef_jkl * Fl;
-        sys[idx2].force += (coef_jkl - 1.0) * Fl - coef_ijk * Fi;
+        sys[idx1].force += (coef_ijk - constant::one) * Fi - coef_jkl * Fl;
+        sys[idx2].force += (coef_jkl - constant::one) * Fl - coef_ijk * Fi;
         sys[idx3].force += Fl;
     }
     return;
@@ -148,7 +152,7 @@ DihedralAngleInteraction<traitsT, potentialT>::calc_energy(
                 sys[idxp.first[3]].position - sys[idxp.first[2]].position);
         const real_type r_kj_lensq_inv = 1. / length_sq(r_kj);
 
-        const coordinate_type n = cross_product(r_kj, -1e0 * r_lk);
+        const coordinate_type n = cross_product(r_kj, constant::minus_one * r_lk);
 
         const coordinate_type R = r_ij -
                               (dot_product(r_ij, r_kj) * r_kj_lensq_inv) * r_kj;
@@ -158,8 +162,9 @@ DihedralAngleInteraction<traitsT, potentialT>::calc_energy(
         const real_type S_lensq = length_sq(S);
 
         const real_type dot_RS = dot_product(R, S) * rsqrt(R_lensq * S_lensq);
-        const real_type cos_phi = (-1e0 <= dot_RS && dot_RS <= 1e0)
-                                  ? dot_RS : std::copysign(1.0, dot_RS);
+        const real_type cos_phi =
+            (-constant::one <= dot_RS && dot_RS <= constant::one) ? dot_RS :
+            std::copysign(constant::one, dot_RS);
         const real_type phi =
             std::copysign(std::acos(cos_phi), dot_product(r_ij, n));
 

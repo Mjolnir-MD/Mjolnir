@@ -30,6 +30,8 @@ class BondAngleInteraction : public LocalInteractionBase<traitsT>
     typedef typename container_type::iterator       iterator;
     typedef typename container_type::const_iterator const_iterator;
 
+    typedef constants<real_type> constant;
+
   public:
 
     BondAngleInteraction(const connection_kind_type kind,
@@ -95,16 +97,16 @@ BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const no
         const coordinate_type r_kj_reg     = r_kj * inv_len_r_kj;
 
         const real_type dot_ijk = dot_product(r_ij_reg, r_kj_reg);
-        const real_type cos_theta = (-1. <= dot_ijk && dot_ijk <= 1.)
-            ? dot_ijk : std::copysign(1.0, dot_ijk); // for numerical robustness
+        const real_type cos_theta =
+            (-constant::one <= dot_ijk && dot_ijk <= constant::one) ? dot_ijk :
+            std::copysign(constant::one, dot_ijk);
 
         const real_type theta = std::acos(cos_theta);
         const real_type coef  = -(idxp.second.derivative(theta));
 
         const real_type sin_theta    = std::sin(theta);
-        const real_type coef_inv_sin =
-            (sin_theta > constants<real_type>::tolerance) ?
-            coef / sin_theta : coef / constants<real_type>::tolerance;
+        const real_type coef_inv_sin = (sin_theta > constant::tolerance) ?
+                             coef / sin_theta : coef / constant::tolerance;
 
         const coordinate_type Fi =
             (coef_inv_sin * inv_len_r_ij) * (cos_theta * r_ij_reg - r_kj_reg);
@@ -141,8 +143,9 @@ BondAngleInteraction<traitsT, potentialT>::calc_energy(
         const real_type dot_v21_v23 = dot_product(v_2to1, v_2to3);
 
         const real_type dot_ijk   = dot_v21_v23 * rsqrt(lensq_v21 * lensq_v23);
-        const real_type cos_theta = (-1. <= dot_ijk && dot_ijk <= 1.)
-                                    ? dot_ijk : std::copysign(1.0, dot_ijk);
+        const real_type cos_theta =
+            (-constant::one <= dot_ijk && dot_ijk <= constant::one) ? dot_ijk :
+            std::copysign(constant::one, dot_ijk);
         const real_type theta     = std::acos(cos_theta);
 
         E += idxp.second.potential(theta);
