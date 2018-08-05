@@ -1,9 +1,10 @@
 #ifndef MJOLNIR_SIMULATED_ANNEALING_SIMULATOR_HPP
 #define MJOLNIR_SIMULATED_ANNEALING_SIMULATOR_HPP
-#include "SimulatorBase.hpp"
-#include "System.hpp"
-#include "ForceField.hpp"
-#include "Observer.hpp"
+#include <mjolnir/core/SimulatorBase.hpp>
+#include <mjolnir/core/System.hpp>
+#include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/Observer.hpp>
+#include <mjolnir/core/constants.hpp>
 
 namespace mjolnir
 {
@@ -12,6 +13,7 @@ template<typename realT>
 struct linear_schedule
 {
     using real_type = realT;
+    using constant = constants<real_type>;
 
     linear_schedule(const real_type first, const real_type last)
         : first_(first), last_(last)
@@ -25,8 +27,8 @@ struct linear_schedule
 
     real_type current(const real_type ratio) const noexcept
     {
-        assert(0.0 <= ratio && ratio <= 1.0);
-        return this->first_ * (1.0 - ratio) + this->last_ * ratio;
+        assert(constant::zero <= ratio && ratio <= constant::one);
+        return this->first_ * (constant::one - ratio) + this->last_ * ratio;
     }
 
   private:
@@ -48,6 +50,7 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef scheduleT<real_type> scheduler_type;
+    typedef constants<real_type> constant;
 
     SimulatedAnnealingSimulator(
         const std::size_t tstep,     const std::size_t sstep,
@@ -96,7 +99,7 @@ template<typename traitsT, typename integratorT,
 inline void
 SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::initialize()
 {
-    system_.attribute("temperature") = this->scheduler_.current(0.0);
+    system_.attribute("temperature") = this->scheduler_.current(constant::zero);
 
     this->ff_.initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_);
