@@ -7,9 +7,9 @@ namespace mjolnir
 // there are 2 objective to have this class. one is to manage special values
 // (e.g. pi) and widely-used variants of them (e.g. 2pi, 1/pi).
 // another objective is to deal with templatized codes. literal 1.0 becomes
-// double. it causes ambiguous template specialization/overload resolution
-// when used with `float` values. to avoid it, use `constants<real>::two`
-// instead of literal `2.0`.
+// double (you need to write `1.0f` for float literal values). it causes
+// template specialization/overload resolution ambiguity when instanciated with
+// `float` values. to avoid it, use `constants<real>::two` instead of `2.0`.
 template<typename realT>
 struct constants
 {
