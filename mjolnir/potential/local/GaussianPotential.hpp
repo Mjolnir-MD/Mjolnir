@@ -20,20 +20,20 @@ class GaussianPotential
 
   public:
     GaussianPotential(const real_type e, const real_type w,
-                      const real_type eq_val) noexcept
-        : epsilon_(e), inv_w2_(-1./(2*w*w)), eq_val_(eq_val)
+                      const real_type v0) noexcept
+        : epsilon_(e), inv_w2_(-1./(2*w*w)), v0_(v0)
     {}
     ~GaussianPotential() = default;
 
     real_type potential(const real_type val) const noexcept
     {
-        const real_type dval = val - this->eq_val_;
+        const real_type dval = val - this->v0_;
         return epsilon_ * std::exp(inv_w2_ * dval * dval);
     }
 
     real_type derivative(const real_type val) const noexcept
     {
-        const real_type dval = val - this->eq_val_;
+        const real_type dval = val - this->v0_;
         return 2*inv_w2_ * dval * epsilon_ * std::exp(inv_w2_ * dval * dval);
     }
 
@@ -44,7 +44,7 @@ class GaussianPotential
   private:
 
     real_type epsilon_, inv_w2_;
-    real_type eq_val_;
+    real_type v0_;
 };
 
 } // mjolnir

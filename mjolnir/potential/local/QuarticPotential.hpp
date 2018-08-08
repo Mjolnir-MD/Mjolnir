@@ -19,21 +19,21 @@ class QuarticPotential
 
   public:
     QuarticPotential(const real_type k1, const real_type k2,
-                     const real_type eq_val)
-        : k1_(k1), k2_(k2), eq_val_(eq_val)
+                     const real_type v0)
+        : k1_(k1), k2_(k2), v0_(v0)
     {}
     ~QuarticPotential() = default;
 
     real_type potential(const real_type val) const
     {
-        const real_type dval = val - this->eq_val_;
+        const real_type dval = val - this->v0_;
         const real_type dv2 = dval * dval;
         return this->k1_ * dv2 + this->k2_ * dv2 * dv2;
     }
 
     real_type derivative(const real_type val) const
     {
-        const real_type dr = val - this->eq_val_;
+        const real_type dr = val - this->v0_;
         return  2 * this->k1_ * dr + 4 * this->k2_ * dr * dr * dr;
     }
 
@@ -45,7 +45,7 @@ class QuarticPotential
 
     real_type k1_;
     real_type k2_;
-    real_type eq_val_; //!< most stable length
+    real_type v0_; //!< most stable length
 };
 
 }
