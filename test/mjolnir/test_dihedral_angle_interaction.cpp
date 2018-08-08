@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
     typedef traits::boundary_type              boundary_type;
     typedef mjolnir::System<traits>            system_type;
     typedef system_type::particle_type         particle_type;
-    typedef mjolnir::HarmonicPotential<traits> harmonic_type;
+    typedef mjolnir::HarmonicPotential<real_type> harmonic_type;
     typedef mjolnir::DihedralAngleInteraction<traits, harmonic_type> dihedral_angle_type;
     typedef dihedral_angle_type::connection_kind_type connection_kind_type;
 

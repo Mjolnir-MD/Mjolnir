@@ -12,16 +12,13 @@ template<typename T> class System;
 
 /*! @brief Default FLP angle                                               *
  * NOTE: It assumes that each theta value in histogram is same as default. */
-template<typename traitsT>
+template<typename realT>
 class FlexibleLocalAnglePotential
 {
   public:
-    typedef traitsT traits_type;
-    typedef System<traits_type> system_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    constexpr static real_type max_force  =  30.0;
-    constexpr static real_type min_force  = -30.0;
+    using real_type = realT;
+    static constexpr real_type max_force  =  30.0;
+    static constexpr real_type min_force  = -30.0;
 
   public:
     FlexibleLocalAnglePotential(const real_type k,
@@ -87,7 +84,9 @@ class FlexibleLocalAnglePotential
         else {return spline_derivative(th) * k_;}
     }
 
-    void update(const system_type&) const noexcept {return;}
+    template<typename T>
+    void update(const System<T>&) const noexcept {return;}
+
     static const char* name() noexcept {return "FlexibleLocalAngle";}
 
   private:

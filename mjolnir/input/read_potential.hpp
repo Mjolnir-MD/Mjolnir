@@ -24,40 +24,40 @@ namespace mjolnir
 // parameters = [
 // {indices = [1, 2], k = 10.0, v0 = 1.0} <- a portion of this table, k and v0.
 // ]
-template<typename traitsT>
-HarmonicPotential<traitsT> read_harmonic_potential(const toml::Table& param)
+template<typename realT>
+HarmonicPotential<realT> read_harmonic_potential(const toml::Table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    using real_type = typename traitsT::real_type;
+    using real_type = realT;
     const auto location = "element of [[parameters]] in harmonic potential";
 
     const auto k  = get_toml_value<real_type>(param, "k",  location);
     const auto v0 = get_toml_value<real_type>(param, "v0", location);
 
     MJOLNIR_LOG_INFO("HarmonicPotential = {v0 = ", v0, ", k = ", k, '}');
-    return HarmonicPotential<traitsT>(k, v0);
+    return HarmonicPotential<realT>(k, v0);
 }
 
-template<typename traitsT>
-Go1012ContactPotential<traitsT>
+template<typename realT>
+Go1012ContactPotential<realT>
 read_go1012_contact_potential(const toml::Table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    using real_type = typename traitsT::real_type;
+    using real_type = realT;
     const auto location = "element of [[parameters]] in Go-10-12 potential";
 
     const auto k  = get_toml_value<real_type>(param, "k",  location);
     const auto v0 = get_toml_value<real_type>(param, "v0", location);
 
     MJOLNIR_LOG_INFO("GoContactPotential = {v0 = ", v0, ", k = ", k, '}');
-    return Go1012ContactPotential<traitsT>(k, v0);
+    return Go1012ContactPotential<realT>(k, v0);
 }
 
-template<typename traitsT>
-GaussianPotential<traitsT> read_gaussian_potential(const toml::Table& param)
+template<typename realT>
+GaussianPotential<realT> read_gaussian_potential(const toml::Table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    using real_type = typename traitsT::real_type;
+    using real_type = realT;
     const auto location = "element of [[parameters]] in Gaussian potential";
 
     const auto v0      = get_toml_value<real_type>(param, "v0",      location);
@@ -66,15 +66,15 @@ GaussianPotential<traitsT> read_gaussian_potential(const toml::Table& param)
 
     MJOLNIR_LOG_INFO("GaussianPotential = {v0 = ", v0,
                      ", epsilon = ", epsilon, ", w = ", w, '}');
-    return GaussianPotential<traitsT>(epsilon, w, v0);
+    return GaussianPotential<realT>(epsilon, w, v0);
 }
 
-template<typename traitsT>
-FlexibleLocalAnglePotential<traitsT>
+template<typename realT>
+FlexibleLocalAnglePotential<realT>
 read_flexible_local_angle_potential(const toml::Table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    using real_type = typename traitsT::real_type;
+    using real_type = realT;
     using term_type = std::array<real_type, 10>;
     const auto location =
         "element of [[parameters]] in FlexibleLocal potential";
@@ -85,15 +85,15 @@ read_flexible_local_angle_potential(const toml::Table& param)
 
     MJOLNIR_LOG_INFO("FlexibleLocalAngle = {k = ", k,
                      ", term1 = ", term1, ", term2 = ", term2, '}');
-    return FlexibleLocalAnglePotential<traitsT>(k, term1, term2);
+    return FlexibleLocalAnglePotential<realT>(k, term1, term2);
 }
 
-template<typename traitsT>
-ClementiDihedralPotential<traitsT>
+template<typename realT>
+ClementiDihedralPotential<realT>
 read_clementi_dihedral_potential(const toml::Table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    using real_type  = typename traitsT::real_type;
+    using real_type = realT;
     const auto location =
         "element of [[parameters]] in ClementiDihedral potential";
 
@@ -103,15 +103,15 @@ read_clementi_dihedral_potential(const toml::Table& param)
 
     MJOLNIR_LOG_INFO("ClementiDihedral = {v0 = ", v0,
                      ", k1 = ", k1, ", k3 = ", k3, '}');
-    return ClementiDihedralPotential<traitsT>(k1, k3, v0);
+    return ClementiDihedralPotential<realT>(k1, k3, v0);
 }
 
-template<typename traitsT>
-FlexibleLocalDihedralPotential<traitsT>
+template<typename realT>
+FlexibleLocalDihedralPotential<realT>
 read_flexible_local_dihedral_potential(const toml::Table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    using real_type = typename traitsT::real_type;
+    using real_type = realT;
     using term_type = std::array<real_type, 7>;
     const auto location =
         "element of [[parameters]] in FlexibleLocalDihedral potential";
@@ -120,7 +120,7 @@ read_flexible_local_dihedral_potential(const toml::Table& param)
     auto term = get_toml_value<term_type>(param, "term", location);
 
     MJOLNIR_LOG_INFO("FlexibleLocalDihedral = {k = ", k, ", term = ", term, '}');
-    return FlexibleLocalDihedralPotential<traitsT>(k, term);
+    return FlexibleLocalDihedralPotential<realT>(k, term);
 }
 
 // ----------------------------------------------------------------------------
@@ -134,52 +134,52 @@ namespace detail
 {
 template<typename potentialT> struct read_local_potential_impl;
 
-template<typename traitsT>
-struct read_local_potential_impl<HarmonicPotential<traitsT>>
+template<typename realT>
+struct read_local_potential_impl<HarmonicPotential<realT>>
 {
-    static HarmonicPotential<traitsT> invoke(const toml::Table& param)
+    static HarmonicPotential<realT> invoke(const toml::Table& param)
     {
-        return read_harmonic_potential<traitsT>(param);
+        return read_harmonic_potential<realT>(param);
     }
 };
-template<typename traitsT>
-struct read_local_potential_impl<Go1012ContactPotential<traitsT>>
+template<typename realT>
+struct read_local_potential_impl<Go1012ContactPotential<realT>>
 {
-    static Go1012ContactPotential<traitsT> invoke(const toml::Table& param)
+    static Go1012ContactPotential<realT> invoke(const toml::Table& param)
     {
-        return read_go1012_contact_potential<traitsT>(param);
+        return read_go1012_contact_potential<realT>(param);
     }
 };
-template<typename traitsT>
-struct read_local_potential_impl<GaussianPotential<traitsT>>
+template<typename realT>
+struct read_local_potential_impl<GaussianPotential<realT>>
 {
-    static GaussianPotential<traitsT> invoke(const toml::Table& param)
+    static GaussianPotential<realT> invoke(const toml::Table& param)
     {
-        return read_gaussian_potential<traitsT>(param);
+        return read_gaussian_potential<realT>(param);
     }
 };
-template<typename traitsT>
-struct read_local_potential_impl<FlexibleLocalAnglePotential<traitsT>>
+template<typename realT>
+struct read_local_potential_impl<FlexibleLocalAnglePotential<realT>>
 {
-    static FlexibleLocalAnglePotential<traitsT> invoke(const toml::Table& param)
+    static FlexibleLocalAnglePotential<realT> invoke(const toml::Table& param)
     {
-        return read_flexible_local_angle_potential<traitsT>(param);
+        return read_flexible_local_angle_potential<realT>(param);
     }
 };
-template<typename traitsT>
-struct read_local_potential_impl<ClementiDihedralPotential<traitsT>>
+template<typename realT>
+struct read_local_potential_impl<ClementiDihedralPotential<realT>>
 {
-    static ClementiDihedralPotential<traitsT> invoke(const toml::Table& param)
+    static ClementiDihedralPotential<realT> invoke(const toml::Table& param)
     {
-        return read_clementi_dihedral_potential<traitsT>(param);
+        return read_clementi_dihedral_potential<realT>(param);
     }
 };
-template<typename traitsT>
-struct read_local_potential_impl<FlexibleLocalDihedralPotential<traitsT>>
+template<typename realT>
+struct read_local_potential_impl<FlexibleLocalDihedralPotential<realT>>
 {
-    static FlexibleLocalDihedralPotential<traitsT> invoke(const toml::Table& param)
+    static FlexibleLocalDihedralPotential<realT> invoke(const toml::Table& param)
     {
-        return read_flexible_local_dihedral_potential<traitsT>(param);
+        return read_flexible_local_dihedral_potential<realT>(param);
     }
 };
 } // namespace detail
@@ -217,10 +217,10 @@ read_local_potential(const toml::Table& local)
     return retval;
 }
 
-template<std::size_t N, typename traitsT,
+template<std::size_t N, typename realT,
          typename potentialT1, typename potentialT2>
 std::vector<std::pair<std::array<std::size_t, N>,
-            SumLocalPotential<traitsT, potentialT1, potentialT2>>>
+            SumLocalPotential<realT, potentialT1, potentialT2>>>
 read_local_potentials(const toml::Table& local,
                       const std::string& p1, const std::string& p2)
 {
@@ -230,7 +230,7 @@ read_local_potentials(const toml::Table& local,
 
     using indices_t                = std::array<std::size_t, N>;
     using indices_potential_pair_t = std::pair<indices_t,
-        SumLocalPotential<traitsT, potentialT1, potentialT2>>;
+        SumLocalPotential<realT, potentialT1, potentialT2>>;
 
     const auto& params = get_toml_value<toml::Array>(
             local, "parameters", "[[forcefield.local]]");
@@ -252,7 +252,7 @@ read_local_potentials(const toml::Table& local,
             get_toml_value<toml::Table>(parameter, p2, "[[forcefield.local]]");
 
         retval.emplace_back(indices,
-            SumLocalPotential<traitsT, potentialT1, potentialT2>(
+            SumLocalPotential<realT, potentialT1, potentialT2>(
                 detail::read_local_potential_impl<potentialT1>::invoke(pot1),
                 detail::read_local_potential_impl<potentialT2>::invoke(pot2)
             ));

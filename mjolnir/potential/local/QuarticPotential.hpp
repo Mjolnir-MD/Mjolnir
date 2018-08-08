@@ -8,14 +8,11 @@ template<typename T> class System;
 /*! @brief quartic potential for 3SPN            *
  *  V(r) =     k1 * (r-r0)^2 +     k2 * (r-r0)^4 *
  * dV/dr = 2 * k1 * (r-r0)   + 4 * k2 * (r-r0)^3 */
-template<typename traitsT>
+template<typename realT>
 class QuarticPotential
 {
   public:
-    typedef traitsT traits_type;
-    typedef System<traits_type> system_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
+    using real_type = realT;
 
   public:
     QuarticPotential(const real_type k1, const real_type k2,
@@ -37,7 +34,8 @@ class QuarticPotential
         return  2 * this->k1_ * dr + 4 * this->k2_ * dr * dr * dr;
     }
 
-    void update(const system_type&) const noexcept {return;}
+    template<typename T>
+    void update(const System<T>&) const noexcept {return;}
 
     static const char* name() noexcept {return "Quartic";}
 

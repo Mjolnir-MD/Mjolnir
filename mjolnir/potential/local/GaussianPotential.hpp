@@ -9,14 +9,11 @@ template<typename T> class System;
 /*! @brief gaussian potential                                *
  * V(r)  = epsilon * exp(-(r-r0)^2 / 2W^2)                   *
  * dV/dr = epsilon * (-(r-r0) / W^2) * exp(-(r-r0)^2 / 2W^2) */
-template<typename traitsT>
+template<typename realT>
 class GaussianPotential
 {
   public:
-    typedef traitsT traits_type;
-    typedef System<traits_type> system_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
+    using real_type = realT;
 
   public:
     GaussianPotential(const real_type e, const real_type w,
@@ -37,7 +34,8 @@ class GaussianPotential
         return 2*inv_w2_ * dval * epsilon_ * std::exp(inv_w2_ * dval * dval);
     }
 
-    void update(const system_type&) const noexcept {return;}
+    template<typename T>
+    void update(const System<T>&) const noexcept {return;}
 
     static const char* name() noexcept {return "Gaussian";}
 

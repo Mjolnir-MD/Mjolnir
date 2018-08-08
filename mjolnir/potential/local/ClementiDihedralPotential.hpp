@@ -9,14 +9,11 @@ template<typename T> class System;
 /*! @brief Clementi-Go dihedral modified-triple-cosine potential *
  *  V(phi) = k1 * (1-cos(phi-phi0)) + k3 * (1-cos(3(phi-phi0)))  *
  * dV/dphi = k1 * sin(phi-phi0)     + k3 * 3 * sin(3(phi-phi0))  */
-template<typename traitsT>
+template<typename realT>
 class ClementiDihedralPotential
 {
   public:
-    typedef traitsT traits_type;
-    typedef System<traits_type> system_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
+    using real_type = realT;
 
   public:
     ClementiDihedralPotential(
@@ -42,7 +39,8 @@ class ClementiDihedralPotential
         return this->k1_ * sin1 + 3.0 * this->k3_ * sin3;
     }
 
-    void update(const system_type&) const noexcept {return;}
+    template<typename T>
+    void update(const System<T>&) const noexcept {return;}
 
     static const char* name() {return "ClementiDihedral";}
 

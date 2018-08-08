@@ -7,32 +7,31 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <test/mjolnir/traits.hpp>
 #include <mjolnir/potential/local/Go1012ContactPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 BOOST_AUTO_TEST_CASE(GoContact_double)
 {
-    typedef mjolnir::test::traits<double> traits;
-    constexpr static std::size_t       N    = 1000;
-    constexpr static traits::real_type h    = 1e-6;
+    using real_type = double;
+    constexpr static std::size_t N = 1000;
+    constexpr static real_type   h = 1e-6;
 
-    const traits::real_type e  = 1.0;
-    const traits::real_type r0 = 5.0;
+    const real_type e  = 1.0;
+    const real_type r0 = 5.0;
 
-    mjolnir::Go1012ContactPotential<traits> Go(e, r0);
+    mjolnir::Go1012ContactPotential<real_type> Go(e, r0);
 
-    const traits::real_type x_min = 0.8 * r0;
-    const traits::real_type x_max = 5.0 * r0;
-    const traits::real_type dx = (x_max - x_min) / N;
+    const real_type x_min = 0.8 * r0;
+    const real_type x_max = 5.0 * r0;
+    const real_type dx = (x_max - x_min) / N;
 
-    traits::real_type x = x_min;
+    real_type x = x_min;
     for(std::size_t i=0; i<N; ++i)
     {
-        const traits::real_type pot1 = Go.potential(x + h);
-        const traits::real_type pot2 = Go.potential(x - h);
-        const traits::real_type dpot = (pot1 - pot2) / (2 * h);
-        const traits::real_type deri = Go.derivative(x);
+        const real_type pot1 = Go.potential(x + h);
+        const real_type pot2 = Go.potential(x - h);
+        const real_type dpot = (pot1 - pot2) / (2 * h);
+        const real_type deri = Go.derivative(x);
 
         if(std::abs(deri) > h)
             BOOST_CHECK_CLOSE_FRACTION(dpot, deri, h);
@@ -44,26 +43,26 @@ BOOST_AUTO_TEST_CASE(GoContact_double)
 
 BOOST_AUTO_TEST_CASE(GoContact_float)
 {
-    typedef mjolnir::test::traits<float> traits;
+    using real_type = double;
     constexpr static std::size_t       N    = 100;
-    constexpr static traits::real_type h    = 1e-3;
+    constexpr static real_type h    = 1e-3;
 
-    const traits::real_type e  = 1.0;
-    const traits::real_type r0 = 5.0;
+    const real_type e  = 1.0;
+    const real_type r0 = 5.0;
 
-    mjolnir::Go1012ContactPotential<traits> Go(e, r0);
+    mjolnir::Go1012ContactPotential<real_type> Go(e, r0);
 
-    const traits::real_type x_min = 0.8 * r0;
-    const traits::real_type x_max = 5.0 * r0;
-    const traits::real_type dx = (x_max - x_min) / N;
+    const real_type x_min = 0.8 * r0;
+    const real_type x_max = 5.0 * r0;
+    const real_type dx = (x_max - x_min) / N;
 
-    traits::real_type x = x_min;
+    real_type x = x_min;
     for(std::size_t i=0; i<N; ++i)
     {
-        const traits::real_type pot1 = Go.potential(x + h);
-        const traits::real_type pot2 = Go.potential(x - h);
-        const traits::real_type dpot = (pot1 - pot2) / (2 * h);
-        const traits::real_type deri = Go.derivative(x);
+        const real_type pot1 = Go.potential(x + h);
+        const real_type pot2 = Go.potential(x - h);
+        const real_type dpot = (pot1 - pot2) / (2 * h);
+        const real_type deri = Go.derivative(x);
 
         if(std::abs(deri) > h)
             BOOST_CHECK_CLOSE_FRACTION(dpot, deri, h);

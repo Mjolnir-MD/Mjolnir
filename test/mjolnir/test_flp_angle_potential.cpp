@@ -13,18 +13,17 @@
 
 BOOST_AUTO_TEST_CASE(FlexibleLocalAngle_double)
 {
-    typedef mjolnir::test::traits<double> traits;
-    constexpr static std::size_t       N = 1000;
-    constexpr static traits::real_type h = 1e-6;
+    using real_type = double;
+    constexpr static std::size_t N = 1000;
+    constexpr static real_type   h = 1e-6;
 
-    typedef typename traits::real_type real_type;
     const real_type k  = 1.0;
     const std::array<real_type, 10> term1{{5.00, 1.34, 0.84, 1.17, 0.82, 1.00,
                                            1.27, 1.52, 3.20, 10.00}};
     const std::array<real_type, 10> term2{{0.00, 151.96, 14.61, -46.89, 39.04,
                                           -4.86, -1.86, 8.38, 250.03, 0.00}};
 
-    mjolnir::FlexibleLocalAnglePotential<traits> flpa(k, term1, term2);
+    mjolnir::FlexibleLocalAnglePotential<real_type> flpa(k, term1, term2);
 
     const real_type x_min = 1.309;
     const real_type x_max = 2.87979;
@@ -49,18 +48,17 @@ BOOST_AUTO_TEST_CASE(FlexibleLocalAngle_double)
 
 BOOST_AUTO_TEST_CASE(FlexibleLocalAngle_float)
 {
-    typedef mjolnir::test::traits<float> traits;
+    using real_type = float;
     constexpr static std::size_t       N = 100;
-    constexpr static traits::real_type h = 1e-3;
+    constexpr static real_type h = 1e-3;
 
-    typedef typename traits::real_type real_type;
     const real_type k  = 1.0;
     const std::array<real_type, 10> term1{{5.00, 1.34, 0.84, 1.17, 0.82, 1.00,
                                            1.27, 1.52, 3.20, 10.00}};
     const std::array<real_type, 10> term2{{0.00, 151.96, 14.61, -46.89, 39.04,
                                           -4.86, -1.86, 8.38, 250.03, 0.00}};
 
-    mjolnir::FlexibleLocalAnglePotential<traits> flpa(k, term1, term2);
+    mjolnir::FlexibleLocalAnglePotential<real_type> flpa(k, term1, term2);
 
     const real_type x_min = 1.309;
     const real_type x_max = 2.87979;

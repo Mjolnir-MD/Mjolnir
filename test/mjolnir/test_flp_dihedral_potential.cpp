@@ -13,16 +13,15 @@
 
 BOOST_AUTO_TEST_CASE(FlexibleLocalDihedral_double)
 {
-    typedef mjolnir::test::traits<double> traits;
-    constexpr static std::size_t       N = 1000;
-    constexpr static traits::real_type h = 1e-6;
+    using real_type = double;
+    constexpr static std::size_t N = 1000;
+    constexpr static real_type   h = 1e-6;
 
-    typedef typename traits::real_type real_type;
     const real_type k  = 1.0;
     const std::array<real_type, 7> term{{2.2056, 0.2183, -0.0795, 0.0451,
                                         -0.3169, 0.0165, -0.1375}};
 
-    mjolnir::FlexibleLocalDihedralPotential<traits> flpd(k, term);
+    mjolnir::FlexibleLocalDihedralPotential<real_type> flpd(k, term);
 
     const real_type x_min = -3.14;
     const real_type x_max = 3.14;
@@ -47,17 +46,16 @@ BOOST_AUTO_TEST_CASE(FlexibleLocalDihedral_double)
 
 BOOST_AUTO_TEST_CASE(FlexibleLocalDihedral_float)
 {
-    typedef mjolnir::test::traits<float> traits;
-    constexpr static std::size_t       N   = 100;
-    constexpr static traits::real_type h   = 1e-3;
-    constexpr static traits::real_type tol = 5e-3;
+    using real_type = float;
+    constexpr static std::size_t N   = 100;
+    constexpr static real_type   h   = 1e-3;
+    constexpr static real_type   tol = 5e-3;
 
-    typedef typename traits::real_type real_type;
     const real_type k  = 1.0;
     const std::array<real_type, 7> term{{2.2056, 0.2183, -0.0795, 0.0451,
                                         -0.3169, 0.0165, -0.1375}};
 
-    mjolnir::FlexibleLocalDihedralPotential<traits> flpd(k, term);
+    mjolnir::FlexibleLocalDihedralPotential<real_type> flpd(k, term);
 
     const real_type x_min = -3.14;
     const real_type x_max = 3.14;

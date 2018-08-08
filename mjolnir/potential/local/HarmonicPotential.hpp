@@ -9,14 +9,11 @@ template<typename T> class System;
 /*! @brief harmonic potential *
  *  V(r) = K * (r - r0)^2     *
  * dV/dr = 2 * K * (r - r0)   */
-template<typename traitsT>
+template<typename realT>
 class HarmonicPotential
 {
   public:
-    typedef traitsT traits_type;
-    typedef System<traits_type> system_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
+    using real_type = realT;
 
   public:
     HarmonicPotential(const real_type k, const real_type r0)
@@ -35,7 +32,8 @@ class HarmonicPotential
         return  2 * this->k_ * (r - r0_);
     }
 
-    void update(const system_type&) const noexcept {return;}
+    template<typename T>
+    void update(const System<T>&) const noexcept {return;}
 
     static const char* name() noexcept {return "Harmonic";}
 

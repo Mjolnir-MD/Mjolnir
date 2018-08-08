@@ -10,14 +10,11 @@ template<typename T> class System;
 /*! @brief cosine-potential for 3SPN.1 dihedral potential *
  *  V(phi) = k * (1 - cos(phi - phi0))                    *
  * dV(phi) = k * sin(phi - phi0))                         */
-template<typename traitsT>
+template<typename realT>
 class CosinePotential
 {
   public:
-    typedef traitsT traits_type;
-    typedef System<traits_type> system_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
+    using real_type = realT;
 
   public:
     CosinePotential(const real_type k, const real_type phi0)
@@ -35,7 +32,9 @@ class CosinePotential
         return this->k_ * std::sin(phi - phi0_);
     }
 
-    void update(const system_type&) const noexcept {return;}
+    template<typename T>
+    void update(const System<T>&) const noexcept {return;}
+
     static const char* name() noexcept {return "Cosine";}
 
   private:

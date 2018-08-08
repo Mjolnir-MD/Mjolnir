@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
     typedef traits::coordinate_type            coord_type;
     typedef traits::boundary_type              boundary_type;
     typedef mjolnir::System<traits>            system_type;
-    typedef mjolnir::HarmonicPotential<traits> harmonic_type;
+    typedef mjolnir::HarmonicPotential<real_type> harmonic_type;
     typedef mjolnir::BondAngleInteraction<traits, harmonic_type> bond_angle_type;
     typedef bond_angle_type::connection_kind_type connection_kind_type;
 
