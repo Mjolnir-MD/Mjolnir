@@ -9,7 +9,7 @@
 
 #include <test/mjolnir/traits.hpp>
 #include <mjolnir/core/BondAngleInteraction.hpp>
-#include <mjolnir/core/constants.hpp>
+#include <mjolnir/math/constants.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
     auto normalize = [](const coord_type& v){return v / mjolnir::length(v);};
 
     const real_type k(1e0);
-    const real_type native(mjolnir::constants<real_type>::pi * 2.0 / 3.0); // 120 degree
+    const real_type native(mjolnir::math::constants<real_type>::pi * 2.0 / 3.0); // 120 degree
 
     harmonic_type potential{k, native};
     bond_angle_type interaction("none", {{ {{0,1,2}}, potential}});
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
     sys.at(2) = {1.0, 1.0, coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)};
 
     const std::size_t N = 1800;
-    const real_type dtheta = mjolnir::constants<real_type>::pi  / N;
+    const real_type dtheta = mjolnir::math::constants<real_type>::pi  / N;
     for(int i = 1; i < N; ++i)
     {
         BOOST_CHECK_SMALL(length(sys[0].position - pos1), tolerance);
@@ -102,8 +102,8 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
             BOOST_CHECK_SMALL(length(normalize(sys[0].force) - f1), tolerance);
 
             const coord_type f3(
-                    cos(theta + mjolnir::constants<real_type>::pi / 2.),
-                    sin(theta + mjolnir::constants<real_type>::pi / 2.),
+                    cos(theta + mjolnir::math::constants<real_type>::pi / 2.),
+                    sin(theta + mjolnir::math::constants<real_type>::pi / 2.),
                     0.);
             BOOST_CHECK_SMALL(length(normalize(sys[2].force) - f3), tolerance);
         }
@@ -118,8 +118,8 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
             BOOST_CHECK_SMALL(length(normalize(sys[0].force) - f1), tolerance);
 
             const coord_type f3(
-                    cos(theta - mjolnir::constants<real_type>::pi / 2.),
-                    sin(theta - mjolnir::constants<real_type>::pi / 2.),
+                    cos(theta - mjolnir::math::constants<real_type>::pi / 2.),
+                    sin(theta - mjolnir::math::constants<real_type>::pi / 2.),
                     0.);
             BOOST_CHECK_SMALL(length(normalize(sys[2].force) - f3), tolerance);
         }

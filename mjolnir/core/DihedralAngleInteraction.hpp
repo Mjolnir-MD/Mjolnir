@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_CORE_DIHEDRAL_ANGLE_INTERACTION
 #define MJOLNIR_CORE_DIHEDRAL_ANGLE_INTERACTION
 #include <mjolnir/core/LocalInteractionBase.hpp>
-#include <mjolnir/core/constants.hpp>
+#include <mjolnir/math/constants.hpp>
 #include <mjolnir/math/rsqrt.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -23,7 +23,7 @@ class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
     typedef typename base_type::system_type     system_type;
     typedef typename base_type::topology_type   topology_type;
     typedef typename base_type::connection_kind_type connection_kind_type;
-    typedef constants<real_type> constant;
+    typedef math::constants<real_type> constant;
 
     typedef std::array<std::size_t, 4>          indices_type;
     typedef std::pair<indices_type, potentialT> potential_index_pair;
@@ -150,7 +150,7 @@ DihedralAngleInteraction<traitsT, potentialT>::calc_energy(
                 sys[idxp.first[2]].position - sys[idxp.first[1]].position);
         const coordinate_type r_lk = sys.adjust_direction(
                 sys[idxp.first[3]].position - sys[idxp.first[2]].position);
-        const real_type r_kj_lensq_inv = 1. / length_sq(r_kj);
+        const real_type r_kj_lensq_inv = constant::one / length_sq(r_kj);
 
         const coordinate_type n = cross_product(r_kj, constant::minus_one * r_lk);
 

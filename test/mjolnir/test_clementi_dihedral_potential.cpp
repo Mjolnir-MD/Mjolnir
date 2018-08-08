@@ -9,7 +9,7 @@
 
 #include <test/mjolnir/traits.hpp>
 #include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
-#include <mjolnir/core/constants.hpp>
+#include <mjolnir/math/constants.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 BOOST_AUTO_TEST_CASE(ClementiDihedral_double)
@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(ClementiDihedral_double)
     typedef mjolnir::test::traits<double> traits;
     constexpr static std::size_t       N   = 1000;
     constexpr static traits::real_type h   = 1e-6;
-    constexpr static traits::real_type pi  = mjolnir::constants<traits::real_type>::pi;
+    constexpr static traits::real_type pi  = mjolnir::math::constants<traits::real_type>::pi;
 
     const traits::real_type k1 = 1.0;
     const traits::real_type k3 = 2.0;
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(ClementiDihedral_float)
     typedef mjolnir::test::traits<float> traits;
     constexpr static std::size_t       N    = 100;
     constexpr static traits::real_type h    = 1e-3;
-    constexpr static traits::real_type pi = mjolnir::constants<traits::real_type>::pi;
+    constexpr static traits::real_type pi = mjolnir::math::constants<traits::real_type>::pi;
 
     const traits::real_type k1 = 1.0;
     const traits::real_type k3 = 2.0;

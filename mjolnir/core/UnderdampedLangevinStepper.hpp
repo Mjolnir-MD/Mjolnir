@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_UNDERDAMPED_LANGEVIN_INTEGRATOR
 #define MJOLNIR_UNDERDAMPED_LANGEVIN_INTEGRATOR
-#include "constants.hpp"
-#include "RandomNumberGenerator.hpp"
+#include <mjolnir/math/constants.hpp>
+#include <mjolnir/core/RandomNumberGenerator.hpp>
 
 namespace mjolnir
 {
@@ -17,7 +17,7 @@ class UnderdampedLangevinStepper
     typedef typename traits_type::boundary_type   boundary_type;
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
-    typedef constants<real_type> constant;
+    typedef math::constants<real_type> constant;
 
     struct parameter_set
     {
@@ -60,7 +60,7 @@ class UnderdampedLangevinStepper
 
         this->temperature_ = sys.attribute("temperature");
         this->noise_coef_  =
-            std::sqrt(2 * physics<real_type>::kB * this->temperature_ / dt_);
+            std::sqrt(2 * physics::constants<real_type>::kB * this->temperature_ / dt_);
     }
 
   private:

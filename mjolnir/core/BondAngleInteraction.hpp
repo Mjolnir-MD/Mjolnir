@@ -2,7 +2,7 @@
 #define MJOLNIR_CORE_BOND_ANGLE_INTERACTION
 #include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
-#include <mjolnir/core/constants.hpp>
+#include <mjolnir/math/constants.hpp>
 #include <mjolnir/math/rsqrt.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -30,7 +30,7 @@ class BondAngleInteraction : public LocalInteractionBase<traitsT>
     typedef typename container_type::iterator       iterator;
     typedef typename container_type::const_iterator const_iterator;
 
-    typedef constants<real_type> constant;
+    typedef math::constants<real_type> constant;
 
   public:
 

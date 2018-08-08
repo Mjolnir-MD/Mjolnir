@@ -25,16 +25,16 @@ read_parameter(const toml::Table& data)
     const auto& parameter =
         get_toml_value<toml::Table>(data, "parameters", "<root>");
 
-    physics<real_type>::kB = get_toml_value<real_type>(parameter, "kB", "[parameters]");
-    physics<real_type>::NA = get_toml_value<real_type>(parameter, "NA", "[parameters]");
-    physics<real_type>::e  = get_toml_value<real_type>(parameter, "e",  "[parameters]");
-    physics<real_type>::vacuum_permittivity =
+    physics::constants<real_type>::kB = get_toml_value<real_type>(parameter, "kB", "[parameters]");
+    physics::constants<real_type>::NA = get_toml_value<real_type>(parameter, "NA", "[parameters]");
+    physics::constants<real_type>::e  = get_toml_value<real_type>(parameter, "e",  "[parameters]");
+    physics::constants<real_type>::vacuum_permittivity =
         get_toml_value<real_type>(parameter, "ε0", "[parameters]");
 
-    MJOLNIR_LOG_INFO("kB = ", physics<real_type>::kB);
-    MJOLNIR_LOG_INFO("NA = ", physics<real_type>::NA);
-    MJOLNIR_LOG_INFO("e  = ", physics<real_type>::e);
-    MJOLNIR_LOG_INFO("ε0 = ", physics<real_type>::vacuum_permittivity);
+    MJOLNIR_LOG_INFO("kB = ", physics::constants<real_type>::kB);
+    MJOLNIR_LOG_INFO("NA = ", physics::constants<real_type>::NA);
+    MJOLNIR_LOG_INFO("e  = ", physics::constants<real_type>::e);
+    MJOLNIR_LOG_INFO("ε0 = ", physics::constants<real_type>::vacuum_permittivity);
 
     return read_simulator<traitsT>(data);
 }

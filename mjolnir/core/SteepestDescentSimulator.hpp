@@ -4,7 +4,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/core/Observer.hpp>
-#include <mjolnir/core/constants.hpp>
+#include <mjolnir/math/constants.hpp>
 #include <limits>
 
 namespace mjolnir
@@ -20,7 +20,7 @@ class SteepestDescentSimulator final : public SimulatorBase
     typedef Observer<traits_type>   observer_type;
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
-    typedef constants<real_type> constant;
+    typedef math::constants<real_type> constant;
 
     SteepestDescentSimulator(const real_type h, const real_type threshold,
             const std::size_t step_limit, const std::size_t save_step,

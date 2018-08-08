@@ -3,6 +3,7 @@
 #include <mjolnir/core/constants.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/potential/global/ChainIgnoration.hpp>
+#include <mjolnir/math/constants.hpp>
 #include <vector>
 #include <cmath>
 
@@ -104,12 +105,12 @@ class DebyeHuckelPotential
 
     void calc_parameters() noexcept
     {
-        const real_type kB   = physics<real_type>::kB;
-        const real_type e    = physics<real_type>::e;
-        const real_type NA   = physics<real_type>::NA;
-        const real_type eps0 = physics<real_type>::vacuum_permittivity;
+        constexpr real_type pi =  math::constants<real_type>::pi;
+        const real_type kB   = physics::constants<real_type>::kB;
+        const real_type e    = physics::constants<real_type>::e;
+        const real_type NA   = physics::constants<real_type>::NA;
+        const real_type eps0 = physics::constants<real_type>::vacuum_permittivity;
         const real_type epsk = calc_dielectric_water(temperature_, ion_conc_);
-        const real_type pi   = constants<real_type>::pi;
 
         const real_type I = 0.5 * 1000 * ion_conc_;
 

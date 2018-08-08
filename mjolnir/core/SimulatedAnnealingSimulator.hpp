@@ -4,7 +4,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/core/Observer.hpp>
-#include <mjolnir/core/constants.hpp>
+#include <mjolnir/math/constants.hpp>
 
 namespace mjolnir
 {
@@ -13,7 +13,7 @@ template<typename realT>
 struct linear_schedule
 {
     using real_type = realT;
-    using constant = constants<real_type>;
+    using constant  = math::constants<real_type>;
 
     linear_schedule(const real_type first, const real_type last)
         : first_(first), last_(last)
@@ -50,7 +50,7 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef scheduleT<real_type> scheduler_type;
-    typedef constants<real_type> constant;
+    typedef math::constants<real_type> constant;
 
     SimulatedAnnealingSimulator(
         const std::size_t tstep,     const std::size_t sstep,
@@ -58,7 +58,7 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
         system_type&&     sys,       forcefield_type&& ff,
         integrator_type&& integr,    observer_type&&   obs)
     : total_step_(tstep), step_count_(0), save_step_(sstep),
-      time_(0.), r_total_step_(1.0 / tstep),
+      time_(constant::zero), r_total_step_(constant::one / tstep),
       each_step_(each_step), scheduler_(scheduler),
       system_(std::move(sys)), ff_(std::move(ff)),
       integrator_(std::move(integr)), observer_(std::move(obs))

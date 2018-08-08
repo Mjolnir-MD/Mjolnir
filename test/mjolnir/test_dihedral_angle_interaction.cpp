@@ -9,7 +9,7 @@
 
 #include <test/mjolnir/traits.hpp>
 #include <mjolnir/core/DihedralAngleInteraction.hpp>
-#include <mjolnir/core/constants.hpp>
+#include <mjolnir/math/constants.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
     auto normalize = [](const coord_type& v){return v / mjolnir::length(v);};
 
     const real_type k(1e0);
-    const real_type native(mjolnir::constants<real_type>::pi * 2.0 / 3.0);
+    const real_type native(mjolnir::math::constants<real_type>::pi * 2.0 / 3.0);
 
     harmonic_type potential{k, native};
     dihedral_angle_type interaction("none", {{ {{0,1,2,3}}, potential}});
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
     sys.at(2) = {1.0, 1.0, pos3,              coord_type(0,0,0), coord_type(0,0,0)};
     sys.at(3) = {1.0, 1.0, coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)};
 
-    const real_type dtheta = mjolnir::constants<real_type>::pi / 1800.0;
+    const real_type dtheta = mjolnir::math::constants<real_type>::pi / 1800.0;
     for(int i = -1800; i < 1800; ++i)
     {
         BOOST_CHECK_SMALL(mjolnir::length(sys[0].position - pos1), tolerance);
