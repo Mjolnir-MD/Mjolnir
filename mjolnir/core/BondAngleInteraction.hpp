@@ -98,8 +98,8 @@ BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const no
 
         const real_type dot_ijk = dot_product(r_ij_reg, r_kj_reg);
         const real_type cos_theta =
-            (-constant::one <= dot_ijk && dot_ijk <= constant::one) ? dot_ijk :
-            std::copysign(constant::one, dot_ijk);
+            (-real_type(1.0) <= dot_ijk && dot_ijk <= real_type(1.0)) ? dot_ijk :
+            std::copysign(real_type(1.0), dot_ijk);
 
         const real_type theta = std::acos(cos_theta);
         const real_type coef  = -(idxp.second.derivative(theta));
@@ -126,7 +126,7 @@ typename BondAngleInteraction<traitsT, potentialT>::real_type
 BondAngleInteraction<traitsT, potentialT>::calc_energy(
         const system_type& sys) const noexcept
 {
-    real_type E = 0.;
+    real_type E = 0.0;
     for(const auto& idxp : this->potentials)
     {
         const std::size_t idx0 = idxp.first[0];
@@ -144,8 +144,8 @@ BondAngleInteraction<traitsT, potentialT>::calc_energy(
 
         const real_type dot_ijk   = dot_v21_v23 * rsqrt(lensq_v21 * lensq_v23);
         const real_type cos_theta =
-            (-constant::one <= dot_ijk && dot_ijk <= constant::one) ? dot_ijk :
-            std::copysign(constant::one, dot_ijk);
+            (-real_type(1) <= dot_ijk && dot_ijk <= real_type(1)) ? dot_ijk :
+            std::copysign(real_type(1), dot_ijk);
         const real_type theta     = std::acos(cos_theta);
 
         E += idxp.second.potential(theta);
