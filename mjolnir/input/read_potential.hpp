@@ -415,13 +415,13 @@ read_debye_huckel_potential(const toml::Table& global)
 // Potential for External Force Fields
 // ---------------------------------------------------------------------------
 
-template<typename traitsT>
-ImplicitMembranePotential<traitsT>
+template<typename realT>
+ImplicitMembranePotential<realT>
 read_implicit_membrane_potential(const toml::Table& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_implicit_membrane_potential(), 0);
-    typedef typename traitsT::real_type real_type;
+    using real_type = realT;
 
     const auto thickness = get_toml_value<real_type>(external,
         "thickness", "[forcefield.external] for ImplicitMembrane");
@@ -447,7 +447,7 @@ read_implicit_membrane_potential(const toml::Table& external)
 
         if(params.size() <= idx)
         {
-            params.resize(idx+1, 0.);
+            params.resize(idx+1, real_type(0.0));
         }
         const auto h = get_toml_value<real_type>(tab, "hydrophobicity",
             "element of [[forcefield.external.parameters]] for ImplicitMembrane"
@@ -456,17 +456,17 @@ read_implicit_membrane_potential(const toml::Table& external)
         params.at(idx) = h;
     }
 
-    return ImplicitMembranePotential<traitsT>(
+    return ImplicitMembranePotential<realT>(
             thickness, magnitude, bend, std::move(params));
 }
 
-template<typename traitsT>
-LennardJonesWallPotential<traitsT>
+template<typename realT>
+LennardJonesWallPotential<realT>
 read_lennard_jones_wall_potential(const toml::Table& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_lennard_jones_wall_potential(), 0);
-    typedef typename traitsT::real_type real_type;
+    using real_type = realT;
 
     const auto& ps = get_toml_value<toml::Array>(external, "parameters",
             "[forcefield.external] for Lennard-Jones Wall");
@@ -491,16 +491,16 @@ read_lennard_jones_wall_potential(const toml::Table& external)
         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", s, ", epsilon = ", e);
         params.at(idx) = std::make_pair(s, e);
     }
-    return LennardJonesWallPotential<traitsT>(std::move(params));
+    return LennardJonesWallPotential<realT>(std::move(params));
 }
 
-template<typename traitsT>
-ExcludedVolumeWallPotential<traitsT>
+template<typename realT>
+ExcludedVolumeWallPotential<realT>
 read_excluded_volume_wall_potential(const toml::Table& external)
 {
-    typedef typename traitsT::real_type real_type;
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_excluded_volume_wall_potential(), 0);
+    using real_type = realT;
 
     const auto& ps = get_toml_value<toml::Array>(external, "parameters",
             "[forcefield.external] for Excluded Volume Wall");
@@ -527,7 +527,7 @@ read_excluded_volume_wall_potential(const toml::Table& external)
         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", s);
         params.at(idx) = s;
     }
-    return ExcludedVolumeWallPotential<traitsT>(eps, std::move(params));
+    return ExcludedVolumeWallPotential<real_type>(eps, std::move(params));
 }
 
 

@@ -9,15 +9,12 @@ namespace mjolnir
 /*! @brief Lennard-Jones form wall potential                               *
  * designed for external force field. For particle-particle L-J potential, *
  * see mjolnir/potential/global/LennardJonesPotential.hpp.                 */
-template<typename traitsT>
+template<typename realT>
 class LennardJonesWallPotential
 {
   public:
-    typedef traitsT traits_type;
-    typedef typename traits_type::real_type       real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    // pair of {sigma, epsilon}
-    typedef std::pair<real_type, real_type> parameter_type;
+    using real_type      = realT;
+    using parameter_type = std::pair<real_type, real_type>;
 
     // rc = 2.5 * sigma
     constexpr static real_type cutoff_ratio = 2.5;
@@ -36,27 +33,27 @@ class LennardJonesWallPotential
     real_type potential(const std::size_t i, const real_type r) const noexcept
     {
         const real_type sigma = params_[i].first;
-        if(sigma * cutoff_ratio < r){return 0.0;}
+        if(sigma * cutoff_ratio < r){return real_type(0.0);}
         const real_type epsilon = params_[i].second;
 
         const real_type r1s1   = sigma / r;
         const real_type r3s3   = r1s1 * r1s1 * r1s1;
         const real_type r6s6   = r3s3 * r3s3;
         const real_type r12s12 = r6s6 * r6s6;
-        return 4.0 * epsilon * (r12s12 - r6s6 - coef_at_cutoff);
+        return real_type(4.0) * epsilon * (r12s12 - r6s6 - coef_at_cutoff);
     }
 
     real_type derivative(const std::size_t i, const real_type r) const noexcept
     {
         const real_type sigma = params_[i].first;
-        if(sigma * cutoff_ratio < r){return 0.0;}
+        if(sigma * cutoff_ratio < r){return real_type(0.0);}
         const real_type epsilon = params_[i].second;
 
         const real_type r1s1   = sigma / r;
         const real_type r3s3   = r1s1 * r1s1 * r1s1;
         const real_type r6s6   = r3s3 * r3s3;
         const real_type r12s12 = r6s6 * r6s6;
-        return 24.0 * epsilon * (r6s6 - 2.0 * r12s12) / r;
+        return real_type(24.0) * epsilon * (r6s6 - real_type(2.0) * r12s12) / r;
     }
 
     real_type max_cutoff_length() const noexcept
@@ -76,7 +73,7 @@ class LennardJonesWallPotential
         retval.reserve(this->params_.size());
         for(std::size_t i=0; i<this->params_.size(); ++i)
         {
-            if(this->params_[i].second != 0.0)
+            if(this->params_[i].second != real_type(0.0))
             {
                 retval.push_back(i);
             }
@@ -85,7 +82,8 @@ class LennardJonesWallPotential
     }
 
     // nothing to do when system parameters change.
-    void update(const System<traitsT>& sys) const noexcept {return;}
+    template<typename T>
+    void update(const System<T>& sys) const noexcept {return;}
 
     const char* name() const noexcept {return "LennardJonesWall";}
 
@@ -98,12 +96,12 @@ class LennardJonesWallPotential
     std::vector<parameter_type> params_;
 };
 
-template<typename traitsT>
-constexpr typename LennardJonesWallPotential<traitsT>::real_type
-LennardJonesWallPotential<traitsT>::cutoff_ratio;
-template<typename traitsT>
-constexpr typename LennardJonesWallPotential<traitsT>::real_type
-LennardJonesWallPotential<traitsT>::coef_at_cutoff;
+template<typename realT>
+constexpr typename LennardJonesWallPotential<realT>::real_type
+LennardJonesWallPotential<realT>::cutoff_ratio;
+template<typename realT>
+constexpr typename LennardJonesWallPotential<realT>::real_type
+LennardJonesWallPotential<realT>::coef_at_cutoff;
 
 } // mjolnir
 #endif // MJOLNIR_EXTERNAL_LENNARD_JONES_WALL_POTENTIAL

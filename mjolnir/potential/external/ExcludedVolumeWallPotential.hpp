@@ -9,14 +9,11 @@ namespace mjolnir
 /*! @brief excluded volume potential                                       *
  * designed for external force field. For particle-particle EXV potential, *
  * see mjolnir/potential/global/ExcludedVolumePotential.hpp.               */
-template<typename traitsT>
+template<typename realT>
 class ExcludedVolumeWallPotential
 {
   public:
-    typedef traitsT traits_type;
-    typedef typename traits_type::real_type       real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    typedef real_type parameter_type;
+    using real_type = realT;
 
     // rc = 2.0 * sigma
     constexpr static real_type cutoff_ratio = 2.0;
@@ -26,8 +23,8 @@ class ExcludedVolumeWallPotential
 
   public:
 
-    ExcludedVolumeWallPotential(const real_type epsilon,
-            std::vector<parameter_type> params)
+    ExcludedVolumeWallPotential(
+        const real_type epsilon, std::vector<real_type> params)
         : epsilon_(epsilon), radii_(std::move(params))
     {}
     ~ExcludedVolumeWallPotential(){}
@@ -35,27 +32,26 @@ class ExcludedVolumeWallPotential
     real_type potential(const std::size_t i, const real_type r) const noexcept
     {
         const real_type d = this->radii_[i];
-        if(d * cutoff_ratio < r){return 0.0;}
+        if(d * cutoff_ratio < r){return real_type(0.0);}
 
         const real_type d_r  = d / r;
         const real_type dr3  = d_r * d_r * d_r;
         const real_type dr6  = dr3 * dr3;
         const real_type dr12 = dr6 * dr6;
         return this->epsilon_ * (dr12 - coef_at_cutoff);
-
     }
 
     real_type derivative(const std::size_t i, const real_type r) const noexcept
     {
         const real_type d = this->radii_[i];
-        if(d * cutoff_ratio < r){return 0.0;}
+        if(d * cutoff_ratio < r){return real_type(0.0);}
 
-        const real_type rinv = 1. / r;
+        const real_type rinv = real_type(1.0) / r;
         const real_type d_r  = d * rinv;
         const real_type dr3  = d_r * d_r * d_r;
         const real_type dr6  = dr3 * dr3;
         const real_type dr12 = dr6 * dr6;
-        return -12.0 * this->epsilon_ * dr12 * rinv;
+        return real_type(-12.0) * this->epsilon_ * dr12 * rinv;
     }
 
     real_type max_cutoff_length() const noexcept
@@ -72,7 +68,7 @@ class ExcludedVolumeWallPotential
         retval.reserve(this->radii_.size());
         for(std::size_t i=0; i<this->radii_.size(); ++i)
         {
-            if(this->radii_[i] != 0.0)
+            if(this->radii_[i] != real_type(0.0))
             {
                 retval.push_back(i);
             }
@@ -81,26 +77,27 @@ class ExcludedVolumeWallPotential
     }
 
     // nothing to do when system parameters change.
-    void update(const System<traitsT>& sys) const noexcept {return;}
+    template<typename T>
+    void update(const System<T>& sys) const noexcept {return;}
 
     const char* name() const noexcept {return "ExcludedVolumeWall";}
 
     // access to the parameters...
-    std::vector<parameter_type>&       params()       noexcept {return radii_;}
-    std::vector<parameter_type> const& params() const noexcept {return radii_;}
+    std::vector<real_type>&       params()       noexcept {return radii_;}
+    std::vector<real_type> const& params() const noexcept {return radii_;}
 
   private:
 
     real_type epsilon_;
-    std::vector<parameter_type> radii_;
+    std::vector<real_type> radii_;
 };
 
-template<typename traitsT>
-constexpr typename ExcludedVolumeWallPotential<traitsT>::real_type
-ExcludedVolumeWallPotential<traitsT>::cutoff_ratio;
-template<typename traitsT>
-constexpr typename ExcludedVolumeWallPotential<traitsT>::real_type
-ExcludedVolumeWallPotential<traitsT>::coef_at_cutoff;
+template<typename realT>
+constexpr typename ExcludedVolumeWallPotential<realT>::real_type
+ExcludedVolumeWallPotential<realT>::cutoff_ratio;
+template<typename realT>
+constexpr typename ExcludedVolumeWallPotential<realT>::real_type
+ExcludedVolumeWallPotential<realT>::coef_at_cutoff;
 
 } // mjolnir
 #endif // MJOLNIR_EXTERNAL_EXCLUDED_VOLUME_WALL_POTENTIAL

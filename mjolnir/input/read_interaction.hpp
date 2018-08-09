@@ -237,30 +237,30 @@ read_external_distance_interaction(const toml::Table& external, shapeT&& shape)
     if(potential == "ImplicitMembrane")
     {
         MJOLNIR_SCOPE(potential == "ImplicitMembrane", 1);
-        using potential_t   = ImplicitMembranePotential<traitsT>;
+        using potential_t   = ImplicitMembranePotential<real_type>;
         using interaction_t = ExternalDistanceInteraction<
                                     traitsT, potential_t, shapeT>;
 
         return make_unique<interaction_t>(std::move(shape),
-             read_implicit_membrane_potential<traitsT>(external));
+             read_implicit_membrane_potential<real_type>(external));
     }
     else if(potential == "LennardJonesWall")
     {
         MJOLNIR_SCOPE(potential == "LennardJonesWall", 1);
-        using potential_t   = LennardJonesWallPotential<traitsT>;
+        using potential_t   = LennardJonesWallPotential<real_type>;
         using interaction_t = ExternalDistanceInteraction<
                                     traitsT, potential_t, shapeT>;
         return make_unique<interaction_t>(std::move(shape),
-             read_lennard_jones_wall_potential<traitsT>(external));
+             read_lennard_jones_wall_potential<real_type>(external));
     }
     else if(potential == "ExcludedVolumeWall")
     {
         MJOLNIR_SCOPE(potential == "ExcludedVolumeWall", 1);
-        using potential_t   = ExcludedVolumeWallPotential<traitsT>;
+        using potential_t   = ExcludedVolumeWallPotential<real_type>;
         using interaction_t = ExternalDistanceInteraction<
                                     traitsT, potential_t, shapeT>;
         return make_unique<interaction_t>(std::move(shape),
-             read_excluded_volume_wall_potential<traitsT>(external));
+             read_excluded_volume_wall_potential<real_type>(external));
     }
     else
     {
