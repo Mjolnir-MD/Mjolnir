@@ -10,24 +10,19 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename ChainIgnoration>
+template<typename realT, typename ChainIgnoration>
 class DebyeHuckelPotential
 {
   public:
-    typedef traitsT traits_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    typedef real_type parameter_type;
-    typedef std::vector<parameter_type> container_type;
-
-    // topology stuff
-    typedef Topology topology_type;
-    typedef typename topology_type::chain_id_type        chain_id_type;
-    typedef typename topology_type::connection_kind_type connection_kind_type;
-    typedef ChainIgnoration chain_ignoration_type;
+    using real_type             = realT;
+    using container_type        = std::vector<real_type>;
+    using chain_ignoration_type = ChainIgnoration;
+    using topology_type         = Topology;
+    using chain_id_type         = typename topology_type::chain_id_type;
+    using connection_kind_type  = typename topology_type::connection_kind_type;
 
     // r_cutoff = cutoff_ratio * debye_length
-    constexpr static real_type cutoff_ratio = 5.5;
+    static constexpr real_type cutoff_ratio = 5.5;
 
   public:
 
@@ -74,6 +69,7 @@ class DebyeHuckelPotential
     }
 
     // for temperature/ionic concentration changes...
+    template<typename traitsT>
     void update(const System<traitsT>& sys) noexcept
     {
         this->temperature_ = sys.attribute("temperature");
@@ -141,9 +137,9 @@ class DebyeHuckelPotential
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 };
 
-template<typename traitsT, typename ignoreT>
-constexpr typename DebyeHuckelPotential<traitsT, ignoreT>::real_type
-DebyeHuckelPotential<traitsT, ignoreT>::cutoff_ratio;
+template<typename realT, typename ignoreT>
+constexpr typename DebyeHuckelPotential<realT, ignoreT>::real_type
+DebyeHuckelPotential<realT, ignoreT>::cutoff_ratio;
 
 } // mjolnir
 #endif /* MJOLNIR_DEBYE_HUCKEL_POTENTIAL */

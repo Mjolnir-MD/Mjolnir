@@ -7,34 +7,33 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <test/mjolnir/traits.hpp>
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 BOOST_AUTO_TEST_CASE(LennardJones_double)
 {
-    typedef mjolnir::test::traits<double> traits;
+    using real_type = double;
     constexpr static std::size_t       N    = 10000;
-    constexpr static traits::real_type h    = 1e-6;
+    constexpr static real_type h    = 1e-6;
 
-    const traits::real_type sigma   = 3.0;
-    const traits::real_type epsilon = 1.0;
-    mjolnir::LennardJonesPotential<traits, mjolnir::IgnoreNothing> lj{
+    const real_type sigma   = 3.0;
+    const real_type epsilon = 1.0;
+    mjolnir::LennardJonesPotential<real_type, mjolnir::IgnoreNothing> lj{
         {{sigma, epsilon}, {sigma, epsilon}}, {}
     };
 
-    const traits::real_type x_min = 0.8 * sigma;
-    const traits::real_type x_max =
-        mjolnir::LennardJonesPotential<traits, mjolnir::IgnoreNothing>::cutoff_ratio * sigma;
-    const traits::real_type dx = (x_max - x_min) / N;
+    const real_type x_min = 0.8 * sigma;
+    const real_type x_max =
+        mjolnir::LennardJonesPotential<real_type, mjolnir::IgnoreNothing>::cutoff_ratio * sigma;
+    const real_type dx = (x_max - x_min) / N;
 
-    traits::real_type x = x_min;
+    real_type x = x_min;
     for(std::size_t i=0; i<N; ++i)
     {
-        const traits::real_type pot1 = lj.potential(0, 1, x + h);
-        const traits::real_type pot2 = lj.potential(0, 1, x - h);
-        const traits::real_type dpot = (pot1 - pot2) / (2 * h);
-        const traits::real_type deri = lj.derivative(0, 1, x);
+        const real_type pot1 = lj.potential(0, 1, x + h);
+        const real_type pot2 = lj.potential(0, 1, x - h);
+        const real_type dpot = (pot1 - pot2) / (2 * h);
+        const real_type deri = lj.derivative(0, 1, x);
 
         if(std::abs(deri) > h)
             BOOST_CHECK_CLOSE_FRACTION(dpot, deri, h);
@@ -47,30 +46,30 @@ BOOST_AUTO_TEST_CASE(LennardJones_double)
 
 BOOST_AUTO_TEST_CASE(LennardJones_float)
 {
-    typedef mjolnir::test::traits<float> traits;
+    using real_type = double;
     constexpr static unsigned int      seed = 32479327;
     constexpr static std::size_t       N    = 1000;
-    constexpr static traits::real_type h    = 1e-3;
-    constexpr static traits::real_type tol  = 5e-3;
+    constexpr static real_type h    = 1e-3;
+    constexpr static real_type tol  = 5e-3;
 
-    const traits::real_type sigma   = 3.0;
-    const traits::real_type epsilon = 1.0;
-    mjolnir::LennardJonesPotential<traits, mjolnir::IgnoreNothing> lj{
+    const real_type sigma   = 3.0;
+    const real_type epsilon = 1.0;
+    mjolnir::LennardJonesPotential<real_type, mjolnir::IgnoreNothing> lj{
         {{sigma, epsilon}, {sigma, epsilon}}, {}
     };
 
-    const traits::real_type x_min = 0.8 * sigma;
-    const traits::real_type x_max =
-        mjolnir::LennardJonesPotential<traits, mjolnir::IgnoreNothing>::cutoff_ratio * sigma;
-    const traits::real_type dx = (x_max - x_min) / N;
+    const real_type x_min = 0.8 * sigma;
+    const real_type x_max =
+        mjolnir::LennardJonesPotential<real_type, mjolnir::IgnoreNothing>::cutoff_ratio * sigma;
+    const real_type dx = (x_max - x_min) / N;
 
-    traits::real_type x = x_min;
+    real_type x = x_min;
     for(std::size_t i=0; i<N; ++i)
     {
-        const traits::real_type pot1 = lj.potential(0, 1, x + h);
-        const traits::real_type pot2 = lj.potential(0, 1, x - h);
-        const traits::real_type dpot = (pot1 - pot2) / (2 * h);
-        const traits::real_type deri = lj.derivative(0, 1, x);
+        const real_type pot1 = lj.potential(0, 1, x + h);
+        const real_type pot2 = lj.potential(0, 1, x - h);
+        const real_type dpot = (pot1 - pot2) / (2 * h);
+        const real_type deri = lj.derivative(0, 1, x);
 
         if(std::abs(deri) > tol)
             BOOST_CHECK_CLOSE_FRACTION(dpot, deri, tol);

@@ -265,13 +265,13 @@ read_local_potentials(const toml::Table& local,
 // global potential
 // ============================================================================
 
-template<typename traitsT, typename ignoreT>
-ExcludedVolumePotential<traitsT, ignoreT>
+template<typename realT, typename ignoreT>
+ExcludedVolumePotential<realT, ignoreT>
 read_excluded_volume_potential(const toml::Table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_excluded_volume_potential(), 0);
-    typedef typename traitsT::real_type real_type;
+    using real_type = realT;
 
     const auto& ignored_connections = get_toml_value<toml::Table>(
         global, "ignored_connections", "[forcefield.global] for ExcludedVolume");
@@ -312,17 +312,17 @@ read_excluded_volume_potential(const toml::Table& global)
         params.at(idx) = sgm;
     }
 
-    return ExcludedVolumePotential<traitsT, ignoreT>(
+    return ExcludedVolumePotential<realT, ignoreT>(
             eps, std::move(params), connections);
 }
 
-template<typename traitsT, typename ignoreT>
-LennardJonesPotential<traitsT, ignoreT>
+template<typename realT, typename ignoreT>
+LennardJonesPotential<realT, ignoreT>
 read_lennard_jones_potential(const toml::Table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_lennard_jones_potential(), 0);
-    typedef typename traitsT::real_type real_type;
+    using real_type = realT;
 
     const auto& ignored_connections = get_toml_value<toml::Table>(
         global, "ignored_connections", "[forcefield.global] for ExcludedVolume");
@@ -362,17 +362,17 @@ read_lennard_jones_potential(const toml::Table& global)
         params.at(idx) = std::make_pair(sigma, epsilon);
     }
 
-    return LennardJonesPotential<traitsT, ignoreT>(
+    return LennardJonesPotential<realT, ignoreT>(
             std::move(params), connections);
 }
 
-template<typename traitsT, typename ignoreT>
-DebyeHuckelPotential<traitsT, ignoreT>
+template<typename realT, typename ignoreT>
+DebyeHuckelPotential<realT, ignoreT>
 read_debye_huckel_potential(const toml::Table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_debye_huckel_potential(), 0);
-    typedef typename traitsT::real_type real_type;
+    using real_type = realT;
 
     const auto& ignored_connections = get_toml_value<toml::Table>(
         global, "ignored_connections", "[forcefield.global] for ExcludedVolume");
@@ -407,7 +407,7 @@ read_debye_huckel_potential(const toml::Table& global)
         params.at(idx) = charge;
     }
 
-    return DebyeHuckelPotential<traitsT, ignoreT>(
+    return DebyeHuckelPotential<realT, ignoreT>(
             std::move(params), connections);
 }
 

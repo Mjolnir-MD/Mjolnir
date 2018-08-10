@@ -14,13 +14,12 @@ namespace mjolnir
  * designed for global force field.                                        *
  * V(r)  =  4. * epsilon * ((r/sigma)^12 - (r/sigma)^6))                   *
  * dV/dr = 24. * epsilon / r * ((r/sigma)^6 - 2 * (r/sigma)^12)            */
-template<typename traitsT, typename ChainIgnoration>
+template<typename realT, typename ChainIgnoration>
 class LennardJonesPotential
 {
   public:
-    typedef traitsT traits_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
+    typedef realT real_type;
+
     // pair of {sigma, epsilon}
     typedef std::pair<real_type, real_type> parameter_type;
 
@@ -94,6 +93,7 @@ class LennardJonesPotential
     }
 
     // nothing to do when system parameters change.
+    template<typename traitsT>
     void update(const System<traitsT>& sys) const noexcept {return;}
 
     // e.g. `3` means ignore particles connected within 3 "bond"s
@@ -119,9 +119,9 @@ class LennardJonesPotential
     chain_ignoration_type ignored_chain_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 };
-template<typename traitsT, typename ignoreT>
-constexpr typename LennardJonesPotential<traitsT, ignoreT>::real_type
-LennardJonesPotential<traitsT, ignoreT>::cutoff_ratio;
+template<typename realT, typename ignoreT>
+constexpr typename LennardJonesPotential<realT, ignoreT>::real_type
+LennardJonesPotential<realT, ignoreT>::cutoff_ratio;
 
 } // mjolnir
 #endif /* MJOLNIR_LENNARD_JONES_POTENTIAL */

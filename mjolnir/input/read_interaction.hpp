@@ -184,6 +184,7 @@ read_global_pair_interaction(const toml::Table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_global_pair_interaction(), 0);
+    using real_type = typename traitsT::real_type;
 
     const auto potential = get_toml_value<std::string>(
             global, "potential", "[[forcefield.global]]");
@@ -191,26 +192,26 @@ read_global_pair_interaction(const toml::Table& global)
     if(potential == "ExcludedVolume")
     {
         MJOLNIR_SCOPE(potential == "ExcludedVolume", 1);
-        using potential_t = ExcludedVolumePotential<traitsT, ignoreT>;
+        using potential_t = ExcludedVolumePotential<real_type, ignoreT>;
 
         return read_spatial_partition<traitsT, potential_t>(
-            global, read_excluded_volume_potential<traitsT, ignoreT>(global));
+            global, read_excluded_volume_potential<real_type, ignoreT>(global));
     }
     else if(potential == "DebyeHuckel")
     {
         MJOLNIR_SCOPE(potential == "DebyeHuckel", 1);
-        using potential_t = DebyeHuckelPotential<traitsT, ignoreT>;
+        using potential_t = DebyeHuckelPotential<real_type, ignoreT>;
 
         return read_spatial_partition<traitsT, potential_t>(
-            global, read_debye_huckel_potential<traitsT, ignoreT>(global));
+            global, read_debye_huckel_potential<real_type, ignoreT>(global));
     }
     else if(potential == "LennardJones")
     {
         MJOLNIR_SCOPE(potential == "LennardJones", 1);
-        using potential_t = LennardJonesPotential<traitsT, ignoreT>;
+        using potential_t = LennardJonesPotential<real_type, ignoreT>;
 
         return read_spatial_partition<traitsT, potential_t>(
-            global, read_lennard_jones_potential<traitsT, ignoreT>(global));
+            global, read_lennard_jones_potential<real_type, ignoreT>(global));
     }
     else
     {

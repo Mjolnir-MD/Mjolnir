@@ -12,16 +12,13 @@ namespace mjolnir
 /*! @brief excluded volume potential        *
  *  V(r) = epsilon * (sigma/r)^12           *
  * dV/dr = -12 * epsilon * (sigma/r)^12 / r */
-template<typename traitsT, typename ChainIgnoration>
+template<typename realT, typename ChainIgnoration>
 class ExcludedVolumePotential
 {
   public:
 
-    typedef traitsT traits_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    typedef real_type parameter_type;
-    typedef std::vector<parameter_type> container_type;
+    typedef realT real_type;
+    typedef std::vector<real_type> container_type;
 
     // topology stuff
     typedef Topology topology_type;
@@ -83,6 +80,7 @@ class ExcludedVolumePotential
     }
 
     // nothing to be done if system parameter (e.g. temperature) changes
+    template<typename traitsT>
     void update(const System<traitsT>&) const noexcept {return;}
 
     real_type max_cutoff_length() const
@@ -113,15 +111,15 @@ class ExcludedVolumePotential
   private:
 
     real_type epsilon_;
-    std::vector<parameter_type> radii_;
+    std::vector<real_type> radii_;
 
     chain_ignoration_type ignored_chain_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 };
 
-template<typename traitsT, typename ignoreT>
-constexpr typename ExcludedVolumePotential<traitsT, ignoreT>::real_type
-ExcludedVolumePotential<traitsT, ignoreT>::cutoff_ratio;
+template<typename realT, typename ignoreT>
+constexpr typename ExcludedVolumePotential<realT, ignoreT>::real_type
+ExcludedVolumePotential<realT, ignoreT>::cutoff_ratio;
 
 } // mjolnir
 #endif /* MJOLNIR_EXCLUDED_VOLUME_POTENTIAL */

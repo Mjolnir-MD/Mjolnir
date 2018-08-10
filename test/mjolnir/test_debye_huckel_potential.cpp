@@ -13,24 +13,24 @@
 
 BOOST_AUTO_TEST_CASE(DH_double)
 {
-    typedef mjolnir::test::traits<double> traits;
+    using real_type = double;
     constexpr static std::size_t       N = 10000;
-    constexpr static traits::real_type h = 1e-6;
+    constexpr static real_type h = 1e-6;
 
-    const traits::real_type charge = 1.0;
-    mjolnir::DebyeHuckelPotential<traits, mjolnir::IgnoreNothing> dh({charge, charge}, {});
+    const real_type charge = 1.0;
+    mjolnir::DebyeHuckelPotential<real_type, mjolnir::IgnoreNothing> dh({charge, charge}, {});
 
-    const traits::real_type x_min = 0.5 * dh.debye_length();
-    const traits::real_type x_max = dh.max_cutoff_length();
-    const traits::real_type dx = (x_max - x_min) / N;
+    const real_type x_min = 0.5 * dh.debye_length();
+    const real_type x_max = dh.max_cutoff_length();
+    const real_type dx = (x_max - x_min) / N;
 
-    traits::real_type x = x_min;
+    real_type x = x_min;
     for(std::size_t i=0; i<N; ++i)
     {
-        const traits::real_type pot1 = dh.potential(0, 1, x + h);
-        const traits::real_type pot2 = dh.potential(0, 1, x - h);
-        const traits::real_type dpot = (pot1 - pot2) / (2 * h);
-        const traits::real_type deri = dh.derivative(0, 1, x);
+        const real_type pot1 = dh.potential(0, 1, x + h);
+        const real_type pot2 = dh.potential(0, 1, x - h);
+        const real_type dpot = (pot1 - pot2) / (2 * h);
+        const real_type deri = dh.derivative(0, 1, x);
 
         if(std::abs(deri) > h)
         {
@@ -46,24 +46,24 @@ BOOST_AUTO_TEST_CASE(DH_double)
 
 BOOST_AUTO_TEST_CASE(DH_float)
 {
-    typedef mjolnir::test::traits<float> traits;
+    using real_type = float;
     constexpr static std::size_t       N    = 1000;
-    constexpr static traits::real_type h    = 1e-2;
+    constexpr static real_type h    = 1e-2;
 
-    const traits::real_type charge = 1.0;
-    mjolnir::DebyeHuckelPotential<traits, mjolnir::IgnoreNothing> dh({charge, charge}, {});
+    const real_type charge = 1.0;
+    mjolnir::DebyeHuckelPotential<real_type, mjolnir::IgnoreNothing> dh({charge, charge}, {});
 
-    const traits::real_type x_min = 0.5 * dh.debye_length();
-    const traits::real_type x_max = dh.max_cutoff_length();
-    const traits::real_type dx = (x_max - x_min) / N;
+    const real_type x_min = 0.5 * dh.debye_length();
+    const real_type x_max = dh.max_cutoff_length();
+    const real_type dx = (x_max - x_min) / N;
 
-    traits::real_type x = x_min;
+    real_type x = x_min;
     for(std::size_t i=0; i<N; ++i)
     {
-        const traits::real_type pot1 = dh.potential(0, 1, x + h);
-        const traits::real_type pot2 = dh.potential(0, 1, x - h);
-        const traits::real_type dpot = (pot1 - pot2) / (2 * h);
-        const traits::real_type deri = dh.derivative(0, 1, x);
+        const real_type pot1 = dh.potential(0, 1, x + h);
+        const real_type pot2 = dh.potential(0, 1, x - h);
+        const real_type dpot = (pot1 - pot2) / (2 * h);
+        const real_type deri = dh.derivative(0, 1, x);
 
         if(std::abs(deri) > h)
         {
