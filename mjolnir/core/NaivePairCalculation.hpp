@@ -1,11 +1,13 @@
 #ifndef MJOLNIR_CORE_NAIVE_PAIR_CALCULATION
 #define MJOLNIR_CORE_NAIVE_PAIR_CALCULATION
-#include "System.hpp"
+#include <mjolnir/core/System.hpp>
+#include <mjolnir/core/NeighborList.hpp>
+#include <mjolnir/core/ExclusionList.hpp>
 
 namespace mjolnir
 {
 
-template<typename traitsT>
+template<typename traitsT, typename parameterT>
 class NaivePairCalculation
 {
   public:
@@ -17,8 +19,11 @@ class NaivePairCalculation
     typedef typename traits_type::coordinate_type coordinate_type;
 
     typedef ExclusionList exclusion_list_type;
-    typedef NeighborList  neighbor_list_type;
-    typedef neighbor_list_type::range_type range_type;
+
+    typedef parameterT parameter_type;
+    typedef NeighborList<parameter_type> neighbor_list_type;
+    typedef typename neighbor_list_type::neighbor_type neighbor_type;
+    typedef typename neighbor_list_type::range_type    range_type;
 
   public:
 
@@ -41,8 +46,11 @@ class NaivePairCalculation
         return;
     }
 
-    void make  (const system_type& sys);
-    void update(const system_type& sys) noexcept {return;}
+    template<typename PotentialT>
+    void make  (const system_type& sys, const PotentialT& pot);
+
+    template<typename PotentialT>
+    void update(const system_type& sys, const PotentialT& pot) noexcept {return;}
 
     range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
 
@@ -52,34 +60,35 @@ class NaivePairCalculation
     neighbor_list_type  neighbors_;
 };
 
-template<typename traitsT>
+template<typename traitsT, typename parameterT>
 template<typename PotentialT>
-void NaivePairCalculation<traitsT>::initialize(
+void NaivePairCalculation<traitsT, parameterT>::initialize(
         const system_type& sys, const PotentialT& pot)
 {
     this->exclusion_.make(sys, pot);
+    this->make(sys, pot);
     return;
 }
 
-template<typename traitsT>
-void NaivePairCalculation<traitsT>::make(const system_type& sys)
+template<typename traitsT, typename parameterT>
+template<typename PotentialT>
+void NaivePairCalculation<traitsT, parameterT>::make(
+        const system_type& sys, const PotentialT& pot)
 {
-    this->partners_.resize(sys.size());
-    for(auto& partner : this->partners_)
-    {
-        partner.clear();
-    }
+    this->neighbors_.clear();
 
     for(std::size_t i=0, sz = sys.size()-1; i < sz; ++i)
     {
+        std::vector<neighbor_type> partners;
         for(std::size_t j=i+1; j<sys.size(); ++j)
         {
             if(this->exclusion_.is_excluded(i, j))
             {
                 continue;
             }
-            this->partners_[i].push_back(j);
+            partners.emplace_back(j, pot.prepair_params(i, j));
         }
+        this->neighbors_.add_list_for(i, partners.begin(), partners.end());
     }
     return;
 }

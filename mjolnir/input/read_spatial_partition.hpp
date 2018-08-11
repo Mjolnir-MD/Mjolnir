@@ -11,30 +11,32 @@
 namespace mjolnir
 {
 
-template<typename boundaryT, typename traitsT>
+template<typename boundaryT, typename traitsT, typename parameterT>
 struct celllist_dispatcher;
 
-template<typename realT, typename coordT, typename traitsT>
-struct celllist_dispatcher<UnlimitedBoundary<realT, coordT>, traitsT>
+template<typename realT, typename coordT, typename traitsT, typename parameterT>
+struct celllist_dispatcher<UnlimitedBoundary<realT, coordT>, traitsT, parameterT>
 {
-    typedef UnlimitedGridCellList<traitsT> type;
+    typedef UnlimitedGridCellList<traitsT, parameterT> type;
     typedef realT real_type;
 
-    static UnlimitedGridCellList<traitsT> invoke(const real_type margin)
+    static UnlimitedGridCellList<traitsT, parameterT>
+    invoke(const real_type margin)
     {
-        return UnlimitedGridCellList<traitsT>(margin);
+        return UnlimitedGridCellList<traitsT, parameterT>(margin);
     }
 };
 
-template<typename realT, typename coordT, typename traitsT>
-struct celllist_dispatcher<CuboidalPeriodicBoundary<realT, coordT>, traitsT>
+template<typename realT, typename coordT, typename traitsT, typename parameterT>
+struct celllist_dispatcher<CuboidalPeriodicBoundary<realT, coordT>, traitsT, parameterT>
 {
-    typedef PeriodicGridCellList<traitsT> type;
+    typedef PeriodicGridCellList<traitsT, parameterT> type;
     typedef realT real_type;
 
-    static PeriodicGridCellList<traitsT> invoke(const real_type margin)
+    static PeriodicGridCellList<traitsT, parameterT>
+    invoke(const real_type margin)
     {
-        return PeriodicGridCellList<traitsT>(margin);
+        return PeriodicGridCellList<traitsT, parameterT>(margin);
     }
 };
 
@@ -44,7 +46,8 @@ read_spatial_partition(const toml::Table& global, potentialT pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_spatial_partition(), 0);
-    typedef typename traitsT::real_type real_type;
+    typedef typename traitsT::real_type         real_type;
+    typedef typename potentialT::parameter_type parameter_type;
 
     const auto& sp   = get_toml_value<toml::Table>(
             global, "spatial_partition", "[forcefield.global]");
@@ -55,7 +58,7 @@ read_spatial_partition(const toml::Table& global, potentialT pot)
     {
         MJOLNIR_SCOPE(type == "CellList", 1);
         using boundary_type = typename traitsT::boundary_type;
-        using dispatcher    = celllist_dispatcher<boundary_type, traitsT>;
+        using dispatcher    = celllist_dispatcher<boundary_type, traitsT, parameter_type>;
         using celllist_type = typename dispatcher::type;
 
         const auto mg =
@@ -75,15 +78,15 @@ read_spatial_partition(const toml::Table& global, potentialT pot)
         MJOLNIR_LOG_INFO("margin = ", margin);
 
         return make_unique<GlobalPairInteraction<
-            traitsT, potentialT, VerletList<traitsT>>>(
-                std::move(pot), VerletList<traitsT>(margin));
+            traitsT, potentialT, VerletList<traitsT, parameter_type>>>(
+                std::move(pot), VerletList<traitsT, parameter_type>(margin));
     }
     else if(type == "Naive")
     {
         MJOLNIR_SCOPE(type == "Naive", 1);
         return make_unique<GlobalPairInteraction<
-            traitsT, potentialT, NaivePairCalculation<traitsT>>
-                >(std::move(pot), NaivePairCalculation<traitsT>());
+            traitsT, potentialT, NaivePairCalculation<traitsT, parameter_type>>
+                >(std::move(pot), NaivePairCalculation<traitsT, parameter_type>());
     }
     else
     {

@@ -9,7 +9,7 @@
 namespace mjolnir
 {
 
-template<typename traitsT>
+template<typename traitsT, typename parameterT>
 class VerletList
 {
   public:
@@ -20,8 +20,11 @@ class VerletList
     typedef typename traits_type::coordinate_type coordinate_type;
 
     typedef ExclusionList exclusion_list_type;
-    typedef NeighborList  neighbor_list_type;
-    typedef neighbor_list_type::range_type range_type;
+
+    typedef parameterT parameter_type;
+    typedef NeighborList<parameter_type> neighbor_list_type;
+    typedef typename neighbor_list_type::neighbor_type neighbor_type;
+    typedef typename neighbor_list_type::range_type    range_type;
 
   public:
 
@@ -44,7 +47,7 @@ class VerletList
     {
         this->set_cutoff(pot.max_cutoff_length());
         this->exclusion_.make(sys, pot);
-        this->make(sys);
+        this->make(sys, pot);
         return;
     }
 
@@ -55,8 +58,11 @@ class VerletList
         return;
     }
 
-    void make  (const system_type& sys);
-    void update(const system_type& sys);
+    template<typename PotentialT>
+    void make  (const system_type& sys, const PotentialT& pot);
+
+    template<typename PotentialT>
+    void update(const system_type& sys, const PotentialT& pot);
 
     real_type cutoff() const noexcept {return this->cutoff_;}
     real_type margin() const noexcept {return this->margin_;}
@@ -78,9 +84,15 @@ class VerletList
     neighbor_list_type  neighbors_;
 };
 
-template<typename traitsT>
-void VerletList<traitsT>::make(const system_type& sys)
+template<typename traitsT, typename parameterT>
+template<typename potentialT>
+void VerletList<traitsT, parameterT>::make(
+        const system_type& sys, const potentialT& pot)
 {
+    static_assert(std::is_same<typename potentialT::parameter_type,
+        parameter_type>::value, "VerletList: invalid template argumnet: "
+        "potentialT::parameter_type should be equal to verletlist::parameterT");
+
     this->neighbors_.clear();
 
     const real_type rc = cutoff_ * (1. + margin_);
@@ -89,7 +101,7 @@ void VerletList<traitsT>::make(const system_type& sys)
     {
         const auto& ri = sys[i].position;
 
-        std::vector<std::size_t> partners;
+        std::vector<neighbor_type> partners;
         for(std::size_t j=i+1; j<sys.size(); ++j)
         {
             if(this->exclusion_.is_excluded(i, j))
@@ -100,7 +112,7 @@ void VerletList<traitsT>::make(const system_type& sys)
             const auto& rj = sys[j].position;
             if(length_sq(sys.adjust_direction(rj - ri)) < rc2)
             {
-                partners.push_back(j);
+                partners.emplace_back(j, pot.prepair_params(i, j));
             }
         }
         this->neighbors_.add_list_for(i, partners.begin(), partners.end());
@@ -109,13 +121,15 @@ void VerletList<traitsT>::make(const system_type& sys)
     return ;
 }
 
-template<typename traitsT>
-void VerletList<traitsT>::update(const system_type& sys)
+template<typename traitsT, typename parameterT>
+template<typename potentialT>
+void VerletList<traitsT, parameterT>::update(
+        const system_type& sys, const potentialT& pot)
 {
     this->current_margin_ -= sys.largest_displacement() * 2;
     if(this->current_margin_ < 0)
     {
-        this->make(sys);
+        this->make(sys, pot);
     }
     return ;
 }

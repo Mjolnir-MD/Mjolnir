@@ -14,7 +14,8 @@
 namespace mjolnir
 {
 
-template<typename traitsT, std::size_t dimI = 8> // its good to use 2^N as dimI
+// its good to use 2^N as dimI
+template<typename traitsT, typename parameterT, std::size_t dimI = 8>
 class UnlimitedGridCellList
 {
   public:
@@ -25,8 +26,11 @@ class UnlimitedGridCellList
     typedef typename traits_type::coordinate_type coordinate_type;
 
     typedef ExclusionList exclusion_list_type;
-    typedef NeighborList  neighbor_list_type;
-    typedef neighbor_list_type::range_type range_type;
+
+    typedef parameterT parameter_type;
+    typedef NeighborList<parameter_type> neighbor_list_type;
+    typedef typename neighbor_list_type::neighbor_type neighbor_type;
+    typedef typename neighbor_list_type::range_type    range_type;
 
     constexpr static std::size_t  dim_size  = dimI;
     constexpr static std::int64_t dim       = static_cast<std::int64_t>(dimI);
@@ -72,8 +76,11 @@ class UnlimitedGridCellList
         return;
     }
 
-    void make  (const system_type& sys);
-    void update(const system_type& sys);
+    template<typename PotentialT>
+    void make  (const system_type& sys, const PotentialT& pot);
+
+    template<typename PotentialT>
+    void update(const system_type& sys, const PotentialT& pot);
 
     real_type cutoff() const noexcept {return this->cutoff_;}
     real_type margin() const noexcept {return this->margin_;}
@@ -129,18 +136,20 @@ class UnlimitedGridCellList
     // first term of cell list contains first and last idx of index_by_cell
 };
 
-template<typename traitsT, std::size_t N>
-constexpr std::size_t  UnlimitedGridCellList<traitsT, N>::dim_size;
-template<typename traitsT, std::size_t N>
-constexpr std::int64_t UnlimitedGridCellList<traitsT, N>::dim;
-template<typename traitsT, std::size_t N>
-constexpr std::size_t  UnlimitedGridCellList<traitsT, N>::total_size;
-template<typename traitsT, std::size_t N>
-constexpr typename UnlimitedGridCellList<traitsT, N>::real_type
-UnlimitedGridCellList<traitsT, N>::mesh_epsilon;
+template<typename traitsT, typename parameterT, std::size_t N>
+constexpr std::size_t  UnlimitedGridCellList<traitsT, parameterT, N>::dim_size;
+template<typename traitsT, typename parameterT, std::size_t N>
+constexpr std::int64_t UnlimitedGridCellList<traitsT, parameterT, N>::dim;
+template<typename traitsT, typename parameterT, std::size_t N>
+constexpr std::size_t  UnlimitedGridCellList<traitsT, parameterT, N>::total_size;
+template<typename traitsT, typename parameterT, std::size_t N>
+constexpr typename UnlimitedGridCellList<traitsT, parameterT, N>::real_type
+UnlimitedGridCellList<traitsT, parameterT, N>::mesh_epsilon;
 
-template<typename traitsT, std::size_t N>
-void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
+template<typename traitsT, typename parameterT, std::size_t N>
+template<typename PotentialT>
+void UnlimitedGridCellList<traitsT, parameterT, N>::make(
+        const system_type& sys, const PotentialT& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_SCOPE_DEBUG(UnlimitedGridCellList<traitsT>::make(), 0);
@@ -188,7 +197,7 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
         MJOLNIR_LOG_DEBUG("cell index",        calc_index(ri));
         MJOLNIR_LOG_DEBUG("making verlet list for index", i);
 
-        std::vector<std::size_t> partner;
+        std::vector<neighbor_type> partner;
         for(std::size_t cidx : cell.second) // for all adjacent cells...
         {
             for(auto pici : cell_list_[cidx].first)
@@ -204,12 +213,15 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
                 if(length_sq(sys.adjust_direction(rj - ri)) < r_c2)
                 {
                     MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
-                    partner.push_back(j);
+                    partner.emplace_back(j, pot.prepair_params(i, j));
                 }
             }
         }
         // make the result consistent with NaivePairCalculation...
-        std::sort(partner.begin(), partner.end());
+        std::sort(partner.begin(), partner.end(),
+            [](const neighbor_type& lhs, const neighbor_type& rhs) noexcept {
+                return lhs.first < rhs.first;
+            });
         this->neighbors_.add_list_for(i, partner.begin(), partner.end());
     }
 
@@ -217,20 +229,22 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
     return ;
 }
 
-template<typename traitsT, std::size_t N>
-void UnlimitedGridCellList<traitsT, N>::update(const system_type& sys)
+template<typename traitsT, typename parameterT, std::size_t N>
+template<typename PotentialT>
+void UnlimitedGridCellList<traitsT, parameterT, N>::update(
+        const system_type& sys, const PotentialT& pot)
 {
     this->current_margin_ -= sys.largest_displacement() * 2;
     if(this->current_margin_ < 0.)
     {
-        this->make(sys);
+        this->make(sys, pot);
     }
     return ;
 }
 
-template<typename traitsT, std::size_t N>
+template<typename traitsT, typename parameterT, std::size_t N>
 template<typename PotentialT>
-void UnlimitedGridCellList<traitsT, N>::initialize(
+void UnlimitedGridCellList<traitsT, parameterT, N>::initialize(
         const system_type& sys, const PotentialT& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -286,7 +300,7 @@ void UnlimitedGridCellList<traitsT, N>::initialize(
         cell.second[26] = calc_index(x_next, y_next, z_next);
     }
 
-    this->make(sys);
+    this->make(sys, pot);
     return;
 }
 

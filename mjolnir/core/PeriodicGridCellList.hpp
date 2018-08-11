@@ -16,7 +16,7 @@ namespace mjolnir
 // XXX: almost same as UnlimitedGridCellList.
 // the difference between UnlimitedGridCellList is only the number of cells.
 // PeriodicGridCellList can optimize the number of cells using boundary size.
-template<typename traitsT>
+template<typename traitsT, typename parameterT>
 class PeriodicGridCellList
 {
   public:
@@ -27,8 +27,11 @@ class PeriodicGridCellList
     typedef typename traits_type::coordinate_type coordinate_type;
 
     typedef ExclusionList exclusion_list_type;
-    typedef NeighborList  neighbor_list_type;
-    typedef neighbor_list_type::range_type range_type;
+
+    typedef parameterT parameter_type;
+    typedef NeighborList<parameter_type> neighbor_list_type;
+    typedef typename neighbor_list_type::neighbor_type neighbor_type;
+    typedef typename neighbor_list_type::range_type    range_type;
 
     constexpr static real_type mesh_epsilon = 1e-6;
 
@@ -70,8 +73,11 @@ class PeriodicGridCellList
         return;
     }
 
-    void make  (const system_type& sys);
-    void update(const system_type& sys);
+    template<typename PotentialT>
+    void make  (const system_type& sys, const PotentialT& pot);
+
+    template<typename PotentialT>
+    void update(const system_type& sys, const PotentialT& pot);
 
     real_type cutoff() const {return this->cutoff_;}
     real_type margin() const {return this->margin_;}
@@ -132,8 +138,10 @@ class PeriodicGridCellList
     // first term of cell list contains first and last idx of index_by_cell
 };
 
-template<typename traitsT>
-void PeriodicGridCellList<traitsT>::make(const system_type& sys)
+template<typename traitsT, typename parameterT>
+template<typename PotentialT>
+void PeriodicGridCellList<traitsT, parameterT>::make(
+        const system_type& sys, const PotentialT& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_SCOPE_DEBUG(PeriodicGridCellList::make(), 0);
@@ -184,7 +192,7 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
         MJOLNIR_LOG_DEBUG("making verlet list for index", i);
         MJOLNIR_LOG_DEBUG("except list for ", i, "-th value");
 
-        std::vector<std::size_t> partner;
+        std::vector<neighbor_type> partner;
         for(std::size_t cidx : cell.second) // for all adjacent cells...
         {
             for(auto pici : cell_list_[cidx].first)
@@ -199,12 +207,15 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
                 if(length_sq(sys.adjust_direction(sys.at(j).position - ri)) < r_c2)
                 {
                     MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
-                    partner.push_back(j);
+                    partner.emplace_back(j, pot.prepair_params(i, j));
                 }
             }
         }
         // make the result consistent with NaivePairCalculation...
-        std::sort(partner.begin(), partner.end());
+        std::sort(partner.begin(), partner.end(),
+            [](const neighbor_type& lhs, const neighbor_type& rhs) noexcept {
+                return lhs.first < rhs.first;
+            });
         this->neighbors_.add_list_for(i, partner.begin(), partner.end());
     }
 
@@ -212,21 +223,23 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
     return ;
 }
 
-template<typename traitsT>
-void PeriodicGridCellList<traitsT>::update(const system_type& sys)
+template<typename traitsT, typename parameterT>
+template<typename PotentialT>
+void PeriodicGridCellList<traitsT, parameterT>::update(
+        const system_type& sys, const PotentialT& pot)
 {
     // TODO if boundary changes, cell list should also reconstructed
     this->current_margin_ -= sys.largest_displacement() * 2.;
     if(this->current_margin_ < 0.)
     {
-        this->make(sys);
+        this->make(sys, pot);
     }
     return ;
 }
 
-template<typename traitsT>
+template<typename traitsT, typename parameterT>
 template<typename PotentialT>
-void PeriodicGridCellList<traitsT>::initialize(
+void PeriodicGridCellList<traitsT, parameterT>::initialize(
         const system_type& sys, const PotentialT& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -317,7 +330,7 @@ void PeriodicGridCellList<traitsT>::initialize(
     }
     }
     }
-    this->make(sys);
+    this->make(sys, pot);
     return;
 }
 
