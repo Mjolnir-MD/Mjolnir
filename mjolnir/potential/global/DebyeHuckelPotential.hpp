@@ -15,7 +15,8 @@ class DebyeHuckelPotential
 {
   public:
     using real_type             = realT;
-    using container_type        = std::vector<real_type>;
+    using parameter_type        = real_type;
+    using container_type        = std::vector<parameter_type>;
     using chain_ignoration_type = ChainIgnoration;
     using topology_type         = Topology;
     using chain_id_type         = typename topology_type::chain_id_type;

@@ -18,16 +18,14 @@ template<typename realT, typename ChainIgnoration>
 class LennardJonesPotential
 {
   public:
-    typedef realT real_type;
-
-    // pair of {sigma, epsilon}
-    typedef std::pair<real_type, real_type> parameter_type;
-
+    using real_type = realT;
+    using parameter_type = std::pair<real_type, real_type>; // {sigma, epsilon}
+    using container_type = std::vector<parameter_type>;
     // topology stuff
-    typedef Topology topology_type;
-    typedef typename topology_type::chain_id_type        chain_id_type;
-    typedef typename topology_type::connection_kind_type connection_kind_type;
-    typedef ChainIgnoration chain_ignoration_type;
+    using topology_type  = Topology;
+    using chain_id_type  = typename topology_type::chain_id_type;
+    using connection_kind_type  = typename topology_type::connection_kind_type;
+    using chain_ignoration_type = ChainIgnoration;
 
     // rc = 2.5 * sigma
     constexpr static real_type cutoff_ratio = 2.5;
@@ -114,7 +112,7 @@ class LennardJonesPotential
 
   private:
 
-    std::vector<parameter_type> radii_;
+    container_type radii_;
 
     chain_ignoration_type ignored_chain_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
