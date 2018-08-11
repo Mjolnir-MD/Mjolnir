@@ -182,7 +182,7 @@ void UnlimitedGridCellList<traitsT, N>::make(const system_type& sys)
     {
         MJOLNIR_SCOPE_DEBUG(for(std::size_t i=0; i<sys.size(); ++i), 0);
         const auto& ri   = sys[i].position;
-        const auto& cell = cell_list_.at(this->calc_index(ri));
+        const auto& cell = cell_list_[this->calc_index(ri)];
 
         MJOLNIR_LOG_DEBUG("particle position", sys[i].position);
         MJOLNIR_LOG_DEBUG("cell index",        calc_index(ri));

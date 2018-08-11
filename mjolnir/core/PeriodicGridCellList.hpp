@@ -178,7 +178,7 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         const auto& ri = sys[i].position;
-        const auto& cell = cell_list_.at(calc_index(ri));
+        const auto& cell = cell_list_[calc_index(ri)];
 
         MJOLNIR_LOG_DEBUG("particle position", sys[i].position);
         MJOLNIR_LOG_DEBUG("making verlet list for index", i);
@@ -196,7 +196,7 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
                     continue;
                 }
 
-                if(length_sq(sys.adjust_direction(sys.at(j).position - ri)) < r_c2)
+                if(length_sq(sys.adjust_direction(sys[j].position - ri)) < r_c2)
                 {
                     MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
                     partner.push_back(j);
