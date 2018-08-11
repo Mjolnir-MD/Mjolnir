@@ -64,6 +64,11 @@ class DebyeHuckelPotential
                std::exp(-r * this->inv_debye_length_);
     }
 
+    parameter_type prepair_params(std::size_t i, std::size_t j) const noexcept
+    {
+        return this->charges_[i] * this->charges_[j];
+    }
+
     real_type max_cutoff_length() const noexcept
     {
         return debye_length_ * cutoff_ratio;

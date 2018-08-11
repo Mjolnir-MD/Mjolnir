@@ -80,6 +80,11 @@ class ExcludedVolumePotential
         return -12.0 * this->epsilon_ * dr12 * rinv;
     }
 
+    parameter_type prepair_params(std::size_t i, std::size_t j) const noexcept
+    {
+        return this->radii_[i] + this->radii_[j];
+    }
+
     // nothing to be done if system parameter (e.g. temperature) changes
     template<typename traitsT>
     void update(const System<traitsT>&) const noexcept {return;}

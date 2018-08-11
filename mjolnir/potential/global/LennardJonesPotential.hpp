@@ -80,6 +80,17 @@ class LennardJonesPotential
         return 24.0 * epsilon * (r6s6 - 2.0 * r12s12) / r;
     }
 
+    parameter_type prepair_params(std::size_t i, std::size_t j) const noexcept
+    {
+        const auto sgm1 = radii_[i].first;
+        const auto eps1 = radii_[i].second;
+        const auto sgm2 = radii_[j].first;
+        const auto eps2 = radii_[j].second;
+
+        return std::make_pair((sgm1 + sgm2) / 2,
+                             ((eps1 == eps2) ? eps1 : std::sqrt(eps1 * eps2)));
+    }
+
     real_type max_cutoff_length() const noexcept
     {
         const real_type max_sigma = std::max_element(
