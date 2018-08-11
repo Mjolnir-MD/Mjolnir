@@ -65,6 +65,17 @@ class ExcludedVolumePotential
         const real_type dr12 = dr6 * dr6;
         return this->epsilon_ * (dr12 - coef_at_cutoff);
     }
+    real_type potential (const std::size_t i, const std::size_t j,
+                         const real_type   r, const parameter_type& d) const noexcept
+    {
+        if(d * cutoff_ratio < r){return 0.0;}
+
+        const real_type d_r  = d / r;
+        const real_type dr3  = d_r * d_r * d_r;
+        const real_type dr6  = dr3 * dr3;
+        const real_type dr12 = dr6 * dr6;
+        return this->epsilon_ * (dr12 - coef_at_cutoff);
+    }
 
     real_type derivative(const std::size_t i, const std::size_t j,
                          const real_type r) const noexcept
@@ -72,7 +83,19 @@ class ExcludedVolumePotential
         const real_type d = this->radii_[i] + this->radii_[j];
         if(d * cutoff_ratio < r){return 0.0;}
 
-        const real_type rinv = 1. / r;
+        const real_type rinv = 1.0 / r;
+        const real_type d_r  = d * rinv;
+        const real_type dr3  = d_r * d_r * d_r;
+        const real_type dr6  = dr3 * dr3;
+        const real_type dr12 = dr6 * dr6;
+        return -12.0 * this->epsilon_ * dr12 * rinv;
+    }
+    real_type derivative(const std::size_t i, const std::size_t j,
+                         const real_type   r, const parameter_type& d) const noexcept
+    {
+        if(d * cutoff_ratio < r){return 0.0;}
+
+        const real_type rinv = 1.0 / r;
         const real_type d_r  = d * rinv;
         const real_type dr3  = d_r * d_r * d_r;
         const real_type dr6  = dr3 * dr3;

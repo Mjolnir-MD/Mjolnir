@@ -63,6 +63,20 @@ class LennardJonesPotential
         const real_type r12s12 = r6s6 * r6s6;
         return 4.0 * epsilon * (r12s12 - r6s6 - coef_at_cutoff);
     }
+    real_type potential(const std::size_t i, const std::size_t j,
+                        const real_type   r, const parameter_type& p) const noexcept
+    {
+        const real_type sigma = p.first;
+        if(sigma * cutoff_ratio < r){return 0.0;}
+
+        const real_type epsilon = p.second;
+
+        const real_type r1s1   = sigma / r;
+        const real_type r3s3   = r1s1 * r1s1 * r1s1;
+        const real_type r6s6   = r3s3 * r3s3;
+        const real_type r12s12 = r6s6 * r6s6;
+        return 4.0 * epsilon * (r12s12 - r6s6 - coef_at_cutoff);
+    }
 
     real_type derivative(const std::size_t i, const std::size_t j,
                          const real_type r) const noexcept
@@ -72,6 +86,20 @@ class LennardJonesPotential
 
         const real_type epsilon = (radii_[i].second == radii_[j].second) ?
            radii_[i].second : std::sqrt(radii_[i].second * radii_[j].second);
+
+        const real_type r1s1   = sigma / r;
+        const real_type r3s3   = r1s1 * r1s1 * r1s1;
+        const real_type r6s6   = r3s3 * r3s3;
+        const real_type r12s12 = r6s6 * r6s6;
+        return 24.0 * epsilon * (r6s6 - 2.0 * r12s12) / r;
+    }
+    real_type derivative(const std::size_t i, const std::size_t j,
+                         const real_type   r, const parameter_type& p) const noexcept
+    {
+        const real_type sigma = p.first;
+        if(sigma * cutoff_ratio < r){return 0.0;}
+
+        const real_type epsilon = p.second;
 
         const real_type r1s1   = sigma / r;
         const real_type r3s3   = r1s1 * r1s1 * r1s1;
