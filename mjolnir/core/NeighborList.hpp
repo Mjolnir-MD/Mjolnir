@@ -32,21 +32,6 @@ class NeighborList
         this->ranges_.reserve(Nparticle);
     }
 
-    void add_list_for(const std::size_t i, std::vector<std::size_t> list)
-    {
-        if(this->ranges_.size() <= i)
-        {
-            this->ranges_.resize(i+1, {0,0});
-        }
-        ranges_[i].first  = idxs_.size();
-        ranges_[i].second = idxs_.size() + list.size();
-
-        // this might break iterator.
-        // this->ranges_ cannot contain pair of iteraor but indices.
-        std::copy(list.begin(), list.end(), std::back_inserter(this->idxs_));
-        return ;
-    }
-
     template<typename Iterator>
     void add_list_for(const std::size_t i, Iterator first, Iterator last)
     {
