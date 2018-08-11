@@ -205,7 +205,7 @@ void PeriodicGridCellList<traitsT>::make(const system_type& sys)
         }
         // make the result consistent with NaivePairCalculation...
         std::sort(partner.begin(), partner.end());
-        this->neighbors_.add_list_for(i, partner);
+        this->neighbors_.add_list_for(i, partner.begin(), partner.end());
     }
 
     this->current_margin_ = cutoff_ * margin_;

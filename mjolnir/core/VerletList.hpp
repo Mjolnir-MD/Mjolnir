@@ -103,7 +103,7 @@ void VerletList<traitsT>::make(const system_type& sys)
                 partners.push_back(j);
             }
         }
-        this->neighbors_.add_list_for(i, partners);
+        this->neighbors_.add_list_for(i, partners.begin(), partners.end());
     }
     this->current_margin_ = cutoff_ * margin_;
     return ;
