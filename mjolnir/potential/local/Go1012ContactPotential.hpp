@@ -27,7 +27,7 @@ class Go1012ContactPotential
     real_type potential(const real_type r) const noexcept
     {
         const real_type rd   = this->r0_ / r;
-        if(rd < rcutoff_ratio) return 0.0;
+        if(rd < rcutoff_ratio){return real_type(0.0);}
 
         const real_type rd2  = rd  * rd;
         const real_type rd4  = rd2 * rd2;
@@ -35,21 +35,21 @@ class Go1012ContactPotential
         const real_type rd10 = rd8 * rd2;
         const real_type rd12 = rd8 * rd4;
 
-        return this->epsilon_ * (5. * rd12 - 6. * rd10);
+        return this->epsilon_ * (5 * rd12 - 6 * rd10);
     }
 
     real_type derivative(const real_type r) const noexcept
     {
-        const real_type invr = 1. / r;
+        const real_type invr = real_type(1.0) / r;
         const real_type rd   = this->r0_ * invr;
-        if(rd < rcutoff_ratio) return 0.0;
+        if(rd < rcutoff_ratio){return real_type(0.0);}
 
         const real_type rd2  = rd  * rd;
         const real_type rd4  = rd2 * rd2;
         const real_type rd8  = rd4 * rd4;
         const real_type rd10 = rd8 * rd2;
         const real_type rd12 = rd8 * rd4;
-        return this->epsilon_ * 60. * (rd10 - rd12) * invr;
+        return this->epsilon_ * 60 * (rd10 - rd12) * invr;
     }
 
     template<typename T>

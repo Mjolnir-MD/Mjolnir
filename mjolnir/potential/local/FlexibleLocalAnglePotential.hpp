@@ -101,7 +101,7 @@ class FlexibleLocalAnglePotential
         const real_type e1 = a * term1_[n] + b * term1_[n+1];
         const real_type e2 =
             ((a * a * a - a) * term2_[n] + (b * b * b - b) * term2_[n+1]) *
-            dtheta * dtheta / 6.;
+            dtheta * dtheta / real_type(6.0);
 
         return e1 + e2;
     }
@@ -115,8 +115,8 @@ class FlexibleLocalAnglePotential
 
         const real_type f1 = (term1_[n+1] - term1_[n]) * inv_dtheta;
         const real_type f2 = (
-            (3. * b * b - 1.) * term2_[n+1] - (3. * a * a - 1.) * term2_[n]
-            ) * dtheta / 6.;
+            (3 * b * b - 1) * term2_[n+1] - (3 * a * a - 1) * term2_[n]
+            ) * dtheta / real_type(6.0);
 
         return f1 + f2;
     }

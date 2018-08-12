@@ -46,10 +46,10 @@ class FlexibleLocalDihedralPotential
         const real_type cos1 = std::cos(phi); // this with __sincos.
         const real_type sin_sq = sin1 * sin1;
         const real_type cos_sq = cos1 * cos1;
-        const real_type sin2 = 2.0 * sin1 * cos1;
+        const real_type sin2 = 2 * sin1 * cos1;
         const real_type cos2 = cos_sq - sin_sq;
-        const real_type sin3 = sin1 * (3.0 - 4.0 * sin_sq);
-        const real_type cos3 = cos1 * (4.0 * cos_sq - 3.0);
+        const real_type sin3 = sin1 * (3 - 4 * sin_sq);
+        const real_type cos3 = cos1 * (4 * cos_sq - 3);
 
         return k_ * (term_[1] * cos1 + term_[2] * sin1 +
                      term_[3] * cos2 + term_[4] * sin2 +
@@ -63,10 +63,10 @@ class FlexibleLocalDihedralPotential
         const real_type cos1 = std::cos(phi); // this with __sincos.
         const real_type sin_sq = sin1 * sin1;
         const real_type cos_sq = cos1 * cos1;
-        const real_type sin2 = 2.0 * sin1 * cos1;
+        const real_type sin2 = 2 * sin1 * cos1;
         const real_type cos2 = cos_sq - sin_sq;
-        const real_type sin3 = sin1 * (3.0 - 4.0 * sin_sq);
-        const real_type cos3 = cos1 * (4.0 * cos_sq - 3.0);
+        const real_type sin3 = sin1 * (3 - 4 * sin_sq);
+        const real_type cos3 = cos1 * (4 * cos_sq - 3);
 
         return k_*(-1*term_[1] * sin1 +   term_[2] * cos1
                    -2*term_[3] * sin2 + 2*term_[4] * cos2
