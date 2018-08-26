@@ -1,12 +1,12 @@
 #ifndef MJOLNIR_READ_INTERACTION
 #define MJOLNIR_READ_INTERACTION
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/core/BondLengthInteraction.hpp>
-#include <mjolnir/core/BondAngleInteraction.hpp>
-#include <mjolnir/core/DihedralAngleInteraction.hpp>
-#include <mjolnir/core/GlobalPairInteraction.hpp>
+#include <mjolnir/interaction/BondLengthInteraction.hpp>
+#include <mjolnir/interaction/BondAngleInteraction.hpp>
+#include <mjolnir/interaction/DihedralAngleInteraction.hpp>
+#include <mjolnir/interaction/GlobalPairInteraction.hpp>
+#include <mjolnir/interaction/ExternalDistanceInteraction.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>
-#include <mjolnir/core/ExternalDistanceInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
