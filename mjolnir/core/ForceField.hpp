@@ -1,8 +1,8 @@
 #ifndef MJOLNIR_FORCE_FIELD
 #define MJOLNIR_FORCE_FIELD
-#include "LocalForceField.hpp"
-#include "GlobalForceField.hpp"
-#include "ExternalForceField.hpp"
+#include <mjolnir/core/LocalForceField.hpp>
+#include <mjolnir/core/GlobalForceField.hpp>
+#include <mjolnir/core/ExternalForceField.hpp>
 
 namespace mjolnir
 {

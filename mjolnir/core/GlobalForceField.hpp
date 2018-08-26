@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_GLOBAL_FORCE_FIELD
 #define MJOLNIR_GLOBAL_FORCE_FIELD
-#include "GlobalInteractionBase.hpp"
+#include <mjolnir/core/GlobalInteractionBase.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <vector>
 #include <array>

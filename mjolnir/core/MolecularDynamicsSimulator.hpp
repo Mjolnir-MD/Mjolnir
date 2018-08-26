@@ -1,9 +1,9 @@
 #ifndef MJOLNIR_MOLECULAR_DYNAMICS_SIMULATOR
 #define MJOLNIR_MOLECULAR_DYNAMICS_SIMULATOR
-#include "SimulatorBase.hpp"
-#include "System.hpp"
-#include "ForceField.hpp"
-#include "Observer.hpp"
+#include <mjolnir/core/SimulatorBase.hpp>
+#include <mjolnir/core/System.hpp>
+#include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/Observer.hpp>
 
 namespace mjolnir
 {

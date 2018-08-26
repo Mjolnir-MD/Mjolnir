@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_CORE_OBSERVER
 #define MJOLNIR_CORE_OBSERVER
-#include "System.hpp"
-#include "ForceField.hpp"
+#include <mjolnir/core/System.hpp>
+#include <mjolnir/core/ForceField.hpp>
 #include <fstream>
 #include <iomanip>
 

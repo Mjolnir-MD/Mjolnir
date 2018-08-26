@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_CORE_NAIVE_PAIR_CALCULATION
 #define MJOLNIR_CORE_NAIVE_PAIR_CALCULATION
-#include "System.hpp"
+#include <mjolnir/core/System.hpp>
 
 namespace mjolnir
 {
