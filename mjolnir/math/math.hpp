@@ -2,11 +2,11 @@
 #define MJOLNIR_MATH_MATH_HPP
 #include <cstdint>
 
-// simple functions to calculate some parameters at a compile time
-
 namespace mjolnir
 {
 
+namespace compiletime
+{
 template<typename realT>
 constexpr inline realT pow(const realT x, const std::uint64_t N) noexcept
 {
@@ -18,6 +18,7 @@ constexpr inline realT abs(const realT x) noexcept
 {
     return (x > 0) ? x : -x;
 }
+} // compiletime
 
 } // mjolnir
 #endif // MJOLNIR_MATH_MATH_HPP

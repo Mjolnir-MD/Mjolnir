@@ -20,8 +20,8 @@ class LennardJonesWallPotential
     constexpr static real_type cutoff_ratio = 2.5;
     // to make the potential curve continuous at the cutoff point
     constexpr static real_type coef_at_cutoff =
-        ::mjolnir::pow(1.0 / cutoff_ratio, 12u) -
-        ::mjolnir::pow(1.0 / cutoff_ratio,  6u);
+        compiletime::pow(1.0 / cutoff_ratio, 12u) -
+        compiletime::pow(1.0 / cutoff_ratio,  6u);
 
   public:
 

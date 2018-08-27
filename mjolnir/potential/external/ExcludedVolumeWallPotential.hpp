@@ -19,7 +19,7 @@ class ExcludedVolumeWallPotential
     constexpr static real_type cutoff_ratio = 2.0;
     // to make the potential curve continuous at the cutoff point
     constexpr static real_type coef_at_cutoff =
-        ::mjolnir::pow(1.0 / cutoff_ratio, 12);
+        compiletime::pow(1.0 / cutoff_ratio, 12);
 
   public:
 
