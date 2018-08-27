@@ -54,13 +54,13 @@ read_boundary(const toml::Table& data)
     {
         MJOLNIR_LOG_INFO("boundary is UnlimitedBoundary");
         return read_parameter<
-            SimulatorTraitsBase<realT, UnlimitedBoundary>>(data);
+            SimulatorTraits<realT, UnlimitedBoundary>>(data);
     }
     else if(boundary == "PeriodicCuboid")
     {
         MJOLNIR_LOG_INFO("boundary is CuboidalPeriodicBoudanry");
         return read_parameter<
-            SimulatorTraitsBase<realT, CuboidalPeriodicBoundary>>(data);
+            SimulatorTraits<realT, CuboidalPeriodicBoundary>>(data);
     }
     else
     {

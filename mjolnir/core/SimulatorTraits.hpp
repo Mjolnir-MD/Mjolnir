@@ -6,7 +6,7 @@ namespace mjolnir
 {
 
 template<typename realT, template<typename, typename> class boundaryT>
-struct SimulatorTraitsBase
+struct SimulatorTraits
 {
     typedef realT                                 real_type;
     typedef Vector<real_type, 3>                  coordinate_type;
