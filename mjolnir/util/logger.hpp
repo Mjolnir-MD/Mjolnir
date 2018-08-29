@@ -110,7 +110,8 @@ class basic_logger
 
   public:
 
-    explicit basic_logger(const std::string& fname): indent_(0), fname_(fname)
+    explicit basic_logger(const std::string& fname)
+        : line_fed_(false), indent_(0), fname_(fname)
     {
         // clear the contents and check the file can be opened
         fstream_type ofs(this->fname_, std::ios_base::out);
@@ -134,7 +135,7 @@ class basic_logger
             throw_exception<std::runtime_error>("Logger: file open error: ",
                     this->fname_);
         }
-        if(indent_ != 0 && this->line_fed_)
+        if(this->line_fed_)
         {
             ofs << string_type(indent_size * indent_, ' ');
         }
