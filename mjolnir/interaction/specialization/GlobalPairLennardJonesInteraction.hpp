@@ -42,7 +42,7 @@ class GlobalPairInteraction<
     {
         std::cerr << "specialized version called!" << std::endl;
         this->partition_.initialize(sys, this->potential_);
-        this->partition_.update(sys);
+        this->partition_.update(sys, this->potential_);
     }
 
     /*! @brief update parameters (e.g. temperature, ionic strength, ...)  *
@@ -58,32 +58,26 @@ class GlobalPairInteraction<
 
     void calc_force(system_type& sys) override
     {
-        partition_.update(sys);
+        partition_.update(sys, this->potential_);
 
         constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
         constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
         const     auto& param           = potential_.radii();
         for(std::size_t i=0; i<sys.size(); ++i)
         {
-            for(auto j : this->partition_.partners(i))
+            for(const auto& ptnr : this->partition_.partners(i))
             {
+                const auto  j     = ptnr.index;
+                const auto& param = ptnr.parameter();
+
                 const coordinate_type rij =
                     sys.adjust_direction(sys[j].position - sys[i].position);
                 const real_type l_sq = length_sq(rij);
 
-                const auto& para_i = param[i];
-                const auto& para_j = param[j];
-
-                // Lorentz-Berthelot rule for sigma
-                const real_type sigma =
-                    (para_i.first + para_j.first) * real_type(0.5);
-
-                const real_type sigma_sq = sigma * sigma;
+                const real_type sigma_sq = param.first * param.first;
                 if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
 
-                // Lorentz-Berthelot rule for epsilon
-                const real_type epsilon = (para_i.second == para_j.second) ?
-                    para_i.second : std::sqrt(para_i.second * para_j.second);
+                const real_type epsilon = param.second;
 
                 const real_type rcp_l_sq = 1 / l_sq;
                 const real_type s2l2 = sigma_sq * rcp_l_sq;
@@ -109,25 +103,19 @@ class GlobalPairInteraction<
         const     auto& param           = potential_.radii();
         for(std::size_t i=0; i<sys.size(); ++i)
         {
-            for(auto j : this->partition_.partners(i))
+            for(const auto& ptnr : this->partition_.partners(i))
             {
+                const auto  j     = ptnr.index;
+                const auto& param = ptnr.parameter();
+
                 const coordinate_type rij =
                     sys.adjust_direction(sys[j].position - sys[i].position);
                 const real_type l_sq = length_sq(rij);
 
-                const auto& para_i = param[i];
-                const auto& para_j = param[j];
-
-                // Lorentz-Berthelot rule for sigma
-                const real_type sigma =
-                    (para_i.first + para_j.first) * real_type(0.5);
-
-                const real_type sigma_sq = sigma * sigma;
+                const real_type sigma_sq = param.first * param.first;
                 if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
 
-                // Lorentz-Berthelot rule for epsilon
-                const real_type epsilon = (para_i.second == para_j.second) ?
-                    para_i.second : std::sqrt(para_i.second * para_j.second);
+                const real_type epsilon = param.second;
 
                 const real_type s2l2 = sigma_sq / l_sq;
                 const real_type s6l6 = s2l2 * s2l2 * s2l2;
