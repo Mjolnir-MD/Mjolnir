@@ -218,10 +218,7 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
             }
         }
         // make the result consistent with NaivePairCalculation...
-        std::sort(partner.begin(), partner.end(),
-            [](const neighbor_type& lhs, const neighbor_type& rhs) noexcept {
-                return lhs.first < rhs.first;
-            });
+        std::sort(partner.begin(), partner.end());
         this->neighbors_.add_list_for(i, partner.begin(), partner.end());
     }
 
