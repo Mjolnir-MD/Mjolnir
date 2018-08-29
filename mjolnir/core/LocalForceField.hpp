@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_LOCAL_FORCE_FIELD
 #define MJOLNIR_LOCAL_FORCE_FIELD
-#include "LocalInteractionBase.hpp"
+#include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <utility>
 #include <vector>

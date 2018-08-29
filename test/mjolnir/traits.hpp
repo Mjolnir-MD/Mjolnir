@@ -11,7 +11,7 @@ namespace test
 
 template<typename realT,
          template<typename, typename> class boundaryT = UnlimitedBoundary>
-using traits = mjolnir::SimulatorTraitsBase<realT, boundaryT>;
+using traits = mjolnir::SimulatorTraits<realT, boundaryT>;
 
 } // test
 } // mjolnir

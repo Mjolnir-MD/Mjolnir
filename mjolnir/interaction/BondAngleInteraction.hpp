@@ -3,6 +3,7 @@
 #include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/math/constants.hpp>
+#include <mjolnir/math/math.hpp>
 #include <mjolnir/math/rsqrt.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -96,10 +97,8 @@ BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const no
         const real_type       inv_len_r_kj = rsqrt(length_sq(r_kj));
         const coordinate_type r_kj_reg     = r_kj * inv_len_r_kj;
 
-        const real_type dot_ijk = dot_product(r_ij_reg, r_kj_reg);
-        const real_type cos_theta =
-            (-real_type(1.0) <= dot_ijk && dot_ijk <= real_type(1.0)) ? dot_ijk :
-            std::copysign(real_type(1.0), dot_ijk);
+        const real_type dot_ijk   = dot_product(r_ij_reg, r_kj_reg);
+        const real_type cos_theta = clamp(dot_ijk, real_type(-1.0), real_type(1.0));
 
         const real_type theta = std::acos(cos_theta);
         const real_type coef  = -(idxp.second.derivative(theta));
@@ -143,9 +142,7 @@ BondAngleInteraction<traitsT, potentialT>::calc_energy(
         const real_type dot_v21_v23 = dot_product(v_2to1, v_2to3);
 
         const real_type dot_ijk   = dot_v21_v23 * rsqrt(lensq_v21 * lensq_v23);
-        const real_type cos_theta =
-            (-real_type(1) <= dot_ijk && dot_ijk <= real_type(1)) ? dot_ijk :
-            std::copysign(real_type(1), dot_ijk);
+        const real_type cos_theta = clamp(dot_ijk, real_type(-1.0), real_type(1.0));
         const real_type theta     = std::acos(cos_theta);
 
         E += idxp.second.potential(theta);

@@ -22,7 +22,7 @@ set(TEST_NAMES
     test_axis_aligned_plane_shape
     )
 
-add_definitions("-O3 -std=c++11")
+add_definitions("-O2 -march=native -mtune=native -std=c++11")
 
 if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
     message(STATUS "boost_unit_test_framework precompiled library found -> ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}")

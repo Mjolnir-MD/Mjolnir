@@ -26,17 +26,17 @@ class ClementiDihedralPotential
     {
         const real_type dphi = val - v0_;
         const real_type cos1 = std::cos(dphi);
-        const real_type cos3 = cos1 * (4 * cos1 * cos1 - 3.0);
-        return this->k1_ * (1.0 - cos1) + k3_ * (1.0 - cos3);
+        const real_type cos3 = cos1 * (real_type(4.0) * cos1 * cos1 - real_type(3.0));
+        return this->k1_ * (real_type(1.0) - cos1) + k3_ * (real_type(1.0) - cos3);
     }
 
     real_type derivative(const real_type val) const noexcept
     {
         const real_type dphi = val - v0_;
         const real_type sin1 = std::sin(dphi);
-        const real_type sin3 = sin1 * (3.0 - 4 * sin1 * sin1);
+        const real_type sin3 = sin1 * (real_type(3.0) - real_type(4.0) * sin1 * sin1);
 
-        return this->k1_ * sin1 + 3.0 * this->k3_ * sin3;
+        return this->k1_ * sin1 + real_type(3.0) * this->k3_ * sin3;
     }
 
     template<typename T>
