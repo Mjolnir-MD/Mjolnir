@@ -88,7 +88,8 @@ struct neighbor_element
     std::size_t index;
 };
 
-static_assert(sizeof(std::size_t) == sizeof(neighbor_element<empty_t>));
+static_assert(sizeof(std::size_t) == sizeof(neighbor_element<empty_t>),
+              "checking neighbor_element reduces size of empty object");
 
 template<typename paramT>
 inline bool operator==(
