@@ -126,8 +126,8 @@ class LennardJonesPotential
     static const char* name() noexcept {return "LennardJones";}
 
     // access to the parameters...
-    std::vector<parameter_type>&       radii()       noexcept {return radii_;}
-    std::vector<parameter_type> const& radii() const noexcept {return radii_;}
+    std::vector<parameter_type>&       parameters()       noexcept {return radii_;}
+    std::vector<parameter_type> const& parameters() const noexcept {return radii_;}
 
   private:
 

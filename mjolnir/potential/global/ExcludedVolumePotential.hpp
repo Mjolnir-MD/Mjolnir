@@ -118,8 +118,8 @@ class ExcludedVolumePotential
     // access to the parameters
     real_type& epsilon()       noexcept {return this->epsilon_;}
     real_type  epsilon() const noexcept {return this->epsilon_;}
-    std::vector<real_type>&       radii()       noexcept {return this->radii_;}
-    std::vector<real_type> const& radii() const noexcept {return this->radii_;}
+    std::vector<real_type>&       parameters()       noexcept {return this->radii_;}
+    std::vector<real_type> const& parameters() const noexcept {return this->radii_;}
 
   private:
 

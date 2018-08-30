@@ -41,7 +41,6 @@ class GlobalPairInteraction<traitsT,
      *  @details before calling `calc_(force|energy)`, this should be called. */
     void initialize(const system_type& sys) override
     {
-        std::cerr << "specialized version called!" << std::endl;
         this->partition_.initialize(sys, this->potential_);
         this->partition_.update(sys, this->potential_);
     }
@@ -63,7 +62,7 @@ class GlobalPairInteraction<traitsT,
 
         constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
         constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-        const     auto& param           = potential_.radii();
+        const     auto& param           = potential_.parameters();
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             for(const auto& ptnr : this->partition_.partners(i))
@@ -101,7 +100,7 @@ class GlobalPairInteraction<traitsT,
         constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
         constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
         constexpr auto  coef_at_cutoff  = potential_type::coef_at_cutoff;
-        const     auto& param           = potential_.radii();
+        const     auto& param           = potential_.parameters();
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             for(const auto& ptnr : this->partition_.partners(i))
