@@ -67,10 +67,10 @@ void GlobalPairInteraction<traitsT, potT, spaceT>::calc_force(
     partition_.update(sys, this->potential_);
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        for(const auto& jp : this->partition_.partners(i))
+        for(const auto& ptnr : this->partition_.partners(i))
         {
-            const auto  j     = jp.index;
-            const auto& param = jp.parameter();
+            const auto  j     = ptnr.index;
+            const auto& param = ptnr.parameter();
 
             const coordinate_type rij =
                 sys.adjust_direction(sys[j].position - sys[i].position);
@@ -96,10 +96,10 @@ GlobalPairInteraction<traitsT, potT, spaceT>::calc_energy(
     real_type e = 0.0;
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        for(const auto& jp : this->partition_.partners(i))
+        for(const auto& ptnr : this->partition_.partners(i))
         {
-            const auto& j     = jp.index;
-            const auto& param = jp.parameter();
+            const auto& j     = ptnr.index;
+            const auto& param = ptnr.parameter();
 
             const real_type l = length(
                 sys.adjust_direction(sys[j].position - sys[i].position));
