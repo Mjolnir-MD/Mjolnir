@@ -13,8 +13,8 @@
 BOOST_AUTO_TEST_CASE(LennardJones_double)
 {
     using real_type = double;
-    constexpr static std::size_t       N    = 10000;
-    constexpr static real_type h    = 1e-6;
+    constexpr static std::size_t N = 10000;
+    constexpr static real_type   h = 1e-6;
 
     const real_type sigma   = 3.0;
     const real_type epsilon = 1.0;
@@ -46,21 +46,21 @@ BOOST_AUTO_TEST_CASE(LennardJones_double)
 
 BOOST_AUTO_TEST_CASE(LennardJones_float)
 {
-    using real_type = double;
-    constexpr static unsigned int      seed = 32479327;
-    constexpr static std::size_t       N    = 1000;
-    constexpr static real_type h    = 1e-3;
-    constexpr static real_type tol  = 5e-3;
+    using real_type = float;
+    constexpr std::size_t N = 1000;
+    constexpr real_type   h = 0.002f;
+    constexpr real_type tol = 0.005f;
 
-    const real_type sigma   = 3.0;
-    const real_type epsilon = 1.0;
+    const real_type sigma   = 3.0f;
+    const real_type epsilon = 1.0f;
     mjolnir::LennardJonesPotential<real_type, mjolnir::IgnoreNothing> lj{
         {{sigma, epsilon}, {sigma, epsilon}}, {}
     };
+    constexpr real_type cutoff = mjolnir::LennardJonesPotential<
+        real_type, mjolnir::IgnoreNothing>::cutoff_ratio;
 
-    const real_type x_min = 0.8 * sigma;
-    const real_type x_max =
-        mjolnir::LennardJonesPotential<real_type, mjolnir::IgnoreNothing>::cutoff_ratio * sigma;
+    const real_type x_min = 0.8f   * sigma;
+    const real_type x_max = cutoff * sigma;
     const real_type dx = (x_max - x_min) / N;
 
     real_type x = x_min;
@@ -72,10 +72,13 @@ BOOST_AUTO_TEST_CASE(LennardJones_float)
         const real_type deri = lj.derivative(0, 1, x);
 
         if(std::abs(deri) > tol)
+        {
             BOOST_CHECK_CLOSE_FRACTION(dpot, deri, tol);
+        }
         else
+        {
             BOOST_CHECK_SMALL(deri, tol);
-
+        }
         x += dx;
     }
 }
