@@ -214,6 +214,14 @@ read_global_pair_interaction(const toml::Table& global)
         return read_spatial_partition<traitsT, potential_t>(
             global, read_lennard_jones_potential<real_type, ignoreT>(global));
     }
+    else if(potential == "UniformLennardJones")
+    {
+        MJOLNIR_SCOPE(potential == "UniformLennardJones", 1);
+        using potential_t = UniformLennardJonesPotential<real_type, ignoreT>;
+
+        return read_spatial_partition<traitsT, potential_t>(
+            global, read_uniform_lennard_jones_potential<real_type, ignoreT>(global));
+    }
     else
     {
         throw_exception<std::runtime_error>(

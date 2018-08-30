@@ -10,6 +10,7 @@
 #include <mjolnir/potential/local/SumLocalPotential.hpp>
 #include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
+#include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/potential/external/ImplicitMembranePotential.hpp>
 #include <mjolnir/potential/external/LennardJonesWallPotential.hpp>
@@ -325,7 +326,7 @@ read_lennard_jones_potential(const toml::Table& global)
     using real_type = realT;
 
     const auto& ignored_connections = get_toml_value<toml::Table>(
-        global, "ignored_connections", "[forcefield.global] for ExcludedVolume");
+        global, "ignored_connections", "[forcefield.global] for Lennard-Jones");
     std::map<std::string, std::size_t> connections;
     for(const auto connection : ignored_connections)
     {
@@ -364,6 +365,38 @@ read_lennard_jones_potential(const toml::Table& global)
 
     return LennardJonesPotential<realT, ignoreT>(
             std::move(params), connections);
+}
+
+template<typename realT, typename ignoreT>
+UniformLennardJonesPotential<realT, ignoreT>
+read_uniform_lennard_jones_potential(const toml::Table& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_uniform_lennard_jones_potential(), 0);
+    using real_type = realT;
+
+    const auto& ignored_connections = get_toml_value<toml::Table>(
+        global, "ignored_connections", "[forcefield.global] for Lennard-Jones");
+
+    std::map<std::string, std::size_t> connections;
+    for(const auto connection : ignored_connections)
+    {
+        connections[connection.first] =
+            toml::get<std::size_t>(connection.second);
+        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
+                         " within ", connections.at(connection.first), " will ",
+                         "be ignored");
+    }
+
+    const auto sigma   = get_toml_value<real_type>(global, "sigma",
+        "[forcefield.global] for Uniform Lennard-Jones potential");
+    const auto epsilon = get_toml_value<real_type>(global, "sigma",
+        "[forcefield.global] for Uniform Lennard-Jones potential");
+
+    MJOLNIR_LOG_INFO("sigma   = ", sigma);
+    MJOLNIR_LOG_INFO("epsilon = ", epsilon);
+
+    return UniformLennardJonesPotential<realT, ignoreT>(sigma, epsilon, connections);
 }
 
 template<typename realT, typename ignoreT>
