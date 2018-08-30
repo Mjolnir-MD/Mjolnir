@@ -31,8 +31,8 @@ class LennardJonesPotential
     constexpr static real_type cutoff_ratio = 2.5;
     // to make the potential curve continuous at the cutoff point
     constexpr static real_type coef_at_cutoff =
-        compiletime::pow(1.0 / cutoff_ratio, 12u) -
-        compiletime::pow(1.0 / cutoff_ratio,  6u);
+        compiletime::pow<real_type>(1 / cutoff_ratio, 12u) -
+        compiletime::pow<real_type>(1 / cutoff_ratio,  6u);
 
   public:
 
@@ -74,7 +74,7 @@ class LennardJonesPotential
     real_type potential(const real_type r, const parameter_type& p) const noexcept
     {
         const real_type sigma = p.first;
-        if(sigma * cutoff_ratio < r){return 0.0;}
+        if(sigma * cutoff_ratio < r){return 0;}
 
         const real_type epsilon = p.second;
 
@@ -82,20 +82,21 @@ class LennardJonesPotential
         const real_type r3s3   = r1s1 * r1s1 * r1s1;
         const real_type r6s6   = r3s3 * r3s3;
         const real_type r12s12 = r6s6 * r6s6;
-        return 4.0 * epsilon * (r12s12 - r6s6 - coef_at_cutoff);
+        return 4 * epsilon * (r12s12 - r6s6 - coef_at_cutoff);
     }
     real_type derivative(const real_type r, const parameter_type& p) const noexcept
     {
         const real_type sigma = p.first;
-        if(sigma * cutoff_ratio < r){return 0.0;}
+        if(sigma * cutoff_ratio < r){return 0;}
 
         const real_type epsilon = p.second;
 
-        const real_type r1s1   = sigma / r;
+        const real_type rinv   = 1 / r;
+        const real_type r1s1   = sigma * rinv;
         const real_type r3s3   = r1s1 * r1s1 * r1s1;
         const real_type r6s6   = r3s3 * r3s3;
         const real_type r12s12 = r6s6 * r6s6;
-        return 24.0 * epsilon * (r6s6 - 2.0 * r12s12) / r;
+        return 24 * epsilon * (r6s6 - 2 * r12s12) * rinv;
     }
 
     real_type max_cutoff_length() const noexcept
