@@ -53,59 +53,43 @@ class ExcludedVolumePotential
     ExcludedVolumePotential& operator=(const ExcludedVolumePotential&) = default;
     ExcludedVolumePotential& operator=(ExcludedVolumePotential&&)      = default;
 
-    real_type potential (const std::size_t i, const std::size_t j,
-                         const real_type r) const noexcept
-    {
-        const real_type d = this->radii_[i] + this->radii_[j];
-        if(d * cutoff_ratio < r){return 0.0;}
-
-        const real_type d_r  = d / r;
-        const real_type dr3  = d_r * d_r * d_r;
-        const real_type dr6  = dr3 * dr3;
-        const real_type dr12 = dr6 * dr6;
-        return this->epsilon_ * (dr12 - coef_at_cutoff);
-    }
-    real_type potential (const std::size_t i, const std::size_t j,
-                         const real_type   r, const parameter_type& d) const noexcept
-    {
-        if(d * cutoff_ratio < r){return 0.0;}
-
-        const real_type d_r  = d / r;
-        const real_type dr3  = d_r * d_r * d_r;
-        const real_type dr6  = dr3 * dr3;
-        const real_type dr12 = dr6 * dr6;
-        return this->epsilon_ * (dr12 - coef_at_cutoff);
-    }
-
-    real_type derivative(const std::size_t i, const std::size_t j,
-                         const real_type r) const noexcept
-    {
-        const real_type d = this->radii_[i] + this->radii_[j];
-        if(d * cutoff_ratio < r){return 0.0;}
-
-        const real_type rinv = 1.0 / r;
-        const real_type d_r  = d * rinv;
-        const real_type dr3  = d_r * d_r * d_r;
-        const real_type dr6  = dr3 * dr3;
-        const real_type dr12 = dr6 * dr6;
-        return -12.0 * this->epsilon_ * dr12 * rinv;
-    }
-    real_type derivative(const std::size_t i, const std::size_t j,
-                         const real_type   r, const parameter_type& d) const noexcept
-    {
-        if(d * cutoff_ratio < r){return 0.0;}
-
-        const real_type rinv = 1.0 / r;
-        const real_type d_r  = d * rinv;
-        const real_type dr3  = d_r * d_r * d_r;
-        const real_type dr6  = dr3 * dr3;
-        const real_type dr12 = dr6 * dr6;
-        return -12.0 * this->epsilon_ * dr12 * rinv;
-    }
-
     parameter_type prepair_params(std::size_t i, std::size_t j) const noexcept
     {
         return this->radii_[i] + this->radii_[j];
+    }
+
+    // forwarding functions for clarity...
+    real_type potential(const std::size_t i, const std::size_t j,
+                        const real_type r) const noexcept
+    {
+        return this->potential(r, this->prepair_params(i, j));
+    }
+    real_type derivative(const std::size_t i, const std::size_t j,
+                         const real_type r) const noexcept
+    {
+        return this->derivative(r, this->prepair_params(i, j));
+    }
+
+    real_type potential(const real_type r, const parameter_type& d) const noexcept
+    {
+        if(d * cutoff_ratio < r){return 0.0;}
+
+        const real_type d_r  = d / r;
+        const real_type dr3  = d_r * d_r * d_r;
+        const real_type dr6  = dr3 * dr3;
+        const real_type dr12 = dr6 * dr6;
+        return this->epsilon_ * (dr12 - coef_at_cutoff);
+    }
+    real_type derivative(const real_type r, const parameter_type& d) const noexcept
+    {
+        if(d * cutoff_ratio < r){return 0.0;}
+
+        const real_type rinv = 1.0 / r;
+        const real_type d_r  = d * rinv;
+        const real_type dr3  = d_r * d_r * d_r;
+        const real_type dr6  = dr3 * dr3;
+        const real_type dr12 = dr6 * dr6;
+        return -12.0 * this->epsilon_ * dr12 * rinv;
     }
 
     // nothing to be done if system parameter (e.g. temperature) changes

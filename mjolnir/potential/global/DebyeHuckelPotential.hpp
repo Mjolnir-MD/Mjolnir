@@ -45,41 +45,32 @@ class DebyeHuckelPotential
     }
     ~DebyeHuckelPotential() = default;
 
+    parameter_type prepair_params(std::size_t i, std::size_t j) const noexcept
+    {
+        return this->inv_4_pi_eps0_epsk_ * this->charges_[i] * this->charges_[j];
+    }
+
     real_type potential(const std::size_t i, const std::size_t j,
                         const real_type   r) const noexcept
     {
-        if(this->max_cutoff_length() <= r) {return 0.0;}
-        return this->inv_4_pi_eps0_epsk_ *
-               this->charges_[i] * this->charges_[j] *
-               std::exp(-r * this->inv_debye_length_) / r;
+        return this->potential(r, this->prepair_params(i, j));
     }
-    real_type potential(const std::size_t i, const std::size_t j,
-                        const real_type   r, const parameter_type& p) const noexcept
+    real_type derivative(const std::size_t i, const std::size_t j,
+                         const real_type   r) const noexcept
+    {
+        return this->derivative(r, this->prepair_params(i, j));
+    }
+
+    real_type potential(const real_type r, const parameter_type& p) const noexcept
     {
         if(this->max_cutoff_length() <= r) {return 0.0;}
         return p * std::exp(-r * this->inv_debye_length_) / r;
     }
-
-    real_type derivative(const std::size_t i, const std::size_t j,
-                         const real_type   r) const noexcept
-    {
-        if(this->max_cutoff_length() <= r) {return 0.0;}
-        return -(this->inv_4_pi_eps0_epsk_) *
-               this->charges_[i] * this->charges_[j] *
-               (debye_length_ + r) * this->inv_debye_length_ / (r * r) *
-               std::exp(-r * this->inv_debye_length_);
-    }
-    real_type derivative(const std::size_t i, const std::size_t j,
-                         const real_type   r, const parameter_type& p) const noexcept
+    real_type derivative(const real_type r, const parameter_type& p) const noexcept
     {
         if(this->max_cutoff_length() <= r) {return 0.0;}
         return -p * (debye_length_ + r) * this->inv_debye_length_ / (r * r) *
                std::exp(-r * this->inv_debye_length_);
-    }
-
-    parameter_type prepair_params(std::size_t i, std::size_t j) const noexcept
-    {
-        return this->inv_4_pi_eps0_epsk_ * this->charges_[i] * this->charges_[j];
     }
 
     real_type max_cutoff_length() const noexcept

@@ -75,7 +75,7 @@ void GlobalPairInteraction<traitsT, potT, spaceT>::calc_force(
             const coordinate_type rij =
                 sys.adjust_direction(sys[j].position - sys[i].position);
             const real_type l = length(rij);
-            const real_type f_mag = potential_.derivative(i, j, l, param);
+            const real_type f_mag = potential_.derivative(l, param);
 
             // if length exceeds cutoff, potential returns just 0.
             if(f_mag == 0.0){continue;}
@@ -98,12 +98,12 @@ GlobalPairInteraction<traitsT, potT, spaceT>::calc_energy(
     {
         for(const auto& ptnr : this->partition_.partners(i))
         {
-            const auto& j     = ptnr.index;
+            const auto  j     = ptnr.index;
             const auto& param = ptnr.parameter();
 
             const real_type l = length(
                 sys.adjust_direction(sys[j].position - sys[i].position));
-            e += potential_.potential(i, j, l, param);
+            e += potential_.potential(l, param);
         }
     }
     return e;
