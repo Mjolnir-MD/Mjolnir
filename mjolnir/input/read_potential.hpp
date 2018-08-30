@@ -307,10 +307,10 @@ read_excluded_volume_potential(const toml::Table& global)
             params.resize(idx+1, 0.);
         }
 
-        const auto sgm = get_toml_value<real_type>(tab, "sigma",
+        const auto radius = get_toml_value<real_type>(tab, "radius",
             "element of [[forcefield.global.parameters]] for Excluded Volume");
-        MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sgm);
-        params.at(idx) = sgm;
+        MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
+        params.at(idx) = radius;
     }
 
     return ExcludedVolumePotential<realT, ignoreT>(
