@@ -390,7 +390,7 @@ read_uniform_lennard_jones_potential(const toml::Table& global)
 
     const auto sigma   = get_toml_value<real_type>(global, "sigma",
         "[forcefield.global] for Uniform Lennard-Jones potential");
-    const auto epsilon = get_toml_value<real_type>(global, "sigma",
+    const auto epsilon = get_toml_value<real_type>(global, "epsilon",
         "[forcefield.global] for Uniform Lennard-Jones potential");
 
     MJOLNIR_LOG_INFO("sigma   = ", sigma);
