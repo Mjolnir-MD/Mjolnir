@@ -51,7 +51,7 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_SCOPE(BondLengthInteraction::initialize(), 0);
         MJOLNIR_LOG_INFO("potential = ", potential_type::name(),
-                         ", N = ", potentials.size());
+                         ", number of bonds = ", potentials.size());
         return;
     }
 
