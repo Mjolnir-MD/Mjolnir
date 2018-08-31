@@ -7,6 +7,7 @@
 #include <mjolnir/interaction/GlobalPairInteraction.hpp>
 #include <mjolnir/interaction/ExternalDistanceInteraction.hpp>
 #include <mjolnir/interaction/specialization/GlobalPairLennardJonesInteraction.hpp>
+#include <mjolnir/interaction/specialization/GlobalPairUniformLennardJonesInteraction.hpp>
 #include <mjolnir/interaction/specialization/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>
 #include <mjolnir/util/make_unique.hpp>
