@@ -2,7 +2,7 @@
 #define MJOLNIR_MATH_VECTOR_H
 #include <mjolnir/math/Matrix.hpp>
 #include <mjolnir/math/quaternion.hpp>
-#include <mjolnir/math/rsqrt.hpp>
+#include <mjolnir/math/approx.hpp>
 #include <cmath>
 
 namespace mjolnir

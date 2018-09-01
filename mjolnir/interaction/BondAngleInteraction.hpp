@@ -4,7 +4,6 @@
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/math/math.hpp>
-#include <mjolnir/math/rsqrt.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <cmath>

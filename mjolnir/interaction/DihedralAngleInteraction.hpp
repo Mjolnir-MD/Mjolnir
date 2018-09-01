@@ -2,7 +2,6 @@
 #define MJOLNIR_CORE_DIHEDRAL_ANGLE_INTERACTION
 #include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/math/math.hpp>
-#include <mjolnir/math/rsqrt.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <cmath>

@@ -1,6 +1,9 @@
 #ifndef MJOLNIR_MATH_MATH_HPP
 #define MJOLNIR_MATH_MATH_HPP
 #include <mjolnir/math/compiletime.hpp>
+#include <mjolnir/math/approx.hpp>
+#include <mjolnir/math/Matrix.hpp>
+#include <mjolnir/math/Vector.hpp>
 #include <cstdint>
 #include <cmath>
 

@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_BOND_LENGTH_INTERACTION
 #define MJOLNIR_BOND_LENGTH_INTERACTION
 #include <mjolnir/core/LocalInteractionBase.hpp>
-#include <mjolnir/math/rsqrt.hpp>
+#include <mjolnir/math/math.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <cmath>
