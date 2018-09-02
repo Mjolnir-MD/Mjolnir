@@ -7,8 +7,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/math/rsqrt.hpp>
-#include <cmath>
+#include <mjolnir/math/math.hpp>
 
 #include <random>
 #include <chrono>
