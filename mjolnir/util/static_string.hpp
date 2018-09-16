@@ -85,12 +85,14 @@ class static_string
         this->size_ = traits_type::length(literal);
         this->check_size();
         traits_type::copy(this->data(), literal, this->size_+1);
+        return *this;
     }
     static_string& operator=(const std::string& str)
     {
         this->size_ = str.size();
         this->check_size();
         traits_type::copy(this->data(), str.c_str(), this->size_+1);
+        return *this;
     }
     template<std::size_t M>
     static_string& operator=(static_string<M> const& rhs)
@@ -101,12 +103,21 @@ class static_string
         return *this;
     }
 
-    static_string& operator+=(const char_type c)
+    static_string& operator+=(const char c)
     {
         this->size_++;
         this->check_size();
         buffer_[this->size_-1] = c;
         return *this;
+    }
+    static_string& operator+=(const char* rhs)
+    {
+        const std::size_t last = this->size_;
+        const std::size_t len  = traits_type::length(rhs);
+        this->size_ += len;
+        this->check_size();
+        traits_type::copy(std::addressof(buffer_[last]), rhs, len+1);
+        return *this;   
     }
     template<std::size_t M>
     static_string& operator+=(const static_string<M>& rhs)
@@ -114,7 +125,7 @@ class static_string
         const std::size_t last = this->size_;
         this->size_ += rhs.size();
         this->check_size();
-        traits_type::copy(std::addressof(buffer_[last]), rhs.c_str());
+        traits_type::copy(std::addressof(buffer_[last]), rhs.c_str(), rhs.size()+1);
         return *this;   
     }
     static_string& operator+=(const std::string& rhs)
@@ -122,7 +133,7 @@ class static_string
         const std::size_t last = this->size_;
         this->size_ += rhs.size();
         this->check_size();
-        traits_type::copy(std::addressof(buffer_[last]), rhs.c_str());
+        traits_type::copy(std::addressof(buffer_[last]), rhs.c_str(), rhs.size()+1);
         return *this;   
     }
 
@@ -178,11 +189,49 @@ operator+(const static_string<N>& lhs, const static_string<M>& rhs)
     retval += rhs;
     return retval;
 }
+template<std::size_t N>
+std::string operator+(const std::string& lhs, const static_string<N>& rhs)
+{
+    std::string retval(lhs);
+    retval.append(rhs.c_str());
+    return retval;
+}
+template<std::size_t N>
+std::string operator+(const static_string<N>& lhs, const std::string& rhs)
+{
+    std::string retval(lhs.c_str());
+    retval.append(rhs);
+    return retval;
+}
+template<std::size_t N>
+std::string operator+(const char* lhs, const static_string<N>& rhs)
+{
+    std::string retval(lhs);
+    retval.append(rhs.c_str());
+    return retval;
+}
+template<std::size_t N>
+std::string operator+(const static_string<N>& lhs, const char* rhs)
+{
+    std::string retval(lhs.c_str());
+    retval.append(rhs);
+    return retval;
+}
+
+// append static_string into std::string
+template<std::size_t N>
+std::string& operator+=(std::string& lhs, const static_string<N>& rhs)
+{
+    lhs.append(rhs.c_str());
+    return lhs;
+}
+
 
 template<std::size_t N, std::size_t M>
 bool operator==(const static_string<N>& lhs, const static_string<M>& rhs)
 {
-    return traits::eq(lhs.data(), rhs.data());
+    return std::char_traits<char>::compare(lhs.data(), rhs.data(),
+            std::min(lhs.size(), rhs.size())) == 0;
 }
 template<std::size_t N, std::size_t M>
 bool operator!=(const static_string<N>& lhs, const static_string<M>& rhs)
@@ -192,12 +241,14 @@ bool operator!=(const static_string<N>& lhs, const static_string<M>& rhs)
 template<std::size_t N, std::size_t M>
 bool operator< (const static_string<N>& lhs, const static_string<M>& rhs)
 {
-    return traits::lt(lhs.data(), rhs.data());
+    return std::char_traits<char>::compare(lhs.data(), rhs.data(),
+            std::min(lhs.size(), rhs.size())) < 0;
 }
 template<std::size_t N, std::size_t M>
 bool operator<=(const static_string<N>& lhs, const static_string<M>& rhs)
 {
-    return traits::compare(lhs.data(), rhs.data()) <= 0;
+    return std::char_traits<char>::compare(lhs.data(), rhs.data(),
+            std::min(lhs.size(), rhs.size())) <= 0;
 }
 template<std::size_t N, std::size_t M>
 bool operator> (const static_string<N>& lhs, const static_string<M>& rhs)
@@ -231,12 +282,14 @@ std::istream& operator>>(std::istream& is, static_string<N>& str)
 template<std::size_t N>
 bool operator==(const static_string<N>& lhs, const std::string& rhs)
 {
-    return traits::eq(lhs.data(), rhs.data());
+    return std::char_traits<char>::compare(lhs.data(), rhs.data(),
+            std::min(lhs.size(), rhs.size())) == 0;
 }
 template<std::size_t N>
 bool operator==(const std::string& lhs, const static_string<N>& rhs)
 {
-    return traits::eq(lhs.data(), rhs.data());
+    return std::char_traits<char>::compare(lhs.data(), rhs.data(),
+            std::min(lhs.size(), rhs.size())) == 0;
 }
 
 template<std::size_t N>
@@ -253,23 +306,27 @@ bool operator!=(const std::string& lhs, const static_string<N>& rhs)
 template<std::size_t N>
 bool operator< (const static_string<N>& lhs, const std::string& rhs)
 {
-    return traits::lt(lhs.data(), rhs.data());
+    return std::char_traits<char>::compare(lhs.data(), rhs.data(),
+            std::min(lhs.size(), rhs.size())) < 0;
 }
 template<std::size_t N>
 bool operator< (const std::string& lhs, const static_string<N>& rhs)
 {
-    return traits::lt(lhs.data(), rhs.data());
+    return std::char_traits<char>::compare(lhs.data(), rhs.data(),
+            std::min(lhs.size(), rhs.size())) < 0;
 }
 
 template<std::size_t N>
 bool operator<=(const static_string<N>& lhs, const std::string& rhs)
 {
-    return traits::compare(lhs.data(), rhs.data()) <= 0;
+    return std::char_traits<char>::compare(lhs.data(), rhs.data(),
+            std::min(lhs.size(), rhs.size())) <= 0;
 }
 template<std::size_t N>
 bool operator<=(const std::string& lhs, const static_string<N>& rhs)
 {
-    return traits::compare(lhs.data(), rhs.data()) <= 0;
+    return std::char_traits<char>::compare(lhs.data(), rhs.data(),
+            std::min(lhs.size(), rhs.size())) <= 0;
 }
 
 template<std::size_t N>
