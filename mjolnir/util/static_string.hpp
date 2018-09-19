@@ -117,7 +117,7 @@ class static_string
         this->size_ += len;
         this->check_size();
         traits_type::copy(std::addressof(buffer_[last]), rhs, len+1);
-        return *this;   
+        return *this;
     }
     template<std::size_t M>
     static_string& operator+=(const static_string<M>& rhs)
@@ -126,7 +126,7 @@ class static_string
         this->size_ += rhs.size();
         this->check_size();
         traits_type::copy(std::addressof(buffer_[last]), rhs.c_str(), rhs.size()+1);
-        return *this;   
+        return *this;
     }
     static_string& operator+=(const std::string& rhs)
     {
@@ -134,7 +134,7 @@ class static_string
         this->size_ += rhs.size();
         this->check_size();
         traits_type::copy(std::addressof(buffer_[last]), rhs.c_str(), rhs.size()+1);
-        return *this;   
+        return *this;
     }
 
     bool empty() const noexcept {return this->size_ == 0;}
