@@ -143,7 +143,7 @@ read_dihedral_angle_interaction(
     else if(potential == "Gaussian")
     {
         MJOLNIR_SCOPE(potential == "Gaussian", 1);
-        using potentialT = GaussianPotential<real_type>;
+        using potentialT = AngularGaussianPotential<real_type>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
             kind, read_local_potential<4, potentialT>(local));

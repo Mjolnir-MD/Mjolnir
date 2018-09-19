@@ -5,6 +5,7 @@
 #include <mjolnir/potential/local/Go1012ContactPotential.hpp>
 #include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
 #include <mjolnir/potential/local/GaussianPotential.hpp>
+#include <mjolnir/potential/local/AngularGaussianPotential.hpp>
 #include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
 #include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
 #include <mjolnir/potential/local/SumLocalPotential.hpp>
@@ -68,6 +69,24 @@ GaussianPotential<realT> read_gaussian_potential(const toml::Table& param)
     MJOLNIR_LOG_INFO("GaussianPotential = {v0 = ", v0,
                      ", epsilon = ", epsilon, ", w = ", w, '}');
     return GaussianPotential<realT>(epsilon, w, v0);
+}
+
+template<typename realT>
+AngularGaussianPotential<realT>
+read_angular_gaussian_potential(const toml::Table& param)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    using real_type = realT;
+    const auto location =
+        "element of [[parameters]] in Angular Gaussian potential";
+
+    const auto v0      = get_toml_value<real_type>(param, "v0",      location);
+    const auto epsilon = get_toml_value<real_type>(param, "epsilon", location);
+    const auto w       = get_toml_value<real_type>(param, "w",       location);
+
+    MJOLNIR_LOG_INFO("AngularGaussianPotential = {v0 = ", v0,
+                     ", epsilon = ", epsilon, ", w = ", w, '}');
+    return AngularGaussianPotential<realT>(epsilon, w, v0);
 }
 
 template<typename realT>
@@ -157,6 +176,14 @@ struct read_local_potential_impl<GaussianPotential<realT>>
     static GaussianPotential<realT> invoke(const toml::Table& param)
     {
         return read_gaussian_potential<realT>(param);
+    }
+};
+template<typename realT>
+struct read_local_potential_impl<AngularGaussianPotential<realT>>
+{
+    static AngularGaussianPotential<realT> invoke(const toml::Table& param)
+    {
+        return read_angular_gaussian_potential<realT>(param);
     }
 };
 template<typename realT>

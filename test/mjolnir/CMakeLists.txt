@@ -9,6 +9,7 @@ set(TEST_NAMES
     test_fast_inv_sqrt
     test_harmonic_potential
     test_gaussian_potential
+    test_angular_gaussian_potential
     test_flp_angle_potential
     test_flp_dihedral_potential
     test_clementi_dihedral_potential
