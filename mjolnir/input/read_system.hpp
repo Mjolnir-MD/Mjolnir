@@ -88,6 +88,11 @@ System<traitsT> read_system_from_table(const toml::Table& system)
         sys[i].velocity = get_toml_value< vec_type>(
                 params, "velocity", "element of [[system.particles]]");
         sys[i].force    = coordinate_type(0, 0, 0);
+        sys[i].name     = "XXX";
+        if(params.count("name") == 1)
+        {
+            sys[i].name = toml::get<std::string>(params.at("name"));
+        }
 
         MJOLNIR_LOG_DEBUG("mass     = ", sys[i].mass    );
         MJOLNIR_LOG_DEBUG("position = ", sys[i].position);
