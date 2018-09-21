@@ -20,8 +20,13 @@ class System
     typedef std::map<std::string, real_type>      attribute_type;
 
     typedef Particle<real_type, coordinate_type>          particle_type;
+    typedef typename particle_type::static_string_type    static_string_type;
     typedef ParticleView<real_type, coordinate_type>      particle_view_type;
     typedef ParticleConstView<real_type, coordinate_type> particle_const_view_type;
+
+    using real_container_type          = std::vector<real_type>;
+    using coordinate_container_type    = std::vector<coordinate_type>;
+    using static_string_container_type = std::vector<static_string_type>;
 
   public:
 
@@ -30,7 +35,7 @@ class System
           attributes_(), num_particles_(num_particles),
           masses_   (num_particles), rmasses_   (num_particles),
           positions_(num_particles), velocities_(num_particles),
-          forces_   (num_particles)
+          forces_   (num_particles), names_     (num_particles)
     {}
     ~System() = default;
 
@@ -44,25 +49,29 @@ class System
     particle_view_type operator[](std::size_t i) noexcept
     {
         return particle_view_type{
-            masses_[i], rmasses_[i], positions_[i], velocities_[i], forces_[i]
+            masses_[i],    rmasses_[i],
+            positions_[i], velocities_[i], forces_[i], names_[i]
         };
     }
     particle_const_view_type operator[](std::size_t i) const noexcept
     {
         return particle_const_view_type{
-            masses_[i], rmasses_[i], positions_[i], velocities_[i], forces_[i]
+            masses_[i],    rmasses_[i],
+            positions_[i], velocities_[i], forces_[i], names_[i]
         };
     }
     particle_view_type at(std::size_t i)
     {
-        return particle_view_type{masses_.at(i), rmasses_.at(i),
-            positions_.at(i), velocities_.at(i), forces_.at(i)
+        return particle_view_type{
+            masses_.at(i),    rmasses_.at(i),
+            positions_.at(i), velocities_.at(i), forces_.at(i), names_.at(i)
         };
     }
     particle_const_view_type at(std::size_t i) const
     {
-        return particle_const_view_type{masses_.at(i), rmasses_.at(i),
-            positions_.at(i), velocities_.at(i), forces_.at(i)
+        return particle_const_view_type{
+            masses_.at(i),    rmasses_.at(i),
+            positions_.at(i), velocities_.at(i), forces_.at(i), names_.at(i)
         };
     }
 
@@ -76,6 +85,8 @@ class System
     std::vector<coordinate_type> const& velocities() const noexcept {return velocities_;}
     std::vector<coordinate_type>&       forces()           noexcept {return forces_;}
     std::vector<coordinate_type> const& forces()     const noexcept {return forces_;}
+    std::vector<static_string_type>&       names()         noexcept {return names_;}
+    std::vector<static_string_type> const& names()   const noexcept {return names_;}
 
     // to implement these, we need a ZipIterator. but is it really needed?
 //     iterator       begin()        noexcept {return particles_.begin();}
@@ -106,12 +117,13 @@ class System
     topology_type  topology_;
     attribute_type attributes_;
 
-    std::size_t num_particles_;
-    std::vector<real_type>       masses_;
-    std::vector<real_type>       rmasses_; // r for reciprocal
-    std::vector<coordinate_type> positions_;
-    std::vector<coordinate_type> velocities_;
-    std::vector<coordinate_type> forces_;
+    std::size_t                  num_particles_;
+    real_container_type          masses_;
+    real_container_type          rmasses_; // r for reciprocal
+    coordinate_container_type    positions_;
+    coordinate_container_type    velocities_;
+    coordinate_container_type    forces_;
+    static_string_container_type names_;
 };
 
 } // mjolnir
