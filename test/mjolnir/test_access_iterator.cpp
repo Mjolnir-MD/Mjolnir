@@ -1,12 +1,6 @@
 #define BOOST_TEST_MODULE "test_access_iterator"
 
-#ifdef UNITTEST_FRAMEWORK_LIBRARY_EXIST
-#include <boost/test/unit_test.hpp>
-#else
-#define BOOST_TEST_NO_LIB
 #include <boost/test/included/unit_test.hpp>
-#endif
-
 #include <mjolnir/util/access_iterator.hpp>
 #include <mjolnir/util/range.hpp>
 
@@ -27,8 +21,8 @@ BOOST_AUTO_TEST_CASE(test_immutable_access_iterator)
     std::size_t idx=0;
     for(iter i(vec.cbegin(), a), e(vec.cend(), a); i!=e; ++i)
     {
-        BOOST_CHECK_EQUAL(*i, vec.at(idx).first);
-        BOOST_CHECK_EQUAL(*i, a(vec.at(idx)));
+        BOOST_TEST(*i == vec.at(idx).first);
+        BOOST_TEST(*i == a(vec.at(idx)));
         ++idx;
     }
 }
@@ -50,8 +44,8 @@ BOOST_AUTO_TEST_CASE(test_mutable_access_iterator)
     std::size_t idx=0;
     for(iter i(vec.begin(), a), e(vec.end(), a); i!=e; ++i)
     {
-        BOOST_CHECK_EQUAL(*i, vec.at(idx).first);
-        BOOST_CHECK_EQUAL(*i, a(vec.at(idx)));
+        BOOST_TEST(*i == vec.at(idx).first);
+        BOOST_TEST(*i == a(vec.at(idx)));
         ++idx;
     }
 
@@ -63,8 +57,8 @@ BOOST_AUTO_TEST_CASE(test_mutable_access_iterator)
     idx = 0;
     for(iter i(vec.begin(), a), e(vec.end(), a); i!=e; ++i)
     {
-        BOOST_CHECK_EQUAL(*i, 5);
-        BOOST_CHECK_EQUAL(*i, a(vec.at(idx)));
+        BOOST_TEST(*i == 5);
+        BOOST_TEST(*i == a(vec.at(idx)));
         ++idx;
     }
 }
@@ -86,8 +80,8 @@ BOOST_AUTO_TEST_CASE(test_make_access_iterator)
     for(auto i(mjolnir::make_access_iterator(vec.cbegin(), a)),
              e(mjolnir::make_access_iterator(vec.cend(), a)); i!=e; ++i)
     {
-        BOOST_CHECK_EQUAL(*i, vec.at(idx).first);
-        BOOST_CHECK_EQUAL(*i, a(vec.at(idx)));
+        BOOST_TEST(*i == vec.at(idx).first);
+        BOOST_TEST(*i == a(vec.at(idx)));
         ++idx;
     }
 }
@@ -108,13 +102,13 @@ BOOST_AUTO_TEST_CASE(test_make_access_iterator_and_range)
     const auto range = mjolnir::make_range(
             mjolnir::make_access_iterator(vec.cbegin(), a),
             mjolnir::make_access_iterator(vec.cend(), a));
-    BOOST_CHECK_EQUAL(range.size(), 4u);
+    BOOST_TEST(range.size() == 4u);
 
     std::size_t idx=0;
     for(auto i : range)
     {
-        BOOST_CHECK_EQUAL(i, vec.at(idx).first);
-        BOOST_CHECK_EQUAL(i, a(vec.at(idx)));
+        BOOST_TEST(i == vec.at(idx).first);
+        BOOST_TEST(i == a(vec.at(idx)));
         ++idx;
     }
 }

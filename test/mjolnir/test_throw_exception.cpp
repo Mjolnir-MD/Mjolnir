@@ -1,12 +1,6 @@
 #define BOOST_TEST_MODULE "test_throw_exception"
 
-#ifdef UNITTEST_FRAMEWORK_LIBRARY_EXIST
-#include <boost/test/unit_test.hpp>
-#else
-#define BOOST_TEST_NO_LIB
 #include <boost/test/included/unit_test.hpp>
-#endif
-
 #include <mjolnir/util/throw_exception.hpp>
 #include <stdexcept>
 
@@ -26,7 +20,7 @@ BOOST_AUTO_TEST_CASE(test_what_message)
         std::ostringstream oss;
         oss << "st" << "ring";
 
-        BOOST_CHECK_EQUAL(oss.str(), what);
+        BOOST_TEST(oss.str() == what);
     }
     {
         const int i = 42;
@@ -43,7 +37,7 @@ BOOST_AUTO_TEST_CASE(test_what_message)
         std::ostringstream oss;
         oss << "integer i = " << i;
 
-        BOOST_CHECK_EQUAL(oss.str(), what);
+        BOOST_TEST(oss.str() == what);
     }
     {
         const int    i = 42;
@@ -62,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_what_message)
         std::ostringstream oss;
         oss << "integer i = " << i << ", double d = " << d;
 
-        BOOST_CHECK_EQUAL(oss.str(), what);
+        BOOST_TEST(oss.str() == what);
     }
 }
 
@@ -79,6 +73,6 @@ BOOST_AUTO_TEST_CASE(test_empty_message)
             what = re.what();
         }
 
-        BOOST_CHECK(what.empty());
+        BOOST_TEST(what.empty());
     }
 }
