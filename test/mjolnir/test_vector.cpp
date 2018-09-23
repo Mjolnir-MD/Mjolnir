@@ -1,163 +1,176 @@
 #define BOOST_TEST_MODULE "test_vector"
 
-#ifdef UNITTEST_FRAMEWORK_LIBRARY_EXIST
-#include <boost/test/unit_test.hpp>
-#else
-#define BOOST_TEST_NO_LIB
+#include <boost/mpl/list.hpp>
 #include <boost/test/included/unit_test.hpp>
-#endif
-
 #include <mjolnir/math/Vector.hpp>
 
 #include <random>
-using namespace mjolnir;
-typedef double real_type;
-typedef mjolnir::Vector<double, 3> Vector3d;
-constexpr static unsigned int seed = 32479327;
-constexpr static std::size_t N = 10000;
-constexpr static real_type tolerance = 1e-8;
+#include <cstdint>
 
-BOOST_AUTO_TEST_CASE(test_vector_add)
+constexpr std::uint32_t seed = 123456789;
+constexpr std::size_t   N    = 10000;
+typedef boost::mpl::list<double, float> test_targets;
+
+namespace test
 {
+template<typename T>
+decltype(boost::test_tools::tolerance(std::declval<T>())) tolerance();
+
+template<>
+decltype(boost::test_tools::tolerance(std::declval<float>()))
+tolerance<float>()
+{return boost::test_tools::tolerance(3.0f / static_cast<float>(std::pow(2, 12)));}
+
+template<>
+decltype(boost::test_tools::tolerance(std::declval<double>()))
+tolerance<double>()
+{return boost::test_tools::tolerance(2.0 / std::pow(2, 14));}
+} // test
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_add, Real, test_targets)
+{
+    using namespace mjolnir;
+
     std::mt19937 mt(seed);
-    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
+    std::uniform_real_distribution<Real> uni(-100.0, 100.0);
+
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
-        const Vector3d lhs(uni(mt), uni(mt), uni(mt));
-        const Vector3d rhs(uni(mt), uni(mt), uni(mt));
-        const Vector3d sum = lhs + rhs;
-        BOOST_CHECK_CLOSE_FRACTION(sum[0], lhs[0] + rhs[0], tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(sum[1], lhs[1] + rhs[1], tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(sum[2], lhs[2] + rhs[2], tolerance);
+        const Vector<Real, 3> lhs(uni(mt), uni(mt), uni(mt)),
+                              rhs(uni(mt), uni(mt), uni(mt));
+        const auto add = lhs + rhs;
+        BOOST_TEST(add[0] == lhs[0] + rhs[0], test::tolerance<Real>());
+        BOOST_TEST(add[1] == lhs[1] + rhs[1], test::tolerance<Real>());
+        BOOST_TEST(add[2] == lhs[2] + rhs[2], test::tolerance<Real>());
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_vector_subtract)
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_sub, Real, test_targets)
 {
+    using namespace mjolnir;
+
     std::mt19937 mt(seed);
-    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
+    std::uniform_real_distribution<Real> uni(-100.0, 100.0);
+
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
-        const Vector3d lhs(uni(mt), uni(mt), uni(mt));
-        const Vector3d rhs(uni(mt), uni(mt), uni(mt));
-        const Vector3d sub = lhs - rhs;
-        BOOST_CHECK_CLOSE_FRACTION(sub[0], lhs[0] - rhs[0], tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(sub[1], lhs[1] - rhs[1], tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(sub[2], lhs[2] - rhs[2], tolerance);
+        const Vector<Real, 3> lhs(uni(mt), uni(mt), uni(mt)),
+                              rhs(uni(mt), uni(mt), uni(mt));
+        const auto sub = lhs - rhs;
+        BOOST_TEST(sub[0] == lhs[0] - rhs[0], test::tolerance<Real>());
+        BOOST_TEST(sub[1] == lhs[1] - rhs[1], test::tolerance<Real>());
+        BOOST_TEST(sub[2] == lhs[2] - rhs[2], test::tolerance<Real>());
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_vector_scalar_multiple)
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_mul, Real, test_targets)
 {
+    using namespace mjolnir;
+
     std::mt19937 mt(seed);
-    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
+    std::uniform_real_distribution<Real> uni(-100.0, 100.0);
+
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
-        const Vector3d lhs(uni(mt), uni(mt), uni(mt));
-        const real_type rhs = uni(mt);
-        const Vector3d mul = lhs * rhs;
-        BOOST_CHECK_CLOSE_FRACTION(mul[0], lhs[0] * rhs, tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(mul[1], lhs[1] * rhs, tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(mul[2], lhs[2] * rhs, tolerance);
+        const Real            lhs(uni(mt));
+        const Vector<Real, 3> rhs(uni(mt), uni(mt), uni(mt));
+        const auto mul = lhs * rhs;
+        BOOST_TEST(mul[0] == lhs * rhs[0], test::tolerance<Real>());
+        BOOST_TEST(mul[1] == lhs * rhs[1], test::tolerance<Real>());
+        BOOST_TEST(mul[2] == lhs * rhs[2], test::tolerance<Real>());
+    }
+
+    for(std::size_t test_times=0; test_times<N; ++test_times)
+    {
+        const Vector<Real, 3> lhs(uni(mt), uni(mt), uni(mt));
+        const Real            rhs(uni(mt));
+        const auto mul = lhs * rhs;
+        BOOST_TEST(mul[0] == lhs[0] * rhs, test::tolerance<Real>());
+        BOOST_TEST(mul[1] == lhs[1] * rhs, test::tolerance<Real>());
+        BOOST_TEST(mul[2] == lhs[2] * rhs, test::tolerance<Real>());
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_vector_scalar_division)
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_div, Real, test_targets)
 {
+    using namespace mjolnir;
+
     std::mt19937 mt(seed);
-    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
+    std::uniform_real_distribution<Real> uni(-100.0, 100.0);
+
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
-        const Vector3d lhs(uni(mt), uni(mt), uni(mt));
-        const real_type rhs = uni(mt);
-        const Vector3d div = lhs / rhs;
-        BOOST_CHECK_CLOSE_FRACTION(div[0], lhs[0] / rhs, tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(div[1], lhs[1] / rhs, tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(div[2], lhs[2] / rhs, tolerance);
+        const Vector<Real, 3> lhs(uni(mt), uni(mt), uni(mt));
+        const Real            rhs(uni(mt));
+        const auto div = lhs / rhs;
+        BOOST_TEST(div[0] == lhs[0] / rhs, test::tolerance<Real>());
+        BOOST_TEST(div[1] == lhs[1] / rhs, test::tolerance<Real>());
+        BOOST_TEST(div[2] == lhs[2] / rhs, test::tolerance<Real>());
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_vector_dot_product)
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_dot, Real, test_targets)
 {
+    using namespace mjolnir;
+
     std::mt19937 mt(seed);
-    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
+    std::uniform_real_distribution<Real> uni(-1.0, 1.0);
+
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
-        const Vector3d lhs(uni(mt), uni(mt), uni(mt));
-        const Vector3d rhs(uni(mt), uni(mt), uni(mt));
-        const real_type dot = dot_product(lhs, rhs);
-        BOOST_CHECK_CLOSE_FRACTION(dot, lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2], tolerance);
+        const Vector<Real, 3> lhs(uni(mt), uni(mt), uni(mt));
+        const Vector<Real, 3> rhs(uni(mt), uni(mt), uni(mt));
+        const Real dot = dot_product(lhs, rhs);
+        BOOST_TEST(dot == lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2],
+                   test::tolerance<Real>());
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_vector_length)
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_len, Real, test_targets)
 {
+    using namespace mjolnir;
+
     std::mt19937 mt(seed);
-    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
+    std::uniform_real_distribution<Real> uni(-1.0, 1.0);
+
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
-        const Vector3d lhs(uni(mt), uni(mt), uni(mt));
-        const real_type dot = dot_product(lhs, lhs);
-        const real_type lensq = length_sq(lhs);
-        BOOST_CHECK_CLOSE_FRACTION(lensq, dot, tolerance);
+        const Vector<Real, 3> lhs(uni(mt), uni(mt), uni(mt));
+        const Real dot   = dot_product(lhs, lhs);
+        const Real lensq = length_sq(lhs);
+        const Real len   = length(lhs);
+        BOOST_TEST(lensq == dot, test::tolerance<Real>());
+
+        BOOST_TEST(lensq == dot,            test::tolerance<Real>());
+        BOOST_TEST(len   == std::sqrt(dot), test::tolerance<Real>());
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_vector_cross_product)
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_cross_product, Real, test_targets)
 {
+    using namespace mjolnir;
+
     std::mt19937 mt(seed);
-    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
+    std::uniform_real_distribution<Real> uni(-1.0, 1.0);
+
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
-        const Vector3d lhs(uni(mt), uni(mt), uni(mt));
-        const Vector3d rhs(uni(mt), uni(mt), uni(mt));
-        const Vector3d cross = cross_product(lhs, rhs);
-        const real_type dotl = dot_product(cross, lhs);
-        const real_type dotr = dot_product(cross, rhs);
-        BOOST_CHECK_SMALL(dotl, tolerance);
-        BOOST_CHECK_SMALL(dotr, tolerance);
-        const real_type lenc = length(cross);
+        const Vector<Real, 3> lhs(uni(mt), uni(mt), uni(mt));
+        const Vector<Real, 3> rhs(uni(mt), uni(mt), uni(mt));
+        const Vector<Real, 3> cross = cross_product(lhs, rhs);
+        const Real dotl = dot_product(cross, lhs);
+        const Real dotr = dot_product(cross, rhs);
 
-        const real_type lenl = length(lhs);
-        const real_type lenr = length(rhs);
-        const real_type dot  = dot_product(lhs, rhs);
-        const real_type cost = dot / (lenl * lenr);
-        const real_type sint = std::sqrt(1. - cost * cost);
+        BOOST_TEST(dotl == static_cast<Real>(0.0), test::tolerance<Real>());
+        BOOST_TEST(dotr == static_cast<Real>(0.0), test::tolerance<Real>());
+        const Real lenc = length(cross);
 
-        BOOST_CHECK_CLOSE_FRACTION(lenc, lenl * lenr * sint, tolerance);
+        const Real lenl = length(lhs);
+        const Real lenr = length(rhs);
+        const Real dot  = dot_product(lhs, rhs);
+        const Real cost = dot / (lenl * lenr);
+        const Real sint = std::sqrt(1.0 - cost * cost);
+
+        BOOST_TEST(lenc == lenl * lenr * sint, test::tolerance<Real>());
     }
 }
-
-BOOST_AUTO_TEST_CASE(test_vector_scalar_triple_product)
-{
-    std::mt19937 mt(seed);
-    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
-    for(std::size_t test_times=0; test_times<N; ++test_times)
-    {
-        const Vector3d lhs(uni(mt), uni(mt), uni(mt));
-        const Vector3d mid(uni(mt), uni(mt), uni(mt));
-        const Vector3d rhs(uni(mt), uni(mt), uni(mt));
-        const real_type tri = scalar_triple_product(lhs, mid, rhs);
-        BOOST_CHECK_CLOSE_FRACTION(tri, dot_product(cross_product(lhs, mid), rhs), tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(tri, dot_product(lhs, cross_product(mid, rhs)), tolerance);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(test_vector_rotation)
-{
-    std::mt19937 mt(seed);
-    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
-    const Vector3d unit_x(1., 0., 0.);
-    const Vector3d unit_z(0., 0., 1.);
-    for(std::size_t test_times=0; test_times<N; ++test_times)
-    {
-        const real_type theta = uni(mt) * 3.14159265358979;
-        const Vector3d rot = rotate(theta, unit_z, unit_x);
-        BOOST_CHECK_CLOSE_FRACTION(length(rot), 1., tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(rot[0], std::cos(theta), tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(rot[1], std::sin(theta), tolerance);
-        BOOST_CHECK_SMALL(rot[2], tolerance);
-    }
-}
-
-
