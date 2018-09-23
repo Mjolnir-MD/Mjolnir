@@ -1,12 +1,6 @@
 #define BOOST_TEST_MODULE "test_bond_length_interaction"
 
-#ifdef UNITTEST_FRAMEWORK_LIBRARY_EXIST
-#include <boost/test/unit_test.hpp>
-#else
-#define BOOST_TEST_NO_LIB
 #include <boost/test/included/unit_test.hpp>
-#endif
-
 #include <test/mjolnir/traits.hpp>
 #include <mjolnir/interaction/BondLengthInteraction.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
@@ -15,7 +9,7 @@
 BOOST_AUTO_TEST_CASE(BondLength_calc_force)
 {
     typedef mjolnir::test::traits<double> traits;
-    constexpr static traits::real_type tolerance = 1e-8;
+    constexpr static traits::real_type tol = 1e-8;
 
     typedef traits::real_type real_type;
     typedef traits::coordinate_type            coord_type;
@@ -60,13 +54,13 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
         // direction
         if(i == 1000) // most stable point
         {
-            BOOST_CHECK_SMALL(force_strength1, tolerance);
-            BOOST_CHECK_SMALL(force_strength2, tolerance);
+            BOOST_TEST(force_strength1 == 0.0, boost::test_tools::tolerance(tol));
+            BOOST_TEST(force_strength2 == 0.0, boost::test_tools::tolerance(tol));
         }
         else if(i < 1000) // repulsive
         {
-            BOOST_CHECK_CLOSE_FRACTION(coef, force_strength1, tolerance);
-            BOOST_CHECK_CLOSE_FRACTION(coef, force_strength2, tolerance);
+            BOOST_TEST(coef == force_strength1, boost::test_tools::tolerance(tol));
+            BOOST_TEST(coef == force_strength2, boost::test_tools::tolerance(tol));
 
             const real_type dir1 =
                 mjolnir::dot_product(normalize(sys[0].force),
@@ -75,13 +69,13 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
                 mjolnir::dot_product(normalize(sys[1].force),
                                      normalize(sys[1].position - sys[0].position));
 
-            BOOST_CHECK_CLOSE_FRACTION(dir1, 1e0, tolerance);
-            BOOST_CHECK_CLOSE_FRACTION(dir2, 1e0, tolerance);
+            BOOST_TEST(dir1 == 1.0, boost::test_tools::tolerance(tol));
+            BOOST_TEST(dir2 == 1.0, boost::test_tools::tolerance(tol));
         }
         else if(i > 1000) // attractive
         {
-            BOOST_CHECK_CLOSE_FRACTION(coef, force_strength1, tolerance);
-            BOOST_CHECK_CLOSE_FRACTION(coef, force_strength2, tolerance);
+            BOOST_TEST(coef == force_strength1, boost::test_tools::tolerance(tol));
+            BOOST_TEST(coef == force_strength2, boost::test_tools::tolerance(tol));
 
             const real_type dir1 =
                 mjolnir::dot_product(normalize(sys[0].force),
@@ -90,11 +84,10 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
                 mjolnir::dot_product(normalize(sys[1].force),
                                      normalize(sys[0].position - sys[1].position));
 
-            BOOST_CHECK_CLOSE_FRACTION(dir1, 1e0, tolerance);
-            BOOST_CHECK_CLOSE_FRACTION(dir2, 1e0, tolerance);
+            BOOST_TEST(dir1 == 1e0, boost::test_tools::tolerance(tol));
+            BOOST_TEST(dir2 == 1e0, boost::test_tools::tolerance(tol));
         }
-
-        BOOST_CHECK_SMALL(length(sys[0].force + sys[1].force), tolerance);
+        BOOST_TEST(length(sys[0].force + sys[1].force) == 0.0, boost::test_tools::tolerance(tol));
 
         dist += dr;
     }

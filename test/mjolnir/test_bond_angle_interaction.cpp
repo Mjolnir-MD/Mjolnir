@@ -1,12 +1,6 @@
 #define BOOST_TEST_MODULE "test_bond_angle_interaction"
 
-#ifdef UNITTEST_FRAMEWORK_LIBRARY_EXIST
-#include <boost/test/unit_test.hpp>
-#else
-#define BOOST_TEST_NO_LIB
 #include <boost/test/included/unit_test.hpp>
-#endif
-
 #include <test/mjolnir/traits.hpp>
 #include <mjolnir/interaction/BondAngleInteraction.hpp>
 #include <mjolnir/math/constants.hpp>
@@ -16,7 +10,7 @@
 BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
 {
     typedef mjolnir::test::traits<double> traits;
-    constexpr static traits::real_type tolerance = 1e-7;
+    constexpr static traits::real_type tol = 1e-7;
 
     typedef traits::real_type real_type;
     typedef traits::coordinate_type            coord_type;
@@ -45,10 +39,10 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
     const real_type dtheta = mjolnir::math::constants<real_type>::pi  / N;
     for(int i = 1; i < N; ++i)
     {
-        BOOST_CHECK_SMALL(length(sys[0].position - pos1), tolerance);
-        BOOST_CHECK_SMALL(length(sys[1].position - pos2), tolerance);
-        BOOST_CHECK_SMALL(length(sys[0].velocity), tolerance);
-        BOOST_CHECK_SMALL(length(sys[1].velocity), tolerance);
+        BOOST_TEST(length(sys[0].position - pos1) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(length(sys[1].position - pos2) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(length(sys[0].velocity)        == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(length(sys[1].velocity)        == 0.0, boost::test_tools::tolerance(tol));
         sys[0].force = coord_type(0,0,0);
         sys[1].force = coord_type(0,0,0);
         sys[2].force = coord_type(0,0,0);
@@ -64,69 +58,69 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
 
         // magnitude
         // if radius == 1e0, then force strength is equal to dV/dtheta.
-        BOOST_CHECK_CLOSE_FRACTION(length(sys[0].position - sys[1].position), 1e0, tolerance);
-        BOOST_CHECK_CLOSE_FRACTION(length(sys[2].position - sys[1].position), 1e0, tolerance);
+        BOOST_TEST(length(sys[0].position - sys[1].position) == 1.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(length(sys[2].position - sys[1].position) == 1.0, boost::test_tools::tolerance(tol));
 
         const real_type force_strength1 = length(sys[0].force);
         const real_type force_strength3 = length(sys[2].force);
         if(i == 1200) // most stable point
         {
-            BOOST_CHECK_SMALL(coef, tolerance);
-            BOOST_CHECK_SMALL(coef, tolerance);
+            BOOST_TEST(coef == 0.0, boost::test_tools::tolerance(tol));
+            BOOST_TEST(coef == 0.0, boost::test_tools::tolerance(tol));
         }
         else
         {
-            BOOST_CHECK_CLOSE_FRACTION(coef, force_strength1, tolerance);
-            BOOST_CHECK_CLOSE_FRACTION(coef, force_strength3, tolerance);
+            BOOST_TEST(coef == force_strength1, boost::test_tools::tolerance(tol));
+            BOOST_TEST(coef == force_strength3, boost::test_tools::tolerance(tol));
         }
 
         // force applied to center particle is equal to sum of others
         const coord_type sum = sys[0].force + sys[1].force + sys[2].force;
-        BOOST_CHECK_SMALL(length(sum), tolerance);
+        BOOST_TEST(length(sum) == 0.0, boost::test_tools::tolerance(tol));
 
         // direction
         if(i == 1200) // most stable point
         {
-            BOOST_CHECK_SMALL(std::abs(force_strength1), tolerance);
-            BOOST_CHECK_SMALL(std::abs(force_strength3), tolerance);
+            BOOST_TEST(std::abs(force_strength1) == 0.0, boost::test_tools::tolerance(tol));
+            BOOST_TEST(std::abs(force_strength3) == 0.0, boost::test_tools::tolerance(tol));
         }
         else if(i < 1200) // narrow
         {
             // perpendicular to radius vector
             const real_type dot1 = dot_product(sys[0].force, sys[0].position - sys[1].position);
             const real_type dot2 = dot_product(sys[2].force, sys[2].position - sys[1].position);
-            BOOST_CHECK_SMALL(dot1, tolerance);
-            BOOST_CHECK_SMALL(dot2, tolerance);
+            BOOST_TEST(dot1 == 0.0, boost::test_tools::tolerance(tol));
+            BOOST_TEST(dot2 == 0.0, boost::test_tools::tolerance(tol));
 
             const coord_type f1(0., -1., 0.);
-            BOOST_CHECK_SMALL(length(normalize(sys[0].force) - f1), tolerance);
+            BOOST_TEST(length(normalize(sys[0].force) - f1) == 0.0, boost::test_tools::tolerance(tol));
 
             const coord_type f3(
                     cos(theta + mjolnir::math::constants<real_type>::pi / 2.),
                     sin(theta + mjolnir::math::constants<real_type>::pi / 2.),
                     0.);
-            BOOST_CHECK_SMALL(length(normalize(sys[2].force) - f3), tolerance);
+            BOOST_TEST(length(normalize(sys[2].force) - f3) == 0.0, boost::test_tools::tolerance(tol));
         }
         else if(i > 1200) // extensive
         {
             const real_type dot1 = dot_product(sys[0].force, sys[0].position - sys[1].position);
             const real_type dot2 = dot_product(sys[2].force, sys[2].position - sys[1].position);
-            BOOST_CHECK_SMALL(dot1, tolerance);
-            BOOST_CHECK_SMALL(dot2, tolerance);
+            BOOST_TEST(dot1 == 0.0, boost::test_tools::tolerance(tol));
+            BOOST_TEST(dot2 == 0.0, boost::test_tools::tolerance(tol));
 
             const coord_type f1(0., 1., 0.);
-            BOOST_CHECK_SMALL(length(normalize(sys[0].force) - f1), tolerance);
+            BOOST_TEST(length(normalize(sys[0].force) - f1) == 0.0, boost::test_tools::tolerance(tol));
 
             const coord_type f3(
                     cos(theta - mjolnir::math::constants<real_type>::pi / 2.),
                     sin(theta - mjolnir::math::constants<real_type>::pi / 2.),
                     0.);
-            BOOST_CHECK_SMALL(length(normalize(sys[2].force) - f3), tolerance);
+            BOOST_TEST(length(normalize(sys[2].force) - f3) == 0.0, boost::test_tools::tolerance(tol));
         }
 
         // perpendicular to z axis
-        BOOST_CHECK_SMALL(sys[0].force[2], tolerance);
-        BOOST_CHECK_SMALL(sys[1].force[2], tolerance);
-        BOOST_CHECK_SMALL(sys[2].force[2], tolerance);
+        BOOST_TEST(sys[0].force[2] == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys[1].force[2] == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys[2].force[2] == 0.0, boost::test_tools::tolerance(tol));
     }
 }
