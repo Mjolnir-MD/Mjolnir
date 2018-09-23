@@ -1,12 +1,6 @@
 #define BOOST_TEST_MODULE "test_axis_aligned_plane_shape"
 
-#ifdef UNITTEST_FRAMEWORK_LIBRARY_EXIST
-#include <boost/test/unit_test.hpp>
-#else
-#define BOOST_TEST_NO_LIB
 #include <boost/test/included/unit_test.hpp>
-#endif
-
 #include <test/mjolnir/traits.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>
@@ -22,7 +16,7 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_PositiveZ_geometry_unlimited)
     using coord_type    = typename traits::coordinate_type;
     using boundary_type = typename traits::boundary_type;
 
-    static constexpr traits::real_type tolerance = 1e-8;
+    constexpr traits::real_type tol = 1e-8;
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<double> uni(-100, 100);
@@ -36,10 +30,10 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_PositiveZ_geometry_unlimited)
         const real_type  dist = xyplane.calc_distance(pos, bdry);
         const coord_type fdir = xyplane.calc_force_direction(pos, bdry);
 
-        BOOST_CHECK_SMALL(fdir[0], tolerance);
-        BOOST_CHECK_SMALL(fdir[1], tolerance);
-        BOOST_CHECK_EQUAL(fdir[2], 1.0);
-        BOOST_CHECK_CLOSE_FRACTION(dist, pos[2], tolerance);
+        BOOST_TEST(fdir[0] == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(fdir[1] == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(fdir[2] == 1.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(dist == pos[2], boost::test_tools::tolerance(tol));
     }
 }
 
@@ -51,7 +45,7 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_NegativeZ_geometry_unlimited)
     using coord_type    = typename traits::coordinate_type;
     using boundary_type = typename traits::boundary_type;
 
-    static constexpr traits::real_type tolerance = 1e-8;
+    static constexpr traits::real_type tol = 1e-8;
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<double> uni(-100, 100);
@@ -65,10 +59,10 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_NegativeZ_geometry_unlimited)
         const real_type  dist = xyplane.calc_distance(pos, bdry);
         const coord_type fdir = xyplane.calc_force_direction(pos, bdry);
 
-        BOOST_CHECK_SMALL(fdir[0], tolerance);
-        BOOST_CHECK_SMALL(fdir[1], tolerance);
-        BOOST_CHECK_EQUAL(fdir[2], -1.0);
-        BOOST_CHECK_CLOSE_FRACTION(dist, -pos[2], tolerance);
+        BOOST_TEST(fdir[0] ==  0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(fdir[1] ==  0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(fdir[2] == -1.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(dist == -pos[2], boost::test_tools::tolerance(tol));
     }
 }
 
@@ -80,7 +74,7 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_geometry_periodic)
     using coord_type    = typename traits::coordinate_type;
     using boundary_type = typename traits::boundary_type;
 
-    static constexpr traits::real_type tolerance = 1e-8;
+    constexpr traits::real_type tol = 1e-8;
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<double> uni(0, 100);
@@ -98,17 +92,17 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_geometry_periodic)
         const real_type sign = (pos[2] <= 50.0) ? 1.0    : -1.0;
         const real_type d    = (pos[2] <= 50.0) ? pos[2] : pos[2] - 100.0;
 
-        BOOST_CHECK_SMALL(fdir[0], tolerance);
-        BOOST_CHECK_SMALL(fdir[1], tolerance);
-        BOOST_CHECK_EQUAL(fdir[2], 1.0);
+        BOOST_TEST(fdir[0] == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(fdir[1] == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(fdir[2] == 1.0, boost::test_tools::tolerance(tol));
 
-        if(std::abs(pos[2] - 50.0) < tolerance)
+        if(std::abs(pos[2] - 50.0) < tol)
         {
-            BOOST_CHECK_CLOSE_FRACTION(std::abs(dist), 50.0, tolerance);
+            BOOST_TEST(std::abs(dist) == 50.0, boost::test_tools::tolerance(tol));
         }
         else
         {
-            BOOST_CHECK_CLOSE_FRACTION(dist, d, tolerance);
+            BOOST_TEST(dist == d, boost::test_tools::tolerance(tol));
         }
     }
 }
@@ -140,7 +134,7 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_neighbors_unlimited)
     using system_type   = mjolnir::System<traits>;
     using particle_type = typename system_type::particle_type;
 
-    static constexpr traits::real_type tolerance = 1e-8;
+    constexpr traits::real_type tol = 1e-8;
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<double> uni(-10, 10);
@@ -156,7 +150,8 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_neighbors_unlimited)
     }
 
     dummy_potential<double> dummy; dummy.cutoff = 1.0; dummy.N = 1000;
-    mjolnir::AxisAlignedPlane<traits, mjolnir::PositiveZDirection> xyplane(0.0, 0.0); // no mergin here
+    mjolnir::AxisAlignedPlane<traits, mjolnir::PositiveZDirection>
+        xyplane(0.0, 0.0); // no mergin here
     xyplane.initialize(sys, dummy);
 
     const auto neighbors = xyplane.neighbors();
@@ -167,13 +162,14 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_neighbors_unlimited)
         {
             std::cerr << i << ", " << sys.at(i).position[2] << std::endl;
         }
-        BOOST_CHECK(std::abs(sys.at(i).position[2]) <= 1.0);
+        BOOST_TEST(std::abs(sys.at(i).position[2]) <= 1.0);
     }
 
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         if(std::abs(sys.at(i).position[2]) > 1.0){continue;}
-        BOOST_CHECK(std::find(neighbors.begin(), neighbors.end(), i)
-                    != neighbors.end());
+        const bool found =
+            std::find(neighbors.begin(), neighbors.end(), i) != neighbors.end();
+        BOOST_TEST(found);
     }
 }

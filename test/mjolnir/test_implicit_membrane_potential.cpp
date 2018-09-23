@@ -1,21 +1,14 @@
 #define BOOST_TEST_MODULE "test_implicit_membrane_potential"
 
-#ifdef UNITTEST_FRAMEWORK_LIBRARY_EXIST
-#include <boost/test/unit_test.hpp>
-#else
-#define BOOST_TEST_NO_LIB
 #include <boost/test/included/unit_test.hpp>
-#endif
-
 #include <mjolnir/potential/external/ImplicitMembranePotential.hpp>
-#include <mjolnir/util/make_unique.hpp>
 
 BOOST_AUTO_TEST_CASE(ImplicitMembranePotential_double)
 {
     using real_type = double;
-    constexpr static std::size_t       N = 10000;
-    constexpr static real_type h = 1e-6;
-    constexpr static real_type tolerance = 1e-5;
+    constexpr static std::size_t N = 10000;
+    constexpr static real_type h   = 1e-6;
+    constexpr static real_type tol = 1e-5;
 
     const real_type thickness = 10.0;
     const real_type interaction_magnitude = 1.0;
@@ -40,21 +33,21 @@ BOOST_AUTO_TEST_CASE(ImplicitMembranePotential_double)
 
         if(std::abs(z) > h)
         {
-            if(std::abs(deri) > tolerance)
+            if(std::abs(deri) > tol)
             {
-                BOOST_CHECK_CLOSE_FRACTION(dpot, deri, tolerance);
+                BOOST_TEST(dpot == deri, boost::test_tools::tolerance(tol));
             }
             else
             {
-                BOOST_CHECK_SMALL(deri, tolerance);
+                BOOST_TEST(deri == 0.0, boost::test_tools::tolerance(tol));
             }
         }
 
         const real_type pot0 = im.potential(1, z);
         const real_type deri0 = im.derivative(1, z);
 
-        BOOST_CHECK_SMALL(pot0, h);
-        BOOST_CHECK_SMALL(deri0, h);
+        BOOST_TEST(pot0  == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(deri0 == 0.0, boost::test_tools::tolerance(tol));
 
         z += dz;
     }
