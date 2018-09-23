@@ -6,7 +6,7 @@ set(TEST_NAMES
     test_throw_exception
     test_static_string
     test_topology
-    test_fast_inv_sqrt
+    test_math
     test_harmonic_potential
     test_gaussian_potential
     test_angular_gaussian_potential
