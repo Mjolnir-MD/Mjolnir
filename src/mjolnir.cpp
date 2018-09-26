@@ -21,12 +21,12 @@ int main(int argc, char** argv)
 
     while(simulator->step()){/* do nothing */;}
 
+    simulator->finalize();
+
     const auto stop = std::chrono::system_clock::now();
     std::cout << "elapsed time: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(
                       stop - start).count() << " [msec]" << std::endl;
-
-    simulator->finalize();
 
     return 0;
 }
