@@ -19,9 +19,9 @@ class progress_bar
     static constexpr auto l3    = u8"▍"; // U+258D Left three eighths block
     static constexpr auto l2    = u8"▎"; // U+258E Left one quarter block
     static constexpr auto l1    = u8"▏"; // U+258F Left one eighth block
-    static constexpr auto r1    = u8"▕"; // U+2595 Right one eighth block
 
-    static constexpr std::size_t buffer_size = 13 + Width * 4;
+    // \r100.0%| ... W*3 ... |\0
+    static constexpr std::size_t buffer_size = 10 + Width * 3;
 
   public:
 
@@ -41,12 +41,11 @@ class progress_bar
         const double ratio = (count == total_) ? 1.0 : count * this->r_total_;
         assert(ratio <= 1.0);
 
-        char* iter = buffer_.data() + 1; // the first character is always \r
-        iter += std::sprintf(iter, "%4.1f", ratio * 100.0);
+        char* iter = buffer_.data();
+        iter++; // the first character is always \r
+        iter += std::sprintf(iter, "%5.1f", ratio * 100.0);
         *iter++ = '%';
-        *iter++ = r1[0];
-        *iter++ = r1[1];
-        *iter++ = r1[2];
+        *iter++ = '|';
 
         const std::size_t filled = std::floor(ratio*Width);
         for(std::size_t i=0; i<filled; ++i)
@@ -73,9 +72,7 @@ class progress_bar
                 *iter++ = ' ';
             }
         }
-        *iter++ = l1[0];
-        *iter++ = l1[1];
-        *iter++ = l1[2];
+        *iter++ = '|';
         *iter++ = '\0';
         return buffer_.data();
     }
