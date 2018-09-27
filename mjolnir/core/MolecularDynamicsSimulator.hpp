@@ -20,7 +20,7 @@ class MolecularDynamicsSimulator final : public SimulatorBase
     typedef Observer<traits_type>   observer_type;
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
-    typedef progress_bar<80> progress_bar_type;
+    typedef progress_bar<50> progress_bar_type;
 
     MolecularDynamicsSimulator(const std::size_t tstep, const std::size_t save_step,
                 system_type&& sys, forcefield_type&& ff,
