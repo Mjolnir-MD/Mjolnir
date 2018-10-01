@@ -16,9 +16,9 @@ class AngularGaussianPotential
     using real_type = realT;
 
   public:
-    AngularGaussianPotential(const real_type e, const real_type w,
+    AngularGaussianPotential(const real_type k, const real_type sigma,
                       const real_type v0) noexcept
-        : epsilon_(e), inv_w2_(-1./(2*w*w)), v0_(v0)
+        : k_(k), sigma_(sigma), inv_sigma2_(-1./(2*sigma*sigma)), v0_(v0)
     {}
     ~AngularGaussianPotential() = default;
 
@@ -29,7 +29,7 @@ class AngularGaussianPotential
 
         real_type dval = val - this->v0_;
         if(dval < -pi) {dval += two_pi;} else if(pi < dval){dval -= two_pi;}
-        return epsilon_ * std::exp(inv_w2_ * dval * dval);
+        return k_ * std::exp(inv_sigma2_ * dval * dval);
     }
 
     real_type derivative(const real_type val) const noexcept
@@ -39,7 +39,7 @@ class AngularGaussianPotential
 
         real_type dval = val - this->v0_;
         if(dval < -pi) {dval += two_pi;} else if(pi < dval){dval -= two_pi;}
-        return 2*inv_w2_ * dval * epsilon_ * std::exp(inv_w2_ * dval * dval);
+        return 2*inv_sigma2_ * dval * k_ * std::exp(inv_sigma2_ * dval * dval);
     }
 
     template<typename T>
@@ -49,7 +49,8 @@ class AngularGaussianPotential
 
   private:
 
-    real_type epsilon_, inv_w2_;
+    real_type k_, sigma_;
+    real_type inv_sigma2_;
     real_type v0_;
 };
 

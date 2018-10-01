@@ -62,13 +62,13 @@ GaussianPotential<realT> read_gaussian_potential(const toml::Table& param)
     using real_type = realT;
     const auto location = "element of [[parameters]] in Gaussian potential";
 
-    const auto v0      = get_toml_value<real_type>(param, "v0",      location);
-    const auto epsilon = get_toml_value<real_type>(param, "epsilon", location);
-    const auto w       = get_toml_value<real_type>(param, "w",       location);
+    const auto v0    = get_toml_value<real_type>(param, "v0",    location);
+    const auto k     = get_toml_value<real_type>(param, "k",     location);
+    const auto sigma = get_toml_value<real_type>(param, "sigma", location);
 
-    MJOLNIR_LOG_INFO("GaussianPotential = {v0 = ", v0,
-                     ", epsilon = ", epsilon, ", w = ", w, '}');
-    return GaussianPotential<realT>(epsilon, w, v0);
+    MJOLNIR_LOG_INFO("GaussianPotential = {v0 = ", v0, ", k = ", k,
+                     ", sigma = ", sigma, '}');
+    return GaussianPotential<realT>(k, sigma, v0);
 }
 
 template<typename realT>
@@ -80,13 +80,13 @@ read_angular_gaussian_potential(const toml::Table& param)
     const auto location =
         "element of [[parameters]] in Angular Gaussian potential";
 
-    const auto v0      = get_toml_value<real_type>(param, "v0",      location);
-    const auto epsilon = get_toml_value<real_type>(param, "epsilon", location);
-    const auto w       = get_toml_value<real_type>(param, "w",       location);
+    const auto v0    = get_toml_value<real_type>(param, "v0",    location);
+    const auto k     = get_toml_value<real_type>(param, "k",     location);
+    const auto sigma = get_toml_value<real_type>(param, "sigma", location);
 
-    MJOLNIR_LOG_INFO("AngularGaussianPotential = {v0 = ", v0,
-                     ", epsilon = ", epsilon, ", w = ", w, '}');
-    return AngularGaussianPotential<realT>(epsilon, w, v0);
+    MJOLNIR_LOG_INFO("AngularGaussianPotential = {v0 = ", v0, ", k = ", k,
+                     ", sigma = ", sigma, '}');
+    return AngularGaussianPotential<realT>(k, sigma, v0);
 }
 
 template<typename realT>
