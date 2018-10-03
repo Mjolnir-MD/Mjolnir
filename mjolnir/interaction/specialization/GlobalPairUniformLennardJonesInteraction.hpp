@@ -9,20 +9,20 @@ namespace mjolnir
 {
 
 // specialization for GlobalPair<LennardJones>
-template<typename realT,      typename traitsT,
-         typename partitionT, typename ignored_chainT>
-class GlobalPairInteraction<traitsT,
-    UniformLennardJonesPotential<realT, ignored_chainT>, partitionT
+template<typename traitsT, typename partitionT, typename ignored_chainT>
+class GlobalPairInteraction<
+    traitsT,
+    UniformLennardJonesPotential<typename traitsT::real_type, ignored_chainT>,
+    partitionT
     > final : public GlobalInteractionBase<traitsT>
 {
   public:
-    static_assert(std::is_same<realT, typename traitsT::real_type>::value,
-        "LennardJones::real_type and traits::real_type should be the same");
 
     using traits_type     = traitsT;
-    using potential_type  = UniformLennardJonesPotential<realT, ignored_chainT>;
     using partition_type  = partitionT;
     using base_type       = GlobalInteractionBase<traits_type>;
+    using potential_type  =
+        UniformLennardJonesPotential<typename traits_type::real_type, ignored_chainT>;
 
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
