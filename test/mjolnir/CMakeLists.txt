@@ -2,7 +2,6 @@ set(TEST_NAMES
     test_matrix
     test_vector
     test_range
-    test_access_iterator
     test_throw_exception
     test_static_string
     test_topology
