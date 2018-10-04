@@ -46,7 +46,7 @@ class Observer
     void initialize(const system_type& sys, const forcefield_type& ff) const
     {
         std::ofstream ofs(this->ene_name_, std::ios::app);
-        ofs << '#' << ff.list_energy_name() << "kinetic_energy\n";
+        ofs << "# time " << ff.list_energy_name() << "kinetic_energy\n";
         return;
     }
 
@@ -80,7 +80,7 @@ inline void Observer<traitsT>::output(
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         const auto& p = sys.position(i);
-        ofs << "CA    " << std::fixed << std::setprecision(8)
+        ofs << sys.name(i) << std::fixed << std::setprecision(8)
             << p[0] << ' ' << p[1] << ' ' << p[2] << '\n';
     }
     ofs.close();
