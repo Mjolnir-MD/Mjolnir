@@ -75,26 +75,20 @@ class System
         };
     }
 
-    std::vector<real_type>&             masses()           noexcept {return masses_;}
-    std::vector<real_type> const&       masses()     const noexcept {return masses_;}
-    std::vector<real_type>&             rmasses()          noexcept {return masses_;}
-    std::vector<real_type> const&       rmasses()    const noexcept {return masses_;}
-    std::vector<coordinate_type>&       positions()        noexcept {return positions_;}
-    std::vector<coordinate_type> const& positions()  const noexcept {return positions_;}
-    std::vector<coordinate_type>&       velocities()       noexcept {return velocities_;}
-    std::vector<coordinate_type> const& velocities() const noexcept {return velocities_;}
-    std::vector<coordinate_type>&       forces()           noexcept {return forces_;}
-    std::vector<coordinate_type> const& forces()     const noexcept {return forces_;}
-    std::vector<static_string_type>&       names()         noexcept {return names_;}
-    std::vector<static_string_type> const& names()   const noexcept {return names_;}
+    real_type  mass (std::size_t i) const noexcept {return masses_[i];}
+    real_type& mass (std::size_t i)       noexcept {return masses_[i];}
+    real_type  rmass(std::size_t i) const noexcept {return rmasses_[i];}
+    real_type& rmass(std::size_t i)       noexcept {return rmasses_[i];}
 
-    // to implement these, we need a ZipIterator. but is it really needed?
-//     iterator       begin()        noexcept {return particles_.begin();}
-//     iterator       end()          noexcept {return particles_.end();}
-//     const_iterator begin()  const noexcept {return particles_.cbegin();}
-//     const_iterator end()    const noexcept {return particles_.cend();}
-//     const_iterator cbegin() const noexcept {return particles_.cbegin();}
-//     const_iterator cend()   const noexcept {return particles_.cend();}
+    coordinate_type const& position(std::size_t i) const noexcept {return positions_[i];}
+    coordinate_type&       position(std::size_t i)       noexcept {return positions_[i];}
+    coordinate_type const& velocity(std::size_t i) const noexcept {return velocities_[i];}
+    coordinate_type&       velocity(std::size_t i)       noexcept {return velocities_[i];}
+    coordinate_type const& force   (std::size_t i) const noexcept {return forces_[i];}
+    coordinate_type&       force   (std::size_t i)       noexcept {return forces_[i];}
+
+    static_string_type const& name(std::size_t i) const noexcept {return names_[i];}
+    static_string_type&       name(std::size_t i)       noexcept {return names_[i];}
 
     boundary_type&       boundary()       noexcept {return boundary_;}
     boundary_type const& boundary() const noexcept {return boundary_;}

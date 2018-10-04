@@ -77,12 +77,11 @@ inline void Observer<traitsT>::output(
 {
     std::ofstream ofs(xyz_name_, std::ios::app);
     ofs << sys.size() << '\n' << time << '\n';
-    for(const auto& position : sys.positions())
+    for(std::size_t i=0; i<sys.size(); ++i)
     {
+        const auto& p = sys.position(i);
         ofs << "CA    " << std::fixed << std::setprecision(8)
-            << position[0] << ' '
-            << position[1] << ' '
-            << position[2] << '\n';
+            << p[0] << ' ' << p[1] << ' ' << p[2] << '\n';
     }
     ofs.close();
 
