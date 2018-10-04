@@ -1,106 +1,116 @@
 #ifndef MJOLNIR_MATH_MATRIX
 #define MJOLNIR_MATH_MATRIX
 #include <mjolnir/util/type_traits.hpp>
-#include <iostream>
+#include <algorithm>
 #include <array>
+#include <ostream>
+#include <cmath>
 
 namespace mjolnir
 {
 
-template<typename realT, std::size_t Row, std::size_t Col>
+template<typename realT, std::size_t R, std::size_t C>
 class Matrix
 {
   public:
-    using real_type = realT;
-    using scalar_type = real_type;
-    constexpr static std::size_t dim_row = Row;
-    constexpr static std::size_t dim_col = Col;
-    constexpr static std::size_t number_of_element = Row * Col;
-    using container      = std::array<real_type, number_of_element>;
-    using iterator       = typename container::iterator;
-    using const_iterator = typename container::const_iterator;
+    //    1   ...   C
+    //  1 x00 ... x0M    N = R-1
+    //  . x10 ... x1M    M = C-1
+    //  .   . ...   .
+    //  R xN0 ... xNM    R * C matrix
+    static constexpr std::size_t    row_size = R;
+    static constexpr std::size_t column_size = C;
+    static constexpr std::size_t  total_size = R * C;
 
-    template<typename T>
-    using is_convertible_to_real = std::is_convertible<T, real_type>;
+    using value_type      = realT;
+    using storage_type    = std::array<value_type, total_size>;
+    using pointer         = value_type*;
+    using const_pointer   = value_type const*;
+    using reference       = value_type&;
+    using const_reference = value_type const&;
+    using size_type       = std::size_t;
+    using iterator        = typename storage_type::iterator;
+    using const_iterator  = typename storage_type::const_iterator;
 
   public:
     Matrix() : values_{{}}{}
     ~Matrix() = default;
+    Matrix(Matrix const&) = default;
+    Matrix(Matrix &&)     = default;
+    Matrix& operator=(Matrix const&) = default;
+    Matrix& operator=(Matrix &&)     = default;
 
-    template<typename ... T_args, typename std::enable_if<
-        (sizeof...(T_args) == number_of_element) &&
-        is_all<is_convertible_to_real, T_args...>::value, std::nullptr_t
-        >::type = nullptr>
-    Matrix(T_args ... args) noexcept : values_{{static_cast<real_type>(args)...}}{}
-
-    template<typename T, typename std::enable_if<
-        std::is_convertible<T, real_type>::value, std::nullptr_t>::type = nullptr>
-    Matrix(const std::array<T, number_of_element>& rhs) noexcept
+    template<typename ... Ts, typename std::enable_if<
+        sizeof...(Ts) == total_size, std::nullptr_t>::type = nullptr>
+    Matrix(Ts&& ... vs) noexcept: values_{{static_cast<value_type>(vs)...}}
     {
-        for(std::size_t i=0; i<number_of_element; ++i)
-            (*this)[i] = static_cast<real_type>(rhs[i]);
+        static_assert(sizeof...(Ts) == total_size, "");
+        static_assert(conjunction<
+                std::is_convertible<Ts, value_type> ...>::value, "");
     }
 
-    Matrix(const Matrix& mat) = default;
-    Matrix(Matrix&& mat)      = default;
-    Matrix& operator=(const Matrix& mat) = default;
-    Matrix& operator=(Matrix&& mat)      = default;
-
-    template<typename T, typename std::enable_if<
-        std::is_convertible<T, real_type>::value, std::nullptr_t>::type = nullptr>
-    Matrix(const Matrix<T, dim_row, dim_col>& rhs) noexcept
+    template<typename T>
+    Matrix(const std::array<T, total_size>& rhs) noexcept
     {
-        for(std::size_t i=0; i<number_of_element; ++i)
-            (*this)[i] = static_cast<real_type>(rhs[i]);
+        static_assert(std::is_convertible<T, value_type>::value, "");
+        std::copy(rhs.begin(), rhs.end(), this->values_.begin());
     }
-    template<typename T, typename std::enable_if<
-        std::is_convertible<T, real_type>::value, std::nullptr_t>::type = nullptr>
-    Matrix(Matrix<T, dim_row, dim_col>&& rhs) noexcept
+    template<typename T>
+    Matrix(const Matrix<T, R, C>& rhs) noexcept
     {
-        for(std::size_t i=0; i<number_of_element; ++i)
-            (*this)[i] = static_cast<real_type>(rhs[i]);
+        static_assert(std::is_convertible<T, value_type>::value, "");
+        std::copy(rhs.begin(), rhs.end(), this->begin());
     }
 
-    template<typename T, typename std::enable_if<
-        std::is_convertible<T, real_type>::value, std::nullptr_t>::type>
-    Matrix& operator=(const Matrix<T, dim_row, dim_col>& rhs) noexcept
+    template<typename T>
+    Matrix& operator=(const Matrix<T, R, C>& rhs) noexcept
     {
-        for(std::size_t i=0; i<number_of_element; ++i)
-            (*this)[i] = static_cast<real_type>(rhs[i]);
-    }
-    template<typename T, typename std::enable_if<
-        std::is_convertible<T, real_type>::value, std::nullptr_t>::type>
-    Matrix& operator=(Matrix<T, dim_row, dim_col>&& rhs) noexcept
-    {
-        for(std::size_t i=0; i<number_of_element; ++i)
-            (*this)[i] = static_cast<real_type>(rhs[i]);
+        static_assert(std::is_convertible<T, value_type>::value, "");
+        std::copy(rhs.begin(), rhs.end(), this->begin());
     }
 
-    template<typename T, class = typename std::enable_if<
-        std::is_convertible<T, real_type>::value>::type>
-    Matrix& operator+=(const Matrix<T, dim_row, dim_col>& mat) noexcept;
+    template<typename T>
+    Matrix& operator+=(const Matrix<T, R, C>& rhs) noexcept
+    {
+        static_assert(std::is_convertible<T, value_type>::value, "");
+        for(std::size_t i=0; i<total_size; ++i){this->values_[i] += rhs[i];}
+        return *this;
+    }
+    template<typename T>
+    Matrix& operator-=(const Matrix<T, R, C>& rhs) noexcept
+    {
+        static_assert(std::is_convertible<T, value_type>::value, "");
+        for(std::size_t i=0; i<total_size; ++i){this->values_[i] -= rhs[i];}
+        return *this;
+    }
 
-    template<typename T, class = typename std::enable_if<
-        std::is_convertible<T, real_type>::value>::type>
-    Matrix& operator-=(const Matrix<T, dim_row, dim_col>& mat) noexcept;
+    template<typename T>
+    Matrix& operator*=(const T& rhs) noexcept
+    {
+        static_assert(std::is_convertible<T, value_type>::value, "");
+        for(std::size_t i=0; i<total_size; ++i){this->values_[i] *= rhs;}
+        return *this;
+    }
+    template<typename T>
+    Matrix& operator/=(const T& rhs) noexcept
+    {
+        static_assert(std::is_convertible<T, value_type>::value, "");
+        for(std::size_t i=0; i<total_size; ++i){this->values_[i] /= rhs;}
+        return *this;
+    }
 
-    template<typename T, class = typename std::enable_if<
-        std::is_convertible<T, real_type>::value>::type>
-    Matrix& operator*=(const T& scl) noexcept;
+    value_type  at(size_type i, size_type j) const {return values_.at(i*C+j);}
+    value_type& at(size_type i, size_type j)       {return values_.at(i*C+j);}
+    value_type  operator()(size_type i, size_type j) const noexcept {return values_[i*C+j];}
+    value_type& operator()(size_type i, size_type j)       noexcept {return values_[i*C+j];}
 
-    template<typename T, class = typename std::enable_if<
-        std::is_convertible<T, real_type>::value>::type>
-    Matrix& operator/=(const T& scl) noexcept;
+    value_type  at(size_type i) const {return values_.at(i);}
+    value_type& at(size_type i)       {return values_.at(i);}
+    value_type  operator[](size_type i) const noexcept {return values_[i];}
+    value_type& operator[](size_type i)       noexcept {return values_[i];}
 
-    scalar_type  at(const std::size_t i, const std::size_t j) const;
-    scalar_type& at(const std::size_t i, const std::size_t j);
-    scalar_type  operator()(const std::size_t i, const std::size_t j) const noexcept;
-    scalar_type& operator()(const std::size_t i, const std::size_t j)       noexcept;
-
-    scalar_type  at(const std::size_t i) const {return values_.at(i);}
-    scalar_type& at(const std::size_t i)       {return values_.at(i);}
-    scalar_type  operator[](const std::size_t i) const noexcept {return values_[i];}
-    scalar_type& operator[](const std::size_t i)       noexcept {return values_[i];}
+    pointer       data()       noexcept {return values_.data();}
+    const_pointer data() const noexcept {return values_.data();}
 
     iterator       begin()        noexcept {return values_.begin();}
     iterator       end()          noexcept {return values_.end();}
@@ -109,176 +119,218 @@ class Matrix
     const_iterator cbegin() const noexcept {return values_.cbegin();}
     const_iterator cend()   const noexcept {return values_.cend();}
 
+    bool diagnosis() const noexcept {return true;}
+
+    void zero() noexcept {values_.fill(value_type(0));}
+
   private:
-    container values_;
+    storage_type values_;
 };
 
-template<typename realT, std::size_t R, std::size_t C>
-template<typename T, class>
-inline Matrix<realT, R, C>&
-Matrix<realT, R, C>::operator+=(const Matrix<T, dim_row, dim_col>& mat) noexcept
-{
-    for(std::size_t i=0; i<R*C; ++i)
-        (*this)[i] += mat[i];
-    return *this;
-}
-
-template<typename realT, std::size_t R, std::size_t C>
-template<typename T, class>
-inline Matrix<realT, R, C>&
-Matrix<realT, R, C>::operator-=(const Matrix<T, dim_row, dim_col>& mat) noexcept
-{
-    for(std::size_t i=0; i<R*C; ++i)
-        (*this)[i] -= mat[i];
-    return *this;
-}
-
-template<typename realT, std::size_t R, std::size_t C>
-template<typename T, class>
-inline Matrix<realT, R, C>&
-Matrix<realT, R, C>::operator*=(const T& s) noexcept
-{
-    for(std::size_t i=0; i<R*C; ++i)
-        (*this)[i] *= s;
-    return *this;
-}
-
-template<typename realT, std::size_t R, std::size_t C>
-template<typename T, class>
-inline Matrix<realT, R, C>&
-Matrix<realT, R, C>::operator/=(const T& s) noexcept
-{
-    for(std::size_t i=0; i<R*C; ++i)
-        (*this)[i] /= s;
-    return *this;
-}
-
-template<typename T, typename U, std::size_t R, std::size_t C>
-inline Matrix<typename std::common_type<T, U>::type, R, C>
-operator+(const Matrix<T, R, C>& lhs, const Matrix<U, R, C>& rhs) noexcept
-{
-    Matrix<typename std::common_type<T, U>::type, R, C> retval;
-    for(std::size_t i=0; i<R*C; ++i)
-        retval[i] = lhs[i] + rhs[i];
-    return retval;
-}
-
-template<typename T, typename U, std::size_t R, std::size_t C>
-inline Matrix<typename std::common_type<T, U>::type, R, C>
-operator-(const Matrix<T, R, C>& lhs, const Matrix<U, R, C>& rhs) noexcept
-{
-    Matrix<typename std::common_type<T, U>::type, R, C> retval;
-    for(std::size_t i=0; i<R*C; ++i)
-        retval[i] = lhs[i] - rhs[i];
-    return retval;
-}
-
-template<typename T, typename U, std::size_t R, std::size_t C, class = typename
-         std::enable_if<std::is_convertible<U, T>::value>::type>
-inline Matrix<T, R, C>
-operator*(const Matrix<T, R, C>& lhs, const U rhs) noexcept
-{
-    Matrix<typename std::common_type<T, U>::type, R, C> retval;
-    for(std::size_t i=0; i<R*C; ++i)
-        retval[i] = lhs[i] * rhs;
-    return retval;
-}
-
-template<typename T, typename U, std::size_t R, std::size_t C, class = typename
-         std::enable_if<std::is_convertible<U, T>::value>::type>
-inline Matrix<T, R, C>
-operator*(const U lhs, const Matrix<T, R, C>& rhs) noexcept
-{
-    Matrix<typename std::common_type<T, U>::type, R, C> retval;
-    for(std::size_t i=0; i<R*C; ++i)
-        retval[i] = lhs * rhs[i];
-    return retval;
-}
-
-template<typename T, typename U, std::size_t R, std::size_t C, class = typename
-         std::enable_if<std::is_convertible<U, T>::value>::type>
-inline Matrix<T, R, C>
-operator/(const Matrix<T, R, C>& lhs, const U rhs) noexcept
-{
-    Matrix<T, R, C> retval;
-    for(std::size_t i=0; i<R*C; ++i)
-        retval[i] = lhs[i] / rhs;
-    return retval;
-}
-
-template<typename T, typename U, std::size_t L, std::size_t M, std::size_t N,
-    class = typename std::enable_if<std::is_convertible<U, T>::value>::type>
-inline Matrix<typename std::common_type<T, U>::type, L, N>
-operator*(const Matrix<T, L, M>& lhs, const Matrix<U, M, N>& rhs) noexcept
-{
-    Matrix<typename std::common_type<T, U>::type, L, N> retval;
-    for(std::size_t i=0; i < L; ++i)
-        for(std::size_t j=0; j < N; ++j)
-            for(std::size_t k=0; k < M; ++k)
-                retval(i, j) += lhs(i, k) * rhs(k, j);
-    return retval;
-}
-
-template<typename realT, std::size_t R, std::size_t C>
-typename Matrix<realT, R, C>::scalar_type
-Matrix<realT, R, C>::at(const std::size_t i, const std::size_t j) const
-{
-    return this->values_.at(i * C + j);
-}
-
-template<typename realT, std::size_t R, std::size_t C>
-typename Matrix<realT, R, C>::scalar_type&
-Matrix<realT, R, C>::at(const std::size_t i, const std::size_t j)
-{
-    return this->values_.at(i * C + j);
-}
-
-template<typename realT, std::size_t R, std::size_t C>
-typename Matrix<realT, R, C>::scalar_type
-Matrix<realT, R, C>::operator()(const std::size_t i, const std::size_t j) const noexcept
-{
-    return this->values_[i * C + j];
-}
-
-template<typename realT, std::size_t R, std::size_t C>
-typename Matrix<realT, R, C>::scalar_type&
-Matrix<realT, R, C>::operator()(const std::size_t i, const std::size_t j) noexcept
-{
-    return this->values_[i * C + j];
-}
-
-template<typename realT, std::size_t R, std::size_t C>
-Matrix<realT, C, R> transpose(const Matrix<realT, R, C>& mat) noexcept
-{
-    Matrix<realT, C, R> retval;
-    for(std::size_t i=0; i<R; ++i)
-        for(std::size_t j=0; j<C; ++j)
-            retval(j, i) = mat(i, j);
-    return retval;
-}
-
-template<typename charT, typename traits,
-         typename realT, std::size_t R, std::size_t C>
+template<typename T, std::size_t R, std::size_t C,
+         typename charT, typename traits>
 std::basic_ostream<charT, traits>&
-operator<<(std::basic_ostream<charT, traits>& os, const Matrix<realT, R, C>& m)
+operator<<(std::basic_ostream<charT, traits>& os, const Matrix<T, R, C>& rhs)
 {
-    os << "(";
+    os << '(';
     for(std::size_t i=0; i<R*C; ++i)
-        os << m[i] << " ";
-    os << ")";
+    {
+        os << i;
+        if(i!=R*C-1){os << ", ";}
+    }
+    os << ')';
     return os;
 }
 
-// for 3*3 only ...
-template<typename realT>
-inline realT determinant(const Matrix<realT, 3, 3>& mat) noexcept
+// negation operator
+template<typename T, std::size_t R, std::size_t C>
+inline Matrix<T, R, C>
+operator-(const Matrix<T, R, C>& rhs) noexcept
 {
-    return mat(0,0) * mat(1,1) * mat(2,2) +
-           mat(1,0) * mat(2,1) * mat(0,2) +
-           mat(2,0) * mat(0,1) * mat(1,2) -
-           mat(0,0) * mat(2,1) * mat(1,2) -
-           mat(2,0) * mat(1,1) * mat(0,2) -
-           mat(1,0) * mat(0,1) * mat(2,2);
+    Matrix<T, R, C> retval;
+    for(std::size_t i=0; i<R*C; ++i) {retval[i] = -rhs[i];}
+    return retval;
+}
+
+template<typename T, std::size_t R, std::size_t C>
+inline Matrix<T, R, C>
+operator+(const Matrix<T, R, C>& lhs, const Matrix<T, R, C>& rhs) noexcept
+{
+    Matrix<T, R, C> retval;
+    for(std::size_t i=0; i<R*C; ++i) {retval[i] = lhs[i] + rhs[i];}
+    return retval;
+}
+template<typename T, std::size_t R, std::size_t C>
+inline Matrix<T, R, C>
+operator-(const Matrix<T, R, C>& lhs, const Matrix<T, R, C>& rhs) noexcept
+{
+    Matrix<T, R, C> retval;
+    for(std::size_t i=0; i<R*C; ++i) {retval[i] = lhs[i] - rhs[i];}
+    return retval;
+}
+
+template<typename T, typename U, std::size_t R, std::size_t C>
+inline Matrix<T, R, C>
+operator*(const Matrix<T, R, C>& lhs, const U& rhs) noexcept
+{
+    static_assert(std::is_convertible<U, T>::value, "");
+    Matrix<T, R, C> retval;
+    for(std::size_t i=0; i<R*C; ++i) {retval[i] = lhs[i] * rhs;}
+    return retval;
+}
+template<typename T, typename U, std::size_t R, std::size_t C>
+inline Matrix<T, R, C>
+operator*(const U& lhs, const Matrix<T, R, C>& rhs) noexcept
+{
+    static_assert(std::is_convertible<U, T>::value, "");
+    Matrix<T, R, C> retval;
+    for(std::size_t i=0; i<R*C; ++i) {retval[i] = lhs * rhs[i];}
+    return retval;
+}
+
+template<typename T, typename U, std::size_t R, std::size_t C>
+inline Matrix<T, R, C>
+operator/(const Matrix<T, R, C>& lhs, const U& rhs) noexcept
+{
+    static_assert(std::is_convertible<U, T>::value, "");
+    Matrix<T, R, C> retval;
+    for(std::size_t i=0; i<R*C; ++i) {retval[i] = lhs[i] / rhs;}
+    return retval;
+}
+
+template<typename T, std::size_t L, std::size_t M, std::size_t N>
+inline Matrix<T, L, N>
+operator*(const Matrix<T, L, M>& lhs, const Matrix<T, M, N>& rhs) noexcept
+{
+    Matrix<T, L, N> retval;
+    for(std::size_t i=0; i < L; ++i)
+    {
+        for(std::size_t j=0; j < N; ++j)
+        {
+            for(std::size_t k=0; k < M; ++k)
+            {
+                retval(i, j) += lhs(i, k) * rhs(k, j);
+            }
+        }
+    }
+    return retval;
+}
+
+template<typename T, std::size_t R, std::size_t C>
+Matrix<T, C, R> transpose(const Matrix<T, R, C>& mat) noexcept
+{
+    Matrix<T, C, R> retval;
+    for(std::size_t i=0; i<R; ++i)
+    {
+        for(std::size_t j=0; j<C; ++j)
+        {
+            retval(j, i) = mat(i, j);
+        }
+    }
+    return retval;
+}
+
+// ---------------------------------------------------------------------------
+// math functions...
+// ---------------------------------------------------------------------------
+
+template<typename T, std::size_t R, std::size_t C>
+inline Matrix<T, R, C>
+min(const Matrix<T, R, C>& lhs, const Matrix<T, R, C>& rhs) noexcept
+{
+    Matrix<T, R, C> retval;
+    for(std::size_t i=0; i<R*C; ++i) {retval[i] = std::min(lhs[i], rhs[i]);}
+    return retval;
+}
+template<typename T, std::size_t R, std::size_t C>
+inline Matrix<T, R, C>
+max(const Matrix<T, R, C>& lhs, const Matrix<T, R, C>& rhs) noexcept
+{
+    Matrix<T, R, C> retval;
+    for(std::size_t i=0; i<R*C; ++i) {retval[i] = std::max(lhs[i], rhs[i]);}
+    return retval;
+}
+
+template<typename T, std::size_t R, std::size_t C>
+inline Matrix<T, R, C> floor(const Matrix<T, R, C>& rhs) noexcept
+{
+    Matrix<T, R, C> retval;
+    for(std::size_t i=0; i<R*C; ++i) {retval[i] = std::floor(rhs[i]);}
+    return retval;
+}
+template<typename T, std::size_t R, std::size_t C>
+inline Matrix<T, R, C> ceil(const Matrix<T, R, C>& rhs) noexcept
+{
+    Matrix<T, R, C> retval;
+    for(std::size_t i=0; i<R*C; ++i) {retval[i] = std::ceil(rhs[i]);}
+    return retval;
+}
+
+// fmadd(a, b, c) := a * b + c
+template<typename T, std::size_t R, std::size_t C>
+inline Matrix<T, R, C>
+fmadd(const T a, const Matrix<T, R, C>& b, const Matrix<T, R, C>& c) noexcept
+{
+    Matrix<T, R, C> retval;
+    for(std::size_t i=0; i<R*C; ++i)
+    {
+        retval[i] = std::fma(a, b[i], c[i]);
+    }
+    return retval;
+}
+
+// fmsub(a, b, c) := a * b - c
+template<typename T, std::size_t R, std::size_t C>
+inline Matrix<T, R, C>
+fmsub(const T a, const Matrix<T, R, C>& b, const Matrix<T, R, C>& c) noexcept
+{
+    Matrix<T, R, C> retval;
+    for(std::size_t i=0; i<R*C; ++i)
+    {
+        retval[i] = std::fma(a, b[i], -c[i]);
+    }
+    return retval;
+}
+
+// fnmadd(a, b, c) := -a * b + c
+template<typename T, std::size_t R, std::size_t C>
+inline Matrix<T, R, C>
+fnmadd(const T a, const Matrix<T, R, C>& b, const Matrix<T, R, C>& c) noexcept
+{
+    Matrix<T, R, C> retval;
+    for(std::size_t i=0; i<R*C; ++i)
+    {
+        retval[i] = std::fma(-a, b[i], c[i]);
+    }
+    return retval;
+}
+
+// fnmsub(a, b, c) := -a * b - c
+template<typename T, std::size_t R, std::size_t C>
+inline Matrix<T, R, C>
+fnmsub(const T a, const Matrix<T, R, C>& b, const Matrix<T, R, C>& c) noexcept
+{
+    Matrix<T, R, C> retval;
+    for(std::size_t i=0; i<R*C; ++i)
+    {
+        retval[i] = -std::fma(a, b[i], c[i]);
+    }
+    return retval;
+}
+
+// ---------------------------------------------------------------------------
+// the following functions are only for 3*3 matrices ...
+// ---------------------------------------------------------------------------
+
+template<typename T>
+inline T determinant(const Matrix<T, 3, 3>& mat) noexcept
+{
+    return mat(0, 0) * mat(1, 1) * mat(2, 2) +
+           mat(1, 0) * mat(2, 1) * mat(0, 2) +
+           mat(2, 0) * mat(0, 1) * mat(1, 2) -
+           mat(0, 0) * mat(2, 1) * mat(1, 2) -
+           mat(2, 0) * mat(1, 1) * mat(0, 2) -
+           mat(1, 0) * mat(0, 1) * mat(2, 2);
 }
 
 template<typename realT>
