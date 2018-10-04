@@ -88,16 +88,25 @@ System<traitsT> read_system_from_table(const toml::Table& system)
         sys[i].velocity = get_toml_value< vec_type>(
                 params, "velocity", "element of [[system.particles]]");
         sys[i].force    = coordinate_type(0, 0, 0);
-        sys[i].name     = "XXX";
+        sys[i].name     = "X";
+        sys[i].group    = "ANON";
+
         if(params.count("name") == 1)
         {
             sys[i].name = toml::get<std::string>(params.at("name"));
         }
+        if(params.count("group") == 1)
+        {
+            sys[i].name = toml::get<std::string>(params.at("group"));
+        }
 
-        MJOLNIR_LOG_DEBUG("mass     = ", sys[i].mass    );
-        MJOLNIR_LOG_DEBUG("position = ", sys[i].position);
-        MJOLNIR_LOG_DEBUG("velocity = ", sys[i].velocity);
-        MJOLNIR_LOG_DEBUG("force    = ", sys[i].force   );
+
+        MJOLNIR_LOG_INFO("mass = ",       sys[i].mass,
+                          ", position = ", sys[i].position,
+                          ", velocity = ", sys[i].velocity,
+                          ", force = ",    sys[i].force,
+                          ", name = ",     sys[i].name,
+                          ", group = ",    sys[i].group);
     }
 
     const auto& attributes =

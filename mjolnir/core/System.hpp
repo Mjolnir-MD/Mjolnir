@@ -35,7 +35,8 @@ class System
           attributes_(), num_particles_(num_particles),
           masses_   (num_particles), rmasses_   (num_particles),
           positions_(num_particles), velocities_(num_particles),
-          forces_   (num_particles), names_     (num_particles)
+          forces_   (num_particles), names_     (num_particles),
+          groups_   (num_particles)
     {}
     ~System() = default;
 
@@ -50,28 +51,32 @@ class System
     {
         return particle_view_type{
             masses_[i],    rmasses_[i],
-            positions_[i], velocities_[i], forces_[i], names_[i]
+            positions_[i], velocities_[i], forces_[i],
+            names_[i],     groups_[i]
         };
     }
     particle_const_view_type operator[](std::size_t i) const noexcept
     {
         return particle_const_view_type{
             masses_[i],    rmasses_[i],
-            positions_[i], velocities_[i], forces_[i], names_[i]
+            positions_[i], velocities_[i], forces_[i],
+            names_[i],     groups_[i]
         };
     }
     particle_view_type at(std::size_t i)
     {
         return particle_view_type{
             masses_.at(i),    rmasses_.at(i),
-            positions_.at(i), velocities_.at(i), forces_.at(i), names_.at(i)
+            positions_.at(i), velocities_.at(i), forces_.at(i),
+            names_.at(i),     groups_.at(i)
         };
     }
     particle_const_view_type at(std::size_t i) const
     {
         return particle_const_view_type{
             masses_.at(i),    rmasses_.at(i),
-            positions_.at(i), velocities_.at(i), forces_.at(i), names_.at(i)
+            positions_.at(i), velocities_.at(i), forces_.at(i),
+            names_.at(i),     groups_.at(i)
         };
     }
 
@@ -89,6 +94,8 @@ class System
 
     static_string_type const& name(std::size_t i) const noexcept {return names_[i];}
     static_string_type&       name(std::size_t i)       noexcept {return names_[i];}
+    static_string_type const& group(std::size_t i) const noexcept {return names_[i];}
+    static_string_type&       group(std::size_t i)       noexcept {return names_[i];}
 
     boundary_type&       boundary()       noexcept {return boundary_;}
     boundary_type const& boundary() const noexcept {return boundary_;}
@@ -118,6 +125,7 @@ class System
     coordinate_container_type    velocities_;
     coordinate_container_type    forces_;
     static_string_container_type names_;
+    static_string_container_type groups_;
 };
 
 } // mjolnir

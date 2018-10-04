@@ -17,6 +17,7 @@ struct Particle
     coordinate_type    velocity;
     coordinate_type    force;
     static_string_type name;
+    static_string_type group;
 };
 
 // To use SoA data structure
@@ -46,9 +47,10 @@ class ParticleView
     ParticleView& operator=(ParticleView&&)      = default;
 
     ParticleView(real_type& m, real_type& rm,
-        coordinate_type& p, coordinate_type& v,
-        coordinate_type& f, static_string_type& n) noexcept
-        : mass(m), rmass(rm), position(p), velocity(v), force(f), name(n)
+        coordinate_type&    p, coordinate_type&    v, coordinate_type& f,
+        static_string_type& n, static_string_type& g) noexcept
+        : mass(m), rmass(rm), position(p), velocity(v), force(f),
+          name(n), group(g)
     {}
 
     ParticleView& operator=(const Particle<real_type, coordinate_type>& p)
@@ -59,6 +61,7 @@ class ParticleView
         velocity = p.velocity;
         force    = p.force;
         name     = p.name;
+        group    = p.group;
         return *this;
     }
 
@@ -68,6 +71,7 @@ class ParticleView
     coordinate_type&    velocity;
     coordinate_type&    force;
     static_string_type& name;
+    static_string_type& group;
 };
 
 template<typename realT, typename coordT>
@@ -88,8 +92,10 @@ class ParticleConstView
 
     ParticleConstView(const real_type& m, const real_type& rm,
         const coordinate_type& p, const coordinate_type& v,
-        const coordinate_type& f, const static_string_type& n) noexcept
-        : mass(m), rmass(rm), position(p), velocity(v), force(f), name(n)
+        const coordinate_type& f,
+        const static_string_type& n, const static_string_type& g) noexcept
+        : mass(m), rmass(rm), position(p), velocity(v), force(f),
+          name(n), group(g)
     {}
 
     real_type          const& mass;
@@ -98,6 +104,7 @@ class ParticleConstView
     coordinate_type    const& velocity;
     coordinate_type    const& force;
     static_string_type const& name;
+    static_string_type const& group;
 };
 
 } // mjolnir
