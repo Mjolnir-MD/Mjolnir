@@ -25,8 +25,12 @@ else()
         message(STATUS "boost 1.67.0 exists.")
         include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_67_0)
     else()
+        find_program(WGET wget)
+        if(NOT WGET)
+            message(FATAL_ERROR "wget is not installed. Can't download BOOST library.")
+        endif()
         message(STATUS "downloading Boost 1.67.0 to ./extlib/ ...")
-        execute_process(COMMAND wget https://dl.bintray.com/boostorg/release/1.67.0/source/boost_1_67_0.tar.bz2
+        execute_process(COMMAND "${WGET}" https://dl.bintray.com/boostorg/release/1.67.0/source/boost_1_67_0.tar.bz2
             WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
             RESULT_VARIABLE DOWNLOAD_BOOST_RESULT OUTPUT_QUIET ERROR_QUIET)
         if(NOT ${DOWNLOAD_BOOST_RESULT} EQUAL "0")
