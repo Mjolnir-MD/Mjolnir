@@ -29,8 +29,6 @@ class Matrix
     using reference       = value_type&;
     using const_reference = value_type const&;
     using size_type       = std::size_t;
-    using iterator        = typename storage_type::iterator;
-    using const_iterator  = typename storage_type::const_iterator;
 
   public:
     Matrix() : values_{{}}{}
@@ -53,20 +51,20 @@ class Matrix
     Matrix(const std::array<T, total_size>& rhs) noexcept
     {
         static_assert(std::is_convertible<T, value_type>::value, "");
-        std::copy(rhs.begin(), rhs.end(), this->values_.begin());
+        for(std::size_t i=0; i<total_size; ++i){this->values_[i] = rhs[i];}
     }
     template<typename T>
     Matrix(const Matrix<T, R, C>& rhs) noexcept
     {
         static_assert(std::is_convertible<T, value_type>::value, "");
-        std::copy(rhs.begin(), rhs.end(), this->begin());
+        for(std::size_t i=0; i<total_size; ++i){this->values_[i] = rhs[i];}
     }
 
     template<typename T>
     Matrix& operator=(const Matrix<T, R, C>& rhs) noexcept
     {
         static_assert(std::is_convertible<T, value_type>::value, "");
-        std::copy(rhs.begin(), rhs.end(), this->begin());
+        for(std::size_t i=0; i<total_size; ++i){this->values_[i] = rhs[i];}
     }
 
     template<typename T>
@@ -111,13 +109,6 @@ class Matrix
 
     pointer       data()       noexcept {return values_.data();}
     const_pointer data() const noexcept {return values_.data();}
-
-    iterator       begin()        noexcept {return values_.begin();}
-    iterator       end()          noexcept {return values_.end();}
-    const_iterator begin()  const noexcept {return values_.begin();}
-    const_iterator end()    const noexcept {return values_.end();}
-    const_iterator cbegin() const noexcept {return values_.cbegin();}
-    const_iterator cend()   const noexcept {return values_.cend();}
 
     bool diagnosis() const noexcept {return true;}
 
