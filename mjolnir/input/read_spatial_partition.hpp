@@ -42,7 +42,7 @@ struct celllist_dispatcher<CuboidalPeriodicBoundary<realT, coordT>, traitsT, par
 
 template<typename traitsT, typename potentialT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_spatial_partition(const toml::Table& global, potentialT pot)
+read_spatial_partition(const toml::Table& global, potentialT&& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_spatial_partition(), 0);
@@ -67,7 +67,8 @@ read_spatial_partition(const toml::Table& global, potentialT pot)
 
         return make_unique<GlobalPairInteraction<
             traitsT, potentialT, celllist_type>>(
-                std::move(pot), dispatcher::invoke(mg));
+                std::forward<potentialT>(pot),
+                dispatcher::invoke(mg));
     }
     else if(type == "VerletList")
     {
@@ -79,14 +80,16 @@ read_spatial_partition(const toml::Table& global, potentialT pot)
 
         return make_unique<GlobalPairInteraction<
             traitsT, potentialT, VerletList<traitsT, parameter_type>>>(
-                std::move(pot), VerletList<traitsT, parameter_type>(margin));
+                std::forward<potentialT>(pot),
+                VerletList<traitsT, parameter_type>(margin));
     }
     else if(type == "Naive")
     {
         MJOLNIR_SCOPE(type == "Naive", 1);
         return make_unique<GlobalPairInteraction<
             traitsT, potentialT, NaivePairCalculation<traitsT, parameter_type>>
-                >(std::move(pot), NaivePairCalculation<traitsT, parameter_type>());
+                >(std::forward<potentialT>(pot),
+                  NaivePairCalculation<traitsT, parameter_type>());
     }
     else
     {
