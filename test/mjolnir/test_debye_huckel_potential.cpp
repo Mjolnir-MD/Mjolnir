@@ -12,8 +12,10 @@ BOOST_AUTO_TEST_CASE(DH_double)
     constexpr real_type   h = 1e-6;
 
     const real_type charge = 1.0;
-    mjolnir::DebyeHuckelPotential<real_type, mjolnir::IgnoreNothing>
-        dh({charge, charge}, {});
+    mjolnir::DebyeHuckelPotential<real_type> dh(
+        {charge, charge}, {}, mjolnir::IgnoreChain<typename
+            mjolnir::Topology::chain_id_type>("Nothing")
+        );
 
     const real_type x_min = 0.5 * dh.debye_length();
     const real_type x_max = dh.max_cutoff_length();
@@ -38,7 +40,10 @@ BOOST_AUTO_TEST_CASE(DH_float)
     constexpr static real_type h    = 1e-2;
 
     const real_type charge = 1.0;
-    mjolnir::DebyeHuckelPotential<real_type, mjolnir::IgnoreNothing> dh({charge, charge}, {});
+    mjolnir::DebyeHuckelPotential<real_type> dh(
+        {charge, charge}, {}, mjolnir::IgnoreChain<typename
+            mjolnir::Topology::chain_id_type>("Nothing")
+        );
 
     const real_type x_min = 0.5 * dh.debye_length();
     const real_type x_max = dh.max_cutoff_length();

@@ -1,8 +1,8 @@
 #ifndef MJOLNIR_LENNARD_JONES_POTENTIAL
 #define MJOLNIR_LENNARD_JONES_POTENTIAL
+#include <mjolnir/potential/global/IgnoreChain.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>
-#include <mjolnir/potential/global/ChainIgnoration.hpp>
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -14,18 +14,19 @@ namespace mjolnir
  * designed for global force field.                                        *
  * V(r)  =  4. * epsilon * ((r/sigma)^12 - (r/sigma)^6))                   *
  * dV/dr = 24. * epsilon / r * ((r/sigma)^6 - 2 * (r/sigma)^12)            */
-template<typename realT, typename ChainIgnoration>
+template<typename realT>
 class LennardJonesPotential
 {
   public:
     using real_type = realT;
     using parameter_type = std::pair<real_type, real_type>; // {sigma, epsilon}
     using container_type = std::vector<parameter_type>;
+
     // topology stuff
-    using topology_type  = Topology;
-    using chain_id_type  = typename topology_type::chain_id_type;
-    using connection_kind_type  = typename topology_type::connection_kind_type;
-    using chain_ignoration_type = ChainIgnoration;
+    using topology_type        = Topology;
+    using chain_id_type        = typename topology_type::chain_id_type;
+    using connection_kind_type = typename topology_type::connection_kind_type;
+    using ignore_chain_type    = IgnoreChain<chain_id_type>;
 
     // rc = 2.5 * sigma
     constexpr static real_type cutoff_ratio = 2.5;
@@ -36,14 +37,11 @@ class LennardJonesPotential
 
   public:
 
-    LennardJonesPotential(const std::vector<parameter_type>& radii,
-        const std::map<connection_kind_type, std::size_t>& exclusions)
-        : radii_(radii), ignored_chain_(),
-          ignore_within_(exclusions.begin(), exclusions.end())
-    {}
-    LennardJonesPotential(std::vector<parameter_type>&& radii,
-        const std::map<connection_kind_type, std::size_t>& exclusions)
-        : radii_(std::move(radii)), ignored_chain_(),
+    LennardJonesPotential(std::vector<parameter_type> radii,
+        const std::map<connection_kind_type, std::size_t>& exclusions,
+        ignore_chain_type ignore_chain)
+        : radii_(std::move(radii)),
+          ignore_chain_(std::move(ignore_chain)),
           ignore_within_(exclusions.begin(), exclusions.end())
     {}
     ~LennardJonesPotential() = default;
@@ -120,7 +118,7 @@ class LennardJonesPotential
     bool is_ignored_chain(
             const chain_id_type& i, const chain_id_type& j) const noexcept
     {
-        return ignored_chain_.is_ignored(i, j);
+        return ignore_chain_.is_ignored(i, j);
     }
 
     static const char* name() noexcept {return "LennardJones";}
@@ -133,12 +131,12 @@ class LennardJonesPotential
 
     container_type radii_;
 
-    chain_ignoration_type ignored_chain_;
+    ignore_chain_type ignore_chain_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 };
-template<typename realT, typename ignoreT>
-constexpr typename LennardJonesPotential<realT, ignoreT>::real_type
-LennardJonesPotential<realT, ignoreT>::cutoff_ratio;
+template<typename realT>
+constexpr typename LennardJonesPotential<realT>::real_type
+LennardJonesPotential<realT>::cutoff_ratio;
 
 } // mjolnir
 #endif /* MJOLNIR_LENNARD_JONES_POTENTIAL */

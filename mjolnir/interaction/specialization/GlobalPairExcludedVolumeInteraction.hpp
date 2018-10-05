@@ -9,10 +9,10 @@ namespace mjolnir
 {
 
 // specialization for Pair<ExcludedVolume>
-template<typename traitsT, typename partitionT, typename ignored_chainT>
+template<typename traitsT, typename partitionT>
 class GlobalPairInteraction<
     traitsT,
-    ExcludedVolumePotential<typename traitsT::real_type, ignored_chainT>,
+    ExcludedVolumePotential<typename traitsT::real_type>,
     partitionT
     > final : public GlobalInteractionBase<traitsT>
 {
@@ -21,8 +21,7 @@ class GlobalPairInteraction<
     using traits_type     = traitsT;
     using partition_type  = partitionT;
     using base_type       = GlobalInteractionBase<traits_type>;
-    using potential_type  =
-        ExcludedVolumePotential<typename traitsT::real_type, ignored_chainT>;
+    using potential_type  = ExcludedVolumePotential<typename traitsT::real_type>;
 
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;

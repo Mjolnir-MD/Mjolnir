@@ -1,8 +1,8 @@
 #ifndef MJOLNIR_DEBYE_HUCKEL_POTENTIAL
 #define MJOLNIR_DEBYE_HUCKEL_POTENTIAL
+#include <mjolnir/potential/global/IgnoreChain.hpp>
 #include <mjolnir/core/constants.hpp>
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/potential/global/ChainIgnoration.hpp>
 #include <mjolnir/math/constants.hpp>
 #include <vector>
 #include <cmath>
@@ -10,34 +10,30 @@
 namespace mjolnir
 {
 
-template<typename realT, typename ChainIgnoration>
+template<typename realT>
 class DebyeHuckelPotential
 {
   public:
     using real_type             = realT;
     using parameter_type        = real_type;
     using container_type        = std::vector<parameter_type>;
-    using chain_ignoration_type = ChainIgnoration;
+
+    // topology stuff
     using topology_type         = Topology;
     using chain_id_type         = typename topology_type::chain_id_type;
     using connection_kind_type  = typename topology_type::connection_kind_type;
+    using ignore_chain_type     = IgnoreChain<chain_id_type>;
 
     // r_cutoff = cutoff_ratio * debye_length
     static constexpr real_type cutoff_ratio = 5.5;
 
   public:
 
-    DebyeHuckelPotential(const container_type& charges,
-        const std::map<connection_kind_type, std::size_t>& exclusions)
-        : charges_(charges), temperature_(300.0), ion_conc_(0.1),
-          ignore_within_(exclusions.begin(), exclusions.end())
-    {
-        // XXX should be updated before use because T and ion conc are default!
-        this->calc_parameters();
-    }
-    DebyeHuckelPotential(container_type&& charges,
-        const std::map<connection_kind_type, std::size_t>& exclusions)
+    DebyeHuckelPotential(container_type charges,
+        const std::map<connection_kind_type, std::size_t>& exclusions,
+        ignore_chain_type ignore_chain)
         : charges_(std::move(charges)), temperature_(300.0), ion_conc_(0.1),
+          ignore_chain_ (std::move(ignore_chain_)),
           ignore_within_(exclusions.begin(), exclusions.end())
     {
         // XXX should be updated before use because T and ion conc are default!
@@ -95,7 +91,7 @@ class DebyeHuckelPotential
     bool is_ignored_chain(
             const chain_id_type& i, const chain_id_type& j) const noexcept
     {
-        return ignored_chain_.is_ignored(i, j);
+        return ignore_chain_.is_ignored(i, j);
     }
 
     static const char* name() noexcept {return "DebyeHuckel";}
@@ -143,13 +139,13 @@ class DebyeHuckelPotential
     real_type inv_debye_length_;
     container_type charges_;
 
-    chain_ignoration_type ignored_chain_;
+    ignore_chain_type ignore_chain_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 };
 
-template<typename realT, typename ignoreT>
-constexpr typename DebyeHuckelPotential<realT, ignoreT>::real_type
-DebyeHuckelPotential<realT, ignoreT>::cutoff_ratio;
+template<typename realT>
+constexpr typename DebyeHuckelPotential<realT>::real_type
+DebyeHuckelPotential<realT>::cutoff_ratio;
 
 } // mjolnir
 #endif /* MJOLNIR_DEBYE_HUCKEL_POTENTIAL */

@@ -9,9 +9,9 @@ namespace mjolnir
 {
 
 // specialization for GlobalPair<LennardJones>
-template<typename traitsT, typename partitionT, typename ignored_chainT>
+template<typename traitsT, typename partitionT>
 class GlobalPairInteraction<traitsT,
-    LennardJonesPotential<typename traitsT::real_type, ignored_chainT>,
+    LennardJonesPotential<typename traitsT::real_type>,
     partitionT
     > final : public GlobalInteractionBase<traitsT>
 {
@@ -20,8 +20,7 @@ class GlobalPairInteraction<traitsT,
     using traits_type     = traitsT;
     using partition_type  = partitionT;
     using base_type       = GlobalInteractionBase<traits_type>;
-    using potential_type  =
-        LennardJonesPotential<typename traitsT::real_type, ignored_chainT>;
+    using potential_type  = LennardJonesPotential<typename traitsT::real_type>;
 
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;

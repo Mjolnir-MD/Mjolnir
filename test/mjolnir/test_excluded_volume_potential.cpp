@@ -11,12 +11,14 @@ BOOST_AUTO_TEST_CASE(EXV_double)
 
     const real_type sigma   = 3.0;
     const real_type epsilon = 1.0;
-    mjolnir::ExcludedVolumePotential<real_type, mjolnir::IgnoreNothing>
-        exv{epsilon, {sigma, sigma}, {}};
+    mjolnir::ExcludedVolumePotential<real_type> exv{
+        epsilon, {sigma, sigma}, {}, mjolnir::IgnoreChain<typename
+            mjolnir::Topology::chain_id_type>("Nothing")
+    };
 
     const real_type x_min = 0.8 * sigma;
     const real_type x_max =
-        mjolnir::ExcludedVolumePotential<real_type, mjolnir::IgnoreNothing>::cutoff_ratio * sigma;
+        mjolnir::ExcludedVolumePotential<real_type>::cutoff_ratio * sigma;
     const real_type dx = (x_max - x_min) / N;
 
     for(std::size_t i=0; i<N; ++i)
@@ -41,10 +43,12 @@ BOOST_AUTO_TEST_CASE(EXV_float)
     const real_type sigma   = 3.0;
     const real_type epsilon = 1.0;
 
-    mjolnir::ExcludedVolumePotential<real_type, mjolnir::IgnoreNothing>
-        exv{epsilon, {sigma, sigma}, {}};
+    mjolnir::ExcludedVolumePotential<real_type> exv{
+        epsilon, {sigma, sigma}, {}, mjolnir::IgnoreChain<typename
+            mjolnir::Topology::chain_id_type>("Nothing")
+    };
     constexpr real_type cutoff =
-        mjolnir::ExcludedVolumePotential<real_type, mjolnir::IgnoreNothing>::cutoff_ratio;
+        mjolnir::ExcludedVolumePotential<real_type>::cutoff_ratio;
 
     const real_type x_min = 0.8f   * sigma;
     const real_type x_max = cutoff * sigma;

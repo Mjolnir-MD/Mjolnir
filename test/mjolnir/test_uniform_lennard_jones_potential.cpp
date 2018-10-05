@@ -12,11 +12,12 @@ BOOST_AUTO_TEST_CASE(LennardJones_double)
 
     constexpr real_type sigma   = 3.0;
     constexpr real_type epsilon = 1.0;
-    mjolnir::UniformLennardJonesPotential<real_type, mjolnir::IgnoreNothing> lj{
-        sigma, epsilon, {}
+    mjolnir::UniformLennardJonesPotential<real_type> lj{
+        sigma, epsilon, {},
+        mjolnir::IgnoreChain<typename mjolnir::Topology::chain_id_type>("Nothing")
     };
-    constexpr real_type cutoff = mjolnir::UniformLennardJonesPotential<
-        real_type, mjolnir::IgnoreNothing>::cutoff_ratio;
+    constexpr real_type cutoff =
+        mjolnir::UniformLennardJonesPotential<real_type>::cutoff_ratio;
 
     const real_type x_min = 0.8 * sigma;
     const real_type x_max = cutoff * sigma;
@@ -43,11 +44,12 @@ BOOST_AUTO_TEST_CASE(LennardJones_float)
 
     constexpr real_type sigma   = 3.0;
     constexpr real_type epsilon = 1.0;
-    mjolnir::UniformLennardJonesPotential<real_type, mjolnir::IgnoreNothing> lj{
-        sigma, epsilon, {}
+    mjolnir::UniformLennardJonesPotential<real_type> lj{
+        sigma, epsilon, {},
+        mjolnir::IgnoreChain<typename mjolnir::Topology::chain_id_type>("Nothing")
     };
-    constexpr real_type cutoff = mjolnir::UniformLennardJonesPotential<
-        real_type, mjolnir::IgnoreNothing>::cutoff_ratio;
+    constexpr real_type cutoff =
+        mjolnir::UniformLennardJonesPotential<real_type>::cutoff_ratio;
 
     const real_type x_min = 0.8 * sigma;
     const real_type x_max = cutoff * sigma;

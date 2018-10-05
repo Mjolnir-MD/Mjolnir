@@ -1,9 +1,9 @@
 #ifndef MJOLNIR_UNIFORM_LENNARD_JONES_POTENTIAL
 #define MJOLNIR_UNIFORM_LENNARD_JONES_POTENTIAL
+#include <mjolnir/potential/global/IgnoreChain.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/empty.hpp>
-#include <mjolnir/potential/global/ChainIgnoration.hpp>
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -15,7 +15,7 @@ namespace mjolnir
  *         each particles.                                                 *
  * V(r)  =  4. * epsilon * ((r/sigma)^12 - (r/sigma)^6))                   *
  * dV/dr = 24. * epsilon / r * ((r/sigma)^6 - 2 * (r/sigma)^12)            */
-template<typename realT, typename ChainIgnoration>
+template<typename realT>
 class UniformLennardJonesPotential
 {
   public:
@@ -24,10 +24,10 @@ class UniformLennardJonesPotential
     using container_type = empty_t;
 
     // topology stuff
-    using topology_type  = Topology;
-    using chain_id_type  = typename topology_type::chain_id_type;
-    using connection_kind_type  = typename topology_type::connection_kind_type;
-    using chain_ignoration_type = ChainIgnoration;
+    using topology_type        = Topology;
+    using chain_id_type        = typename topology_type::chain_id_type;
+    using connection_kind_type = typename topology_type::connection_kind_type;
+    using ignore_chain_type    = IgnoreChain<chain_id_type>;
 
     // rc = 2.5 * sigma
     constexpr static real_type cutoff_ratio = 2.5;
@@ -39,9 +39,11 @@ class UniformLennardJonesPotential
   public:
 
     UniformLennardJonesPotential(const real_type sgm, const real_type eps,
-        const std::map<connection_kind_type, std::size_t>& exclusions)
+        const std::map<connection_kind_type, std::size_t>& exclusions,
+        ignore_chain_type ignore_chain)
         : sigma_(sgm), epsilon_(eps), r_cut_(sgm * cutoff_ratio),
-          ignored_chain_(), ignore_within_(exclusions.begin(), exclusions.end())
+          ignore_chain_(std::move(ignore_chain)),
+          ignore_within_(exclusions.begin(), exclusions.end())
     {}
     ~UniformLennardJonesPotential() = default;
 
@@ -103,7 +105,7 @@ class UniformLennardJonesPotential
     bool is_ignored_chain(
             const chain_id_type& i, const chain_id_type& j) const noexcept
     {
-        return ignored_chain_.is_ignored(i, j);
+        return ignore_chain_.is_ignored(i, j);
     }
 
     static const char* name() noexcept {return "LennardJones";}
@@ -118,13 +120,13 @@ class UniformLennardJonesPotential
 
     real_type sigma_, epsilon_, r_cut_;
 
-    chain_ignoration_type ignored_chain_;
+    ignore_chain_type ignore_chain_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 };
 
-template<typename traitsT, typename ignoreT>
-constexpr typename UniformLennardJonesPotential<traitsT, ignoreT>::real_type
-UniformLennardJonesPotential<traitsT, ignoreT>::cutoff_ratio;
+template<typename traitsT>
+constexpr typename UniformLennardJonesPotential<traitsT>::real_type
+UniformLennardJonesPotential<traitsT>::cutoff_ratio;
 
 } // mjolnir
 #endif /* MJOLNIR_LENNARD_JONES_POTENTIAL */

@@ -16,7 +16,9 @@
 #include <mjolnir/potential/external/ImplicitMembranePotential.hpp>
 #include <mjolnir/potential/external/LennardJonesWallPotential.hpp>
 #include <mjolnir/potential/external/ExcludedVolumeWallPotential.hpp>
+#include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
+#include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
@@ -293,13 +295,44 @@ read_local_potentials(const toml::Table& local,
 // global potential
 // ============================================================================
 
-template<typename realT, typename ignoreT>
-ExcludedVolumePotential<realT, ignoreT>
+inline IgnoreChain<typename Topology::chain_id_type>
+read_ignored_chain(const std::string& ignored_chain)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_ignored_chain(), 0);
+
+    if(ignored_chain == "Nothing")
+    {
+        MJOLNIR_LOG_INFO("all the interactions(both (inter|intra)-chain) are included");
+        return make_unique<IgnoreNothing<typename Topology::chain_id_type>>();
+    }
+    else if(ignored_chain == "Self")
+    {
+        MJOLNIR_LOG_INFO("intra-chain interaction is ignored");
+        return make_unique<IgnoreSelf<typename Topology::chain_id_type>>();
+    }
+    else if(ignored_chain == "Others")
+    {
+        MJOLNIR_LOG_INFO("inter-chain interaction is ignored");
+        return make_unique<IgnoreOthers<typename Topology::chain_id_type>>();
+    }
+    else
+    {
+        throw_exception<std::runtime_error>("invalid `ignored_chain`: ",
+            ignored_chain, ". allowed: Nothing, Self, or Others.");
+    }
+}
+
+template<typename realT>
+ExcludedVolumePotential<realT>
 read_excluded_volume_potential(const toml::Table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_excluded_volume_potential(), 0);
     using real_type = realT;
+
+    auto ignored_chain = read_ignored_chain(get_toml_value<std::string>(
+        global, "ignored_chain", "[forcefield.global] for ExcludedVolume"));
 
     const auto& ignored_connections = get_toml_value<toml::Table>(
         global, "ignored_connections", "[forcefield.global] for ExcludedVolume");
@@ -340,17 +373,20 @@ read_excluded_volume_potential(const toml::Table& global)
         params.at(idx) = radius;
     }
 
-    return ExcludedVolumePotential<realT, ignoreT>(
-            eps, std::move(params), connections);
+    return ExcludedVolumePotential<realT>(
+        eps, std::move(params), connections, std::move(ignored_chain));
 }
 
-template<typename realT, typename ignoreT>
-LennardJonesPotential<realT, ignoreT>
+template<typename realT>
+LennardJonesPotential<realT>
 read_lennard_jones_potential(const toml::Table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_lennard_jones_potential(), 0);
     using real_type = realT;
+
+    auto ignored_chain = read_ignored_chain(get_toml_value<std::string>(
+        global, "ignored_chain", "[forcefield.global] for LennardJones"));
 
     const auto& ignored_connections = get_toml_value<toml::Table>(
         global, "ignored_connections", "[forcefield.global] for Lennard-Jones");
@@ -390,17 +426,20 @@ read_lennard_jones_potential(const toml::Table& global)
         params.at(idx) = std::make_pair(sigma, epsilon);
     }
 
-    return LennardJonesPotential<realT, ignoreT>(
-            std::move(params), connections);
+    return LennardJonesPotential<realT>(
+            std::move(params), connections, std::move(ignored_chain));
 }
 
-template<typename realT, typename ignoreT>
-UniformLennardJonesPotential<realT, ignoreT>
+template<typename realT>
+UniformLennardJonesPotential<realT>
 read_uniform_lennard_jones_potential(const toml::Table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_uniform_lennard_jones_potential(), 0);
     using real_type = realT;
+
+    auto ignored_chain = read_ignored_chain(get_toml_value<std::string>(
+        global, "ignored_chain", "[forcefield.global] for UniformLennardJones"));
 
     const auto& ignored_connections = get_toml_value<toml::Table>(
         global, "ignored_connections", "[forcefield.global] for Lennard-Jones");
@@ -423,16 +462,20 @@ read_uniform_lennard_jones_potential(const toml::Table& global)
     MJOLNIR_LOG_INFO("sigma   = ", sigma);
     MJOLNIR_LOG_INFO("epsilon = ", epsilon);
 
-    return UniformLennardJonesPotential<realT, ignoreT>(sigma, epsilon, connections);
+    return UniformLennardJonesPotential<realT>(
+            sigma, epsilon, connections, std::move(ignored_chain));
 }
 
-template<typename realT, typename ignoreT>
-DebyeHuckelPotential<realT, ignoreT>
+template<typename realT>
+DebyeHuckelPotential<realT>
 read_debye_huckel_potential(const toml::Table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_debye_huckel_potential(), 0);
     using real_type = realT;
+
+    auto ignored_chain = read_ignored_chain(get_toml_value<std::string>(
+        global, "ignored_chain", "[forcefield.global] for DebyeHuckel"));
 
     const auto& ignored_connections = get_toml_value<toml::Table>(
         global, "ignored_connections", "[forcefield.global] for ExcludedVolume");
@@ -467,8 +510,8 @@ read_debye_huckel_potential(const toml::Table& global)
         params.at(idx) = charge;
     }
 
-    return DebyeHuckelPotential<realT, ignoreT>(
-            std::move(params), connections);
+    return DebyeHuckelPotential<realT>(
+            std::move(params), connections, std::move(ignored_chain));
 }
 
 // ---------------------------------------------------------------------------

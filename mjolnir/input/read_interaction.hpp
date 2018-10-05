@@ -181,7 +181,7 @@ read_dihedral_angle_interaction(
 // global interaction
 // ----------------------------------------------------------------------------
 
-template<typename traitsT, typename ignoreT>
+template<typename traitsT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_global_pair_interaction(const toml::Table& global)
 {
@@ -195,34 +195,34 @@ read_global_pair_interaction(const toml::Table& global)
     if(potential == "ExcludedVolume")
     {
         MJOLNIR_SCOPE(potential == "ExcludedVolume", 1);
-        using potential_t = ExcludedVolumePotential<real_type, ignoreT>;
+        using potential_t = ExcludedVolumePotential<real_type>;
 
         return read_spatial_partition<traitsT, potential_t>(
-            global, read_excluded_volume_potential<real_type, ignoreT>(global));
+            global, read_excluded_volume_potential<real_type>(global));
     }
     else if(potential == "DebyeHuckel")
     {
         MJOLNIR_SCOPE(potential == "DebyeHuckel", 1);
-        using potential_t = DebyeHuckelPotential<real_type, ignoreT>;
+        using potential_t = DebyeHuckelPotential<real_type>;
 
         return read_spatial_partition<traitsT, potential_t>(
-            global, read_debye_huckel_potential<real_type, ignoreT>(global));
+            global, read_debye_huckel_potential<real_type>(global));
     }
     else if(potential == "LennardJones")
     {
         MJOLNIR_SCOPE(potential == "LennardJones", 1);
-        using potential_t = LennardJonesPotential<real_type, ignoreT>;
+        using potential_t = LennardJonesPotential<real_type>;
 
         return read_spatial_partition<traitsT, potential_t>(
-            global, read_lennard_jones_potential<real_type, ignoreT>(global));
+            global, read_lennard_jones_potential<real_type>(global));
     }
     else if(potential == "UniformLennardJones")
     {
         MJOLNIR_SCOPE(potential == "UniformLennardJones", 1);
-        using potential_t = UniformLennardJonesPotential<real_type, ignoreT>;
+        using potential_t = UniformLennardJonesPotential<real_type>;
 
         return read_spatial_partition<traitsT, potential_t>(
-            global, read_uniform_lennard_jones_potential<real_type, ignoreT>(global));
+            global, read_uniform_lennard_jones_potential<real_type>(global));
     }
     else
     {
@@ -403,31 +403,11 @@ read_global_interaction(const toml::Table& global)
     MJOLNIR_SCOPE(read_global_interaction(), 0);
     const auto interaction = get_toml_value<std::string>(
             global, "interaction", "[forcefields.global]");
-    const auto ignored_chain = get_toml_value<std::string>(
-            global, "ignored_chain", "[forcefields.global]");
 
     if(interaction == "Pair")
     {
         MJOLNIR_LOG_INFO("Pair interaction found");
-        if(ignored_chain == "Nothing")
-        {
-            MJOLNIR_LOG_INFO("all the interactions(both (inter|intra)-chain) are included");
-            return read_global_pair_interaction<traitsT, IgnoreNothing>(global);
-        }
-        else if(ignored_chain == "Self")
-        {
-            MJOLNIR_LOG_INFO("intra-chain interaction is ignored");
-            return read_global_pair_interaction<traitsT, IgnoreSelf>(global);
-        }
-        else if(ignored_chain == "Others")
-        {
-            MJOLNIR_LOG_INFO("inter-chain interaction is ignored");
-            return read_global_pair_interaction<traitsT, IgnoreOthers>(global);
-        }
-        else
-        {
-            throw std::runtime_error("invalid `ignored_chain`: " + ignored_chain);
-        }
+        return read_global_pair_interaction<traitsT>(global);
     }
     else
     {

@@ -1,9 +1,10 @@
 #ifndef MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
 #define MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
+#include <mjolnir/potential/global/IgnoreChain.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>
-#include <mjolnir/potential/global/ChainIgnoration.hpp>
 #include <algorithm>
+#include <memory>
 #include <cmath>
 
 namespace mjolnir
@@ -12,7 +13,7 @@ namespace mjolnir
 /*! @brief excluded volume potential        *
  *  V(r) = epsilon * (sigma/r)^12           *
  * dV/dr = -12 * epsilon * (sigma/r)^12 / r */
-template<typename realT, typename ChainIgnoration>
+template<typename realT>
 class ExcludedVolumePotential
 {
   public:
@@ -24,8 +25,8 @@ class ExcludedVolumePotential
     // topology stuff
     using topology_type = Topology;
     using chain_id_type = typename topology_type::chain_id_type;
-    using connection_kind_type  = typename topology_type::connection_kind_type;
-    using chain_ignoration_type = ChainIgnoration;
+    using connection_kind_type = typename topology_type::connection_kind_type;
+    using ignore_chain_type = IgnoreChain<chain_id_type>;
 
     // rc = 2.0 * sigma
     constexpr static real_type cutoff_ratio = 2.0;
@@ -36,18 +37,15 @@ class ExcludedVolumePotential
 
   public:
 
-    ExcludedVolumePotential(const real_type eps, const container_type& params,
-        const std::map<connection_kind_type, std::size_t>& exclusions)
-        : epsilon_(eps), radii_(params), ignored_chain_(),
-          ignore_within_(exclusions.begin(), exclusions.end())
-    {}
-    ExcludedVolumePotential(const real_type eps, container_type&& params,
-        const std::map<connection_kind_type, std::size_t>& exclusions)
-        : epsilon_(eps), radii_(std::move(params)), ignored_chain_(),
+    ExcludedVolumePotential(const real_type eps, container_type params,
+        const std::map<connection_kind_type, std::size_t>& exclusions,
+        ignore_chain_type ignore_chain)
+        : epsilon_(eps),
+          radii_(std::move(params)),
+          ignore_chain_(std::move(ignore_chain)),
           ignore_within_(exclusions.begin(), exclusions.end())
     {}
     ~ExcludedVolumePotential() = default;
-
     ExcludedVolumePotential(const ExcludedVolumePotential&) = default;
     ExcludedVolumePotential(ExcludedVolumePotential&&)      = default;
     ExcludedVolumePotential& operator=(const ExcludedVolumePotential&) = default;
@@ -110,7 +108,7 @@ class ExcludedVolumePotential
     bool is_ignored_chain(
             const chain_id_type& i, const chain_id_type& j) const noexcept
     {
-        return ignored_chain_.is_ignored(i, j);
+        return ignore_chain_.is_ignored(i, j);
     }
 
     static const char* name() noexcept {return "ExcludedVolume";}
@@ -126,13 +124,13 @@ class ExcludedVolumePotential
     real_type epsilon_;
     std::vector<real_type> radii_;
 
-    chain_ignoration_type ignored_chain_;
+    ignore_chain_type ignore_chain_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 };
 
-template<typename realT, typename ignoreT>
-constexpr typename ExcludedVolumePotential<realT, ignoreT>::real_type
-ExcludedVolumePotential<realT, ignoreT>::cutoff_ratio;
+template<typename realT>
+constexpr typename ExcludedVolumePotential<realT>::real_type
+ExcludedVolumePotential<realT>::cutoff_ratio;
 
 } // mjolnir
 #endif /* MJOLNIR_EXCLUDED_VOLUME_POTENTIAL */
