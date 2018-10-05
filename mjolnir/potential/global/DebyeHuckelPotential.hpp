@@ -33,7 +33,7 @@ class DebyeHuckelPotential
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_chain_type ignore_chain)
         : charges_(std::move(charges)), temperature_(300.0), ion_conc_(0.1),
-          ignore_chain_ (std::move(ignore_chain_)),
+          ignore_chain_ (std::move(ignore_chain)),
           ignore_within_(exclusions.begin(), exclusions.end())
     {
         // XXX should be updated before use because T and ion conc are default!
