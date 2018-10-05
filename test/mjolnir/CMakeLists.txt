@@ -1,11 +1,12 @@
 set(TEST_NAMES
     test_matrix
     test_vector
+    test_math
+    test_unit
     test_range
     test_throw_exception
     test_static_string
     test_topology
-    test_math
     test_harmonic_potential
     test_gaussian_potential
     test_angular_gaussian_potential
