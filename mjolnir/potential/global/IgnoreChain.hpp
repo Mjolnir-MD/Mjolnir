@@ -4,6 +4,17 @@
 #include <string>
 #include <memory>
 
+// In some case, we need to ignore intra- or inter-chain interaction.
+// For example, consider you have an elastic network model and charges on it
+// that are tuned to reproduce the electrostatic potentials around the native
+// structure. In that case, the electrostatic interaction should not be applied
+// for the intra-chain pairs to avoid double-counting because the elastic
+// network potential is modeled as a sum of all the intra-chain interactions.
+//     IgnoreChain provides you a way to specify the rule to determine ignored
+// pairs of particles. If you specify IgnoreSelf, all the intra-chain
+// interactions would be ignored. IgnoreOthers ignores inter-chain interactions.
+// Clearly, IgnoreNothing ignores nothing.
+
 namespace mjolnir
 {
 
