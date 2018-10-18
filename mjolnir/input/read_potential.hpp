@@ -18,6 +18,7 @@
 #include <mjolnir/potential/external/ExcludedVolumeWallPotential.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
+#include <mjolnir/util/string.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/logger.hpp>
 
@@ -66,7 +67,8 @@ GaussianPotential<realT> read_gaussian_potential(const toml::Table& param)
 
     const auto v0    = get_toml_value<real_type>(param, "v0",    location);
     const auto k     = get_toml_value<real_type>(param, "k",     location);
-    const auto sigma = get_toml_value<real_type>(param, "sigma", location);
+    const auto sigma =
+        get_toml_value<real_type>(param, {"sigma"_str, u8"σ"_str}, location);
 
     MJOLNIR_LOG_INFO("GaussianPotential = {v0 = ", v0, ", k = ", k,
                      ", sigma = ", sigma, '}');
@@ -84,7 +86,8 @@ read_angular_gaussian_potential(const toml::Table& param)
 
     const auto v0    = get_toml_value<real_type>(param, "v0",    location);
     const auto k     = get_toml_value<real_type>(param, "k",     location);
-    const auto sigma = get_toml_value<real_type>(param, "sigma", location);
+    const auto sigma =
+        get_toml_value<real_type>(param, {"sigma"_str, u8"σ"_str}, location);
 
     MJOLNIR_LOG_INFO("AngularGaussianPotential = {v0 = ", v0, ", k = ", k,
                      ", sigma = ", sigma, '}');
