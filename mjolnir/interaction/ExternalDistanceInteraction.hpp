@@ -57,7 +57,7 @@ class ExternalDistanceInteraction final
     }
 
     std::string name() const override
-    {return "ExternalDistance:"_str + potential_.name();}
+    {return "ExternalDistance:"_s + potential_.name();}
 
   private:
 

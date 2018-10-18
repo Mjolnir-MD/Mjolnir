@@ -64,7 +64,7 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
     }
 
     std::string name() const override
-    {return "BondLength:"_str + potential_type::name();}
+    {return "BondLength:"_s + potential_type::name();}
 
     void write_topology(topology_type&) const override;
 
