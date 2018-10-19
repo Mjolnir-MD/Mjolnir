@@ -424,8 +424,8 @@ read_lennard_jones_potential(const toml::Table& global)
             const std::pair<real_type, real_type> dummy{0., 0.};
             params.resize(idx+1, dummy);
         }
-        const auto sigma   = get_toml_value<real_type>(tab, "sigma", parameters);
-        const auto epsilon = get_toml_value<real_type>(tab, "epsilon", parameters);
+        const auto sigma   = get_toml_value<real_type>(tab, {"sigma"_s,   u8"σ"_s}, parameters);
+        const auto epsilon = get_toml_value<real_type>(tab, {"epsilon"_s, u8"ε"_s}, parameters);
         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma, ", epsilon = ", epsilon);
 
         params.at(idx) = std::make_pair(sigma, epsilon);
@@ -460,8 +460,8 @@ read_uniform_lennard_jones_potential(const toml::Table& global)
                          "be ignored");
     }
 
-    const auto sigma   = get_toml_value<real_type>(global, "sigma",   location);
-    const auto epsilon = get_toml_value<real_type>(global, "epsilon", location);
+    const auto sigma   = get_toml_value<real_type>(global, {"sigma"_s,   u8"σ"_s}, location);
+    const auto epsilon = get_toml_value<real_type>(global, {"epsilon"_s, u8"ε"_s}, location);
 
     MJOLNIR_LOG_INFO("sigma   = ", sigma);
     MJOLNIR_LOG_INFO("epsilon = ", epsilon);
@@ -590,8 +590,8 @@ read_lennard_jones_wall_potential(const toml::Table& external)
     {
         const auto& tab = param.cast<toml::value_t::Table>();
         const auto idx = get_toml_value<std::size_t>(tab, "index", parameters);
-        const auto s = get_toml_value<real_type>(tab, "sigma", parameters);
-        const auto e = get_toml_value<real_type>(tab, "epsilon", parameters);
+        const auto s = get_toml_value<real_type>(tab, {"sigma"_s,   u8"σ"_s}, parameters);
+        const auto e = get_toml_value<real_type>(tab, {"epsilon"_s, u8"ε"_s}, parameters);
         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", s, ", epsilon = ", e);
 
         if(params.size() <= idx)
@@ -627,7 +627,7 @@ read_excluded_volume_wall_potential(const toml::Table& external)
     {
         const auto& tab = param.cast<toml::value_t::Table>();
         const auto idx = get_toml_value<std::size_t>(tab, "index", parameters);
-        const auto s = get_toml_value<real_type>(tab, "sigma", parameters);
+        const auto s = get_toml_value<real_type>(tab, {"sigma"_s, u8"σ"_s}, parameters);
         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", s);
 
         if(params.size() <= idx)
