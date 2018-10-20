@@ -1,6 +1,5 @@
 #ifndef MJOLNIR_CORE_UNIT_HPP
 #define MJOLNIR_CORE_UNIT_HPP
-#include <ratio>
 
 namespace mjolnir
 {
@@ -9,199 +8,65 @@ namespace unit
 {
 
 // -----------------------------------------------------------------------------
-// generalized ratio class to use 1/mol or something that cannot be represented
-// by a rational in int64_t (like `per mol`). The result of this might include
-// numerical errors because it uses floating-point arithmetics!
+// At first the unit system is implemented based on phantom-type. However,
+// since mjolnir doesn't have any plan to use such a complex unit system
+// inside the engine, we replaced them to simpler one, the constants to convert.
 // -----------------------------------------------------------------------------
 
-template<typename Numer, typename Denom>
-struct Ratio
+template<typename realT>
+struct constants
 {
-    template<typename T>
-    struct value_type_of {using type = typename T::value_type;};
-    template<std::intmax_t N1, std::intmax_t D1>
-    struct value_type_of<std::ratio<N1, D1>> {using type = double;};
-    template<typename T>
-    using value_type_of_t = typename value_type_of<T>::type;
+    using real_type = realT;
 
-    template<typename T>
-    struct value_of {static constexpr value_type_of_t<T> value = T::value;};
-    template<std::intmax_t N1, std::intmax_t D1>
-    struct value_of<std::ratio<N1, D1>>
-    {
-        static constexpr double value = static_cast<double>(N1) / D1;
-    };
+    // 1.0 [nm] * nm_to_angstrom = 10.0 [A]
+    static constexpr real_type nm_to_angstrom = 1e+1;  // 1 nm = 10 A
+    static constexpr real_type angstrom_to_nm = 1e-1;  // 1 A  = 0.1 nm
 
-    using numerator_value_type   = value_type_of_t<Numer>;
-    using denominator_value_type = value_type_of_t<Denom>;
+    static constexpr real_type m_to_angstrom  = 1e+10; // 1 m  = 10^+10 A
+    static constexpr real_type angstrom_to_m  = 1e-10; // 1 A  = 10^-10 A
 
-    static constexpr numerator_value_type   num = value_of<Numer>::value;
-    static constexpr denominator_value_type den = value_of<Denom>::value;
+    static constexpr real_type m_to_nm        = 1e+9;  // 1 m  = 10^+9 nm
+    static constexpr real_type nm_to_m        = 1e-9;  // 1 nm = 1e^-9 m
 
-    using value_type = decltype(num / den);
-    static constexpr value_type value = num / den;
-};
-template<typename Numer, typename Denom>
-constexpr typename Ratio<Numer, Denom>::numerator_value_type Ratio<Numer, Denom>::num;
-template<typename Numer, typename Denom>
-constexpr typename Ratio<Numer, Denom>::denominator_value_type Ratio<Numer, Denom>::den;
-template<typename Numer, typename Denom>
-constexpr typename Ratio<Numer, Denom>::value_type Ratio<Numer, Denom>::value;
+    static constexpr real_type cal_to_J       = 4.1868; // the IT calorie
+    static constexpr real_type J_to_cal       = 1.0 / kcal_to_kJ;
 
-// for ease
-using One = std::integral_constant<std::intmax_t, 1>;
+    static constexpr real_type J_to_eV        = elementary_charge; // J = CxV
+    static constexpr real_type eV_to_J        = 1.0 / J_to_eV;
 
-template<typename Real, typename FromRatio, typename ToRatio>
-struct ratio_between
-{
-    using real_type = Real;
+    static constexpr real_type cal_to_eV      = cal_to_J * J_to_eV;
+    static constexpr real_type eV_to_cal      =  eV_to_J * J_to_cal;
 
-    static constexpr real_type value =
-        (static_cast<real_type>(FromRatio::num) * static_cast<real_type>(ToRatio::den)) /
-        (static_cast<real_type>(FromRatio::den) * static_cast<real_type>(ToRatio::num));
-};
-template<typename Real, typename FromRatio, typename ToRatio>
-constexpr Real ratio_between<Real, FromRatio, ToRatio>::value;
-
-// specialization for std::ratio<N, D>
-
-template<typename Real, std::intmax_t N1, std::intmax_t D1,
-                        std::intmax_t N2, std::intmax_t D2>
-struct ratio_between<Real, std::ratio<N1, D1>, std::ratio<N2, D2>>
-{
-    using real_type  = Real;
-    using ratio_type = std::ratio_divide<std::ratio<N1, D1>, std::ratio<N2, D2>>;
-
-    static constexpr real_type value =
-        static_cast<real_type>(ratio_type::num) /
-        static_cast<real_type>(ratio_type::den);
-};
-template<typename Real, std::intmax_t N1, std::intmax_t D1,
-                        std::intmax_t N2, std::intmax_t D2>
-constexpr Real ratio_between<Real, std::ratio<N1,D1>, std::ratio<N2,D2>>::value;
-
-// -------------------------------------------------------------------------
-// conversion between Units (From -> To)
-// -------------------------------------------------------------------------
-
-template<typename Real, typename FromUnit, typename ToUnit>
-struct convert
-{
-    using real_type = Real;
-
-    static constexpr real_type coef = ratio_between<Real,
-        typename FromUnit::ratio_type, typename ToUnit::ratio_type>::value;
-
-    static constexpr real_type invoke(real_type from) noexcept
-    {
-        return from * coef;
-    }
-};
-template<typename Real, typename FromUnit, typename ToUnit>
-constexpr Real convert<Real, FromUnit, ToUnit>::coef;
-
-// -------------------------------------------------------------------------
-// tag (+ratio) types to represent physical units
-// -------------------------------------------------------------------------
-
-template<typename T, typename R = std::ratio<1, 1>>
-struct meter
-{
-    using value_type = T;
-    using ratio_type = R;
+    // NIST CODATA in the SI unit
+    static constexpr real_type boltzmann_constant  = 1.38064852e-23;   // [J/K]
+    static constexpr real_type avogadro_constant   = 6.022140857e23;   // [/mol]
+    static constexpr real_type elementary_charge   = 1.6021766208e-19; // [C]
+    static constexpr real_type vacuum_permittivity = 8.854187817e-12;  // [F/m]
+    // [V] = [J/C]; [F/m] = [C/V.m] = [C^2/J.m]
 };
 
-template<typename T> using micro_meter = meter<T, std::micro>;
-template<typename T> using nano_meter  = meter<T, std::nano>;
-template<typename T> using angstrom    = meter<T, std::ratio<1, 10000000000>>;
-template<typename T> using pico_meter  = meter<T, std::pico>;
+template<typename realT> constexpr realT constants<realT>::m_to_nm;
+template<typename realT> constexpr realT constants<realT>::nm_to_m;
 
-template<typename T, typename R = std::ratio<1, 1>>
-struct mol
-{
-    using value_type = T;
-    using ratio_type = R;
+template<typename realT> constexpr realT constants<realT>::m_to_angstrom;
+template<typename realT> constexpr realT constants<realT>::angstrom_to_m;
 
-    // XXX mol can be used as a ratio later...
-    static constexpr value_type value = static_cast<value_type>(6.022140857e23);
-};
-template<typename T, typename R>
-constexpr T mol<T, R>::value;
+template<typename realT> constexpr realT constants<realT>::nm_to_angstrom;
+template<typename realT> constexpr realT constants<realT>::angstrom_to_nm;
 
-template<typename T> using per_mol = Ratio<One, mol<T>>;
+template<typename realT> constexpr realT constants<realT>::cal_to_J;
+template<typename realT> constexpr realT constants<realT>::J_to_cal;
 
-template<typename T, typename R = std::ratio<1, 1>>
-struct joule
-{
-    using value_type = T;
-    using ratio_type = R;
-};
+template<typename realT> constexpr realT constants<realT>::J_to_eV;
+template<typename realT> constexpr realT constants<realT>::eV_to_J;
 
+template<typename realT> constexpr realT constants<realT>::cal_to_eV;
+template<typename realT> constexpr realT constants<realT>::eV_to_cal;
 
-template<typename T> using kilo_joule         = joule<T, std::kilo>;
-template<typename T> using joule_per_mol      = joule<T, per_mol<T>>;
-template<typename T> using kilo_joule_per_mol = joule<T, Ratio<std::kilo, mol<T>>>;
-
-template<typename T, typename R> using J          = joule<T, R>;
-template<typename T>             using kJ         = kilo_joule<T>;
-template<typename T>             using J_per_mol  = joule_per_mol<T>;
-template<typename T>             using kJ_per_mol = kilo_joule_per_mol<T>;
-
-template<typename T, typename R = std::ratio<1, 1>>
-struct calorie
-{
-    using value_type = T;
-    using ratio_type = R;
-};
-
-template<typename T> using kilo_calorie         = calorie<T, std::kilo>;
-template<typename T> using calorie_per_mol      = calorie<T, per_mol<T>>;
-template<typename T> using kilo_calorie_per_mol = calorie<T, Ratio<std::kilo, mol<T>>>;
-
-template<typename T, typename R> using cal          = calorie<T, R>;
-template<typename T>             using kcal         = kilo_calorie<T>;
-template<typename T>             using cal_per_mol  = calorie_per_mol<T>;
-template<typename T>             using kcal_per_mol = kilo_calorie_per_mol<T>;
-
-
-
-
-
-template<typename T, template<typename> class Unit>
-struct quantity
-{
-    using value_type = T;
-    using unit_type  = Unit<value_type>;
-
-    quantity(value_type v): value(v) {}
-
-    quantity(): value(0){};
-    ~quantity() = default;
-    quantity(quantity const&) = default;
-    quantity(quantity &&)     = default;
-    quantity& operator=(quantity const&) = default;
-    quantity& operator=(quantity &&)     = default;
-
-    template<typename T2, template<typename> class Unit2>
-    quantity(const quantity<T2, Unit2>& rhs)
-        : value(convert<T, Unit2<value_type>, unit_type>::invoke(rhs.value))
-    {}
-    template<typename T2, template<typename> class Unit2>
-    quantity& operator=(const quantity<T2, Unit2>& rhs) noexcept
-    {
-        this->value = convert<T, Unit2<value_type>, unit_type>::invoke(rhs.value);
-        return *this;
-    }
-
-    template<typename T2, template<typename> class Unit2>
-    quantity& operator+=(const quantity<T2, Unit2>& rhs) noexcept
-    {
-        this->value += convert<T, Unit2<value_type>, unit_type>::invoke(rhs.value);
-        return *this;
-    }
-
-    value_type value;
-};
+template<typename realT> constexpr realT constants<realT>::boltzmann_constant;
+template<typename realT> constexpr realT constants<realT>::avogadro_constant;
+template<typename realT> constexpr realT constants<realT>::elementary_charge;
+template<typename realT> constexpr realT constants<realT>::vacuum_permittivity;
 
 } // unit
 } // mjolnir
