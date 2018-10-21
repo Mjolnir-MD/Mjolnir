@@ -5,6 +5,10 @@ boundary    = "Unlimited"   # one of {"PeriodicCuboid", "Unlimited"}
 output_prefix = "sh3_unlim" # file prefix.
 output_path   = "./"        # output path
 
+[units]
+length = "angstrom" # "angstorm" or "Å" or "nm"
+energy = "kcal/mol" # "kcal/mol" or "kJ/mol"
+
 [[systems]]
 attributes = {temperature = 300.0, ionic_strength = 100.0}
 boundary = {} # Unlimited
@@ -662,8 +666,3 @@ parameters = [ # {{{
 {index = 55, radius = 2.0},
 ] # }}}
 
-[parameters]
-kB   = 1.986231313e-3  # Boltzmann constant
-NA   = 6.0221417930e23 # Avogadro constant
-e    = 1.0             # elementary charge
-"ε0" = 8.854187817e-12 # permittivity of vaccum

@@ -6,11 +6,9 @@ GPU           = false            # enable GPU parallelization
 output_prefix = "excluded-volume"  # file prefix.
 output_path   = "./"             # output path
 
-[parameters]
-kB   = 1.986231313e-3  # Boltzmann constant
-NA   = 6.0221417930e23 # Avogadro constant
-e    = 1.0             # elementary charge
-"ε0" = 8.854187817e-12 # permittivity of vaccum
+[units]
+length = "angstrom" # "angstorm" or "Å" or "nm"
+energy = "kcal/mol" # "kcal/mol" or "kJ/mol"
 
 [simulator]
 file_name = "input/excluded-volume/excluded-volume-langevin.toml"
