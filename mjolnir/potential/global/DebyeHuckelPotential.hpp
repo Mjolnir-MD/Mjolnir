@@ -111,7 +111,7 @@ class DebyeHuckelPotential
         const real_type kB   = physics::constants<real_type>::kB;
         const real_type e    = physics::constants<real_type>::e;
         const real_type NA   = physics::constants<real_type>::NA;
-        const real_type eps0 = physics::constants<real_type>::vacuum_permittivity;
+        const real_type eps0 = physics::constants<real_type>::eps0;
         const real_type epsk = calc_dielectric_water(temperature_, ion_conc_);
 
         const real_type I = 0.5 * 1000 * ion_conc_;

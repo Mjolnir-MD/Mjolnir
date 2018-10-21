@@ -7,37 +7,11 @@
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
-#include <mjolnir/input/read_simulator.hpp>
+#include <mjolnir/input/read_units.hpp>
 #include <memory>
 
 namespace mjolnir
 {
-
-template<typename traitsT>
-std::unique_ptr<SimulatorBase>
-read_parameter(const toml::Table& data)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_parameter(const toml::Table& data), 0);
-
-    typedef typename traitsT::real_type real_type;
-
-    const auto& parameter =
-        get_toml_value<toml::Table>(data, "parameters", "<root>");
-
-    physics::constants<real_type>::kB = get_toml_value<real_type>(parameter, "kB", "[parameters]");
-    physics::constants<real_type>::NA = get_toml_value<real_type>(parameter, "NA", "[parameters]");
-    physics::constants<real_type>::e  = get_toml_value<real_type>(parameter, "e",  "[parameters]");
-    physics::constants<real_type>::vacuum_permittivity =
-        get_toml_value<real_type>(parameter, "ε0", "[parameters]");
-
-    MJOLNIR_LOG_INFO("kB = ", physics::constants<real_type>::kB);
-    MJOLNIR_LOG_INFO("NA = ", physics::constants<real_type>::NA);
-    MJOLNIR_LOG_INFO("e  = ", physics::constants<real_type>::e);
-    MJOLNIR_LOG_INFO("ε0 = ", physics::constants<real_type>::vacuum_permittivity);
-
-    return read_simulator<traitsT>(data);
-}
 
 template<typename realT>
 std::unique_ptr<SimulatorBase>
@@ -53,14 +27,12 @@ read_boundary(const toml::Table& data)
     if(boundary == "Unlimited")
     {
         MJOLNIR_LOG_INFO("boundary is UnlimitedBoundary");
-        return read_parameter<
-            SimulatorTraits<realT, UnlimitedBoundary>>(data);
+        return read_units<SimulatorTraits<realT, UnlimitedBoundary>>(data);
     }
     else if(boundary == "PeriodicCuboid")
     {
         MJOLNIR_LOG_INFO("boundary is CuboidalPeriodicBoudanry");
-        return read_parameter<
-            SimulatorTraits<realT, CuboidalPeriodicBoundary>>(data);
+        return read_units<SimulatorTraits<realT, CuboidalPeriodicBoundary>>(data);
     }
     else
     {
