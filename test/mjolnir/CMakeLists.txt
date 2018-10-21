@@ -2,7 +2,7 @@ set(TEST_NAMES
     test_matrix
     test_vector
     test_math
-    test_unit
+#     test_unit
     test_range
     test_throw_exception
     test_static_string
