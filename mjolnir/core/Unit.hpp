@@ -18,6 +18,17 @@ struct constants
 {
     using real_type = realT;
 
+    // NIST CODATA in the SI unit
+    static constexpr real_type boltzmann_constant  = 1.38064852e-23;   // [J/K]
+    static constexpr real_type avogadro_constant   = 6.022140857e23;   // [/mol]
+    static constexpr real_type elementary_charge   = 1.6021766208e-19; // [C]
+    static constexpr real_type vacuum_permittivity = 8.854187817e-12;  // [F/m]
+    // [V] = [J/C]; [F/m] = [C/V.m] = [C^2/J.m]
+
+    // ------------------------------------------------------------------------
+    // constants to convert units
+    // ------------------------------------------------------------------------
+
     // 1.0 [nm] * nm_to_angstrom = 10.0 [A]
     static constexpr real_type nm_to_angstrom = 1e+1;  // 1 nm = 10 A
     static constexpr real_type angstrom_to_nm = 1e-1;  // 1 A  = 0.1 nm
@@ -29,20 +40,13 @@ struct constants
     static constexpr real_type nm_to_m        = 1e-9;  // 1 nm = 1e^-9 m
 
     static constexpr real_type cal_to_J       = 4.1868; // the IT calorie
-    static constexpr real_type J_to_cal       = 1.0 / kcal_to_kJ;
+    static constexpr real_type J_to_cal       = 1.0 / cal_to_J;
 
     static constexpr real_type J_to_eV        = elementary_charge; // J = CxV
     static constexpr real_type eV_to_J        = 1.0 / J_to_eV;
 
     static constexpr real_type cal_to_eV      = cal_to_J * J_to_eV;
     static constexpr real_type eV_to_cal      =  eV_to_J * J_to_cal;
-
-    // NIST CODATA in the SI unit
-    static constexpr real_type boltzmann_constant  = 1.38064852e-23;   // [J/K]
-    static constexpr real_type avogadro_constant   = 6.022140857e23;   // [/mol]
-    static constexpr real_type elementary_charge   = 1.6021766208e-19; // [C]
-    static constexpr real_type vacuum_permittivity = 8.854187817e-12;  // [F/m]
-    // [V] = [J/C]; [F/m] = [C/V.m] = [C^2/J.m]
 };
 
 template<typename realT> constexpr realT constants<realT>::m_to_nm;
