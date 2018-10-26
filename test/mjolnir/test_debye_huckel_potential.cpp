@@ -5,16 +5,17 @@
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
+
 BOOST_AUTO_TEST_CASE(DH_double)
 {
     using real_type = double;
+    using molecule_id_type = mjolnir::Topology::molecule_id_type;
     constexpr std::size_t N = 10000;
     constexpr real_type   h = 1e-6;
 
     const real_type charge = 1.0;
     mjolnir::DebyeHuckelPotential<real_type> dh(
-        {charge, charge}, {}, mjolnir::IgnoreChain<typename
-            mjolnir::Topology::chain_id_type>("Nothing")
+        {charge, charge}, {}, mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
         );
 
     const real_type x_min = 0.5 * dh.debye_length();
@@ -36,13 +37,13 @@ BOOST_AUTO_TEST_CASE(DH_double)
 BOOST_AUTO_TEST_CASE(DH_float)
 {
     using real_type = float;
-    constexpr static std::size_t       N    = 1000;
-    constexpr static real_type h    = 1e-2;
+    using molecule_id_type = mjolnir::Topology::molecule_id_type;
+    constexpr static std::size_t N = 1000;
+    constexpr static real_type   h = 1e-2;
 
     const real_type charge = 1.0;
     mjolnir::DebyeHuckelPotential<real_type> dh(
-        {charge, charge}, {}, mjolnir::IgnoreChain<typename
-            mjolnir::Topology::chain_id_type>("Nothing")
+        {charge, charge}, {}, mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
         );
 
     const real_type x_min = 0.5 * dh.debye_length();

@@ -6,6 +6,7 @@
 BOOST_AUTO_TEST_CASE(LennardJones_double)
 {
     using real_type = double;
+    using molecule_id_type = mjolnir::Topology::molecule_id_type;
     constexpr static std::size_t N = 10000;
     constexpr static real_type   h = 1e-6;
 
@@ -13,7 +14,7 @@ BOOST_AUTO_TEST_CASE(LennardJones_double)
     const real_type epsilon = 1.0;
     mjolnir::LennardJonesPotential<real_type> lj{
         {{sigma, epsilon}, {sigma, epsilon}}, {},
-        mjolnir::IgnoreChain<typename mjolnir::Topology::chain_id_type>("Nothing")
+        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
     };
 
     const real_type x_min = 0.8 * sigma;
@@ -36,6 +37,7 @@ BOOST_AUTO_TEST_CASE(LennardJones_double)
 BOOST_AUTO_TEST_CASE(LennardJones_float)
 {
     using real_type = float;
+    using molecule_id_type = mjolnir::Topology::molecule_id_type;
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 0.002f;
     constexpr real_type tol = 0.005f;
@@ -44,7 +46,7 @@ BOOST_AUTO_TEST_CASE(LennardJones_float)
     const real_type epsilon = 1.0f;
     mjolnir::LennardJonesPotential<real_type> lj{
         {{sigma, epsilon}, {sigma, epsilon}}, {},
-        mjolnir::IgnoreChain<typename mjolnir::Topology::chain_id_type>("Nothing")
+        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
     };
     constexpr real_type cutoff = mjolnir::LennardJonesPotential<
         real_type>::cutoff_ratio;
