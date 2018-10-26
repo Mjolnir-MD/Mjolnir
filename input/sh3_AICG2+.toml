@@ -2,7 +2,7 @@
 [general]
 precision   = "double"      # one of {"float", "double"}.
 boundary    = "Unlimited"   # one of {"PeriodicCuboid", "Unlimited"}
-output_prefix = "sh3_unlim" # file prefix.
+output_prefix = "sh3_unlim_test" # file prefix.
 output_path   = "./"        # output path
 
 [[systems]]
@@ -598,11 +598,10 @@ parameters = [ #{{{
 ] #}}}
 [[forcefields.global]]
 interaction = "Pair"
-potential = "ExcludedVolume"
-ignored_chain       = "Nothing"
-ignored_connections = {bond = 3, contact = 1}
-spatial_partition   = {type = "CellList", margin = 1.0}
-epsilon = 0.2
+potential   = "ExcludedVolume"
+ignore      = {molecule = "Nothing", particles_within = {bond = 3, contact = 1}}
+spatial_partition = {type = "CellList", margin = 1.0}
+epsilon           = 0.2
 parameters = [ # {{{
 {index =  0, radius = 2.0},
 {index =  1, radius = 2.0},

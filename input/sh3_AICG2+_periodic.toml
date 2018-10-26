@@ -680,9 +680,8 @@ parameters = [
 #}}}
 [[forcefields.global]]
 interaction = "Pair"
-potential = "ExcludedVolume"
-ignored_chain    = "Nothing"
-ignored_connections = {bond = 3, contact = 1}
+potential   = "ExcludedVolume"
+ignore      = {molecule = "Nothing", particles_within = {bond = 3, contact = 1}}
 spatial_partition = {type = "CellList", margin = 1.0}
 epsilon = 0.2
 # params{{{

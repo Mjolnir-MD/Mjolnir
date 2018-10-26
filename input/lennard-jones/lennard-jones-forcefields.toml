@@ -1,8 +1,7 @@
 [[global]]
 interaction = "Pair"
 potential   = "LennardJones"
-ignored_chain       = "Nothing"
-ignored_connections = {bond = 3, contact = 1}
+ignore      = {molecule = "Nothing", particles_within = {bond = 3, contact = 1}}
 spatial_partition   = {type = "CellList", margin = 0.5}
 parameters = [
 {index =     0, "σ" = 2.0, "ε" = 1.0},
