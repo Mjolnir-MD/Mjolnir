@@ -44,7 +44,7 @@ class ForceField
     {
         // first, fetch current topology
         local_.write_topology(sys.topology());
-        sys.topology().construct_chains();
+        sys.topology().construct_molecules();
 
         // based on the topology, make exclusion list
            local_.initialize(sys);

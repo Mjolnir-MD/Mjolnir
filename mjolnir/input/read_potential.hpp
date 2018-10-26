@@ -300,31 +300,31 @@ read_local_potentials(const toml::Table& local,
 // global potential
 // ============================================================================
 
-inline IgnoreChain<typename Topology::chain_id_type>
-read_ignored_chain(const std::string& ignored_chain)
+inline IgnoreMolecule<typename Topology::molecule_id_type>
+read_ignored_molecule(const std::string& ignored_mol)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_ignored_chain(), 0);
+    MJOLNIR_SCOPE(read_ignored_molecule(), 0);
 
-    if(ignored_chain == "Nothing")
+    if(ignored_mol == "Nothing")
     {
-        MJOLNIR_LOG_INFO("all the interactions(both (inter|intra)-chain) are included");
-        return make_unique<IgnoreNothing<typename Topology::chain_id_type>>();
+        MJOLNIR_LOG_INFO("all the interactions(both (inter|intra)-molecule) are included");
+        return make_unique<IgnoreNothing<typename Topology::molecule_id_type>>();
     }
-    else if(ignored_chain == "Self")
+    else if(ignored_mol == "Self" || ignored_mol == "Intra")
     {
-        MJOLNIR_LOG_INFO("intra-chain interaction is ignored");
-        return make_unique<IgnoreSelf<typename Topology::chain_id_type>>();
+        MJOLNIR_LOG_INFO("intra-molecule interaction is ignored");
+        return make_unique<IgnoreSelf<typename Topology::molecule_id_type>>();
     }
-    else if(ignored_chain == "Others")
+    else if(ignored_mol == "Others" || ignored_mol == "Inter")
     {
-        MJOLNIR_LOG_INFO("inter-chain interaction is ignored");
-        return make_unique<IgnoreOthers<typename Topology::chain_id_type>>();
+        MJOLNIR_LOG_INFO("inter-molecule interaction is ignored");
+        return make_unique<IgnoreOthers<typename Topology::molecule_id_type>>();
     }
     else
     {
-        throw_exception<std::runtime_error>("invalid `ignored_chain`: ",
-            ignored_chain, ". allowed: Nothing, Self, or Others.");
+        throw_exception<std::runtime_error>("invalid `ignored_molecule`: ",
+            ignored_mol, ". allowed: Nothing, Self, or Others.");
     }
 }
 
@@ -338,14 +338,15 @@ read_excluded_volume_potential(const toml::Table& global)
 
     const auto location = "[forcefield.global] for ExcludedVolume potential";
 
-    auto ignored_chain = read_ignored_chain(get_toml_value<std::string>(
-        global, "ignored_chain", location));
+    const auto& ignore =
+        get_toml_value<toml::Table>(global, "ignore", location);
 
-    const auto& ignored_connections = get_toml_value<toml::Table>(
-        global, "ignored_connections", location);
+    auto ignored_mol = read_ignored_molecule(
+        get_toml_value<std::string>(ignore, "molecule", location));
 
     std::map<std::string, std::size_t> connections;
-    for(const auto connection : ignored_connections)
+    for(const auto connection :
+            get_toml_value<toml::Table>(ignore, "particles_within", location))
     {
         connections[connection.first] =
             toml::get<std::size_t>(connection.second);
@@ -360,7 +361,7 @@ read_excluded_volume_potential(const toml::Table& global)
 
     const auto& ps = get_toml_value<toml::Array>(global, "parameters", location);
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-    const auto parameters = 
+    const auto parameters =
         "element of [[forcefield.global.parameters]] for ExcludedVolume";
 
     std::vector<real_type> params;
@@ -381,7 +382,7 @@ read_excluded_volume_potential(const toml::Table& global)
     }
 
     return ExcludedVolumePotential<realT>(
-        eps, std::move(params), connections, std::move(ignored_chain));
+        eps, std::move(params), connections, std::move(ignored_mol));
 }
 
 template<typename realT>
@@ -391,15 +392,18 @@ read_lennard_jones_potential(const toml::Table& global)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_lennard_jones_potential(), 0);
     using real_type = realT;
+
     const auto location   = "[forcefield.global] for LennardJones potential";
 
-    auto ignored_chain = read_ignored_chain(get_toml_value<std::string>(
-        global, "ignored_chain", location));
+    const auto& ignore =
+        get_toml_value<toml::Table>(global, "ignore", location);
 
-    const auto& ignored_connections = get_toml_value<toml::Table>(
-        global, "ignored_connections", location);
+    auto ignored_mol = read_ignored_molecule(
+        get_toml_value<std::string>(ignore, "molecule", location));
+
     std::map<std::string, std::size_t> connections;
-    for(const auto connection : ignored_connections)
+    for(const auto connection :
+        get_toml_value<toml::Table>(ignore, "particles_within", location))
     {
         connections[connection.first] =
             toml::get<std::size_t>(connection.second);
@@ -432,7 +436,7 @@ read_lennard_jones_potential(const toml::Table& global)
     }
 
     return LennardJonesPotential<realT>(
-            std::move(params), connections, std::move(ignored_chain));
+            std::move(params), connections, std::move(ignored_mol));
 }
 
 template<typename realT>
@@ -444,14 +448,15 @@ read_uniform_lennard_jones_potential(const toml::Table& global)
     using real_type = realT;
     const auto location = "[forcefield.global] for UniformLennardJones";
 
-    auto ignored_chain = read_ignored_chain(get_toml_value<std::string>(
-        global, "ignored_chain", location));
+    const auto& ignore =
+        get_toml_value<toml::Table>(global, "ignore", location);
 
-    const auto& ignored_connections = get_toml_value<toml::Table>(
-        global, "ignored_connections", location);
+    auto ignored_mol = read_ignored_molecule(
+        get_toml_value<std::string>(ignore, "molecule", location));
 
     std::map<std::string, std::size_t> connections;
-    for(const auto connection : ignored_connections)
+    for(const auto connection :
+            get_toml_value<toml::Table>(ignore, "particles_within", location))
     {
         connections[connection.first] =
             toml::get<std::size_t>(connection.second);
@@ -467,7 +472,7 @@ read_uniform_lennard_jones_potential(const toml::Table& global)
     MJOLNIR_LOG_INFO("epsilon = ", epsilon);
 
     return UniformLennardJonesPotential<realT>(
-            sigma, epsilon, connections, std::move(ignored_chain));
+            sigma, epsilon, connections, std::move(ignored_mol));
 }
 
 template<typename realT>
@@ -479,13 +484,15 @@ read_debye_huckel_potential(const toml::Table& global)
     using real_type = realT;
     const auto location = "[forcefield.global] for DebyeHuckel";
 
-    auto ignored_chain = read_ignored_chain(get_toml_value<std::string>(
-        global, "ignored_chain", location));
+    const auto& ignore =
+        get_toml_value<toml::Table>(global, "ignore", location);
 
-    const auto& ignored_connections = get_toml_value<toml::Table>(
-        global, "ignored_connections", location);
+    auto ignored_mol = read_ignored_molecule(
+        get_toml_value<std::string>(ignore, "molecule", location));
+
     std::map<std::string, std::size_t> connections;
-    for(const auto connection : ignored_connections)
+    for(const auto connection :
+            get_toml_value<toml::Table>(ignore, "particles_within", location))
     {
         connections[connection.first] =
             toml::get<std::size_t>(connection.second);
@@ -516,7 +523,7 @@ read_debye_huckel_potential(const toml::Table& global)
     }
 
     return DebyeHuckelPotential<realT>(
-            std::move(params), connections, std::move(ignored_chain));
+            std::move(params), connections, std::move(ignored_mol));
 }
 
 // ---------------------------------------------------------------------------
