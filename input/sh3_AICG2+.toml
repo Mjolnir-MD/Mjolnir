@@ -2,7 +2,7 @@
 [general]
 precision   = "double"      # one of {"float", "double"}.
 boundary    = "Unlimited"   # one of {"PeriodicCuboid", "Unlimited"}
-output_prefix = "sh3_unlim_test" # file prefix.
+output_prefix = "sh3_unlim" # file prefix.
 output_path   = "./"        # output path
 
 [[systems]]
