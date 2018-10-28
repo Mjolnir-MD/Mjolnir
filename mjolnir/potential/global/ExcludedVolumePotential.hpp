@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
 #define MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
-#include <mjolnir/potential/global/IgnoreChain.hpp>
+#include <mjolnir/potential/global/IgnoreMolecule.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>
 #include <algorithm>
@@ -23,10 +23,10 @@ class ExcludedVolumePotential
     using container_type = std::vector<parameter_type>;
 
     // topology stuff
-    using topology_type = Topology;
-    using chain_id_type = typename topology_type::chain_id_type;
+    using topology_type        = Topology;
+    using molecule_id_type     = typename topology_type::molecule_id_type;
     using connection_kind_type = typename topology_type::connection_kind_type;
-    using ignore_chain_type = IgnoreChain<chain_id_type>;
+    using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
 
     // rc = 2.0 * sigma
     constexpr static real_type cutoff_ratio = 2.0;
@@ -39,11 +39,11 @@ class ExcludedVolumePotential
 
     ExcludedVolumePotential(const real_type eps, container_type params,
         const std::map<connection_kind_type, std::size_t>& exclusions,
-        ignore_chain_type ignore_chain)
+        ignore_molecule_type ignore_molecule)
         : epsilon_(eps),
           radii_(std::move(params)),
-          ignore_chain_(std::move(ignore_chain)),
-          ignore_within_(exclusions.begin(), exclusions.end())
+          ignore_molecule_(std::move(ignore_molecule)),
+          ignore_within_  (exclusions.begin(), exclusions.end())
     {}
     ~ExcludedVolumePotential() = default;
     ExcludedVolumePotential(const ExcludedVolumePotential&) = default;
@@ -105,10 +105,10 @@ class ExcludedVolumePotential
     std::vector<std::pair<connection_kind_type, std::size_t>>
     ignore_within() const {return ignore_within_;}
 
-    bool is_ignored_chain(
-            const chain_id_type& i, const chain_id_type& j) const noexcept
+    bool is_ignored_molecule(
+            const molecule_id_type& i, const molecule_id_type& j) const noexcept
     {
-        return ignore_chain_.is_ignored(i, j);
+        return ignore_molecule_.is_ignored(i, j);
     }
 
     static const char* name() noexcept {return "ExcludedVolume";}
@@ -124,7 +124,7 @@ class ExcludedVolumePotential
     real_type epsilon_;
     std::vector<real_type> radii_;
 
-    ignore_chain_type ignore_chain_;
+    ignore_molecule_type ignore_molecule_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 };
 

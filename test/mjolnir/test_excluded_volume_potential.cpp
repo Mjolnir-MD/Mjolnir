@@ -6,14 +6,14 @@
 BOOST_AUTO_TEST_CASE(EXV_double)
 {
     using real_type = double;
+    using molecule_id_type = mjolnir::Topology::molecule_id_type;
     constexpr std::size_t N = 10000;
     constexpr real_type   h = 1e-6;
 
     const real_type sigma   = 3.0;
     const real_type epsilon = 1.0;
     mjolnir::ExcludedVolumePotential<real_type> exv{
-        epsilon, {sigma, sigma}, {}, mjolnir::IgnoreChain<typename
-            mjolnir::Topology::chain_id_type>("Nothing")
+        epsilon, {sigma, sigma}, {}, mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
     };
 
     const real_type x_min = 0.8 * sigma;
@@ -36,6 +36,7 @@ BOOST_AUTO_TEST_CASE(EXV_double)
 BOOST_AUTO_TEST_CASE(EXV_float)
 {
     using real_type = float;
+    using molecule_id_type = mjolnir::Topology::molecule_id_type;
     constexpr static std::size_t N = 1000;
     constexpr static real_type   h = 0.002;
     constexpr static real_type tol = 0.005;
@@ -44,8 +45,7 @@ BOOST_AUTO_TEST_CASE(EXV_float)
     const real_type epsilon = 1.0;
 
     mjolnir::ExcludedVolumePotential<real_type> exv{
-        epsilon, {sigma, sigma}, {}, mjolnir::IgnoreChain<typename
-            mjolnir::Topology::chain_id_type>("Nothing")
+        epsilon, {sigma, sigma}, {}, mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
     };
     constexpr real_type cutoff =
         mjolnir::ExcludedVolumePotential<real_type>::cutoff_ratio;

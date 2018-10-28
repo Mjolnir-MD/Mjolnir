@@ -11,6 +11,19 @@ namespace mjolnir
 {
 
 // XXX Topology class manages the connections between beads.
+//
+// NOTE: connection kind "bond" is used to determine the molecules.
+//       Other kind of connections also can be defined (and overlayed
+//       if nessesary). In that case, you can traverse the graph by using
+//       your connection kind also, but it will not be considered when
+//       it detemines "molecule"s.
+//
+// Most of the time, "molecule" defined by this class is equivalent to "chain".
+// the reason why it calls "chain" as molecule is that small molecules and
+// circular molecules are allowed.
+// considering lipids, "molecule" looks better than "chain" because they
+// are too small and in the most of the cases, there are many of them.
+//
 // Generally, traversing graph takes time rather than finding value from
 // contiguous container. So there are ExclusionList class that stores the
 // connection information for NeighborLists (usually, nonlocal potentials are
@@ -21,20 +34,17 @@ class Topology
 {
   public:
 
-    using chain_id_type        = std::size_t;
+    using molecule_id_type     = std::size_t;
     using connection_kind_type = std::string;
     using edge_type = std::pair<std::size_t, connection_kind_type>;
 
-    // there is one `reserved` connection kind that has special meaning.
-    // "bond" is used to determine chains.
 
-    static constexpr chain_id_type uninitialized =
-        std::numeric_limits<chain_id_type>::max();
+    static constexpr molecule_id_type uninitialized =
+        std::numeric_limits<molecule_id_type>::max();
 
-    // each node corresponds to the particle having the same idx in a system.
     struct node
     {
-        std::size_t chain_id;
+        std::size_t molecule_id;
         std::string identifier;
         std::vector<edge_type> adjacents;
     };
@@ -61,10 +71,10 @@ class Topology
     std::string const& identifier_of(const std::size_t i) const
     {return this->nodes_.at(i).identifier;}
 
-    chain_id_type  chain_of(const std::size_t idx) const
-    {return nodes_.at(idx).chain_id;}
-    chain_id_type& chain_of(const std::size_t idx)
-    {return nodes_.at(idx).chain_id;}
+    molecule_id_type  molecule_of(const std::size_t idx) const
+    {return nodes_.at(idx).molecule_id;}
+    molecule_id_type& molecule_of(const std::size_t idx)
+    {return nodes_.at(idx).molecule_id;}
 
     void add_connection  (const std::size_t i, const std::size_t j,
                           const connection_kind_type& kind);
@@ -82,11 +92,11 @@ class Topology
     list_connections_between(const std::size_t i, const std::size_t j,
                              const connection_kind_type& kind) const;
 
-    //! reset chain_id of all the particles
-    void construct_chains();
+    //! reset molecule_id of all the particles
+    void construct_molecules();
     void resize(const std::size_t N) {nodes_.resize(N); return;}
 
-    std::size_t number_of_chains() const noexcept {return this->num_chains_;}
+    std::size_t number_of_molecules() const noexcept {return this->num_molecules_;}
 
 
   private:
@@ -118,10 +128,11 @@ class Topology
     }
 
   private:
-    std::size_t  num_chains_;
-    std::vector<node> nodes_;
+    std::size_t num_molecules_;
+    std::vector<node>   nodes_;
+    // each node corresponds to the particle having the same idx in a system.
 };
-constexpr typename Topology::chain_id_type Topology::uninitialized;
+constexpr typename Topology::molecule_id_type Topology::uninitialized;
 
 inline void Topology::add_connection(
         const std::size_t i, const std::size_t j,
@@ -245,33 +256,33 @@ Topology::list_connections_between(const std::size_t i, const std::size_t j,
 }
 
 inline void
-Topology::construct_chains()
+Topology::construct_molecules()
 {
     if(this->nodes_.empty()){return;}
     for(auto& node : nodes_)
     {
-        node.chain_id = uninitialized;
+        node.molecule_id = uninitialized;
     }
 
-    chain_id_type next_chain_id = 0;
+    molecule_id_type next_molecule_id = 0;
     for(auto& node : nodes_)
     {
         for(const auto& edge : node.adjacents)
         {
             if(edge.second != "bond") {continue;}
             const auto& adj = this->nodes_.at(edge.first);
-            if(adj.chain_id != uninitialized)
+            if(adj.molecule_id != uninitialized)
             {
-                node.chain_id = adj.chain_id;
+                node.molecule_id = adj.molecule_id;
                 break;
             }
         }
-        if(node.chain_id == uninitialized)
+        if(node.molecule_id == uninitialized)
         {
-            node.chain_id = next_chain_id++;
+            node.molecule_id = next_molecule_id++;
         }
     }
-    this->num_chains_ = ++next_chain_id;
+    this->num_molecules_ = ++next_molecule_id;
     return;
 }
 
