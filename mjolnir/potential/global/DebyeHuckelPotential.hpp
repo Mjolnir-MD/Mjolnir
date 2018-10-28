@@ -127,7 +127,7 @@ class DebyeHuckelPotential
             const real_type T, const real_type c) const noexcept
     {
         return (249.4 - 0.788 * T + 7.2e-4 * T * T) *
-               (1. - 2.551 * c + 5.151e-2 * c * c - 6.889e-3 * c * c * c);
+               (1. - 2.551e-1 * c + 5.151e-2 * c * c - 6.889e-3 * c * c * c);
     }
 
   private:
