@@ -58,7 +58,7 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
     real_type calc_energy(const system_type&) const override;
 
     std::string name() const override
-    {return "Pair:"_str + potential_type::name();}
+    {return "Pair:"_s + potential_type::name();}
 
   private:
 

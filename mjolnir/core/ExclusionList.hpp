@@ -15,7 +15,7 @@ class ExclusionList
 {
   public:
     typedef Topology topology_type;
-    typedef topology_type::chain_id_type chain_id_type;
+    typedef topology_type::molecule_id_type molecule_id_type;
     typedef topology_type::connection_kind_type connection_kind_type;
 
   public:
@@ -33,12 +33,12 @@ class ExclusionList
     bool is_excluded(const std::size_t i, const std::size_t j) const
     {
         // assuming both list is enough small (< 20 or so)
-        const auto chain_of_j = this->chain_ids_[j];
-        for(const auto& ignoring_chn : this->ignored_chn_of(this->chain_ids_[i]))
+        const auto mol_of_j = this->mol_ids_[j];
+        for(const auto& ignoring_mol : this->ignored_mol_of(this->mol_ids_[i]))
         {
-            // already sorted like ignoring_chn = [4,5,6]
-            if     (chain_of_j <  ignoring_chn) {break;}
-            else if(chain_of_j == ignoring_chn) {return true;}
+            // already sorted like ignoring_mol = [4,5,6]
+            if     (mol_of_j <  ignoring_mol) {break;}
+            else if(mol_of_j == ignoring_mol) {return true;}
         }
         for(const auto& ignoring_idx : this->ignored_idx_of(i))
         {
@@ -59,35 +59,35 @@ class ExclusionList
         const auto& topol = sys.topology();
         const std::size_t N = sys.size();
 
-        // copy chain_ids from topol to this
-        this->chain_ids_.resize(N);
+        // copy molecule_ids from topol to this
+        this->mol_ids_.resize(N);
         for(std::size_t i=0; i<N; ++i)
         {
-            this->chain_ids_[i] = topol.chain_of(i);
-            MJOLNIR_LOG_DEBUG("particle ", i, " is belonging chain ",
-                              topol.chain_of(i));
+            this->mol_ids_[i] = topol.molecule_of(i);
+            MJOLNIR_LOG_DEBUG("particle ", i, " is belonging molecule ",
+                              topol.molecule_of(i));
         }
 
-        // make ignored_chain_idxs
+        // make ignored_molecule_idxs
         {
-            const std::size_t Nchain = topol.number_of_chains();
+            const std::size_t Nmols = topol.number_of_molecules();
             std::size_t idx = 0;
-            for(std::size_t i=0; i<Nchain; ++i)
+            for(std::size_t i=0; i<Nmols; ++i)
             {
                 const std::size_t first = idx;
-                for(std::size_t j=0; j<Nchain; ++j)
+                for(std::size_t j=0; j<Nmols; ++j)
                 {
-                    if(pot.is_ignored_chain(i, j))
+                    if(pot.is_ignored_molecule(i, j))
                     {
-                        MJOLNIR_LOG_INFO("chain ", i, " and chain ", j,
-                                         " will be ignored");
-                        this->ignored_chns_.push_back(i);
+                        MJOLNIR_LOG_INFO("molecule ", i, " and molecule ", j,
+                            " will ignore each other on ", pot.name());
+                        this->ignored_mols_.push_back(i);
                         ++idx;
                     }
                 }
-                const auto beg = ignored_chns_.begin();
+                const auto beg = ignored_mols_.begin();
                 std::sort(beg + first, beg + idx);
-                this->chn_ranges_.emplace_back(first, idx);
+                this->mol_ranges_.emplace_back(first, idx);
             }
         }
 
@@ -136,21 +136,22 @@ class ExclusionList
         };
     }
     range<typename std::vector<std::size_t>::const_iterator>
-    ignored_chn_of(const std::size_t i) const noexcept
+    ignored_mol_of(const std::size_t i) const noexcept
     {
         return range<typename std::vector<std::size_t>::const_iterator>{
-            this->ignored_chns_.begin() + this->chn_ranges_[i].first,
-            this->ignored_chns_.begin() + this->chn_ranges_[i].second
+            this->ignored_mols_.begin() + this->mol_ranges_[i].first,
+            this->ignored_mols_.begin() + this->mol_ranges_[i].second
         };
     }
 
   private:
 
-    std::vector<chain_id_type> chain_ids_; // same as {topol.nodes_.chain_id};
+    // It contains the same infromation as {topol.nodes_.molecule_id};
+    std::vector<molecule_id_type> mol_ids_;
 
-    // ignored chains...
-    std::vector<std::size_t> ignored_chns_;
-    std::vector<std::pair<std::size_t, std::size_t>> chn_ranges_;
+    // ignored mol_id...
+    std::vector<std::size_t> ignored_mols_;
+    std::vector<std::pair<std::size_t, std::size_t>> mol_ranges_;
 
     std::vector<std::size_t> ignored_idxs_;
     std::vector<std::pair<std::size_t, std::size_t>> idx_ranges_;
