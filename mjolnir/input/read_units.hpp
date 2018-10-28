@@ -35,7 +35,7 @@ std::unique_ptr<SimulatorBase> read_units(const toml::Table& data)
         phys_type::kB   *= (unit_type::J_to_cal / 1000.0) *
                            unit_type::avogadro_constant;
         // eps0 [F/m] == [C^2/J/m] -> [C^2/(kcal/mol)/m]
-        phys_type::eps0 *= (1000.0 / unit_type::J_to_cal) / 
+        phys_type::eps0 *= (1000.0 / unit_type::J_to_cal) /
                            unit_type::avogadro_constant;
     }
     else if(energy == "kJ/mol")
@@ -53,7 +53,7 @@ std::unique_ptr<SimulatorBase> read_units(const toml::Table& data)
 
     // until here, SI `m` are used as length unit.
 
-    if(length == "angstrom" || length == "Å")
+    if(length == "angstrom" || length == u8"Å")
     {
         // eps0 [C^2/Energy/m] -> [C^2/Energy/Angstrom]
         phys_type::eps0 *= (1.0 / unit_type::m_to_angstrom);
