@@ -33,7 +33,7 @@ struct constants
     static constexpr real_type nm_to_angstrom = 1e+1;  // 1 nm = 10 A
     static constexpr real_type angstrom_to_nm = 1e-1;  // 1 A  = 0.1 nm
 
-    static constexpr real_type m_to_angstrom  = 1e+10; // 1 m  = 10^+10 A
+    static constexpr real_type m_to_angstrom  = 1e+10; // 1 m  = 10^+10 a
     static constexpr real_type angstrom_to_m  = 1e-10; // 1 A  = 10^-10 A
 
     static constexpr real_type m_to_nm        = 1e+9;  // 1 m  = 10^+9 nm
@@ -41,12 +41,6 @@ struct constants
 
     static constexpr real_type cal_to_J       = 4.1868; // the IT calorie
     static constexpr real_type J_to_cal       = 1.0 / cal_to_J;
-
-    static constexpr real_type J_to_eV        = elementary_charge; // J = CxV
-    static constexpr real_type eV_to_J        = 1.0 / J_to_eV;
-
-    static constexpr real_type cal_to_eV      = cal_to_J * J_to_eV;
-    static constexpr real_type eV_to_cal      =  eV_to_J * J_to_cal;
 };
 
 template<typename realT> constexpr realT constants<realT>::m_to_nm;
@@ -60,12 +54,6 @@ template<typename realT> constexpr realT constants<realT>::angstrom_to_nm;
 
 template<typename realT> constexpr realT constants<realT>::cal_to_J;
 template<typename realT> constexpr realT constants<realT>::J_to_cal;
-
-template<typename realT> constexpr realT constants<realT>::J_to_eV;
-template<typename realT> constexpr realT constants<realT>::eV_to_J;
-
-template<typename realT> constexpr realT constants<realT>::cal_to_eV;
-template<typename realT> constexpr realT constants<realT>::eV_to_cal;
 
 template<typename realT> constexpr realT constants<realT>::boltzmann_constant;
 template<typename realT> constexpr realT constants<realT>::avogadro_constant;
