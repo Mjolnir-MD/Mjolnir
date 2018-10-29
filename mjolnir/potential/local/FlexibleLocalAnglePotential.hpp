@@ -10,8 +10,14 @@ namespace mjolnir
 
 template<typename T> class System;
 
-/*! @brief Default FLP angle                                               *
- * NOTE: It assumes that each theta value in histogram is same as default. */
+// Flexible Local Angle potential (T. Terakawa & S. Takada Biophys J 2011)
+// NOTE: It assumes that each theta value in histogram is same as the default.
+//
+// Here, the implementation is derived from the original implementation in
+// the CGMD package, Cafemol (Kenzaki et al., JCTC 2011).
+// As the original implementation does, the first term represents the value of
+// energy, and the second term represents the value of the *second* derivative
+// of the energy.
 template<typename realT>
 class FlexibleLocalAnglePotential
 {
