@@ -53,15 +53,26 @@ std::unique_ptr<SimulatorBase> read_units(const toml::Table& data)
 
     // until here, SI `m` are used as length unit.
 
+    // 1 [mol/m^3] = 1e-3  [mol/L] = 1e-27 [mol/nm^3] = 1e-30 [mol/A^3]
+    //               1     [mol/L] = 1e-24 [mol/nm^3] = 1e-27 [mol/A^3]
     if(length == "angstrom" || length == u8"Å")
     {
         // eps0 [C^2/Energy/m] -> [C^2/Energy/Angstrom]
         phys_type::eps0 *= (1.0 / unit_type::m_to_angstrom);
+
+        // 1e3 [mol/m^3] = 1 [mol/L] = 1e-27 [mol/A^3]
+        phys_type::conc_coef = 1e3 / (unit_type::m_to_angstrom *
+                                      unit_type::m_to_angstrom *
+                                      unit_type::m_to_angstrom);
     }
     else if(length == "nm")
     {
         // eps0 [C^2/Energy/m] -> [C^2/Energy/nm]
         phys_type::eps0 *= (1.0 / unit_type::m_to_nm);
+
+        // 1 [mol/L] = 1e-24 [mol/nm^3]
+        phys_type::conc_coef = 1e3 / (unit_type::m_to_nm * unit_type::m_to_nm *
+                                      unit_type::m_to_nm);
     }
     else
     {
@@ -71,9 +82,7 @@ std::unique_ptr<SimulatorBase> read_units(const toml::Table& data)
 
     MJOLNIR_LOG_INFO(u8"phys::kB = ", phys_type::kB,   " [", energy, "]");
     MJOLNIR_LOG_INFO(u8"phys::NA = ", phys_type::NA,   " [1/mol]");
-    MJOLNIR_LOG_INFO(u8"phys::e  = ", phys_type::e,    " [C]");
-    MJOLNIR_LOG_INFO(u8"phys::ε0 = ", phys_type::eps0,
-                       " [C^2 / (", energy, '*', length, ")]");
+    MJOLNIR_LOG_INFO(u8"phys::ε0 = ", phys_type::eps0, " [e^2 / (", energy, '*', length, ")]");
 
     return read_simulator<traitsT>(data);
 }
