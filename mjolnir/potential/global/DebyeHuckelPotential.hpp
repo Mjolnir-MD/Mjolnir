@@ -4,6 +4,7 @@
 #include <mjolnir/core/constants.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/constants.hpp>
+#include <mjolnir/util/logger.hpp>
 #include <vector>
 #include <cmath>
 
@@ -107,19 +108,38 @@ class DebyeHuckelPotential
 
     void calc_parameters() noexcept
     {
-        constexpr real_type pi =  math::constants<real_type>::pi;
-        const real_type kB   = physics::constants<real_type>::kB;
-        const real_type e    = physics::constants<real_type>::e;
-        const real_type NA   = physics::constants<real_type>::NA;
-        const real_type eps0 = physics::constants<real_type>::eps0;
-        const real_type epsk = calc_dielectric_water(temperature_, ion_conc_);
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_SCOPE(DebyeHuckelPotential::calc_parameters(), 0);
 
-        const real_type I = 0.5 * 1000 * ion_conc_;
+        using math_const =    math::constants<real_type>;
+        using phys_const = physics::constants<real_type>;
 
-        this->inv_4_pi_eps0_epsk_ = 1. / (4 * pi * eps0 * epsk);
-        this->debye_length_ = std::sqrt(eps0 * epsk * kB * temperature_ /
-                                        (2 * NA * e * e * I));
+        constexpr real_type pi   = math_const::pi;
+        const     real_type kB   = phys_const::kB;
+        const     real_type NA   = phys_const::NA;
+        const     real_type eps0 = phys_const::eps0;
+
+        const     real_type epsk = calc_dielectric_water(temperature_, ion_conc_);
+        const     real_type T    = this->temperature_;
+
+        MJOLNIR_LOG_INFO("kB               = ", kB);
+        MJOLNIR_LOG_INFO("T                = ", T);
+        MJOLNIR_LOG_INFO("NA               = ", NA);
+        MJOLNIR_LOG_INFO("epsilon_0        = ", eps0);
+        MJOLNIR_LOG_INFO("epsilon_k        = ", epsk);
+
+        this->inv_4_pi_eps0_epsk_ = 1.0 / (4 * pi * eps0 * epsk);
+
+        // convert [M] (mol/L) or [mM] -> [mol/nm^3] or [mol/A^3]
+        const real_type I = 0.5 * ion_conc_ * phys_const::conc_coef;
+
+        this->debye_length_ = std::sqrt((eps0 * epsk * kB * T) / (2 * NA * I));
         this->inv_debye_length_ = 1. / this->debye_length_;
+
+        MJOLNIR_LOG_INFO("debye length     = ", debye_length_);
+        MJOLNIR_LOG_INFO("1 / debye length = ", inv_debye_length_);
+        MJOLNIR_LOG_INFO("1 / 4pi epsilon  = ", inv_4_pi_eps0_epsk_);
+
         return;
     }
 
