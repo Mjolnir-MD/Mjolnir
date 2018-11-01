@@ -80,7 +80,7 @@ inline void Observer<traitsT>::output(
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         const auto& p = sys.position(i);
-        ofs << sys.name(i) << std::fixed << std::setprecision(8)
+        ofs << sys.name(i) << ' ' << std::fixed << std::setprecision(8)
             << p[0] << ' ' << p[1] << ' ' << p[2] << '\n';
     }
     ofs.close();
