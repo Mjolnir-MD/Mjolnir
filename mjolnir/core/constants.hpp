@@ -15,7 +15,13 @@ struct constants
     static real_type kB;   // Boltzmann constant
     static real_type NA;   // Avogadro constant
     static real_type eps0; // vacuum permittivity
-    static real_type conc_coef; // constant to convert (input mol conc) -> mol/L^3
+
+    // conversion coefficients
+    static real_type m_to_length;
+    static real_type length_to_m;
+
+    static real_type L_to_volume;
+    static real_type volume_to_L;
 };
 
 // convert them in read_units() function defined in mjolnir/input/read_units.hpp
@@ -39,8 +45,11 @@ template<typename realT>
 realT constants<realT>::eps0 = (unit::constants<realT>::vacuum_permittivity /
                                 unit::constants<realT>::elementary_charge)  /
                                 unit::constants<realT>::elementary_charge;
-template<typename realT>
-realT constants<realT>::conc_coef = 1.0;
+
+template<typename realT> realT constants<realT>::m_to_length = 1.0;
+template<typename realT> realT constants<realT>::length_to_m = 1.0;
+template<typename realT> realT constants<realT>::L_to_volume = 1e-3;
+template<typename realT> realT constants<realT>::volume_to_L = 1e+3;
 
 } // physics
 } // mjolnir

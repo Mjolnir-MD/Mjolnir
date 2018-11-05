@@ -131,7 +131,7 @@ class DebyeHuckelPotential
         this->inv_4_pi_eps0_epsk_ = 1.0 / (4 * pi * eps0 * epsk);
 
         // convert [M] (mol/L) or [mM] -> [mol/nm^3] or [mol/A^3]
-        const real_type I = 0.5 * ion_conc_ * phys_const::conc_coef;
+        const real_type I = 0.5 * ion_conc_ / phys_const::L_to_volume;
 
         this->debye_length_ = std::sqrt((eps0 * epsk * kB * T) / (2 * NA * I));
         this->inv_debye_length_ = 1. / this->debye_length_;

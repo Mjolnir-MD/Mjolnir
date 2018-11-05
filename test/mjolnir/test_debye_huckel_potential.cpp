@@ -26,8 +26,11 @@ BOOST_AUTO_TEST_CASE(DH_double)
     phys_type::kB   *= (1e-3 * unit_type::J_to_cal * unit_type::avogadro_constant);
     phys_type::eps0 *= (1e+3 / unit_type::J_to_cal / unit_type::avogadro_constant) *
                        (1.0 / unit_type::m_to_angstrom);
-    // 1 [mol/L] = 1e-27 [mol/A^3]
-    phys_type::conc_coef = 1e-27;
+
+    phys_type::m_to_length = 1e-10;
+    phys_type::length_to_m = 1e+10;
+    phys_type::L_to_volume = 1e+27;
+    phys_type::volume_to_L = 1e-27;
 
     constexpr std::size_t N = 10000;
     constexpr real_type   h = 1e-6;
@@ -70,8 +73,11 @@ BOOST_AUTO_TEST_CASE(DH_float)
     phys_type::kB   *= (1e-3 * unit_type::J_to_cal * unit_type::avogadro_constant);
     phys_type::eps0 *= (1e+3 / unit_type::J_to_cal / unit_type::avogadro_constant) *
                        (1.0 / unit_type::m_to_angstrom);
-    // 1 [mol/L] = 1e-27 [mol/A^3]
-    phys_type::conc_coef = 1e-27;
+
+    phys_type::m_to_length = 1e-10;
+    phys_type::length_to_m = 1e+10;
+    phys_type::L_to_volume = 1e+27;
+    phys_type::volume_to_L = 1e-27;
 
     constexpr static std::size_t N = 1000;
     constexpr static real_type   h = 1e-2;

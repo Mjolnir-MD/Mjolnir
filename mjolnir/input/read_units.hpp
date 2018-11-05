@@ -7,6 +7,7 @@
 #include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_simulator.hpp>
+#include <cmath>
 
 namespace mjolnir
 {
@@ -60,19 +61,38 @@ std::unique_ptr<SimulatorBase> read_units(const toml::Table& data)
         // eps0 [C^2/Energy/m] -> [C^2/Energy/Angstrom]
         phys_type::eps0 *= (1.0 / unit_type::m_to_angstrom);
 
-        // 1e3 [mol/m^3] = 1 [mol/L] = 1e-27 [mol/A^3]
-        phys_type::conc_coef = 1e3 / (unit_type::m_to_angstrom *
-                                      unit_type::m_to_angstrom *
-                                      unit_type::m_to_angstrom);
+        // 1 m = 10^9 nm, 1 nm = 10^-9 m
+        phys_type::m_to_length = unit_type::m_to_angstrom;
+        phys_type::length_to_m = unit_type::angstrom_to_m;
+
+        // 1 [L] = 1e-3 [m^3] = 1e+24 [nm^3]; 1 [m^3] = 1e27 [nm^3]
+        phys_type::L_to_volume = 1e-3 * std::pow(unit_type::m_to_angstrom, 3);
+        phys_type::volume_to_L = 1e+3 * std::pow(unit_type::angstrom_to_m, 3);
+
+        MJOLNIR_LOG_INFO("1 [m] = ", phys_type::m_to_length, " [", length, "]");
+        MJOLNIR_LOG_INFO("1 [", length, "] = ", phys_type::length_to_m, " [m]");
+
+        MJOLNIR_LOG_INFO("1 [L] = ", phys_type::L_to_volume, " [", length, "^3]");
+        MJOLNIR_LOG_INFO("1 [", length, "^3] = ", phys_type::volume_to_L, " [L]");
     }
     else if(length == "nm")
     {
         // eps0 [C^2/Energy/m] -> [C^2/Energy/nm]
         phys_type::eps0 *= (1.0 / unit_type::m_to_nm);
 
-        // 1 [mol/L] = 1e-24 [mol/nm^3]
-        phys_type::conc_coef = 1e3 / (unit_type::m_to_nm * unit_type::m_to_nm *
-                                      unit_type::m_to_nm);
+        // 1 m = 10^9 nm, 1 nm = 10^-9 m
+        phys_type::m_to_length = unit_type::m_to_nm;
+        phys_type::length_to_m = unit_type::nm_to_m;
+
+        // 1 [L] = 1e-3 [m^3] = 1e+24 [nm^3]; 1 [m^3] = 1e27 [nm^3]
+        phys_type::L_to_volume = 1e-3 * std::pow(unit_type::m_to_nm, 3);
+        phys_type::volume_to_L = 1e+3 * std::pow(unit_type::nm_to_m, 3);
+
+        MJOLNIR_LOG_INFO("1 [m] = ", phys_type::m_to_length, " [", length, "]");
+        MJOLNIR_LOG_INFO("1 [", length, "] = ", phys_type::length_to_m, " [m]");
+
+        MJOLNIR_LOG_INFO("1 [L] = ", phys_type::L_to_volume, " [", length, "^3]");
+        MJOLNIR_LOG_INFO("1 [", length, "^3] = ", phys_type::volume_to_L, " [L]");
     }
     else
     {
