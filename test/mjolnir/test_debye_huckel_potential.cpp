@@ -17,20 +17,18 @@ BOOST_AUTO_TEST_CASE(DH_double)
     using phys_type = mjolnir::physics::constants<real_type>;
     using unit_type = mjolnir::unit::constants<real_type>;
 
-    phys_type::kB   = unit_type::boltzmann_constant;
-    phys_type::NA   = unit_type::avogadro_constant;
-    phys_type::eps0 = (unit_type::vacuum_permittivity /
-                       unit_type::elementary_charge) /
-                       unit_type::elementary_charge;
+    phys_type::set_kB(unit_type::boltzmann_constant *
+                      1e-3 * unit_type::J_to_cal * unit_type::avogadro_constant);
+    phys_type::set_NA(unit_type::avogadro_constant);
+    phys_type::set_eps0((unit_type::vacuum_permittivity /
+        unit_type::elementary_charge) / unit_type::elementary_charge *
+        (1e+3 / unit_type::J_to_cal / unit_type::avogadro_constant) *
+        (1.0 / unit_type::m_to_angstrom));
 
-    phys_type::kB   *= (1e-3 * unit_type::J_to_cal * unit_type::avogadro_constant);
-    phys_type::eps0 *= (1e+3 / unit_type::J_to_cal / unit_type::avogadro_constant) *
-                       (1.0 / unit_type::m_to_angstrom);
-
-    phys_type::m_to_length = 1e-10;
-    phys_type::length_to_m = 1e+10;
-    phys_type::L_to_volume = 1e+27;
-    phys_type::volume_to_L = 1e-27;
+    phys_type::set_m_to_length(1e-10);
+    phys_type::set_length_to_m(1e+10);
+    phys_type::set_L_to_volume(1e+27);
+    phys_type::set_volume_to_L(1e-27);
 
     constexpr std::size_t N = 10000;
     constexpr real_type   h = 1e-6;
@@ -64,20 +62,18 @@ BOOST_AUTO_TEST_CASE(DH_float)
     using phys_type = mjolnir::physics::constants<real_type>;
     using unit_type = mjolnir::unit::constants<real_type>;
 
-    phys_type::kB   = unit_type::boltzmann_constant;
-    phys_type::NA   = unit_type::avogadro_constant;
-    phys_type::eps0 = (unit_type::vacuum_permittivity /
-                       unit_type::elementary_charge) /
-                       unit_type::elementary_charge;
+    phys_type::set_kB(unit_type::boltzmann_constant *
+        (1e-3 * unit_type::J_to_cal * unit_type::avogadro_constant));
+    phys_type::set_NA(unit_type::avogadro_constant);
+    phys_type::set_eps0((unit_type::vacuum_permittivity /
+        unit_type::elementary_charge) / unit_type::elementary_charge *
+        (1e+3 / unit_type::J_to_cal / unit_type::avogadro_constant) *
+        (1.0 / unit_type::m_to_angstrom));
 
-    phys_type::kB   *= (1e-3 * unit_type::J_to_cal * unit_type::avogadro_constant);
-    phys_type::eps0 *= (1e+3 / unit_type::J_to_cal / unit_type::avogadro_constant) *
-                       (1.0 / unit_type::m_to_angstrom);
-
-    phys_type::m_to_length = 1e-10;
-    phys_type::length_to_m = 1e+10;
-    phys_type::L_to_volume = 1e+27;
-    phys_type::volume_to_L = 1e-27;
+    phys_type::set_m_to_length(1e-10);
+    phys_type::set_length_to_m(1e+10);
+    phys_type::set_L_to_volume(1e+27);
+    phys_type::set_volume_to_L(1e-27);
 
     constexpr static std::size_t N = 1000;
     constexpr static real_type   h = 1e-2;

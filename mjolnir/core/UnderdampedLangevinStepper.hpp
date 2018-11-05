@@ -60,8 +60,8 @@ class UnderdampedLangevinStepper
         }
 
         this->temperature_ = sys.attribute("temperature");
-        this->noise_coef_  =
-            std::sqrt(2 * physics::constants<real_type>::kB * this->temperature_ / dt_);
+        this->noise_coef_  = std::sqrt(2 * physics::constants<real_type>::kB() *
+                                       this->temperature_ / dt_);
     }
 
   private:

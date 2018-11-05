@@ -12,16 +12,40 @@ template<typename realT>
 struct constants
 {
     typedef realT real_type;
-    static real_type kB;   // Boltzmann constant
-    static real_type NA;   // Avogadro constant
-    static real_type eps0; // vacuum permittivity
+    // access as constant
+    static real_type kB()   noexcept {return kB_;}   // Boltzmann constant
+    static real_type NA()   noexcept {return NA_;}   // Avogadro constant
+    static real_type eps0() noexcept {return eps0_;} // vacuum permittivity
+
+    static real_type m_to_length() noexcept {return m_to_length_;}
+    static real_type length_to_m() noexcept {return length_to_m_;}
+
+    static real_type L_to_volume() noexcept {return L_to_volume_;}
+    static real_type volume_to_L() noexcept {return volume_to_L_;}
+
+    // setter to protect constants from modification
+    static void set_kB  (const real_type v) noexcept {kB_   = v;}
+    static void set_NA  (const real_type v) noexcept {NA_   = v;}
+    static void set_eps0(const real_type v) noexcept {eps0_ = v;}
+    static void set_m_to_length(const real_type v) noexcept {m_to_length_ = v;}
+    static void set_length_to_m(const real_type v) noexcept {length_to_m_ = v;}
+    static void set_L_to_volume(const real_type v) noexcept {L_to_volume_ = v;}
+    static void set_volume_to_L(const real_type v) noexcept {volume_to_L_ = v;}
+
+    // the code in read_units() can be put here. which is better?
+
+  private:
+
+    static real_type kB_;
+    static real_type NA_;
+    static real_type eps0_;
 
     // conversion coefficients
-    static real_type m_to_length;
-    static real_type length_to_m;
+    static real_type m_to_length_;
+    static real_type length_to_m_;
 
-    static real_type L_to_volume;
-    static real_type volume_to_L;
+    static real_type L_to_volume_;
+    static real_type volume_to_L_;
 };
 
 // convert them in read_units() function defined in mjolnir/input/read_units.hpp
@@ -38,18 +62,18 @@ struct constants
 //      the range.
 
 template<typename realT>
-realT constants<realT>::kB = unit::constants<realT>::boltzmann_constant;
+realT constants<realT>::kB_ = unit::constants<realT>::boltzmann_constant;
 template<typename realT>
-realT constants<realT>::NA = unit::constants<realT>::avogadro_constant;
+realT constants<realT>::NA_ = unit::constants<realT>::avogadro_constant;
 template<typename realT>
-realT constants<realT>::eps0 = (unit::constants<realT>::vacuum_permittivity /
+realT constants<realT>::eps0_ = (unit::constants<realT>::vacuum_permittivity /
                                 unit::constants<realT>::elementary_charge)  /
                                 unit::constants<realT>::elementary_charge;
 
-template<typename realT> realT constants<realT>::m_to_length = 1.0;
-template<typename realT> realT constants<realT>::length_to_m = 1.0;
-template<typename realT> realT constants<realT>::L_to_volume = 1e-3;
-template<typename realT> realT constants<realT>::volume_to_L = 1e+3;
+template<typename realT> realT constants<realT>::m_to_length_ = 1.0;
+template<typename realT> realT constants<realT>::length_to_m_ = 1.0;
+template<typename realT> realT constants<realT>::L_to_volume_ = 1e-3;
+template<typename realT> realT constants<realT>::volume_to_L_ = 1e+3;
 
 } // physics
 } // mjolnir

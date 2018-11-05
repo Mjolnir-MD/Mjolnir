@@ -115,9 +115,9 @@ class DebyeHuckelPotential
         using phys_const = physics::constants<real_type>;
 
         constexpr real_type pi   = math_const::pi;
-        const     real_type kB   = phys_const::kB;
-        const     real_type NA   = phys_const::NA;
-        const     real_type eps0 = phys_const::eps0;
+        const     real_type kB   = phys_const::kB();
+        const     real_type NA   = phys_const::NA();
+        const     real_type eps0 = phys_const::eps0();
 
         const     real_type epsk = calc_dielectric_water(temperature_, ion_conc_);
         const     real_type T    = this->temperature_;
@@ -131,14 +131,14 @@ class DebyeHuckelPotential
         this->inv_4_pi_eps0_epsk_ = 1.0 / (4 * pi * eps0 * epsk);
 
         // convert [M] (mol/L) or [mM] -> [mol/nm^3] or [mol/A^3]
-        const real_type I = 0.5 * ion_conc_ / phys_const::L_to_volume;
+        const real_type I = 0.5 * ion_conc_ / phys_const::L_to_volume();
 
         this->debye_length_ = std::sqrt((eps0 * epsk * kB * T) / (2 * NA * I));
         this->inv_debye_length_ = 1. / this->debye_length_;
 
-        MJOLNIR_LOG_INFO("debye length     = ", debye_length_);
-        MJOLNIR_LOG_INFO("1 / debye length = ", inv_debye_length_);
-        MJOLNIR_LOG_INFO("1 / 4pi epsilon  = ", inv_4_pi_eps0_epsk_);
+        MJOLNIR_LOG_INFO("debye length      = ", debye_length_);
+        MJOLNIR_LOG_INFO("1 / debye length  = ", inv_debye_length_);
+        MJOLNIR_LOG_INFO("1 / 4pi eps0 epsk = ", inv_4_pi_eps0_epsk_);
 
         return;
     }
