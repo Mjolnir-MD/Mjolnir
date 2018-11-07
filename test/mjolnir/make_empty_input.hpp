@@ -44,7 +44,7 @@ inline toml::Table make_empty_input()
     // "empty forcefields" completely make sense because essentially any kind of
     // forcefields are a sum of several potential terms. Forcefield that has
     // zero term means an ideal system having no interaction.
-    toml::Array forcefields;
+    toml::Array forcefields(1, toml::Table(/* nothing! */));
 
     toml::Table input;
     input["general"]     = std::move(general);
