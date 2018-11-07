@@ -40,7 +40,7 @@ inline float rsqrt<float>(float x) noexcept
 template<>
 inline double rsqrt<double>(double x) noexcept
 {
-    return _mm_cvtsd_f64(_mm_rsqrt14_sd(_mm_set_sd(x), _mm_undefined_pd()));
+    return _mm_cvtsd_f64(_mm_rsqrt14_sd(_mm_undefined_pd(), _mm_set_sd(x)));
 }
 #endif // AVX512F
 
