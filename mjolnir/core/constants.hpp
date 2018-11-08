@@ -11,7 +11,9 @@ namespace physics
 template<typename realT>
 struct constants
 {
-    typedef realT real_type;
+    using real_type = realT;
+    using unit_type = unit::constants<real_type>;
+
     // access as constant
     static real_type kB()   noexcept {return kB_;}   // Boltzmann constant
     static real_type NA()   noexcept {return NA_;}   // Avogadro constant
@@ -31,6 +33,21 @@ struct constants
     static void set_length_to_m(const real_type v) noexcept {length_to_m_ = v;}
     static void set_L_to_volume(const real_type v) noexcept {L_to_volume_ = v;}
     static void set_volume_to_L(const real_type v) noexcept {volume_to_L_ = v;}
+
+    // forget all the units and put the default value. mainly for test codes
+    static void reset() noexcept
+    {
+        kB_   = unit_type::boltzmann_constant;
+        NA_   = unit_type::avogadro_constant;
+        eps0_ = unit_type::vacuum_permittivity /
+                unit_type::elementary_charge   /
+                unit_type::elementary_charge;
+
+        m_to_length_ = 1.0;
+        length_to_m_ = 1.0;
+        L_to_volume_ = 1e-3;
+        volume_to_L_ = 1e+3;
+    }
 
     // the code in read_units() can be put here. which is better?
 
@@ -67,8 +84,8 @@ template<typename realT>
 realT constants<realT>::NA_ = unit::constants<realT>::avogadro_constant;
 template<typename realT>
 realT constants<realT>::eps0_ = (unit::constants<realT>::vacuum_permittivity /
-                                unit::constants<realT>::elementary_charge)  /
-                                unit::constants<realT>::elementary_charge;
+                                 unit::constants<realT>::elementary_charge)  /
+                                 unit::constants<realT>::elementary_charge;
 
 template<typename realT> realT constants<realT>::m_to_length_ = 1.0;
 template<typename realT> realT constants<realT>::length_to_m_ = 1.0;
