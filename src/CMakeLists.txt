@@ -1,6 +1,9 @@
 add_executable(mjolnir mjolnir.cpp)
 set_target_properties(mjolnir
     PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${MJOLNIR_EXECUTABLE_LOCATION}
+    COMPILE_FLAGS "-std=c++11 -Ofast -march=native -mtune=native"
+    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
 )
 
+# XXX we may later need to add a script to generate optimal compiler flags
+#     depending on the environment.

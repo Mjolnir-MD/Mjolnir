@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.0)
 enable_testing()
 project(mjolnir)
 
+# the reference says it enables compiler's extension also (e.g. -std=gnu11,
+# not -std=c++11). it's not so nice, so just add `std=c++11` instead.
+# set(${CMAKE_CXX_STANDARD} 11)
+# later we may need to prepare nicer stuff to set compilation flags depending
+# on the environment.
+
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/extlib)
 
@@ -9,14 +15,13 @@ option(DEBUG "dump debug information" OFF)
 if(DEBUG)
     add_definitions(-DMJOLNIR_DEBUG)
 endif()
-set(MJOLNIR_EXECUTABLE_LOCATION "${PROJECT_SOURCE_DIR}/bin")
 
 if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/toml/toml.hpp")
     execute_process(COMMAND git submodule update --init --recursive
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()
 
-# if manually defined
+# if BOOST_ROOT is manually defined, use the library.
 if(BOOST_ROOT)
     find_package(Boost 1.66.0 REQUIRED)
     include_directories(${Boost_INCLUDE_DIRS})
@@ -61,8 +66,6 @@ else()
         message(STATUS "done.")
     endif()
 endif()
-
-add_definitions("-std=c++11 -Ofast -march=native -mtune=native")
 
 add_subdirectory(src)
 add_subdirectory(test)
