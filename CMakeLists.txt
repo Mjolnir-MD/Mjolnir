@@ -5,6 +5,8 @@ project(mjolnir)
 # the reference says it enables compiler's extension also (e.g. -std=gnu11,
 # not -std=c++11). it's not so nice, so just add `std=c++11` instead.
 # set(${CMAKE_CXX_STANDARD} 11)
+# later we may need to prepare nicer stuff to set compilation flags depending
+# on the environment.
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/extlib)
