@@ -1,11 +1,11 @@
 #define BOOST_TEST_MODULE "test_unit_conversion"
 #include <boost/test/included/unit_test.hpp>
 #include <boost/mpl/list.hpp>
+#include <test/util/make_empty_input.hpp>
+#include <test/util/traits.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/input/read_units.hpp>
 #include <mjolnir/util/string.hpp>
-#include <test/mjolnir/make_empty_input.hpp>
-#include <test/mjolnir/traits.hpp>
 
 typedef boost::mpl::list<double, float> test_targets;
 
