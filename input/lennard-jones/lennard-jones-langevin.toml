@@ -1,6 +1,8 @@
 # [simulator]
-type       = "Molecular Dynamics"
-scheme     = "Underdamped Langevin"
+type          = "Molecular Dynamics"
+scheme        = "Underdamped Langevin"
+boundary_type = "PeriodicCuboid"
+precision     = "double"
 seed       = 2374
 delta_t    = 0.01
 total_step = 10000
