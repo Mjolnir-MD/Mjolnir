@@ -102,7 +102,7 @@ System<traitsT> read_system_from_table(const toml::Table& system)
         }
 
 
-        MJOLNIR_LOG_INFO("mass = ",       sys[i].mass,
+        MJOLNIR_LOG_INFO("mass = ",        sys[i].mass,
                           ", position = ", sys[i].position,
                           ", velocity = ", sys[i].velocity,
                           ", force = ",    sys[i].force,
@@ -143,6 +143,14 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
         throw_exception<std::out_of_range>("no enough system definitions: ", N);
     }
 
+    const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
+    std::string input_path_("./");
+    if(files.count("input_path") == 1)
+    {
+        input_path_ = get_toml_value<std::string>(files, "input_path", "[files]");
+    }
+    const auto input_path(input_path_); // add constness
+
     MJOLNIR_LOG_INFO(system_params.size(), " systems are provided");
     MJOLNIR_LOG_INFO("using ", N, "-th system");
 
@@ -161,7 +169,7 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
                              " file (", file_name, ").");
         }
 
-        const auto system_file = toml::parse(file_name);
+        const auto system_file = toml::parse(input_path + file_name);
         if(system_file.count("systems") == 1)
         {
             MJOLNIR_LOG_WARN("in `system` file, root object is treated as "
