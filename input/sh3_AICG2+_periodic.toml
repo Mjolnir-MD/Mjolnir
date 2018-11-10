@@ -11,6 +11,7 @@ energy = "kcal/mol" # "kcal/mol" or "kJ/mol"
 type          = "Molecular Dynamics"
 scheme        = "Underdamped Langevin"
 boundary_type = "PeriodicCuboid"
+precision     = "double"
 seed       = 2374
 delta_t    = 0.1
 total_step = 50_000
