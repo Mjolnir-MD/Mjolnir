@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_TRAITS_FOR_TEST_CODE
-#define MJOLNIR_TRAITS_FOR_TEST_CODE
+#ifndef MJOLNIR_TEST_UTIL_TRAITS_HPP
+#define MJOLNIR_TEST_UTIL_TRAITS_HPP
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SystemMotionRemover.hpp>
@@ -15,4 +15,4 @@ using traits = mjolnir::SimulatorTraits<realT, boundaryT>;
 
 } // test
 } // mjolnir
-#endif // MJOLNIR_TRAITS_FOR_TEST_CODE
+#endif // MJOLNIR_TEST_UTIL_TRAITS_HPP
