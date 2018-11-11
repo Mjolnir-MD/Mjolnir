@@ -15,15 +15,15 @@ read_observer(const toml::Table& data)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_observer(), 0);
 
-    const auto& general =
-        get_toml_value<toml::Table>(data, "general", "<root>");
+    const auto& files =
+        get_toml_value<toml::Table>(data, "files", "<root>");
 
     std::string path =
-        get_toml_value<std::string>(general, "output_path", "[general]");
+        get_toml_value<std::string>(files, "output_path", "[files]");
     if(path.back() != '/') {path += '/';} //XXX assuming posix
 
     const std::string prefix = get_toml_value<std::string>(
-            general, "output_prefix", "[general]");
+            files, "output_prefix", "[files]");
     MJOLNIR_LOG_INFO("path   = ", path);
     MJOLNIR_LOG_INFO("prefix = ", prefix);
 

@@ -22,7 +22,7 @@ struct read_boundary_impl<UnlimitedBoundary<realT, coordT>>
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_SCOPE(read_boundary_impl::invoke(), 0);
-        MJOLNIR_LOG_INFO("no boundary is set");
+        MJOLNIR_LOG_INFO("no boundary is set. unlimited");
         return UnlimitedBoundary<realT, coordT>{};
     }
 };
@@ -38,9 +38,10 @@ struct read_boundary_impl<CuboidalPeriodicBoundary<realT, coordT>>
         MJOLNIR_LOG_INFO("shape of periodic boundary is cuboid");
 
         const coordT upper(get_toml_value<std::array<realT, 3>>(
-                    boundary, "upper", "[boundary]"));
+                    boundary, "upper", "[boundary_shape]"));
         const coordT lower(get_toml_value<std::array<realT, 3>>(
-                    boundary, "lower", "[boundary]"));
+                    boundary, "lower", "[boundary_shape]"));
+
         assert(upper[0] > lower[0]);
         assert(upper[1] > lower[1]);
         assert(upper[2] > lower[2]);
@@ -69,7 +70,7 @@ System<traitsT> read_system_from_table(const toml::Table& system)
     using coordinate_type = typename traitsT::coordinate_type;
 
     const auto& boundary  =
-        get_toml_value<toml::Table>(system, "boundary",  "[systems.boundary]");
+        get_toml_value<toml::Table>(system, "boundary_shape", "[system]");
     const auto& particles =
         get_toml_value<toml::Array>(system, "particles", "[system]");
 
@@ -101,7 +102,7 @@ System<traitsT> read_system_from_table(const toml::Table& system)
         }
 
 
-        MJOLNIR_LOG_INFO("mass = ",       sys[i].mass,
+        MJOLNIR_LOG_INFO("mass = ",        sys[i].mass,
                           ", position = ", sys[i].position,
                           ", velocity = ", sys[i].velocity,
                           ", force = ",    sys[i].force,
@@ -142,6 +143,14 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
         throw_exception<std::out_of_range>("no enough system definitions: ", N);
     }
 
+    const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
+    std::string input_path_("./");
+    if(files.count("input_path") == 1)
+    {
+        input_path_ = get_toml_value<std::string>(files, "input_path", "[files]");
+    }
+    const auto input_path(input_path_); // add constness
+
     MJOLNIR_LOG_INFO(system_params.size(), " systems are provided");
     MJOLNIR_LOG_INFO("using ", N, "-th system");
 
@@ -160,7 +169,7 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
                              " file (", file_name, ").");
         }
 
-        const auto system_file = toml::parse(file_name);
+        const auto system_file = toml::parse(input_path + file_name);
         if(system_file.count("systems") == 1)
         {
             MJOLNIR_LOG_WARN("in `system` file, root object is treated as "

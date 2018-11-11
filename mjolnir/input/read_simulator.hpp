@@ -206,6 +206,14 @@ read_simulator(const toml::Table& data)
     const auto& simulator =
         get_toml_value<toml::Table>(data, "simulator", "<root>");
 
+    const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
+    std::string input_path_("./");
+    if(files.count("input_path") == 1)
+    {
+        input_path_ = get_toml_value<std::string>(files, "input_path", "[files]");
+    }
+    const auto input_path(input_path_); // add constness
+
     if(simulator.count("file_name") == 1)
     {
         MJOLNIR_SCOPE(simulator.count("file_name") == 1, 1);
@@ -222,7 +230,7 @@ read_simulator(const toml::Table& data)
                              " file (", file_name, ").");
         }
 
-        const auto simulator_file = toml::parse(file_name);
+        const auto simulator_file = toml::parse(input_path + file_name);
         if(simulator_file.count("simulator") == 1)
         {
             MJOLNIR_LOG_WARN("in `simulator` file, root object is treated as "

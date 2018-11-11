@@ -1,9 +1,5 @@
-[general]
-precision     = "double"         # one of {"float", "double"}.
-boundary      = "PeriodicCuboid" # one of {"PeriodicCube", "Unlimited"}
-thread        = false            # enable threading parallelization (not impled yet)
-GPU           = false            # enable GPU parallelization       (not impled yet)
-output_prefix = "implicit_mem"   # file prefix.
+[files]
+output_prefix = "implicit_mem"   # output file prefix
 output_path   = "./"             # output path
 
 [units]
@@ -11,8 +7,10 @@ length = "angstrom" # "angstorm" or "Å" or "nm"
 energy = "kcal/mol" # "kcal/mol" or "kJ/mol"
 
 [simulator]
-type       = "Molecular Dynamics"
-scheme     = "Underdamped Langevin"
+type          = "Molecular Dynamics"
+scheme        = "Underdamped Langevin"
+precision     = "double"
+boundary_type = "PeriodicCuboid" # one of {"PeriodicCube", "Unlimited"}
 seed       = 2374
 delta_t    = 0.01
 total_step = 100_000
@@ -4117,8 +4115,8 @@ parameters = [ # {{{
 ] # }}}
 
 [[systems]]
-attributes = {temperature = 300.0, ionic_strength = 100.0}
-boundary   = {lower = [0.0, 0.0, 0.0], upper = [32.0, 32.0, 32.0]}
+attributes     = {temperature = 300.0}
+boundary_shape = {lower = [0.0, 0.0, 0.0], upper = [32.0, 32.0, 32.0]}
 particles = [ # {{{
 {mass = 1.0, position = [  1.000,  1.000,  1.000], velocity = [1.000, 0.000, 0.000]},
 {mass = 1.0, position = [  3.000,  1.000,  1.000], velocity = [0.000, 0.000, 0.000]},
@@ -8220,12 +8218,11 @@ particles = [ # {{{
 
 [[forcefields]]
 [[forcefields.global]]
-interaction = "Distance"
+interaction = "Pair"
 potential   = "LennardJones"
 ignore = {molecule = "Nothing", particles_within = {bond = 3, contact = 1}}
 spatial_partition = {type = "CellList", margin = 1.0}
-# params{{{
-parameters = [
+parameters = [ #{{{
 {index =     0, group = 0, sigma = 1.0, epsilon = 0.5},
 {index =     1, group = 0, sigma = 1.0, epsilon = 0.5},
 {index =     2, group = 0, sigma = 1.0, epsilon = 0.5},
@@ -12331,8 +12328,7 @@ potential = "ImplicitMembrane"
 thickness = 8.0
 interaction_magnitude = 1.0
 bend = 4.0
-# params{{{
-parameters = [
+parameters = [ #{{{
 {index =     0, hydrophobicity = 10.0},
 {index =     1, hydrophobicity = 10.0},
 {index =     2, hydrophobicity = 10.0},

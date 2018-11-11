@@ -1,21 +1,18 @@
 # vim: foldmethod=marker
-[general]
-precision     = "double"         # one of {"float", "double"}.
-boundary      = "PeriodicCuboid" # one of {"PeriodicCuboid", "Unlimited"}
-thread        = false            # enable threading parallelization
-GPU           = false            # enable GPU parallelization
+[files]
 output_prefix = "lennard-jones"  # file prefix.
 output_path   = "./"             # output path
+input_path    = "./input/lennard-jones/" # input path
 
 [units]
 length = "angstrom" # "angstorm" or "Å" or "nm"
 energy = "kcal/mol" # "kcal/mol" or "kJ/mol"
 
 [simulator]
-file_name = "input/lennard-jones/lennard-jones-langevin.toml"
+file_name = "lennard-jones-langevin.toml"
 
 [[systems]]
-file_name = "input/lennard-jones/lennard-jones-system.toml"
+file_name = "lennard-jones-system.toml"
 
 [[forcefields]]
-file_name = "input/lennard-jones/lennard-jones-forcefields.toml"
+file_name = "lennard-jones-forcefields.toml"

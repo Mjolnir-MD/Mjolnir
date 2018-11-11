@@ -11,7 +11,8 @@ namespace mjolnir
 
 template<typename traitsT>
 LocalForceField<traitsT>
-read_local_forcefield(std::vector<toml::Table> interactions)
+read_local_forcefield(std::vector<toml::Table> interactions,
+                      const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_local_forcefield(), 0);
@@ -39,7 +40,7 @@ read_local_forcefield(std::vector<toml::Table> interactions)
                     file_name, ").");
             }
 
-            const auto forcefield_file = toml::parse(file_name);
+            const auto forcefield_file = toml::parse(input_path + file_name);
             if(forcefield_file.count("forcefields") == 1)
             {
                 MJOLNIR_LOG_ERROR(
@@ -80,7 +81,8 @@ read_local_forcefield(std::vector<toml::Table> interactions)
 
 template<typename traitsT>
 GlobalForceField<traitsT>
-read_global_forcefield(std::vector<toml::Table> interactions)
+read_global_forcefield(std::vector<toml::Table> interactions,
+                       const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_global_forcefield(), 0);
@@ -108,7 +110,7 @@ read_global_forcefield(std::vector<toml::Table> interactions)
                     file_name, ").");
             }
 
-            const auto forcefield_file = toml::parse(file_name);
+            const auto forcefield_file = toml::parse(input_path + file_name);
             if(forcefield_file.count("forcefields") == 1)
             {
                 MJOLNIR_LOG_ERROR(
@@ -149,7 +151,8 @@ read_global_forcefield(std::vector<toml::Table> interactions)
 
 template<typename traitsT>
 ExternalForceField<traitsT>
-read_external_forcefield(std::vector<toml::Table> interactions)
+read_external_forcefield(std::vector<toml::Table> interactions,
+                         const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_external_forcefield(), 0);
@@ -177,7 +180,7 @@ read_external_forcefield(std::vector<toml::Table> interactions)
                     file_name, ").");
             }
 
-            const auto forcefield_file = toml::parse(file_name);
+            const auto forcefield_file = toml::parse(input_path + file_name);
             if(forcefield_file.count("forcefields") == 1)
             {
                 MJOLNIR_LOG_ERROR(
@@ -219,7 +222,7 @@ read_external_forcefield(std::vector<toml::Table> interactions)
 
 template<typename traitsT>
 ForceField<traitsT>
-read_forcefield_from_table(const toml::Table& ff)
+read_forcefield_from_table(const toml::Table& ff, const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_forcefield_from_table(), 0);
@@ -253,9 +256,9 @@ read_forcefield_from_table(const toml::Table& ff)
         }
     }
     return ForceField<traitsT>(
-            read_local_forcefield<traitsT>(std::move(fflocal)),
-            read_global_forcefield<traitsT>(std::move(ffglobal)),
-            read_external_forcefield<traitsT>(std::move(ffexternal)));
+        read_local_forcefield<traitsT>(std::move(fflocal), input_path),
+        read_global_forcefield<traitsT>(std::move(ffglobal), input_path),
+        read_external_forcefield<traitsT>(std::move(ffexternal), input_path));
 }
 
 
@@ -265,6 +268,15 @@ read_forcefield(const toml::Table& data, std::size_t N)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_forcefield(), 0);
+
+    const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
+    std::string input_path_("./");
+    if(files.count("input_path") == 1)
+    {
+        input_path_ = get_toml_value<std::string>(files, "input_path", "[files]");
+    }
+    const auto input_path(input_path_); // add constness
+    MJOLNIR_LOG_INFO("input path is -> ", input_path);
 
     const auto& ffs = get_toml_value<toml::Array>(data, "forcefields", "<root>");
     if(ffs.size() <= N)
@@ -291,7 +303,7 @@ read_forcefield(const toml::Table& data, std::size_t N)
                              " file (", file_name, ").");
         }
 
-        const auto forcefield_file = toml::parse(file_name);
+        const auto forcefield_file = toml::parse(input_path + file_name);
         if(forcefield_file.count("forcefields") == 1)
         {
             MJOLNIR_LOG_WARN("in `forcefield` file, root object is treated as "
@@ -310,12 +322,14 @@ read_forcefield(const toml::Table& data, std::size_t N)
                 std::exit(1);
             }
             return read_forcefield_from_table<traitsT>(forcefield_file.at(
-                    "forcefields").template cast<toml::value_t::Table>());
+                    "forcefields").template cast<toml::value_t::Table>(),
+                    input_path);
         }
-        return read_forcefield_from_table<traitsT>(forcefield_file);
+        return read_forcefield_from_table<traitsT>(forcefield_file, input_path);
     }
-    // else
-    return read_forcefield_from_table<traitsT>(ff);
+
+    // all-in-one file
+    return read_forcefield_from_table<traitsT>(ff, input_path);
 }
 
 } // mjolnir

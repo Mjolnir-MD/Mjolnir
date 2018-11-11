@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_MATH_RSQRT
-#define MJOLNIR_MATH_RSQRT
+#ifndef MJOLNIR_MATH_FUNCTIONS_HPP
+#define MJOLNIR_MATH_FUNCTIONS_HPP
 #include <cstdint>
 #include <cmath>
 
@@ -28,21 +28,26 @@ inline realT rsqrt(realT x) noexcept
     return realT(1.0) / std::sqrt(x);
 }
 
-#ifdef __SSE__
+#if defined(MJOLNIR_WITH_APPROX)
+#  if defined(__SSE__)
+
 template<>
 inline float rsqrt<float>(float x) noexcept
 {
     return _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(x)));
 }
-#endif // SSE
 
-#if defined(__AVX512F__) && defined(__SSE2__)
+#  endif // SSE
+#  if defined(__AVX512F__) && defined(__SSE2__)
+
 template<>
 inline double rsqrt<double>(double x) noexcept
 {
     return _mm_cvtsd_f64(_mm_rsqrt14_sd(_mm_undefined_pd(), _mm_set_sd(x)));
 }
-#endif // AVX512F
+
+#  endif // AVX512F
+#endif // MJOLNIR_WITH_APPROX
 
 } // mjolnir
-#endif // MJOLNIR_MATH_RSQRT
+#endif // MJOLNIR_MATH_FUNCTIONS_HPP
