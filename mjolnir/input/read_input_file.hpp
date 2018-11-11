@@ -20,9 +20,35 @@ read_boundary(const toml::Table& data)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_boundary(const toml::Table& data), 0);
 
-    const auto& general = get_toml_value<toml::Table>(data, "general", "<root>");
-    const auto boundary =
-        get_toml_value<std::string>(general, "boundary", "[general]");
+    // [simulator] can be provided in a different file. in that case, the table
+    // has `file_name` field. In that case, input_path is also needed to
+    // determine the location of the file.
+
+    std::string boundary;
+
+    const auto& simulator =
+        get_toml_value<toml::Table>(data, "simulator", "<root>");
+
+    if(simulator.count("file_name") == 1)
+    {
+        const auto filename = toml::get<std::string>(simulator.at("file_name"));
+        std::string input_path; //default: empty
+
+        const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
+        if(files.count("input_path") == 1)
+        {
+            input_path = toml::get<std::string>(files.at("input_path"));
+        }
+
+        const auto& sim = toml::parse(input_path + filename);
+        boundary = get_toml_value<std::string>(
+                sim, "boundary_type", "[simulator]");
+    }
+    else
+    {
+        boundary = get_toml_value<std::string>(
+                simulator, "boundary_type", "[simulator]");
+    }
 
     if(boundary == "Unlimited")
     {
@@ -36,8 +62,9 @@ read_boundary(const toml::Table& data)
     }
     else
     {
-        throw std::runtime_error(
-            "invalid boundary setting (Unlimited|PeriodicCuboid): " + boundary);
+        throw_exception<std::runtime_error>("mjolnir::read_boundary: "
+            "invalid boundary: neither 'Unlimited' or 'PeriodicCuboid' -> ",
+            boundary);
     }
 }
 
@@ -47,9 +74,33 @@ read_precision(const toml::Table& data)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_precision(const toml::Table& data), 0);
 
-    const auto& general = get_toml_value<toml::Table>(data, "general", "<root>");
-    const auto prec =
-        get_toml_value<std::string>(general, "precision", "[general]");
+    // [simulator] can be provided in a different file. in that case, the table
+    // has `file_name` field. In that case, input_path is also needed to
+    // determine the location of the file.
+
+    std::string prec;
+
+    const auto& simulator =
+        get_toml_value<toml::Table>(data, "simulator", "<root>");
+
+    if(simulator.count("file_name") == 1)
+    {
+        const auto filename = toml::get<std::string>(simulator.at("file_name"));
+        std::string input_path; //default: empty
+
+        const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
+        if(files.count("input_path") == 1)
+        {
+            input_path = toml::get<std::string>(files.at("input_path"));
+        }
+
+        const auto& sim = toml::parse(input_path + filename);
+        prec = get_toml_value<std::string>(sim, "precision", "[simulator]");
+    }
+    else
+    {
+        prec = get_toml_value<std::string>(simulator, "precision", "[simulator]");
+    }
 
     if(prec == "double")
     {
@@ -63,8 +114,8 @@ read_precision(const toml::Table& data)
     }
     else
     {
-        throw std::runtime_error(
-                "invalid precision setting (double|float): " + prec);
+        throw_exception<std::runtime_error>("mjolnir::read_precision: "
+            "invalid precision: neither 'double' or 'float' -> ", prec);
     }
 }
 
@@ -73,13 +124,17 @@ read_input_file(const std::string& filename)
 {
     const auto data = toml::parse(filename);
 
-    // setting logger ...
-    const auto& general = get_toml_value<toml::Table>(data, "general", "<root>");
-    std::string path = get_toml_value<std::string>(general, "output_path", "[general]");
-    if(path.back() != '/') {path += '/';/*XXX assuming posix */}
+    // initializing logger by using output_path and output_prefix ...
+    const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
+    const auto  path  = get_toml_value<std::string>(files, "output_path", "[files]");
+
+    // XXX:  Here, this code assumes POSIX. it does not support windows.
+    // TODO: Consider using Boost.filesystem to manage path and files
+    //       in more elegant and powerful way? After switching C++17,
+    //       we can re-write that into std::filesystem.
 
     const std::string logger_name = path + get_toml_value<std::string>(
-            general, "output_prefix", "[general]") + ".log";
+            files, "output_prefix", "[files]") + ".log";
     MJOLNIR_SET_DEFAULT_LOGGER(logger_name);
 
     MJOLNIR_GET_DEFAULT_LOGGER();
