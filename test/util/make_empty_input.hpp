@@ -14,11 +14,9 @@ inline toml::Table make_empty_input()
 {
     using namespace mjolnir::literals::string_literals;
 
-    toml::Table general;
-    general["precision"]     = "double"_s;
-    general["boundary"]      = "Unlimited"_s;
-    general["output_prefix"] = "nothing"_s;
-    general["output_path"]   = "./"_s;
+    toml::Table files;
+    files["output_prefix"] = "nothing"_s;
+    files["output_path"]   = "./"_s;
 
     toml::Table units;
     units["length"] = "angstrom"_s;
@@ -28,17 +26,19 @@ inline toml::Table make_empty_input()
     // (that does not make sense!) . Here, temporary set MD simulator with
     // Newtonian dynamics.
     toml::Table simulator;
-    simulator["type"]       = "Molecular Dynamics"_s;
-    simulator["scheme"]     = "Newtonian"_s;
-    simulator["total_step"] = 1;
-    simulator["save_step"]  = 1;
-    simulator["delta_t"]    = 0.1;
+    simulator["type"]          = "Molecular Dynamics"_s;
+    simulator["scheme"]        = "Newtonian"_s;
+    simulator["precision"]     = "double"_s;
+    simulator["boundary_type"] = "Unlimited"_s;
+    simulator["total_step"]    = 1;
+    simulator["save_step"]     = 1;
+    simulator["delta_t"]       = 0.1;
 
     // Mjolnir requires a system to simulate, even if it has no particle.
     toml::Table system;
-    system["attributes"] = toml::Table{{"temperature"_s, toml::value(300.0)}};
-    system["boundary"]   = toml::Table(); // no boundary
-    system["particles"]  = toml::Array(); // no particle
+    system["attributes"]     = toml::Table{{"temperature"_s, toml::value(300.0)}};
+    system["boundary_shape"] = toml::Table(); // no boundary
+    system["particles"]      = toml::Array(); // no particle
     toml::Array systems(1, std::move(system));
 
     // "empty forcefields" completely make sense because essentially any kind of
@@ -47,7 +47,7 @@ inline toml::Table make_empty_input()
     toml::Array forcefields(1, toml::Table(/* nothing! */));
 
     toml::Table input;
-    input["general"]     = std::move(general);
+    input["files"]       = std::move(files);
     input["units"]       = std::move(units);
     input["simulator"]   = std::move(simulator);
     input["systems"]     = std::move(systems);
