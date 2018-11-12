@@ -36,21 +36,5 @@ class RandomNumberGenerator
     std::normal_distribution<real_type>       nrm_;
 };
 
-template<typename traitsT>
-inline typename RandomNumberGenerator<traitsT>::real_type
-RandomNumberGenerator<traitsT>::uniform_real(
-    const real_type min, const real_type max)
-{
-    return (std::uniform_real_distribution<real_type>(min, max))(rng_);
-}
-
-template<typename traitsT>
-inline typename RandomNumberGenerator<traitsT>::real_type
-RandomNumberGenerator<traitsT>::gaussian(
-    const real_type mean, const real_type sigma)
-{
-    return (std::normal_distribution<real_type>(mean, sigma))(rng_);
-}
-
 } // mjolnir
 #endif /*MJOLNIR_CORE_RANDOM_NUMBER_GENERATOR*/
