@@ -10,9 +10,9 @@ template<typename traitsT>
 class RandomNumberGenerator
 {
   public:
-    typedef traitsT traits_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
+    using traits_type     = traitsT;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
 
   public:
     RandomNumberGenerator(const std::uint32_t seed)
