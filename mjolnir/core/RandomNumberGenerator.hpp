@@ -20,12 +20,20 @@ class RandomNumberGenerator
     {}
     ~RandomNumberGenerator() = default;
 
-    real_type uniform_real(const real_type min, const real_type max);
-    real_type gaussian(const real_type mean, const real_type sigma);
+    real_type uniform_real(const real_type min, const real_type max)
+    {
+        return this->uni_(this->rng_) * (max - min) + min;
+    }
+    real_type gaussian(const real_type mean, const real_type stddev)
+    {
+        return this->nrm_(this->rng_) * stddev + mean;
+    }
 
   private:
     const std::uint32_t seed_;
-    std::mt19937 rng_;
+    std::mt19937        rng_;
+    std::uniform_real_distribution<real_type> uni_;
+    std::normal_distribution<real_type>       nrm_;
 };
 
 template<typename traitsT>
