@@ -1,7 +1,7 @@
 #define BOOST_TEST_MODULE "test_axis_aligned_plane_shape"
 
 #include <boost/test/included/unit_test.hpp>
-#include <test/mjolnir/traits.hpp>
+#include <test/util/traits.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>
 #include <mjolnir/util/make_unique.hpp>

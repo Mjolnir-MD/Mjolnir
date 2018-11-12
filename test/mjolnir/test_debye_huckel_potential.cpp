@@ -1,7 +1,7 @@
 #define BOOST_TEST_MODULE "test_debye_huckel_potential"
 
 #include <boost/test/included/unit_test.hpp>
-#include <test/mjolnir/traits.hpp>
+#include <test/util/traits.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/logger.hpp>
