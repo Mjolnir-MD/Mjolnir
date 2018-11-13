@@ -16,7 +16,7 @@ class RandomNumberGenerator
 
   public:
     RandomNumberGenerator(const std::uint32_t seed)
-        : seed_(seed), rng_(seed)
+        : seed_(seed), rng_(seed), uni_(0.0, 1.0), nrm_(0.0, 1.0)
     {}
     ~RandomNumberGenerator() = default;
 
