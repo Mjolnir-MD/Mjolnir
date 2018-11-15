@@ -21,6 +21,7 @@ class Observer
   public:
     Observer(const std::string& filename_prefix) :
         xyz_name_(filename_prefix + std::string(".xyz")),
+        vel_name_(filename_prefix + std::string(".vel")),
         ene_name_(filename_prefix + std::string(".ene"))
     {
         // clear the contents
@@ -29,6 +30,14 @@ class Observer
             if(not ofs.good())
             {
                 throw std::runtime_error("file open error: " + this->xyz_name_);
+            }
+            ofs.close();
+        }
+        {
+            std::ofstream ofs(this->vel_name_);
+            if(not ofs.good())
+            {
+                throw std::runtime_error("file open error: " + this->vel_name_);
             }
             ofs.close();
         }
@@ -68,6 +77,7 @@ class Observer
   private:
 
     std::string xyz_name_;
+    std::string vel_name_;
     std::string ene_name_;
 };
 
@@ -82,6 +92,16 @@ inline void Observer<traitsT>::output(
         const auto& p = sys.position(i);
         ofs << sys.name(i) << ' ' << std::fixed << std::setprecision(8)
             << p[0] << ' ' << p[1] << ' ' << p[2] << '\n';
+    }
+    ofs.close();
+
+    ofs.open(vel_name_, std::ios::app);
+    ofs << sys.size() << '\n' << time << '\n';
+    for(std::size_t i=0; i<sys.size(); ++i)
+    {
+        const auto& v = sys.velocity(i);
+        ofs << sys.name(i) << ' ' << std::fixed << std::setprecision(8)
+            << v[0] << ' ' << v[1] << ' ' << v[2] << '\n';
     }
     ofs.close();
 
