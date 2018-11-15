@@ -259,7 +259,10 @@ void PeriodicGridCellList<traitsT, parameterT>::initialize(
 
     if(dim_x_ == 3 || dim_y_ == 3 || dim_z_ == 3)
     {
-        MJOLNIR_LOG_WARN("system size is too small. Cell List has no merit.");
+        MJOLNIR_LOG_WARN("system size is too small (",
+                dim_x_, 'x', dim_y_, 'x', dim_z_,
+                "). This might cause a problem. Please check the cutoff ratio"
+                " and the box size!");
     }
 
     // it may expand cell a bit (to fit system range)
