@@ -11,6 +11,13 @@
 namespace mjolnir
 {
 
+// Debye-Huckel type electrostatic interaction.
+// This class contains charges and other parameters and calculates energy and
+// derivative of the potential function.
+// This class is an implementation of the electrostatic term used in the 3SPN
+// series of the coarse-grained DNA models (Knotts et al., (2007), Sambriski and
+// de Pablo, (2009), Hinckley et al., (2013), and Freeman et al., (2014))
+// It is same as the default electrostatic term in CafeMol (Kenzaki et al. 2011)
 template<typename realT>
 class DebyeHuckelPotential
 {

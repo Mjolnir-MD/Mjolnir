@@ -10,7 +10,7 @@ namespace mjolnir
 
 template<typename T> class System;
 
-// Flexible Local Angle potential (T. Terakawa & S. Takada Biophys J 2011)
+// Flexible Local Angle potential (T. Terakawa and S. Takada Biophys J 2011)
 // NOTE: It assumes that each theta value in histogram is same as the default.
 //
 // Here, the implementation is derived from the original implementation in

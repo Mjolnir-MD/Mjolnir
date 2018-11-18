@@ -11,10 +11,9 @@
 namespace mjolnir
 {
 
-/*! @brief Lennard-Jones potential that has the same sigma and epsilon for *
- *         each particles.                                                 *
- * V(r)  =  4. * epsilon * ((r/sigma)^12 - (r/sigma)^6))                   *
- * dV/dr = 24. * epsilon / r * ((r/sigma)^6 - 2 * (r/sigma)^12)            */
+// Well-known Lennard-Jones interaction with uniform parameters.
+// This class contains a sigma and an epsilon that are the same among all the
+// particles.
 template<typename realT>
 class UniformLennardJonesPotential
 {

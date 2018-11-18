@@ -11,6 +11,8 @@
 namespace mjolnir
 {
 
+// calculate energy and force of bond angle interaction.
+// The implementation is based on the book written by A. Ueda (2003) Shokabo.
 template<typename traitsT, typename potentialT>
 class BondAngleInteraction : public LocalInteractionBase<traitsT>
 {

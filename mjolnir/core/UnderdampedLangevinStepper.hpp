@@ -8,6 +8,11 @@
 namespace mjolnir
 {
 
+// Simple underdamped Langevin integrator.
+// The implementation is based on the article written by J. D. Honeycutt and
+// D. Thirumalai (1992) Biopolymers and also the article written by Z. Guo and
+// D. Thirumalai (1995) Biopolymers. Same algorithm used as default Langevin
+// integrator in CafeMol that is developed by H. Kenzaki et al., (2011) JCTC.
 template<typename traitsT>
 class UnderdampedLangevinStepper
 {

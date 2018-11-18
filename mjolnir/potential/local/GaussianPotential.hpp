@@ -6,9 +6,9 @@ namespace mjolnir
 {
 template<typename T> class System;
 
-/*! @brief gaussian potential                                  *
- * V(r)  = k * exp(-(r-r0)^2 / 2sigma^2)                       *
- * dV/dr = k * (-(r-r0) / sigma^2) * exp(-(r-r0)^2 / 2sigma^2) */
+// well-known gaussian-shape potential.
+// V(r)  = k * exp(-(r-r0)^2 / 2sigma^2)
+// dV/dr = k * (-(r-r0) / sigma^2) * exp(-(r-r0)^2 / 2sigma^2)
 template<typename realT>
 class GaussianPotential
 {

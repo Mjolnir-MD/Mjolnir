@@ -10,9 +10,12 @@
 namespace mjolnir
 {
 
-/*! @brief excluded volume potential        *
- *  V(r) = epsilon * (sigma/r)^12           *
- * dV/dr = -12 * epsilon * (sigma/r)^12 / r */
+// excluded volume potential.
+// This class contains radii of the particles and calculates energy and
+// derivative of the potential function.
+// This class is an implementation of the excluded volume term used in
+// Clementi's off-lattice Go-like model (Clement et al., 2000) and AICG2+ model
+// (Li et al., 2014)
 template<typename realT>
 class ExcludedVolumePotential
 {

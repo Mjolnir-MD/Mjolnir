@@ -6,9 +6,10 @@ namespace mjolnir
 {
 template<typename T> class System;
 
-/*! @brief Clementi-Go dihedral modified-triple-cosine potential *
- *  V(phi) = k1 * (1-cos(phi-phi0)) + k3 * (1-cos(3(phi-phi0)))  *
- * dV/dphi = k1 * sin(phi-phi0)     + k3 * 3 * sin(3(phi-phi0))  */
+// triple-cosine potential used as the dihedral term in Clementi's off-lattice
+// Go-like protein model (Clement et al., 2000).
+//  V(phi) = k1 * (1-cos(phi-phi0)) + k3 * (1-cos(3(phi-phi0)))
+// dV/dphi = k1 *    sin(phi-phi0)  + k3 * 3 * sin(3(phi-phi0))
 template<typename realT>
 class ClementiDihedralPotential
 {

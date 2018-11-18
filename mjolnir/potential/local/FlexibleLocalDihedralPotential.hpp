@@ -11,9 +11,9 @@ namespace mjolnir
 
 template<typename T> class System;
 
-/* @brief Flexible Local dihedral potential
- * V(phi) = \sum_m^3 k_m^s sin(mphi) + \sum_m^3 k_n^c cos(nphi) + C
- * NOTE: term := {C, k_1^s, k_1^c, k_2^s, k_2^c, k_3^s, k_3^c} */
+// Flexible Local Dihedral potential (T. Terakawa and S. Takada Biophys J 2011)
+// used in the AICG2+ protein model.
+// NOTE: term := {C, k_1^s, k_1^c, k_2^s, k_2^c, k_3^s, k_3^c}
 template<typename realT>
 class FlexibleLocalDihedralPotential
 {

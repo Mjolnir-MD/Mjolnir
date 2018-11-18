@@ -9,7 +9,9 @@
 namespace mjolnir
 {
 
-/*! @brief calculate energy and force of Bond length type local interaction */
+// calculate energy and force of dihedral angle interaction.
+// The implementation is based on the article written by H. Bekker,
+// H.J.C. Berendsen and W.F. van Gunsteren (1995) J. Comput. Chem.
 template<typename traitsT, typename potentialT>
 class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
 {

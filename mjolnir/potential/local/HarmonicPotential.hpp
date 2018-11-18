@@ -6,9 +6,7 @@ namespace mjolnir
 
 template<typename T> class System;
 
-/*! @brief harmonic potential *
- *  V(r) = K * (r - r0)^2     *
- * dV/dr = 2 * K * (r - r0)   */
+// Well-known harmonic potential.
 template<typename realT>
 class HarmonicPotential
 {
