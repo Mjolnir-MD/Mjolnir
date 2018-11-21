@@ -89,7 +89,10 @@ template<typename traitsT, typename integratorT>
 inline void MolecularDynamicsSimulator<traitsT, integratorT>::finalize()
 {
     std::cerr << progress_bar_.format(this->total_step_) << std::endl;
-//     observer_.output(time_, this->system_);
+    if(this->step_count_ % save_step_ != 0)
+    {
+        observer_.output(this->time_, this->system_, this->ff_);
+    }
     return;
 }
 
