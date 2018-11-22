@@ -33,8 +33,10 @@ $ make test # optional
 
 After this, you will find executable in `bin` directory.
 
-`g++-5` and `clang++-3.7` on `Ubuntu`, `clang++` on `OS X` are tested on
-[Travis CI](https://travis-ci.org/ToruNiina/Mjolnir).
+The codes are tested with the following compilers on [Travis CI](https://travis-ci.org/ToruNiina/Mjolnir).
+- `g++-7`, `g++-6`, `g++-5` on `Linux`
+- `clang++-7`, `clang++-6`, `clang++-5` on `Linux`
+- `clang++` on `OS X`
 
 ## Dependency
 
