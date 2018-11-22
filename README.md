@@ -31,7 +31,7 @@ $ make
 $ make test # optional
 ```
 
-After this, you will find executable in `bin` directory.
+After this, you will find executable binary in `bin` directory.
 
 The codes are tested with the following compilers on [Travis CI](https://travis-ci.org/ToruNiina/Mjolnir).
 - `g++-7`, `g++-6`, `g++-5` on `Linux`
@@ -40,21 +40,22 @@ The codes are tested with the following compilers on [Travis CI](https://travis-
 
 ## Dependency
 
-Mjolnir depends on Boost C++ Library and toml11.
+Mjolnir depends on [Boost C++ Library](https://www.boost.org/) and
+[toml11](https://github.com/ToruNiina/toml11).
 
 These libraries are automatically downloaded in the CMake script.
 You need nothing to install.
 
-## Example
+If you have already installed recent version of Boost Library (1.67.0 or later),
+you can use it by passing `-DBOOST_ROOT=/path/to/boost` option to `cmake`.
 
-__NOTE__: Specifications of this project is currently unstable.
-Most of the following procedures may be changed.
+## Example
 
 Example input files are in the `input` directory.
 You can run them with the command below.
 
 ```console
-$ mjolnir input/sh3_AICG2+.toml
+$ ./bin/mjolnir input/sh3_AICG2+.toml
 ```
 
 ## Author
