@@ -82,12 +82,12 @@ System<traitsT> read_system_from_table(const toml::Table& system)
         const auto& params = particles[i].cast<toml::value_t::Table>();
 
         sys[i].mass     = get_toml_value<real_type>(
-                params, "mass", "element of [[system.particles]]");
+                params, {"m","mass"},       "[[system.particles]]");
         sys[i].rmass    = 1.0 / sys[i].mass;
-        sys[i].position = get_toml_value< vec_type>(
-                params, "position", "element of [[system.particles]]");
-        sys[i].velocity = get_toml_value< vec_type>(
-                params, "velocity", "element of [[system.particles]]");
+        sys[i].position = get_toml_value<vec_type>(
+                params, {"pos","position"}, "[[system.particles]]");
+        sys[i].velocity = get_toml_value<vec_type>(
+                params, {"vel","velocity"}, "[[system.particles]]");
         sys[i].force    = coordinate_type(0, 0, 0);
         sys[i].name     = "X";
         sys[i].group    = "ANON";
@@ -117,7 +117,7 @@ System<traitsT> read_system_from_table(const toml::Table& system)
         {
             throw_exception<std::runtime_error>("mjolnir::read_system: "
                 "attribute `", attr.first, "` has type `", attr.second.type(),
-                "`, expected type is `", toml::value_t::Float, "`.");
+                "`, expected type is `toml::Float (a.k.a. double)`.");
         }
         const real_type attribute = toml::get<real_type>(attr.second);
         MJOLNIR_LOG_INFO("attribute.", attr.first, " = ", attribute);
