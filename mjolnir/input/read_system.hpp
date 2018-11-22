@@ -90,7 +90,7 @@ System<traitsT> read_system_from_table(const toml::Table& system)
                 params, {"vel","velocity"}, "[[system.particles]]");
         sys[i].force    = coordinate_type(0, 0, 0);
         sys[i].name     = "X";
-        sys[i].group    = "ANON";
+        sys[i].group    = "NONE";
 
         if(params.count("name") == 1)
         {
