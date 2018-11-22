@@ -126,7 +126,7 @@ operator<<(std::basic_ostream<charT, traits>& os, const Matrix<T, R, C>& rhs)
     os << '(';
     for(std::size_t i=0; i<R*C; ++i)
     {
-        os << i;
+        os << rhs[i];
         if(i!=R*C-1){os << ", ";}
     }
     os << ')';
