@@ -98,9 +98,8 @@ System<traitsT> read_system_from_table(const toml::Table& system)
         }
         if(params.count("group") == 1)
         {
-            sys[i].name = toml::get<std::string>(params.at("group"));
+            sys[i].group = toml::get<std::string>(params.at("group"));
         }
-
 
         MJOLNIR_LOG_INFO("mass = ",        sys[i].mass,
                           ", position = ", sys[i].position,
