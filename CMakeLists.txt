@@ -26,19 +26,21 @@ if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/toml/toml.hpp")
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()
 
-# if BOOST_ROOT is manually defined, use the library.
 if(BOOST_ROOT)
-    find_package(Boost 1.66.0 REQUIRED)
+    # if BOOST_ROOT is manually defined, use the library.
+    find_package(Boost 1.67.0 REQUIRED)
     include_directories(${Boost_INCLUDE_DIRS})
 else()
     if(EXISTS "${PROJECT_SOURCE_DIR}/extlib/boost_1_67_0/boost/version.hpp")
         message(STATUS "boost 1.67.0 exists.")
         include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_67_0)
     else()
+
         find_program(WGET wget)
         if(NOT WGET)
             message(FATAL_ERROR "wget is not installed. Can't download BOOST library.")
         endif()
+
         message(STATUS "downloading Boost 1.67.0 to ./extlib/ ...")
         execute_process(COMMAND "${WGET}" https://dl.bintray.com/boostorg/release/1.67.0/source/boost_1_67_0.tar.bz2
             WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
