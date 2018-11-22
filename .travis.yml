@@ -6,6 +6,26 @@ matrix:
   - os: linux
     language: cpp
     compiler: gcc
+    env: COMPILER="g++-7"
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-7
+  - os: linux
+    language: cpp
+    compiler: gcc
+    env: COMPILER="g++-6"
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-6
+  - os: linux
+    language: cpp
+    compiler: gcc
     env: COMPILER="g++-5"
     addons:
       apt:
@@ -13,28 +33,56 @@ matrix:
         - ubuntu-toolchain-r-test
         packages:
         - g++-5
-        - build-essential
-        - cmake
-        - libboost-test-dev
   - os: linux
     language: cpp
     compiler: clang
-    env: COMPILER="clang++"
+    env: COMPILER="clang++-7.0"
     addons:
       apt:
         sources:
         - ubuntu-toolchain-r-test
+        - llvm-toolchain-trusty-7.0
         packages:
-        - build-essential
-        - cmake
-        - libboost-test-dev
+        - clang-7.0
+  - os: linux
+    language: cpp
+    compiler: clang
+    env: COMPILER="clang++-6.0"
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - llvm-toolchain-trusty-6.0
+        packages:
+        - clang-6.0
+  - os: linux
+    language: cpp
+    compiler: clang
+    env: COMPILER="clang++-5.0"
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - llvm-toolchain-trusty-5.0
+        packages:
+        - clang-5.0
   - os: osx
     language: cpp
     compiler: clang
+    env: COMPILER="clang++"
 
-install:
-- git submodule init
-- git submodule update
+before_install:
+- |
+  if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+    mkdir -p cmake
+    travis_retry wget "https://cmake.org/files/v3.11/cmake-3.11.2-Linux-x86_64.tar.gz"
+    tar xf cmake-3.11.2-Linux-x86_64.tar.gz -C cmake --strip-components=1
+    export PATH=${TRAVIS_BUILD_DIR}/cmake/bin:${PATH}
+  else
+    brew install cmake
+    brew upgrade cmake
+  fi
+- cmake --version
 
 script:
 - mkdir build
