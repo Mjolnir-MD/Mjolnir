@@ -16,27 +16,16 @@
 namespace mjolnir
 {
 
-/* Here, these macros are defined. _NO_LF suffix means "no linefeed". *
- *  1. MJOLNIR_LOG_DEBUG                                              *
- *    - just for debug purpose. the log file may become too large.    *
- *  2. MJOLNIR_LOG_INFO                                               *
- *    - useful information to check the behavior. by default, on.     *
- *  3. MJOLNIR_LOG_WARN                                               *
- *    - be careful with it. It can run, but it might not make sense.  *
- *  4. MJOLNIR_LOG_ERROR                                              *
- *    - something wrong happen.                                       *
- *  5. MJOLNIR_SCOPE                                                  *
- *    - helps output format of log.                                   *
- *  6. MJOLNIR_SCOPE_DEBUG                                            *
- *    - helps output format of log. by default, off.                  *
- *  7. MJOLNIR_GET_DEFAULT_LOGGER                                     *
- *    - enable logging in the scope.                                  *
- *  8. MJOLNIR_GET_LOGGER                                             *
- *    - make new log file and output to that file.                    *
- *  9. MJOLNIR_GET_DEFAULT_LOGGER_DEBUG                               *
- *    - enabled only when MJOLNIR_DEBUG flag is set.                  *
- * 10. MJOLNIR_GET_LOGGER_DEBUG                                       *
- *    - enabled only when MJOLNIR_DEBUG flag is set.                  */
+/* these macros are defined.                                                 *
+ * - MJOLNIR_LOG_DEBUG  -- for debugging. it makes simulation too slow.      *
+ * - MJOLNIR_LOG_INFO   -- output in-detail info unless it slows down.       *
+ * - MJOLNIR_LOG_NOTICE -- write current progress and status to console.     *
+ * - MJOLNIR_LOG_WARN   -- may not be wrong, but undesirable stuff happens.  *
+ * - MJOLNIR_LOG_ERROR  -- something wrong.                                  *
+ *
+ * - MJOLNIR_SCOPE      -- helps logging by indentation.                     *
+ * - MJOLNIR_GET_LOGGER -- get a logger for the current scope with name.     *
+ * - MJOLNIR_GET_DEFAULT_LOGGER -- get a default logger.                     */
 
 namespace logger_detail
 {
