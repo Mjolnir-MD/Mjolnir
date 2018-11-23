@@ -134,19 +134,21 @@ class basic_logger
     using ostream_type = std::basic_ostream<charT, traits>;
 
     static constexpr std::size_t indent_size = 2;
-    enum class Level
+
+    enum class Level : std::uint8_t
     {
-        None, // internal use only
-        Debug,
-        Info,
-        Warn,
-        Error
+        None   = 0, // internal use only
+        Debug  = 1,
+        Info   = 2,
+        Notice = 3,
+        Warn   = 4,
+        Error  = 5
     };
 
   public:
 
     explicit basic_logger(const std::string& fname)
-        : line_fed_(false), indent_(0), fname_(fname)
+        : indentation_needed_(false), indent_(0), fname_(fname)
     {
         // clear the contents and check the file can be opened
         fstream_type ofs(this->fname_, std::ios_base::out);
@@ -162,50 +164,78 @@ class basic_logger
     void unindent() noexcept {indent_ -= 1; return;}
 
     template<typename ... Ts>
-    void log(Level level, bool lf, Ts&& ... args)
+    void log(Level level, Ts&& ... args)
     {
         fstream_type ofs(this->fname_, std::ios_base::out | std::ios_base::app);
         if(!ofs.good())
         {
-            throw_exception<std::runtime_error>("Logger: file open error: ",
-                    this->fname_);
+            throw_exception<std::runtime_error>(
+                "Logger: file open error: ", this->fname_);
         }
-        if(this->line_fed_)
+        if(this->indentation_needed_)
         {
             ofs << string_type(indent_size * indent_, ' ');
         }
 
-        if(level == Level::Warn)
+        if(level == Level::Notice || level == Level::Warn || level == Level::Error)
         {
-            ofs << "[WARNING] ";
-            output_message(ofs, std::forward<Ts>(args)...);
+            // message is also printed to stderr
+            output_message(std::cerr, "-- ", this->stringize(level),
+                           std::forward<Ts>(args)...);
+            std::cerr << std::endl;
+        }
 
-            // warning message is also printed to stderr
-            std::cerr << "[WARNING] ";
-            output_message(std::cerr, std::forward<Ts>(args)...);
-            std::cerr << std::flush;
-        }
-        else if(level == Level::Error)
-        {
-            ofs << "[ERROR] ";
-            output_message(ofs, std::forward<Ts>(args)...);
+        output_message(ofs, this->stringize(level), std::forward<Ts>(args)...);
+        ofs << std::endl;
 
-            // error message is also printed to stderr
-            std::cerr << "[ERROR] ";
-            output_message(std::cerr, std::forward<Ts>(args)...);
-            std::cerr << std::flush;
-        }
-        else
+        this->indentation_needed_ = true;
+        return;
+    }
+
+    template<typename ... Ts>
+    void log_no_lf(Level level, Ts&& ... args)
+    {
+        fstream_type ofs(this->fname_, std::ios_base::out | std::ios_base::app);
+        if(!ofs.good())
         {
-            output_message(ofs, std::forward<Ts>(args)...);
+            throw_exception<std::runtime_error>(
+                "Logger: file open error: ", this->fname_);
         }
+        if(this->indentation_needed_)
+        {
+            ofs << string_type(indent_size * indent_, ' ');
+        }
+
+        if(level == Level::Notice || level == Level::Warn || level == Level::Error)
+        {
+            // message is also printed to stderr
+            output_message(std::cerr, "-- ", this->stringize(level),
+                           std::forward<Ts>(args)...);
+            std::cerr << std::endl;
+        }
+
+        output_message(ofs, this->stringize(level), std::forward<Ts>(args)...);
         ofs << std::flush;
 
-        this->line_fed_ = lf;
+        this->indentation_needed_ = false;
         return;
     }
 
   private:
+
+    std::string stringize(const Level lv)
+    {
+        switch(lv)
+        {
+            case Level::None  : return "";
+            case Level::Debug : return "";
+            case Level::Info  : return "";
+            case Level::Notice: return "";
+            case Level::Warn  : return "WARNING: ";
+            case Level::Error : return "ERROR: ";
+            default: return "UNKNOWN LOG LEVEL: ";
+        }
+    }
 
     template<typename T, typename ...T_args>
     static void output_message(ostream_type& os, T&& arg1, T_args&& ...args)
@@ -214,12 +244,11 @@ class basic_logger
         os << arg1;
         return output_message(os, std::forward<T_args>(args)...);
     }
-
     static void output_message(ostream_type& os) {return;}
 
   private:
 
-    bool line_fed_;
+    bool indentation_needed_;
     std::size_t indent_;
     string_type  fname_;
 };
@@ -239,7 +268,7 @@ class basic_logger_manager
         if(default_ == fname)
         {
             std::cerr << "WARNING for Developers: Default Logger("
-                      << fname << ") is set twice" << std::endl;
+                      << fname << ") is set twice." << std::endl;
             return;
         }
 
@@ -257,6 +286,11 @@ class basic_logger_manager
 
     static logger_type& get_default_logger()
     {
+        if(default_.empty())
+        {
+            throw_exception<std::out_of_range>("mjolnir::basic_logger_manager: "
+                "default logger is not set yet.");
+        }
         if(loggers_.count(default_) == 0)
         {
             throw_exception<std::out_of_range>("mjolnir::basic_logger_manager: "
