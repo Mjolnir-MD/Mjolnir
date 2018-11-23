@@ -345,57 +345,29 @@ using Logger        = basic_logger<char>;
 using LoggerManager = basic_logger_manager<char>;
 using Scope         = basic_scope<char>;
 
+#define MJOLNIR_SET_DEFAULT_LOGGER(name)  LoggerManager::set_default_logger(name)
+#define MJOLNIR_GET_DEFAULT_LOGGER()      auto& l_o_g_g_e_r_ = LoggerManager::get_default_logger()
+#define MJOLNIR_GET_LOGGER(name)          auto& l_o_g_g_e_r_ = LoggerManager::get_logger(name)
+#define MJOLNIR_LOG_INFO(args...)         l_o_g_g_e_r_.log(Logger::Level::Info,   args)
+#define MJOLNIR_LOG_NOTICE(args...)       l_o_g_g_e_r_.log(Logger::Level::Notice, args)
+#define MJOLNIR_LOG_WARN(args...)         l_o_g_g_e_r_.log(Logger::Level::Warn,   args)
+#define MJOLNIR_LOG_ERROR(args...)        l_o_g_g_e_r_.log(Logger::Level::Error,  args)
+#define MJOLNIR_LOG_INFO_NO_LF(args...)   l_o_g_g_e_r_.log_no_lf(Logger::Level::Info,   args)
+#define MJOLNIR_LOG_NOTICE_NO_LF(args...) l_o_g_g_e_r_.log_no_lf(Logger::Level::Notice, args)
+#define MJOLNIR_LOG_WARN_NO_LF(args...)   l_o_g_g_e_r_.log_no_lf(Logger::Level::Warn,   args)
+#define MJOLNIR_LOG_ERROR_NO_LF(args...)  l_o_g_g_e_r_.log_no_lf(Logger::Level::Error,  args)
+#define MJOLNIR_SCOPE(name, id)           Scope s_c_o_p_e_##id (l_o_g_g_e_r_, #name)
+
 #ifdef MJOLNIR_DEBUG
-#  define MJOLNIR_SET_DEFAULT_LOGGER(name)\
-    LoggerManager::set_default_logger(name)
-#  define MJOLNIR_GET_DEFAULT_LOGGER()\
-    auto& l_o_g_g_e_r_ = LoggerManager::get_default_logger()
-#  define MJOLNIR_GET_DEFAULT_LOGGER_DEBUG()\
-    auto& l_o_g_g_e_r_ = LoggerManager::get_default_logger()
-#  define MJOLNIR_GET_LOGGER(name)\
-    auto& l_o_g_g_e_r_ = LoggerManager::get_logger(name)
-#  define MJOLNIR_SCOPE(name, id)       Scope s_c_o_p_e_##id (l_o_g_g_e_r_, #name)
-#  define MJOLNIR_SCOPE_DEBUG(name, id) Scope s_c_o_p_e_##id (l_o_g_g_e_r_, #name)
-#  define MJOLNIR_LOG_DEBUG(args...) l_o_g_g_e_r_.log(Logger::Level::Debug, true, args, '\n')
-#  define MJOLNIR_LOG_INFO(args...)  l_o_g_g_e_r_.log(Logger::Level::Info,  true, args, '\n')
-#  define MJOLNIR_LOG_WARN(args...)  l_o_g_g_e_r_.log(Logger::Level::Warn,  true, args, '\n')
-#  define MJOLNIR_LOG_ERROR(args...) l_o_g_g_e_r_.log(Logger::Level::Error, true, args, '\n')
-#  define MJOLNIR_LOG_DEBUG_NO_LF(args...) l_o_g_g_e_r_.log(Logger::Level::Debug, false, args)
-#  define MJOLNIR_LOG_INFO_NO_LF(args...)  l_o_g_g_e_r_.log(Logger::Level::Info,  false, args)
-#  define MJOLNIR_LOG_WARN_NO_LF(args...)  l_o_g_g_e_r_.log(Logger::Level::Warn,  false, args)
-#  define MJOLNIR_LOG_ERROR_NO_LF(args...) l_o_g_g_e_r_.log(Logger::Level::Error, false, args)
-#elif defined(MJOLNIR_NO_LOG)
-#  define MJOLNIR_SET_DEFAULT_LOGGER(name)   /**/
-#  define MJOLNIR_GET_DEFAULT_LOGGER()       /**/
+#  define MJOLNIR_GET_DEFAULT_LOGGER_DEBUG() auto& l_o_g_g_e_r_ = LoggerManager::get_default_logger()
+#  define MJOLNIR_LOG_DEBUG(args...)         l_o_g_g_e_r_.log(Logger::Level::Debug, args)
+#  define MJOLNIR_LOG_DEBUG_NO_LF(args...)   l_o_g_g_e_r_.log_no_lf(Logger::Level::Debug, args)
+#  define MJOLNIR_SCOPE_DEBUG(name, id)      Scope s_c_o_p_e_##id (l_o_g_g_e_r_, #name)
+#else
 #  define MJOLNIR_GET_DEFAULT_LOGGER_DEBUG() /**/
-#  define MJOLNIR_GET_LOGGER(name)           /**/
-#  define MJOLNIR_SCOPE(name, id)            /**/
-#  define MJOLNIR_SCOPE_DEBUG(name, id)      /**/
 #  define MJOLNIR_LOG_DEBUG(args...)         /**/
-#  define MJOLNIR_LOG_INFO(args...)          /**/
-#  define MJOLNIR_LOG_WARN(args...)          /**/
-#  define MJOLNIR_LOG_ERROR(args...)         /**/
 #  define MJOLNIR_LOG_DEBUG_NO_LF(args...)   /**/
-#  define MJOLNIR_LOG_INFO_NO_LF(args...)    /**/
-#  define MJOLNIR_LOG_WARN_NO_LF(args...)    /**/
-#  define MJOLNIR_LOG_ERROR_NO_LF(args...)   /**/
-#else // normal case
-#  define MJOLNIR_SET_DEFAULT_LOGGER(name) LoggerManager::set_default_logger(name)
-#  define MJOLNIR_GET_DEFAULT_LOGGER()\
-    auto& l_o_g_g_e_r_ = LoggerManager::get_default_logger()
-#  define MJOLNIR_GET_LOGGER(name)\
-    auto& l_o_g_g_e_r_ = LoggerManager::get_logger(name)
-#  define MJOLNIR_SCOPE(name, id) Scope s_c_o_p_e_##id (l_o_g_g_e_r_, #name)
-#  define MJOLNIR_GET_DEFAULT_LOGGER_DEBUG() /**/
 #  define MJOLNIR_SCOPE_DEBUG(name, id)      /**/
-#  define MJOLNIR_LOG_DEBUG(args...)         /**/
-#  define MJOLNIR_LOG_INFO(args...)  l_o_g_g_e_r_.log(Logger::Level::Info,  true, args, '\n')
-#  define MJOLNIR_LOG_WARN(args...)  l_o_g_g_e_r_.log(Logger::Level::Warn,  true, args, '\n')
-#  define MJOLNIR_LOG_ERROR(args...) l_o_g_g_e_r_.log(Logger::Level::Error, true, args, '\n')
-#  define MJOLNIR_LOG_DEBUG_NO_LF(args...)   /**/
-#  define MJOLNIR_LOG_INFO_NO_LF(args...)  l_o_g_g_e_r_.log(Logger::Level::Info,  false, args)
-#  define MJOLNIR_LOG_WARN_NO_LF(args...)  l_o_g_g_e_r_.log(Logger::Level::Warn,  false, args)
-#  define MJOLNIR_LOG_ERROR_NO_LF(args...) l_o_g_g_e_r_.log(Logger::Level::Error, false, args)
 #endif // MJOLNIR_DEBUG
 
 } // mjolnir
