@@ -40,6 +40,58 @@ namespace mjolnir
 
 namespace logger_detail
 {
+// since there is no standard way to format containers, the standard library
+// does not provide output operators for containers. To make logging easier,
+// here output operators are defined for some of the containers.
+// To avoid fixing the output format, these are defined in the special namespace
+// `logger_detail`. loggers first imports this namespace and output using these
+// operators.
+
+template<typename charT, typename traits, typename T, std::size_t N>
+std::basic_ostream<charT, traits>&
+operator<<(std::basic_ostream<charT, traits>& os, const std::array<T, N>& ar)
+{
+    os << '[';
+    for(const auto& v : ar){os << v << ", ";}
+    os << ']';
+    return os;
+}
+
+template<typename charT, typename traits, typename T, typename Alloc>
+std::basic_ostream<charT, traits>&
+operator<<(std::basic_ostream<charT, traits>& os,
+           const std::vector<T, Alloc>& vc)
+{
+    os << '[';
+    for(const auto item : vc){os << item << ", ";}
+    os << ']';
+    return os;
+}
+
+template<typename charT, typename traits, typename Key, typename Value,
+         typename Comp, typename Alloc>
+std::basic_ostream<charT, traits>&
+operator<<(std::basic_ostream<charT, traits>& os,
+           const std::map<Key, Value, Comp, Alloc>& mp)
+{
+    os << '{';
+    for(const auto kv : mp){os << kv.first << '=' << kv.second << ", ";}
+    os << '}';
+    return os;
+}
+
+template<typename charT, typename traits, typename Key, typename Value,
+         typename Hash, typename Pred, typename Alloc>
+std::basic_ostream<charT, traits>&
+operator<<(std::basic_ostream<charT, traits>& os,
+           const std::unordered_map<Key, Value, Hash, Pred, Alloc>& mp)
+{
+    os << '{';
+    for(const auto kv : mp){os << kv.first << '=' << kv.second << ", ";}
+    os << '}';
+    return os;
+}
+
 template<typename charT, typename traits, typename T1, typename T2>
 std::basic_ostream<charT, traits>&
 operator<<(std::basic_ostream<charT, traits>& os, const std::pair<T1, T2>& pr)
@@ -47,46 +99,40 @@ operator<<(std::basic_ostream<charT, traits>& os, const std::pair<T1, T2>& pr)
     os << '[' << pr.first << ", " << pr.second << ']';
     return os;
 }
-template<typename charT, typename traits, typename T, std::size_t N>
+
+template<std::size_t I, std::size_t N>
+struct tuple_output_helper
+{
+    template<typename charT, typename traits, typename ... Ts>
+    static std::basic_ostream<charT, traits>&
+    invoke(std::basic_ostream<charT, traits>& os, const std::tuple<Ts...>& t)
+    {
+        static_assert(N == sizeof...(Ts), "");
+        os << std::get<I>(t) << ", ";
+        return tuple_output_helper<I+1, N>::invoke(os, t);
+    }
+};
+template<std::size_t N>
+struct tuple_output_helper<N, N>
+{
+    template<typename charT, typename traits, typename ... Ts>
+    static std::basic_ostream<charT, traits>&
+    invoke(std::basic_ostream<charT, traits>& os, const std::tuple<Ts...>& t)
+    {
+        static_assert(N == sizeof...(Ts), "");
+        return os;
+    }
+};
+template<typename charT, typename traits, typename ... Ts>
 std::basic_ostream<charT, traits>&
-operator<<(std::basic_ostream<charT, traits>& os, const std::array<T, N>& ar)
+operator<<(std::basic_ostream<charT, traits>& os, const std::tuple<Ts...>& t)
 {
     os << '[';
-    for(std::size_t i=0; i<N; ++i){os << ar[i] << ", ";}
+    tuple_output_helper<0, sizeof...(Ts)>::invoke(os, t);
     os << ']';
     return os;
 }
-template<typename charT, typename traits, typename T, typename Alloc>
-std::basic_ostream<charT, traits>&
-operator<<(std::basic_ostream<charT, traits>& os, const std::vector<T, Alloc>& vc)
-{
-    os << '[';
-    for(const auto item : vc){os << item << ", ";}
-    os << ']';
-    return os;
-}
-template<typename charT, typename traits,
-         typename K, typename V, typename Comp, typename Alloc>
-std::basic_ostream<charT, traits>&
-operator<<(std::basic_ostream<charT, traits>& os,
-           const std::map<K, V, Comp, Alloc>& mp)
-{
-    os << '{';
-    for(const auto kv : mp){os << kv.first << '=' << kv.second << ", ";}
-    os << '}';
-    return os;
-}
-template<typename charT, typename traits,
-         typename K, typename V, typename Hash, typename Pred, typename Alloc>
-std::basic_ostream<charT, traits>&
-operator<<(std::basic_ostream<charT, traits>& os,
-           const std::unordered_map<K, V, Hash, Pred, Alloc>& mp)
-{
-    os << '{';
-    for(const auto kv : mp){os << kv.first << '=' << kv.second << ", ";}
-    os << '}';
-    return os;
-}
+
 } // logger_detail
 
 template<typename charT, typename traits = std::char_traits<charT>>
