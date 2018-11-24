@@ -18,14 +18,17 @@ read_observer(const toml::Table& data)
     const auto& files =
         get_toml_value<toml::Table>(data, "files", "<root>");
 
-    std::string path =
+    std::string path_ =
         get_toml_value<std::string>(files, "output_path", "[files]");
-    if(path.back() != '/') {path += '/';} //XXX assuming posix
+    if(path_.back() != '/') {path_ += '/';} //XXX assuming posix
+    const auto path(path_);
 
     const std::string prefix = get_toml_value<std::string>(
             files, "output_prefix", "[files]");
     MJOLNIR_LOG_INFO("path   = ", path);
     MJOLNIR_LOG_INFO("prefix = ", prefix);
+
+    MJOLNIR_LOG_NOTICE("output files are `", path, prefix, ".*`");
 
     return Observer<traitsT>(path + prefix);
 }
