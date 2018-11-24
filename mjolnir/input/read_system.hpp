@@ -132,7 +132,7 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_system(), 0);
-    MJOLNIR_LOG_NOTICE("reading ", N, "-th [[system]]");
+    MJOLNIR_LOG_NOTICE("reading ", N, "-th [[system]].");
 
     using real_type       = typename traitsT::real_type;
     using coordinate_type = typename traitsT::coordinate_type;
