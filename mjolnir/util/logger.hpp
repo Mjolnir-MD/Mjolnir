@@ -334,14 +334,14 @@ class basic_scope
     basic_scope(logger_type& trc, const std::string& name)
       : start_(std::chrono::system_clock::now()), logger_(trc), name_(name)
     {
-        logger_.log(logger_type::Level::None, true, this->name_, " {\n");
+        logger_.log(logger_type::Level::None, this->name_, " {");
         logger_.indent();
     }
     ~basic_scope()
     {
         logger_.unindent();
-        logger_.log(logger_type::Level::None, true, "} ", this->format_duration(
-                    std::chrono::system_clock::now() - this->start_), '\n');
+        logger_.log(logger_type::Level::None, "} ", this->format_duration(
+                    std::chrono::system_clock::now() - this->start_));
     }
 
     std::string const& name() const noexcept {return name_;}
