@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_READ_INTEGRATOR
 #define MJOLNIR_READ_INTEGRATOR
-#include <extlib/toml/toml.hpp>
+#include <extlib/toml/toml/toml.hpp>
 #include <mjolnir/core/VelocityVerletStepper.hpp>
 #include <mjolnir/core/UnderdampedLangevinStepper.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
@@ -11,7 +11,7 @@ namespace mjolnir
 
 template<typename traitsT>
 VelocityVerletStepper<traitsT>
-read_velocity_verlet_stepper(const toml::Table& simulator)
+read_velocity_verlet_stepper(const toml::table& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_velocity_verlet_stepper(), 0);
@@ -27,21 +27,21 @@ read_velocity_verlet_stepper(const toml::Table& simulator)
 
 template<typename traitsT>
 UnderdampedLangevinStepper<traitsT>
-read_underdamped_langevin_stepper(const toml::Table& simulator)
+read_underdamped_langevin_stepper(const toml::table& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_underdamped_langevin_stepper(), 0);
     typedef typename traitsT::real_type real_type;
 
     const auto& parameters = // array of tables
-        get_toml_value<toml::Array>(simulator, "parameters", "[simulator]");
+        get_toml_value<toml::array>(simulator, "parameters", "[simulator]");
     const auto  seed =
         get_toml_value<std::uint32_t>(simulator, "seed", "[simulator]");
 
     std::vector<real_type> gamma(parameters.size());
     for(const auto& tab : parameters)
     {
-        const auto& params = tab.cast<toml::value_t::Table>();
+        const auto& params = toml::get<toml::table>(tab);
         const std::size_t idx = get_toml_value<std::size_t>(
                 params, "index", "<anonymous> in register");
         const real_type    gm = get_toml_value<real_type>(

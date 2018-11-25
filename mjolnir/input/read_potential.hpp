@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_READ_POTENTIAL
 #define MJOLNIR_READ_POTENTIAL
-#include <extlib/toml/toml.hpp>
+#include <extlib/toml/toml/toml.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/potential/local/Go1012ContactPotential.hpp>
 #include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
@@ -30,7 +30,7 @@ namespace mjolnir
 // {indices = [1, 2], k = 10.0, v0 = 1.0} <- a portion of this table, k and v0.
 // ]
 template<typename realT>
-HarmonicPotential<realT> read_harmonic_potential(const toml::Table& param)
+HarmonicPotential<realT> read_harmonic_potential(const toml::table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
@@ -45,7 +45,7 @@ HarmonicPotential<realT> read_harmonic_potential(const toml::Table& param)
 
 template<typename realT>
 Go1012ContactPotential<realT>
-read_go1012_contact_potential(const toml::Table& param)
+read_go1012_contact_potential(const toml::table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
@@ -59,7 +59,7 @@ read_go1012_contact_potential(const toml::Table& param)
 }
 
 template<typename realT>
-GaussianPotential<realT> read_gaussian_potential(const toml::Table& param)
+GaussianPotential<realT> read_gaussian_potential(const toml::table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
@@ -77,7 +77,7 @@ GaussianPotential<realT> read_gaussian_potential(const toml::Table& param)
 
 template<typename realT>
 AngularGaussianPotential<realT>
-read_angular_gaussian_potential(const toml::Table& param)
+read_angular_gaussian_potential(const toml::table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
@@ -96,7 +96,7 @@ read_angular_gaussian_potential(const toml::Table& param)
 
 template<typename realT>
 FlexibleLocalAnglePotential<realT>
-read_flexible_local_angle_potential(const toml::Table& param)
+read_flexible_local_angle_potential(const toml::table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
@@ -115,7 +115,7 @@ read_flexible_local_angle_potential(const toml::Table& param)
 
 template<typename realT>
 ClementiDihedralPotential<realT>
-read_clementi_dihedral_potential(const toml::Table& param)
+read_clementi_dihedral_potential(const toml::table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
@@ -133,7 +133,7 @@ read_clementi_dihedral_potential(const toml::Table& param)
 
 template<typename realT>
 FlexibleLocalDihedralPotential<realT>
-read_flexible_local_dihedral_potential(const toml::Table& param)
+read_flexible_local_dihedral_potential(const toml::table& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
@@ -164,7 +164,7 @@ template<typename potentialT> struct read_local_potential_impl;
 template<typename realT>
 struct read_local_potential_impl<HarmonicPotential<realT>>
 {
-    static HarmonicPotential<realT> invoke(const toml::Table& param)
+    static HarmonicPotential<realT> invoke(const toml::table& param)
     {
         return read_harmonic_potential<realT>(param);
     }
@@ -172,7 +172,7 @@ struct read_local_potential_impl<HarmonicPotential<realT>>
 template<typename realT>
 struct read_local_potential_impl<Go1012ContactPotential<realT>>
 {
-    static Go1012ContactPotential<realT> invoke(const toml::Table& param)
+    static Go1012ContactPotential<realT> invoke(const toml::table& param)
     {
         return read_go1012_contact_potential<realT>(param);
     }
@@ -180,7 +180,7 @@ struct read_local_potential_impl<Go1012ContactPotential<realT>>
 template<typename realT>
 struct read_local_potential_impl<GaussianPotential<realT>>
 {
-    static GaussianPotential<realT> invoke(const toml::Table& param)
+    static GaussianPotential<realT> invoke(const toml::table& param)
     {
         return read_gaussian_potential<realT>(param);
     }
@@ -188,7 +188,7 @@ struct read_local_potential_impl<GaussianPotential<realT>>
 template<typename realT>
 struct read_local_potential_impl<AngularGaussianPotential<realT>>
 {
-    static AngularGaussianPotential<realT> invoke(const toml::Table& param)
+    static AngularGaussianPotential<realT> invoke(const toml::table& param)
     {
         return read_angular_gaussian_potential<realT>(param);
     }
@@ -196,7 +196,7 @@ struct read_local_potential_impl<AngularGaussianPotential<realT>>
 template<typename realT>
 struct read_local_potential_impl<FlexibleLocalAnglePotential<realT>>
 {
-    static FlexibleLocalAnglePotential<realT> invoke(const toml::Table& param)
+    static FlexibleLocalAnglePotential<realT> invoke(const toml::table& param)
     {
         return read_flexible_local_angle_potential<realT>(param);
     }
@@ -204,7 +204,7 @@ struct read_local_potential_impl<FlexibleLocalAnglePotential<realT>>
 template<typename realT>
 struct read_local_potential_impl<ClementiDihedralPotential<realT>>
 {
-    static ClementiDihedralPotential<realT> invoke(const toml::Table& param)
+    static ClementiDihedralPotential<realT> invoke(const toml::table& param)
     {
         return read_clementi_dihedral_potential<realT>(param);
     }
@@ -212,7 +212,7 @@ struct read_local_potential_impl<ClementiDihedralPotential<realT>>
 template<typename realT>
 struct read_local_potential_impl<FlexibleLocalDihedralPotential<realT>>
 {
-    static FlexibleLocalDihedralPotential<realT> invoke(const toml::Table& param)
+    static FlexibleLocalDihedralPotential<realT> invoke(const toml::table& param)
     {
         return read_flexible_local_dihedral_potential<realT>(param);
     }
@@ -223,7 +223,7 @@ struct read_local_potential_impl<FlexibleLocalDihedralPotential<realT>>
 // and returns pairs of [indices, potential parameters].
 template<std::size_t N, typename potentialT>
 std::vector<std::pair<std::array<std::size_t, N>, potentialT>>
-read_local_potential(const toml::Table& local)
+read_local_potential(const toml::table& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_local_potential(), 0);
@@ -232,7 +232,7 @@ read_local_potential(const toml::Table& local)
     using indices_t                = std::array<std::size_t, N>;
     using indices_potential_pair_t = std::pair<indices_t, potentialT>;
 
-    const auto& params = get_toml_value<toml::Array>(
+    const auto& params = get_toml_value<toml::array>(
             local, "parameters", "[[forcefield.local]]");
     MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
 
@@ -240,7 +240,7 @@ read_local_potential(const toml::Table& local)
     retval.reserve(params.size());
     for(const auto& item : params)
     {
-        const auto& parameter = item.cast<toml::value_t::Table>();
+        const auto& parameter = toml::get<toml::table>(item);
 
         const auto indices = get_toml_value<indices_t>(parameter, "indices",
                 "element of [[forcefields.local.parameters]]");
@@ -256,7 +256,7 @@ template<std::size_t N, typename realT,
          typename potentialT1, typename potentialT2>
 std::vector<std::pair<std::array<std::size_t, N>,
             SumLocalPotential<realT, potentialT1, potentialT2>>>
-read_local_potentials(const toml::Table& local,
+read_local_potentials(const toml::table& local,
                       const std::string& p1, const std::string& p2)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -267,7 +267,7 @@ read_local_potentials(const toml::Table& local,
     using indices_potential_pair_t = std::pair<indices_t,
         SumLocalPotential<realT, potentialT1, potentialT2>>;
 
-    const auto& params = get_toml_value<toml::Array>(
+    const auto& params = get_toml_value<toml::array>(
             local, "parameters", "[[forcefield.local]]");
     MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
 
@@ -275,16 +275,16 @@ read_local_potentials(const toml::Table& local,
     retval.reserve(params.size());
     for(const auto& item : params)
     {
-        const auto& parameter = item.cast<toml::value_t::Table>();
+        const auto& parameter = toml::get<toml::table>(item);
 
         const auto indices = get_toml_value<indices_t>(parameter, "indices",
                 "element of [[forcefields.local.parameters]]");
         MJOLNIR_LOG_INFO("idxs = ", indices);
 
         const auto& pot1 =
-            get_toml_value<toml::Table>(parameter, p1, "[[forcefield.local]]");
+            get_toml_value<toml::table>(parameter, p1, "[[forcefield.local]]");
         const auto& pot2 =
-            get_toml_value<toml::Table>(parameter, p2, "[[forcefield.local]]");
+            get_toml_value<toml::table>(parameter, p2, "[[forcefield.local]]");
 
         retval.emplace_back(indices,
             SumLocalPotential<realT, potentialT1, potentialT2>(
@@ -330,7 +330,7 @@ read_ignored_molecule(const std::string& ignored_mol)
 
 template<typename realT>
 ExcludedVolumePotential<realT>
-read_excluded_volume_potential(const toml::Table& global)
+read_excluded_volume_potential(const toml::table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_excluded_volume_potential(), 0);
@@ -339,14 +339,14 @@ read_excluded_volume_potential(const toml::Table& global)
     const auto location = "[forcefield.global] for ExcludedVolume potential";
 
     const auto& ignore =
-        get_toml_value<toml::Table>(global, "ignore", location);
+        get_toml_value<toml::table>(global, "ignore", location);
 
     auto ignored_mol = read_ignored_molecule(
         get_toml_value<std::string>(ignore, "molecule", location));
 
     std::map<std::string, std::size_t> connections;
     for(const auto connection :
-            get_toml_value<toml::Table>(ignore, "particles_within", location))
+            get_toml_value<toml::table>(ignore, "particles_within", location))
     {
         connections[connection.first] =
             toml::get<std::size_t>(connection.second);
@@ -359,7 +359,7 @@ read_excluded_volume_potential(const toml::Table& global)
         global, "epsilon", location);
     MJOLNIR_LOG_INFO("epsilon = ", eps);
 
-    const auto& ps = get_toml_value<toml::Array>(global, "parameters", location);
+    const auto& ps = get_toml_value<toml::array>(global, "parameters", location);
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
     const auto parameters =
         "element of [[forcefield.global.parameters]] for ExcludedVolume";
@@ -369,7 +369,7 @@ read_excluded_volume_potential(const toml::Table& global)
 
     for(const auto& param : ps)
     {
-        const auto& tab = param.cast<toml::value_t::Table>();
+        const auto& tab = toml::get<toml::table>(param);
         const auto  idx = get_toml_value<std::size_t>(tab, "index", parameters);
         if(params.size() <= idx)
         {
@@ -387,7 +387,7 @@ read_excluded_volume_potential(const toml::Table& global)
 
 template<typename realT>
 LennardJonesPotential<realT>
-read_lennard_jones_potential(const toml::Table& global)
+read_lennard_jones_potential(const toml::table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_lennard_jones_potential(), 0);
@@ -396,14 +396,14 @@ read_lennard_jones_potential(const toml::Table& global)
     const auto location   = "[forcefield.global] for LennardJones potential";
 
     const auto& ignore =
-        get_toml_value<toml::Table>(global, "ignore", location);
+        get_toml_value<toml::table>(global, "ignore", location);
 
     auto ignored_mol = read_ignored_molecule(
         get_toml_value<std::string>(ignore, "molecule", location));
 
     std::map<std::string, std::size_t> connections;
     for(const auto connection :
-        get_toml_value<toml::Table>(ignore, "particles_within", location))
+        get_toml_value<toml::table>(ignore, "particles_within", location))
     {
         connections[connection.first] =
             toml::get<std::size_t>(connection.second);
@@ -412,7 +412,7 @@ read_lennard_jones_potential(const toml::Table& global)
                          "be ignored");
     }
 
-    const auto& ps = get_toml_value<toml::Array>(global, "parameters", location);
+    const auto& ps = get_toml_value<toml::array>(global, "parameters", location);
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
     const auto parameters =
         "element of [[forcefield.global.parameters]] for Lennard-Jones";
@@ -421,7 +421,7 @@ read_lennard_jones_potential(const toml::Table& global)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto& tab = param.cast<toml::value_t::Table>();
+        const auto& tab = toml::get<toml::table>(param);
         const auto idx = get_toml_value<std::size_t>(tab, "index", parameters);
         if(params.size() <= idx)
         {
@@ -441,7 +441,7 @@ read_lennard_jones_potential(const toml::Table& global)
 
 template<typename realT>
 UniformLennardJonesPotential<realT>
-read_uniform_lennard_jones_potential(const toml::Table& global)
+read_uniform_lennard_jones_potential(const toml::table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_uniform_lennard_jones_potential(), 0);
@@ -449,14 +449,14 @@ read_uniform_lennard_jones_potential(const toml::Table& global)
     const auto location = "[forcefield.global] for UniformLennardJones";
 
     const auto& ignore =
-        get_toml_value<toml::Table>(global, "ignore", location);
+        get_toml_value<toml::table>(global, "ignore", location);
 
     auto ignored_mol = read_ignored_molecule(
         get_toml_value<std::string>(ignore, "molecule", location));
 
     std::map<std::string, std::size_t> connections;
     for(const auto connection :
-            get_toml_value<toml::Table>(ignore, "particles_within", location))
+            get_toml_value<toml::table>(ignore, "particles_within", location))
     {
         connections[connection.first] =
             toml::get<std::size_t>(connection.second);
@@ -477,7 +477,7 @@ read_uniform_lennard_jones_potential(const toml::Table& global)
 
 template<typename realT>
 DebyeHuckelPotential<realT>
-read_debye_huckel_potential(const toml::Table& global)
+read_debye_huckel_potential(const toml::table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_debye_huckel_potential(), 0);
@@ -485,14 +485,14 @@ read_debye_huckel_potential(const toml::Table& global)
     const auto location = "[forcefield.global] for DebyeHuckel";
 
     const auto& ignore =
-        get_toml_value<toml::Table>(global, "ignore", location);
+        get_toml_value<toml::table>(global, "ignore", location);
 
     auto ignored_mol = read_ignored_molecule(
         get_toml_value<std::string>(ignore, "molecule", location));
 
     std::map<std::string, std::size_t> connections;
     for(const auto connection :
-            get_toml_value<toml::Table>(ignore, "particles_within", location))
+            get_toml_value<toml::table>(ignore, "particles_within", location))
     {
         connections[connection.first] =
             toml::get<std::size_t>(connection.second);
@@ -501,7 +501,7 @@ read_debye_huckel_potential(const toml::Table& global)
                          "be ignored");
     }
 
-    const auto& ps = get_toml_value<toml::Array>(global, "parameters", location);
+    const auto& ps = get_toml_value<toml::array>(global, "parameters", location);
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
     const auto parameters =
@@ -511,7 +511,7 @@ read_debye_huckel_potential(const toml::Table& global)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto& tab = param.cast<toml::value_t::Table>();
+        const auto& tab = toml::get<toml::table>(param);
         const auto idx = get_toml_value<std::size_t>(tab, "index", parameters);
         const auto charge = get_toml_value<real_type>(tab, "charge", parameters);
         MJOLNIR_LOG_INFO("idx    = ", idx, ", charge = ", charge);
@@ -532,7 +532,7 @@ read_debye_huckel_potential(const toml::Table& global)
 
 template<typename realT>
 ImplicitMembranePotential<realT>
-read_implicit_membrane_potential(const toml::Table& external)
+read_implicit_membrane_potential(const toml::table& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_implicit_membrane_potential(), 0);
@@ -548,7 +548,7 @@ read_implicit_membrane_potential(const toml::Table& external)
     MJOLNIR_LOG_INFO("magnitude = ", magnitude);
     MJOLNIR_LOG_INFO("bend      = ", bend     );
 
-    const auto& ps = get_toml_value<toml::Array>(external, "parameters",
+    const auto& ps = get_toml_value<toml::array>(external, "parameters",
             location);
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
@@ -559,7 +559,7 @@ read_implicit_membrane_potential(const toml::Table& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto& tab = param.cast<toml::value_t::Table>();
+        const auto& tab = toml::get<toml::table>(param);
         const auto idx = get_toml_value<std::size_t>(tab, "index", parameters);
         const auto h   = get_toml_value<real_type>(tab, "hydrophobicity",
                                                    parameters);
@@ -578,14 +578,14 @@ read_implicit_membrane_potential(const toml::Table& external)
 
 template<typename realT>
 LennardJonesWallPotential<realT>
-read_lennard_jones_wall_potential(const toml::Table& external)
+read_lennard_jones_wall_potential(const toml::table& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_lennard_jones_wall_potential(), 0);
     using real_type = realT;
     const auto location = "[forcefield.external] for Lennard-Jones Wall";
 
-    const auto& ps = get_toml_value<toml::Array>(external, "parameters", location);
+    const auto& ps = get_toml_value<toml::array>(external, "parameters", location);
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
     const auto parameters =
@@ -595,7 +595,7 @@ read_lennard_jones_wall_potential(const toml::Table& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto& tab = param.cast<toml::value_t::Table>();
+        const auto& tab = toml::get<toml::table>(param);
         const auto idx = get_toml_value<std::size_t>(tab, "index", parameters);
         const auto s = get_toml_value<real_type>(tab, {"sigma"_s,   u8"σ"_s}, parameters);
         const auto e = get_toml_value<real_type>(tab, {"epsilon"_s, u8"ε"_s}, parameters);
@@ -612,7 +612,7 @@ read_lennard_jones_wall_potential(const toml::Table& external)
 
 template<typename realT>
 ExcludedVolumeWallPotential<realT>
-read_excluded_volume_wall_potential(const toml::Table& external)
+read_excluded_volume_wall_potential(const toml::table& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_excluded_volume_wall_potential(), 0);
@@ -622,7 +622,7 @@ read_excluded_volume_wall_potential(const toml::Table& external)
     const real_type eps = get_toml_value<real_type>(external, "epsilon", location);
     MJOLNIR_LOG_INFO("epsilon = ", eps);
 
-    const auto& ps = get_toml_value<toml::Array>(external, "parameters", location);
+    const auto& ps = get_toml_value<toml::array>(external, "parameters", location);
     MJOLNIR_LOG_INFO("number of parameters = ", ps.size());
 
     const auto parameters =
@@ -632,7 +632,7 @@ read_excluded_volume_wall_potential(const toml::Table& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto& tab = param.cast<toml::value_t::Table>();
+        const auto& tab = toml::get<toml::table>(param);
         const auto idx = get_toml_value<std::size_t>(tab, "index", parameters);
         const auto s = get_toml_value<real_type>(tab, {"sigma"_s, u8"σ"_s}, parameters);
         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", s);

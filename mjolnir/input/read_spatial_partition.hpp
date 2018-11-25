@@ -42,14 +42,14 @@ struct celllist_dispatcher<CuboidalPeriodicBoundary<realT, coordT>, traitsT, par
 
 template<typename traitsT, typename potentialT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_spatial_partition(const toml::Table& global, potentialT&& pot)
+read_spatial_partition(const toml::table& global, potentialT&& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_spatial_partition(), 0);
     typedef typename traitsT::real_type         real_type;
     typedef typename potentialT::parameter_type parameter_type;
 
-    const auto& sp   = get_toml_value<toml::Table>(
+    const auto& sp   = get_toml_value<toml::table>(
             global, "spatial_partition", "[forcefield.global]");
     const auto  type = get_toml_value<std::string>(
             sp, "type", "[forcefield.global]");

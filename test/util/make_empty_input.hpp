@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_TEST_MAKE_EMPTY_INPUT_HPP
 #define MJOLNIR_TEST_MAKE_EMPTY_INPUT_HPP
-#include <extlib/toml/toml.hpp>
+#include <extlib/toml/toml/toml.hpp>
 #include <mjolnir/util/string.hpp>
 
 namespace mjolnir
@@ -10,22 +10,22 @@ namespace test
 
 // make a minimal input file that contains no particle, no forcefield.
 // It contains only parameters that are needed to pass read_input() functions.
-inline toml::Table make_empty_input()
+inline toml::table make_empty_input()
 {
     using namespace mjolnir::literals::string_literals;
 
-    toml::Table files;
+    toml::table files;
     files["output_prefix"] = "nothing"_s;
     files["output_path"]   = "./"_s;
 
-    toml::Table units;
+    toml::table units;
     units["length"] = "angstrom"_s;
     units["energy"] = "kcal/mol"_s;
 
     // Mjolnir does not consider running simulation without simulator
     // (that does not make sense!) . Here, temporary set MD simulator with
     // Newtonian dynamics.
-    toml::Table simulator;
+    toml::table simulator;
     simulator["type"]          = "Molecular Dynamics"_s;
     simulator["scheme"]        = "Newtonian"_s;
     simulator["precision"]     = "double"_s;
@@ -35,18 +35,18 @@ inline toml::Table make_empty_input()
     simulator["delta_t"]       = 0.1;
 
     // Mjolnir requires a system to simulate, even if it has no particle.
-    toml::Table system;
-    system["attributes"]     = toml::Table{{"temperature"_s, toml::value(300.0)}};
-    system["boundary_shape"] = toml::Table(); // no boundary
-    system["particles"]      = toml::Array(); // no particle
-    toml::Array systems(1, std::move(system));
+    toml::table system;
+    system["attributes"]     = toml::table{{"temperature"_s, toml::value(300.0)}};
+    system["boundary_shape"] = toml::table(); // no boundary
+    system["particles"]      = toml::array(); // no particle
+    toml::array systems(1, std::move(system));
 
     // "empty forcefields" completely make sense because essentially any kind of
     // forcefields are a sum of several potential terms. Forcefield that has
     // zero term means an ideal system having no interaction.
-    toml::Array forcefields(1, toml::Table(/* nothing! */));
+    toml::array forcefields(1, toml::table(/* nothing! */));
 
-    toml::Table input;
+    toml::table input;
     input["files"]       = std::move(files);
     input["units"]       = std::move(units);
     input["simulator"]   = std::move(simulator);

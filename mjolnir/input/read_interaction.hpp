@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_READ_INTERACTION
 #define MJOLNIR_READ_INTERACTION
-#include <extlib/toml/toml.hpp>
+#include <extlib/toml/toml/toml.hpp>
 #include <mjolnir/interaction/BondLengthInteraction.hpp>
 #include <mjolnir/interaction/BondAngleInteraction.hpp>
 #include <mjolnir/interaction/DihedralAngleInteraction.hpp>
@@ -27,7 +27,7 @@ namespace mjolnir
 
 template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
-read_bond_length_interaction(const std::string& kind, const toml::Table& local)
+read_bond_length_interaction(const std::string& kind, const toml::table& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_bond_length_interaction(), 0);
@@ -71,7 +71,7 @@ template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
 read_bond_angle_interaction(
     const typename LocalInteractionBase<traitsT>::connection_kind_type kind,
-    const toml::Table& local)
+    const toml::table& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_bond_angle_interaction(), 0);
@@ -115,7 +115,7 @@ template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
 read_dihedral_angle_interaction(
     const typename LocalInteractionBase<traitsT>::connection_kind_type kind,
-    const toml::Table& local)
+    const toml::table& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_dihedral_angle_interaction(), 0);
@@ -183,7 +183,7 @@ read_dihedral_angle_interaction(
 
 template<typename traitsT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_global_pair_interaction(const toml::Table& global)
+read_global_pair_interaction(const toml::table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_global_pair_interaction(), 0);
@@ -237,7 +237,7 @@ read_global_pair_interaction(const toml::Table& global)
 
 template<typename traitsT, typename shapeT>
 std::unique_ptr<ExternalForceInteractionBase<traitsT>>
-read_external_distance_interaction(const toml::Table& external, shapeT&& shape)
+read_external_distance_interaction(const toml::table& external, shapeT&& shape)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_global_distance_interaction(), 0);
@@ -283,13 +283,13 @@ read_external_distance_interaction(const toml::Table& external, shapeT&& shape)
 
 template<typename traitsT>
 std::unique_ptr<ExternalForceInteractionBase<traitsT>>
-read_external_distance_interaction_shape(const toml::Table& external)
+read_external_distance_interaction_shape(const toml::table& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_global_distance_interaction(), 0);
     using real_type = typename traitsT::real_type;
 
-    const auto shape = get_toml_value<toml::Table>(external, "shape",
+    const auto shape = get_toml_value<toml::table>(external, "shape",
             "[forcefield.external] for ExternalDistance");
     const auto name  = get_toml_value<std::string>(shape, "name",
             "[forcefield.external.shape] for ExternalDistance");
@@ -365,7 +365,7 @@ read_external_distance_interaction_shape(const toml::Table& external)
 
 template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
-read_local_interaction(const toml::Table& local)
+read_local_interaction(const toml::table& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_local_interaction(), 0);
@@ -400,7 +400,7 @@ read_local_interaction(const toml::Table& local)
 
 template<typename traitsT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_global_interaction(const toml::Table& global)
+read_global_interaction(const toml::table& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_global_interaction(), 0);
@@ -421,7 +421,7 @@ read_global_interaction(const toml::Table& global)
 
 template<typename traitsT>
 std::unique_ptr<ExternalForceInteractionBase<traitsT>>
-read_external_interaction(const toml::Table& external)
+read_external_interaction(const toml::table& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_external_interaction(), 0);

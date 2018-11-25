@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_READ_UNIT_SYSTEM_HPP
 #define MJOLNIR_READ_UNIT_SYSTEM_HPP
-#include <extlib/toml/toml.hpp>
+#include <extlib/toml/toml/toml.hpp>
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/core/constants.hpp>
 #include <mjolnir/core/Unit.hpp>
@@ -13,16 +13,16 @@ namespace mjolnir
 {
 
 template<typename traitsT>
-std::unique_ptr<SimulatorBase> read_units(const toml::Table& data)
+std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_units(const toml::Table& data), 0);
+    MJOLNIR_SCOPE(read_units(const toml::table& data), 0);
     using real_type = typename traitsT::real_type;
     using phys_type = physics::constants<real_type>;
     using math_type = math::constants<real_type>;
     using unit_type = unit::constants<real_type>;
 
-    const auto& units = get_toml_value<toml::Table>(data, "units", "<root>");
+    const auto& units = get_toml_value<toml::table>(data, "units", "<root>");
 
     const auto& energy = get_toml_value<std::string>(units, "energy", "[units]");
     const auto& length = get_toml_value<std::string>(units, "length", "[units]");

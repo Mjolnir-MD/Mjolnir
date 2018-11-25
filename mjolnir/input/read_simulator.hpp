@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_READ_SIMULATOR
 #define MJOLNIR_READ_SIMULATOR
-#include <extlib/toml/toml.hpp>
+#include <extlib/toml/toml/toml.hpp>
 #include <mjolnir/core/MolecularDynamicsSimulator.hpp>
 #include <mjolnir/core/SteepestDescentSimulator.hpp>
 #include <mjolnir/core/SimulatedAnnealingSimulator.hpp>
@@ -19,7 +19,7 @@ namespace mjolnir
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_molecular_dynamics_simulator(
-        const toml::Table& data, const toml::Table& simulator)
+        const toml::table& data, const toml::table& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_molecular_dynamics_simulator(), 0);
@@ -68,7 +68,7 @@ read_molecular_dynamics_simulator(
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_steepest_descent_simulator(
-        const toml::Table& data, const toml::Table& simulator)
+        const toml::table& data, const toml::table& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_steepest_descent_simulator(), 0);
@@ -99,7 +99,7 @@ read_steepest_descent_simulator(
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_simulated_annealing_simulator(
-        const toml::Table& data, const toml::Table& simulator)
+        const toml::table& data, const toml::table& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_simulated_annealing_simulator(), 0);
@@ -168,7 +168,7 @@ read_simulated_annealing_simulator(
 
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
-read_simulator_from_table(const toml::Table& data, const toml::Table& simulator)
+read_simulator_from_table(const toml::table& data, const toml::table& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_simulator_from_table(), 0);
@@ -199,16 +199,16 @@ read_simulator_from_table(const toml::Table& data, const toml::Table& simulator)
 
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
-read_simulator(const toml::Table& data)
+read_simulator(const toml::table& data)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_simulator(), 0);
 
     using real_type   = typename traitsT::real_type;
     const auto& simulator =
-        get_toml_value<toml::Table>(data, "simulator", "<root>");
+        get_toml_value<toml::table>(data, "simulator", "<root>");
 
-    const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
+    const auto& files = get_toml_value<toml::table>(data, "files", "<root>");
     std::string input_path_("./");
     if(files.count("input_path") == 1)
     {
@@ -242,18 +242,18 @@ read_simulator(const toml::Table& data)
             MJOLNIR_LOG_WARN("but in ", file_name, ", `simulator` key found. "
                              "trying to read it as a simulator setup.");
 
-            if(simulator_file.at("simulator").type() != toml::value_t::Table)
+            if(!simulator_file.at("simulator").is(toml::value::table_tag))
             {
                 MJOLNIR_LOG_ERROR("type of `simulator` is different from "
-                                  "toml::Table in file (", file_name, ").");
+                                  "toml::table in file (", file_name, ").");
                 MJOLNIR_LOG_ERROR("note: [[...]] means Array-of-Tables. "
                                   "please take care.");
                 std::exit(1);
             }
 
             MJOLNIR_LOG_INFO("reading `[simulator]` table");
-            return read_simulator_from_table<traitsT>(data, simulator_file.at(
-                    "simulator").template cast<toml::value_t::Table>());
+            return read_simulator_from_table<traitsT>(data,
+                    toml::get<toml::table>(simulator_file.at("simulator")));
         }
         return read_simulator_from_table<traitsT>(data, simulator_file);
     }

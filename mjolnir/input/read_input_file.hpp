@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_READ_INPUT_FILE
 #define MJOLNIR_READ_INPUT_FILE
-#include <extlib/toml/toml.hpp>
+#include <extlib/toml/toml/toml.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/constants.hpp>
 #include <mjolnir/core/SimulatorBase.hpp>
@@ -15,10 +15,10 @@ namespace mjolnir
 
 template<typename realT>
 std::unique_ptr<SimulatorBase>
-read_boundary(const toml::Table& data)
+read_boundary(const toml::table& data)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_boundary(const toml::Table& data), 0);
+    MJOLNIR_SCOPE(read_boundary(const toml::table& data), 0);
 
     // [simulator] can be provided in a different file. in that case, the table
     // has `file_name` field. In that case, input_path is also needed to
@@ -27,14 +27,14 @@ read_boundary(const toml::Table& data)
     std::string boundary;
 
     const auto& simulator =
-        get_toml_value<toml::Table>(data, "simulator", "<root>");
+        get_toml_value<toml::table>(data, "simulator", "<root>");
 
     if(simulator.count("file_name") == 1)
     {
         const auto filename = toml::get<std::string>(simulator.at("file_name"));
         std::string input_path; //default: empty
 
-        const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
+        const auto& files = get_toml_value<toml::table>(data, "files", "<root>");
         if(files.count("input_path") == 1)
         {
             input_path = toml::get<std::string>(files.at("input_path"));
@@ -69,10 +69,10 @@ read_boundary(const toml::Table& data)
 }
 
 inline std::unique_ptr<SimulatorBase>
-read_precision(const toml::Table& data)
+read_precision(const toml::table& data)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_precision(const toml::Table& data), 0);
+    MJOLNIR_SCOPE(read_precision(const toml::table& data), 0);
 
     // [simulator] can be provided in a different file. in that case, the table
     // has `file_name` field. In that case, input_path is also needed to
@@ -81,14 +81,14 @@ read_precision(const toml::Table& data)
     std::string prec;
 
     const auto& simulator =
-        get_toml_value<toml::Table>(data, "simulator", "<root>");
+        get_toml_value<toml::table>(data, "simulator", "<root>");
 
     if(simulator.count("file_name") == 1)
     {
         const auto filename = toml::get<std::string>(simulator.at("file_name"));
         std::string input_path; //default: empty
 
-        const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
+        const auto& files = get_toml_value<toml::table>(data, "files", "<root>");
         if(files.count("input_path") == 1)
         {
             input_path = toml::get<std::string>(files.at("input_path"));
@@ -128,7 +128,7 @@ read_input_file(const std::string& filename)
     std::cerr << " successfully parsed." << std::endl;
 
     // initializing logger by using output_path and output_prefix ...
-    const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
+    const auto& files = get_toml_value<toml::table>(data, "files", "<root>");
     const auto  path  = get_toml_value<std::string>(files, "output_path", "[files]");
 
     // XXX:  Here, this code assumes POSIX. it does not support windows.
@@ -142,7 +142,7 @@ read_input_file(const std::string& filename)
     MJOLNIR_GET_DEFAULT_LOGGER();
 
     MJOLNIR_LOG_NOTICE("the log file is `", logger_name, '`');
-    MJOLNIR_SCOPE(read_input_file(const toml::Table& data), 0);
+    MJOLNIR_SCOPE(read_input_file(const toml::table& data), 0);
 
     return read_precision(data); // read all the settings recursively...
 }

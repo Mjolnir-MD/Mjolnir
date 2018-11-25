@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_READ_FORCEFIELD
 #define MJOLNIR_READ_FORCEFIELD
-#include <extlib/toml/toml.hpp>
+#include <extlib/toml/toml/toml.hpp>
 #include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -11,7 +11,7 @@ namespace mjolnir
 
 template<typename traitsT>
 LocalForceField<traitsT>
-read_local_forcefield(std::vector<toml::Table> interactions,
+read_local_forcefield(std::vector<toml::table> interactions,
                       const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -56,7 +56,7 @@ read_local_forcefield(std::vector<toml::Table> interactions,
                     "[local] should be provided as a root object of file ",
                     file_name, ". but [local] table found");
 
-                if(forcefield_file.at("local").type() != toml::value_t::Table)
+                if(!forcefield_file.at("local").is(toml::value::table_tag))
                 {
                     MJOLNIR_LOG_ERROR("type of `local` is different from toml::"
                                       "Table in file (", file_name, ").");
@@ -65,7 +65,7 @@ read_local_forcefield(std::vector<toml::Table> interactions,
                     std::exit(1);
                 }
                 lff.emplace(read_local_interaction<traitsT>(
-                    get_toml_value<toml::Table>(
+                    get_toml_value<toml::table>(
                         forcefield_file, "local", file_name)));
             }
             else
@@ -83,7 +83,7 @@ read_local_forcefield(std::vector<toml::Table> interactions,
 
 template<typename traitsT>
 GlobalForceField<traitsT>
-read_global_forcefield(std::vector<toml::Table> interactions,
+read_global_forcefield(std::vector<toml::table> interactions,
                        const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -128,16 +128,16 @@ read_global_forcefield(std::vector<toml::Table> interactions,
                     "[global] should be provided as a root object of file ",
                     file_name, ". but [global] key found");
 
-                if(forcefield_file.at("global").type() != toml::value_t::Table)
+                if(!forcefield_file.at("global").is(toml::value::table_tag))
                 {
                     MJOLNIR_LOG_ERROR("type of `global` is different from "
-                                      "toml::Table in file (", file_name, ").");
+                                      "toml::table in file (", file_name, ").");
                     MJOLNIR_LOG_ERROR("note: [[...]] means Array-of-Tables. "
                                       "please take care.");
                     std::exit(1);
                 }
                 gff.emplace(read_global_interaction<traitsT>(
-                    get_toml_value<toml::Table>(
+                    get_toml_value<toml::table>(
                         forcefield_file, "global", file_name)));
             }
             else
@@ -155,7 +155,7 @@ read_global_forcefield(std::vector<toml::Table> interactions,
 
 template<typename traitsT>
 ExternalForceField<traitsT>
-read_external_forcefield(std::vector<toml::Table> interactions,
+read_external_forcefield(std::vector<toml::table> interactions,
                          const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -200,17 +200,17 @@ read_external_forcefield(std::vector<toml::Table> interactions,
                     "[external] should be provided as a root object of file ",
                     file_name, ". but [external] key found");
 
-                if(forcefield_file.at("external").type() != toml::value_t::Table)
+                if(!forcefield_file.at("external").is(toml::value::table_tag))
                 {
                     MJOLNIR_LOG_ERROR("type of `external` is different from "
-                                      "toml::Table in file (", file_name, ").");
+                                      "toml::table in file (", file_name, ").");
                     MJOLNIR_LOG_ERROR("note: [[...]] means Array-of-Tables. "
                                       "please take care.");
                     std::exit(1);
                 }
 
                 eff.emplace(read_external_interaction<traitsT>(
-                    get_toml_value<toml::Table>(
+                    get_toml_value<toml::table>(
                         forcefield_file, "external", file_name)));
             }
             else
@@ -228,28 +228,28 @@ read_external_forcefield(std::vector<toml::Table> interactions,
 
 template<typename traitsT>
 ForceField<traitsT>
-read_forcefield_from_table(const toml::Table& ff, const std::string& input_path)
+read_forcefield_from_table(const toml::table& ff, const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_forcefield_from_table(), 0);
 
-    std::vector<toml::Table> fflocal, ffglobal, ffexternal;
+    std::vector<toml::table> fflocal, ffglobal, ffexternal;
     if(ff.count("local") == 1)
     {
         MJOLNIR_LOG_INFO("LocalForceField found");
-        fflocal = get_toml_value<std::vector<toml::Table>>(
+        fflocal = get_toml_value<std::vector<toml::table>>(
                 ff, "local", "[[forcefields]]");
     }
     if(ff.count("global") == 1)
     {
         MJOLNIR_LOG_INFO("GlobalForceField found");
-        ffglobal = get_toml_value<std::vector<toml::Table>>(
+        ffglobal = get_toml_value<std::vector<toml::table>>(
                 ff, "global", "[[forcefields]]");
     }
     if(ff.count("external") == 1)
     {
         MJOLNIR_LOG_INFO("ExternalForceField found");
-        ffexternal = get_toml_value<std::vector<toml::Table>>(
+        ffexternal = get_toml_value<std::vector<toml::table>>(
                 ff, "external", "[[forcefields]]");
     }
 
@@ -270,13 +270,13 @@ read_forcefield_from_table(const toml::Table& ff, const std::string& input_path)
 
 template<typename traitsT>
 ForceField<traitsT>
-read_forcefield(const toml::Table& data, std::size_t N)
+read_forcefield(const toml::table& data, std::size_t N)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_forcefield(), 0);
     MJOLNIR_LOG_NOTICE("reading ", N, "-th [[forcefield]].");
 
-    const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
+    const auto& files = get_toml_value<toml::table>(data, "files", "<root>");
     std::string input_path_("./");
     if(files.count("input_path") == 1)
     {
@@ -285,7 +285,7 @@ read_forcefield(const toml::Table& data, std::size_t N)
     const auto input_path(input_path_); // add constness
     MJOLNIR_LOG_INFO("input path is -> ", input_path);
 
-    const auto& ffs = get_toml_value<toml::Array>(data, "forcefields", "<root>");
+    const auto& ffs = get_toml_value<toml::array>(data, "forcefields", "<root>");
     if(ffs.size() <= N)
     {
         throw std::out_of_range("no enough forcefields: " + std::to_string(N));
@@ -293,7 +293,7 @@ read_forcefield(const toml::Table& data, std::size_t N)
     MJOLNIR_LOG_INFO(ffs.size(), " forcefields are provided");
     MJOLNIR_LOG_INFO("using ", N, "-th forcefield");
 
-    const auto& ff = ffs.at(N).cast<toml::value_t::Table>();
+    const auto& ff = toml::get<toml::table>(ffs.at(N));
     if(ff.count("file_name") == 1)
     {
         MJOLNIR_SCOPE(ff.count("file_name") == 1, 1);
@@ -321,16 +321,16 @@ read_forcefield(const toml::Table& data, std::size_t N)
             MJOLNIR_LOG_WARN("in ", file_name, ", [forcefields] key found."
                              "trying to read it as a forcefield setup.");
 
-            if(forcefield_file.at("forcefields").type() != toml::value_t::Table)
+            if(!forcefield_file.at("forcefields").is(toml::value::table_tag))
             {
                 MJOLNIR_LOG_ERROR("type of `forcefields` is different from "
-                                  "toml::Table in file (", file_name, ").");
+                                  "toml::table in file (", file_name, ").");
                 MJOLNIR_LOG_ERROR("note: [[...]] means Array-of-Tables. "
                                   "please take care.");
                 std::exit(1);
             }
-            return read_forcefield_from_table<traitsT>(forcefield_file.at(
-                    "forcefields").template cast<toml::value_t::Table>(),
+            return read_forcefield_from_table<traitsT>(
+                    toml::get<toml::table>(forcefield_file.at("forcefields")),
                     input_path);
         }
         return read_forcefield_from_table<traitsT>(forcefield_file, input_path);

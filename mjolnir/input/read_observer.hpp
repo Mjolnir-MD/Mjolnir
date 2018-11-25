@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_READ_OBSERVER
 #define MJOLNIR_READ_OBSERVER
-#include <extlib/toml/toml.hpp>
+#include <extlib/toml/toml/toml.hpp>
 #include <mjolnir/core/Observer.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -10,13 +10,13 @@ namespace mjolnir
 
 template<typename traitsT>
 Observer<traitsT>
-read_observer(const toml::Table& data)
+read_observer(const toml::table& data)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_observer(), 0);
 
     const auto& files =
-        get_toml_value<toml::Table>(data, "files", "<root>");
+        get_toml_value<toml::table>(data, "files", "<root>");
 
     std::string path_ =
         get_toml_value<std::string>(files, "output_path", "[files]");

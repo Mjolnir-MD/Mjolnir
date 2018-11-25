@@ -1,59 +1,21 @@
 #ifndef MJOLNIR_UTIL_GET_TOML_VALUE
 #define MJOLNIR_UTIL_GET_TOML_VALUE
-#include <extlib/toml/toml.hpp>
-#include <mjolnir/util/type_traits.hpp>
+#include <extlib/toml/toml/toml.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <string>
+#include <sstream>
 #include <stdexcept>
 
 namespace mjolnir
 {
 
-// one of the toml values. needs no conversion. so it can return a reference.
-template<typename T, typename std::enable_if<disjunction<
-    std::is_same<T, toml::Boolean >,
-    std::is_same<T, toml::Integer >,
-    std::is_same<T, toml::Float   >,
-    std::is_same<T, toml::String  >,
-    std::is_same<T, toml::Datetime>,
-    std::is_same<T, toml::Array   >,
-    std::is_same<T, toml::Table   >
-    >::value, std::nullptr_t>::type = nullptr>
-T const& get_toml_value(const toml::Table& tab, const std::string& key,
-                        const std::string& tablename)
-{
-    try
-    {
-        return tab.at(key).cast<toml::value_traits<T>::type_index>();
-    }
-    catch(const std::out_of_range& oor)
-    {
-        throw_exception<std::runtime_error>(
-            "mjolnir: while reading toml file: key(", key,
-            ") in table(", tablename, ") missing");
-    }
-    catch(const toml::type_error& tte)
-    {
-        throw_exception<std::runtime_error>(
-            "mjolnir: while reading toml file: key(", key,
-            ") in table(", tablename, ") has type `",
-            tab.at(key).type(), "`, expected `",
-            toml::value_traits<T>::type_index, "`.");
-    }
-}
+// utility functions to get a value from toml::table.
+// To show the informative error message, use it instead of the raw toml::get.
 
-// none of the toml values. needs conversion.
-template<typename T, typename std::enable_if<conjunction<
-    negation<std::is_same<T, toml::Boolean >>,
-    negation<std::is_same<T, toml::Integer >>,
-    negation<std::is_same<T, toml::Float   >>,
-    negation<std::is_same<T, toml::String  >>,
-    negation<std::is_same<T, toml::Datetime>>,
-    negation<std::is_same<T, toml::Array   >>,
-    negation<std::is_same<T, toml::Table   >>
-    >::value, std::nullptr_t>::type = nullptr>
-T get_toml_value(const toml::Table& tab, const std::string& key,
-                 const std::string& tablename)
+template<typename T>
+decltype(toml::get<T>(std::declval<toml::value>()))
+get_toml_value(const toml::table& tab, const std::string& key,
+               const std::string& tablename)
 {
     try
     {
@@ -65,82 +27,45 @@ T get_toml_value(const toml::Table& tab, const std::string& key,
             "mjolnir: while reading toml file: key(", key,
             ") in table(", tablename, ") missing");
     }
-    catch(const toml::type_error& tte)
+    catch(const toml::bad_get& bg)
     {
         throw_exception<std::runtime_error>(
             "mjolnir: while reading toml file: key(", key,
-            ") in table(", tablename, ") has type `",
-            tab.at(key).type(), "`, expected `",
-            toml::value_traits<T>::type_index, "`.");
+            ") in table(", tablename, "): ", bg.what());
     }
 }
 
-// one of the toml values. needs no conversion. so it can return a reference.
-template<typename T, typename std::enable_if<disjunction<
-    std::is_same<T, toml::Boolean >,
-    std::is_same<T, toml::Integer >,
-    std::is_same<T, toml::Float   >,
-    std::is_same<T, toml::String  >,
-    std::is_same<T, toml::Datetime>,
-    std::is_same<T, toml::Array   >,
-    std::is_same<T, toml::Table   >
-    >::value, std::nullptr_t>::type = nullptr>
-T const& get_toml_value(const toml::Table& tab,
-                        std::initializer_list<std::string> keys,
-                        const std::string& tablename)
+template<typename T>
+decltype(toml::get<T>(std::declval<toml::value>()))
+get_toml_value(const toml::table& tab, std::initializer_list<std::string> keys,
+               const std::string& tablename)
 {
     for(const auto& key : keys)
     {
         const auto iter = tab.find(key);
         if(iter != tab.end())
         {
-            return tab.at(key).cast<toml::value_traits<T>::type_index>();
+            try
+            {
+                return toml::get<T>(iter->second);
+            }
+            catch(const toml::bad_get& bg)
+            {
+                throw_exception<std::runtime_error>(
+                    "mjolnir: while reading toml file: key(", key,
+                    ") in table(", tablename, "): ", bg.what());
+            }
         }
     }
 
-    std::ostringstream oss;
-    oss << "mjolnir: while reading toml file: none of the key(";
-    for(const auto& key : keys)
-    {
-        oss << key << ", ";
-    }
-    oss << ") are found in table (" << tablename << ").";
-    throw std::runtime_error(oss.str());
-}
-
-// none of the toml values. needs conversion.
-template<typename T, typename std::enable_if<conjunction<
-    negation<std::is_same<T, toml::Boolean >>,
-    negation<std::is_same<T, toml::Integer >>,
-    negation<std::is_same<T, toml::Float   >>,
-    negation<std::is_same<T, toml::String  >>,
-    negation<std::is_same<T, toml::Datetime>>,
-    negation<std::is_same<T, toml::Array   >>,
-    negation<std::is_same<T, toml::Table   >>
-    >::value, std::nullptr_t>::type = nullptr>
-T get_toml_value(const toml::Table& tab,
-                 std::initializer_list<std::string> keys,
-                 const std::string& tablename)
-{
-    for(const auto& key : keys)
-    {
-        const auto iter = tab.find(key);
-        if(iter != tab.end())
-        {
-            return toml::get<T>(tab.at(key));
-        }
-    }
+    // not found. throw an error.
 
     std::ostringstream oss;
     oss << "mjolnir: while reading toml file: none of the key(";
-    for(const auto& key : keys)
-    {
-        oss << key << ", ";
-    }
-    oss << ") are found in table (" << tablename << ").";
+    for(const auto& key : keys) {oss << key << ", ";}
+    oss << ") is found in table (" << tablename << ").";
     throw std::runtime_error(oss.str());
 }
-
 
 } // mjolnir
 #endif// MJOLNIR_INPUT_GET_TOML_VALUE
