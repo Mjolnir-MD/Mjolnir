@@ -21,10 +21,11 @@ if(USE_APPROX)
     add_definitions(-DMJOLNIR_WITH_APPROX)
 endif()
 
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/toml/toml.hpp")
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/toml/toml/toml.hpp")
     execute_process(COMMAND git submodule update --init --recursive
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()
+include_directories(${PROJECT_SOURCE_DIR}/extlib/toml)
 
 if(BOOST_ROOT)
     # if BOOST_ROOT is manually defined, use the library.
