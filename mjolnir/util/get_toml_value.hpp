@@ -9,22 +9,6 @@
 namespace mjolnir
 {
 
-inline toml::value const&
-toml_value_at(const toml::Table& tab, const std::string& key,
-              const std::string& tablename)
-{
-    try
-    {
-        return tab.at(key);
-    }
-    catch(const std::out_of_range& oor)
-    {
-        throw_exception<std::runtime_error>(
-            "mjolnir: while reading toml file: key(", key,
-            ") in table(", tablename, ") missing");
-    }
-}
-
 // one of the toml values. needs no conversion. so it can return a reference.
 template<typename T, typename std::enable_if<disjunction<
     std::is_same<T, toml::Boolean >,
@@ -154,7 +138,8 @@ T get_toml_value(const toml::Table& tab,
         oss << key << ", ";
     }
     oss << ") are found in table (" << tablename << ").";
-    throw std::runtime_error(oss.str());}
+    throw std::runtime_error(oss.str());
+}
 
 
 } // mjolnir
