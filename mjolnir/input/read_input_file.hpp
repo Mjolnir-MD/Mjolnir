@@ -52,12 +52,12 @@ read_boundary(const toml::Table& data)
 
     if(boundary == "Unlimited")
     {
-        MJOLNIR_LOG_INFO("boundary is UnlimitedBoundary");
+        MJOLNIR_LOG_NOTICE("Boundary Condition is Unlimited");
         return read_units<SimulatorTraits<realT, UnlimitedBoundary>>(data);
     }
     else if(boundary == "PeriodicCuboid")
     {
-        MJOLNIR_LOG_INFO("boundary is CuboidalPeriodicBoudanry");
+        MJOLNIR_LOG_NOTICE("Boundary Condition is CuboidalPeriodic");
         return read_units<SimulatorTraits<realT, CuboidalPeriodicBoundary>>(data);
     }
     else
@@ -104,12 +104,12 @@ read_precision(const toml::Table& data)
 
     if(prec == "double")
     {
-        MJOLNIR_LOG_INFO("precision is double");
+        MJOLNIR_LOG_NOTICE("precision is double");
         return read_boundary<double>(data);
     }
     else if(prec == "float")
     {
-        MJOLNIR_LOG_INFO("precision is float");
+        MJOLNIR_LOG_NOTICE("precision is float");
         return read_boundary<float>(data);
     }
     else
@@ -122,7 +122,10 @@ read_precision(const toml::Table& data)
 inline std::unique_ptr<SimulatorBase>
 read_input_file(const std::string& filename)
 {
+    // here, logger name is not given yet. output status directory on console.
+    std::cerr << "-- reading and parsing toml file `" << filename << "` ... ";
     const auto data = toml::parse(filename);
+    std::cerr << " successfully parsed." << std::endl;
 
     // initializing logger by using output_path and output_prefix ...
     const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
@@ -131,13 +134,14 @@ read_input_file(const std::string& filename)
     // XXX:  Here, this code assumes POSIX. it does not support windows.
     // TODO: Consider using Boost.filesystem to manage path and files
     //       in more elegant and powerful way? After switching C++17,
-    //       we can re-write that into std::filesystem.
+    //       we can re-write that with <filesystem>.
 
     const std::string logger_name = path + get_toml_value<std::string>(
             files, "output_prefix", "[files]") + ".log";
     MJOLNIR_SET_DEFAULT_LOGGER(logger_name);
-
     MJOLNIR_GET_DEFAULT_LOGGER();
+
+    MJOLNIR_LOG_NOTICE("the log file is `", logger_name, '`');
     MJOLNIR_SCOPE(read_input_file(const toml::Table& data), 0);
 
     return read_precision(data); // read all the settings recursively...

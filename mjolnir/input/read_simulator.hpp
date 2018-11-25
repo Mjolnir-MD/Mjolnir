@@ -31,12 +31,12 @@ read_molecular_dynamics_simulator(
             simulator, "total_step", "[simulator]");
     const std::size_t sstep = get_toml_value<std::size_t>(
             simulator, "save_step",  "[simulator]");
-
-    MJOLNIR_LOG_INFO("total step = ", tstep);
+    MJOLNIR_LOG_NOTICE("total step is ", tstep);
+    MJOLNIR_LOG_NOTICE("save  step is ", sstep);
 
     if(integration == "Newtonian")
     {
-        MJOLNIR_SCOPE(integration == "Newtonian", 2);
+        MJOLNIR_LOG_NOTICE("Integrator is Newtonian.");
         using integrator_t = VelocityVerletStepper<traitsT>;
         using simulator_t  = MolecularDynamicsSimulator<traitsT, integrator_t>;
         return make_unique<simulator_t>(
@@ -48,7 +48,7 @@ read_molecular_dynamics_simulator(
     }
     else if(integration == "Underdamped Langevin")
     {
-        MJOLNIR_SCOPE(integration == "Underdamped Langevin", 2);
+        MJOLNIR_LOG_NOTICE("Integrator is Underdamped Langevin.");
         using integrator_t = UnderdampedLangevinStepper<traitsT>;
         using simulator_t  = MolecularDynamicsSimulator<traitsT, integrator_t>;
         return make_unique<simulator_t>(
@@ -84,10 +84,10 @@ read_steepest_descent_simulator(
     const real_type   threshold = get_toml_value<real_type>(
             simulator, "threshold", "[simulator]");
 
-    MJOLNIR_LOG_INFO("step_lim  = ", step_lim);
-    MJOLNIR_LOG_INFO("save_step = ", save_step);
-    MJOLNIR_LOG_INFO("delta     = ", delta);
-    MJOLNIR_LOG_INFO("threshold = ", threshold);
+    MJOLNIR_LOG_NOTICE("step_limit is ", step_lim);
+    MJOLNIR_LOG_NOTICE("save_step  is ", save_step);
+    MJOLNIR_LOG_NOTICE("delta      is ", delta);
+    MJOLNIR_LOG_NOTICE("threshold  is ", threshold);
 
     return make_unique<simulator_type>(
             delta, threshold, step_lim, save_step,
@@ -112,8 +112,8 @@ read_simulated_annealing_simulator(
     const std::size_t sstep = get_toml_value<std::size_t>(
             simulator, "save_step", "[simulator]");
 
-    MJOLNIR_LOG_INFO("total step = ", tstep);
-    MJOLNIR_LOG_INFO("save  step = ", sstep);
+    MJOLNIR_LOG_NOTICE("total step is ", tstep);
+    MJOLNIR_LOG_NOTICE("save  step is ", sstep);
 
     const std::string schedule = get_toml_value<std::string>(
             simulator, "schedule", "[simulator]");
@@ -124,12 +124,14 @@ read_simulated_annealing_simulator(
     const std::size_t each_step = get_toml_value<std::size_t>(
             simulator, "each_step",  "[simulator]");
 
-    MJOLNIR_LOG_INFO("temperature from = ", T_from);
-    MJOLNIR_LOG_INFO("temperature to   = ", T_to);
-    MJOLNIR_LOG_INFO("for each step    = ", each_step);
+    MJOLNIR_LOG_NOTICE("temperature from ", T_from);
+    MJOLNIR_LOG_NOTICE("temperature to   ", T_to);
+    MJOLNIR_LOG_INFO("update temperature for each ", each_step, " steps");
 
     if(schedule == "linear")
     {
+        MJOLNIR_LOG_NOTICE("temparing schedule is linear.");
+
         if(integration == "Newtonian")
         {
             MJOLNIR_LOG_ERROR("Simulated Annealing + NVE Newtonian");
@@ -143,7 +145,7 @@ read_simulated_annealing_simulator(
             using simulator_t  = SimulatedAnnealingSimulator<
                 traitsT, integrator_t, linear_schedule>;
 
-            MJOLNIR_LOG_INFO("Underdamped Langevin is used as a MD engine");
+            MJOLNIR_LOG_NOTICE("Integrator is Underdamped Langevin.");
             return make_unique<simulator_t>(tstep, sstep, each_step,
                     linear_schedule<real_type>(T_from, T_to),
                     read_system<traitsT>(data, 0),
@@ -176,17 +178,17 @@ read_simulator_from_table(const toml::Table& data, const toml::Table& simulator)
 
     if(type == "Molecular Dynamics")
     {
-        MJOLNIR_SCOPE(type == "Molecular Dynamics", 1);
+        MJOLNIR_LOG_NOTICE("Simulator type is Molecular Dynamics.");
         return read_molecular_dynamics_simulator<traitsT>(data, simulator);
     }
     else if(type == "Steepest Descent")
     {
-        MJOLNIR_SCOPE(type == "Steepest Descent", 1);
+        MJOLNIR_LOG_NOTICE("Simulator type is Steepest Descent.");
         return read_steepest_descent_simulator<traitsT>(data, simulator);
     }
     else if(type == "Simulated Annealing")
     {
-        MJOLNIR_SCOPE(type == "Simulated Annealing", 1);
+        MJOLNIR_LOG_NOTICE("Simulator type is Simulated Annealing.");
         return read_simulated_annealing_simulator<traitsT>(data, simulator);
     }
     else
@@ -230,7 +232,9 @@ read_simulator(const toml::Table& data)
                              " file (", file_name, ").");
         }
 
+        MJOLNIR_LOG_NOTICE("simulator is defined in ", input_path, file_name);
         const auto simulator_file = toml::parse(input_path + file_name);
+
         if(simulator_file.count("simulator") == 1)
         {
             MJOLNIR_LOG_WARN("in `simulator` file, root object is treated as "

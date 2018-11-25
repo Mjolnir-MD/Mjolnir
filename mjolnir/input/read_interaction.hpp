@@ -38,7 +38,7 @@ read_bond_length_interaction(const std::string& kind, const toml::Table& local)
 
     if(potential == "Harmonic")
     {
-        MJOLNIR_SCOPE(potential == "Harmonic", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Harmonic.");
         using potentialT = HarmonicPotential<real_type>;
 
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
@@ -46,7 +46,7 @@ read_bond_length_interaction(const std::string& kind, const toml::Table& local)
     }
     else if(potential == "Go1012Contact")
     {
-        MJOLNIR_SCOPE(potential == "Go1012Contact", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is 10-12 Go contact.");
         using potentialT = Go1012ContactPotential<real_type>;
 
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
@@ -54,7 +54,7 @@ read_bond_length_interaction(const std::string& kind, const toml::Table& local)
     }
     else if(potential == "Gaussian")
     {
-        MJOLNIR_SCOPE(potential == "Gaussian", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Gaussian.");
         using potentialT = GaussianPotential<real_type>;
 
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
@@ -82,7 +82,7 @@ read_bond_angle_interaction(
 
     if(potential == "Harmonic")
     {
-        MJOLNIR_SCOPE(potential == "Harmonic", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Harmonic.");
         using potentialT = HarmonicPotential<real_type>;
 
         return make_unique<BondAngleInteraction<traitsT, potentialT>>(
@@ -90,7 +90,7 @@ read_bond_angle_interaction(
     }
     else if(potential == "FlexibleLocalAngle")
     {
-        MJOLNIR_SCOPE(potential == "FlexibleLocalAngle", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Flexible Local Angle.");
         using potentialT = FlexibleLocalAnglePotential<real_type>;
 
         return make_unique<BondAngleInteraction<traitsT, potentialT>>(
@@ -98,7 +98,7 @@ read_bond_angle_interaction(
     }
     else if(potential == "Gaussian")
     {
-        MJOLNIR_SCOPE(potential == "Gaussian", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Gaussian.");
         using potentialT = GaussianPotential<real_type>;
 
         return make_unique<BondAngleInteraction<traitsT, potentialT>>(
@@ -126,7 +126,7 @@ read_dihedral_angle_interaction(
 
     if(potential == "Harmonic")
     {
-        MJOLNIR_SCOPE(potential == "Harmonic", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Harmonic.");
         using potentialT = HarmonicPotential<real_type>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
@@ -134,7 +134,7 @@ read_dihedral_angle_interaction(
     }
     else if(potential == "ClementiDihedral")
     {
-        MJOLNIR_SCOPE(potential == "ClementiDihedral", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Clementi-Go's dihedral.");
         using potentialT = ClementiDihedralPotential<real_type>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
@@ -142,7 +142,7 @@ read_dihedral_angle_interaction(
     }
     else if(potential == "Gaussian")
     {
-        MJOLNIR_SCOPE(potential == "Gaussian", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Gaussian.");
         using potentialT = AngularGaussianPotential<real_type>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
@@ -150,7 +150,7 @@ read_dihedral_angle_interaction(
     }
     else if(potential == "FlexibleLocalDihedral")
     {
-        MJOLNIR_SCOPE(potential == "FlexibleLocalDihedral", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Flexible Local Dihedral.");
         using potentialT = FlexibleLocalDihedralPotential<real_type>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
@@ -160,7 +160,7 @@ read_dihedral_angle_interaction(
     // not so difficult, but practically, it makes the code messy...).
     else if(potential == "Gaussian+FlexibleLocalDihedral")
     {
-        MJOLNIR_SCOPE(potential == "Gaussian+FlexibleLocalDihedral", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Gaussian + FlexibleLocalDihedral.");
         using potential_1_T = GaussianPotential<real_type>;
         using potential_2_T = FlexibleLocalDihedralPotential<real_type>;
         using potentialT    =
@@ -194,7 +194,7 @@ read_global_pair_interaction(const toml::Table& global)
 
     if(potential == "ExcludedVolume")
     {
-        MJOLNIR_SCOPE(potential == "ExcludedVolume", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Excluded Volume.");
         using potential_t = ExcludedVolumePotential<real_type>;
 
         return read_spatial_partition<traitsT, potential_t>(
@@ -202,7 +202,7 @@ read_global_pair_interaction(const toml::Table& global)
     }
     else if(potential == "DebyeHuckel")
     {
-        MJOLNIR_SCOPE(potential == "DebyeHuckel", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Debye-Huckel.");
         using potential_t = DebyeHuckelPotential<real_type>;
 
         return read_spatial_partition<traitsT, potential_t>(
@@ -210,7 +210,7 @@ read_global_pair_interaction(const toml::Table& global)
     }
     else if(potential == "LennardJones")
     {
-        MJOLNIR_SCOPE(potential == "LennardJones", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Lennard-Jones.");
         using potential_t = LennardJonesPotential<real_type>;
 
         return read_spatial_partition<traitsT, potential_t>(
@@ -218,7 +218,7 @@ read_global_pair_interaction(const toml::Table& global)
     }
     else if(potential == "UniformLennardJones")
     {
-        MJOLNIR_SCOPE(potential == "UniformLennardJones", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Uniform Lennard-Jones.");
         using potential_t = UniformLennardJonesPotential<real_type>;
 
         return read_spatial_partition<traitsT, potential_t>(
@@ -248,7 +248,7 @@ read_external_distance_interaction(const toml::Table& external, shapeT&& shape)
 
     if(potential == "ImplicitMembrane")
     {
-        MJOLNIR_SCOPE(potential == "ImplicitMembrane", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Implicit Membrane.");
         using potential_t   = ImplicitMembranePotential<real_type>;
         using interaction_t = ExternalDistanceInteraction<
                                     traitsT, potential_t, shapeT>;
@@ -258,7 +258,7 @@ read_external_distance_interaction(const toml::Table& external, shapeT&& shape)
     }
     else if(potential == "LennardJonesWall")
     {
-        MJOLNIR_SCOPE(potential == "LennardJonesWall", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Lennard-Jones.");
         using potential_t   = LennardJonesWallPotential<real_type>;
         using interaction_t = ExternalDistanceInteraction<
                                     traitsT, potential_t, shapeT>;
@@ -267,7 +267,7 @@ read_external_distance_interaction(const toml::Table& external, shapeT&& shape)
     }
     else if(potential == "ExcludedVolumeWall")
     {
-        MJOLNIR_SCOPE(potential == "ExcludedVolumeWall", 1);
+        MJOLNIR_LOG_NOTICE("-- potential functions is Excluded-Volume.");
         using potential_t   = ExcludedVolumeWallPotential<real_type>;
         using interaction_t = ExternalDistanceInteraction<
                                     traitsT, potential_t, shapeT>;
@@ -296,7 +296,6 @@ read_external_distance_interaction_shape(const toml::Table& external)
 
     if(name == "AxisAlignedPlane")
     {
-        MJOLNIR_SCOPE(potential == "AxisAlignedPlane", 1);
         const auto pos = get_toml_value<real_type>(shape, "position",
             "[forcefield.external.shape] for ExternalDistance");
         const auto margin = get_toml_value<real_type>(shape, "margin",
@@ -306,44 +305,45 @@ read_external_distance_interaction_shape(const toml::Table& external)
 
         const auto axis = get_toml_value<std::string>(shape, "axis",
             "[forcefield.external.shape] for ExternalDistance");
+        MJOLNIR_LOG_INFO("axis   = ", axis);
         if(axis == "X" || axis == "+X")
         {
-            MJOLNIR_LOG_INFO("axis   = +X");
+            MJOLNIR_LOG_NOTICE("-- interaction shape is YZ-Plane (+).");
             using shape_t = AxisAlignedPlane<traitsT, PositiveXDirection>;
             return read_external_distance_interaction<traitsT, shape_t>(
                     external, shape_t(pos, margin));
         }
         else if(axis == "-X")
         {
-            MJOLNIR_LOG_INFO("axis   = -X");
+            MJOLNIR_LOG_NOTICE("-- interaction shape is YZ-Plane (-).");
             using shape_t = AxisAlignedPlane<traitsT, NegativeXDirection>;
             return read_external_distance_interaction<traitsT, shape_t>(
                     external, shape_t(pos, margin));
         }
         else if(axis == "Y" || axis == "+Y")
         {
-            MJOLNIR_LOG_INFO("axis   = +Y");
+            MJOLNIR_LOG_NOTICE("-- interaction shape is ZX-Plane (+).");
             using shape_t = AxisAlignedPlane<traitsT, PositiveYDirection>;
             return read_external_distance_interaction<traitsT, shape_t>(
                     external, shape_t(pos, margin));
         }
         else if(axis == "-Y")
         {
-            MJOLNIR_LOG_INFO("axis   = -Y");
+            MJOLNIR_LOG_NOTICE("-- interaction shape is ZX-Plane (-).");
             using shape_t = AxisAlignedPlane<traitsT, NegativeYDirection>;
             return read_external_distance_interaction<traitsT, shape_t>(
                     external, shape_t(pos, margin));
         }
         else if(axis == "Z" || axis == "+Z")
         {
-            MJOLNIR_LOG_INFO("axis   = +Z");
+            MJOLNIR_LOG_NOTICE("-- interaction shape is XY-Plane (+).");
             using shape_t = AxisAlignedPlane<traitsT, PositiveZDirection>;
             return read_external_distance_interaction<traitsT, shape_t>(
                     external, shape_t(pos, margin));
         }
         else if(axis == "-Z")
         {
-            MJOLNIR_LOG_INFO("axis   = -Z");
+            MJOLNIR_LOG_NOTICE("-- interaction shape is XY-Plane (-).");
             using shape_t = AxisAlignedPlane<traitsT, NegativeZDirection>;
             return read_external_distance_interaction<traitsT, shape_t>(
                     external, shape_t(pos, margin));
@@ -378,14 +378,17 @@ read_local_interaction(const toml::Table& local)
 
     if(interaction == "BondLength")
     {
+        MJOLNIR_LOG_NOTICE("Bond Length interaction found.");
         return read_bond_length_interaction<traitsT>(kind, local);
     }
     else if(interaction == "BondAngle")
     {
+        MJOLNIR_LOG_NOTICE("Bond Angle interaction found.");
         return read_bond_angle_interaction<traitsT>(kind, local);
     }
     else if(interaction == "DihedralAngle")
     {
+        MJOLNIR_LOG_NOTICE("Dihedral Angle interaction found.");
         return read_dihedral_angle_interaction<traitsT>(kind, local);
     }
     else
@@ -406,7 +409,7 @@ read_global_interaction(const toml::Table& global)
 
     if(interaction == "Pair")
     {
-        MJOLNIR_LOG_INFO("Pair interaction found");
+        MJOLNIR_LOG_NOTICE("Pair interaction found.");
         return read_global_pair_interaction<traitsT>(global);
     }
     else
@@ -427,7 +430,7 @@ read_external_interaction(const toml::Table& external)
 
     if(interaction == "Distance")
     {
-        MJOLNIR_LOG_INFO("Distance interaction found");
+        MJOLNIR_LOG_NOTICE("Distance interaction found.");
         return read_external_distance_interaction_shape<traitsT>(external);
     }
     else

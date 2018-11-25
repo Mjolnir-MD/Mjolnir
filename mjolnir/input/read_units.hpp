@@ -27,8 +27,8 @@ std::unique_ptr<SimulatorBase> read_units(const toml::Table& data)
     const auto& energy = get_toml_value<std::string>(units, "energy", "[units]");
     const auto& length = get_toml_value<std::string>(units, "length", "[units]");
 
-    MJOLNIR_LOG_INFO("unit of energy : [", energy, ']');
-    MJOLNIR_LOG_INFO("unit of length : [", length, ']');
+    MJOLNIR_LOG_NOTICE("energy unit is [", energy, ']');
+    MJOLNIR_LOG_NOTICE("length unit is [", length, ']');
 
     if(energy == "kcal/mol")
     {

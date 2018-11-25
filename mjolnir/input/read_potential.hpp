@@ -234,7 +234,7 @@ read_local_potential(const toml::Table& local)
 
     const auto& params = get_toml_value<toml::Array>(
             local, "parameters", "[[forcefield.local]]");
-    MJOLNIR_LOG_INFO(params.size(), " parameters are found");
+    MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
 
     std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
@@ -269,7 +269,7 @@ read_local_potentials(const toml::Table& local,
 
     const auto& params = get_toml_value<toml::Array>(
             local, "parameters", "[[forcefield.local]]");
-    MJOLNIR_LOG_INFO(params.size(), " parameters are found");
+    MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
 
     std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
