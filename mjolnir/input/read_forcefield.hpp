@@ -40,6 +40,8 @@ read_local_forcefield(std::vector<toml::Table> interactions,
                     file_name, ").");
             }
 
+            MJOLNIR_LOG_NOTICE("local forcefield is defined in `",
+                               input_path, file_name, "`.");
             const auto forcefield_file = toml::parse(input_path + file_name);
             if(forcefield_file.count("forcefields") == 1)
             {
@@ -110,6 +112,8 @@ read_global_forcefield(std::vector<toml::Table> interactions,
                     file_name, ").");
             }
 
+            MJOLNIR_LOG_NOTICE("global forcefield is defined in `",
+                               input_path, file_name, "`.");
             const auto forcefield_file = toml::parse(input_path + file_name);
             if(forcefield_file.count("forcefields") == 1)
             {
@@ -180,6 +184,8 @@ read_external_forcefield(std::vector<toml::Table> interactions,
                     file_name, ").");
             }
 
+            MJOLNIR_LOG_NOTICE("external forcefield is defined in `",
+                               input_path, file_name, "`.");
             const auto forcefield_file = toml::parse(input_path + file_name);
             if(forcefield_file.count("forcefields") == 1)
             {
@@ -268,6 +274,7 @@ read_forcefield(const toml::Table& data, std::size_t N)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_forcefield(), 0);
+    MJOLNIR_LOG_NOTICE("reading ", N, "-th [[forcefield]].");
 
     const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
     std::string input_path_("./");
@@ -303,6 +310,7 @@ read_forcefield(const toml::Table& data, std::size_t N)
                              " file (", file_name, ").");
         }
 
+        MJOLNIR_LOG_NOTICE("forcefield is defined in `", input_path, file_name, "`.");
         const auto forcefield_file = toml::parse(input_path + file_name);
         if(forcefield_file.count("forcefields") == 1)
         {

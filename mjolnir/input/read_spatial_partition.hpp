@@ -56,7 +56,7 @@ read_spatial_partition(const toml::Table& global, potentialT&& pot)
 
     if(type == "CellList")
     {
-        MJOLNIR_SCOPE(type == "CellList", 1);
+        MJOLNIR_LOG_NOTICE("-- Spatial Partition is CellList.");
         using boundary_type = typename traitsT::boundary_type;
         using dispatcher    = celllist_dispatcher<boundary_type, traitsT, parameter_type>;
         using celllist_type = typename dispatcher::type;
@@ -72,7 +72,7 @@ read_spatial_partition(const toml::Table& global, potentialT&& pot)
     }
     else if(type == "VerletList")
     {
-        MJOLNIR_SCOPE(type == "VerletList", 1);
+        MJOLNIR_LOG_NOTICE("-- Spatial Partition is VerletList without any spatial structure.");
 
         const auto margin = get_toml_value<real_type>(
                     sp, "margin", "[forcefield.global]");
@@ -85,7 +85,7 @@ read_spatial_partition(const toml::Table& global, potentialT&& pot)
     }
     else if(type == "Naive")
     {
-        MJOLNIR_SCOPE(type == "Naive", 1);
+        MJOLNIR_LOG_NOTICE("-- No Spatial Partition.");
         return make_unique<GlobalPairInteraction<
             traitsT, potentialT, NaivePairCalculation<traitsT, parameter_type>>
                 >(std::forward<potentialT>(pot),

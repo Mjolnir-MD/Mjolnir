@@ -75,7 +75,7 @@ System<traitsT> read_system_from_table(const toml::Table& system)
         get_toml_value<toml::Array>(system, "particles", "[system]");
 
     System<traitsT> sys(particles.size(), read_boundary<traitsT>(boundary));
-    MJOLNIR_LOG_INFO(particles.size(), " particles are provided");
+    MJOLNIR_LOG_NOTICE(particles.size(), " particles are found. reading...");
     for(std::size_t i=0; i<particles.size(); ++i)
     {
         using vec_type = std::array<real_type, 3>;
@@ -108,6 +108,7 @@ System<traitsT> read_system_from_table(const toml::Table& system)
                           ", name = ",     sys[i].name,
                           ", group = ",    sys[i].group);
     }
+    MJOLNIR_LOG_NOTICE("done.");
 
     const auto& attributes =
         get_toml_value<toml::Table>(system, "attributes", "[[systems]]");
@@ -131,6 +132,7 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_system(), 0);
+    MJOLNIR_LOG_NOTICE("reading ", N, "-th [[system]].");
 
     using real_type       = typename traitsT::real_type;
     using coordinate_type = typename traitsT::coordinate_type;
@@ -168,6 +170,7 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
                              " file (", file_name, ").");
         }
 
+        MJOLNIR_LOG_NOTICE("system is defined in ", input_path + file_name);
         const auto system_file = toml::parse(input_path + file_name);
         if(system_file.count("systems") == 1)
         {
