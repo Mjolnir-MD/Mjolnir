@@ -94,8 +94,8 @@ class System
 
     static_string_type const& name(std::size_t i) const noexcept {return names_[i];}
     static_string_type&       name(std::size_t i)       noexcept {return names_[i];}
-    static_string_type const& group(std::size_t i) const noexcept {return names_[i];}
-    static_string_type&       group(std::size_t i)       noexcept {return names_[i];}
+    static_string_type const& group(std::size_t i) const noexcept {return groups_[i];}
+    static_string_type&       group(std::size_t i)       noexcept {return groups_[i];}
 
     boundary_type&       boundary()       noexcept {return boundary_;}
     boundary_type const& boundary() const noexcept {return boundary_;}
