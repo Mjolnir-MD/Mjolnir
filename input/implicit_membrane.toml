@@ -1,6 +1,6 @@
-[files]
-output_prefix = "implicit_mem"   # output file prefix
-output_path   = "./"             # output path
+[files.output]
+prefix = "implicit_mem"   # output file prefix
+path   = "./"             # output path
 
 [units]
 length = "angstrom" # "angstorm" or "Å" or "nm"
