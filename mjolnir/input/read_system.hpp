@@ -6,6 +6,7 @@
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <mjolnir/input/read_files_table.hpp>
 
 namespace mjolnir
 {
@@ -145,12 +146,7 @@ System<traitsT> read_system(const toml::Table& data, std::size_t N)
     }
 
     const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
-    std::string input_path_("./");
-    if(files.count("input_path") == 1)
-    {
-        input_path_ = get_toml_value<std::string>(files, "input_path", "[files]");
-    }
-    const auto input_path(input_path_); // add constness
+    const auto input_path = read_input_path(data);
 
     MJOLNIR_LOG_INFO(system_params.size(), " systems are provided");
     MJOLNIR_LOG_INFO("using ", N, "-th system");
