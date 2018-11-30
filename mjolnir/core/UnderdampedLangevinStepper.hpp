@@ -35,14 +35,13 @@ class UnderdampedLangevinStepper
   public:
 
     UnderdampedLangevinStepper(const real_type dt,
-            std::vector<real_type>&& gamma, rng_type&& rng)
+            std::vector<real_type> gamma, rng_type&& rng)
         : dt_(dt), halfdt_(dt / 2), halfdt2_(dt * dt / 2),
-          rng_(std::move(rng)), parameters_(gamma.size())
+          rng_(std::move(rng)),
+          sqrt_gamma_over_mass_(gamma.size()),
+          acceleration_(gamma.size())
     {
-        for(std::size_t i=0; i<gamma.size(); ++i)
-        {
-            parameters_[i].gamma = gamma[i];
-        }
+        gammas_ = std::move(gamma);
     }
     ~UnderdampedLangevinStepper() = default;
 
@@ -86,30 +85,33 @@ class UnderdampedLangevinStepper
     real_type noise_coef_;
     rng_type  rng_;
 
-    std::vector<parameter_set> parameters_;
+    std::vector<real_type>       gammas_;
+    std::vector<real_type>       sqrt_gamma_over_mass_;
+    std::vector<coordinate_type> acceleration_;
 };
 
 template<typename traitsT>
 void UnderdampedLangevinStepper<traitsT>::initialize(
         system_type& system, forcefield_type& ff)
 {
+    // initialize temperature and noise intensity
     this->update(system);
 
     for(std::size_t i=0; i<system.size(); ++i)
     {
-        system[i].force = coordinate_type(real_type(0.0), real_type(0.0), real_type(0.0));
+        system.force(i) = coordinate_type(0, 0, 0);
     }
     system.largest_displacement() = real_type(0.0);
     ff.calc_force(system);
 
     for(std::size_t i=0; i<system.size(); ++i)
     {
-        auto pv = system[i];
+        const auto  rmass = system.rmass(i);
+        const auto& force = system.force(i);
 
-        auto& p = parameters_[i];
-        p.sqrt_gamma_over_mass = std::sqrt(p.gamma * pv.rmass);
-        p.accel = pv.force * pv.rmass + this->gen_gaussian_vec(
-                  this->noise_coef_ * p.sqrt_gamma_over_mass);
+        sqrt_gamma_over_mass_[i] = std::sqrt(gammas_[i] * rmass);
+        acceleration_[i] = force * rmass +
+            this->gen_gaussian_vec(this->noise_coef_ * sqrt_gamma_over_mass_[i]);
     }
     return;
 }
@@ -122,27 +124,29 @@ UnderdampedLangevinStepper<traitsT>::step(
     real_type largest_disp2 = real_type(0.0);
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        auto pv = sys[i]; // particle_view that points i-th particle.
-        const auto& param = this->parameters_[i];
+        auto&       p = sys.position(i); // position of i-th particle
+        auto&       v = sys.velocity(i); // ditto
+        auto&       f = sys.force(i);    // ditto
+        const auto& a = this->acceleration_[i];
+        auto    gamma = this->gammas_[i];
 
-        const real_type gamma_dt_over_2           = param.gamma * halfdt_;
-        const real_type one_minus_gamma_dt_over_2 = real_type(1.0) - gamma_dt_over_2;
+        const real_type gamma_dt_over_2           = gamma * halfdt_;
+        const real_type one_minus_gamma_dt_over_2 = 1 - gamma_dt_over_2;
 
-        const auto disp = (dt_ * one_minus_gamma_dt_over_2) * (pv.velocity) +
-                halfdt2_ * param.accel;
+        const auto displacement =
+            (dt_ * one_minus_gamma_dt_over_2) * v + halfdt2_ * a;
 
-        pv.position = sys.adjust_position(pv.position + disp);
+        p = sys.adjust_position(p + displacement);
 
-        pv.velocity *= one_minus_gamma_dt_over_2 *
-            (one_minus_gamma_dt_over_2 * one_minus_gamma_dt_over_2 +
-             gamma_dt_over_2);
-        pv.velocity += (halfdt_ * one_minus_gamma_dt_over_2) * param.accel;
+        v *= one_minus_gamma_dt_over_2 * (one_minus_gamma_dt_over_2 *
+             one_minus_gamma_dt_over_2 + gamma_dt_over_2);
+        v += (halfdt_ * one_minus_gamma_dt_over_2) * a;
 
-        pv.force = coordinate_type(real_type(0.0), real_type(0.0), real_type(0.0));
+        f = coordinate_type(0, 0, 0);
 
-        largest_disp2 = std::max(largest_disp2, length_sq(disp));
+        largest_disp2 = std::max(largest_disp2, length_sq(displacement));
     }
-    sys.largest_displacement() = std::sqrt(largest_disp2);
+    sys.largest_displacement() = std::sqrt(largest_disp2); // use in neighbor list
 
     // calc f(t+dt)
     ff.calc_force(sys);
@@ -150,11 +154,14 @@ UnderdampedLangevinStepper<traitsT>::step(
     // calc a(t+dt) and v(t+dt), generate noise
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        auto pv = sys[i]; // particle_view that points i-th particle.
-        auto& param = this->parameters_[i];
-        param.accel = pv.force * pv.rmass + this->gen_gaussian_vec(
-                      this->noise_coef_ * param.sqrt_gamma_over_mass);
-        pv.velocity += halfdt_ * (real_type(1.0) - param.gamma * halfdt_) * param.accel;
+        const auto  rm = sys.rmass(i);
+        const auto& p  = sys.position(i);
+        auto&       v  = sys.velocity(i);
+        const auto& f  = sys.force(i);
+        auto&       a  = this->acceleration_[i];
+
+        a  = f * rm + gen_gaussian_vec(noise_coef_ * sqrt_gamma_over_mass_[i]);
+        v += halfdt_ * (1 - gammas_[i] * halfdt_) * a;
     }
 
     return time + dt_;
