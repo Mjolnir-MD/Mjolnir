@@ -14,9 +14,12 @@ inline toml::Table make_empty_input()
 {
     using namespace mjolnir::literals::string_literals;
 
+    toml::Table output;
+    output["prefix"] = "nothing"_s;
+    output["path"]   = "./"_s;
+
     toml::Table files;
-    files["output_prefix"] = "nothing"_s;
-    files["output_path"]   = "./"_s;
+    files["output"]  = std::move(output);
 
     toml::Table units;
     units["length"] = "angstrom"_s;

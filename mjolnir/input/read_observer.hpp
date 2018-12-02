@@ -17,23 +17,26 @@ read_observer(const toml::Table& data)
 
     const auto& files =
         get_toml_value<toml::Table>(data, "files", "<root>");
+    const auto& output =
+        get_toml_value<toml::Table>(files, "output", "[files]");
 
-    std::string path_ =
-        get_toml_value<std::string>(files, "output_path", "[files]");
-    if(path_.back() != '/') {path_ += '/';} //XXX assuming posix
-    const auto path(path_);
+    std::string output_path("./");
+    if(output.count("path") == 1)
+    {
+        output_path = get_toml_value<std::string>(output, "path", "[files.output]");
+    }
+    if(output_path.back() != '/') {output_path += '/';}
 
-    const std::string prefix = get_toml_value<std::string>(
-            files, "output_prefix", "[files]");
-    MJOLNIR_LOG_INFO("path   = ", path);
-    MJOLNIR_LOG_INFO("prefix = ", prefix);
+    const auto output_prefix = get_toml_value<std::string>(
+            output, "prefix", "[files.output]");
 
-    MJOLNIR_LOG_NOTICE("output files are `", path, prefix, ".*`");
+    MJOLNIR_LOG_INFO("path   = ", output_path);
+    MJOLNIR_LOG_INFO("prefix = ", output_prefix);
 
-    return Observer<traitsT>(path + prefix);
+    MJOLNIR_LOG_NOTICE("output files are `", output_path, output_prefix, ".*`");
+
+    return Observer<traitsT>(output_path + output_prefix);
 }
 
-
-
-}
+} // mjolnir
 #endif// MJOLNIR_READ_OBSERVER

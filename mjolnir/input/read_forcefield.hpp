@@ -5,6 +5,7 @@
 #include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_interaction.hpp>
+#include <mjolnir/input/read_files_table.hpp>
 
 namespace mjolnir
 {
@@ -276,13 +277,7 @@ read_forcefield(const toml::Table& data, std::size_t N)
     MJOLNIR_SCOPE(read_forcefield(), 0);
     MJOLNIR_LOG_NOTICE("reading ", N, "-th [[forcefield]].");
 
-    const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
-    std::string input_path_("./");
-    if(files.count("input_path") == 1)
-    {
-        input_path_ = get_toml_value<std::string>(files, "input_path", "[files]");
-    }
-    const auto input_path(input_path_); // add constness
+    const auto input_path = read_input_path(data);
     MJOLNIR_LOG_INFO("input path is -> ", input_path);
 
     const auto& ffs = get_toml_value<toml::Array>(data, "forcefields", "<root>");

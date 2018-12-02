@@ -12,6 +12,7 @@
 #include <mjolnir/input/read_forcefield.hpp>
 #include <mjolnir/input/read_integrator.hpp>
 #include <mjolnir/input/read_observer.hpp>
+#include <mjolnir/input/read_files_table.hpp>
 
 namespace mjolnir
 {
@@ -209,12 +210,7 @@ read_simulator(const toml::Table& data)
         get_toml_value<toml::Table>(data, "simulator", "<root>");
 
     const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
-    std::string input_path_("./");
-    if(files.count("input_path") == 1)
-    {
-        input_path_ = get_toml_value<std::string>(files, "input_path", "[files]");
-    }
-    const auto input_path(input_path_); // add constness
+    const auto input_path = read_input_path(data);
 
     if(simulator.count("file_name") == 1)
     {

@@ -1,7 +1,7 @@
 # vim:set foldmethod=marker
-[files]
-output_prefix = "sh3_periodic" # output file prefix
-output_path   = "./"           # output path
+[files.output]
+prefix = "sh3_periodic" # output file prefix
+path   = "./"           # output path
 
 [units]
 length = "angstrom" # "angstorm" or "Å" or "nm"
