@@ -155,7 +155,6 @@ UnderdampedLangevinStepper<traitsT>::step(
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         const auto  rm = sys.rmass(i);
-        const auto& p  = sys.position(i);
         auto&       v  = sys.velocity(i);
         const auto& f  = sys.force(i);
         auto&       a  = this->acceleration_[i];
