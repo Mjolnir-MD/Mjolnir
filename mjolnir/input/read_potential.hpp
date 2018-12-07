@@ -104,12 +104,12 @@ read_flexible_local_angle_potential(const toml::Table& param)
     const auto location =
         "element of [[parameters]] in FlexibleLocal potential";
 
-    const auto k     = get_toml_value<real_type>(param, "k",     location);
-    const auto term1 = get_toml_value<term_type>(param, "term1", location);
-    const auto term2 = get_toml_value<term_type>(param, "term2", location);
+    const auto k     = get_toml_value<real_type>(param, "k",   location);
+    const auto term1 = get_toml_value<term_type>(param, "y",   location);
+    const auto term2 = get_toml_value<term_type>(param, "d2y", location);
 
     MJOLNIR_LOG_INFO("FlexibleLocalAngle = {k = ", k,
-                     ", term1 = ", term1, ", term2 = ", term2, '}');
+                     ", y = ", term1, ", d2y = ", term2, '}');
     return FlexibleLocalAnglePotential<realT>(k, term1, term2);
 }
 
@@ -142,9 +142,9 @@ read_flexible_local_dihedral_potential(const toml::Table& param)
         "element of [[parameters]] in FlexibleLocalDihedral potential";
 
     auto k    = get_toml_value<real_type>(param, "k",    location);
-    auto term = get_toml_value<term_type>(param, "term", location);
+    auto term = get_toml_value<term_type>(param, "coef", location);
 
-    MJOLNIR_LOG_INFO("FlexibleLocalDihedral = {k = ", k, ", term = ", term, '}');
+    MJOLNIR_LOG_INFO("FlexibleLocalDihedral = {k = ", k, ", coef = ", term, '}');
     return FlexibleLocalDihedralPotential<realT>(k, term);
 }
 
