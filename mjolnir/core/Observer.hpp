@@ -55,11 +55,11 @@ class Observer
     void initialize(const system_type& sys, const forcefield_type& ff) const
     {
         std::ofstream ofs(this->ene_name_, std::ios::app);
-        ofs << "# time " << ff.list_energy_name() << "kinetic_energy\n";
+        ofs << "# timestep " << ff.list_energy_name() << "kinetic_energy\n";
         return;
     }
 
-    void output(const real_type time, const system_type& sys,
+    void output(const std::size_t step, const system_type& sys,
                 const forcefield_type& ff) const;
 
   private:
@@ -83,10 +83,10 @@ class Observer
 
 template<typename traitsT>
 inline void Observer<traitsT>::output(
-    const real_type time, const system_type& sys, const forcefield_type& ff) const
+    const std::size_t step, const system_type& sys, const forcefield_type& ff) const
 {
     std::ofstream ofs(xyz_name_, std::ios::app);
-    ofs << sys.size() << '\n' << time << '\n';
+    ofs << sys.size() << "\nstep = " << step << '\n';
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         const auto& p = sys.position(i);
@@ -96,7 +96,7 @@ inline void Observer<traitsT>::output(
     ofs.close();
 
     ofs.open(vel_name_, std::ios::app);
-    ofs << sys.size() << '\n' << time << '\n';
+    ofs << sys.size() << "\nstep = " << step << '\n';
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         const auto& v = sys.velocity(i);
@@ -106,7 +106,7 @@ inline void Observer<traitsT>::output(
     ofs.close();
 
     ofs.open(ene_name_, std::ios::app);
-    ofs << time << ' ' << ff.dump_energy(sys) << ' '
+    ofs << step << ' ' << ff.dump_energy(sys) << ' '
         << this->calc_kinetic_energy(sys) << '\n';
     ofs.close();
     return ;
