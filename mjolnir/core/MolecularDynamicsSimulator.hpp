@@ -66,7 +66,7 @@ inline void MolecularDynamicsSimulator<traitsT, integratorT>::initialize()
     this->integrator_.initialize(this->system_, this->ff_);
 
     observer_.initialize(this->system_, this->ff_);
-    observer_.output(0., this->system_, this->ff_);
+    observer_.output(0, this->system_, this->ff_);
     return;
 }
 
@@ -79,7 +79,7 @@ inline bool MolecularDynamicsSimulator<traitsT, integratorT>::step()
 
     if(step_count_ % save_step_ == 0)
     {
-        observer_.output(this->time_, this->system_, this->ff_);
+        observer_.output(this->step_count_, this->system_, this->ff_);
         std::cerr << progress_bar_.format(this->step_count_);
     }
     return step_count_ < total_step_;
@@ -91,7 +91,7 @@ inline void MolecularDynamicsSimulator<traitsT, integratorT>::finalize()
     std::cerr << progress_bar_.format(this->total_step_) << std::endl;
     if(this->step_count_ % save_step_ != 0)
     {
-        observer_.output(this->time_, this->system_, this->ff_);
+        observer_.output(this->step_count_, this->system_, this->ff_);
     }
     return;
 }

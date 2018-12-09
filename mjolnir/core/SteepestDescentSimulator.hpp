@@ -85,16 +85,14 @@ inline bool SteepestDescentSimulator<traitsT>::step()
 
     if(max_diff < this->threshold_)
     {
-        this->observer_.output(static_cast<real_type>(this->step_count_),
-                               this->system_, this->ff_);
+        this->observer_.output(this->step_count_, this->system_, this->ff_);
         return false; // converged. stop the simulation!
     }
     this->system_.largest_displacement() = std::sqrt(max_disp2);
 
     if(step_count_ % save_step_ == 0)
     {
-        this->observer_.output(static_cast<real_type>(this->step_count_),
-                               this->system_, this->ff_);
+        this->observer_.output(this->step_count_, this->system_, this->ff_);
     }
     ++step_count_;
     return this->step_count_ < this->step_limit_;
@@ -103,8 +101,7 @@ inline bool SteepestDescentSimulator<traitsT>::step()
 template<typename traitsT>
 inline void SteepestDescentSimulator<traitsT>::finalize()
 {
-    this->observer_.output(static_cast<real_type>(this->step_count_),
-                           this->system_, this->ff_);
+    this->observer_.output(this->step_count_, this->system_, this->ff_);
     return;
 }
 
