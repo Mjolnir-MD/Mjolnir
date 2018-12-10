@@ -71,21 +71,21 @@ class GlobalForceField
         std::string retval;
         for(const auto& i : interactions_)
         {
-            retval += i->name();
             retval += ' ';
+            retval += i->name();
         }
         return retval;
     }
 
     std::string dump_energy(const system_type& sys) const
     {
-        std::string retval;
+        std::ostringstream oss;
         for(const auto& i : interactions_)
         {
-            retval += std::to_string(i->calc_energy(sys));
-            retval += ' ';
+            oss << ' ' << std::setw(i->name().size()) << std::fixed
+                << std::right << i->calc_energy(sys);
         }
-        return retval;
+        return oss.str();
     }
 
   private:
