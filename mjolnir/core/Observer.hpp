@@ -55,7 +55,7 @@ class Observer
     void initialize(const system_type& sys, const forcefield_type& ff) const
     {
         std::ofstream ofs(this->ene_name_, std::ios::app);
-        ofs << "# timestep " << ff.list_energy_name() << "kinetic_energy\n";
+        ofs << "# timestep  " << ff.list_energy_name() << " kinetic_energy\n";
         return;
     }
 
@@ -106,8 +106,11 @@ inline void Observer<traitsT>::output(
     ofs.close();
 
     ofs.open(ene_name_, std::ios::app);
-    ofs << step << ' ' << ff.dump_energy(sys) << ' '
-        << this->calc_kinetic_energy(sys) << '\n';
+    // if the width exceeds, operator<<(std::ostream, std::string) ignores
+    // ostream::width and outputs whole string.
+    ofs << std::setw(11) << std::left << std::to_string(step) << ' ';
+    ofs << ff.dump_energy(sys) << ' ';
+    ofs << std::setw(14) << std::right << this->calc_kinetic_energy(sys) << '\n';
     ofs.close();
     return ;
 }
