@@ -1,20 +1,18 @@
-[general]
-precision     = "double"         # one of {"float", "double"}.
-boundary      = "PeriodicCuboid" # one of {"PeriodicCuboid", "Unlimited"}
-thread        = false            # enable threading parallelization
-GPU           = false            # enable GPU parallelization
-output_prefix = "excluded-volume"  # file prefix.
-output_path   = "./"             # output path
+[files.output]
+prefix = "excluded-volume"  # file prefix.
+path   = "./"             # output path
+[files.input]
+path   = "./input/excluded-volume/" # input path
 
 [units]
 length = "angstrom" # "angstorm" or "Å" or "nm"
 energy = "kcal/mol" # "kcal/mol" or "kJ/mol"
 
 [simulator]
-file_name = "input/excluded-volume/excluded-volume-langevin.toml"
+file_name = "excluded-volume-langevin.toml"
 
 [[systems]]
-file_name = "input/excluded-volume/excluded-volume-system.toml"
+file_name = "excluded-volume-system.toml"
 
 [[forcefields]]
-file_name = "input/excluded-volume/excluded-volume-forcefields.toml"
+file_name = "excluded-volume-forcefields.toml"
