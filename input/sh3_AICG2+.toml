@@ -9,7 +9,7 @@ energy = "kcal/mol" # "kcal/mol" or "kJ/mol"
 
 [simulator]
 type          = "Molecular Dynamics"
-scheme        = "Underdamped Langevin"
+integrator    = "Underdamped Langevin"
 boundary_type = "Unlimited"
 precision     = "double"
 seed          = 2374

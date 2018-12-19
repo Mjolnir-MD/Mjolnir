@@ -30,7 +30,7 @@ inline toml::Table make_empty_input()
     // Newtonian dynamics.
     toml::Table simulator;
     simulator["type"]          = "Molecular Dynamics"_s;
-    simulator["scheme"]        = "Newtonian"_s;
+    simulator["integrator"]    = "Newtonian"_s;
     simulator["precision"]     = "double"_s;
     simulator["boundary_type"] = "Unlimited"_s;
     simulator["total_step"]    = 1;

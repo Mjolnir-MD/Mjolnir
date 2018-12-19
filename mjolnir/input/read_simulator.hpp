@@ -26,8 +26,8 @@ read_molecular_dynamics_simulator(
     MJOLNIR_SCOPE(read_molecular_dynamics_simulator(), 0);
     using real_type = typename traitsT::real_type;
 
-    const std::string integration = get_toml_value<std::string>(
-            simulator, "scheme", "[simulator]");
+    const std::string integrator = get_toml_value<std::string>(
+            simulator, "integrator", "[simulator]");
     const std::size_t tstep = get_toml_value<std::size_t>(
             simulator, "total_step", "[simulator]");
     const std::size_t sstep = get_toml_value<std::size_t>(
@@ -35,7 +35,7 @@ read_molecular_dynamics_simulator(
     MJOLNIR_LOG_NOTICE("total step is ", tstep);
     MJOLNIR_LOG_NOTICE("save  step is ", sstep);
 
-    if(integration == "Newtonian")
+    if(integrator == "Newtonian")
     {
         MJOLNIR_LOG_NOTICE("Integrator is Newtonian.");
         using integrator_t = VelocityVerletStepper<traitsT>;
@@ -47,7 +47,7 @@ read_molecular_dynamics_simulator(
                 read_velocity_verlet_stepper<traitsT>(simulator),
                 read_observer<traitsT>(data));
     }
-    else if(integration == "Underdamped Langevin")
+    else if(integrator == "Underdamped Langevin")
     {
         MJOLNIR_LOG_NOTICE("Integrator is Underdamped Langevin.");
         using integrator_t = UnderdampedLangevinStepper<traitsT>;
@@ -61,8 +61,8 @@ read_molecular_dynamics_simulator(
     }
     else
     {
-        throw_exception<std::runtime_error>("invalid integration scheme: ",
-                integration, " for MolecularDynamicsSimulator");
+        throw_exception<std::runtime_error>("invalid integrator: ",
+                integrator, " for MolecularDynamicsSimulator");
     }
 }
 
@@ -106,8 +106,8 @@ read_simulated_annealing_simulator(
     MJOLNIR_SCOPE(read_simulated_annealing_simulator(), 0);
     using real_type   = typename traitsT::real_type;
 
-    const std::string integration = get_toml_value<std::string>(
-            simulator, "scheme", "[simulator]");
+    const std::string integrator = get_toml_value<std::string>(
+            simulator, "integrator", "[simulator]");
     const std::size_t tstep = get_toml_value<std::size_t>(
             simulator, "total_step", "[simulator]");
     const std::size_t sstep = get_toml_value<std::size_t>(
@@ -133,14 +133,14 @@ read_simulated_annealing_simulator(
     {
         MJOLNIR_LOG_NOTICE("temparing schedule is linear.");
 
-        if(integration == "Newtonian")
+        if(integrator == "Newtonian")
         {
             MJOLNIR_LOG_ERROR("Simulated Annealing + NVE Newtonian");
             MJOLNIR_LOG_ERROR("NVE Newtonian doesn't have temperature control.");
             throw_exception<std::runtime_error>("Simulated Annealing has ",
                     "no effect for Newtonian Integrator");
         }
-        else if(integration == "Underdamped Langevin")
+        else if(integrator == "Underdamped Langevin")
         {
             using integrator_t = UnderdampedLangevinStepper<traitsT>;
             using simulator_t  = SimulatedAnnealingSimulator<
@@ -156,8 +156,8 @@ read_simulated_annealing_simulator(
         }
         else
         {
-            throw_exception<std::runtime_error>("invalid integration scheme: ",
-                    integration, " for Simulated Annealing");
+            throw_exception<std::runtime_error>("invalid integration: ",
+                    integrator, " for Simulated Annealing");
         }
     }
     else
