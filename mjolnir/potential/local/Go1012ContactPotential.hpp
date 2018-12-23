@@ -58,7 +58,7 @@ class Go1012ContactPotential
 
     static const char* name() noexcept {return "Go1012Contact";}
 
-    real_type k()  const noexcept {return k_;}
+    real_type k()  const noexcept {return epsilon_;}
     real_type v0() const noexcept {return v0_;}
 
   private:

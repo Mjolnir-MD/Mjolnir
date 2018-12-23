@@ -79,7 +79,7 @@ class FlexibleLocalDihedralPotential
     static const char* name() noexcept {return "FlexibleLocalDihedral";}
 
     real_type                       k()    const noexcept {return k_;}
-    std::array<real_type, 7> const& term() const noexcept {return term_;}
+    std::array<real_type, 7> const& coef() const noexcept {return term_;}
 
   private:
     real_type min_energy;
