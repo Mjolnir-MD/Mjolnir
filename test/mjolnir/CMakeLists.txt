@@ -7,6 +7,7 @@ set(TEST_NAMES
     test_throw_exception
     test_static_string
     test_topology
+
     test_harmonic_potential
     test_gaussian_potential
     test_angular_gaussian_potential
@@ -23,6 +24,8 @@ set(TEST_NAMES
     test_dihedral_angle_interaction
     test_implicit_membrane_potential
     test_axis_aligned_plane_shape
+
+    test_read_gaussian_potential
     )
 
 add_definitions("-O2 -march=native -mtune=native -std=c++11")

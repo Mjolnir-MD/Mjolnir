@@ -39,6 +39,10 @@ class GaussianPotential
 
     static const char* name() noexcept {return "Gaussian";}
 
+    real_type k()     const noexcept {return k_;}
+    real_type sigma() const noexcept {return sigma_;}
+    real_type v0()    const noexcept {return v0_;}
+
   private:
 
     real_type k_, sigma_;
