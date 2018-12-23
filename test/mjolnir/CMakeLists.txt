@@ -25,7 +25,13 @@ set(TEST_NAMES
     test_implicit_membrane_potential
     test_axis_aligned_plane_shape
 
+    test_read_harmonic_potential
+    test_read_go1012_contact_potential
+    test_read_clementi_dihedral_potential
     test_read_gaussian_potential
+    test_read_angular_gaussian_potential
+    test_read_flexible_local_angle_potential
+    test_read_flexible_local_dihedral_potential
     )
 
 add_definitions("-O2 -march=native -mtune=native -std=c++11")
