@@ -45,6 +45,10 @@ class ClementiDihedralPotential
 
     static const char* name() {return "ClementiDihedral";}
 
+    real_type k1() const noexcept {return k1_;}
+    real_type k3() const noexcept {return k3_;}
+    real_type v0() const noexcept {return v0_;}
+
   private:
 
     real_type k1_;
