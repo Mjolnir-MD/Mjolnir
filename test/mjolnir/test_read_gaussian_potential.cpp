@@ -1,7 +1,7 @@
 #define BOOST_TEST_MODULE "test_read_gaussian_potential"
 
 #include <boost/test/included/unit_test.hpp>
-#include <mjolnir/input/read_potential.hpp>
+#include <mjolnir/input/read_local_potential.hpp>
 
 BOOST_AUTO_TEST_CASE(read_gaussian_double)
 {
