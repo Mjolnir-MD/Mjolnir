@@ -33,6 +33,9 @@ set(TEST_NAMES
     test_read_flexible_local_angle_potential
     test_read_flexible_local_dihedral_potential
     test_read_excluded_volume_potential
+    test_read_debye_huckel_potential
+    test_read_lennard_jones_potential
+    test_read_uniform_lennard_jones_potential
     )
 
 add_definitions("-O2 -march=native -mtune=native -std=c++11")
