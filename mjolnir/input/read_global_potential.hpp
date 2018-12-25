@@ -93,7 +93,7 @@ read_excluded_volume_potential(const toml::value& global)
 
 template<typename realT>
 LennardJonesPotential<realT>
-read_lennard_jones_potential(const toml::Table& global)
+read_lennard_jones_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_lennard_jones_potential(), 0);
@@ -138,7 +138,7 @@ read_lennard_jones_potential(const toml::Table& global)
 
 template<typename realT>
 UniformLennardJonesPotential<realT>
-read_uniform_lennard_jones_potential(const toml::Table& global)
+read_uniform_lennard_jones_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_uniform_lennard_jones_potential(), 0);
@@ -169,7 +169,7 @@ read_uniform_lennard_jones_potential(const toml::Table& global)
 
 template<typename realT>
 DebyeHuckelPotential<realT>
-read_debye_huckel_potential(const toml::Table& global)
+read_debye_huckel_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_debye_huckel_potential(), 0);
