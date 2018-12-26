@@ -39,8 +39,8 @@ read_implicit_membrane_potential(const toml::value& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx = toml::find<std::size_t>(ps, "index");
-        const auto h   = toml::find<real_type  >(ps, "hydrophobicity");
+        const auto idx = toml::find<std::size_t>(param, "index");
+        const auto h   = toml::find<real_type  >(param, "hydrophobicity");
         if(params.size() <= idx) {params.resize(idx+1, real_type(0.0));}
         params.at(idx) = h;
 
@@ -65,11 +65,11 @@ read_lennard_jones_wall_potential(const toml::value& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx = toml::find<std::size_t>(ps, "index");
-        const auto s   = toml::expect<real_type>(ps, u8"σ").or_other(
-                         toml::expect<real_type>(ps, "sigma")).unwrap();
-        const auto e   = toml::expect<real_type>(ps, u8"ε").or_other(
-                         toml::expect<real_type>(ps, "epsilon")).unwrap();
+        const auto idx = toml::find<std::size_t>(param, "index");
+        const auto s   = toml::expect<real_type>(param, u8"σ").or_other(
+                         toml::expect<real_type>(param, "sigma")).unwrap();
+        const auto e   = toml::expect<real_type>(param, u8"ε").or_other(
+                         toml::expect<real_type>(param, "epsilon")).unwrap();
         if(params.size() <= idx)
         {
             params.resize(idx+1, std::make_pair(real_type(0), real_type(0)));
@@ -100,9 +100,9 @@ read_excluded_volume_wall_potential(const toml::value& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx = toml::find<std::size_t>(ps, "index");
-        const auto s   = toml::expect<real_type>(ps, u8"σ").or_other(
-                         toml::expect<real_type>(ps, "sigma")).unwrap();
+        const auto idx = toml::find<std::size_t>(param, "index");
+        const auto s   = toml::expect<real_type>(param, u8"σ").or_other(
+                         toml::expect<real_type>(param, "sigma")).unwrap();
         if(params.size() <= idx) {params.resize(idx+1, real_type(0));}
         params.at(idx) = s;
 
