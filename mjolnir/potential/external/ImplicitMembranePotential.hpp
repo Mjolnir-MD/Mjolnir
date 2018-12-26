@@ -82,7 +82,7 @@ class ImplicitMembranePotential
 
     real_type half_thick_;            // half of thickness of the membrane.
     real_type interaction_magnitude_; // overall scaling parameter.
-    real_type bend_;                  // the slope of tanh carve.
+    real_type bend_;                  // the slope of tanh curve.
     std::vector<real_type> hydrophobicities_;
 };
 
