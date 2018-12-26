@@ -6,7 +6,6 @@
 #include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/core/Topology.hpp>
-#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/logger.hpp>
