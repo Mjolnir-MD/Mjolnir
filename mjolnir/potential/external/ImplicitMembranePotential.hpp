@@ -78,6 +78,9 @@ class ImplicitMembranePotential
     real_type& interaction_magnitude()       noexcept
     {return interaction_magnitude_;}
 
+    std::vector<real_type> const&
+    hydrophobicities() const noexcept {return hydrophobicities_;}
+
   private:
 
     real_type half_thick_;            // half of thickness of the membrane.
