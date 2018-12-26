@@ -4,7 +4,9 @@
 #include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
-#include <mjolnir/input/read_interaction.hpp>
+#include <mjolnir/input/read_local_interaction.hpp>
+#include <mjolnir/input/read_global_interaction.hpp>
+#include <mjolnir/input/read_external_interaction.hpp>
 #include <mjolnir/input/read_files_table.hpp>
 
 namespace mjolnir
