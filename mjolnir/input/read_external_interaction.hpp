@@ -5,7 +5,6 @@
 #include <mjolnir/core/AxisAlignedPlane.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
-#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_external_potential.hpp>
 #include <memory>
@@ -19,15 +18,13 @@ namespace mjolnir
 
 template<typename traitsT, typename shapeT>
 std::unique_ptr<ExternalForceInteractionBase<traitsT>>
-read_external_distance_interaction(const toml::Table& external, shapeT&& shape)
+read_external_distance_interaction(const toml::value& external, shapeT&& shape)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_global_distance_interaction(), 0);
     using real_type = typename traitsT::real_type;
 
-    const auto potential = get_toml_value<std::string>(
-            external, "potential", "[forcefield.external]");
-
+    const auto potential = toml::find<std::string>(external, "potential");
     if(potential == "ImplicitMembrane")
     {
         MJOLNIR_LOG_NOTICE("-- potential functions is Implicit Membrane.");
@@ -58,36 +55,38 @@ read_external_distance_interaction(const toml::Table& external, shapeT&& shape)
     }
     else
     {
-        throw_exception<std::runtime_error>(
-            "invalid potential as ExternalDistanceInteraction: ", potential);
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_external_distance_interaction: invalid potential",
+            toml::find<toml::value>(external, "potential"), "here", {
+            "expected value is one of the following.",
+            "- \"ExcludedVolumeWall\": repulsive r^12 potential",
+            "- \"LennardJonesWall\"  : famous r^12 - r^6 potential",
+            "- \"ImplicitMembrane\"  : single-well interaction that models a membrane"
+            }));
     }
 }
 
 template<typename traitsT>
 std::unique_ptr<ExternalForceInteractionBase<traitsT>>
-read_external_distance_interaction_shape(const toml::Table& external)
+read_external_distance_interaction_shape(const toml::value& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_global_distance_interaction(), 0);
     using real_type = typename traitsT::real_type;
 
-    const auto shape = get_toml_value<toml::Table>(external, "shape",
-            "[forcefield.external] for ExternalDistance");
-    const auto name  = get_toml_value<std::string>(shape, "name",
-            "[forcefield.external.shape] for ExternalDistance");
+    const auto shape = toml::find<toml::value>(external, "shape");
+    const auto name  = toml::find<std::string>(shape, "name");
 
     if(name == "AxisAlignedPlane")
     {
-        const auto pos = get_toml_value<real_type>(shape, "position",
-            "[forcefield.external.shape] for ExternalDistance");
-        const auto margin = get_toml_value<real_type>(shape, "margin",
-            "[forcefield.external.shape] for ExternalDistance");
+        const auto pos    = toml::find<real_type>(shape, "position");
+        const auto margin = toml::find<real_type>(shape, "margin");
         MJOLNIR_LOG_INFO("pos    = ", pos);
         MJOLNIR_LOG_INFO("margin = ", margin);
 
-        const auto axis = get_toml_value<std::string>(shape, "axis",
-            "[forcefield.external.shape] for ExternalDistance");
+        const auto axis = toml::find<std::string>(shape, "axis");
         MJOLNIR_LOG_INFO("axis   = ", axis);
+
         if(axis == "X" || axis == "+X")
         {
             MJOLNIR_LOG_NOTICE("-- interaction shape is YZ-Plane (+).");
@@ -132,7 +131,9 @@ read_external_distance_interaction_shape(const toml::Table& external)
         }
         else
         {
-            throw std::runtime_error("invalid axis name: " + axis);
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "mjolnir::read_external_distance_interaction_shape: invalid shape",
+                toml::find<toml::value>(external, "shape"), "expected [+-]?[XYZ]"));
         }
     }
     else
@@ -147,12 +148,11 @@ read_external_distance_interaction_shape(const toml::Table& external)
 
 template<typename traitsT>
 std::unique_ptr<ExternalForceInteractionBase<traitsT>>
-read_external_interaction(const toml::Table& external)
+read_external_interaction(const toml::value& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_external_interaction(), 0);
-    const auto interaction = get_toml_value<std::string>(
-            external, "interaction", "[forcefields.external]");
+    const auto interaction = toml::find<std::string>(external, "interaction");
 
     if(interaction == "Distance")
     {
@@ -161,8 +161,12 @@ read_external_interaction(const toml::Table& external)
     }
     else
     {
-        throw std::runtime_error(
-                "invalid external interaction type: " + interaction);
+        throw std::runtime_error(toml::format_error("[error] "
+            "mjolnir::read_external_interaction: invalid interaction",
+            toml::find<toml::value>(external, "interaction"), "here", {
+            "expected value is one of the following.",
+            "- \"Distance\": interaction depending on the distance between particle and spatial structure"
+            }));
     }
 }
 
