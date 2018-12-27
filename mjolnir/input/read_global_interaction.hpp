@@ -5,7 +5,6 @@
 #include <mjolnir/interaction/specialization/GlobalPairLennardJonesInteraction.hpp>
 #include <mjolnir/interaction/specialization/GlobalPairUniformLennardJonesInteraction.hpp>
 #include <mjolnir/interaction/specialization/GlobalPairExcludedVolumeInteraction.hpp>
-#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -22,14 +21,13 @@ namespace mjolnir
 
 template<typename traitsT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_global_pair_interaction(const toml::Table& global)
+read_global_pair_interaction(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_global_pair_interaction(), 0);
     using real_type = typename traitsT::real_type;
 
-    const auto potential = get_toml_value<std::string>(
-            global, "potential", "[[forcefield.global]]");
+    const auto potential = toml::find<std::string>(global, "potential");
 
     if(potential == "ExcludedVolume")
     {
@@ -65,8 +63,15 @@ read_global_pair_interaction(const toml::Table& global)
     }
     else
     {
-        throw_exception<std::runtime_error>(
-                "invalid potential as GlobalPairInteraction: ", potential);
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_global_pair_interaction: invalid potential",
+            toml::find<toml::value>(global, "potential"), "here", {
+            "expected value is one of the following.",
+            "- \"ExcludedVolume\"       : repulsive r^12 potential",
+            "- \"DebyeHuckel\"          : Debye-Huckel type electrostatic potential",
+            "- \"LennardJones\"         : famous r^12 - r^6 potential",
+            "- \"UniformLennardJones\"  : famous r^12 - r^6 potential with uniform parameters"
+            }));
     }
 }
 
@@ -76,12 +81,11 @@ read_global_pair_interaction(const toml::Table& global)
 
 template<typename traitsT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_global_interaction(const toml::Table& global)
+read_global_interaction(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_global_interaction(), 0);
-    const auto interaction = get_toml_value<std::string>(
-            global, "interaction", "[forcefields.global]");
+    const auto interaction = toml::find<std::string>(global, "interaction");
 
     if(interaction == "Pair")
     {
@@ -90,8 +94,12 @@ read_global_interaction(const toml::Table& global)
     }
     else
     {
-        throw std::runtime_error(
-                "invalid global interaction type: " + interaction);
+        throw std::runtime_error(toml::format_error("[error] "
+            "mjolnir::read_global_interaction: invalid interaction",
+            toml::find<toml::value>(global, "interaction"), "here", {
+            "expected value is one of the following.",
+            "- \"Pair\": well-known pair interaction depends only on the distance"
+            }));
     }
 }
 
