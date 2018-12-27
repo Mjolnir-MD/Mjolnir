@@ -46,6 +46,7 @@ set(TEST_NAMES
 
     test_read_unit
     test_read_integrator
+    test_read_input_path
     )
 
 add_definitions("-O2 -march=native -mtune=native -std=c++11")
