@@ -1,7 +1,6 @@
 #ifndef MJOLNIR_READ_FILES_TABLE_H
 #define MJOLNIR_READ_FILES_TABLE_H
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
 
 namespace mjolnir

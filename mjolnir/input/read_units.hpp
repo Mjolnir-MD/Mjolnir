@@ -4,7 +4,6 @@
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/core/constants.hpp>
 #include <mjolnir/core/Unit.hpp>
-#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_simulator.hpp>
 #include <cmath>
