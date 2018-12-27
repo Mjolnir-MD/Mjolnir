@@ -13,20 +13,18 @@ namespace mjolnir
 {
 
 template<typename traitsT>
-std::unique_ptr<SimulatorBase> read_units(const toml::Table& data)
+std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_units(const toml::Table& data), 0);
+    MJOLNIR_SCOPE(read_units(const toml::value& data), 0);
     using real_type = typename traitsT::real_type;
     using phys_type = physics::constants<real_type>;
     using math_type = math::constants<real_type>;
     using unit_type = unit::constants<real_type>;
 
-    const auto& units = get_toml_value<toml::Table>(data, "units", "<root>");
-
-    const auto& energy = get_toml_value<std::string>(units, "energy", "[units]");
-    const auto& length = get_toml_value<std::string>(units, "length", "[units]");
-
+    const auto& units  = toml::find<toml::value>(data,  "units");
+    const auto& energy = toml::find<std::string>(units, "energy");
+    const auto& length = toml::find<std::string>(units, "length");
     MJOLNIR_LOG_NOTICE("energy unit is [", energy, ']');
     MJOLNIR_LOG_NOTICE("length unit is [", length, ']');
 
@@ -50,8 +48,13 @@ std::unique_ptr<SimulatorBase> read_units(const toml::Table& data)
     }
     else
     {
-        throw_exception<std::runtime_error>("mjolnir::read_units: unknown unit "
-            "for energy: `", energy, "`. `kcal/mol`, `kJ/mol` are allowed");
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_units: unknown unit for energy: `",
+            toml::find(units, "energy"), "here", {
+            "expected value is one of the following.",
+            "- \"kcal/mol\"",
+            "- \"kJ/mol\""
+            }));
     }
 
     // until here, SI `m` are used as length unit.
@@ -98,8 +101,13 @@ std::unique_ptr<SimulatorBase> read_units(const toml::Table& data)
     }
     else
     {
-        throw_exception<std::runtime_error>("mjolnir::read_units: unknown unit "
-            "for length: `", length, "`. `angstrom`, `nm` are allowed");
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_units: unknown unit for length: `",
+            toml::find(units, "length"), "here", {
+            "expected value is one of the following.",
+            "- \"nm\"",
+            "- \"angstrom\""
+            }));
     }
 
     MJOLNIR_LOG_INFO(u8"phys::kB = ", phys_type::kB(), " [", energy, "]");
