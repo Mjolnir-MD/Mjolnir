@@ -1,6 +1,8 @@
 #ifndef MJOLNIR_GLOBAL_PAIR_INTEARACTION
 #define MJOLNIR_GLOBAL_PAIR_INTEARACTION
 #include <mjolnir/core/GlobalInteractionBase.hpp>
+#include <mjolnir/util/logger.hpp>
+#include <mjolnir/util/string.hpp>
 #include <memory>
 
 namespace mjolnir
