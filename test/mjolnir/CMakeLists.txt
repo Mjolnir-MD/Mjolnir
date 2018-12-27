@@ -45,6 +45,7 @@ set(TEST_NAMES
     test_read_global_pair_interaction
 
     test_read_unit
+    test_read_system
     test_read_integrator
     test_read_input_path
     )
