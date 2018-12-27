@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_CASE(read_uniform_lennard_jones_double)
     {
         const toml::value v = toml::table{
             {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("ExcludedVolume")},
+            {"potential",         toml::value("UniformLennardJones")},
             {"spatial_partition", toml::value(toml::table{
                         {"type", toml::value("Nothing")}
             })},
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(read_uniform_lennard_jones_double)
     {
         const toml::value v = toml::table{
             {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("ExcludedVolume")},
+            {"potential",         toml::value("UniformLennardJones")},
             {"spatial_partition", toml::value(toml::table{
                         {"type", toml::value("Nothing")}
             })},
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(read_uniform_lennard_jones_float)
     {
         const toml::value v = toml::table{
             {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("ExcludedVolume")},
+            {"potential",         toml::value("UniformLennardJones")},
             {"spatial_partition", toml::value(toml::table{
                         {"type", toml::value("Nothing")}
             })},
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(read_uniform_lennard_jones_float)
     {
         const toml::value v = toml::table{
             {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("ExcludedVolume")},
+            {"potential",         toml::value("UniformLennardJones")},
             {"spatial_partition", toml::value(toml::table{
                         {"type", toml::value("Nothing")}
             })},
