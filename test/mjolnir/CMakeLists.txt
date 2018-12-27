@@ -45,6 +45,7 @@ set(TEST_NAMES
     test_read_dihedral_angle_interaction
     test_read_global_pair_interaction
 
+    test_read_integrator
     )
 
 add_definitions("-O2 -march=native -mtune=native -std=c++11")
