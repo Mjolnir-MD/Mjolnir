@@ -2,7 +2,6 @@ set(TEST_NAMES
     test_matrix
     test_vector
     test_math
-    test_unit
     test_range
     test_throw_exception
     test_static_string
@@ -45,6 +44,7 @@ set(TEST_NAMES
     test_read_dihedral_angle_interaction
     test_read_global_pair_interaction
 
+    test_read_unit
     test_read_integrator
     )
 
