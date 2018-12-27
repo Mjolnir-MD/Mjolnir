@@ -142,64 +142,8 @@ read_external_distance_interaction_shape(const toml::Table& external)
 }
 
 // ----------------------------------------------------------------------------
-// general read_(local|global|external)_interaction function
+// general read_external_interaction function
 // ----------------------------------------------------------------------------
-
-template<typename traitsT>
-std::unique_ptr<LocalInteractionBase<traitsT>>
-read_local_interaction(const toml::Table& local)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_local_interaction(), 0);
-    const auto interaction = get_toml_value<std::string>(
-            local, "interaction", "[forcefields.local]");
-
-    const auto kind = get_toml_value<std::string>(
-            local, "topology", "[forcefield.local]");
-    MJOLNIR_LOG_INFO("connection kind = ", kind);
-
-    if(interaction == "BondLength")
-    {
-        MJOLNIR_LOG_NOTICE("Bond Length interaction found.");
-        return read_bond_length_interaction<traitsT>(kind, local);
-    }
-    else if(interaction == "BondAngle")
-    {
-        MJOLNIR_LOG_NOTICE("Bond Angle interaction found.");
-        return read_bond_angle_interaction<traitsT>(kind, local);
-    }
-    else if(interaction == "DihedralAngle")
-    {
-        MJOLNIR_LOG_NOTICE("Dihedral Angle interaction found.");
-        return read_dihedral_angle_interaction<traitsT>(kind, local);
-    }
-    else
-    {
-        throw std::runtime_error(
-                "invalid local interaction type: " + interaction);
-    }
-}
-
-template<typename traitsT>
-std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_global_interaction(const toml::Table& global)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_global_interaction(), 0);
-    const auto interaction = get_toml_value<std::string>(
-            global, "interaction", "[forcefields.global]");
-
-    if(interaction == "Pair")
-    {
-        MJOLNIR_LOG_NOTICE("Pair interaction found.");
-        return read_global_pair_interaction<traitsT>(global);
-    }
-    else
-    {
-        throw std::runtime_error(
-                "invalid global interaction type: " + interaction);
-    }
-}
 
 template<typename traitsT>
 std::unique_ptr<ExternalForceInteractionBase<traitsT>>

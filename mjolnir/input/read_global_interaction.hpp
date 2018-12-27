@@ -70,5 +70,30 @@ read_global_pair_interaction(const toml::Table& global)
     }
 }
 
+// ----------------------------------------------------------------------------
+// general read_global_interaction function
+// ----------------------------------------------------------------------------
+
+template<typename traitsT>
+std::unique_ptr<GlobalInteractionBase<traitsT>>
+read_global_interaction(const toml::Table& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_global_interaction(), 0);
+    const auto interaction = get_toml_value<std::string>(
+            global, "interaction", "[forcefields.global]");
+
+    if(interaction == "Pair")
+    {
+        MJOLNIR_LOG_NOTICE("Pair interaction found.");
+        return read_global_pair_interaction<traitsT>(global);
+    }
+    else
+    {
+        throw std::runtime_error(
+                "invalid global interaction type: " + interaction);
+    }
+}
+
 } // mjolnir
 #endif// MJOLNIR_READ_GLOBAL_INTERACTION_HPP

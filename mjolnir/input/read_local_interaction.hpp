@@ -15,7 +15,8 @@ namespace mjolnir
 {
 
 // ----------------------------------------------------------------------------
-// local interaction
+// individual local interaction. would be called from read_local_interaction
+// defined at the bottom of this file.
 // ----------------------------------------------------------------------------
 
 template<typename traitsT>
@@ -149,8 +150,8 @@ read_dihedral_angle_interaction(
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
             kind, read_local_potential<4, potentialT>(local));
     }
-    // XXX generalization of this feature is too difficult (technically, it's
-    // not so difficult, but practically, it makes the code messy...).
+    // XXX generalization of this feature is too difficult (technically it's
+    //     not so difficult, but practically, it makes the code messy...).
     else if(potential == "Gaussian+FlexibleLocalDihedral")
     {
         MJOLNIR_LOG_NOTICE("-- potential functions is Gaussian + FlexibleLocalDihedral.");
@@ -167,6 +168,45 @@ read_dihedral_angle_interaction(
     {
         throw_exception<std::runtime_error>(
                 "invalid potential as DihedralAngleInteraction: " + potential);
+    }
+}
+
+// ----------------------------------------------------------------------------
+// general read_local_interaction function
+// ----------------------------------------------------------------------------
+
+template<typename traitsT>
+std::unique_ptr<LocalInteractionBase<traitsT>>
+read_local_interaction(const toml::Table& local)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_SCOPE(read_local_interaction(), 0);
+    const auto interaction = get_toml_value<std::string>(
+            local, "interaction", "[forcefields.local]");
+
+    const auto kind = get_toml_value<std::string>(
+            local, "topology", "[forcefield.local]");
+    MJOLNIR_LOG_INFO("connection kind = ", kind);
+
+    if(interaction == "BondLength")
+    {
+        MJOLNIR_LOG_NOTICE("Bond Length interaction found.");
+        return read_bond_length_interaction<traitsT>(kind, local);
+    }
+    else if(interaction == "BondAngle")
+    {
+        MJOLNIR_LOG_NOTICE("Bond Angle interaction found.");
+        return read_bond_angle_interaction<traitsT>(kind, local);
+    }
+    else if(interaction == "DihedralAngle")
+    {
+        MJOLNIR_LOG_NOTICE("Dihedral Angle interaction found.");
+        return read_dihedral_angle_interaction<traitsT>(kind, local);
+    }
+    else
+    {
+        throw std::runtime_error(
+                "invalid local interaction type: " + interaction);
     }
 }
 
