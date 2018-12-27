@@ -1,4 +1,4 @@
-# [[systems]]
+[system]
 attributes = {temperature = 300.0}
 boundary_shape = {lower = [0.0, 0.0, 0.0], upper = [32.0, 32.0, 32.0]}
 particles = [ # {{{
