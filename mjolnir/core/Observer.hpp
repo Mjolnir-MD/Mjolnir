@@ -19,7 +19,7 @@ class Observer
     typedef typename traits_type::coordinate_type coordinate_type;
 
   public:
-    Observer(const std::string& filename_prefix) :
+    Observer(const std::string& filename_prefix) : prefix_(filename_prefix),
         xyz_name_(filename_prefix + std::string(".xyz")),
         vel_name_(filename_prefix + std::string(".vel")),
         ene_name_(filename_prefix + std::string(".ene"))
@@ -62,6 +62,8 @@ class Observer
     void output(const std::size_t step, const system_type& sys,
                 const forcefield_type& ff) const;
 
+    std::string const& prefix() const noexcept {return prefix_;}
+
   private:
 
     real_type calc_kinetic_energy(const system_type& sys) const
@@ -76,6 +78,7 @@ class Observer
 
   private:
 
+    std::string prefix_;
     std::string xyz_name_;
     std::string vel_name_;
     std::string ene_name_;
