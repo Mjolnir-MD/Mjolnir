@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_NVE_NEWTONIAN_INTEGRATOR
 #define MJOLNIR_NVE_NEWTONIAN_INTEGRATOR
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/core/SystemMotionRemover.hpp>
+#include <mjolnir/core/ForceField.hpp>
 
 namespace mjolnir
 {
