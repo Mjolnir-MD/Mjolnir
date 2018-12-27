@@ -6,7 +6,6 @@
 #include <mjolnir/interaction/DihedralAngleInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
-#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_local_potential.hpp>
 #include <memory>
@@ -21,15 +20,13 @@ namespace mjolnir
 
 template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
-read_bond_length_interaction(const std::string& kind, const toml::Table& local)
+read_bond_length_interaction(const std::string& kind, const toml::value& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_bond_length_interaction(), 0);
     using real_type = typename traitsT::real_type;
 
-    const auto potential = get_toml_value<std::string>(
-            local, "potential", "[forcefield.local]");
-
+    const auto potential = toml::find<std::string>(local, "potential");
     if(potential == "Harmonic")
     {
         MJOLNIR_LOG_NOTICE("-- potential functions is Harmonic.");
@@ -56,8 +53,14 @@ read_bond_length_interaction(const std::string& kind, const toml::Table& local)
     }
     else
     {
-        throw_exception<std::runtime_error>(
-                "invalid potential as BondLengthInteraction: ", potential);
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_bond_length_interaction: invalid potential",
+            toml::find<toml::value>(local, "potential"), "here", {
+            "expected value is one of the following.",
+            "- \"Harmonic\"     : well-known harmonic potential",
+            "- \"Go1012Contact\": r^12 - r^10 type native contact potential",
+            "- \"Gaussian\"     : well-known gaussian potential"
+            }));
     }
 }
 
@@ -65,14 +68,13 @@ template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
 read_bond_angle_interaction(
     const typename LocalInteractionBase<traitsT>::connection_kind_type kind,
-    const toml::Table& local)
+    const toml::value& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_bond_angle_interaction(), 0);
     using real_type = typename traitsT::real_type;
 
-    const auto potential = get_toml_value<std::string>(
-            local, "potential", "[[forcefields.local]]");
+    const auto potential = toml::find<std::string>(local, "potential");
 
     if(potential == "Harmonic")
     {
@@ -100,8 +102,14 @@ read_bond_angle_interaction(
     }
     else
     {
-        throw_exception<std::runtime_error>(
-                "invalid potential as BondAngleInteraction: " + potential);
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_bond_angle_interaction: invalid potential",
+            toml::find<toml::value>(local, "potential"), "here", {
+            "expected value is one of the following.",
+            "- \"Harmonic\"          : well-known harmonic potential",
+            "- \"Gaussian\"          : well-known gaussian potential"
+            "- \"FlexibleLocalAngle\": table-based potential for C-alpha protein model",
+            }));
     }
 }
 
@@ -109,14 +117,13 @@ template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
 read_dihedral_angle_interaction(
     const typename LocalInteractionBase<traitsT>::connection_kind_type kind,
-    const toml::Table& local)
+    const toml::value& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_dihedral_angle_interaction(), 0);
     using real_type = typename traitsT::real_type;
 
-    const auto potential = get_toml_value<std::string>(
-            local, "potential", "[[forcefields.local]]");
+    const auto potential = toml::find<std::string>(local, "potential");
 
     if(potential == "Harmonic")
     {
@@ -166,8 +173,15 @@ read_dihedral_angle_interaction(
     }
     else
     {
-        throw_exception<std::runtime_error>(
-                "invalid potential as DihedralAngleInteraction: " + potential);
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_dihedral_angle_interaction: invalid potential",
+            toml::find<toml::value>(local, "potential"), "here", {
+            "expected value is one of the following.",
+            "- \"Harmonic\"             : well-known harmonic potential",
+            "- \"Gaussian\"             : well-known gaussian potential"
+            "- \"ClementiDihedral\"     : potential used in the off-lattice Go protein model"
+            "- \"FlexibleLocalDihedral\": table-based potential for C-alpha protein model",
+            }));
     }
 }
 
@@ -177,15 +191,13 @@ read_dihedral_angle_interaction(
 
 template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
-read_local_interaction(const toml::Table& local)
+read_local_interaction(const toml::value& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_local_interaction(), 0);
-    const auto interaction = get_toml_value<std::string>(
-            local, "interaction", "[forcefields.local]");
 
-    const auto kind = get_toml_value<std::string>(
-            local, "topology", "[forcefield.local]");
+    const auto interaction = toml::find<std::string>(local, "interaction");
+    const auto kind        = toml::find<std::string>(local, "topology");
     MJOLNIR_LOG_INFO("connection kind = ", kind);
 
     if(interaction == "BondLength")
@@ -205,8 +217,14 @@ read_local_interaction(const toml::Table& local)
     }
     else
     {
-        throw std::runtime_error(
-                "invalid local interaction type: " + interaction);
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_local_interaction: invalid interaction",
+            toml::find<toml::value>(local, "interaction"), "here", {
+            "expected value is one of the following.",
+            "- \"BondLength\"    : 2-body well-known chemical bond interaction",
+            "- \"BondAngle\"     : 3-body well-known bond angle interaction",
+            "- \"DihedralAngle\" : 4-body well-known dihedral angle interaction",
+            }));
     }
 }
 
