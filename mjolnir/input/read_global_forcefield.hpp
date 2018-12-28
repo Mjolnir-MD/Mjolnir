@@ -12,7 +12,7 @@ namespace mjolnir
 
 template<typename traitsT>
 GlobalForceField<traitsT>
-read_global_forcefield(std::vector<toml::Table> interactions,
+read_global_forcefield(toml::array interactions,
                        const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -21,7 +21,7 @@ read_global_forcefield(std::vector<toml::Table> interactions,
                      " kinds of local interactions are found.");
 
     GlobalForceField<traitsT> gff;
-    for(const auto& interaction : interactions)
+    for(const auto& interaction : toml::get<std::vector<toml::table>>(interactions))
     {
         if(interaction.count("file_name") == 1)
         {

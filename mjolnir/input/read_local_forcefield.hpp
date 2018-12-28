@@ -12,8 +12,8 @@ namespace mjolnir
 
 template<typename traitsT>
 LocalForceField<traitsT>
-read_local_forcefield(std::vector<toml::Table> interactions,
-                      const std::string& input_path)
+read_local_forcefield(
+        const toml::array& interactions, const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_local_forcefield(), 0);
@@ -21,7 +21,7 @@ read_local_forcefield(std::vector<toml::Table> interactions,
                      " kinds of local interactions are found.");
 
     LocalForceField<traitsT> lff;
-    for(const auto& interaction : interactions)
+    for(const auto& interaction : toml::get<std::vector<toml::table>(interactions))
     {
         if(interaction.count("file_name") == 1)
         {

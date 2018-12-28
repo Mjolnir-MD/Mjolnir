@@ -19,24 +19,21 @@ read_forcefield_from_table(const toml::Table& ff, const std::string& input_path)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_forcefield_from_table(), 0);
 
-    std::vector<toml::Table> fflocal, ffglobal, ffexternal;
+    toml::array fflocal, ffglobal, ffexternal;
     if(ff.count("local") == 1)
     {
         MJOLNIR_LOG_INFO("LocalForceField found");
-        fflocal = get_toml_value<std::vector<toml::Table>>(
-                ff, "local", "[[forcefields]]");
+        fflocal = toml::find<toml::array>(ff, "local");
     }
     if(ff.count("global") == 1)
     {
         MJOLNIR_LOG_INFO("GlobalForceField found");
-        ffglobal = get_toml_value<std::vector<toml::Table>>(
-                ff, "global", "[[forcefields]]");
+        ffglobal = toml::find<toml::array>(ff, "global");
     }
     if(ff.count("external") == 1)
     {
         MJOLNIR_LOG_INFO("ExternalForceField found");
-        ffexternal = get_toml_value<std::vector<toml::Table>>(
-                ff, "external", "[[forcefields]]");
+        ffexternal = toml::find<toml::array>(ff, "external");
     }
 
     for(const auto kv: ff)

@@ -12,7 +12,7 @@ namespace mjolnir
 
 template<typename traitsT>
 ExternalForceField<traitsT>
-read_external_forcefield(std::vector<toml::Table> interactions,
+read_external_forcefield(toml::array interactions,
                          const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -21,7 +21,7 @@ read_external_forcefield(std::vector<toml::Table> interactions,
                      " kinds of external interactions are found.");
 
     ExternalForceField<traitsT> eff;
-    for(const auto& interaction : interactions)
+    for(const auto& interaction : toml::get<std::vector<toml::table>>(interactions))
     {
         if(interaction.count("file_name") == 1)
         {
