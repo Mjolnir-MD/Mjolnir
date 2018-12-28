@@ -14,20 +14,20 @@ class HarmonicPotential
     using real_type = realT;
 
   public:
-    HarmonicPotential(const real_type k, const real_type r0)
-        : k_(k), r0_(r0)
+    HarmonicPotential(const real_type k, const real_type v0)
+        : k_(k), v0_(v0)
     {}
     ~HarmonicPotential() = default;
 
-    real_type potential(const real_type r) const noexcept
+    real_type potential(const real_type v) const noexcept
     {
-        const real_type dr = r - r0_;
-        return this->k_ * dr * dr;
+        const real_type dv = v - v0_;
+        return this->k_ * dv * dv;
     }
 
-    real_type derivative(const real_type r) const noexcept
+    real_type derivative(const real_type v) const noexcept
     {
-        return  2 * this->k_ * (r - r0_);
+        return  2 * this->k_ * (v - v0_);
     }
 
     template<typename T>
@@ -35,10 +35,13 @@ class HarmonicPotential
 
     static const char* name() noexcept {return "Harmonic";}
 
+    real_type k()  const noexcept {return k_;}
+    real_type v0() const noexcept {return v0_;}
+
   private:
 
     real_type k_;
-    real_type r0_;
+    real_type v0_;
 };
 
 }

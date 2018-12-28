@@ -82,9 +82,11 @@ class ExcludedVolumeWallPotential
 
     const char* name() const noexcept {return "ExcludedVolumeWall";}
 
+    real_type epsilon() const noexcept {return epsilon_;}
+
     // access to the parameters...
-    std::vector<real_type>&       params()       noexcept {return radii_;}
-    std::vector<real_type> const& params() const noexcept {return radii_;}
+    std::vector<real_type>&       parameters()       noexcept {return radii_;}
+    std::vector<real_type> const& parameters() const noexcept {return radii_;}
 
   private:
 

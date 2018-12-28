@@ -95,6 +95,10 @@ class FlexibleLocalAnglePotential
 
     static const char* name() noexcept {return "FlexibleLocalAngle";}
 
+    real_type                        k()   const noexcept {return k_;}
+    std::array<real_type, 10> const& y()   const noexcept {return term1_;}
+    std::array<real_type, 10> const& d2y() const noexcept {return term2_;}
+
   private:
 
     real_type spline_interpolate(const real_type th) const noexcept

@@ -6,7 +6,6 @@
 #include <mjolnir/core/SimulatedAnnealingSimulator.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
-#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_system.hpp>
 #include <mjolnir/input/read_forcefield.hpp>
@@ -20,18 +19,15 @@ namespace mjolnir
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_molecular_dynamics_simulator(
-        const toml::Table& data, const toml::Table& simulator)
+        const toml::table& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_molecular_dynamics_simulator(), 0);
     using real_type = typename traitsT::real_type;
 
-    const std::string integrator = get_toml_value<std::string>(
-            simulator, "integrator", "[simulator]");
-    const std::size_t tstep = get_toml_value<std::size_t>(
-            simulator, "total_step", "[simulator]");
-    const std::size_t sstep = get_toml_value<std::size_t>(
-            simulator, "save_step",  "[simulator]");
+    const auto integrator = toml::find<std::string>(simulator, "integrator");
+    const auto tstep      = toml::find<std::size_t>(simulator, "total_step");
+    const auto sstep      = toml::find<std::size_t>(simulator, "save_step");
     MJOLNIR_LOG_NOTICE("total step is ", tstep);
     MJOLNIR_LOG_NOTICE("save  step is ", sstep);
 
@@ -40,50 +36,54 @@ read_molecular_dynamics_simulator(
         MJOLNIR_LOG_NOTICE("Integrator is Newtonian.");
         using integrator_t = VelocityVerletStepper<traitsT>;
         using simulator_t  = MolecularDynamicsSimulator<traitsT, integrator_t>;
+
         return make_unique<simulator_t>(
                 tstep, sstep,
-                read_system<traitsT>(data, 0),
-                read_forcefield<traitsT>(data, 0),
+                read_system<traitsT>(root, 0),
+                read_forcefield<traitsT>(root, 0),
                 read_velocity_verlet_stepper<traitsT>(simulator),
-                read_observer<traitsT>(data));
+                read_observer<traitsT>(root));
     }
     else if(integrator == "Underdamped Langevin")
     {
         MJOLNIR_LOG_NOTICE("Integrator is Underdamped Langevin.");
         using integrator_t = UnderdampedLangevinStepper<traitsT>;
         using simulator_t  = MolecularDynamicsSimulator<traitsT, integrator_t>;
+
         return make_unique<simulator_t>(
                 tstep, sstep,
-                read_system<traitsT>(data, 0),
-                read_forcefield<traitsT>(data, 0),
+                read_system<traitsT>(root, 0),
+                read_forcefield<traitsT>(root, 0),
                 read_underdamped_langevin_stepper<traitsT>(simulator),
-                read_observer<traitsT>(data));
+                read_observer<traitsT>(root));
     }
     else
     {
-        throw_exception<std::runtime_error>("invalid integrator: ",
-                integrator, " for MolecularDynamicsSimulator");
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_molecular_dynamics_simulator: invalid integrator: ",
+            toml::find(simulator, "integrator"), "here", {
+            "expected value is one of the following.",
+            "- \"Newtonian\"           : simple and standard Velocity Verlet integrator.",
+            "- \"Underdamped Langevin\": simple Underdamped Langevin Integrator"
+                                       " based on the Velocity Verlet"
+            }));
     }
 }
 
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_steepest_descent_simulator(
-        const toml::Table& data, const toml::Table& simulator)
+        const toml::table& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_steepest_descent_simulator(), 0);
-    using real_type = typename traitsT::real_type;
+    using real_type      = typename traitsT::real_type;
     using simulator_type = SteepestDescentSimulator<traitsT>;
 
-    const std::size_t step_lim  = get_toml_value<std::size_t>(
-            simulator, "step_limit", "[simulator]");
-    const std::size_t save_step = get_toml_value<std::size_t>(
-            simulator, "save_step", "[simulator]");
-    const real_type   delta     = get_toml_value<real_type>(
-            simulator, "delta", "[simulator]");
-    const real_type   threshold = get_toml_value<real_type>(
-            simulator, "threshold", "[simulator]");
+    const auto step_lim  = toml::find<std::size_t>(simulator, "step_limit");
+    const auto save_step = toml::find<std::size_t>(simulator, "save_step");
+    const auto delta     = toml::find<real_type  >(simulator, "delta");
+    const auto threshold = toml::find<real_type  >(simulator, "threshold");
 
     MJOLNIR_LOG_NOTICE("step_limit is ", step_lim);
     MJOLNIR_LOG_NOTICE("save_step  is ", save_step);
@@ -92,53 +92,51 @@ read_steepest_descent_simulator(
 
     return make_unique<simulator_type>(
             delta, threshold, step_lim, save_step,
-            read_system<traitsT>(data, 0),
-            read_forcefield<traitsT>(data, 0),
-            read_observer<traitsT>(data));
+            read_system<traitsT>(root, 0),
+            read_forcefield<traitsT>(root, 0),
+            read_observer<traitsT>(root));
 }
 
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_simulated_annealing_simulator(
-        const toml::Table& data, const toml::Table& simulator)
+        const toml::table& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_simulated_annealing_simulator(), 0);
     using real_type   = typename traitsT::real_type;
 
-    const std::string integrator = get_toml_value<std::string>(
-            simulator, "integrator", "[simulator]");
-    const std::size_t tstep = get_toml_value<std::size_t>(
-            simulator, "total_step", "[simulator]");
-    const std::size_t sstep = get_toml_value<std::size_t>(
-            simulator, "save_step", "[simulator]");
+    const auto integrator = toml::find<std::string>(simulator, "integrator");
+    const auto tstep      = toml::find<std::size_t>(simulator, "total_step");
+    const auto sstep      = toml::find<std::size_t>(simulator, "save_step");
 
     MJOLNIR_LOG_NOTICE("total step is ", tstep);
     MJOLNIR_LOG_NOTICE("save  step is ", sstep);
 
-    const std::string schedule = get_toml_value<std::string>(
-            simulator, "schedule", "[simulator]");
-    const real_type   T_from = get_toml_value<real_type>(
-            simulator, "T_begin", "[simulator]");
-    const real_type   T_to   = get_toml_value<real_type>(
-            simulator, "T_end",  "[simulator]");
-    const std::size_t each_step = get_toml_value<std::size_t>(
-            simulator, "each_step",  "[simulator]");
+    const auto schedule  = toml::find<std::string>(simulator, "schedule");
+    const auto T_begin   = toml::find<real_type>  (simulator, "T_begin");
+    const auto T_end     = toml::find<real_type>  (simulator, "T_end");
+    const auto each_step = toml::find<std::size_t>(simulator, "each_step");
 
-    MJOLNIR_LOG_NOTICE("temperature from ", T_from);
-    MJOLNIR_LOG_NOTICE("temperature to   ", T_to);
+    MJOLNIR_LOG_NOTICE("temperature from ", T_begin);
+    MJOLNIR_LOG_NOTICE("temperature to   ", T_end);
     MJOLNIR_LOG_INFO("update temperature for each ", each_step, " steps");
 
     if(schedule == "linear")
     {
         MJOLNIR_LOG_NOTICE("temparing schedule is linear.");
-
         if(integrator == "Newtonian")
         {
             MJOLNIR_LOG_ERROR("Simulated Annealing + NVE Newtonian");
             MJOLNIR_LOG_ERROR("NVE Newtonian doesn't have temperature control.");
-            throw_exception<std::runtime_error>("Simulated Annealing has ",
-                    "no effect for Newtonian Integrator");
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "mjolnir::read_simulated_annealing_simulator: invalid integrator: ",
+                toml::find(simulator, "integrator"), "here", {
+                "Newtonian Integrator does not controls temperature."
+                "expected value is one of the following.",
+                "- \"Underdamped Langevin\": simple Underdamped Langevin Integrator"
+                                           " based on the Velocity Verlet"
+                }));
         }
         else if(integrator == "Underdamped Langevin")
         {
@@ -148,116 +146,112 @@ read_simulated_annealing_simulator(
 
             MJOLNIR_LOG_NOTICE("Integrator is Underdamped Langevin.");
             return make_unique<simulator_t>(tstep, sstep, each_step,
-                    linear_schedule<real_type>(T_from, T_to),
-                    read_system<traitsT>(data, 0),
-                    read_forcefield<traitsT>(data, 0),
+                    linear_schedule<real_type>(T_begin, T_end),
+                    read_system<traitsT>(root, 0),
+                    read_forcefield<traitsT>(root, 0),
                     read_underdamped_langevin_stepper<traitsT>(simulator),
-                    read_observer<traitsT>(data));
+                    read_observer<traitsT>(root));
         }
         else
         {
-            throw_exception<std::runtime_error>("invalid integration: ",
-                    integrator, " for Simulated Annealing");
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "mjolnir::read_simulated_annealing_simulator: invalid integrator: ",
+                toml::find(simulator, "integrator"), "here", {
+                "expected value is one of the following.",
+                "- \"Underdamped Langevin\": simple Underdamped Langevin Integrator"
+                                           " based on the Velocity Verlet"
+                }));
         }
     }
     else
     {
-        throw_exception<std::runtime_error>("invalid temperature schedule: ",
-                schedule, " for Simulated Annealing");
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_simulated_annealing_simulator: invalid schedule",
+            toml::find<toml::value>(simulator, "schedule"), "here", {
+            "expected value is one of the following.",
+            "- \"linear\"     : simple linear temperature scheduling",
+            }));
     }
 }
 
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
-read_simulator_from_table(const toml::Table& data, const toml::Table& simulator)
+read_simulator_from_table(const toml::table& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_simulator_from_table(), 0);
 
-    const std::string type =
-        get_toml_value<std::string>(simulator, "type", "[simulator]");
-
+    const auto type = toml::find<std::string>(simulator, "type");
     if(type == "Molecular Dynamics")
     {
         MJOLNIR_LOG_NOTICE("Simulator type is Molecular Dynamics.");
-        return read_molecular_dynamics_simulator<traitsT>(data, simulator);
+        return read_molecular_dynamics_simulator<traitsT>(root, simulator);
     }
     else if(type == "Steepest Descent")
     {
         MJOLNIR_LOG_NOTICE("Simulator type is Steepest Descent.");
-        return read_steepest_descent_simulator<traitsT>(data, simulator);
+        return read_steepest_descent_simulator<traitsT>(root, simulator);
     }
     else if(type == "Simulated Annealing")
     {
         MJOLNIR_LOG_NOTICE("Simulator type is Simulated Annealing.");
-        return read_simulated_annealing_simulator<traitsT>(data, simulator);
+        return read_simulated_annealing_simulator<traitsT>(root, simulator);
     }
     else
     {
-        throw_exception<std::runtime_error>("invalid simulator type: ", type);
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_simulator: invalid type",
+            toml::find<toml::value>(simulator, "type"), "here", {
+            "expected value is one of the following.",
+            "- \"Molecular Dynamcis\" : standard MD simulation",
+            "- \"Steepest Descent\"   : energy minimization by gradient method",
+            "- \"Simulated Annealing\": energy minimization by Annealing",
+            }));
     }
 }
 
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
-read_simulator(const toml::Table& data)
+read_simulator(const toml::table& root)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_simulator(), 0);
+    using real_type = typename traitsT::real_type;
 
-    using real_type   = typename traitsT::real_type;
-    const auto& simulator =
-        get_toml_value<toml::Table>(data, "simulator", "<root>");
-
-    const auto& files = get_toml_value<toml::Table>(data, "files", "<root>");
-    const auto input_path = read_input_path(data);
-
-    if(simulator.count("file_name") == 1)
+    const auto& simulator  = toml::find(root, "simulator");
+    if(toml::get<toml::table>(simulator).count("file_name") == 1)
     {
         MJOLNIR_SCOPE(simulator.count("file_name") == 1, 1);
 
-        const std::string file_name =
-            get_toml_value<std::string>(simulator, "file_name", "[simulator]");
+        const auto input_path = read_input_path(root);
+        const auto file_name  = toml::find<std::string>(simulator, "file_name");
         MJOLNIR_LOG_INFO("file_name = ", file_name);
 
-        if(simulator.size() != 1)
+        if(toml::get<toml::table>(simulator).size() != 1)
         {
             MJOLNIR_LOG_WARN("[simulator] has `file_name` key and other keys.");
             MJOLNIR_LOG_WARN("When `file_name` is provided, other values are "
                              "ignored because those are read from the specified"
-                             " file (", file_name, ").");
+                             " file (", input_path, file_name, ").");
         }
 
         MJOLNIR_LOG_NOTICE("simulator is defined in ", input_path, file_name);
-        const auto simulator_file = toml::parse(input_path + file_name);
+        const auto simfile = toml::parse(input_path + file_name);
 
-        if(simulator_file.count("simulator") == 1)
+        if(simfile.count("simulator") != 1)
         {
-            MJOLNIR_LOG_WARN("in `simulator` file, root object is treated as "
-                             "a [simulator] table.");
-            MJOLNIR_LOG_WARN("but in ", file_name, ", `simulator` key found. "
-                             "trying to read it as a simulator setup.");
-
-            if(simulator_file.at("simulator").type() != toml::value_t::Table)
-            {
-                MJOLNIR_LOG_ERROR("type of `simulator` is different from "
-                                  "toml::Table in file (", file_name, ").");
-                MJOLNIR_LOG_ERROR("note: [[...]] means Array-of-Tables. "
-                                  "please take care.");
-                std::exit(1);
-            }
-
-            MJOLNIR_LOG_INFO("reading `[simulator]` table");
-            return read_simulator_from_table<traitsT>(data, simulator_file.at(
-                    "simulator").template cast<toml::value_t::Table>());
+            throw_exception<std::out_of_range>("[error] mjolnir::read_simulator: "
+                "table [simulator] not found in the toml file\n --> ",
+                input_path, file_name, "\n | the file should define [simulator] "
+                "table and define values in it.");
         }
-        return read_simulator_from_table<traitsT>(data, simulator_file);
+        return read_simulator_from_table<traitsT>(root, simfile.at("simulator"));
     }
     else
     {
-        return read_simulator_from_table<traitsT>(data, simulator);
+        return read_simulator_from_table<traitsT>(root, simulator);
     }
 }
 
-}
+} // mjolnir
 #endif// MJOLNIR_READ_SIMULATOR

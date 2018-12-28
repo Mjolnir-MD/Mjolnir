@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_input_angstrom_kcalmol, Real, test_targets)
     using unit = mjolnir::unit::constants<Real>;
 
     auto input = mjolnir::test::make_empty_input();
-    auto& units = input["units"].cast<toml::value_t::Table>();
+    auto& units = toml::get<toml::table>(input["units"]);
 
     units["length"] = "angstrom"_s;
     units["energy"] = "kcal/mol"_s;
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_input_angstrom_kJmol, Real, test_targets)
 
 
     auto input  = mjolnir::test::make_empty_input();
-    auto& units = input["units"].cast<toml::value_t::Table>();
+    auto& units = toml::get<toml::table>(input["units"]);
 
     units["length"] = "angstrom"_s;
     units["energy"] = "kJ/mol"_s;
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_input_nm_kcalmol, Real, test_targets)
     using unit = mjolnir::unit::constants<Real>;
 
     auto input = mjolnir::test::make_empty_input();
-    auto& units = input["units"].cast<toml::value_t::Table>();
+    auto& units = toml::get<toml::table>(input["units"]);
 
     units["length"] = "nm"_s;
     units["energy"] = "kcal/mol"_s;
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_input_nm_kJmol, Real, test_targets)
     using unit = mjolnir::unit::constants<Real>;
 
     auto input  = mjolnir::test::make_empty_input();
-    auto& units = input["units"].cast<toml::value_t::Table>();
+    auto& units = toml::get<toml::table>(input["units"]);
 
     units["length"] = "nm"_s;
     units["energy"] = "kJ/mol"_s;

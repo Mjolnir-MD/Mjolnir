@@ -88,8 +88,8 @@ class LennardJonesWallPotential
     const char* name() const noexcept {return "LennardJonesWall";}
 
     // access to the parameters...
-    std::vector<parameter_type>&       params()       noexcept {return params_;}
-    std::vector<parameter_type> const& params() const noexcept {return params_;}
+    std::vector<parameter_type>&       parameters()       noexcept {return params_;}
+    std::vector<parameter_type> const& parameters() const noexcept {return params_;}
 
   private:
 

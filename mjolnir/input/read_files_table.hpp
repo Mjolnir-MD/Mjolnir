@@ -1,27 +1,27 @@
 #ifndef MJOLNIR_READ_FILES_TABLE_H
 #define MJOLNIR_READ_FILES_TABLE_H
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
 {
 
 // this function may be callen from other read_* functions.
-inline std::string read_input_path(const toml::Table& root)
+inline std::string read_input_path(const toml::table& root)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_input_path(), 0);
 
-    const auto& files = get_toml_value<toml::Table>(root, "files", "<root>");
+    const auto& files = toml::find<toml::table>(root, "files");
 
-    std::string input_path;
+    std::string input_path("./");
     if(files.count("input") == 1)
     {
-        const auto& input = get_toml_value<toml::Table>(files, "input", "[files]");
+        const auto& input = toml::find<toml::table>(files, "input");
         if(input.count("path") == 1)
         {
-            input_path = get_toml_value<std::string>(input, "path", "[files.input]");
+            input_path = toml::find<std::string>(input, "path");
+            if(input_path.back() != '/') {input_path += '/';}
         }
     }
     return input_path;

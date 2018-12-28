@@ -68,6 +68,8 @@ class UnderdampedLangevinStepper
                                        this->temperature_ / dt_);
     }
 
+    std::vector<real_type> const& parameters() const noexcept {return gammas_;}
+
   private:
 
     coordinate_type gen_gaussian_vec(const real_type coef)
