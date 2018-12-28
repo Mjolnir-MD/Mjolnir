@@ -151,14 +151,20 @@ System<traitsT> read_system(const toml::table& root, std::size_t N)
                              " file (", input_path, file_name, ").");
         }
         const auto system_file = toml::parse(input_path + file_name);
-        if(system_file.count("system") != 1)
+        if(system_file.count("system") == 1)
         {
-            throw_exception<std::out_of_range>("[error] mjolnir::read_system: "
-                "table [system] not found in toml file\n --> ",
-                input_path, file_name, "\n | the file should define [system] "
-                "table and define values in it.");
+            return read_system_from_table<traitsT>(
+                    toml::find(system_file, "system"));
         }
-        return read_system_from_table<traitsT>(toml::find(system_file, "system"));
+        else if(system_file.count("systems") == 1)
+        {
+            return read_system_from_table<traitsT>(
+                    toml::find(system_file, "systems"));
+        }
+        throw_exception<std::out_of_range>("[error] mjolnir::read_system: "
+            "table [system] not found in toml file\n --> ",
+            input_path, file_name, "\n | the file should define [system] "
+            "table and define values in it.");
     }
     return read_system_from_table<traitsT>(system_params.at(N));
 }

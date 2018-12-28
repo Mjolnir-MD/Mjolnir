@@ -85,15 +85,20 @@ read_forcefield(const toml::table& root, std::size_t N)
                              " file (", input_path, file_name, ").");
         }
         const auto ff_file = toml::parse(input_path + file_name);
-        if(ff_file.count("forcefields") != 1)
+        if(ff_file.count("forcefield") == 1)
         {
-            throw_exception<std::out_of_range>("[error] mjolnir::read_system: "
-                "table [system] not found in toml file\n --> ",
-                input_path, file_name, "\n | the file should define [forcefield] "
-                "table and define values in it.");
+            return read_forcefield_from_table<traitsT>(
+                    toml::find(ff_file, "forcefield"), input_path);
         }
-        return read_forcefield_from_table<traitsT>(
-                toml::find(ff_file, "forcefields"), input_path);
+        else if(ff_file.count("forcefields") == 1)
+        {
+            return read_forcefield_from_table<traitsT>(
+                    toml::find(ff_file, "forcefields"), input_path);
+        }
+        throw_exception<std::out_of_range>("[error] mjolnir::read_forcefield: "
+            "table [forcefield] not found in toml file\n --> ",
+            input_path, file_name, "\n | the file should define [forcefield] "
+            "table and define values in it.");
     }
     // all-in-one file
     return read_forcefield_from_table<traitsT>(ffs.at(N), input_path);
