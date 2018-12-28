@@ -25,7 +25,7 @@ read_velocity_verlet_stepper(const toml::value& simulator)
 
 template<typename traitsT>
 UnderdampedLangevinStepper<traitsT>
-read_underdamped_langevin_stepper(const toml::Table& simulator)
+read_underdamped_langevin_stepper(const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_underdamped_langevin_stepper(), 0);
@@ -53,5 +53,5 @@ read_underdamped_langevin_stepper(const toml::Table& simulator)
             RandomNumberGenerator<traitsT>(seed));
 }
 
-}
+} // mjolnir
 #endif// MJOLNIR_READ_INTEGRATOR
