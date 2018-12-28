@@ -20,6 +20,9 @@ class GlobalForceField
     typedef typename traits_type::boundary_type   boundary_type;
     typedef GlobalInteractionBase<traitsT>    interaction_base;
     typedef std::unique_ptr<interaction_base> interaction_ptr;
+    typedef std::vector<interaction_ptr>            container_type;
+    typedef typename container_type::iterator       iterator;
+    typedef typename container_type::const_iterator const_iterator;
 
   public:
     GlobalForceField() = default;
@@ -99,7 +102,7 @@ class GlobalForceField
 
   private:
 
-    std::vector<interaction_ptr> interactions_;
+    container_type interactions_;
 };
 
 } // mjolnir
