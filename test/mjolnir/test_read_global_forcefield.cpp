@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(read_empty_global_forcefield)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     constexpr real_type tol = 1e-8;
     {
-        const std::vector<toml::table> v{};
+        const toml::array v{};
         const auto ff = mjolnir::read_global_forcefield<traits_type>(v, "./");
         BOOST_TEST(ff.empty());
         BOOST_TEST(ff.size() == 0);
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(read_global_forcefield)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     constexpr real_type tol = 1e-8;
     {
-        const std::vector<toml::table> v{toml::table{
+        const toml::array v{toml::table{
             {"interaction",       toml::value("Pair")},
             {"potential",         toml::value("ExcludedVolume")},
             {"spatial_partition", toml::value(toml::table{
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(read_several_global_forcefield)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     constexpr real_type tol = 1e-8;
     {
-        const std::vector<toml::table> v{toml::table{
+        const toml::array v{toml::table{
                 {"interaction",       toml::value("Pair")},
                 {"potential",         toml::value("ExcludedVolume")},
                 {"spatial_partition", toml::value(toml::table{
