@@ -47,6 +47,7 @@ set(TEST_NAMES
     test_read_unit
     test_read_system
     test_read_integrator
+    test_read_simulator
     test_read_input_path
     )
 
