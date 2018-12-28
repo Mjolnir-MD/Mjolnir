@@ -6,7 +6,6 @@
 #include <mjolnir/core/SimulatedAnnealingSimulator.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
-#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_system.hpp>
 #include <mjolnir/input/read_forcefield.hpp>

@@ -2,7 +2,6 @@
 #define MJOLNIR_READ_FORCEFIELD_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/ForceField.hpp>
-#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_local_forcefield.hpp>
 #include <mjolnir/input/read_global_forcefield.hpp>
