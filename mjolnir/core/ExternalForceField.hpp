@@ -96,6 +96,8 @@ class ExternalForceField
         return retval;
     }
 
+    bool           empty()  const noexcept {return interactions_.empty();}
+    std::size_t    size()   const noexcept {return interactions_.size();}
     iterator       begin()        noexcept {return interactions_.begin();}
     iterator       end()          noexcept {return interactions_.end();}
     const_iterator begin()  const noexcept {return interactions_.begin();}
@@ -107,10 +109,6 @@ class ExternalForceField
 
     container_type interactions_;
 };
-
-
-
-
 
 } // mjolnir
 #endif// MJOLNIR_EXTERNAL_FORCE_FIELD
