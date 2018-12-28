@@ -242,7 +242,7 @@ read_simulator(const toml::table& root)
         {
             throw_exception<std::out_of_range>("[error] mjolnir::read_simulator: "
                 "table [simulator] not found in the toml file\n --> ",
-                input_path, file_name, "\n | the file should define [system] "
+                input_path, file_name, "\n | the file should define [simulator] "
                 "table and define values in it.");
         }
         return read_simulator_from_table<traitsT>(root, simfile.at("simulator"));
