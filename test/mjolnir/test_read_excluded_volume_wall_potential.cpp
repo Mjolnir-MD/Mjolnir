@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_CASE(read_excluded_volume_wall_double)
     {
         const toml::value v = toml::table{
             {"interaction",       toml::value("Distance")},
-            {"potential",         toml::value("Excludedvolume_wallWall")},
+            {"potential",         toml::value("ExcludedvolumeWall")},
             {"shape", toml::value(toml::table{
                     {"name",     toml::value("AxisAlignedPlane")},
                     {"axis",     toml::value("-X")},
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(read_excluded_volume_wall_float)
     {
         const toml::value v = toml::table{
             {"interaction",       toml::value("Distance")},
-            {"potential",         toml::value("Excludedvolume_wallWall")},
+            {"potential",         toml::value("ExcludedVolumeWall")},
             {"shape", toml::value(toml::table{
                     {"name",     toml::value("AxisAlignedPlane")},
                     {"axis",     toml::value("-X")},
