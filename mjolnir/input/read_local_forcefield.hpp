@@ -48,8 +48,10 @@ read_local_forcefield(
                             toml::find(ff_tab, "local")));
                 }
             }
-            MJOLNIR_LOG_ERROR("[forcefield.local] table should be provided in "
-                              "the file ", input_path, file_name, ".");
+            throw_exception<std::runtime_error>("[error] "
+                "mjolnir::read_local_forcefield: [forcefield.local] table"
+                " should be provided in the file\n --> ", input_path, file_name,
+                ".");
         }
         else
         {
