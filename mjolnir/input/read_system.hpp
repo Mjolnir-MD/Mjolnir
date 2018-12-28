@@ -160,7 +160,7 @@ System<traitsT> read_system(const toml::table& root, std::size_t N)
         }
         return read_system_from_table<traitsT>(toml::find(system_file, "system"));
     }
-    return read_system_from_table<traitsT>(system);
+    return read_system_from_table<traitsT>(system_params.at(N));
 }
 
 }//mjolnir
