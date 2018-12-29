@@ -8,7 +8,7 @@ energy = "kcal/mol" # "kcal/mol" or "kJ/mol"
 
 [simulator]
 type          = "Molecular Dynamics"
-scheme        = "Underdamped Langevin"
+integrator    = "Underdamped Langevin"
 precision     = "double"
 boundary_type = "PeriodicCuboid" # one of {"PeriodicCube", "Unlimited"}
 seed       = 2374

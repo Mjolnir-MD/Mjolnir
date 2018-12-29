@@ -1,24 +1,38 @@
 #ifndef MJOLNIR_READ_SPATIAL_PARTITION
 #define MJOLNIR_READ_SPATIAL_PARTITION
+#include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/UnlimitedGridCellList.hpp>
 #include <mjolnir/core/PeriodicGridCellList.hpp>
 #include <mjolnir/core/NaivePairCalculation.hpp>
 #include <mjolnir/core/VerletList.hpp>
 #include <mjolnir/util/make_unique.hpp>
-#include <mjolnir/util/get_toml_value.hpp>
 #include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
 {
 
+// ---------------------------------------------------------------------------
+// It constructs cell list depending on the boundary condition.
+// Since the most efficient implementation changes depending on the boundary
+// condition, there is `celllist_dispatcher` that creates different cell list
+// depending on the boundary condition.
+//
+// XXX note for specialist:
+// After constructing neighbor-list, we can calculate forcefield parameter, e.g.
+// multiply of charges of each pair, in order to accelerate force calculation.
+// But to store those parameters in an efficient way, we need to pass the type
+// of parameters to the cell-list. Here, parameterT represents the type.
 template<typename boundaryT, typename traitsT, typename parameterT>
 struct celllist_dispatcher;
 
+// implementation for Unlimited Boundary case.
 template<typename realT, typename coordT, typename traitsT, typename parameterT>
-struct celllist_dispatcher<UnlimitedBoundary<realT, coordT>, traitsT, parameterT>
+struct celllist_dispatcher<
+    UnlimitedBoundary<realT, coordT>, traitsT, parameterT
+    >
 {
-    typedef UnlimitedGridCellList<traitsT, parameterT> type;
-    typedef realT real_type;
+    using real_type = realT;
+    using type      = UnlimitedGridCellList<traitsT, parameterT>;
 
     static UnlimitedGridCellList<traitsT, parameterT>
     invoke(const real_type margin)
@@ -27,11 +41,14 @@ struct celllist_dispatcher<UnlimitedBoundary<realT, coordT>, traitsT, parameterT
     }
 };
 
+// implementation for Cuboidal Periodic Boundary case.
 template<typename realT, typename coordT, typename traitsT, typename parameterT>
-struct celllist_dispatcher<CuboidalPeriodicBoundary<realT, coordT>, traitsT, parameterT>
+struct celllist_dispatcher<
+    CuboidalPeriodicBoundary<realT, coordT>, traitsT, parameterT
+    >
 {
-    typedef PeriodicGridCellList<traitsT, parameterT> type;
-    typedef realT real_type;
+    using real_type = realT;
+    using type      = PeriodicGridCellList<traitsT, parameterT>;
 
     static PeriodicGridCellList<traitsT, parameterT>
     invoke(const real_type margin)
@@ -40,60 +57,64 @@ struct celllist_dispatcher<CuboidalPeriodicBoundary<realT, coordT>, traitsT, par
     }
 };
 
+// ---------------------------------------------------------------------------
+// It reads spatial partition that is dedicated for a GlobalPotential.
+// In most of the cases, "type" would be a "CellList".
+//
+// TODO: this assumes the global interaction is GlobalPairInteraction.
+//       After some other interactions are added, we would need to change
+//       the interface.
 template<typename traitsT, typename potentialT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_spatial_partition(const toml::Table& global, potentialT&& pot)
+read_spatial_partition(const toml::value& global, potentialT&& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_spatial_partition(), 0);
-    typedef typename traitsT::real_type         real_type;
-    typedef typename potentialT::parameter_type parameter_type;
+    using real_type      = typename traitsT::real_type;
+    using parameter_type = typename potentialT::parameter_type;
 
-    const auto& sp   = get_toml_value<toml::Table>(
-            global, "spatial_partition", "[forcefield.global]");
-    const auto  type = get_toml_value<std::string>(
-            sp, "type", "[forcefield.global]");
+    const auto& sp   = toml::find<toml::value>(global, "spatial_partition");
+    const auto  type = toml::find<std::string>(sp,     "type");
 
     if(type == "CellList")
     {
-        MJOLNIR_LOG_NOTICE("-- Spatial Partition is CellList.");
         using boundary_type = typename traitsT::boundary_type;
         using dispatcher    = celllist_dispatcher<boundary_type, traitsT, parameter_type>;
         using celllist_type = typename dispatcher::type;
 
-        const auto mg =
-            get_toml_value<real_type>(sp, "margin", "[forcefield.global]");
-        MJOLNIR_LOG_INFO("margin = ", mg);
-
-        return make_unique<GlobalPairInteraction<
-            traitsT, potentialT, celllist_type>>(
-                std::forward<potentialT>(pot),
-                dispatcher::invoke(mg));
+        const auto margin = toml::find<real_type>(sp, "margin");
+        MJOLNIR_LOG_NOTICE("-- Spatial Partition is CellList "
+                           "with relative margin = ", margin);
+        return make_unique<
+            GlobalPairInteraction<traitsT, potentialT, celllist_type>
+            >(std::forward<potentialT>(pot), dispatcher::invoke(margin));
     }
     else if(type == "VerletList")
     {
-        MJOLNIR_LOG_NOTICE("-- Spatial Partition is VerletList without any spatial structure.");
+        using verlet_list_type = VerletList<traitsT, parameter_type>;
 
-        const auto margin = get_toml_value<real_type>(
-                    sp, "margin", "[forcefield.global]");
-        MJOLNIR_LOG_INFO("margin = ", margin);
-
-        return make_unique<GlobalPairInteraction<
-            traitsT, potentialT, VerletList<traitsT, parameter_type>>>(
-                std::forward<potentialT>(pot),
-                VerletList<traitsT, parameter_type>(margin));
+        const auto margin = toml::find<real_type>(sp, "margin");
+        MJOLNIR_LOG_NOTICE("-- Spatial Partition is VerletList "
+                           "with relative margin = ", margin);
+        return make_unique<
+            GlobalPairInteraction<traitsT, potentialT, verlet_list_type>
+            >(std::forward<potentialT>(pot), verlet_list_type(margin));
     }
     else if(type == "Naive")
     {
-        MJOLNIR_LOG_NOTICE("-- No Spatial Partition.");
-        return make_unique<GlobalPairInteraction<
-            traitsT, potentialT, NaivePairCalculation<traitsT, parameter_type>>
-                >(std::forward<potentialT>(pot),
-                  NaivePairCalculation<traitsT, parameter_type>());
+        MJOLNIR_LOG_NOTICE("-- No Spatial Partition. Calculate all the possible pairs.");
+        using naive_pair_type = NaivePairCalculation<traitsT, parameter_type>;
+
+        return make_unique<
+            GlobalPairInteraction<traitsT, potentialT, naive_pair_type>
+            >(std::forward<potentialT>(pot), naive_pair_type());
     }
     else
     {
-        throw std::runtime_error("invalid spatial partition type: " + type);
+        throw std::runtime_error(toml::format_error("[error] "
+            "mjolnir::read_spatial_partition: unknown option appeared",
+            toml::find<toml::value>(sp, "type"),
+            "expected \"CellList\" or \"VerletList\""));
     }
 }
 

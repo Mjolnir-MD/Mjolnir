@@ -1,0 +1,191 @@
+#define BOOST_TEST_MODULE "test_read_system"
+
+#include <boost/test/included/unit_test.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/System.hpp>
+#include <mjolnir/input/read_system.hpp>
+
+BOOST_AUTO_TEST_CASE(read_system_with_unlimited_boundary)
+{
+    mjolnir::LoggerManager::set_default_logger("test_read_system.log");
+
+    using real_type = double;
+    using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    constexpr real_type tol = 1e-8;
+    {
+        const toml::table v = toml::table{
+            {"boundary_shape", toml::table{/*empty*/}},
+            {"attributes", toml::table{
+                {"test_attr", toml::value(3.14)}
+            }},
+            {"particles", toml::array{toml::table{
+                {"m", 1.0},
+                {"pos",   toml::array{1.0, 2.0, 3.0}},
+                {"vel",   toml::array{1.1, 2.1, 3.1}},
+                {"name",  toml::value("testnm")},
+                {"group", toml::value("testgrp")}
+            }, toml::table{
+                {"mass", 2.0},
+                {"position", toml::array{1.2, 2.2, 3.2}},
+                {"velocity", toml::array{1.3, 2.3, 3.3}},
+                {"name",     toml::value("testnm")},
+                {"group",    toml::value("testgrp")}
+            }, toml::table{
+                {"m", 3.0},
+                {"pos", toml::array{1.4, 2.4, 3.4}},
+                {"vel", toml::array{1.5, 2.5, 3.5}}
+            }}}
+        };
+
+        const auto sys = mjolnir::read_system_from_table<traits_type>(v);
+        BOOST_TEST(sys.size() == 3);
+
+        BOOST_TEST(sys.mass(0) == 1.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.mass(1) == 2.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.mass(2) == 3.0, boost::test_tools::tolerance(tol));
+
+        BOOST_TEST(sys.rmass(0) == 1.0 / 1.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.rmass(1) == 1.0 / 2.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.rmass(2) == 1.0 / 3.0, boost::test_tools::tolerance(tol));
+
+        BOOST_TEST(sys.position(0).at(0) == 1.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(0).at(1) == 2.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(0).at(2) == 3.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(1).at(0) == 1.2, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(1).at(1) == 2.2, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(1).at(2) == 3.2, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(2).at(0) == 1.4, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(2).at(1) == 2.4, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(2).at(2) == 3.4, boost::test_tools::tolerance(tol));
+
+        BOOST_TEST(sys.velocity(0).at(0) == 1.1, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(0).at(1) == 2.1, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(0).at(2) == 3.1, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(1).at(0) == 1.3, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(1).at(1) == 2.3, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(1).at(2) == 3.3, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(2).at(0) == 1.5, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(2).at(1) == 2.5, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(2).at(2) == 3.5, boost::test_tools::tolerance(tol));
+
+        BOOST_TEST(sys.force(0).at(0) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(0).at(1) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(0).at(2) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(1).at(0) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(1).at(1) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(1).at(2) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(2).at(0) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(2).at(1) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(2).at(2) == 0.0, boost::test_tools::tolerance(tol));
+
+        BOOST_TEST(sys.name(0) == "testnm");
+        BOOST_TEST(sys.name(1) == "testnm");
+        BOOST_TEST(sys.name(2) == "X");
+
+        BOOST_TEST(sys.group(0) == "testgrp");
+        BOOST_TEST(sys.group(1) == "testgrp");
+        BOOST_TEST(sys.group(2) == "NONE");
+
+        BOOST_TEST(sys.has_attribute("test_attr"));
+        BOOST_TEST(sys.attribute("test_attr") == 3.14, boost::test_tools::tolerance(tol));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(read_system_with_cuboidal_periodic_boundary)
+{
+    mjolnir::LoggerManager::set_default_logger("test_read_system.log");
+
+    using real_type = double;
+    using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::CuboidalPeriodicBoundary>;
+    constexpr real_type tol = 1e-8;
+    {
+        const toml::table v = toml::table{
+            {"boundary_shape", toml::table{
+                {"upper", toml::array{10.0, 11.0, 12.0}},
+                {"lower", toml::array{ 0.0,  1.0,  2.0}}
+            }},
+            {"attributes", toml::table{
+                {"test_attr", toml::value(3.14)}
+            }},
+            {"particles", toml::array{toml::table{
+                {"m", 1.0},
+                {"pos",   toml::array{1.0, 2.0, 3.0}},
+                {"vel",   toml::array{1.1, 2.1, 3.1}},
+                {"name",  toml::value("testnm")},
+                {"group", toml::value("testgrp")}
+            }, toml::table{
+                {"mass", 2.0},
+                {"position", toml::array{1.2, 2.2, 3.2}},
+                {"velocity", toml::array{1.3, 2.3, 3.3}},
+                {"name",     toml::value("testnm")},
+                {"group",    toml::value("testgrp")}
+            }, toml::table{
+                {"m", 3.0},
+                {"pos", toml::array{1.4, 2.4, 3.4}},
+                {"vel", toml::array{1.5, 2.5, 3.5}}
+            }}}
+        };
+
+        const auto sys = mjolnir::read_system_from_table<traits_type>(v);
+
+        BOOST_TEST(sys.boundary().lower_bound().at(0) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.boundary().lower_bound().at(1) == 1.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.boundary().lower_bound().at(2) == 2.0, boost::test_tools::tolerance(tol));
+
+        BOOST_TEST(sys.boundary().upper_bound().at(0) == 10.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.boundary().upper_bound().at(1) == 11.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.boundary().upper_bound().at(2) == 12.0, boost::test_tools::tolerance(tol));
+
+        BOOST_TEST(sys.size() == 3);
+
+        BOOST_TEST(sys.mass(0) == 1.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.mass(1) == 2.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.mass(2) == 3.0, boost::test_tools::tolerance(tol));
+
+        BOOST_TEST(sys.rmass(0) == 1.0 / 1.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.rmass(1) == 1.0 / 2.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.rmass(2) == 1.0 / 3.0, boost::test_tools::tolerance(tol));
+
+        BOOST_TEST(sys.position(0).at(0) == 1.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(0).at(1) == 2.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(0).at(2) == 3.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(1).at(0) == 1.2, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(1).at(1) == 2.2, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(1).at(2) == 3.2, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(2).at(0) == 1.4, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(2).at(1) == 2.4, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.position(2).at(2) == 3.4, boost::test_tools::tolerance(tol));
+
+        BOOST_TEST(sys.velocity(0).at(0) == 1.1, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(0).at(1) == 2.1, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(0).at(2) == 3.1, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(1).at(0) == 1.3, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(1).at(1) == 2.3, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(1).at(2) == 3.3, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(2).at(0) == 1.5, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(2).at(1) == 2.5, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.velocity(2).at(2) == 3.5, boost::test_tools::tolerance(tol));
+
+        BOOST_TEST(sys.force(0).at(0) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(0).at(1) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(0).at(2) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(1).at(0) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(1).at(1) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(1).at(2) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(2).at(0) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(2).at(1) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(2).at(2) == 0.0, boost::test_tools::tolerance(tol));
+
+        BOOST_TEST(sys.name(0) == "testnm");
+        BOOST_TEST(sys.name(1) == "testnm");
+        BOOST_TEST(sys.name(2) == "X");
+
+        BOOST_TEST(sys.group(0) == "testgrp");
+        BOOST_TEST(sys.group(1) == "testgrp");
+        BOOST_TEST(sys.group(2) == "NONE");
+
+        BOOST_TEST(sys.has_attribute("test_attr"));
+        BOOST_TEST(sys.attribute("test_attr") == 3.14, boost::test_tools::tolerance(tol));
+    }
+}

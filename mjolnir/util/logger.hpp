@@ -231,8 +231,8 @@ class basic_logger
             case Level::Debug : return "";
             case Level::Info  : return "";
             case Level::Notice: return "";
-            case Level::Warn  : return "WARNING: ";
-            case Level::Error : return "ERROR: ";
+            case Level::Warn  : return "[warning] ";
+            case Level::Error : return "[error] ";
             default: return "UNKNOWN LOG LEVEL: ";
         }
     }
@@ -267,7 +267,7 @@ class basic_logger_manager
     {
         if(default_ == fname)
         {
-            std::cerr << "WARNING for Developers: Default Logger("
+            std::cerr << "[warning] for Developers: Default Logger("
                       << fname << ") is set twice." << std::endl;
             return;
         }
@@ -275,7 +275,7 @@ class basic_logger_manager
         default_ = fname;
         if(loggers_.count(fname) != 0)
         {
-            std::cerr << "WARNING for Developers: Logger(" << fname << ") is "
+            std::cerr << "[warning] for Developers: Logger(" << fname << ") is "
                       << "already set. from now, it becomes the default logger."
                       << std::endl;
             return;

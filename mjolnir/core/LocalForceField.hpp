@@ -107,6 +107,8 @@ class LocalForceField
         return oss.str();
     }
 
+    bool           empty()  const noexcept {return interactions_.empty();}
+    std::size_t    size()   const noexcept {return interactions_.size();}
     iterator       begin()        noexcept {return interactions_.begin();}
     iterator       end()          noexcept {return interactions_.end();}
     const_iterator begin()  const noexcept {return interactions_.begin();}

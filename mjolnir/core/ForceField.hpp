@@ -83,6 +83,10 @@ class ForceField
             external_.dump_energy(sys);
     }
 
+    local_forcefield_type    const& local()    const noexcept {return local_;}
+    global_forcefield_type   const& global()   const noexcept {return global_;}
+    external_forcefield_type const& external() const noexcept {return external_;}
+
   private:
 
     local_forcefield_type    local_;

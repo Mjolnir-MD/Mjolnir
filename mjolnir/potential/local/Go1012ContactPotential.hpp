@@ -20,14 +20,14 @@ class Go1012ContactPotential
     static constexpr real_type rcutoff_ratio = 1. / cutoff_ratio;
 
   public:
-    Go1012ContactPotential(const real_type e, const real_type r0) noexcept
-        : epsilon_(e), r0_(r0)
+    Go1012ContactPotential(const real_type e, const real_type v0) noexcept
+        : epsilon_(e), v0_(v0)
     {}
     ~Go1012ContactPotential() = default;
 
-    real_type potential(const real_type r) const noexcept
+    real_type potential(const real_type v) const noexcept
     {
-        const real_type rd   = this->r0_ / r;
+        const real_type rd   = this->v0_ / v;
         if(rd < rcutoff_ratio){return real_type(0.0);}
 
         const real_type rd2  = rd  * rd;
@@ -39,10 +39,10 @@ class Go1012ContactPotential
         return this->epsilon_ * (5 * rd12 - 6 * rd10);
     }
 
-    real_type derivative(const real_type r) const noexcept
+    real_type derivative(const real_type v) const noexcept
     {
-        const real_type invr = real_type(1.0) / r;
-        const real_type rd   = this->r0_ * invr;
+        const real_type invr = real_type(1.0) / v;
+        const real_type rd   = this->v0_ * invr;
         if(rd < rcutoff_ratio){return real_type(0.0);}
 
         const real_type rd2  = rd  * rd;
@@ -58,10 +58,13 @@ class Go1012ContactPotential
 
     static const char* name() noexcept {return "Go1012Contact";}
 
+    real_type k()  const noexcept {return epsilon_;}
+    real_type v0() const noexcept {return v0_;}
+
   private:
 
     real_type epsilon_;
-    real_type r0_;
+    real_type v0_;
 };
 
 template<typename realT>
