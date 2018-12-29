@@ -73,6 +73,8 @@ System<traitsT> read_system_from_table(const toml::value& system)
     using real_type       = typename traitsT::real_type;
     using coordinate_type = typename traitsT::coordinate_type;
 
+    MJOLNIR_LOG_NOTICE("start to read system ...");
+
     const auto& boundary  = toml::find<toml::value>(system, "boundary_shape");
     const auto& particles = toml::find<toml::array>(system, "particles");
 
@@ -150,15 +152,25 @@ System<traitsT> read_system(const toml::table& root, std::size_t N)
                              "ignored because those are read from the specified"
                              " file (", input_path, file_name, ").");
         }
+
+        MJOLNIR_LOG_NOTICE_NO_LF("reading ", input_path, file_name, " ...");
         const auto system_file = toml::parse(input_path + file_name);
-        if(system_file.count("system") != 1)
+        MJOLNIR_LOG_NOTICE(" done.");
+
+        if(system_file.count("systems") != 1)
         {
             throw_exception<std::out_of_range>("[error] mjolnir::read_system: "
-                "table [system] not found in toml file\n --> ",
-                input_path, file_name, "\n | the file should define [system] "
-                "table and define values in it.");
+                "table [[systems]] not found in toml file\n --> ",
+                input_path, file_name, "\n | the file should define [[systems]]"
+                " table and define values in it.");
         }
-        return read_system_from_table<traitsT>(toml::find(system_file, "system"));
+        if(system_file.at("systems").is(toml::value_t::Array))
+        {
+            return read_system_from_table<traitsT>(
+                toml::find<toml::array>(system_file, "systems").front());
+        }
+        return read_system_from_table<traitsT>(
+                toml::find(system_file, "systems"));
     }
     return read_system_from_table<traitsT>(system_params.at(N));
 }
