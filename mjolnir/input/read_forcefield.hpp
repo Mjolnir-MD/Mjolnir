@@ -87,8 +87,8 @@ read_forcefield(const toml::table& root, std::size_t N)
         const auto ff_file = toml::parse(input_path + file_name);
         if(ff_file.count("forcefields") != 1)
         {
-            throw_exception<std::out_of_range>("[error] mjolnir::read_system: "
-                "table [system] not found in toml file\n --> ",
+            throw_exception<std::out_of_range>("[error] mjolnir::read_forcefields: "
+                "table [forcefields] not found in the toml file\n --> ",
                 input_path, file_name, "\n | the file should define [forcefield] "
                 "table and define values in it.");
         }
