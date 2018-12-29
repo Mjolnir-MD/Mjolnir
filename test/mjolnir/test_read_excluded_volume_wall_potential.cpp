@@ -21,8 +21,8 @@ BOOST_AUTO_TEST_CASE(read_excluded_volume_wall_double)
             })},
             {"epsilon",           toml::value(3.14)},
             {"parameters",        toml::value(toml::array{
-                toml::table{{"index", 0}, {"sigma", 2.0}},
-                toml::table{{"index", 1}, {"sigma", 2.0}}
+                toml::table{{"index", 0}, {"radius", 2.0}},
+                toml::table{{"index", 1}, {"radius", 2.0}}
             })}
         };
         const auto g = mjolnir::read_excluded_volume_wall_potential<real_type>(v);
@@ -52,8 +52,8 @@ BOOST_AUTO_TEST_CASE(read_excluded_volume_wall_float)
             })},
             {"epsilon",           toml::value(3.14)},
             {"parameters",        toml::value(toml::array{
-                toml::table{{"index", 0}, {"sigma", 2.0}},
-                toml::table{{"index", 1}, {"sigma", 2.0}}
+                toml::table{{"index", 0}, {"radius", 2.0}},
+                toml::table{{"index", 1}, {"radius", 2.0}}
             })}
         };
         const auto g = mjolnir::read_excluded_volume_wall_potential<real_type>(v);
