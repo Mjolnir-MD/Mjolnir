@@ -2,7 +2,6 @@
 #define MJOLNIR_READ_UNIT_SYSTEM_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/math/constants.hpp>
-#include <mjolnir/core/constants.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_simulator.hpp>
