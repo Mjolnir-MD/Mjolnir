@@ -85,7 +85,7 @@ read_forcefield(const toml::table& root, std::size_t N)
                              " file (", input_path, file_name, ").");
         }
 
-        MJOLNIR_LOG_NOTICE_NO_LF("reading ", input_path, file_name, " ...");
+        MJOLNIR_LOG_NOTICE("reading ", input_path, file_name, " ...");
         const auto ff_file = toml::parse(input_path + file_name);
         MJOLNIR_LOG_NOTICE(" done.");
 

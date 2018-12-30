@@ -236,7 +236,7 @@ read_simulator(const toml::table& root)
         }
 
         MJOLNIR_LOG_NOTICE("simulator is defined in ", input_path, file_name);
-        MJOLNIR_LOG_NOTICE_NO_LF("reading ", input_path, file_name, " ...");
+        MJOLNIR_LOG_NOTICE("reading ", input_path, file_name, " ...");
         const auto simfile = toml::parse(input_path + file_name);
         MJOLNIR_LOG_NOTICE(" done.");
 
