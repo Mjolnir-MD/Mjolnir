@@ -37,10 +37,10 @@ class FlexibleLocalAnglePotential
 
   public:
     FlexibleLocalAnglePotential(const real_type k,
-            const std::array<real_type, 10>& term1,
-            const std::array<real_type, 10>& term2)
+                                const std::array<real_type, 10>& ys,
+                                const std::array<real_type, 10>& d2ys)
         : min_theta(thetas.front()), max_theta(thetas.back()),
-          k_(k), term1_(term1), term2_(term2)
+          k_(k), ys_(ys), d2ys_(d2ys)
     {
         // set the range and the parameters from table
         // from cafemol3/mloop_flexible_local.F90
@@ -102,8 +102,8 @@ class FlexibleLocalAnglePotential
     static const char* name() noexcept {return "FlexibleLocalAngle";}
 
     real_type                        k()   const noexcept {return k_;}
-    std::array<real_type, 10> const& y()   const noexcept {return term1_;}
-    std::array<real_type, 10> const& d2y() const noexcept {return term2_;}
+    std::array<real_type, 10> const& y()   const noexcept {return ys_;}
+    std::array<real_type, 10> const& d2y() const noexcept {return d2ys_;}
 
   private:
 
@@ -116,9 +116,9 @@ class FlexibleLocalAnglePotential
         const real_type   a = (thetas[n+1] - th) * rdtheta;
         const real_type   b = (th - thetas[n  ]) * rdtheta;
 
-        const real_type e1 = a * term1_[n] + b * term1_[n+1];
+        const real_type e1 = a * ys_[n] + b * ys_[n+1];
         const real_type e2 =
-            ((a * a * a - a) * term2_[n] + (b * b * b - b) * term2_[n+1]) *
+            ((a * a * a - a) * d2ys_[n] + (b * b * b - b) * d2ys_[n+1]) *
             dtheta * dtheta * one_over_six;
 
         return e1 + e2;
@@ -133,9 +133,9 @@ class FlexibleLocalAnglePotential
         const real_type a = (thetas[n+1] - th) * rdtheta;
         const real_type b = (th - thetas[n  ]) * rdtheta;
 
-        const real_type f1 = (term1_[n+1] - term1_[n]) * rdtheta;
+        const real_type f1 = (ys_[n+1] - ys_[n]) * rdtheta;
         const real_type f2 = (
-            (3 * b * b - 1) * term2_[n+1] - (3 * a * a - 1) * term2_[n]
+            (3 * b * b - 1) * d2ys_[n+1] - (3 * a * a - 1) * d2ys_[n]
             ) * dtheta * one_over_six;
 
         return f1 + f2;
@@ -149,8 +149,8 @@ class FlexibleLocalAnglePotential
     real_type max_theta_ene;
 
     real_type k_;
-    std::array<real_type, 10> term1_;
-    std::array<real_type, 10> term2_;
+    std::array<real_type, 10> ys_;
+    std::array<real_type, 10> d2ys_;
 };
 template<typename realT>
 constexpr realT FlexibleLocalAnglePotential<realT>::max_force;
