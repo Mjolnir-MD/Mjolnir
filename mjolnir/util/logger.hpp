@@ -211,7 +211,7 @@ class basic_logger
             // message is also printed to stderr
             output_message(std::cerr, "-- ", this->stringize(level),
                            std::forward<Ts>(args)...);
-            std::cerr << std::endl;
+            std::cerr << std::flush; // no Line Feed
         }
 
         output_message(ofs, this->stringize(level), std::forward<Ts>(args)...);
