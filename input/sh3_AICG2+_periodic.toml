@@ -1,7 +1,7 @@
 # vim:set foldmethod=marker
-[files.output]
-prefix = "sh3_periodic" # output file prefix
-path   = "./"           # output path
+[files]
+output.prefix = "sh3_periodic" # output file prefix
+output.path   = "./"           # output path
 
 [units]
 length = "angstrom" # "angstorm" or "Å" or "nm"
@@ -76,8 +76,9 @@ parameters = [ # {{{
 ] # }}}
 
 [[systems]]
-attributes     = {temperature = 300.0, ionic_strength = 0.1}
-boundary_shape = {upper = [30.0, 15.0, 10.0], lower = [0.0, -15.0, -20.0]}
+attributes.temperature = 300.0
+boundary_shape.upper = [30.0,  15.0,  10.0]
+boundary_shape.lower = [ 0.0, -15.0, -20.0]
 particles = [ #{{{
 {m=101.11, pos=[15.308,   14.18,  -2.955], vel=[  0.1225, -0.0424, -0.1671], name="CA", group="PRO"},
 {m=147.18, pos=[13.365,   10.96,  -3.638], vel=[  0.0659, -0.0029, -0.0215], name="CA", group="PRO"},
@@ -674,7 +675,9 @@ parameters = [
 [[forcefields.global]]
 interaction = "Pair"
 potential   = "ExcludedVolume"
-ignore      = {molecule = "Nothing", particles_within = {bond = 3, contact = 1}}
+ignore.molecule = "Nothing"
+ignore.particles_within.bond = 3
+ignore.particles_within.contact = 1
 spatial_partition = {type = "CellList", margin = 1.0}
 epsilon = 0.2
 # params{{{

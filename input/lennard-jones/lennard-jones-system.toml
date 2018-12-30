@@ -1,6 +1,7 @@
-[system]
-attributes = {temperature = 300.0}
-boundary_shape = {lower = [0.0, 0.0, 0.0], upper = [32.0, 32.0, 32.0]}
+[[systems]]
+attributes.temperature = 300.0
+boundary_shape.lower = [ 0.0,  0.0,  0.0]
+boundary_shape.upper = [32.0, 32.0, 32.0]
 particles = [ # {{{
 {mass = 1.0, position = [  1.000,  1.000,  1.000], velocity = [  0.5101,   0.7734,  -2.0929]},
 {mass = 1.0, position = [  3.000,  1.000,  1.000], velocity = [  0.5655,   0.1503,  -0.7554]},

@@ -1,8 +1,11 @@
-[[global]]
+[[forcefields.global]]
 interaction = "Pair"
 potential   = "LennardJones"
-ignore      = {molecule = "Nothing", particles_within = {bond = 3, contact = 1}}
-spatial_partition   = {type = "CellList", margin = 0.5}
+ignore.molecule = "Nothing"
+ignore.particles_within.bond = 3
+ignore.particles_within.contact = 1
+spatial_partition.type   = "CellList"
+spatial_partition.margin = 0.5
 parameters = [
 {index =     0, "σ" = 2.0, "ε" = 1.0},
 {index =     1, "σ" = 2.0, "ε" = 1.0},
