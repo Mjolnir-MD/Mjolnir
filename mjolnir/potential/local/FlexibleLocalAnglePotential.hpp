@@ -12,6 +12,7 @@ template<typename T> class System;
 
 // Flexible Local Angle potential (T. Terakawa and S. Takada Biophys J 2011)
 // NOTE: It assumes that each theta value in histogram is same as the default.
+//     : It requires the unit to be [kcal/mol] & [angstrom]!
 //
 // Here, the implementation is derived from the original implementation in
 // the CGMD package, Cafemol (Kenzaki et al., JCTC 2011).
@@ -23,46 +24,51 @@ class FlexibleLocalAnglePotential
 {
   public:
     using real_type = realT;
+    // TODO: support unit systems
     static constexpr real_type max_force  =  30.0;
     static constexpr real_type min_force  = -30.0;
+
+    static constexpr std::array<real_type, 10> thetas = {
+        {1.30900, 1.48353, 1.65806, 1.83260, 2.00713,
+         2.18166, 2.35619, 2.53073, 2.70526, 2.87979}
+    };
+    static constexpr real_type dtheta  = (2.87979 - 1.30900) / 9.0;
+    static constexpr real_type rdtheta = 1.0 / dtheta;
 
   public:
     FlexibleLocalAnglePotential(const real_type k,
             const std::array<real_type, 10>& term1,
             const std::array<real_type, 10>& term2)
-        : min_theta(1.30900), max_theta(2.87979),
-          dtheta((max_theta - min_theta) / 9.0), inv_dtheta(1. / dtheta), k_(k),
-          thetas{{1.30900, 1.48353, 1.65806, 1.83260, 2.00713,
-                  2.18166, 2.35619, 2.53073, 2.70526, 2.87979}},
-          term1_(term1), term2_(term2)
+        : min_theta(thetas.front()), max_theta(thetas.back()),
+          k_(k), term1_(term1), term2_(term2)
     {
+        // set the range and the parameters from table
         // from cafemol3/mloop_flexible_local.F90
         real_type th = thetas[0];
-        const real_type center_th  = (max_theta + min_theta) * 0.5;
-        min_theta_ene = min_energy = spline_interpolate(min_theta);
-        max_theta_ene =              spline_interpolate(max_theta - 1e-4);
+        const real_type center_th = (max_theta + min_theta) * 0.5;
+        this->min_theta_ene = spline_interpolate(min_theta);
+        this->max_theta_ene = spline_interpolate(max_theta - 1e-4);
 
+        this->min_energy = min_theta_ene;
         while(th < max_theta)
         {
-            const real_type energy = spline_interpolate(th);
-            const real_type force  = spline_derivative(th);
-
-            min_energy = std::min(min_energy, energy);
+            const real_type energy = this->spline_interpolate(th);
+            const real_type force  = this->spline_derivative(th);
+            this->min_energy = std::min(min_energy, energy);
 
             if(force < min_force)
             {
-                min_theta     = th;
-                min_theta_ene = energy;
+                this->min_theta     = th;
+                this->min_theta_ene = energy;
             }
-            if(max_force < force && center_th < th && max_theta == thetas[9])
+            if(max_force < force && center_th < th && max_theta == thetas.back())
             {
-                max_theta     = th;
-                max_theta_ene = energy;
+                this->max_theta     = th;
+                this->max_theta_ene = energy;
             }
             th += 1e-4;
         }
     }
-
     ~FlexibleLocalAnglePotential() = default;
 
     real_type potential(const real_type th) const noexcept
@@ -79,15 +85,15 @@ class FlexibleLocalAnglePotential
         }
         else
         {
-            return k_ * (spline_interpolate(th) - min_energy);
+            return k_ * (this->spline_interpolate(th) - min_energy);
         }
     }
 
     real_type derivative(const real_type th) const noexcept
     {
-             if(th <  min_theta) {return min_force;}
+        if     (th <  min_theta) {return min_force;}
         else if(th >= max_theta) {return max_force;}
-        else {return spline_derivative(th) * k_;}
+        else {return this->spline_derivative(th) * k_;}
     }
 
     template<typename T>
@@ -103,48 +109,59 @@ class FlexibleLocalAnglePotential
 
     real_type spline_interpolate(const real_type th) const noexcept
     {
-        const std::size_t n = std::floor((th - min_theta) * inv_dtheta);
+        constexpr real_type one_over_six = real_type(1.0) / real_type(6.0);
+
+        const std::size_t n = std::floor((th - min_theta) * rdtheta);
         assert(n < 9);
-        const real_type a = (thetas[n+1] - th) * inv_dtheta;
-        const real_type b = (th - thetas[n  ]) * inv_dtheta;
+        const real_type   a = (thetas[n+1] - th) * rdtheta;
+        const real_type   b = (th - thetas[n  ]) * rdtheta;
 
         const real_type e1 = a * term1_[n] + b * term1_[n+1];
         const real_type e2 =
             ((a * a * a - a) * term2_[n] + (b * b * b - b) * term2_[n+1]) *
-            dtheta * dtheta / real_type(6.0);
+            dtheta * dtheta * one_over_six;
 
         return e1 + e2;
     }
 
     real_type spline_derivative(const real_type th) const noexcept
     {
-        const std::size_t n = std::floor((th - min_theta) * inv_dtheta);
-        assert(n < 9);
-        const real_type a = (thetas[n+1] - th) * inv_dtheta;
-        const real_type b = (th - thetas[n  ]) * inv_dtheta;
+        constexpr real_type one_over_six = real_type(1.0) / real_type(6.0);
 
-        const real_type f1 = (term1_[n+1] - term1_[n]) * inv_dtheta;
+        const std::size_t n = std::floor((th - min_theta) * rdtheta);
+        assert(n < 9);
+        const real_type a = (thetas[n+1] - th) * rdtheta;
+        const real_type b = (th - thetas[n  ]) * rdtheta;
+
+        const real_type f1 = (term1_[n+1] - term1_[n]) * rdtheta;
         const real_type f2 = (
             (3 * b * b - 1) * term2_[n+1] - (3 * a * a - 1) * term2_[n]
-            ) * dtheta / real_type(6.0);
+            ) * dtheta * one_over_six;
 
         return f1 + f2;
     }
 
   private:
     real_type min_energy;
-    real_type min_theta_ene;
-    real_type max_theta_ene;
     real_type min_theta;
     real_type max_theta;
+    real_type min_theta_ene;
+    real_type max_theta_ene;
 
-    real_type dtheta;
-    real_type inv_dtheta;
     real_type k_;
-    std::array<real_type, 10> thetas;
     std::array<real_type, 10> term1_;
     std::array<real_type, 10> term2_;
 };
+template<typename realT>
+constexpr realT FlexibleLocalAnglePotential<realT>::max_force;
+template<typename realT>
+constexpr realT FlexibleLocalAnglePotential<realT>::min_force;
+template<typename realT>
+constexpr realT FlexibleLocalAnglePotential<realT>::dtheta;
+template<typename realT>
+constexpr realT FlexibleLocalAnglePotential<realT>::rdtheta;
+template<typename realT>
+constexpr std::array<realT, 10> FlexibleLocalAnglePotential<realT>::thetas;
 
 } // mjolnir
 #endif // MJOLNIR_FLEXIBLE_LOCAL_ANGLE_POTENTIAL
