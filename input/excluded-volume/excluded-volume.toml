@@ -1,8 +1,7 @@
-[files.output]
-prefix = "excluded-volume"  # file prefix.
-path   = "./"             # output path
-[files.input]
-path   = "./input/excluded-volume/" # input path
+[files]
+output.prefix = "excluded-volume"         # file prefix.
+output.path   = "./"                      # output path
+input.path   = "./input/excluded-volume/" # input path
 
 [units]
 length = "angstrom" # "angstorm" or "Å" or "nm"

@@ -1,4 +1,4 @@
-# [simulator]
+[simulator]
 type       = "Molecular Dynamics"
 integrator = "Underdamped Langevin"
 boundary_type = "PeriodicCuboid"
