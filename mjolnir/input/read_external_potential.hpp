@@ -101,12 +101,11 @@ read_excluded_volume_wall_potential(const toml::value& external)
     for(const auto& param : ps)
     {
         const auto idx = toml::find<std::size_t>(param, "index");
-        const auto s   = toml::expect<real_type>(param, u8"σ").or_other(
-                         toml::expect<real_type>(param, "sigma")).unwrap();
+        const auto rad = toml::find<real_type>(param, "radius");
         if(params.size() <= idx) {params.resize(idx+1, real_type(0));}
-        params.at(idx) = s;
+        params.at(idx) = rad;
 
-        MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", s);
+        MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", rad);
     }
     return ExcludedVolumeWallPotential<real_type>(eps, std::move(params));
 }

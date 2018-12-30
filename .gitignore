@@ -2,6 +2,7 @@ bin/*
 build/*
 data/*
 *.ene
+*.vel
 *.xyz
 *.png
 *.log
