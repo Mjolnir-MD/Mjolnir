@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(read_newtonian_molecular_dynamics_simulator)
         BOOST_TEST(static_cast<bool>(sim));
 
         const auto mdsim = dynamic_cast<mjolnir::MolecularDynamicsSimulator<
-            traits_type, mjolnir::VelocityVerletStepper<traits_type>>*>(sim.get());
+            traits_type, mjolnir::VelocityVerletIntegrator<traits_type>>*>(sim.get());
         BOOST_TEST(static_cast<bool>(mdsim));
 
         sim->initialize();
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(read_langevin_molecular_dynamics_simulator)
         BOOST_TEST(static_cast<bool>(sim));
 
         const auto mdsim = dynamic_cast<mjolnir::MolecularDynamicsSimulator<
-            traits_type, mjolnir::UnderdampedLangevinStepper<traits_type>>*>(sim.get());
+            traits_type, mjolnir::UnderdampedLangevinIntegrator<traits_type>>*>(sim.get());
         BOOST_TEST(static_cast<bool>(mdsim));
 
         sim->initialize();
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(read_simulated_annealing_simulator)
         BOOST_TEST(static_cast<bool>(sim));
 
         const auto sasim = dynamic_cast<mjolnir::SimulatedAnnealingSimulator<
-            traits_type, mjolnir::UnderdampedLangevinStepper<traits_type>,
+            traits_type, mjolnir::UnderdampedLangevinIntegrator<traits_type>,
             mjolnir::linear_schedule>*>(sim.get());
         BOOST_TEST(static_cast<bool>(sasim));
 

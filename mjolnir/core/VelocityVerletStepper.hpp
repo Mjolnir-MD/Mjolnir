@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_NVE_NEWTONIAN_INTEGRATOR
-#define MJOLNIR_NVE_NEWTONIAN_INTEGRATOR
+#ifndef MJOLNIR_NVE_VELOCITY_VERLET_INTEGRATOR_HPP
+#define MJOLNIR_NVE_VELOCITY_VERLET_INTEGRATOR_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
 
@@ -7,7 +7,7 @@ namespace mjolnir
 {
 
 template<typename traitsT>
-class VelocityVerletStepper
+class VelocityVerletIntegrator
 {
   public:
     typedef traitsT traits_type;
@@ -19,10 +19,10 @@ class VelocityVerletStepper
 
   public:
 
-    VelocityVerletStepper(const real_type dt) noexcept
+    VelocityVerletIntegrator(const real_type dt) noexcept
         : dt_(dt), halfdt_(dt / 2)
     {}
-    ~VelocityVerletStepper() = default;
+    ~VelocityVerletIntegrator() = default;
 
     void initialize(system_type& sys, forcefield_type& ff);
 
@@ -42,7 +42,7 @@ class VelocityVerletStepper
 };
 
 template<typename traitsT>
-void VelocityVerletStepper<traitsT>::initialize(
+void VelocityVerletIntegrator<traitsT>::initialize(
         system_type& system, forcefield_type& ff)
 {
     this->update(system);
@@ -57,8 +57,8 @@ void VelocityVerletStepper<traitsT>::initialize(
 }
 
 template<typename traitsT>
-typename VelocityVerletStepper<traitsT>::real_type
-VelocityVerletStepper<traitsT>::step(
+typename VelocityVerletIntegrator<traitsT>::real_type
+VelocityVerletIntegrator<traitsT>::step(
         const real_type time, system_type& system, forcefield_type& ff)
 {
     real_type largest_disp2(0);
@@ -90,4 +90,4 @@ VelocityVerletStepper<traitsT>::step(
 }
 
 } // mjolnir
-#endif /* MJOLNIR_VELOCITY_VERLET_INTEGRATOR */
+#endif // MJOLNIR_NVE_VELOCITY_VERLET_INTEGRATOR_HPP
