@@ -1,8 +1,8 @@
 #ifndef MJOLNIR_READ_INTEGRATOR
 #define MJOLNIR_READ_INTEGRATOR
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/core/VelocityVerletStepper.hpp>
-#include <mjolnir/core/UnderdampedLangevinStepper.hpp>
+#include <mjolnir/core/VelocityVerletIntegrator.hpp>
+#include <mjolnir/core/UnderdampedLangevinIntegrator.hpp>
 #include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
