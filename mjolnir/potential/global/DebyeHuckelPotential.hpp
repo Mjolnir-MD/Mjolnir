@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_DEBYE_HUCKEL_POTENTIAL
 #define MJOLNIR_DEBYE_HUCKEL_POTENTIAL
 #include <mjolnir/potential/global/IgnoreMolecule.hpp>
-#include <mjolnir/core/constants.hpp>
+#include <mjolnir/core/Unit.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/util/logger.hpp>

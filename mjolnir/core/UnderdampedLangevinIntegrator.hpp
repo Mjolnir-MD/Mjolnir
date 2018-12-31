@@ -3,7 +3,7 @@
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
-#include <mjolnir/core/constants.hpp>
+#include <mjolnir/core/Unit.hpp>
 
 namespace mjolnir
 {
