@@ -34,27 +34,27 @@ read_molecular_dynamics_simulator(
     if(integrator == "Newtonian")
     {
         MJOLNIR_LOG_NOTICE("Integrator is Newtonian.");
-        using integrator_t = VelocityVerletStepper<traitsT>;
+        using integrator_t = VelocityVerletIntegrator<traitsT>;
         using simulator_t  = MolecularDynamicsSimulator<traitsT, integrator_t>;
 
         return make_unique<simulator_t>(
                 tstep, sstep,
                 read_system<traitsT>(root, 0),
                 read_forcefield<traitsT>(root, 0),
-                read_velocity_verlet_stepper<traitsT>(simulator),
+                read_velocity_verlet_integrator<traitsT>(simulator),
                 read_observer<traitsT>(root));
     }
     else if(integrator == "Underdamped Langevin")
     {
         MJOLNIR_LOG_NOTICE("Integrator is Underdamped Langevin.");
-        using integrator_t = UnderdampedLangevinStepper<traitsT>;
+        using integrator_t = UnderdampedLangevinIntegrator<traitsT>;
         using simulator_t  = MolecularDynamicsSimulator<traitsT, integrator_t>;
 
         return make_unique<simulator_t>(
                 tstep, sstep,
                 read_system<traitsT>(root, 0),
                 read_forcefield<traitsT>(root, 0),
-                read_underdamped_langevin_stepper<traitsT>(simulator),
+                read_underdamped_langevin_integrator<traitsT>(simulator),
                 read_observer<traitsT>(root));
     }
     else
@@ -140,7 +140,7 @@ read_simulated_annealing_simulator(
         }
         else if(integrator == "Underdamped Langevin")
         {
-            using integrator_t = UnderdampedLangevinStepper<traitsT>;
+            using integrator_t = UnderdampedLangevinIntegrator<traitsT>;
             using simulator_t  = SimulatedAnnealingSimulator<
                 traitsT, integrator_t, linear_schedule>;
 
@@ -149,7 +149,7 @@ read_simulated_annealing_simulator(
                     linear_schedule<real_type>(T_begin, T_end),
                     read_system<traitsT>(root, 0),
                     read_forcefield<traitsT>(root, 0),
-                    read_underdamped_langevin_stepper<traitsT>(simulator),
+                    read_underdamped_langevin_integrator<traitsT>(simulator),
                     read_observer<traitsT>(root));
         }
         else

@@ -1,34 +1,34 @@
 #ifndef MJOLNIR_READ_INTEGRATOR
 #define MJOLNIR_READ_INTEGRATOR
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/core/VelocityVerletStepper.hpp>
-#include <mjolnir/core/UnderdampedLangevinStepper.hpp>
+#include <mjolnir/core/VelocityVerletIntegrator.hpp>
+#include <mjolnir/core/UnderdampedLangevinIntegrator.hpp>
 #include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
 {
 
 template<typename traitsT>
-VelocityVerletStepper<traitsT>
-read_velocity_verlet_stepper(const toml::value& simulator)
+VelocityVerletIntegrator<traitsT>
+read_velocity_verlet_integrator(const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_velocity_verlet_stepper(), 0);
+    MJOLNIR_SCOPE(read_velocity_verlet_integrator(), 0);
     typedef typename traitsT::real_type real_type;
 
     const real_type delta_t = toml::find<real_type>(simulator, "delta_t");
     MJOLNIR_LOG_INFO("delta_t = ", delta_t);
 
-    return VelocityVerletStepper<traitsT>(delta_t);
+    return VelocityVerletIntegrator<traitsT>(delta_t);
 }
 
 
 template<typename traitsT>
-UnderdampedLangevinStepper<traitsT>
-read_underdamped_langevin_stepper(const toml::value& simulator)
+UnderdampedLangevinIntegrator<traitsT>
+read_underdamped_langevin_integrator(const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_underdamped_langevin_stepper(), 0);
+    MJOLNIR_SCOPE(read_underdamped_langevin_integrator(), 0);
     typedef typename traitsT::real_type real_type;
 
     const auto seed       = toml::find<std::uint32_t>(simulator, "seed");
@@ -49,7 +49,7 @@ read_underdamped_langevin_stepper(const toml::value& simulator)
     const real_type delta_t = toml::find<real_type>(simulator, "delta_t");
     MJOLNIR_LOG_INFO("delta_t = ", delta_t);
 
-    return UnderdampedLangevinStepper<traitsT>(delta_t, std::move(gamma),
+    return UnderdampedLangevinIntegrator<traitsT>(delta_t, std::move(gamma),
             RandomNumberGenerator<traitsT>(seed));
 }
 

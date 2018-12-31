@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(read_velocity_verlet_integrator)
             {"delta_t",       toml::value(0.1)},
         };
 
-        const auto integr = mjolnir::read_velocity_verlet_stepper<traits_type>(v);
+        const auto integr = mjolnir::read_velocity_verlet_integrator<traits_type>(v);
         BOOST_TEST(integr.delta_t() == 0.1, boost::test_tools::tolerance(tol));
     }
 }
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(read_underdamped_langevin_integrator)
             })},
         };
 
-        const auto integr = mjolnir::read_underdamped_langevin_stepper<traits_type>(v);
+        const auto integr = mjolnir::read_underdamped_langevin_integrator<traits_type>(v);
         BOOST_TEST(integr.delta_t() == 0.1, boost::test_tools::tolerance(tol));
         BOOST_TEST(integr.parameters().size() == 2);
         BOOST_TEST(integr.parameters().at(0) == 0.1, boost::test_tools::tolerance(tol));

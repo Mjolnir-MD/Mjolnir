@@ -14,7 +14,7 @@ namespace mjolnir
 // D. Thirumalai (1995) Biopolymers. Same algorithm used as default Langevin
 // integrator in CafeMol that is developed by H. Kenzaki et al., (2011) JCTC.
 template<typename traitsT>
-class UnderdampedLangevinStepper
+class UnderdampedLangevinIntegrator
 {
   public:
     typedef traitsT traits_type;
@@ -34,7 +34,7 @@ class UnderdampedLangevinStepper
 
   public:
 
-    UnderdampedLangevinStepper(const real_type dt,
+    UnderdampedLangevinIntegrator(const real_type dt,
             std::vector<real_type> gamma, rng_type&& rng)
         : dt_(dt), halfdt_(dt / 2), halfdt2_(dt * dt / 2),
           rng_(std::move(rng)),
@@ -43,7 +43,7 @@ class UnderdampedLangevinStepper
     {
         gammas_ = std::move(gamma);
     }
-    ~UnderdampedLangevinStepper() = default;
+    ~UnderdampedLangevinIntegrator() = default;
 
     void initialize(system_type& sys, forcefield_type& ff);
     real_type step(const real_type time, system_type& sys, forcefield_type& ff);
@@ -58,7 +58,7 @@ class UnderdampedLangevinStepper
     {
         if(!sys.has_attribute("temperature"))
         {
-            throw std::out_of_range("mjolnir::UnderdampedLangevinStepper: "
+            throw std::out_of_range("mjolnir::UnderdampedLangevinIntegrator: "
                 "Langevin Integrator requires reference temperature, but "
                 "`temperature` is not found in `system.attribute`.");
         }
@@ -93,7 +93,7 @@ class UnderdampedLangevinStepper
 };
 
 template<typename traitsT>
-void UnderdampedLangevinStepper<traitsT>::initialize(
+void UnderdampedLangevinIntegrator<traitsT>::initialize(
         system_type& system, forcefield_type& ff)
 {
     // initialize temperature and noise intensity
@@ -119,8 +119,8 @@ void UnderdampedLangevinStepper<traitsT>::initialize(
 }
 
 template<typename traitsT>
-typename UnderdampedLangevinStepper<traitsT>::real_type
-UnderdampedLangevinStepper<traitsT>::step(
+typename UnderdampedLangevinIntegrator<traitsT>::real_type
+UnderdampedLangevinIntegrator<traitsT>::step(
         const real_type time, system_type& sys, forcefield_type& ff)
 {
     real_type largest_disp2 = real_type(0.0);
