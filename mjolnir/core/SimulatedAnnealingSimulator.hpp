@@ -48,7 +48,6 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
     typedef scheduleT<real_type> scheduler_type;
-    typedef progress_bar<50> progress_bar_type;
 
     SimulatedAnnealingSimulator(
         const std::size_t tstep,     const std::size_t sstep,
@@ -59,8 +58,7 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
       time_(0.0), r_total_step_(1.0 / tstep),
       each_step_(each_step), scheduler_(scheduler),
       system_(std::move(sys)), ff_(std::move(ff)),
-      integrator_(std::move(integr)), observer_(std::move(obs)),
-      progress_bar_(tstep)
+      integrator_(std::move(integr)), observer_(std::move(obs))
     {}
     ~SimulatedAnnealingSimulator() override = default;
 
@@ -91,7 +89,6 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
     forcefield_type ff_;
     integrator_type integrator_;
     observer_type   observer_;
-    progress_bar_type progress_bar_;
 };
 
 template<typename traitsT, typename integratorT,
@@ -104,7 +101,7 @@ SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::initialize()
     this->ff_.initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_);
 
-    observer_.initialize(this->system_, this->ff_);
+    observer_.initialize(this->system_, this->ff_, this->total_step_);
     observer_.output(0, this->system_, this->ff_);
     return;
 }
@@ -135,7 +132,6 @@ inline bool SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::step()
     if(step_count_ % save_step_ == 0)
     {
         observer_.output(this->step_count_, this->system_, this->ff_);
-        std::cerr << progress_bar_.format(this->step_count_);
     }
     return step_count_ < total_step_;
 }
@@ -145,7 +141,6 @@ template<typename traitsT, typename integratorT,
 inline void
 SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::finalize()
 {
-    std::cerr << progress_bar_.format(this->total_step_) << std::endl;
     if(this->step_count_ % save_step_ != 0)
     {
         observer_.output(this->step_count_, this->system_, this->ff_);

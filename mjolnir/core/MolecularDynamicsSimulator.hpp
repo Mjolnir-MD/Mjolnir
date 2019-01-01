@@ -4,7 +4,6 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/core/Observer.hpp>
-#include <mjolnir/util/progress_bar.hpp>
 
 namespace mjolnir
 {
@@ -20,15 +19,13 @@ class MolecularDynamicsSimulator final : public SimulatorBase
     typedef Observer<traits_type>   observer_type;
     typedef typename traits_type::real_type       real_type;
     typedef typename traits_type::coordinate_type coordinate_type;
-    typedef progress_bar<50> progress_bar_type;
 
     MolecularDynamicsSimulator(const std::size_t tstep, const std::size_t save_step,
                 system_type&& sys, forcefield_type&& ff,
                 integrator_type&& integr, observer_type&& obs)
     : total_step_(tstep), step_count_(0), save_step_(save_step), time_(0.),
       system_(std::move(sys)), ff_(std::move(ff)),
-      integrator_(std::move(integr)), observer_(std::move(obs)),
-      progress_bar_(tstep)
+      integrator_(std::move(integr)), observer_(std::move(obs))
     {}
     ~MolecularDynamicsSimulator() override = default;
 
@@ -56,7 +53,6 @@ class MolecularDynamicsSimulator final : public SimulatorBase
     forcefield_type   ff_;
     integrator_type   integrator_;
     observer_type     observer_;
-    progress_bar_type progress_bar_;
 };
 
 template<typename traitsT, typename integratorT>
@@ -65,7 +61,7 @@ inline void MolecularDynamicsSimulator<traitsT, integratorT>::initialize()
     this->ff_.initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_);
 
-    observer_.initialize(this->system_, this->ff_);
+    observer_.initialize(this->system_, this->ff_, this->total_step_);
     observer_.output(0, this->system_, this->ff_);
     return;
 }
@@ -80,7 +76,6 @@ inline bool MolecularDynamicsSimulator<traitsT, integratorT>::step()
     if(step_count_ % save_step_ == 0)
     {
         observer_.output(this->step_count_, this->system_, this->ff_);
-        std::cerr << progress_bar_.format(this->step_count_);
     }
     return step_count_ < total_step_;
 }
@@ -88,7 +83,6 @@ inline bool MolecularDynamicsSimulator<traitsT, integratorT>::step()
 template<typename traitsT, typename integratorT>
 inline void MolecularDynamicsSimulator<traitsT, integratorT>::finalize()
 {
-    std::cerr << progress_bar_.format(this->total_step_) << std::endl;
     if(this->step_count_ % save_step_ != 0)
     {
         observer_.output(this->step_count_, this->system_, this->ff_);
