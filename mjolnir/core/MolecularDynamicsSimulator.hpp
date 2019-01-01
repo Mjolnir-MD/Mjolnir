@@ -76,6 +76,9 @@ inline bool MolecularDynamicsSimulator<traitsT, integratorT>::step()
     if(step_count_ % save_step_ == 0)
     {
         observer_.output(this->step_count_, this->system_, this->ff_);
+        observer_.output_progress(this->step_count_);
+        // output_progress might be ignored by observer
+        // depending on the runtime condition
     }
     return step_count_ < total_step_;
 }
@@ -86,6 +89,7 @@ inline void MolecularDynamicsSimulator<traitsT, integratorT>::finalize()
     if(this->step_count_ % save_step_ != 0)
     {
         observer_.output(this->step_count_, this->system_, this->ff_);
+        observer_.output_progress_LF(this->step_count_);
     }
     return;
 }
