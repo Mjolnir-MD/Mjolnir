@@ -17,6 +17,9 @@ read_observer(const toml::table& root)
     const auto& files  = toml::find<toml::value>(root, "files");
     const auto& output = toml::find<toml::value>(files, "output");
 
+    const auto progress_bar = toml::expect<bool>(output, "progress_bar")
+                                                .unwrap_or(true);
+
     std::string output_path("./");
     if(toml::get<toml::table>(output).count("path") == 1)
     {
@@ -26,7 +29,7 @@ read_observer(const toml::table& root)
     const auto output_prefix = toml::find<std::string>(output, "prefix");
     MJOLNIR_LOG_NOTICE("output files are `", output_path, output_prefix, ".*`");
 
-    return Observer<traitsT>(output_path + output_prefix);
+    return Observer<traitsT>(output_path + output_prefix, progress_bar);
 }
 
 } // mjolnir
