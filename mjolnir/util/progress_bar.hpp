@@ -25,6 +25,11 @@ class progress_bar
 
   public:
 
+    progress_bar(): total_(1), r_total_(1.0)
+    {
+        buffer_.fill('\0');
+        buffer_.front() = '\r';
+    }
     progress_bar(std::size_t tot) : total_(tot), r_total_(1.0 / tot)
     {
         buffer_.fill('\0');
@@ -35,6 +40,13 @@ class progress_bar
     progress_bar(progress_bar &&)     = default;
     progress_bar& operator=(progress_bar const&) = default;
     progress_bar& operator=(progress_bar &&)     = default;
+
+    void reset(const std::size_t total_step)
+    {
+        this->total_   = total_step;
+        this->r_total_ = 1.0 / static_cast<double>(total_step);
+        return;
+    }
 
     const char* format(std::size_t count)
     {
