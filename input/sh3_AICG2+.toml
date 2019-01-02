@@ -1,7 +1,8 @@
 # vim:set foldmethod=marker
 [files]
-output.prefix = "sh3_unlim" # output file prefix
-output.path   = "./"        # output path
+output.prefix = "sh3_unlim_" # output file prefix
+output.path   = "./"         # output path
+output.progress_bar = true   # write progress bar into console. by default, true
 
 [units]
 length = "angstrom" # "angstorm" or "Å" or "nm"
