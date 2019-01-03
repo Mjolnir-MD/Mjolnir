@@ -30,8 +30,9 @@ class static_string
     {
         if(this->size_ > this->capacity_)
         {
-            throw_exception<std::length_error>("constructing static_assert<", N,
-                "> with literal string having ", this->size_, " length.");
+            throw_exception<std::length_error>("static_string (with capacity ",
+                this->capacity_, ") cannot be constructed with string having ",
+                this->size_, " length.");
         }
         return ;
     }
@@ -180,6 +181,9 @@ class static_string
     std::size_t    size_;
     container_type buffer_;
 };
+
+template<std::size_t N>
+constexpr std::size_t static_string<N>::capacity_;
 
 template<std::size_t N, std::size_t M>
 static_string<N+M>
