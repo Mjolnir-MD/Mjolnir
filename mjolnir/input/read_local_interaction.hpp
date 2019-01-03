@@ -29,7 +29,7 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
     const auto potential = toml::find<std::string>(local, "potential");
     if(potential == "Harmonic")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Harmonic.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Harmonic.");
         using potentialT = HarmonicPotential<real_type>;
 
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
@@ -37,7 +37,7 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
     }
     else if(potential == "Go1012Contact")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is 10-12 Go contact.");
+        MJOLNIR_LOG_NOTICE("-- potential function is 10-12 Go contact.");
         using potentialT = Go1012ContactPotential<real_type>;
 
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
@@ -45,7 +45,7 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
     }
     else if(potential == "Gaussian")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Gaussian.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Gaussian.");
         using potentialT = GaussianPotential<real_type>;
 
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
@@ -78,7 +78,7 @@ read_bond_angle_interaction(
 
     if(potential == "Harmonic")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Harmonic.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Harmonic.");
         using potentialT = HarmonicPotential<real_type>;
 
         return make_unique<BondAngleInteraction<traitsT, potentialT>>(
@@ -86,7 +86,7 @@ read_bond_angle_interaction(
     }
     else if(potential == "FlexibleLocalAngle")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Flexible Local Angle.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Flexible Local Angle.");
         using potentialT = FlexibleLocalAnglePotential<real_type>;
 
         return make_unique<BondAngleInteraction<traitsT, potentialT>>(
@@ -94,7 +94,7 @@ read_bond_angle_interaction(
     }
     else if(potential == "Gaussian")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Gaussian.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Gaussian.");
         using potentialT = GaussianPotential<real_type>;
 
         return make_unique<BondAngleInteraction<traitsT, potentialT>>(
@@ -127,7 +127,7 @@ read_dihedral_angle_interaction(
 
     if(potential == "Harmonic")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Harmonic.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Harmonic.");
         using potentialT = HarmonicPotential<real_type>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
@@ -135,7 +135,7 @@ read_dihedral_angle_interaction(
     }
     else if(potential == "ClementiDihedral")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Clementi-Go's dihedral.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Clementi-Go's dihedral.");
         using potentialT = ClementiDihedralPotential<real_type>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
@@ -143,7 +143,7 @@ read_dihedral_angle_interaction(
     }
     else if(potential == "Gaussian")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Gaussian.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Gaussian.");
         using potentialT = AngularGaussianPotential<real_type>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
@@ -151,7 +151,7 @@ read_dihedral_angle_interaction(
     }
     else if(potential == "FlexibleLocalDihedral")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Flexible Local Dihedral.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Flexible Local Dihedral.");
         using potentialT = FlexibleLocalDihedralPotential<real_type>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
@@ -161,7 +161,7 @@ read_dihedral_angle_interaction(
     //     not so difficult, but practically, it makes the code messy...).
     else if(potential == "Gaussian+FlexibleLocalDihedral")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Gaussian + FlexibleLocalDihedral.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Gaussian + FlexibleLocalDihedral.");
         using potential_1_T = GaussianPotential<real_type>;
         using potential_2_T = FlexibleLocalDihedralPotential<real_type>;
         using potentialT    =

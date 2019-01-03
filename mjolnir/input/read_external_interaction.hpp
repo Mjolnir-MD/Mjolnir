@@ -27,7 +27,7 @@ read_external_distance_interaction(const toml::value& external, shapeT&& shape)
     const auto potential = toml::find<std::string>(external, "potential");
     if(potential == "ImplicitMembrane")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Implicit Membrane.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Implicit Membrane.");
         using potential_t   = ImplicitMembranePotential<real_type>;
         using interaction_t = ExternalDistanceInteraction<
                                     traitsT, potential_t, shapeT>;
@@ -37,7 +37,7 @@ read_external_distance_interaction(const toml::value& external, shapeT&& shape)
     }
     else if(potential == "LennardJonesWall")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Lennard-Jones.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Lennard-Jones.");
         using potential_t   = LennardJonesWallPotential<real_type>;
         using interaction_t = ExternalDistanceInteraction<
                                     traitsT, potential_t, shapeT>;
@@ -46,7 +46,7 @@ read_external_distance_interaction(const toml::value& external, shapeT&& shape)
     }
     else if(potential == "ExcludedVolumeWall")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Excluded-Volume.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Excluded-Volume.");
         using potential_t   = ExcludedVolumeWallPotential<real_type>;
         using interaction_t = ExternalDistanceInteraction<
                                     traitsT, potential_t, shapeT>;

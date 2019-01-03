@@ -31,7 +31,7 @@ read_global_pair_interaction(const toml::value& global)
 
     if(potential == "ExcludedVolume")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Excluded Volume.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Excluded Volume.");
         using potential_t = ExcludedVolumePotential<real_type>;
 
         return read_spatial_partition<traitsT, potential_t>(
@@ -39,7 +39,7 @@ read_global_pair_interaction(const toml::value& global)
     }
     else if(potential == "DebyeHuckel")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Debye-Huckel.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Debye-Huckel.");
         using potential_t = DebyeHuckelPotential<real_type>;
 
         return read_spatial_partition<traitsT, potential_t>(
@@ -47,7 +47,7 @@ read_global_pair_interaction(const toml::value& global)
     }
     else if(potential == "LennardJones")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Lennard-Jones.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Lennard-Jones.");
         using potential_t = LennardJonesPotential<real_type>;
 
         return read_spatial_partition<traitsT, potential_t>(
@@ -55,7 +55,7 @@ read_global_pair_interaction(const toml::value& global)
     }
     else if(potential == "UniformLennardJones")
     {
-        MJOLNIR_LOG_NOTICE("-- potential functions is Uniform Lennard-Jones.");
+        MJOLNIR_LOG_NOTICE("-- potential function is Uniform Lennard-Jones.");
         using potential_t = UniformLennardJonesPotential<real_type>;
 
         return read_spatial_partition<traitsT, potential_t>(
