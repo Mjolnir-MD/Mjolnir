@@ -107,6 +107,7 @@ inline void Observer<traitsT>::output_progress(const std::size_t step)
     if(this->output_progress_)
     {
         std::cerr << progress_bar_.format(step);
+        if(step == progress_bar_.total()){std::cerr << std::endl;}
     }
     return;
 }
