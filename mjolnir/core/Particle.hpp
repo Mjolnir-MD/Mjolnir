@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_PARTICLE
-#define MJOLNIR_PARTICLE
+#ifndef MJOLNIR_PARTICLE_HPP
+#define MJOLNIR_PARTICLE_HPP
 #include <mjolnir/util/static_string.hpp>
 
 namespace mjolnir
@@ -8,9 +8,10 @@ namespace mjolnir
 template<typename realT, typename coordT>
 struct Particle
 {
-    typedef realT            real_type;
-    typedef coordT           coordinate_type;
-    typedef static_string<8> static_string_type;
+    using real_type          = realT;
+    using coordinate_type    = coordT;
+    using static_string_type = static_string<16>;
+
     real_type          mass;
     real_type          rmass; // r is for reciprocal
     coordinate_type    position;
@@ -34,10 +35,10 @@ template<typename realT, typename coordT>
 class ParticleView
 {
   public:
-    typedef realT  real_type;
-    typedef coordT coordinate_type;
-    typedef Particle<real_type, coordinate_type>       particle_type;
-    typedef typename particle_type::static_string_type static_string_type;
+    using particle_type      = Particle<realT, coordT>;
+    using real_type          = typename particle_type::real_type;
+    using coordinate_type    = typename particle_type::coordinate_type;
+    using static_string_type = typename particle_type::static_string_type;
 
     ParticleView()  = delete; // it makes all the references undefined.
     ~ParticleView() = default;
@@ -78,10 +79,10 @@ template<typename realT, typename coordT>
 class ParticleConstView
 {
   public:
-    typedef realT  real_type;
-    typedef coordT coordinate_type;
-    typedef Particle<real_type, coordinate_type>       particle_type;
-    typedef typename particle_type::static_string_type static_string_type;
+    using particle_type      = Particle<realT, coordT>;
+    using real_type          = typename particle_type::real_type;
+    using coordinate_type    = typename particle_type::coordinate_type;
+    using static_string_type = typename particle_type::static_string_type;
 
     ParticleConstView()  = delete; // it makes all the references undefined.
     ~ParticleConstView() = default;
