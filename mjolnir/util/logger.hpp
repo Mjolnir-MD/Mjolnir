@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_UTIL_LOGGER
-#define MJOLNIR_UTIL_LOGGER
+#ifndef MJOLNIR_UTIL_LOGGER_HPP
+#define MJOLNIR_UTIL_LOGGER_HPP
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <array>

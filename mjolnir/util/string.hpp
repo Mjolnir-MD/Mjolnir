@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_STRING_HPP
-#define MJOLNIR_STRING_HPP
+#ifndef MJOLNIR_UTIL_STRING_HPP
+#define MJOLNIR_UTIL_STRING_HPP
 #include <string>
 
 namespace mjolnir

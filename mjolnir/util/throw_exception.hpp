@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_THROW_EXCEPTION_H
-#define MJOLNIR_THROW_EXCEPTION_H
+#ifndef MJOLNIR_UTIL_THROW_EXCEPTION_HPP
+#define MJOLNIR_UTIL_THROW_EXCEPTION_HPP
 #include <utility>
 #include <sstream>
 #include <string>
@@ -40,4 +40,4 @@ template<typename Exception, typename ...Args>
 }
 
 } // mjolnir
-#endif// MJOLNIR_THROW_EXCEPTION_H
+#endif// MJOLNIR_UTIL_THROW_EXCEPTION_HPP

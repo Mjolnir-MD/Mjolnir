@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_UTIL_RANGE
-#define MJOLNIR_UTIL_RANGE
+#ifndef MJOLNIR_UTIL_RANGE_HPP
+#define MJOLNIR_UTIL_RANGE_HPP
 #include <iterator>
 
 namespace mjolnir
@@ -41,4 +41,4 @@ inline range<Iterator> make_range(Iterator b, Iterator e)
 }
 
 } // mjolnir
-#endif// MJOLNIR_UTIL_RANGE
+#endif// MJOLNIR_UTIL_RANGE_HPP
