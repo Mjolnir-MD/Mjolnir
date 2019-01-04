@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_PROGRESS_BAR_HPP
-#define MJOLNIR_PROGRESS_BAR_HPP
+#ifndef MJOLNIR_UTIL_PROGRESS_BAR_HPP
+#define MJOLNIR_UTIL_PROGRESS_BAR_HPP
 #include <cstring>
 #include <cmath>
 #include <array>

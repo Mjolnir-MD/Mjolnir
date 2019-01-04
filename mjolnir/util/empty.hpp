@@ -1,8 +1,8 @@
-#ifndef MJOLNIR_UTILITY_EMPTY_STRUCT
-#define MJOLNIR_UTILITY_EMPTY_STRUCT
+#ifndef MJOLNIR_UTIL_EMPTY_HPP
+#define MJOLNIR_UTIL_EMPTY_HPP
 
 namespace mjolnir
 {
 struct empty_t{};
 } // mjolnir
-#endif // MJOLNIR_UTILITY_EMPTY_STRUCT
+#endif // MJOLNIR_UTIL_EMPTY_HPP

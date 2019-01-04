@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_UTIL_MAKE_UNIQUE
-#define MJOLNIR_UTIL_MAKE_UNIQUE
+#ifndef MJOLNIR_UTIL_MAKE_UNIQUE_HPP
+#define MJOLNIR_UTIL_MAKE_UNIQUE_HPP
 #include <memory>
 
 namespace mjolnir
@@ -12,4 +12,4 @@ inline std::unique_ptr<T> make_unique(Ts&& ... args)
 }
 
 } // mjolnir
-#endif /* MJOLNIR_UTIL_MAKE_UNIQUE */
+#endif // MJOLNIR_UTIL_MAKE_UNIQUE_HPP
