@@ -1,6 +1,7 @@
 # Mjolnir
 
 [![Build Status](https://travis-ci.org/ToruNiina/Mjolnir.svg?branch=master)](https://travis-ci.org/ToruNiina/Mjolnir)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/dd4a2d8484e0409bb259c81fdefbb683)](https://www.codacy.com/app/ToruNiina/Mjolnir?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ToruNiina/Mjolnir&amp;utm_campaign=Badge_Grade)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
 Molecular Dynamics Simulation Software written in C++11.
