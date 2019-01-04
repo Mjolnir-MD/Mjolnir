@@ -13,9 +13,9 @@ Mainly focused on Coarse-Grained MD simulation.
 
 ### Goals
 
- 1. Flexibility: To make it easy to implement new forcefields.
- 2. Reliability: To do everything that a user wants and nothing more than that.
- 3. Efficiency: To be fast whenever possible without breaking the above goals.
+1. Flexibility: To make it easy to implement new forcefields.
+2. Reliability: To do everything that a user wants and nothing more than that.
+3. Efficiency: To be fast whenever possible without breaking the above goals.
 
 ## Build
 
@@ -32,9 +32,9 @@ $ make test # optional
 After this, you will find executable binary in `bin` directory.
 
 The codes are tested with the following compilers on [Travis CI](https://travis-ci.org/ToruNiina/Mjolnir).
-  - `g++-7`, `g++-6`, `g++-5` on `Linux`
-  - `clang++-7`, `clang++-6`, `clang++-5` on `Linux`
-  - `clang++` on `OS X`
+- `g++-7`, `g++-6`, `g++-5` on `Linux`
+- `clang++-7`, `clang++-6`, `clang++-5` on `Linux`
+- `clang++` on `OS X`
 
 ## Dependency
 
@@ -59,15 +59,15 @@ $ ./bin/mjolnir input/sh3_AICG2+.toml
 
 ## Author
 
-  - Toru Niina
-    - the original designer and implementer.
-  - Yutaka Murata
-    - adds implicit membrane potential.
+- Toru Niina
+  - the original designer and implementer.
+- Yutaka Murata
+  - adds implicit membrane potential.
 
 ## Licensing terms
 
 This product is licensed under the terms of the [MIT License](LICENSE).
 
-  - Copyright (c) 2016-2018 Toru Niina
+- Copyright (c) 2016-2018 Toru Niina
 
 All rights reserved.
