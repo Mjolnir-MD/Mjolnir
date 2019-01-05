@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_GLOBAL_INTEARACTION_BASE
 #define MJOLNIR_GLOBAL_INTEARACTION_BASE
 #include <mjolnir/core/System.hpp>
+#include <string>
 
 namespace mjolnir
 {
@@ -20,8 +21,8 @@ class GlobalInteractionBase
 
     virtual ~GlobalInteractionBase() = default;
 
-    virtual void initialize(const system_type& sys) = 0;
-    virtual void update    (const system_type& sys) = 0;
+    virtual void initialize(const system_type&) = 0;
+    virtual void update    (const system_type&) = 0;
     virtual void update_margin(const real_type, const system_type&) = 0;
 
     virtual void      calc_force (system_type&)             = 0;

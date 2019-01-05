@@ -1,8 +1,7 @@
 #ifndef MJOLNIR_LOCAL_INTEARACTION_BASE
 #define MJOLNIR_LOCAL_INTEARACTION_BASE
 #include <mjolnir/core/System.hpp>
-#include <memory>
-#include <array>
+#include <string>
 
 namespace mjolnir
 {

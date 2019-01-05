@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_EXTERNAL_FORCE_INTEARACTION_BASE
 #define MJOLNIR_EXTERNAL_FORCE_INTEARACTION_BASE
 #include <mjolnir/core/System.hpp>
+#include <string>
 
 namespace mjolnir
 {
@@ -20,8 +21,8 @@ class ExternalForceInteractionBase
 
     virtual ~ExternalForceInteractionBase() = default;
 
-    virtual void initialize (const system_type& sys) = 0;
-    virtual void reconstruct(const system_type& sys) = 0;
+    virtual void initialize(const system_type&) = 0;
+    virtual void update    (const system_type&) = 0;
 
     virtual void      calc_force (system_type&)             = 0;
     virtual real_type calc_energy(const system_type&) const = 0;

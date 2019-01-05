@@ -49,7 +49,7 @@ class ExternalDistanceInteraction final
      *  @details A method that change system parameters (e.g. Annealing), *
      *           the method is bound to call this function after changing *
      *           parameters.                                              */
-    void reconstruct(const system_type& sys) override
+    void update(const system_type& sys) override
     {
         this->potential_.update(sys); // update system parameters
         this->shape_.reconstruct(sys, this->potential_);
