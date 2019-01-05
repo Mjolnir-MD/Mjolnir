@@ -80,7 +80,7 @@ class UnlimitedGridCellList
     void make  (const system_type& sys, const PotentialT& pot);
 
     template<typename PotentialT>
-    void update(const system_type& sys, const PotentialT& pot);
+    void update(const real_type, const system_type&, const PotentialT&);
 
     real_type cutoff() const noexcept {return this->cutoff_;}
     real_type margin() const noexcept {return this->margin_;}
@@ -148,6 +148,19 @@ UnlimitedGridCellList<traitsT, parameterT, N>::mesh_epsilon;
 
 template<typename traitsT, typename parameterT, std::size_t N>
 template<typename PotentialT>
+void UnlimitedGridCellList<traitsT, parameterT, N>::update(
+        const real_type dmargin, const system_type& sys, const PotentialT& pot)
+{
+    this->current_margin_ -= dmargin;
+    if(this->current_margin_ < 0.)
+    {
+        this->make(sys, pot);
+    }
+    return ;
+}
+
+template<typename traitsT, typename parameterT, std::size_t N>
+template<typename PotentialT>
 void UnlimitedGridCellList<traitsT, parameterT, N>::make(
         const system_type& sys, const PotentialT& pot)
 {
@@ -193,9 +206,9 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
         const auto& ri   = sys[i].position;
         const auto& cell = cell_list_[this->calc_index(ri)];
 
-        MJOLNIR_LOG_DEBUG("particle position", sys[i].position);
-        MJOLNIR_LOG_DEBUG("cell index",        calc_index(ri));
-        MJOLNIR_LOG_DEBUG("making verlet list for index", i);
+        MJOLNIR_LOG_DEBUG("particle position ", sys[i].position);
+        MJOLNIR_LOG_DEBUG("cell index ",        calc_index(ri));
+        MJOLNIR_LOG_DEBUG("making verlet list for index ", i);
 
         std::vector<neighbor_type> partner;
         for(std::size_t cidx : cell.second) // for all adjacent cells...
@@ -203,7 +216,7 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
             for(auto pici : cell_list_[cidx].first)
             {
                 const auto j = pici.first;
-                MJOLNIR_LOG_DEBUG("looking particle", j);
+                MJOLNIR_LOG_DEBUG("looking particle ", j);
                 if(j <= i || this->exclusion_.is_excluded(i, j))
                 {
                     continue;
@@ -212,7 +225,7 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
                 const auto& rj = sys[j].position;
                 if(length_sq(sys.adjust_direction(rj - ri)) < r_c2)
                 {
-                    MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
+                    MJOLNIR_LOG_DEBUG("add index ", j, " to verlet list ", i);
                     partner.emplace_back(j, pot.prepair_params(i, j));
                 }
             }
@@ -223,19 +236,6 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
     }
 
     this->current_margin_ = cutoff_ * margin_;
-    return ;
-}
-
-template<typename traitsT, typename parameterT, std::size_t N>
-template<typename PotentialT>
-void UnlimitedGridCellList<traitsT, parameterT, N>::update(
-        const system_type& sys, const PotentialT& pot)
-{
-    this->current_margin_ -= sys.largest_displacement() * 2;
-    if(this->current_margin_ < 0.)
-    {
-        this->make(sys, pot);
-    }
     return ;
 }
 

@@ -62,7 +62,7 @@ class VerletList
     void make  (const system_type& sys, const PotentialT& pot);
 
     template<typename PotentialT>
-    void update(const system_type& sys, const PotentialT& pot);
+    void update(const real_type, const system_type&, const PotentialT&);
 
     real_type cutoff() const noexcept {return this->cutoff_;}
     real_type margin() const noexcept {return this->margin_;}
@@ -83,6 +83,19 @@ class VerletList
     exclusion_list_type exclusion_;
     neighbor_list_type  neighbors_;
 };
+
+template<typename traitsT, typename parameterT>
+template<typename potentialT>
+void VerletList<traitsT, parameterT>::update(
+        const real_type dmargin, const system_type& sys, const potentialT& pot)
+{
+    this->current_margin_ -= dmargin;
+    if(this->current_margin_ < 0)
+    {
+        this->make(sys, pot);
+    }
+    return ;
+}
 
 template<typename traitsT, typename parameterT>
 template<typename potentialT>
@@ -118,19 +131,6 @@ void VerletList<traitsT, parameterT>::make(
         this->neighbors_.add_list_for(i, partners.begin(), partners.end());
     }
     this->current_margin_ = cutoff_ * margin_;
-    return ;
-}
-
-template<typename traitsT, typename parameterT>
-template<typename potentialT>
-void VerletList<traitsT, parameterT>::update(
-        const system_type& sys, const potentialT& pot)
-{
-    this->current_margin_ -= sys.largest_displacement() * 2;
-    if(this->current_margin_ < 0)
-    {
-        this->make(sys, pot);
-    }
     return ;
 }
 

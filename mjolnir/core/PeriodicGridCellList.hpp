@@ -77,7 +77,7 @@ class PeriodicGridCellList
     void make  (const system_type& sys, const PotentialT& pot);
 
     template<typename PotentialT>
-    void update(const system_type& sys, const PotentialT& pot);
+    void update(const real_type, const system_type&, const PotentialT&);
 
     real_type cutoff() const {return this->cutoff_;}
     real_type margin() const {return this->margin_;}
@@ -137,6 +137,19 @@ class PeriodicGridCellList
     // index_by_cell_ has {particle idx, cell idx} and sorted by cell idx
     // first term of cell list contains first and last idx of index_by_cell
 };
+
+template<typename traitsT, typename parameterT>
+template<typename PotentialT>
+void PeriodicGridCellList<traitsT, parameterT>::update(
+        const real_type dmargin, const system_type& sys, const PotentialT& pot)
+{
+    this->current_margin_ -= dmargin;
+    if(this->current_margin_ < 0.)
+    {
+        this->make(sys, pot);
+    }
+    return ;
+}
 
 template<typename traitsT, typename parameterT>
 template<typename PotentialT>
@@ -217,20 +230,6 @@ void PeriodicGridCellList<traitsT, parameterT>::make(
     }
 
     this->current_margin_ = cutoff_ * margin_;
-    return ;
-}
-
-template<typename traitsT, typename parameterT>
-template<typename PotentialT>
-void PeriodicGridCellList<traitsT, parameterT>::update(
-        const system_type& sys, const PotentialT& pot)
-{
-    // TODO if boundary changes, cell list should also reconstructed
-    this->current_margin_ -= sys.largest_displacement() * 2.;
-    if(this->current_margin_ < 0.)
-    {
-        this->make(sys, pot);
-    }
     return ;
 }
 

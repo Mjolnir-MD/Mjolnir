@@ -50,7 +50,8 @@ class NaivePairCalculation
     void make  (const system_type& sys, const PotentialT& pot);
 
     template<typename PotentialT>
-    void update(const system_type& sys, const PotentialT& pot) noexcept {return;}
+    void update(const real_type, const system_type&, const PotentialT&) noexcept
+    {return;}
 
     range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
 
@@ -76,7 +77,6 @@ void NaivePairCalculation<traitsT, parameterT>::make(
         const system_type& sys, const PotentialT& pot)
 {
     this->neighbors_.clear();
-
     for(std::size_t i=0, sz = sys.size()-1; i < sz; ++i)
     {
         std::vector<neighbor_type> partners;
