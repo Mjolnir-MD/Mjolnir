@@ -70,7 +70,7 @@ class Plane
     }
 
     void make  (const system_type& sys);
-    void update(const system_type& sys);
+    void update(const real_type dm, const system_type& sys);
 
     std::vector<std::size_t> const& neighbors() const noexcept
     {return this->negihbors_;}
@@ -84,6 +84,17 @@ class Plane
     std::vector<std::size_t> neighbors_;   // being inside of cutoff range
     std::vector<std::size_t> participant_; // particle that interacts with
 };
+
+template<typename traitsT>
+void Plane<traitsT>::update(const real_type dmargin, const system_type& sys)
+{
+    this->current_margin_ -= dmargin;
+    if(this->current_margin_ < 0)
+    {
+        this->make(sys);
+    }
+    return;
+}
 
 template<typename traitsT>
 void Plane<traitsT>::make(const system_type& sys)
@@ -101,17 +112,6 @@ void Plane<traitsT>::make(const system_type& sys)
     }
 
     this->current_margin_ = this->cutoff_ * this->margin_;
-    return;
-}
-
-template<typename traitsT>
-void Plane<traitsT>::update(const system_type& sys)
-{
-    this->current_margin_ -= sys.largest_displacement();
-    if(this->current_margin_ < 0)
-    {
-        this->make(sys);
-    }
     return;
 }
 

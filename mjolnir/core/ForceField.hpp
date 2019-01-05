@@ -65,7 +65,7 @@ class ForceField
     {
         local_   .update_margin(dmargin, sys);
         global_  .update_margin(dmargin, sys);
-//         external_.update_margin(dmargin, sys);
+        external_.update_margin(dmargin, sys);
     }
 
     void calc_force(system_type& sys)

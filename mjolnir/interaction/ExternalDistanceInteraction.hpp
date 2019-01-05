@@ -53,7 +53,11 @@ class ExternalDistanceInteraction final
     {
         this->potential_.update(sys); // update system parameters
         this->shape_.reconstruct(sys, this->potential_);
-        this->shape_.update(sys);
+    }
+
+    void update_margin(const real_type dmargin, const system_type& sys) override
+    {
+        this->shape_.update(dmargin, sys);
     }
 
     std::string name() const override
