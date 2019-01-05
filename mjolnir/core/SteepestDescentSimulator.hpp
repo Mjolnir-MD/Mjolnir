@@ -88,7 +88,9 @@ inline bool SteepestDescentSimulator<traitsT>::step()
         this->observer_.output(this->step_count_, this->system_, this->ff_);
         return false; // converged. stop the simulation!
     }
-    this->system_.largest_displacement() = std::sqrt(max_disp2);
+
+    // update neighbor list; reduce margin, reconstruct the list if needed
+    this->ff_.update_margin(2 * std::sqrt(max_disp2), this->system_);
 
     if(step_count_ % save_step_ == 0)
     {
