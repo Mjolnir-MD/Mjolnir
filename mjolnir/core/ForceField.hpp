@@ -47,23 +47,31 @@ class ForceField
         sys.topology().construct_molecules();
 
         // based on the topology, make exclusion list
-           local_.initialize(sys);
-          global_.initialize(sys);
+        local_   .initialize(sys);
+        global_  .initialize(sys);
         external_.initialize(sys);
     }
 
     // update parameters like temperature, ionic concentration, etc...
     void update(const system_type& sys)
     {
-           local_.update(sys);
-          global_.update(sys);
+        local_   .update(sys);
+        global_  .update(sys);
         external_.update(sys);
+    }
+
+    // update margin of neighbor list
+    void update_margin(const real_type dmargin, const system_type& sys)
+    {
+//         local_   .update_margin(dmargin, sys);
+        global_  .update_margin(dmargin, sys);
+//         external_.update_margin(dmargin, sys);
     }
 
     void calc_force(system_type& sys)
     {
-           local_.calc_force(sys);
-          global_.calc_force(sys);
+        local_   .calc_force(sys);
+        global_  .calc_force(sys);
         external_.calc_force(sys);
     }
     real_type calc_energy(const system_type& sys) const
