@@ -98,12 +98,12 @@ void UnderdampedLangevinIntegrator<traitsT>::initialize(
 {
     // initialize temperature and noise intensity
     this->update(system);
-
     for(std::size_t i=0; i<system.size(); ++i)
     {
         system.force(i) = coordinate_type(0, 0, 0);
     }
-    system.largest_displacement() = real_type(0.0);
+
+    // calculate force
     ff.calc_force(system);
 
     for(std::size_t i=0; i<system.size(); ++i)
@@ -123,7 +123,7 @@ typename UnderdampedLangevinIntegrator<traitsT>::real_type
 UnderdampedLangevinIntegrator<traitsT>::step(
         const real_type time, system_type& sys, forcefield_type& ff)
 {
-    real_type largest_disp2 = real_type(0.0);
+    real_type largest_disp2(0.0);
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         auto&       p = sys.position(i); // position of i-th particle
@@ -148,7 +148,9 @@ UnderdampedLangevinIntegrator<traitsT>::step(
 
         largest_disp2 = std::max(largest_disp2, length_sq(displacement));
     }
-    sys.largest_displacement() = std::sqrt(largest_disp2); // use in neighbor list
+
+    // update neighbor list; reduce margin, reconstruct the list if needed
+    ff.update_margin(2 * std::sqrt(largest_disp2), sys);
 
     // calc f(t+dt)
     ff.calc_force(sys);
