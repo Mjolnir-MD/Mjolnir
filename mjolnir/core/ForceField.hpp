@@ -63,7 +63,7 @@ class ForceField
     // update margin of neighbor list
     void update_margin(const real_type dmargin, const system_type& sys)
     {
-//         local_   .update_margin(dmargin, sys);
+        local_   .update_margin(dmargin, sys);
         global_  .update_margin(dmargin, sys);
 //         external_.update_margin(dmargin, sys);
     }

@@ -66,6 +66,10 @@ class BondAngleInteraction : public LocalInteractionBase<traitsT>
         }
     }
 
+    // do nothing. this is used to reduce margin of neighbor list, and added
+    // to this class for the consistency.
+    void update_margin(const real_type, const system_type&) override {return;}
+
     std::string name() const override
     {return "BondAngle:"_s + potential_type::name();}
 
