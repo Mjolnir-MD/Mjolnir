@@ -2,7 +2,7 @@
 #define MJOLNIR_READ_OBSERVER_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/ObserverBase.hpp>
-#include <mjolnir/core/Observer.hpp>
+#include <mjolnir/core/XYZObserver.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
@@ -36,7 +36,7 @@ read_observer(const toml::table& root)
     const auto& format = toml::find<std::string>(output, "format");
     if(format == "xyz")
     {
-        using observer_type = Observer<traitsT>;
+        using observer_type = XYZObserver<traitsT>;
         MJOLNIR_LOG_NOTICE("output format is xyz.");
         return make_unique<observer_type>(file_prefix, progress_bar);
     }

@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_CORE_OBSERVER
-#define MJOLNIR_CORE_OBSERVER
+#ifndef MJOLNIR_CORE_XYZ_OBSERVER_HPP
+#define MJOLNIR_CORE_XYZ_OBSERVER_HPP
 #include <mjolnir/core/ObserverBase.hpp>
 #include <mjolnir/util/progress_bar.hpp>
 #include <iostream>
@@ -10,7 +10,7 @@ namespace mjolnir
 {
 
 template<typename traitsT>
-class Observer final : public ObserverBase<traitsT>
+class XYZObserver final : public ObserverBase<traitsT>
 {
   public:
     using base_type         = ObserverBase<traitsT>;
@@ -23,7 +23,7 @@ class Observer final : public ObserverBase<traitsT>
 
   public:
 
-    Observer(const std::string& filename_prefix, bool output_progress = false)
+    XYZObserver(const std::string& filename_prefix, bool output_progress = false)
       : base_type(), output_progress_(output_progress), progress_bar_(1),
         prefix_(filename_prefix),
         xyz_name_(filename_prefix + std::string(".xyz")),
@@ -35,7 +35,7 @@ class Observer final : public ObserverBase<traitsT>
         this->clear_file(this->vel_name_);
         this->clear_file(this->ene_name_);
     }
-    ~Observer() override = default;
+    ~XYZObserver() override = default;
 
     void initialize(const std::size_t total_step,
                     const system_type& sys, const forcefield_type& ff) override
@@ -59,7 +59,7 @@ class Observer final : public ObserverBase<traitsT>
         std::ofstream ofs(fname);
         if(not ofs.good())
         {
-            throw_exception<std::runtime_error>("[error] mjolnir::Observer: "
+            throw_exception<std::runtime_error>("[error] mjolnir::XYZObserver: "
                     "file open error: ", fname);
         }
         return;
@@ -86,7 +86,7 @@ class Observer final : public ObserverBase<traitsT>
 };
 
 template<typename traitsT>
-inline void Observer<traitsT>::output(
+inline void XYZObserver<traitsT>::output(
     const std::size_t step, const system_type& sys, const forcefield_type& ff)
 {
     std::ofstream ofs(xyz_name_, std::ios::app);
@@ -128,4 +128,4 @@ inline void Observer<traitsT>::output(
 }
 
 } // mjolnir
-#endif /* MJOLNIR_CORE_OBSERVER */
+#endif // MJOLNIR_CORE_XYZ_OBSERVER_HPP
