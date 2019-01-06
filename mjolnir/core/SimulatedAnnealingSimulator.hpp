@@ -101,7 +101,7 @@ SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::initialize()
     this->ff_.initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_);
 
-    observer_.initialize(this->system_, this->ff_, this->total_step_);
+    observer_.initialize(this->total_step_, this->system_, this->ff_);
     return;
 }
 

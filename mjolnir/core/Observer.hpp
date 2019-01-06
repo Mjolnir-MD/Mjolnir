@@ -1,7 +1,6 @@
 #ifndef MJOLNIR_CORE_OBSERVER
 #define MJOLNIR_CORE_OBSERVER
-#include <mjolnir/core/System.hpp>
-#include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/ObserverBase.hpp>
 #include <mjolnir/util/progress_bar.hpp>
 #include <iostream>
 #include <fstream>
@@ -10,57 +9,36 @@
 namespace mjolnir
 {
 
-
-// TODO: consider adding ObserverBase and implement Observers for each format
 template<typename traitsT>
-class Observer
+class Observer final : ObserverBase<traitsT>
 {
   public:
-    typedef traitsT traits_type;
-    typedef System<traits_type> system_type;
-    typedef ForceField<traits_type> forcefield_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    typedef progress_bar<50> progress_bar_type;
+    using base_type         = ObserverBase<traitsT>;
+    using traits_type       = typename base_type::traits_type;
+    using real_type         = typename base_type::real_type;
+    using coordinate_type   = typename base_type::coordinate_type;
+    using system_type       = typename base_type::system_type;
+    using forcefield_type   = typename base_type::forcefield_type;
+    using progress_bar_type = progress_bar<50>;
 
   public:
 
     Observer(const std::string& filename_prefix, bool output_progress = false)
-      : output_progress_(output_progress), progress_bar_(1), prefix_(filename_prefix),
+      : base_type(), output_progress_(output_progress), progress_bar_(1),
+        prefix_(filename_prefix),
         xyz_name_(filename_prefix + std::string(".xyz")),
         vel_name_(filename_prefix + std::string(".vel")),
         ene_name_(filename_prefix + std::string(".ene"))
     {
-        // clear the contents
-        {
-            std::ofstream ofs(this->xyz_name_);
-            if(not ofs.good())
-            {
-                throw std::runtime_error("file open error: " + this->xyz_name_);
-            }
-            ofs.close();
-        }
-        {
-            std::ofstream ofs(this->vel_name_);
-            if(not ofs.good())
-            {
-                throw std::runtime_error("file open error: " + this->vel_name_);
-            }
-            ofs.close();
-        }
-        {
-            std::ofstream ofs(this->ene_name_);
-            if(not ofs.good())
-            {
-                throw std::runtime_error("file open error: " + this->ene_name_);
-            }
-            ofs.close();
-        }
+        // clear files and throw an error if the files cannot be opened.
+        this->clear_file(this->xyz_name_);
+        this->clear_file(this->vel_name_);
+        this->clear_file(this->ene_name_);
     }
-    ~Observer() = default;
+    ~Observer() override = default;
 
-    void initialize(const system_type& sys, const forcefield_type& ff,
-                    const std::size_t total_step)
+    void initialize(const std::size_t total_step,
+                    const system_type& sys, const forcefield_type& ff) override
     {
         this->progress_bar_.reset(total_step); // set total_step
 
@@ -70,11 +48,22 @@ class Observer
     }
 
     void output(const std::size_t step,
-                const system_type& sys, const forcefield_type& ff);
+                const system_type& sys, const forcefield_type& ff) override;
 
-    std::string const& prefix() const noexcept {return prefix_;}
+    std::string const& prefix() const noexcept override {return prefix_;}
 
   private:
+
+    void clear_file(const std::string& fname) const
+    {
+        std::ofstream ofs(fname);
+        if(not ofs.good())
+        {
+            throw_exception<std::runtime_error>("[error] mjolnir::Observer: "
+                    "file open error: ", fname);
+        }
+        return;
+    }
 
     real_type calc_kinetic_energy(const system_type& sys) const
     {

@@ -57,7 +57,7 @@ inline void SteepestDescentSimulator<traitsT>::initialize()
 {
     this->ff_.initialize(this->system_);
 
-    this->observer_.initialize(this->system_, this->ff_, step_limit_);
+    this->observer_.initialize(this->step_limit_, this->system_, this->ff_);
     return;
 }
 
