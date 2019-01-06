@@ -16,6 +16,7 @@ inline toml::Table make_empty_input()
 
     toml::Table output;
     output["prefix"] = "nothing"_s;
+    output["format"] = "xyz"_s;
     output["path"]   = "./"_s;
 
     toml::Table files;
