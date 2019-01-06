@@ -1,9 +1,9 @@
 #ifndef MJOLNIR_SIMULATED_ANNEALING_SIMULATOR_HPP
 #define MJOLNIR_SIMULATED_ANNEALING_SIMULATOR_HPP
 #include <mjolnir/core/SimulatorBase.hpp>
+#include <mjolnir/core/ObserverBase.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
-#include <mjolnir/core/Observer.hpp>
 
 namespace mjolnir
 {
@@ -40,14 +40,15 @@ template<typename traitsT, typename integratorT,
 class SimulatedAnnealingSimulator final : public SimulatorBase
 {
   public:
-    typedef traitsT     traits_type;
-    typedef integratorT integrator_type;
-    typedef System<traits_type>     system_type;
-    typedef ForceField<traits_type> forcefield_type;
-    typedef Observer<traits_type>   observer_type;
-    typedef typename traits_type::real_type       real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    typedef scheduleT<real_type> scheduler_type;
+    using traits_type        = traitsT;
+    using real_type          = typename traits_type::real_type;
+    using coordinate_type    = typename traits_type::coordinate_type;
+    using integrator_type    = integratorT;
+    using system_type        = System<traits_type>;
+    using forcefield_type    = ForceField<traits_type>;
+    using observer_base_type = ObserverBase<traits_type>;
+    using observer_type      = std::unique_ptr<observer_base_type>;
+    using scheduler_type     = scheduleT<real_type> ;
 
     SimulatedAnnealingSimulator(
         const std::size_t tstep,     const std::size_t sstep,
@@ -101,7 +102,7 @@ SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::initialize()
     this->ff_.initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_);
 
-    observer_.initialize(this->total_step_, this->system_, this->ff_);
+    observer_->initialize(this->total_step_, this->system_, this->ff_);
     return;
 }
 
@@ -114,7 +115,7 @@ inline bool SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::step()
 
     if(step_count_ % save_step_ == 0)
     {
-        observer_.output(this->step_count_, this->system_, this->ff_);
+        observer_->output(this->step_count_, this->system_, this->ff_);
     }
 
     integrator_.step(this->time_, system_, ff_);
@@ -141,7 +142,7 @@ template<typename traitsT, typename integratorT,
 inline void
 SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::finalize()
 {
-    observer_.output(this->step_count_, this->system_, this->ff_);
+    observer_->output(this->step_count_, this->system_, this->ff_);
     return;
 }
 

@@ -1,9 +1,9 @@
 #ifndef MJOLNIR_STEEPEST_DESCENT_SIMULATOR
 #define MJOLNIR_STEEPEST_DESCENT_SIMULATOR
 #include <mjolnir/core/SimulatorBase.hpp>
+#include <mjolnir/core/ObserverBase.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
-#include <mjolnir/core/Observer.hpp>
 #include <limits>
 
 namespace mjolnir
@@ -13,12 +13,13 @@ template<typename traitsT>
 class SteepestDescentSimulator final : public SimulatorBase
 {
   public:
-    typedef traitsT traits_type;
-    typedef System<traits_type>     system_type;
-    typedef ForceField<traits_type> forcefield_type;
-    typedef Observer<traits_type>   observer_type;
-    typedef typename traits_type::real_type       real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
+    using traits_type        = traitsT;
+    using real_type          = typename traits_type::real_type;
+    using coordinate_type    = typename traits_type::coordinate_type;
+    using system_type        = System<traits_type>;
+    using forcefield_type    = ForceField<traits_type>;
+    using observer_base_type = ObserverBase<traits_type>;
+    using observer_type      = std::unique_ptr<observer_base_type>;
 
     SteepestDescentSimulator(const real_type h, const real_type threshold,
             const std::size_t step_limit, const std::size_t save_step,
@@ -57,7 +58,7 @@ inline void SteepestDescentSimulator<traitsT>::initialize()
 {
     this->ff_.initialize(this->system_);
 
-    this->observer_.initialize(this->step_limit_, this->system_, this->ff_);
+    this->observer_->initialize(this->step_limit_, this->system_, this->ff_);
     return;
 }
 
@@ -66,7 +67,7 @@ inline bool SteepestDescentSimulator<traitsT>::step()
 {
     if(step_count_ % save_step_ == 0)
     {
-        this->observer_.output(this->step_count_, this->system_, this->ff_);
+        this->observer_->output(this->step_count_, this->system_, this->ff_);
     }
 
     // calculate negative derivatives (-dV/dr)
@@ -100,7 +101,7 @@ inline bool SteepestDescentSimulator<traitsT>::step()
 template<typename traitsT>
 inline void SteepestDescentSimulator<traitsT>::finalize()
 {
-    this->observer_.output(this->step_count_, this->system_, this->ff_);
+    this->observer_->output(this->step_count_, this->system_, this->ff_);
     return;
 }
 
