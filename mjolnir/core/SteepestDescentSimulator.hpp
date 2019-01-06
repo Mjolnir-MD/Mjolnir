@@ -58,13 +58,17 @@ inline void SteepestDescentSimulator<traitsT>::initialize()
     this->ff_.initialize(this->system_);
 
     this->observer_.initialize(this->system_, this->ff_, step_limit_);
-    this->observer_.output(0, this->system_, this->ff_);
     return;
 }
 
 template<typename traitsT>
 inline bool SteepestDescentSimulator<traitsT>::step()
 {
+    if(step_count_ % save_step_ == 0)
+    {
+        this->observer_.output(this->step_count_, this->system_, this->ff_);
+    }
+
     // calculate negative derivatives (-dV/dr)
     this->ff_.calc_force(this->system_);
 
@@ -85,18 +89,10 @@ inline bool SteepestDescentSimulator<traitsT>::step()
 
     if(max_diff < this->threshold_)
     {
-        this->observer_.output(this->step_count_, this->system_, this->ff_);
         return false; // converged. stop the simulation!
     }
     this->system_.largest_displacement() = std::sqrt(max_disp2);
 
-    if(step_count_ % save_step_ == 0)
-    {
-        this->observer_.output(this->step_count_, this->system_, this->ff_);
-        this->observer_.output_progress(this->step_count_);
-        // output_progress might be ignored by observer
-        // depending on the runtime condition
-    }
     ++step_count_;
     return this->step_count_ < this->step_limit_;
 }
@@ -105,7 +101,6 @@ template<typename traitsT>
 inline void SteepestDescentSimulator<traitsT>::finalize()
 {
     this->observer_.output(this->step_count_, this->system_, this->ff_);
-    this->observer_.output_progress_LF(this->step_count_);
     return;
 }
 

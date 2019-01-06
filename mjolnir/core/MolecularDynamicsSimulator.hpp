@@ -62,35 +62,28 @@ inline void MolecularDynamicsSimulator<traitsT, integratorT>::initialize()
     this->integrator_.initialize(this->system_, this->ff_);
 
     observer_.initialize(this->system_, this->ff_, this->total_step_);
-    observer_.output(0, this->system_, this->ff_);
     return;
 }
 
 template<typename traitsT, typename integratorT>
 inline bool MolecularDynamicsSimulator<traitsT, integratorT>::step()
 {
+    if(step_count_ % save_step_ == 0)
+    {
+        observer_.output(this->step_count_, this->system_, this->ff_);
+    }
+
     integrator_.step(this->time_, system_, ff_);
     ++step_count_;
     this->time_ = this->step_count_ * integrator_.delta_t();
 
-    if(step_count_ % save_step_ == 0)
-    {
-        observer_.output(this->step_count_, this->system_, this->ff_);
-        observer_.output_progress(this->step_count_);
-        // output_progress might be ignored by observer
-        // depending on the runtime condition
-    }
     return step_count_ < total_step_;
 }
 
 template<typename traitsT, typename integratorT>
 inline void MolecularDynamicsSimulator<traitsT, integratorT>::finalize()
 {
-    if(this->step_count_ % save_step_ != 0)
-    {
-        observer_.output(this->step_count_, this->system_, this->ff_);
-        observer_.output_progress_LF(this->step_count_);
-    }
+    observer_.output(this->step_count_, this->system_, this->ff_);
     return;
 }
 

@@ -72,9 +72,6 @@ class Observer
     void output(const std::size_t step,
                 const system_type& sys, const forcefield_type& ff);
 
-    void output_progress   (const std::size_t step);
-    void output_progress_LF(const std::size_t step);
-
     std::string const& prefix() const noexcept {return prefix_;}
 
   private:
@@ -98,30 +95,6 @@ class Observer
     std::string ene_name_;
     progress_bar_type progress_bar_;
 };
-
-template<typename traitsT>
-inline void Observer<traitsT>::output_progress(const std::size_t step)
-{
-    // XXX consider introducing template argument to remove this if-branching
-    //     at the compile time
-    if(this->output_progress_)
-    {
-        std::cerr << progress_bar_.format(step);
-        if(step == progress_bar_.total()){std::cerr << std::endl;}
-    }
-    return;
-}
-template<typename traitsT>
-inline void Observer<traitsT>::output_progress_LF(const std::size_t step)
-{
-    // XXX consider introducing template argument to remove this if-branching
-    //     at the compile time
-    if(this->output_progress_)
-    {
-        std::cerr << progress_bar_.format(step) << std::endl;
-    }
-    return;
-}
 
 template<typename traitsT>
 inline void Observer<traitsT>::output(
@@ -155,6 +128,13 @@ inline void Observer<traitsT>::output(
     ofs << std::setw(14) << std::right << this->calc_kinetic_energy(sys) << '\n';
     ofs.close();
 
+    // XXX consider introducing template argument to remove this if-branching
+    //     at the compile time
+    if(this->output_progress_)
+    {
+        std::cerr << progress_bar_.format(step);
+        if(step == progress_bar_.total()){std::cerr << std::endl;}
+    }
     return ;
 }
 
