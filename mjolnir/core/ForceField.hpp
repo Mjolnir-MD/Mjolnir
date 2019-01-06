@@ -63,6 +63,17 @@ class ForceField
     // update margin of neighbor list
     void update_margin(const real_type dmargin, const system_type& sys)
     {
+        // TODO:
+        // dmargin is a maximum (safe) length to reduce the margin. Since global
+        // forcefields calculate forces between particles, the safe length is
+        // mostly 2 * (largest displacement in the step). It is dmargin.
+        // However, since external forcefields calculate forces between particle
+        // and an external field, the safe length can be just the largest
+        // displacement in the step. The current implementation overestimate the
+        // safe length for the external forcefields (it's correct for global
+        // forcefields). In most cases, the most time-consuming part is global
+        // forcefields, so I implemented in this way for now. If some idea that
+        // works more efficiently is came up, this part would be re-implemented.
         local_   .update_margin(dmargin, sys);
         global_  .update_margin(dmargin, sys);
         external_.update_margin(dmargin, sys);
