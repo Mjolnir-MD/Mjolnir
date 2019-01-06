@@ -10,7 +10,7 @@ namespace mjolnir
 {
 
 template<typename traitsT>
-class Observer final : ObserverBase<traitsT>
+class Observer final : public ObserverBase<traitsT>
 {
   public:
     using base_type         = ObserverBase<traitsT>;
