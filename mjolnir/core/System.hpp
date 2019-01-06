@@ -31,7 +31,7 @@ class System
   public:
 
     System(const std::size_t num_particles, const boundary_type& bound)
-        : largest_disp_(0.0), boundary_(bound), topology_(num_particles),
+        : boundary_(bound), topology_(num_particles),
           attributes_(), num_particles_(num_particles),
           masses_   (num_particles), rmasses_   (num_particles),
           positions_(num_particles), velocities_(num_particles),
@@ -108,12 +108,8 @@ class System
     real_type& attribute(const std::string& key)       {return attributes_[key];}
     bool   has_attribute(const std::string& key) const {return attributes_.count(key) == 1;}
 
-    // store largest displacement in a step to decrease margin of verlet list.
-    real_type& largest_displacement()       noexcept {return largest_disp_;}
-    real_type  largest_displacement() const noexcept {return largest_disp_;}
-
   private:
-    real_type      largest_disp_;
+
     boundary_type  boundary_;
     topology_type  topology_;
     attribute_type attributes_;
