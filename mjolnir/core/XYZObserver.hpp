@@ -26,8 +26,8 @@ class XYZObserver final : public ObserverBase<traitsT>
     XYZObserver(const std::string& filename_prefix, bool output_progress = false)
       : base_type(), output_progress_(output_progress), progress_bar_(1),
         prefix_(filename_prefix),
-        xyz_name_(filename_prefix + std::string(".xyz")),
-        vel_name_(filename_prefix + std::string(".vel")),
+        xyz_name_(filename_prefix + std::string("_position.xyz")),
+        vel_name_(filename_prefix + std::string("_velocity.xyz")),
         ene_name_(filename_prefix + std::string(".ene"))
     {
         // clear files and throw an error if the files cannot be opened.
