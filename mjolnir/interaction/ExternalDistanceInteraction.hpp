@@ -42,7 +42,6 @@ class ExternalDistanceInteraction final
     {
         this->potential_.update(sys); // update system parameters
         this->shape_.initialize(sys, this->potential_);
-        this->shape_.update(sys);
     }
 
     /*! @brief update parameters (e.g. temperature, ionic strength, ...)  *
@@ -53,7 +52,11 @@ class ExternalDistanceInteraction final
     {
         this->potential_.update(sys); // update system parameters
         this->shape_.reconstruct(sys, this->potential_);
-        this->shape_.update(sys);
+    }
+
+    void update_margin(const real_type dmargin, const system_type& sys) override
+    {
+        this->shape_.update(dmargin, sys);
     }
 
     std::string name() const override
@@ -69,8 +72,6 @@ template<typename traitsT, typename potT, typename spaceT>
 void ExternalDistanceInteraction<traitsT, potT, spaceT>::calc_force(
         system_type& sys)
 {
-    this->shape_.update(sys); // update neighbor list...
-
     for(std::size_t i : this->shape_.neighbors())
     {
         const auto& ri = sys[i].position;

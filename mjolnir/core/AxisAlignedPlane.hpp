@@ -195,7 +195,7 @@ class AxisAlignedPlane
 
     // neighbor-list stuff
     void make  (const system_type& sys);
-    void update(const system_type& sys);
+    void update(const real_type dm, const system_type& sys);
 
     std::vector<std::size_t> const& neighbors() const noexcept
     {return this->neighbors_;}
@@ -214,6 +214,18 @@ constexpr typename AxisAlignedPlane<traitsT, NormalAxis>::real_type
     AxisAlignedPlane<traitsT, NormalAxis>::axis_sign;
 
 template<typename traitsT, template<typename> class NormalAxis>
+void AxisAlignedPlane<traitsT, NormalAxis>::update(
+        const real_type dmargin, const system_type& sys)
+{
+    this->current_margin_ -= dmargin;
+    if(this->current_margin_ < 0)
+    {
+        this->make(sys);
+    }
+    return;
+}
+
+template<typename traitsT, template<typename> class NormalAxis>
 void AxisAlignedPlane<traitsT, NormalAxis>::make(const system_type& sys)
 {
     this->neighbors_.clear();
@@ -230,17 +242,6 @@ void AxisAlignedPlane<traitsT, NormalAxis>::make(const system_type& sys)
     }
 
     this->current_margin_ = this->cutoff_ * this->margin_;
-    return;
-}
-
-template<typename traitsT, template<typename> class NormalAxis>
-void AxisAlignedPlane<traitsT, NormalAxis>::update(const system_type& sys)
-{
-    this->current_margin_ -= sys.largest_displacement();
-    if(this->current_margin_ < 0)
-    {
-        this->make(sys);
-    }
     return;
 }
 

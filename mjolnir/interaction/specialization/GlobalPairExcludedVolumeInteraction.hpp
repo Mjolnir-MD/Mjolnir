@@ -44,7 +44,6 @@ class GlobalPairInteraction<
         MJOLNIR_SCOPE(GlobalPairInteraction<ExcludedVolumePotential>::initialize(), 0);
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->partition_.initialize(sys, this->potential_);
-        this->partition_.update(sys, this->potential_);
     }
 
     /*! @brief update parameters (e.g. temperature, ionic strength, ...)  *
@@ -61,9 +60,16 @@ class GlobalPairInteraction<
         this->partition_.reconstruct(sys, this->potential_);
     }
 
+    void update_margin(const real_type dmargin, const system_type& sys) override
+    {
+        this->partition_.update(dmargin, sys, this->potential_);
+        return;
+    }
+
     void calc_force(system_type& sys) override
     {
-        partition_.update(sys, this->potential_);
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+        MJOLNIR_SCOPE_DEBUG(GlobalPairInteraction<ExcludedVolumePotential>::calc_force(), 0);
 
         constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
         constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
@@ -83,6 +89,8 @@ class GlobalPairInteraction<
                 const real_type sigma_sq = param * param;
                 if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
 
+                MJOLNIR_LOG_DEBUG("calculating force between ", i, " and ", j);
+
                 const real_type rcp_l_sq = 1 / l_sq;
                 const real_type s2l2   = sigma_sq * rcp_l_sq;
                 const real_type s6l6   = s2l2 * s2l2 * s2l2;
@@ -99,6 +107,9 @@ class GlobalPairInteraction<
 
     real_type calc_energy(const system_type& sys) const override
     {
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+        MJOLNIR_SCOPE_DEBUG(GlobalPairInteraction<ExcludedVolumePotential>::calc_force(), 0);
+
         real_type E(0);
 
         constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
@@ -119,6 +130,8 @@ class GlobalPairInteraction<
 
                 const real_type sigma_sq = param * param;
                 if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
+
+                MJOLNIR_LOG_DEBUG("calculating energy between ", i, " and ", j);
 
                 const real_type s2l2 = sigma_sq / l_sq;
                 const real_type s6l6 = s2l2 * s2l2 * s2l2;

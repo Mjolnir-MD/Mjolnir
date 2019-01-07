@@ -54,17 +54,30 @@ class GlobalForceField
         }
     }
 
+    // to reduce margin of neighbor list, and re-construct the list if needed
+    void update_margin(const real_type dmargin, const system_type& sys)
+    {
+        for(auto& item : this->interactions_)
+        {
+            item->update_margin(dmargin, sys);
+        }
+    }
+
     void calc_force(system_type& sys)
     {
         for(const auto& item : this->interactions_)
+        {
             item->calc_force(sys);
+        }
         return;
     }
     real_type calc_energy(const system_type& sys) const
     {
         real_type energy = 0.;
         for(const auto& item : this->interactions_)
+        {
             energy += item->calc_energy(sys);
+        }
         return energy;
     }
 

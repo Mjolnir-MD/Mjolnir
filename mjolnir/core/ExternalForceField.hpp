@@ -55,6 +55,15 @@ class ExternalForceField
         }
     }
 
+    // to reduce margin of neighbor list, and re-construct the list if needed
+    void update_margin(const real_type dmargin, const system_type& sys)
+    {
+        for(auto& item : this->interactions_)
+        {
+            item->update_margin(dmargin, sys);
+        }
+    }
+
     void calc_force(system_type& sys) const
     {
         for(const auto& item : this->interactions_)

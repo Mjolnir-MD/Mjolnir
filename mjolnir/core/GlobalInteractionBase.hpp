@@ -23,6 +23,7 @@ class GlobalInteractionBase
 
     virtual void initialize(const system_type&) = 0;
     virtual void update    (const system_type&) = 0;
+    virtual void update_margin(const real_type, const system_type&) = 0;
 
     virtual void      calc_force (system_type&)             = 0;
     virtual real_type calc_energy(const system_type&) const = 0;

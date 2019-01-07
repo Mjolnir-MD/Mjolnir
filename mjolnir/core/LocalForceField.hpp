@@ -56,6 +56,16 @@ class LocalForceField
         return;
     }
 
+    // to reduce margin of neighbor list, and re-construct the list if needed
+    void update_margin(const real_type dmargin, const system_type& sys)
+    {
+        for(auto& item : this->interactions_)
+        {
+            item->update_margin(dmargin, sys);
+        }
+        return;
+    }
+
     // Topology is defined based on LocalForceField.
     void write_topology(typename system_type::topology_type& topol)
     {

@@ -38,7 +38,6 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
         MJOLNIR_SCOPE(GlobalPairInteraction::initialize(), 0);
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->partition_.initialize(sys, this->potential_);
-        this->partition_.update(sys, this->potential_);
     }
 
     /*! @brief update parameters (e.g. temperature, ionic strength, ...)  *
@@ -53,7 +52,12 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
         this->potential_.update(sys);
         // potential update may change the cutoff length!
         this->partition_.reconstruct(sys, this->potential_);
-        this->partition_.update(sys, this->potential_);
+    }
+
+    void update_margin(const real_type dmargin, const system_type& sys) override
+    {
+        this->partition_.update(dmargin, sys, this->potential_);
+        return;
     }
 
     void      calc_force (system_type&)             override;
@@ -72,7 +76,6 @@ template<typename traitsT, typename potT, typename spaceT>
 void GlobalPairInteraction<traitsT, potT, spaceT>::calc_force(
         system_type& sys)
 {
-    partition_.update(sys, this->potential_);
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         for(const auto& ptnr : this->partition_.partners(i))

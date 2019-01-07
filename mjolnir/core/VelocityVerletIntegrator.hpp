@@ -51,7 +51,6 @@ void VelocityVerletIntegrator<traitsT>::initialize(
     {
         system[i].force = coordinate_type(real_type(0.0), real_type(0.0), real_type(0.0));
     }
-    system.largest_displacement() = 0;
     ff.calc_force(system);
     return;
 }
@@ -75,7 +74,9 @@ VelocityVerletIntegrator<traitsT>::step(
 
         largest_disp2 = std::max(largest_disp2, length_sq(disp));
     }
-    system.largest_displacement() = std::sqrt(largest_disp2);
+
+    // update neighbor list; reduce margin, reconstruct the list if needed
+    ff.update_margin(2 * std::sqrt(largest_disp2), system);
 
     // calc f(t+dt)
     ff.calc_force(system);
