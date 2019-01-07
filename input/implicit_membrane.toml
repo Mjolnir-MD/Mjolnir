@@ -1,6 +1,7 @@
 [files]
 output.prefix = "implicit_mem"   # output file prefix
 output.path   = "./"             # output path
+output.format = "xyz"            # output file format
 
 [units]
 length = "angstrom" # "angstorm" or "Å" or "nm"

@@ -2,6 +2,7 @@
 [files]
 output.prefix = "sh3_periodic" # output file prefix
 output.path   = "./"           # output path
+output.format = "xyz"          # output format
 
 [units]
 length = "angstrom" # "angstorm" or "Å" or "nm"

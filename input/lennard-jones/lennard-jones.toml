@@ -1,7 +1,8 @@
 # vim: foldmethod=marker
 [files]
-output.prefix = "lennard-jones_"  # file prefix.
-output.path   = "./"             # output path
+output.prefix = "lennard-jones" # file prefix.
+output.path   = "./"            # output path
+output.format = "xyz"           # output file format
 input.path    = "./input/lennard-jones/" # input path
 
 [units]

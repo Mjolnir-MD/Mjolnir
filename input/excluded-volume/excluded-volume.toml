@@ -1,6 +1,7 @@
 [files]
 output.prefix = "excluded-volume"         # file prefix.
 output.path   = "./"                      # output path
+output.format = "xyz"                     # output file format
 input.path   = "./input/excluded-volume/" # input path
 
 [units]
