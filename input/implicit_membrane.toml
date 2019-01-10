@@ -8223,7 +8223,7 @@ particles = [ # {{{
 interaction = "Pair"
 potential   = "LennardJones"
 ignore.molecule = "Nothing"
-ignore.particles_within = {bond = 3, contact = 1}}
+ignore.particles_within = {bond = 3, contact = 1}
 spatial_partition = {type = "CellList", margin = 1.0}
 parameters = [ #{{{
 {index =     0, group = 0, sigma = 1.0, epsilon = 0.5},

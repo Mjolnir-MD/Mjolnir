@@ -2,7 +2,7 @@
 interaction = "Pair"
 potential   = "ExcludedVolume"
 ignore.molecule = "Nothing"
-ignore.particles_within = {bond = 3, contact = 1}}
+ignore.particles_within = {bond = 3, contact = 1}
 spatial_partition   = {type = "CellList", margin = 0.5}
 epsilon = 0.3
 parameters = [
