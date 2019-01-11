@@ -8,22 +8,24 @@ namespace mjolnir
 template<typename realT, typename coordT>
 struct UnlimitedBoundary
 {
-    typedef realT  real_type;
-    typedef coordT coord_type;
+  public:
+    using real_type       = realT;
+    using coordinate_type = coordT;
 
+  public:
     UnlimitedBoundary() = default;
     ~UnlimitedBoundary() = default;
 
-    coord_type adjust_direction(coord_type dr) const noexcept {return dr;}
-    coord_type adjust_position (coord_type r ) const noexcept {return r;}
+    coordinate_type adjust_direction(coordinate_type dr) const noexcept {return dr;}
+    coordinate_type adjust_position (coordinate_type r ) const noexcept {return r;}
 };
 
 template<typename realT, typename coordT>
 struct CuboidalPeriodicBoundary
 {
   public:
-    typedef realT  real_type;
-    typedef coordT coordinate_type;
+    using real_type       = realT;
+    using coordinate_type = coordT;
 
   public:
 
@@ -58,6 +60,16 @@ struct CuboidalPeriodicBoundary
     coordinate_type const& lower_bound() const noexcept {return lower_;}
     coordinate_type const& upper_bound() const noexcept {return upper_;}
     coordinate_type const& width()       const noexcept {return width_;}
+
+    void set_boundary(const coordinate_type& lw,
+                      const coordinate_type& up) noexcept
+    {
+        this->lower_ = lw;
+        this->upper_ = up;
+        this->width_ = this->upper_ - this->lower_;
+        this->halfw_ = this->width_ * 0.5;
+        return;
+    }
 
     void set_lower_bound(const coordinate_type& lw) noexcept
     {
