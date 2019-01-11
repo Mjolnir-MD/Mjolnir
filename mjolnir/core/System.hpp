@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_SYSTEM
-#define MJOLNIR_SYSTEM
+#ifndef MJOLNIR_SYSTEM_HPP
+#define MJOLNIR_SYSTEM_HPP
 #include <mjolnir/core/Particle.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <vector>
@@ -12,17 +12,17 @@ template<typename traitsT>
 class System
 {
   public:
-    typedef traitsT  traits_type;
-    typedef typename traits_type::real_type       real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    typedef typename traits_type::boundary_type   boundary_type;
-    typedef Topology                              topology_type;
-    typedef std::map<std::string, real_type>      attribute_type;
+    using traits_type     = traitsT;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
+    using boundary_type   = typename traits_type::boundary_type;
+    using topology_type   = Topology;
+    using attribute_type  = std::map<std::string, real_type>;
 
-    typedef Particle<real_type, coordinate_type>          particle_type;
-    typedef typename particle_type::static_string_type    static_string_type;
-    typedef ParticleView<real_type, coordinate_type>      particle_view_type;
-    typedef ParticleConstView<real_type, coordinate_type> particle_const_view_type;
+    using particle_type            = Particle<real_type, coordinate_type>;
+    using static_string_type       = typename particle_type::static_string_type;
+    using particle_view_type       = ParticleView<real_type, coordinate_type>;
+    using particle_const_view_type = ParticleConstView<real_type, coordinate_type>;
 
     using real_container_type          = std::vector<real_type>;
     using coordinate_container_type    = std::vector<coordinate_type>;
@@ -125,4 +125,4 @@ class System
 };
 
 } // mjolnir
-#endif// MJOLNIR_SYSTEM
+#endif// MJOLNIR_SYSTEM_HPP
