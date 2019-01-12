@@ -14,9 +14,9 @@ namespace mjolnir
 class ExclusionList
 {
   public:
-    typedef Topology topology_type;
-    typedef topology_type::molecule_id_type molecule_id_type;
-    typedef topology_type::connection_kind_type connection_kind_type;
+    using topology_type        = Topology;
+    using molecule_id_type     = topology_type::molecule_id_type;
+    using connection_kind_type = topology_type::connection_kind_type;
 
   public:
 
