@@ -11,13 +11,13 @@ class LocalInteractionBase
 {
   public:
 
-    typedef traitsT traits_type;
-    typedef System<traits_type> system_type;
-    typedef typename traits_type::real_type       real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    typedef typename traits_type::boundary_type   boundary_type;
-    typedef typename system_type::topology_type   topology_type;
-    typedef typename topology_type::connection_kind_type connection_kind_type;
+    using traits_type          = traitsT;
+    using system_type          = System<traits_type>;
+    using real_type            = typename traits_type::real_type;
+    using coordinate_type      = typename traits_type::coordinate_type;
+    using boundary_type        = typename traits_type::boundary_type;
+    using topology_type        = typename system_type::topology_type;
+    using connection_kind_type = typename topology_type::connection_kind_type;
 
   public:
 

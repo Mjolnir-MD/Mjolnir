@@ -10,15 +10,13 @@ template<typename traitsT>
 class ExternalForceInteractionBase
 {
   public:
-
-    typedef traitsT traits_type;
-    typedef System<traits_type> system_type;
-    typedef typename traits_type::real_type       real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    typedef typename traits_type::boundary_type   boundary_type;
+    using traits_type     = traitsT;
+    using system_type     = System<traits_type>;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
+    using boundary_type   = typename traits_type::boundary_type;
 
   public:
-
     virtual ~ExternalForceInteractionBase() = default;
 
     virtual void initialize(const system_type&) = 0;
