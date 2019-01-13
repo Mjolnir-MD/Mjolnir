@@ -13,21 +13,19 @@ template<typename traitsT, typename parameterT>
 class VerletList
 {
   public:
-    typedef traitsT traits_type;
-    typedef System<traits_type> system_type;
-    typedef typename traits_type::boundary_type   boundary_type;
-    typedef typename traits_type::real_type       real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
+    using traits_type         = traitsT;
+    using system_type         = System<traits_type>;
+    using boundary_type       = typename traits_type::boundary_type;
+    using real_type           = typename traits_type::real_type;
+    using coordinate_type     = typename traits_type::coordinate_type;
+    using exclusion_list_type = ExclusionList;
 
-    typedef ExclusionList exclusion_list_type;
-
-    typedef parameterT parameter_type;
-    typedef NeighborList<parameter_type> neighbor_list_type;
-    typedef typename neighbor_list_type::neighbor_type neighbor_type;
-    typedef typename neighbor_list_type::range_type    range_type;
+    using parameter_type      = parameterT;
+    using neighbor_list_type  = NeighborList<parameter_type>;
+    using neighbor_type       = typename neighbor_list_type::neighbor_type;
+    using range_type          = typename neighbor_list_type::range_type;
 
   public:
-
     VerletList() : margin_(0.5), current_margin_(-1.0){}
     VerletList(const real_type mgn): margin_(mgn), current_margin_(-1.0){}
 

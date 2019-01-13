@@ -257,9 +257,9 @@ template<typename charT, typename traitsT = std::char_traits<charT>>
 class basic_logger_manager
 {
   public:
-    typedef basic_logger<charT, traitsT>         logger_type;
-    typedef std::unique_ptr<logger_type>         resource_type;
-    typedef std::map<std::string, resource_type> container_type;
+    using logger_type    = basic_logger<charT, traitsT>;
+    using resource_type  = std::unique_ptr<logger_type>;
+    using container_type = std::map<std::string, resource_type>;
 
   public:
 
@@ -325,9 +325,9 @@ template<typename charT, typename traitsT = std::char_traits<charT>>
 class basic_scope
 {
   public:
-    typedef charT   char_type;
-    typedef traitsT traits_type;
-    typedef basic_logger<char_type, traits_type> logger_type;
+    using char_type   = charT;
+    using traits_type = traitsT;
+    using logger_type = basic_logger<char_type, traits_type>;
 
   public:
 

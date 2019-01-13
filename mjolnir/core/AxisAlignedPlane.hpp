@@ -126,12 +126,12 @@ template<typename traitsT, template<typename> class normal_axisT>
 class AxisAlignedPlane
 {
   public:
-    typedef traitsT traits_type;
-    typedef System<traits_type> system_type;
-    typedef typename traits_type::real_type        real_type;
-    typedef typename traits_type::coordinate_type  coordinate_type;
-    typedef typename traits_type::boundary_type    boundary_type;
-    typedef normal_axisT<traits_type>              normal_axis_type;
+    using traits_type      = traitsT;
+    using system_type      = System<traits_type>;
+    using real_type        = typename traits_type::real_type;
+    using coordinate_type  = typename traits_type::coordinate_type;
+    using boundary_type    = typename traits_type::boundary_type;
+    using normal_axis_type = normal_axisT<traits_type>;
     static constexpr std::size_t axis_index = normal_axis_type::index;
     static constexpr real_type   axis_sign  = normal_axis_type::sign;
 

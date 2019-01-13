@@ -49,9 +49,9 @@ struct SystemMotionRemover<std::false_type, std::true_type>
     template<typename traitsT>
     static void invoke(System<traitsT>& sys) noexcept
     {
-        typedef typename traitsT::real_type       real_type;
-        typedef typename traitsT::coordinate_type coordinate_type;
-        typedef typename traitsT::template matrix_type<3,3> matrix33_type;
+        using real_type       = typename traitsT::real_type;
+        using coordinate_type = typename traitsT::coordinate_type;
+        using matrix33_type   = typename traitsT::template matrix_type<3,3>;
 
         coordinate_type L(0, 0, 0); // total angular momentum
         for(const auto& p : sys)
@@ -105,9 +105,9 @@ struct SystemMotionRemover<std::true_type, std::true_type>
     template<typename traitsT>
     static void invoke(System<traitsT>& sys)  noexcept
     {
-        typedef typename traitsT::real_type       real_type;
-        typedef typename traitsT::coordinate_type coordinate_type;
-        typedef typename traitsT::template matrix_type<3,3> matrix33_type;
+        using real_type       = typename traitsT::real_type;
+        using coordinate_type = typename traitsT::coordinate_type;
+        using matrix33_type   = typename traitsT::template matrix_type<3,3>;
 
         coordinate_type trans(0, 0, 0); // total translation
         coordinate_type L    (0, 0, 0); // total angular momentum

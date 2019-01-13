@@ -9,7 +9,7 @@ namespace math
 template<typename realT>
 struct constants
 {
-    typedef realT real_type;
+    using real_type = realT;
     static constexpr real_type tolerance = static_cast<real_type>(1e-8);
 
     static constexpr real_type pi          = static_cast<real_type>(3.14159265358979323846264338);

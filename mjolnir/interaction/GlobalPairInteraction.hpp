@@ -12,15 +12,14 @@ template<typename traitsT, typename potentialT, typename partitionT>
 class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
 {
   public:
-
-    typedef traitsT    traits_type;
-    typedef potentialT potential_type;
-    typedef partitionT partition_type;
-    typedef GlobalInteractionBase<traitsT> base_type;
-    typedef typename base_type::real_type       real_type;
-    typedef typename base_type::coordinate_type coordinate_type;
-    typedef typename base_type::system_type     system_type;
-    typedef typename base_type::boundary_type   boundary_type;
+    using traits_type     = traitsT;
+    using potential_type  = potentialT;
+    using partition_type  = partitionT;
+    using base_type       = GlobalInteractionBase<traitsT>;
+    using real_type       = typename base_type::real_type;
+    using coordinate_type = typename base_type::coordinate_type;
+    using system_type     = typename base_type::system_type;
+    using boundary_type   = typename base_type::boundary_type;
 
   public:
     GlobalPairInteraction()  = default;

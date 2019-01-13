@@ -14,7 +14,7 @@ read_velocity_verlet_integrator(const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_velocity_verlet_integrator(), 0);
-    typedef typename traitsT::real_type real_type;
+    using real_type = typename traitsT::real_type;
 
     const real_type delta_t = toml::find<real_type>(simulator, "delta_t");
     MJOLNIR_LOG_INFO("delta_t = ", delta_t);
@@ -29,7 +29,7 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_SCOPE(read_underdamped_langevin_integrator(), 0);
-    typedef typename traitsT::real_type real_type;
+    using real_type = typename traitsT::real_type;
 
     const auto seed       = toml::find<std::uint32_t>(simulator, "seed");
     const auto parameters = toml::find<toml::array>(simulator, "parameters");

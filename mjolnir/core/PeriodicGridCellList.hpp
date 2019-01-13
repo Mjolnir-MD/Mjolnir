@@ -20,28 +20,24 @@ template<typename traitsT, typename parameterT>
 class PeriodicGridCellList
 {
   public:
-
-    typedef traitsT traits_type;
-    typedef System<traits_type> system_type;
-    typedef typename traits_type::real_type real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-
-    typedef ExclusionList exclusion_list_type;
-
-    typedef parameterT parameter_type;
-    typedef NeighborList<parameter_type> neighbor_list_type;
-    typedef typename neighbor_list_type::neighbor_type neighbor_type;
-    typedef typename neighbor_list_type::range_type    range_type;
+    using traits_type         = traitsT;
+    using system_type         = System<traits_type>;
+    using real_type           = typename traits_type::real_type;
+    using coordinate_type     = typename traits_type::coordinate_type;
+    using exclusion_list_type = ExclusionList;
+    using parameter_type      = parameterT;
+    using neighbor_list_type  = NeighborList<parameter_type>;
+    using neighbor_type       = typename neighbor_list_type::neighbor_type;
+    using range_type          = typename neighbor_list_type::range_type;
 
     constexpr static real_type mesh_epsilon = 1e-6;
 
-    typedef std::pair<std::size_t, std::size_t> particle_cell_idx_pair;
-    typedef std::vector<particle_cell_idx_pair> cell_index_container_type;
-
-    typedef std::array<std::size_t, 27> adjacent_cell_idx;
-    typedef std::pair<range<typename cell_index_container_type::const_iterator>,
-                      adjacent_cell_idx> cell_type;
-    typedef std::vector<cell_type> cell_list_type;
+    using particle_cell_idx_pair    = std::pair<std::size_t, std::size_t>;
+    using cell_index_container_type = std::vector<particle_cell_idx_pair>;
+    using cell_index_const_iterator = typename cell_index_container_type::const_iterator;
+    using adjacent_cell_idx         = std::array<std::size_t, 27>;
+    using cell_type                 = std::pair<range<cell_index_const_iterator>, adjacent_cell_idx>;
+    using cell_list_type            = std::vector<cell_type>;
 
   public:
 

@@ -15,21 +15,20 @@ template<typename traitsT, typename potentialT>
 class BondLengthInteraction : public LocalInteractionBase<traitsT>
 {
   public:
+    using traits_type          = traitsT;
+    using potential_type       = potentialT;
+    using base_type            = LocalInteractionBase<traits_type>;
+    using real_type            = typename base_type::real_type;
+    using coordinate_type      = typename base_type::coordinate_type;
+    using system_type          = typename base_type::system_type;
+    using topology_type        = typename base_type::topology_type;
+    using connection_kind_type = typename base_type::connection_kind_type;
 
-    typedef traitsT    traits_type;
-    typedef potentialT potential_type;
-    typedef LocalInteractionBase<traits_type>   base_type;
-    typedef typename base_type::real_type       real_type;
-    typedef typename base_type::coordinate_type coordinate_type;
-    typedef typename base_type::system_type     system_type;
-    typedef typename base_type::topology_type   topology_type;
-    typedef typename base_type::connection_kind_type connection_kind_type;
-
-    typedef std::array<std::size_t, 2>          indices_type;
-    typedef std::pair<indices_type, potentialT> potential_index_pair;
-    typedef std::vector<potential_index_pair>   container_type;
-    typedef typename container_type::iterator       iterator;
-    typedef typename container_type::const_iterator const_iterator;
+    using indices_type         = std::array<std::size_t, 2>;
+    using potential_index_pair = std::pair<indices_type, potentialT>;
+    using container_type       = std::vector<potential_index_pair>;
+    using iterator             = typename container_type::iterator;
+    using const_iterator       = typename container_type::const_iterator;
 
   public:
 

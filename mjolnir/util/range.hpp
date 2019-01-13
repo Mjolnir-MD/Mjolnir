@@ -8,8 +8,8 @@ namespace mjolnir
 template<typename Iterator>
 struct range
 {
-    typedef Iterator iterator;
-    typedef std::reverse_iterator<iterator> reverse_iterator;
+    using iterator = Iterator;
+    using reverse_iterator = std::reverse_iterator<iterator>;
 
     range(iterator b, iterator e) noexcept
         : begin_(b), end_(e), sz_(std::distance(b, e))

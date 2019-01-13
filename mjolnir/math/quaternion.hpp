@@ -11,9 +11,9 @@ template<typename realT>
 class quaternion
 {
   public:
-    typedef realT real_type;
-    typedef real_type value_type;
-    typedef std::array<real_type, 4> container_type;
+    using real_type      = realT;
+    using value_type     = real_type;
+    using container_type = std::array<real_type, 4>;
 
   public:
     quaternion()  = default;
@@ -185,7 +185,7 @@ template<typename T1, typename T2, typename std::enable_if<
 inline quaternion<decltype(std::declval<T1>() * std::declval<T2>())>
 operator*(const quaternion<T1>& lhs, const quaternion<T2>& rhs)
 {
-    typedef decltype(std::declval<T1>() * std::declval<T2>()) realT;
+    using realT = decltype(std::declval<T1>() * std::declval<T2>());
     const realT a = lhs[0]*rhs[0] - lhs[1]*rhs[1] - lhs[2]*rhs[2] - lhs[3]*rhs[3];
     const realT b = lhs[0]*rhs[1] + lhs[1]*rhs[0] + lhs[2]*rhs[3] - lhs[3]*rhs[2];
     const realT c = lhs[0]*rhs[2] - lhs[1]*rhs[3] + lhs[2]*rhs[0] + lhs[3]*rhs[1];
@@ -198,7 +198,6 @@ template<typename T1, typename T2, typename std::enable_if<
 inline quaternion<decltype(std::declval<T1>() / std::declval<T2>())>
 operator/(const quaternion<T1>& lhs, const quaternion<T2>& rhs)
 {
-    typedef decltype(std::declval<T1>() / std::declval<T2>()) realT;
     return lhs * conj(rhs) / norm_sq(rhs);
 }
 

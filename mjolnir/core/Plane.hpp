@@ -15,11 +15,11 @@ template<typename traitsT>
 class Plane
 {
   public:
-    typedef traitsT traits_type;
-    typedef System<traits_type> system_type;
-    typedef typename traits_type::real_type        real_type;
-    typedef typename traits_type::coordinate_type  coordinate_type;
-    typedef typename traits_type::boundary_type    boundary_type;
+    using traits_type     = traitsT;
+    using system_type     = System<traits_type>;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
+    using boundary_type   = typename traits_type::boundary_type;
 
     static_assert(!std::is_same<boundary_type,
             CuboidalPeriodicBoundary<real_type, coordinate_type>>::value,

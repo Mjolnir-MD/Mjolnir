@@ -17,13 +17,13 @@ template<typename traitsT>
 class UnderdampedLangevinIntegrator
 {
   public:
-    typedef traitsT traits_type;
-    typedef System<traits_type>     system_type;
-    typedef ForceField<traits_type> forcefield_type;
-    typedef RandomNumberGenerator<traits_type>    rng_type;
-    typedef typename traits_type::boundary_type   boundary_type;
-    typedef typename traits_type::real_type       real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
+    using traits_type     = traitsT;
+    using boundary_type   = typename traits_type::boundary_type;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
+    using system_type     = System<traitsT>;
+    using forcefield_type = ForceField<traitsT>;
+    using rng_type        = RandomNumberGenerator<traits_type>;
 
     struct parameter_set
     {

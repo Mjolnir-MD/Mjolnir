@@ -10,12 +10,12 @@ template<typename traitsT>
 class VelocityVerletIntegrator
 {
   public:
-    typedef traitsT traits_type;
-    typedef typename traits_type::boundary_type   boundary_type;
-    typedef typename traits_type::real_type       real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    typedef System<traitsT>     system_type;
-    typedef ForceField<traitsT> forcefield_type;
+    using traits_type = traitsT;
+    using boundary_type   = typename traits_type::boundary_type;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
+    using system_type     = System<traitsT>;
+    using forcefield_type = ForceField<traitsT>;
 
   public:
 
