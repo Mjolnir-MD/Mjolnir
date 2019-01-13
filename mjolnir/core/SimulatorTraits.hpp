@@ -13,7 +13,7 @@ struct SimulatorTraits
     template<std::size_t N, std::size_t M>
     using matrix_type = Matrix<real_type, N, M>;
 
-    using boundary_type boundaryT<real_type, coordinate_type>;
+    using boundary_type = boundaryT<real_type, coordinate_type>;
 };
 
 } // mjolnir
