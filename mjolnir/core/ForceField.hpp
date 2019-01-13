@@ -11,13 +11,13 @@ template<typename traitsT>
 class ForceField
 {
   public:
-    typedef traitsT traits_type;
-    typedef typename traits_type::real_type       real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    typedef System<traits_type>             system_type;
-    typedef LocalForceField<traits_type>    local_forcefield_type;
-    typedef GlobalForceField<traits_type>   global_forcefield_type;
-    typedef ExternalForceField<traits_type> external_forcefield_type;
+    using traits_type              = traitsT;
+    using real_type                = typename traits_type::real_type;
+    using coordinate_type          = typename traits_type::coordinate_type;
+    using system_type              = System<traits_type>;
+    using local_forcefield_type    = LocalForceField<traits_type>;
+    using global_forcefield_type   = GlobalForceField<traits_type>;
+    using external_forcefield_type = ExternalForceField<traits_type>;
 
   public:
 

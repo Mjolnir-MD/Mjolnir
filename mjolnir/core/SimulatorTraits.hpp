@@ -8,12 +8,12 @@ namespace mjolnir
 template<typename realT, template<typename, typename> class boundaryT>
 struct SimulatorTraits
 {
-    typedef realT                                 real_type;
-    typedef Vector<real_type, 3>                  coordinate_type;
+    using real_type       = realT;
+    using coordinate_type = Vector<real_type, 3>;
     template<std::size_t N, std::size_t M>
     using matrix_type = Matrix<real_type, N, M>;
-    typedef coordinate_type                       position_type;
-    typedef boundaryT<real_type, coordinate_type> boundary_type;
+
+    using boundary_type boundaryT<real_type, coordinate_type>;
 };
 
 } // mjolnir

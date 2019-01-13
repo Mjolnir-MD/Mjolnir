@@ -13,16 +13,16 @@ template<typename traitsT>
 class GlobalForceField
 {
   public:
-    typedef traitsT traits_type;
-    typedef System<traits_type> system_type;
-    typedef typename traits_type::real_type       real_type;
-    typedef typename traits_type::coordinate_type coordinate_type;
-    typedef typename traits_type::boundary_type   boundary_type;
-    typedef GlobalInteractionBase<traitsT>    interaction_base;
-    typedef std::unique_ptr<interaction_base> interaction_ptr;
-    typedef std::vector<interaction_ptr>            container_type;
-    typedef typename container_type::iterator       iterator;
-    typedef typename container_type::const_iterator const_iterator;
+    using traits_type      = traitsT;
+    using real_type        = typename traits_type::real_type;
+    using coordinate_type  = typename traits_type::coordinate_type;
+    using boundary_type    = typename traits_type::boundary_type;
+    using system_type      = System<traits_type>;
+    using interaction_base = GlobalInteractionBase<traitsT>;
+    using interaction_ptr  = std::unique_ptr<interaction_base>;
+    using container_type   = std::vector<interaction_ptr>;
+    using iterator         = typename container_type::iterator;
+    using const_iterator   = typename container_type::const_iterator;
 
   public:
     GlobalForceField() = default;
