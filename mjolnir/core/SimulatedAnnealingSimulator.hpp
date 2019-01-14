@@ -9,19 +9,19 @@ namespace mjolnir
 {
 
 template<typename realT>
-struct linear_schedule
+struct LinearScheduler
 {
     using real_type = realT;
 
-    linear_schedule(const real_type first, const real_type last)
+    LinearScheduler(const real_type first, const real_type last)
         : first_(first), last_(last)
     {}
-    ~linear_schedule() = default;
+    ~LinearScheduler() = default;
 
-    linear_schedule(const linear_schedule&) = default;
-    linear_schedule(linear_schedule&&)      = default;
-    linear_schedule& operator=(const linear_schedule&) = default;
-    linear_schedule& operator=(linear_schedule&&)      = default;
+    LinearScheduler(const LinearScheduler&) = default;
+    LinearScheduler(LinearScheduler&&)      = default;
+    LinearScheduler& operator=(const LinearScheduler&) = default;
+    LinearScheduler& operator=(LinearScheduler&&)      = default;
 
     real_type current(const real_type ratio) const noexcept
     {

@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(read_simulated_annealing_simulator)
 
         const auto sasim = dynamic_cast<mjolnir::SimulatedAnnealingSimulator<
             traits_type, mjolnir::UnderdampedLangevinIntegrator<traits_type>,
-            mjolnir::linear_schedule>*>(sim.get());
+            mjolnir::LinearScheduler>*>(sim.get());
         BOOST_TEST(static_cast<bool>(sasim));
 
         sim->initialize();

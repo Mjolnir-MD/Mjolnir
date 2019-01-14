@@ -142,11 +142,11 @@ read_simulated_annealing_simulator(
         {
             using integrator_t = UnderdampedLangevinIntegrator<traitsT>;
             using simulator_t  = SimulatedAnnealingSimulator<
-                traitsT, integrator_t, linear_schedule>;
+                traitsT, integrator_t, LinearScheduler>;
 
             MJOLNIR_LOG_NOTICE("Integrator is Underdamped Langevin.");
             return make_unique<simulator_t>(tstep, sstep, each_step,
-                    linear_schedule<real_type>(T_begin, T_end),
+                    LinearScheduler<real_type>(T_begin, T_end),
                     read_system<traitsT>(root, 0),
                     read_forcefield<traitsT>(root, 0),
                     read_underdamped_langevin_integrator<traitsT>(simulator),
