@@ -25,13 +25,6 @@ class UnderdampedLangevinIntegrator
     using forcefield_type = ForceField<traitsT>;
     using rng_type        = RandomNumberGenerator<traits_type>;
 
-    struct parameter_set
-    {
-        real_type       gamma;
-        real_type       sqrt_gamma_over_mass;
-        coordinate_type accel;
-    };
-
   public:
 
     UnderdampedLangevinIntegrator(const real_type dt,
