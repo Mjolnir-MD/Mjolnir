@@ -15,7 +15,9 @@ BOOST_AUTO_TEST_CASE(read_newtonian_molecular_dynamics_simulator)
     {
         const toml::table v = toml::table{
             {"type",          toml::value("Molecular Dynamics")},
-            {"integrator",    toml::value("Newtonian")},
+            {"integrator",    toml::value(toml::table{
+                {"type", toml::value("Newtonian")}
+            })},
             {"precision",     toml::value("double")},
             {"boundary_type", toml::value("Unlimited")},
             {"delta_t",       toml::value(0.1)},
@@ -54,14 +56,16 @@ BOOST_AUTO_TEST_CASE(read_langevin_molecular_dynamics_simulator)
     {
         const toml::table v{
             {"type",          toml::value("Molecular Dynamics")},
-            {"integrator",    toml::value("Underdamped Langevin")},
+            {"integrator",    toml::value(toml::table{
+                {"type", toml::value("Underdamped Langevin")},
+                {"seed", toml::value(12345)},
+                {"parameters",    toml::array{}}
+            })},
             {"precision",     toml::value("double")},
             {"boundary_type", toml::value("Unlimited")},
             {"total_step",    toml::value(100)},
             {"save_step",     toml::value(10)},
-            {"delta_t",       toml::value(0.1)},
-            {"seed",          toml::value(12345)},
-            {"parameters",    toml::array{}}
+            {"delta_t",       toml::value(0.1)}
         };
         root["simulator"] = v;
         const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
@@ -131,7 +135,11 @@ BOOST_AUTO_TEST_CASE(read_simulated_annealing_simulator)
     {
         const toml::table v{
             {"type",          toml::value("Simulated Annealing")},
-            {"integrator",    toml::value("Underdamped Langevin")},
+            {"integrator",    toml::value(toml::table{
+                {"type", toml::value("Underdamped Langevin")},
+                {"seed",          toml::value(12345)},
+                {"parameters",    toml::array{}}
+            })},
             {"precision",     toml::value("double")},
             {"boundary_type", toml::value("Unlimited")},
             {"total_step",    toml::value(100)},
@@ -140,9 +148,7 @@ BOOST_AUTO_TEST_CASE(read_simulated_annealing_simulator)
             {"T_begin",       toml::value(300.0)},
             {"T_end",         toml::value( 10.0)},
             {"each_step",     toml::value( 1)},
-            {"delta_t",       toml::value(0.1)},
-            {"seed",          toml::value(12345)},
-            {"parameters",    toml::array{}}
+            {"delta_t",       toml::value(0.1)}
         };
         root["simulator"] = v;
         const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
