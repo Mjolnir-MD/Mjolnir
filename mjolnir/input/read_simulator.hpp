@@ -25,13 +25,14 @@ read_molecular_dynamics_simulator(
     MJOLNIR_SCOPE(read_molecular_dynamics_simulator(), 0);
     using real_type = typename traitsT::real_type;
 
-    const auto integrator = toml::find<std::string>(simulator, "integrator");
+    const auto& integrator     = toml::find(simulator, "integrator");
+    const auto integrator_type = toml::find<std::string>(integrator, "type");
     const auto tstep      = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep      = toml::find<std::size_t>(simulator, "save_step");
     MJOLNIR_LOG_NOTICE("total step is ", tstep);
     MJOLNIR_LOG_NOTICE("save  step is ", sstep);
 
-    if(integrator == "Newtonian")
+    if(integrator_type == "Newtonian")
     {
         MJOLNIR_LOG_NOTICE("Integrator is Newtonian.");
         using integrator_t = VelocityVerletIntegrator<traitsT>;
@@ -44,7 +45,7 @@ read_molecular_dynamics_simulator(
                 read_velocity_verlet_integrator<traitsT>(simulator),
                 read_observer<traitsT>(root));
     }
-    else if(integrator == "Underdamped Langevin")
+    else if(integrator_type == "Underdamped Langevin")
     {
         MJOLNIR_LOG_NOTICE("Integrator is Underdamped Langevin.");
         using integrator_t = UnderdampedLangevinIntegrator<traitsT>;
@@ -61,7 +62,7 @@ read_molecular_dynamics_simulator(
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
             "mjolnir::read_molecular_dynamics_simulator: invalid integrator: ",
-            toml::find(simulator, "integrator"), "here", {
+            toml::find(integrator, "type"), "here", {
             "expected value is one of the following.",
             "- \"Newtonian\"           : simple and standard Velocity Verlet integrator.",
             "- \"Underdamped Langevin\": simple Underdamped Langevin Integrator"
@@ -106,7 +107,8 @@ read_simulated_annealing_simulator(
     MJOLNIR_SCOPE(read_simulated_annealing_simulator(), 0);
     using real_type   = typename traitsT::real_type;
 
-    const auto integrator = toml::find<std::string>(simulator, "integrator");
+    const auto& integrator     = toml::find(simulator, "integrator");
+    const auto integrator_type = toml::find<std::string>(integrator, "type");
     const auto tstep      = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep      = toml::find<std::size_t>(simulator, "save_step");
 
@@ -125,20 +127,20 @@ read_simulated_annealing_simulator(
     if(schedule == "linear")
     {
         MJOLNIR_LOG_NOTICE("temparing schedule is linear.");
-        if(integrator == "Newtonian")
+        if(integrator_type == "Newtonian")
         {
             MJOLNIR_LOG_ERROR("Simulated Annealing + NVE Newtonian");
             MJOLNIR_LOG_ERROR("NVE Newtonian doesn't have temperature control.");
             throw_exception<std::runtime_error>(toml::format_error("[error] "
                 "mjolnir::read_simulated_annealing_simulator: invalid integrator: ",
-                toml::find(simulator, "integrator"), "here", {
+                toml::find(integrator, "type"), "here", {
                 "Newtonian Integrator does not controls temperature."
                 "expected value is one of the following.",
                 "- \"Underdamped Langevin\": simple Underdamped Langevin Integrator"
                                            " based on the Velocity Verlet"
                 }));
         }
-        else if(integrator == "Underdamped Langevin")
+        else if(integrator_type == "Underdamped Langevin")
         {
             using integrator_t = UnderdampedLangevinIntegrator<traitsT>;
             using simulator_t  = SimulatedAnnealingSimulator<

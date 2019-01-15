@@ -22,7 +22,6 @@ read_velocity_verlet_integrator(const toml::value& simulator)
     return VelocityVerletIntegrator<traitsT>(delta_t);
 }
 
-
 template<typename traitsT>
 UnderdampedLangevinIntegrator<traitsT>
 read_underdamped_langevin_integrator(const toml::value& simulator)
@@ -31,8 +30,13 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
     MJOLNIR_SCOPE(read_underdamped_langevin_integrator(), 0);
     using real_type = typename traitsT::real_type;
 
-    const auto seed       = toml::find<std::uint32_t>(simulator, "seed");
-    const auto parameters = toml::find<toml::array>(simulator, "parameters");
+    const real_type delta_t = toml::find<real_type>(simulator, "delta_t");
+    MJOLNIR_LOG_INFO("delta_t = ", delta_t);
+
+    const auto& integrator = toml::find(simulator, "integrator");
+
+    const auto seed       = toml::find<std::uint32_t>(integrator, "seed");
+    const auto parameters = toml::find<toml::array  >(integrator, "parameters");
 
     std::vector<real_type> gamma(parameters.size());
     for(const auto& params : parameters)
@@ -45,10 +49,6 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
 
         MJOLNIR_LOG_INFO("idx = ", idx, ", gamma = ", gm);
     }
-
-    const real_type delta_t = toml::find<real_type>(simulator, "delta_t");
-    MJOLNIR_LOG_INFO("delta_t = ", delta_t);
-
     return UnderdampedLangevinIntegrator<traitsT>(delta_t, std::move(gamma),
             RandomNumberGenerator<traitsT>(seed));
 }
