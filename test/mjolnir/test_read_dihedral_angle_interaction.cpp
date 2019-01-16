@@ -70,7 +70,31 @@ BOOST_AUTO_TEST_CASE(read_dihedral_angle_gaussian)
         BOOST_TEST(static_cast<bool>(base));
 
         const auto derv = dynamic_cast<mjolnir::DihedralAngleInteraction<
-            traits_type, mjolnir::AngularGaussianPotential<real_type>>*
+            traits_type, mjolnir::GaussianPotential<real_type>>*
+            >(base.get()); // check the expected type is contained
+        BOOST_TEST(static_cast<bool>(derv));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(read_dihedral_angle_periodic_gaussian)
+{
+    mjolnir::LoggerManager::set_default_logger("test_read_dihedral_angle_interaction.log");
+
+    using real_type = double;
+    using traits_type = mjolnir::test::traits<real_type>;
+    constexpr real_type tol = 1e-8;
+    {
+        const toml::table v = toml::table{
+            {"interaction", toml::value("DihedralAngle")},
+            {"potential",   toml::value("PeriodicGaussian")},
+            {"topology",    toml::value("none")},
+            {"parameters",  toml::value(toml::array(/*empty*/))}
+        };
+        const auto base = mjolnir::read_local_interaction<traits_type>(v);
+        BOOST_TEST(static_cast<bool>(base));
+
+        const auto derv = dynamic_cast<mjolnir::DihedralAngleInteraction<
+            traits_type, mjolnir::PeriodicGaussianPotential<real_type>>*
             >(base.get()); // check the expected type is contained
         BOOST_TEST(static_cast<bool>(derv));
     }

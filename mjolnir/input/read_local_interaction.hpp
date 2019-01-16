@@ -144,7 +144,15 @@ read_dihedral_angle_interaction(
     else if(potential == "Gaussian")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Gaussian.");
-        using potentialT = AngularGaussianPotential<real_type>;
+        using potentialT = GaussianPotential<real_type>;
+
+        return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
+            kind, read_local_potential<4, potentialT>(local));
+    }
+    else if(potential == "PeriodicGaussian")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is PeriodicGaussian.");
+        using potentialT = PeriodicGaussianPotential<real_type>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
             kind, read_local_potential<4, potentialT>(local));

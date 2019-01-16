@@ -61,8 +61,8 @@ GaussianPotential<realT> read_gaussian_potential(const toml::value& param)
 }
 
 template<typename realT>
-AngularGaussianPotential<realT>
-read_angular_gaussian_potential(const toml::value& param)
+PeriodicGaussianPotential<realT>
+read_periodic_gaussian_potential(const toml::value& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
@@ -71,9 +71,9 @@ read_angular_gaussian_potential(const toml::value& param)
     const auto sigma = toml::expect<real_type>(param, u8"σ").or_other(
                        toml::expect<real_type>(param, "sigma")).unwrap();
 
-    MJOLNIR_LOG_INFO("AngularGaussianPotential = {v0 = ", v0, ", k = ", k,
+    MJOLNIR_LOG_INFO("PeriodicGaussianPotential = {v0 = ", v0, ", k = ", k,
                      ", sigma = ", sigma, '}');
-    return AngularGaussianPotential<realT>(k, sigma, v0);
+    return PeriodicGaussianPotential<realT>(k, sigma, v0);
 }
 
 template<typename realT>
@@ -157,11 +157,11 @@ struct read_local_potential_impl<GaussianPotential<realT>>
     }
 };
 template<typename realT>
-struct read_local_potential_impl<AngularGaussianPotential<realT>>
+struct read_local_potential_impl<PeriodicGaussianPotential<realT>>
 {
-    static AngularGaussianPotential<realT> invoke(const toml::value& param)
+    static PeriodicGaussianPotential<realT> invoke(const toml::value& param)
     {
-        return read_angular_gaussian_potential<realT>(param);
+        return read_periodic_gaussian_potential<realT>(param);
     }
 };
 template<typename realT>
