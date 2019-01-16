@@ -9,8 +9,8 @@ length = "angstrom" # "angstorm" or "Å" or "nm"
 energy = "kcal/mol" # "kcal/mol" or "kJ/mol"
 
 [simulator]
-type          = "Molecular Dynamics"
-integrator    = "Underdamped Langevin"
+type          = "MolecularDynamics"
+integrator    = "UnderdampedLangevin"
 boundary_type = "PeriodicCuboid"
 precision     = "double"
 seed          = 2374

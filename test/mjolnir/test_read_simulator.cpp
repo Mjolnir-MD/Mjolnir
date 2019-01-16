@@ -14,8 +14,8 @@ BOOST_AUTO_TEST_CASE(read_newtonian_molecular_dynamics_simulator)
     auto root = mjolnir::test::make_empty_input();
     {
         const toml::table v = toml::table{
-            {"type",          toml::value("Molecular Dynamics")},
-            {"integrator",    toml::value("Newtonian")},
+            {"type",          toml::value("MolecularDynamics")},
+            {"integrator",    toml::value("VelocityVerlet")},
             {"precision",     toml::value("double")},
             {"boundary_type", toml::value("Unlimited")},
             {"delta_t",       toml::value(0.1)},
@@ -53,8 +53,8 @@ BOOST_AUTO_TEST_CASE(read_langevin_molecular_dynamics_simulator)
 
     {
         const toml::table v{
-            {"type",          toml::value("Molecular Dynamics")},
-            {"integrator",    toml::value("Underdamped Langevin")},
+            {"type",          toml::value("MolecularDynamics")},
+            {"integrator",    toml::value("UnderdampedLangevin")},
             {"precision",     toml::value("double")},
             {"boundary_type", toml::value("Unlimited")},
             {"total_step",    toml::value(100)},
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(read_steepest_descent_simulator)
     auto root = mjolnir::test::make_empty_input();
     {
         const toml::table v{
-            {"type",          toml::value("Steepest Descent")},
+            {"type",          toml::value("SteepestDescent")},
             {"precision",     toml::value("double")},
             {"boundary_type", toml::value("Unlimited")},
             {"step_limit",    toml::value(100)},
@@ -130,8 +130,8 @@ BOOST_AUTO_TEST_CASE(read_simulated_annealing_simulator)
     auto root = mjolnir::test::make_empty_input();
     {
         const toml::table v{
-            {"type",          toml::value("Simulated Annealing")},
-            {"integrator",    toml::value("Underdamped Langevin")},
+            {"type",          toml::value("SimulatedAnnealing")},
+            {"integrator",    toml::value("UnderdampedLangevin")},
             {"precision",     toml::value("double")},
             {"boundary_type", toml::value("Unlimited")},
             {"total_step",    toml::value(100)},

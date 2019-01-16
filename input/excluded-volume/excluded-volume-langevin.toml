@@ -1,6 +1,6 @@
 [simulator]
-type       = "Molecular Dynamics"
-integrator = "Underdamped Langevin"
+type       = "MolecularDynamics"
+integrator = "UnderdampedLangevin"
 boundary_type = "PeriodicCuboid"
 precision     = "double"
 seed       = 2374
