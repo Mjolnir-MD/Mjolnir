@@ -1,7 +1,7 @@
 #define BOOST_TEST_MODULE "test_angular_gaussian_potential"
 
 #include <boost/test/included/unit_test.hpp>
-#include <mjolnir/potential/local/AngularGaussianPotential.hpp>
+#include <mjolnir/potential/local/PeriodicGaussianPotential.hpp>
 #include <mjolnir/math/constants.hpp>
 
 BOOST_AUTO_TEST_CASE(AngularGaussian_double)

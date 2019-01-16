@@ -5,7 +5,7 @@
 #include <mjolnir/potential/local/Go1012ContactPotential.hpp>
 #include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
 #include <mjolnir/potential/local/GaussianPotential.hpp>
-#include <mjolnir/potential/local/AngularGaussianPotential.hpp>
+#include <mjolnir/potential/local/PeriodicGaussianPotential.hpp>
 #include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
 #include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
 #include <mjolnir/potential/local/SumLocalPotential.hpp>
