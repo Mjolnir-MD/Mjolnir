@@ -30,9 +30,9 @@ inline toml::Table make_empty_input()
     // (that does not make sense!) . Here, temporary set MD simulator with
     // Newtonian dynamics.
     toml::Table integrator;
-    integrator["type"] = "Newtonian"_s;
+    integrator["type"] = "VelocityVerlet"_s;
     toml::Table simulator;
-    simulator["type"]          = "Molecular Dynamics"_s;
+    simulator["type"]          = "MolecularDynamics"_s;
     simulator["integrator"]    = std::move(integrator);
     simulator["precision"]     = "double"_s;
     simulator["boundary_type"] = "Unlimited"_s;

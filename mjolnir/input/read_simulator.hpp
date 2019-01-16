@@ -32,9 +32,9 @@ read_molecular_dynamics_simulator(
     MJOLNIR_LOG_NOTICE("total step is ", tstep);
     MJOLNIR_LOG_NOTICE("save  step is ", sstep);
 
-    if(integrator_type == "Newtonian")
+    if(integrator_type == "VelocityVerlet")
     {
-        MJOLNIR_LOG_NOTICE("Integrator is Newtonian.");
+        MJOLNIR_LOG_NOTICE("Integrator is VelocityVerlet.");
         using integrator_t = VelocityVerletIntegrator<traitsT>;
         using simulator_t  = MolecularDynamicsSimulator<traitsT, integrator_t>;
 
@@ -45,7 +45,7 @@ read_molecular_dynamics_simulator(
                 read_velocity_verlet_integrator<traitsT>(simulator),
                 read_observer<traitsT>(root));
     }
-    else if(integrator_type == "Underdamped Langevin")
+    else if(integrator_type == "UnderdampedLangevin")
     {
         MJOLNIR_LOG_NOTICE("Integrator is Underdamped Langevin.");
         using integrator_t = UnderdampedLangevinIntegrator<traitsT>;
@@ -64,9 +64,9 @@ read_molecular_dynamics_simulator(
             "mjolnir::read_molecular_dynamics_simulator: invalid integrator: ",
             toml::find(integrator, "type"), "here", {
             "expected value is one of the following.",
-            "- \"Newtonian\"           : simple and standard Velocity Verlet integrator.",
-            "- \"Underdamped Langevin\": simple Underdamped Langevin Integrator"
-                                       " based on the Velocity Verlet"
+            "- \"VelocityVerlet\"     : simple and standard Velocity Verlet integrator.",
+            "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
+                                      " based on the Velocity Verlet"
             }));
     }
 }
@@ -127,7 +127,7 @@ read_simulated_annealing_simulator(
     if(schedule == "linear")
     {
         MJOLNIR_LOG_NOTICE("temparing schedule is linear.");
-        if(integrator_type == "Newtonian")
+        if(integrator_type == "VelocityVerlet")
         {
             MJOLNIR_LOG_ERROR("Simulated Annealing + NVE Newtonian");
             MJOLNIR_LOG_ERROR("NVE Newtonian doesn't have temperature control.");
@@ -136,11 +136,11 @@ read_simulated_annealing_simulator(
                 toml::find(integrator, "type"), "here", {
                 "Newtonian Integrator does not controls temperature."
                 "expected value is one of the following.",
-                "- \"Underdamped Langevin\": simple Underdamped Langevin Integrator"
-                                           " based on the Velocity Verlet"
+                "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
+                                          " based on the Velocity Verlet"
                 }));
         }
-        else if(integrator_type == "Underdamped Langevin")
+        else if(integrator_type == "UnderdampedLangevin")
         {
             using integrator_t = UnderdampedLangevinIntegrator<traitsT>;
             using simulator_t  = SimulatedAnnealingSimulator<
@@ -160,8 +160,8 @@ read_simulated_annealing_simulator(
                 "mjolnir::read_simulated_annealing_simulator: invalid integrator: ",
                 toml::find(simulator, "integrator"), "here", {
                 "expected value is one of the following.",
-                "- \"Underdamped Langevin\": simple Underdamped Langevin Integrator"
-                                           " based on the Velocity Verlet"
+                "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
+                                          " based on the Velocity Verlet"
                 }));
         }
     }
@@ -184,17 +184,17 @@ read_simulator_from_table(const toml::table& root, const toml::value& simulator)
     MJOLNIR_SCOPE(read_simulator_from_table(), 0);
 
     const auto type = toml::find<std::string>(simulator, "type");
-    if(type == "Molecular Dynamics")
+    if(type == "MolecularDynamics")
     {
         MJOLNIR_LOG_NOTICE("Simulator type is Molecular Dynamics.");
         return read_molecular_dynamics_simulator<traitsT>(root, simulator);
     }
-    else if(type == "Steepest Descent")
+    else if(type == "SteepestDescent")
     {
         MJOLNIR_LOG_NOTICE("Simulator type is Steepest Descent.");
         return read_steepest_descent_simulator<traitsT>(root, simulator);
     }
-    else if(type == "Simulated Annealing")
+    else if(type == "SimulatedAnnealing")
     {
         MJOLNIR_LOG_NOTICE("Simulator type is Simulated Annealing.");
         return read_simulated_annealing_simulator<traitsT>(root, simulator);
@@ -205,9 +205,9 @@ read_simulator_from_table(const toml::table& root, const toml::value& simulator)
             "mjolnir::read_simulator: invalid type",
             toml::find<toml::value>(simulator, "type"), "here", {
             "expected value is one of the following.",
-            "- \"Molecular Dynamcis\" : standard MD simulation",
-            "- \"Steepest Descent\"   : energy minimization by gradient method",
-            "- \"Simulated Annealing\": energy minimization by Annealing",
+            "- \"MolecularDynamcis\" : standard MD simulation",
+            "- \"SteepestDescent\"   : energy minimization by gradient method",
+            "- \"SimulatedAnnealing\": energy minimization by Annealing",
             }));
     }
 }

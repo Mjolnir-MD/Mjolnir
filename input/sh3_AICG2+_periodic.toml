@@ -9,13 +9,13 @@ length = "angstrom" # "angstorm" or "Å" or "nm"
 energy = "kcal/mol" # "kcal/mol" or "kJ/mol"
 
 [simulator]
-type          = "Molecular Dynamics"
+type          = "MolecularDynamics"
 boundary_type = "PeriodicCuboid"
 precision     = "double"
 delta_t       = 0.1
 total_step    = 50_000
 save_step     = 100
-integrator.type = "Underdamped Langevin"
+integrator.type = "UnderdampedLangevin"
 integrator.seed = 2374
 integrator.parameters = [ # {{{
 {index =  0, gamma = 0.8435},

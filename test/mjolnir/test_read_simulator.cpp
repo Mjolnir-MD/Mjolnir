@@ -14,9 +14,9 @@ BOOST_AUTO_TEST_CASE(read_newtonian_molecular_dynamics_simulator)
     auto root = mjolnir::test::make_empty_input();
     {
         const toml::table v = toml::table{
-            {"type",          toml::value("Molecular Dynamics")},
+            {"type",          toml::value("MolecularDynamics")},
             {"integrator",    toml::value(toml::table{
-                {"type", toml::value("Newtonian")}
+                {"type", toml::value("VelocityVerlet")}
             })},
             {"precision",     toml::value("double")},
             {"boundary_type", toml::value("Unlimited")},
@@ -55,9 +55,9 @@ BOOST_AUTO_TEST_CASE(read_langevin_molecular_dynamics_simulator)
 
     {
         const toml::table v{
-            {"type",          toml::value("Molecular Dynamics")},
+            {"type",          toml::value("MolecularDynamics")},
             {"integrator",    toml::value(toml::table{
-                {"type", toml::value("Underdamped Langevin")},
+                {"type", toml::value("UnderdampedLangevin")},
                 {"seed", toml::value(12345)},
                 {"parameters",    toml::array{}}
             })},
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(read_steepest_descent_simulator)
     auto root = mjolnir::test::make_empty_input();
     {
         const toml::table v{
-            {"type",          toml::value("Steepest Descent")},
+            {"type",          toml::value("SteepestDescent")},
             {"precision",     toml::value("double")},
             {"boundary_type", toml::value("Unlimited")},
             {"step_limit",    toml::value(100)},
@@ -134,9 +134,9 @@ BOOST_AUTO_TEST_CASE(read_simulated_annealing_simulator)
     auto root = mjolnir::test::make_empty_input();
     {
         const toml::table v{
-            {"type",          toml::value("Simulated Annealing")},
+            {"type",          toml::value("SimulatedAnnealing")},
             {"integrator",    toml::value(toml::table{
-                {"type", toml::value("Underdamped Langevin")},
+                {"type", toml::value("UnderdampedLangevin")},
                 {"seed",          toml::value(12345)},
                 {"parameters",    toml::array{}}
             })},
