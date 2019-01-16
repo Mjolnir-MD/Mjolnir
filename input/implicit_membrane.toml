@@ -9,14 +9,14 @@ energy = "kcal/mol" # "kcal/mol" or "kJ/mol"
 
 [simulator]
 type          = "MolecularDynamics"
-integrator    = "UnderdampedLangevin"
 precision     = "double"
 boundary_type = "PeriodicCuboid" # one of {"PeriodicCube", "Unlimited"}
-seed       = 2374
 delta_t    = 0.01
 total_step = 100_000
 save_step  = 1000
-parameters = [ # {{{
+integrator.seed = 2374
+integrator.type = "UnderdampedLangevin"
+integrator.parameters = [ # {{{
 {index =     0, gamma = 0.1},
 {index =     1, gamma = 0.1},
 {index =     2, gamma = 0.1},

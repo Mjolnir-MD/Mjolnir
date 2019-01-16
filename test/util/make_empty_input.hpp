@@ -29,9 +29,11 @@ inline toml::Table make_empty_input()
     // Mjolnir does not consider running simulation without simulator
     // (that does not make sense!) . Here, temporary set MD simulator with
     // Newtonian dynamics.
+    toml::Table integrator;
+    integrator["type"] = "VelocityVerlet"_s;
     toml::Table simulator;
     simulator["type"]          = "MolecularDynamics"_s;
-    simulator["integrator"]    = "VelocityVerlet"_s;
+    simulator["integrator"]    = std::move(integrator);
     simulator["precision"]     = "double"_s;
     simulator["boundary_type"] = "Unlimited"_s;
     simulator["total_step"]    = 1;

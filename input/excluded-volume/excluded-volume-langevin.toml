@@ -1,13 +1,13 @@
 [simulator]
 type       = "MolecularDynamics"
-integrator = "UnderdampedLangevin"
 boundary_type = "PeriodicCuboid"
 precision     = "double"
-seed       = 2374
 delta_t    = 0.01
 total_step = 10000
 save_step  = 100
-parameters = [
+integrator.type = "UnderdampedLangevin"
+integrator.seed = 2374
+integrator.parameters = [
 {index =    0, gamma = 1.00},
 {index =    1, gamma = 1.00},
 {index =    2, gamma = 1.00},

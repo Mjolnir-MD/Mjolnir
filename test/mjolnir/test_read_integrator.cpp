@@ -32,11 +32,13 @@ BOOST_AUTO_TEST_CASE(read_underdamped_langevin_integrator)
     {
         const toml::table v = toml::table{
             {"delta_t",       toml::value(0.1)},
-            {"seed",          toml::value(1234)},
-            {"parameters",    toml::value(toml::array{
-                toml::table{{"index", toml::value(0)}, {"gamma", toml::value(0.1)}},
-                toml::table{{"index", toml::value(1)}, {u8"γ",   toml::value(0.2)}},
-            })},
+            {"integrator",    toml::table{
+                {"seed",        toml::value(1234)},
+                {"parameters",  toml::value(toml::array{
+                    toml::table{{"index", toml::value(0)}, {"gamma", toml::value(0.1)}},
+                    toml::table{{"index", toml::value(1)}, {u8"γ",   toml::value(0.2)}}
+                })}}
+            }
         };
 
         const auto integr = mjolnir::read_underdamped_langevin_integrator<traits_type>(v);
