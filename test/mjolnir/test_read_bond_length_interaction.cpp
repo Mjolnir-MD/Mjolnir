@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(read_bond_length_go_contact)
     {
         const toml::table v = toml::table{
             {"interaction", toml::value("BondLength")},
-            {"potential",   toml::value("Go1012Contact")},
+            {"potential",   toml::value("GoContact")},
             {"topology",    toml::value("contact")},
             {"parameters",  toml::value(toml::array(/*empty*/))}
         };
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(read_bond_length_go_contact)
         BOOST_TEST(static_cast<bool>(base));
 
         const auto derv = dynamic_cast<mjolnir::BondLengthInteraction<
-            traits_type, mjolnir::Go1012ContactPotential<real_type>>*
+            traits_type, mjolnir::GoContactPotential<real_type>>*
             >(base.get()); // check the expected type is contained
         BOOST_TEST(static_cast<bool>(derv));
     }

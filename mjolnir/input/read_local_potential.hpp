@@ -2,7 +2,7 @@
 #define MJOLNIR_READ_LOCAL_POTENTIAL_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
-#include <mjolnir/potential/local/Go1012ContactPotential.hpp>
+#include <mjolnir/potential/local/GoContactPotential.hpp>
 #include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
 #include <mjolnir/potential/local/GaussianPotential.hpp>
 #include <mjolnir/potential/local/PeriodicGaussianPotential.hpp>
@@ -34,8 +34,8 @@ HarmonicPotential<realT> read_harmonic_potential(const toml::value& param)
 }
 
 template<typename realT>
-Go1012ContactPotential<realT>
-read_go1012_contact_potential(const toml::value& param)
+GoContactPotential<realT>
+read_go_contact_potential(const toml::value& param)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
@@ -43,7 +43,7 @@ read_go1012_contact_potential(const toml::value& param)
     const auto v0 = toml::find<real_type>(param, "v0");
 
     MJOLNIR_LOG_INFO("GoContactPotential = {v0 = ", v0, ", k = ", k, '}');
-    return Go1012ContactPotential<realT>(k, v0);
+    return GoContactPotential<realT>(k, v0);
 }
 
 template<typename realT>
@@ -141,11 +141,11 @@ struct read_local_potential_impl<HarmonicPotential<realT>>
     }
 };
 template<typename realT>
-struct read_local_potential_impl<Go1012ContactPotential<realT>>
+struct read_local_potential_impl<GoContactPotential<realT>>
 {
-    static Go1012ContactPotential<realT> invoke(const toml::value& param)
+    static GoContactPotential<realT> invoke(const toml::value& param)
     {
-        return read_go1012_contact_potential<realT>(param);
+        return read_go_contact_potential<realT>(param);
     }
 };
 template<typename realT>

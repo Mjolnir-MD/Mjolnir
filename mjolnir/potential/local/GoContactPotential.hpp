@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_GO_10_12_CONTACT_POTENTIAL
-#define MJOLNIR_GO_10_12_CONTACT_POTENTIAL
+#ifndef MJOLNIR_GO_CONTACT_POTENTIAL
+#define MJOLNIR_GO_CONTACT_POTENTIAL
 
 namespace mjolnir
 {
@@ -11,7 +11,7 @@ template<typename T> class System;
 //  V(r) = epsilon * (5 * (r0/r)^12 - 6 * (r0/r)^10)
 // dV/dr = 60 * epsilon * ((r0/r)^10 - (r0/r)^12) / r
 template<typename realT>
-class Go1012ContactPotential
+class GoContactPotential
 {
   public:
     using real_type = realT;
@@ -20,10 +20,10 @@ class Go1012ContactPotential
     static constexpr real_type rcutoff_ratio = 1. / cutoff_ratio;
 
   public:
-    Go1012ContactPotential(const real_type e, const real_type v0) noexcept
+    GoContactPotential(const real_type e, const real_type v0) noexcept
         : epsilon_(e), v0_(v0)
     {}
-    ~Go1012ContactPotential() = default;
+    ~GoContactPotential() = default;
 
     real_type potential(const real_type v) const noexcept
     {
@@ -56,7 +56,7 @@ class Go1012ContactPotential
     template<typename T>
     void update(const System<T>&) const noexcept {return;}
 
-    static const char* name() noexcept {return "Go1012Contact";}
+    static const char* name() noexcept {return "GoContact";}
 
     real_type k()  const noexcept {return epsilon_;}
     real_type v0() const noexcept {return v0_;}
@@ -68,12 +68,12 @@ class Go1012ContactPotential
 };
 
 template<typename realT>
-constexpr typename Go1012ContactPotential<realT>::real_type
-Go1012ContactPotential<realT>::cutoff_ratio;
+constexpr typename GoContactPotential<realT>::real_type
+GoContactPotential<realT>::cutoff_ratio;
 
 template<typename realT>
-constexpr typename Go1012ContactPotential<realT>::real_type
-Go1012ContactPotential<realT>::rcutoff_ratio;
+constexpr typename GoContactPotential<realT>::real_type
+GoContactPotential<realT>::rcutoff_ratio;
 
 } // mjolnir
 #endif /* MJOLNIR_GO_10_12_CONTACT_POTENTIAL */
