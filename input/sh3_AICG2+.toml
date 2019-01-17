@@ -203,7 +203,7 @@ parameters = [ #{{{
 ] # }}}
 [[forcefields.local]]
 interaction = "BondLength"
-potential = "Go1012Contact"
+potential = "GoContact"
 topology  = "contact"
 parameters = [ # {{{
 {indices = [ 0, 22], v0 =  7.2644, k = 0.1600},
