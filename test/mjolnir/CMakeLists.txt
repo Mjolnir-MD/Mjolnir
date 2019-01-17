@@ -13,7 +13,7 @@ set(TEST_NAMES
     test_flp_angle_potential
     test_flp_dihedral_potential
     test_clementi_dihedral_potential
-    test_go1012_potential
+    test_go_contact_potential
     test_lennard_jones_potential
     test_uniform_lennard_jones_potential
     test_excluded_volume_potential
@@ -25,7 +25,7 @@ set(TEST_NAMES
     test_axis_aligned_plane_shape
 
     test_read_harmonic_potential
-    test_read_go1012_contact_potential
+    test_read_go_contact_potential
     test_read_clementi_dihedral_potential
     test_read_gaussian_potential
     test_read_periodic_gaussian_potential
