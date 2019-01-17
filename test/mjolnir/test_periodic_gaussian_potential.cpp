@@ -1,10 +1,10 @@
-#define BOOST_TEST_MODULE "test_angular_gaussian_potential"
+#define BOOST_TEST_MODULE "test_periodic_gaussian_potential"
 
 #include <boost/test/included/unit_test.hpp>
-#include <mjolnir/potential/local/AngularGaussianPotential.hpp>
+#include <mjolnir/potential/local/PeriodicGaussianPotential.hpp>
 #include <mjolnir/math/constants.hpp>
 
-BOOST_AUTO_TEST_CASE(AngularGaussian_double)
+BOOST_AUTO_TEST_CASE(PeriodicGaussian_double)
 {
     using real_type = double;
     constexpr std::size_t N = 1000;
@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE(AngularGaussian_double)
     const real_type w  = 1.0;
     const real_type r0 = 3.0;
 
-    mjolnir::AngularGaussianPotential<real_type> gaussian(e, w, r0);
+    mjolnir::PeriodicGaussianPotential<real_type> gaussian(e, w, r0);
 
     const real_type x_min = -2 * pi;
     const real_type x_max =  2 * pi;
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(AngularGaussian_double)
     }
 }
 
-BOOST_AUTO_TEST_CASE(AngularGaussian_float)
+BOOST_AUTO_TEST_CASE(PeriodicGaussian_float)
 {
     using real_type = float;
     constexpr std::size_t N = 100;
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(AngularGaussian_float)
     const real_type w  = 1.0;
     const real_type r0 = 3.0;
 
-    mjolnir::AngularGaussianPotential<real_type> gaussian(e, w, r0);
+    mjolnir::PeriodicGaussianPotential<real_type> gaussian(e, w, r0);
 
     const real_type x_min = -2 * pi;
     const real_type x_max =  2 * pi;

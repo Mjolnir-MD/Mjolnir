@@ -10,17 +10,17 @@ template<typename T> class System;
 // V(r)  = epsilon * exp(-(r-r0)^2 / 2W^2)
 // dV/dr = epsilon * (-(r-r0) / W^2) * exp(-(r-r0)^2 / 2W^2)
 template<typename realT>
-class AngularGaussianPotential
+class PeriodicGaussianPotential
 {
   public:
     using real_type = realT;
 
   public:
-    AngularGaussianPotential(const real_type k, const real_type sigma,
+    PeriodicGaussianPotential(const real_type k, const real_type sigma,
                       const real_type v0) noexcept
         : k_(k), sigma_(sigma), inv_sigma2_(-1./(2*sigma*sigma)), v0_(v0)
     {}
-    ~AngularGaussianPotential() = default;
+    ~PeriodicGaussianPotential() = default;
 
     real_type potential(const real_type val) const noexcept
     {
@@ -45,7 +45,7 @@ class AngularGaussianPotential
     template<typename T>
     void update(const System<T>&) const noexcept {return;}
 
-    static const char* name() noexcept {return "AngularGaussian";}
+    static const char* name() noexcept {return "PeriodicGaussian";}
 
     real_type k()     const noexcept {return k_;}
     real_type sigma() const noexcept {return sigma_;}

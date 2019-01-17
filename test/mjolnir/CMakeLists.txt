@@ -9,7 +9,7 @@ set(TEST_NAMES
 
     test_harmonic_potential
     test_gaussian_potential
-    test_angular_gaussian_potential
+    test_periodic_gaussian_potential
     test_flp_angle_potential
     test_flp_dihedral_potential
     test_clementi_dihedral_potential
@@ -28,7 +28,7 @@ set(TEST_NAMES
     test_read_go1012_contact_potential
     test_read_clementi_dihedral_potential
     test_read_gaussian_potential
-    test_read_angular_gaussian_potential
+    test_read_periodic_gaussian_potential
     test_read_flexible_local_angle_potential
     test_read_flexible_local_dihedral_potential
     test_read_excluded_volume_potential

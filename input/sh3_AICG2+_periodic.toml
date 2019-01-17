@@ -491,7 +491,7 @@ parameters = [
 #}}}
 [[forcefields.local]]
 interaction = "DihedralAngle"
-potential = "Gaussian"
+potential = "PeriodicGaussian"
 topology  = "none"
 # params{{{
 parameters = [
