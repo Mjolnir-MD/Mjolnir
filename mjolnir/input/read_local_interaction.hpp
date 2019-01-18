@@ -35,10 +35,10 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
                 kind, read_local_potential<2, potentialT>(local));
     }
-    else if(potential == "Go1012Contact")
+    else if(potential == "GoContact")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is 10-12 Go contact.");
-        using potentialT = Go1012ContactPotential<real_type>;
+        using potentialT = GoContactPotential<real_type>;
 
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
                 kind, read_local_potential<2, potentialT>(local));
@@ -57,9 +57,9 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
             "mjolnir::read_bond_length_interaction: invalid potential",
             toml::find<toml::value>(local, "potential"), "here", {
             "expected value is one of the following.",
-            "- \"Harmonic\"     : well-known harmonic potential",
-            "- \"Go1012Contact\": r^12 - r^10 type native contact potential",
-            "- \"Gaussian\"     : well-known gaussian potential"
+            "- \"Harmonic\" : well-known harmonic potential",
+            "- \"GoContact\": r^12 - r^10 type native contact potential",
+            "- \"Gaussian\" : well-known gaussian potential"
             }));
     }
 }

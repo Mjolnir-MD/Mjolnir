@@ -1,7 +1,7 @@
-#define BOOST_TEST_MODULE "test_go1012_potential"
+#define BOOST_TEST_MODULE "test_gocontact_potential"
 
 #include <boost/test/included/unit_test.hpp>
-#include <mjolnir/potential/local/Go1012ContactPotential.hpp>
+#include <mjolnir/potential/local/GoContactPotential.hpp>
 
 BOOST_AUTO_TEST_CASE(GoContact_double)
 {
@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_CASE(GoContact_double)
     const real_type e  = 1.0;
     const real_type r0 = 5.0;
 
-    mjolnir::Go1012ContactPotential<real_type> Go(e, r0);
+    mjolnir::GoContactPotential<real_type> Go(e, r0);
 
     const real_type x_min = 0.8 * r0;
     const real_type x_max = 5.0 * r0;
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(GoContact_float)
     const real_type e  = 1.0;
     const real_type r0 = 5.0;
 
-    mjolnir::Go1012ContactPotential<real_type> Go(e, r0);
+    mjolnir::GoContactPotential<real_type> Go(e, r0);
 
     const real_type x_min = 0.8 * r0;
     const real_type x_max = 5.0 * r0;
