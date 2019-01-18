@@ -144,9 +144,11 @@ BOOST_AUTO_TEST_CASE(read_simulated_annealing_simulator)
             {"boundary_type", toml::value("Unlimited")},
             {"total_step",    toml::value(100)},
             {"save_step",     toml::value(10)},
-            {"schedule",      toml::value("linear")},
-            {"T_begin",       toml::value(300.0)},
-            {"T_end",         toml::value( 10.0)},
+            {"schedule",    toml::value(toml::table{
+                {"type",  toml::value("linear")},
+                {"begin", toml::value(300.0)},
+                {"end",   toml::value( 10.0)}
+            })},
             {"each_step",     toml::value( 1)},
             {"delta_t",       toml::value(0.1)}
         };
