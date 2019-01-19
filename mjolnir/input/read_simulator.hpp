@@ -115,16 +115,17 @@ read_simulated_annealing_simulator(
     MJOLNIR_LOG_NOTICE("total step is ", tstep);
     MJOLNIR_LOG_NOTICE("save  step is ", sstep);
 
-    const auto schedule  = toml::find<std::string>(simulator, "schedule");
-    const auto T_begin   = toml::find<real_type>  (simulator, "T_begin");
-    const auto T_end     = toml::find<real_type>  (simulator, "T_end");
+    const auto schedule  = toml::find(simulator, "schedule");
+    const auto schedule_type  = toml::find<std::string>(schedule, "type");
+    const auto schedule_begin = toml::find<real_type>  (schedule, "begin");
+    const auto schedule_end   = toml::find<real_type>  (schedule, "end");
     const auto each_step = toml::find<std::size_t>(simulator, "each_step");
 
-    MJOLNIR_LOG_NOTICE("temperature from ", T_begin);
-    MJOLNIR_LOG_NOTICE("temperature to   ", T_end);
+    MJOLNIR_LOG_NOTICE("temperature from ", schedule_begin);
+    MJOLNIR_LOG_NOTICE("temperature to   ", schedule_end);
     MJOLNIR_LOG_INFO("update temperature for each ", each_step, " steps");
 
-    if(schedule == "linear")
+    if(schedule_type == "linear")
     {
         MJOLNIR_LOG_NOTICE("temparing schedule is linear.");
         if(integrator_type == "VelocityVerlet")
@@ -148,7 +149,7 @@ read_simulated_annealing_simulator(
 
             MJOLNIR_LOG_NOTICE("Integrator is Underdamped Langevin.");
             return make_unique<simulator_t>(tstep, sstep, each_step,
-                    LinearScheduler<real_type>(T_begin, T_end),
+                    LinearScheduler<real_type>(schedule_begin, schedule_end),
                     read_system<traitsT>(root, 0),
                     read_forcefield<traitsT>(root, 0),
                     read_underdamped_langevin_integrator<traitsT>(simulator),
@@ -168,8 +169,8 @@ read_simulated_annealing_simulator(
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
-            "mjolnir::read_simulated_annealing_simulator: invalid schedule",
-            toml::find<toml::value>(simulator, "schedule"), "here", {
+            "mjolnir::read_simulated_annealing_simulator: invalid schedule.type",
+            toml::find<toml::value>(schedule, "type"), "here", {
             "expected value is one of the following.",
             "- \"linear\"     : simple linear temperature scheduling",
             }));
