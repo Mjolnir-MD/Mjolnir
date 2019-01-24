@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/Mjolnir-MD/Mjolnir.svg?branch=master)](https://travis-ci.org/Mjolnir-MD/Mjolnir)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b55282103ca74dd5b9b0022a3af99f3b)](https://www.codacy.com/app/ToruNiina/Mjolnir?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Mjolnir-MD/Mjolnir&amp;utm_campaign=Badge_Grade)
+[![Latest Tag](https://img.shields.io/github/tag-date/Mjolnir-MD/Mjolnir.svg)](https://github.com/Mjolnir-MD/Mjolnir/tags)
+[![Latest Version](https://img.shields.io/github/release/Mjolnir-MD/Mjolnir.svg)](https://github.com/Mjolnir-MD/Mjolnir/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
 Molecular Dynamics Simulation Software written in C++11.
