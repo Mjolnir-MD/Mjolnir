@@ -127,7 +127,6 @@ System<traitsT> read_system(const toml::table& root, std::size_t N)
     else       {MJOLNIR_LOG_NOTICE("reading [[system]].");}
 
     using real_type       = typename traitsT::real_type;
-    using coordinate_type = typename traitsT::coordinate_type;
 
     const auto& system_params = toml::find<toml::array>(root, "systems");
     if(system_params.size() <= N)
