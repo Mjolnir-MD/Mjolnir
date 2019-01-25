@@ -7,6 +7,8 @@
 
 namespace mjolnir
 {
+namespace math
+{
 
 template<typename realT, std::size_t N>
 using Vector = Matrix<realT, N, 1>;
@@ -51,5 +53,6 @@ inline realT length(const Vector<realT, 3>& lhs) noexcept
     return std::sqrt(length_sq(lhs));
 }
 
+} // math
 } // mjolnir
 #endif /* MJOLNIR_VECTOR */

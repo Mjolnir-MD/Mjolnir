@@ -121,7 +121,7 @@ void VerletList<traitsT, parameterT>::make(
             }
 
             const auto& rj = sys[j].position;
-            if(length_sq(sys.adjust_direction(rj - ri)) < rc2)
+            if(math::length_sq(sys.adjust_direction(rj - ri)) < rc2)
             {
                 partners.emplace_back(j, pot.prepair_params(i, j));
             }

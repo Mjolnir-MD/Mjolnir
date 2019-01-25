@@ -37,7 +37,7 @@ class Plane
     real_type calc_distance(
             const coordinate_type& pos, const boundary_type& bd) const
     {
-        return dot_product(this->normal_,
+        return math::dot_product(this->normal_,
                 bd.adjust_direction(pos - this->position_));
     }
 
@@ -45,7 +45,7 @@ class Plane
             const coordinate_type& pos, const boundary_type& bd) const
     {
         // calculate `f` that will be used in this form `F = -dV * f`;
-        const real_type sign = std::copysign(real_type(1.0), dot_product(
+        const real_type sign = std::copysign(real_type(1.0), math::dot_product(
                 this->normal_, bd.adjust_direction(pos - this->position_)));
 
         return sign * normal_;

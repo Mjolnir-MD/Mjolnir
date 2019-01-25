@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(rsqrt, Real, test_targets)
         const Real x     = uni(mt);
         const Real x_sq  = x * x;
         const Real x_inv = 1 / x;
-        BOOST_TEST(x_inv == mjolnir::rsqrt(x_sq), test::tolerance<Real>());
+        BOOST_TEST(x_inv == mjolnir::math::rsqrt(x_sq), test::tolerance<Real>());
     }
 }
 
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(clamp, Real, test_targets)
     for(std::size_t i=0; i < N; ++i)
     {
         const Real x = uni(mt);
-        BOOST_TEST(mjolnir::clamp<Real>(x, minimum, maximum) ==
+        BOOST_TEST(mjolnir::math::clamp<Real>(x, minimum, maximum) ==
                    std::min(std::max(minimum, x), maximum),
                    test::tolerance<Real>());
     }

@@ -8,6 +8,8 @@
 
 namespace mjolnir
 {
+namespace math
+{
 
 // matrix type.
 //    1   ...   C
@@ -371,5 +373,6 @@ inline Matrix<realT, 3, 3> inverse(const Matrix<realT, 3, 3>& mat) noexcept
     return inverse(mat, determinant(mat));
 }
 
+} // math
 } // mjolnir
 #endif /* MJOLNIR_MATH_MATRIX */

@@ -79,7 +79,7 @@ class GlobalPairInteraction<traitsT,
 
                 const coordinate_type rij =
                     sys.adjust_direction(sys[j].position - sys[i].position);
-                const real_type l_sq = length_sq(rij);
+                const real_type l_sq = math::length_sq(rij);
 
                 const real_type sigma_sq = param.first * param.first;
                 if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
@@ -117,7 +117,7 @@ class GlobalPairInteraction<traitsT,
 
                 const coordinate_type rij =
                     sys.adjust_direction(sys[j].position - sys[i].position);
-                const real_type l_sq = length_sq(rij);
+                const real_type l_sq = math::length_sq(rij);
 
                 const real_type sigma_sq = param.first * param.first;
                 if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}

@@ -9,6 +9,8 @@
 
 namespace mjolnir
 {
+namespace math
+{
 
 // std::clamp is defined after C++17
 // after C++14, std::min and std::max become constexpr
@@ -17,6 +19,7 @@ inline T clamp(const T x, const T low, const T high) noexcept
 {
     return std::min(std::max(x, low), high);
 }
+
 
 // ---------------------------------------------------------------------------
 // rsqrt
@@ -49,5 +52,6 @@ inline double rsqrt<double>(double x) noexcept
 #  endif // AVX512F
 #endif // MJOLNIR_WITH_APPROX
 
+} // math
 } // mjolnir
 #endif // MJOLNIR_MATH_FUNCTIONS_HPP

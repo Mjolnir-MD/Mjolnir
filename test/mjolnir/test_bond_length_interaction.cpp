@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
     typedef mjolnir::BondLengthInteraction<traits, harmonic_type> bond_length_type;
     typedef bond_length_type::connection_kind_type connection_kind_type;
 
-    auto normalize = [](const coord_type& v){return v / mjolnir::length(v);};
+    auto normalize = [](const coord_type& v){return v / mjolnir::math::length(v);};
 
     const real_type k(100.);
     const real_type native(2.0);
@@ -47,8 +47,8 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
 
         interaction.calc_force(sys);
 
-        const real_type force_strength1 = mjolnir::length(sys[0].force);
-        const real_type force_strength2 = mjolnir::length(sys[1].force);
+        const real_type force_strength1 = mjolnir::math::length(sys[0].force);
+        const real_type force_strength2 = mjolnir::math::length(sys[1].force);
 
 
         // direction
@@ -62,12 +62,10 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
             BOOST_TEST(coef == force_strength1, boost::test_tools::tolerance(tol));
             BOOST_TEST(coef == force_strength2, boost::test_tools::tolerance(tol));
 
-            const real_type dir1 =
-                mjolnir::dot_product(normalize(sys[0].force),
-                                     normalize(sys[0].position - sys[1].position));
-            const real_type dir2 =
-                mjolnir::dot_product(normalize(sys[1].force),
-                                     normalize(sys[1].position - sys[0].position));
+            const real_type dir1 = mjolnir::math::dot_product(
+                normalize(sys[0].force), normalize(sys[0].position - sys[1].position));
+            const real_type dir2 = mjolnir::math::dot_product(
+                normalize(sys[1].force), normalize(sys[1].position - sys[0].position));
 
             BOOST_TEST(dir1 == 1.0, boost::test_tools::tolerance(tol));
             BOOST_TEST(dir2 == 1.0, boost::test_tools::tolerance(tol));
@@ -77,17 +75,16 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
             BOOST_TEST(coef == force_strength1, boost::test_tools::tolerance(tol));
             BOOST_TEST(coef == force_strength2, boost::test_tools::tolerance(tol));
 
-            const real_type dir1 =
-                mjolnir::dot_product(normalize(sys[0].force),
-                                     normalize(sys[1].position - sys[0].position));
-            const real_type dir2 =
-                mjolnir::dot_product(normalize(sys[1].force),
-                                     normalize(sys[0].position - sys[1].position));
+            const real_type dir1 = mjolnir::math::dot_product(
+                normalize(sys[0].force), normalize(sys[1].position - sys[0].position));
+            const real_type dir2 = mjolnir::math::dot_product(
+                normalize(sys[1].force), normalize(sys[0].position - sys[1].position));
 
             BOOST_TEST(dir1 == 1e0, boost::test_tools::tolerance(tol));
             BOOST_TEST(dir2 == 1e0, boost::test_tools::tolerance(tol));
         }
-        BOOST_TEST(length(sys[0].force + sys[1].force) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(mjolnir::math::length(sys[0].force + sys[1].force) == 0.0,
+                   boost::test_tools::tolerance(tol));
 
         dist += dr;
     }

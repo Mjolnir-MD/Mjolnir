@@ -97,28 +97,28 @@ DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const noexce
             sys.adjust_direction(sys[idx3].position - sys[idx2].position);
         const coordinate_type r_kl = real_type(-1.0) * r_lk;
 
-        const real_type r_kj_lensq  = length_sq(r_kj);
-        const real_type r_kj_rlen   = rsqrt(r_kj_lensq);
+        const real_type r_kj_lensq  = math::length_sq(r_kj);
+        const real_type r_kj_rlen   = math::rsqrt(r_kj_lensq);
         const real_type r_kj_rlensq = r_kj_rlen * r_kj_rlen;
         const real_type r_kj_len    = r_kj_rlen * r_kj_lensq;
 
-        const coordinate_type m = cross_product(r_ij, r_kj);
-        const coordinate_type n = cross_product(r_kj, r_kl);
-        const real_type m_lensq = length_sq(m);
-        const real_type n_lensq = length_sq(n);
+        const coordinate_type m = math::cross_product(r_ij, r_kj);
+        const coordinate_type n = math::cross_product(r_kj, r_kl);
+        const real_type m_lensq = math::length_sq(m);
+        const real_type n_lensq = math::length_sq(n);
 
         const coordinate_type R =
-            r_ij - (dot_product(r_ij, r_kj) * r_kj_rlensq) * r_kj;
+            r_ij - (math::dot_product(r_ij, r_kj) * r_kj_rlensq) * r_kj;
         const coordinate_type S =
-            r_lk - (dot_product(r_lk, r_kj) * r_kj_rlensq) * r_kj;
+            r_lk - (math::dot_product(r_lk, r_kj) * r_kj_rlensq) * r_kj;
 
-        const real_type R_lensq = length_sq(R);
-        const real_type S_lensq = length_sq(S);
+        const real_type R_lensq = math::length_sq(R);
+        const real_type S_lensq = math::length_sq(S);
 
-        const real_type dot_RS  = dot_product(R, S) * rsqrt(R_lensq * S_lensq);
-        const real_type cos_phi = clamp(dot_RS, real_type(-1.0), real_type(1.0));
+        const real_type dot_RS  = math::dot_product(R, S) * math::rsqrt(R_lensq * S_lensq);
+        const real_type cos_phi = math::clamp(dot_RS, real_type(-1.0), real_type(1.0));
         const real_type phi     =
-            std::copysign(std::acos(cos_phi), dot_product(r_ij, n));
+            std::copysign(std::acos(cos_phi), math::dot_product(r_ij, n));
 
         // -dV / dphi
         const real_type coef = -(idxp.second.derivative(phi));
@@ -126,8 +126,8 @@ DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const noexce
         const coordinate_type Fi = ( coef * r_kj_len / m_lensq) * m;
         const coordinate_type Fl = (-coef * r_kj_len / n_lensq) * n;
 
-        const real_type coef_ijk = dot_product(r_ij, r_kj) * r_kj_rlensq;
-        const real_type coef_jkl = dot_product(r_kl, r_kj) * r_kj_rlensq;
+        const real_type coef_ijk = math::dot_product(r_ij, r_kj) * r_kj_rlensq;
+        const real_type coef_jkl = math::dot_product(r_kl, r_kj) * r_kj_rlensq;
 
         sys[idx0].force += Fi;
         sys[idx1].force += (coef_ijk - real_type(1.0)) * Fi - coef_jkl * Fl;
@@ -151,21 +151,21 @@ DihedralAngleInteraction<traitsT, potentialT>::calc_energy(
                 sys[idxp.first[2]].position - sys[idxp.first[1]].position);
         const coordinate_type r_lk = sys.adjust_direction(
                 sys[idxp.first[3]].position - sys[idxp.first[2]].position);
-        const real_type r_kj_lensq_inv = real_type(1.0) / length_sq(r_kj);
+        const real_type r_kj_lensq_inv = real_type(1.0) / math::length_sq(r_kj);
 
-        const coordinate_type n = cross_product(r_kj, real_type(-1.0) * r_lk);
+        const coordinate_type n = math::cross_product(r_kj, real_type(-1.0) * r_lk);
 
         const coordinate_type R = r_ij -
-                              (dot_product(r_ij, r_kj) * r_kj_lensq_inv) * r_kj;
+                              (math::dot_product(r_ij, r_kj) * r_kj_lensq_inv) * r_kj;
         const coordinate_type S = r_lk -
-                              (dot_product(r_lk, r_kj) * r_kj_lensq_inv) * r_kj;
-        const real_type R_lensq = length_sq(R);
-        const real_type S_lensq = length_sq(S);
+                              (math::dot_product(r_lk, r_kj) * r_kj_lensq_inv) * r_kj;
+        const real_type R_lensq = math::length_sq(R);
+        const real_type S_lensq = math::length_sq(S);
 
-        const real_type dot_RS  = dot_product(R, S) * rsqrt(R_lensq * S_lensq);
-        const real_type cos_phi = clamp(dot_RS, real_type(-1.0), real_type(1.0));
+        const real_type dot_RS  = math::dot_product(R, S) * math::rsqrt(R_lensq * S_lensq);
+        const real_type cos_phi = math::clamp(dot_RS, real_type(-1.0), real_type(1.0));
         const real_type phi     =
-            std::copysign(std::acos(cos_phi), dot_product(r_ij, n));
+            std::copysign(std::acos(cos_phi), math::dot_product(r_ij, n));
 
         E += idxp.second.potential(phi);
     }

@@ -139,7 +139,7 @@ UnderdampedLangevinIntegrator<traitsT>::step(
 
         f = coordinate_type(0, 0, 0);
 
-        largest_disp2 = std::max(largest_disp2, length_sq(displacement));
+        largest_disp2 = std::max(largest_disp2, math::length_sq(displacement));
     }
 
     // update neighbor list; reduce margin, reconstruct the list if needed

@@ -93,17 +93,17 @@ BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const no
         const coordinate_type r_ij =
             sys.adjust_direction(sys[idx0].position - sys[idx1].position);
 
-        const real_type       inv_len_r_ij = rsqrt(length_sq(r_ij));
+        const real_type       inv_len_r_ij = math::rsqrt(math::length_sq(r_ij));
         const coordinate_type r_ij_reg     = r_ij * inv_len_r_ij;
 
         const coordinate_type r_kj =
             sys.adjust_direction(sys[idx2].position - sys[idx1].position);
 
-        const real_type       inv_len_r_kj = rsqrt(length_sq(r_kj));
+        const real_type       inv_len_r_kj = math::rsqrt(math::length_sq(r_kj));
         const coordinate_type r_kj_reg     = r_kj * inv_len_r_kj;
 
-        const real_type dot_ijk   = dot_product(r_ij_reg, r_kj_reg);
-        const real_type cos_theta = clamp(dot_ijk, real_type(-1.0), real_type(1.0));
+        const real_type dot_ijk   = math::dot_product(r_ij_reg, r_kj_reg);
+        const real_type cos_theta = math::clamp(dot_ijk, real_type(-1.0), real_type(1.0));
 
         const real_type theta = std::acos(cos_theta);
         const real_type coef  = -(idxp.second.derivative(theta));
@@ -142,12 +142,12 @@ BondAngleInteraction<traitsT, potentialT>::calc_energy(
         const coordinate_type v_2to3 =
             sys.adjust_direction(sys[idx2].position - sys[idx1].position);
 
-        const real_type lensq_v21   = length_sq(v_2to1);
-        const real_type lensq_v23   = length_sq(v_2to3);
-        const real_type dot_v21_v23 = dot_product(v_2to1, v_2to3);
+        const real_type lensq_v21   = math::length_sq(v_2to1);
+        const real_type lensq_v23   = math::length_sq(v_2to3);
+        const real_type dot_v21_v23 = math::dot_product(v_2to1, v_2to3);
 
-        const real_type dot_ijk   = dot_v21_v23 * rsqrt(lensq_v21 * lensq_v23);
-        const real_type cos_theta = clamp(dot_ijk, real_type(-1.0), real_type(1.0));
+        const real_type dot_ijk   = dot_v21_v23 * math::rsqrt(lensq_v21 * lensq_v23);
+        const real_type cos_theta = math::clamp(dot_ijk, real_type(-1.0), real_type(1.0));
         const real_type theta     = std::acos(cos_theta);
 
         E += idxp.second.potential(theta);

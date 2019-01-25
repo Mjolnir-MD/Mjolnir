@@ -9,9 +9,9 @@ template<typename realT, template<typename, typename> class boundaryT>
 struct SimulatorTraits
 {
     using real_type       = realT;
-    using coordinate_type = Vector<real_type, 3>;
+    using coordinate_type = math::Vector<real_type, 3>;
     template<std::size_t N, std::size_t M>
-    using matrix_type = Matrix<real_type, N, M>;
+    using matrix_type = math::Matrix<real_type, N, M>;
 
     using boundary_type = boundaryT<real_type, coordinate_type>;
 };
