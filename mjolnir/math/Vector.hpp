@@ -13,6 +13,23 @@ namespace math
 template<typename realT, std::size_t N>
 using Vector = Matrix<realT, N, 1>;
 
+// use mjolnir::math::X() to access elements of vector.
+
+template<typename realT>
+inline realT  X(const Vector<realT, 3>& v) noexcept {return v[0];}
+template<typename realT>
+inline realT& X(Vector<realT, 3>& v) noexcept {return v[0];}
+
+template<typename realT>
+inline realT  Y(const Vector<realT, 3>& v) noexcept {return v[1];}
+template<typename realT>
+inline realT& Y(Vector<realT, 3>& v) noexcept {return v[1];}
+
+template<typename realT>
+inline realT  Z(const Vector<realT, 3>& v) noexcept {return v[2];}
+template<typename realT>
+inline realT& Z(Vector<realT, 3>& v) noexcept {return v[2];}
+
 // functions for vector 3d
 
 template<typename realT>
