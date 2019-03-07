@@ -4,6 +4,7 @@
 #include <mjolnir/core/ObserverBase.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/math/math.hpp>
 #include <limits>
 
 namespace mjolnir
@@ -83,7 +84,7 @@ inline bool SteepestDescentSimulator<traitsT>::step()
         max_diff = std::max(max_diff, std::abs(this->system_[i].force[1]));
         max_diff = std::max(max_diff, std::abs(this->system_[i].force[2]));
 
-        max_disp2 = std::max(max_disp2, length_sq(disp));
+        max_disp2 = std::max(max_disp2, math::length_sq(disp));
         system_[i].position = system_.adjust_position(system_[i].position + disp);
         system_[i].force    = coordinate_type(0, 0, 0);
     }

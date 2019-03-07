@@ -70,7 +70,7 @@ class XYZObserver final : public ObserverBase<traitsT>
         real_type k = 0.0;
         for(std::size_t i=0; i<sys.size(); ++i)
         {
-            k += length_sq(sys[i].velocity) * sys[i].mass;
+            k += math::length_sq(sys[i].velocity) * sys[i].mass;
         }
         return k * 0.5;
     }

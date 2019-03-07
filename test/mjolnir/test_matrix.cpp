@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(add_matrix_3x3, Real, test_targets)
 
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
-        const Matrix<Real, 3, 3> lhs(
+        const math::Matrix<Real, 3, 3> lhs(
                 uni(mt), uni(mt), uni(mt),
                 uni(mt), uni(mt), uni(mt),
                 uni(mt), uni(mt), uni(mt)
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(sub_matrix_3x3, Real, test_targets)
 
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
-        const Matrix<Real, 3, 3> lhs(
+        const math::Matrix<Real, 3, 3> lhs(
                 uni(mt), uni(mt), uni(mt),
                 uni(mt), uni(mt), uni(mt),
                 uni(mt), uni(mt), uni(mt)
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(scalar_mul_matrix_3x3, Real, test_targets)
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
         const Real lhs = uni(mt);
-        const Matrix<Real, 3, 3> rhs(
+        const math::Matrix<Real, 3, 3> rhs(
                 uni(mt), uni(mt), uni(mt),
                 uni(mt), uni(mt), uni(mt),
                 uni(mt), uni(mt), uni(mt)
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(scalar_mul_matrix_3x3, Real, test_targets)
 
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
-        const Matrix<Real, 3, 3> lhs(
+        const math::Matrix<Real, 3, 3> lhs(
                 uni(mt), uni(mt), uni(mt),
                 uni(mt), uni(mt), uni(mt),
                 uni(mt), uni(mt), uni(mt)
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(scalar_div_matrix_3x3, Real, test_targets)
 
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
-        const Matrix<Real, 3, 3> lhs(
+        const math::Matrix<Real, 3, 3> lhs(
                 uni(mt), uni(mt), uni(mt),
                 uni(mt), uni(mt), uni(mt),
                 uni(mt), uni(mt), uni(mt)
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(mul_matrix_3x3, Real, test_targets)
 
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
-        const Matrix<Real, 3, 3> lhs(
+        const math::Matrix<Real, 3, 3> lhs(
                 uni(mt), uni(mt), uni(mt),
                 uni(mt), uni(mt), uni(mt),
                 uni(mt), uni(mt), uni(mt)
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(matrix_3x3_inverse, Real, test_targets)
 
     for(std::size_t test_times=0; test_times<N; ++test_times)
     {
-        const Matrix<Real, 3, 3> lhs(
+        const math::Matrix<Real, 3, 3> lhs(
                 uni(mt), uni(mt), uni(mt),
                 uni(mt), uni(mt), uni(mt),
                 uni(mt), uni(mt), uni(mt)

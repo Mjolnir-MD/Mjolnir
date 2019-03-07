@@ -213,7 +213,7 @@ void PeriodicGridCellList<traitsT, parameterT>::make(
                     continue;
                 }
 
-                if(length_sq(sys.adjust_direction(sys[j].position - ri)) < r_c2)
+                if(math::length_sq(sys.adjust_direction(sys[j].position - ri)) < r_c2)
                 {
                     MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
                     partner.emplace_back(j, pot.prepair_params(i, j));

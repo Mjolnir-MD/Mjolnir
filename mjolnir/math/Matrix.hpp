@@ -8,16 +8,29 @@
 
 namespace mjolnir
 {
+namespace math
+{
 
+// matrix type.
+//    1   ...   C
+//  1 x00 ... x0M    N = R-1
+//  . x10 ... x1M    M = C-1
+//  .   . ...   .
+//  R xN0 ... xNM    R * C matrix
+//
+// Access by using `operator()` in the following way.
+// Matrix<double, 3, 3> m;
+// assert(m(1,0) == x10);
+// assert(m(2,1) == x21);
+//
+// Note that the order of `operator[]` is not guaranteed.
+// *DO NOT* use `mat[i]` to modify the element.
+// It is only for the internal use.
 template<typename realT, std::size_t R, std::size_t C>
 class Matrix
 {
   public:
-    //    1   ...   C
-    //  1 x00 ... x0M    N = R-1
-    //  . x10 ... x1M    M = C-1
-    //  .   . ...   .
-    //  R xN0 ... xNM    R * C matrix
+
     static constexpr std::size_t    row_size = R;
     static constexpr std::size_t column_size = C;
     static constexpr std::size_t  total_size = R * C;
@@ -117,19 +130,28 @@ class Matrix
   private:
     storage_type values_;
 };
+template<typename realT, std::size_t R, std::size_t C>
+constexpr std::size_t Matrix<realT, R, C>::row_size;
+template<typename realT, std::size_t R, std::size_t C>
+constexpr std::size_t Matrix<realT, R, C>::column_size;
+template<typename realT, std::size_t R, std::size_t C>
+constexpr std::size_t Matrix<realT, R, C>::total_size;
 
-template<typename T, std::size_t R, std::size_t C,
-         typename charT, typename traits>
-std::basic_ostream<charT, traits>&
-operator<<(std::basic_ostream<charT, traits>& os, const Matrix<T, R, C>& rhs)
+template<typename charT, typename traitsT,
+         typename T, std::size_t R, std::size_t C>
+std::basic_ostream<charT, traitsT>&
+operator<<(std::basic_ostream<charT, traitsT>& os, const Matrix<T, R, C>& mat)
 {
-    os << '(';
-    for(std::size_t i=0; i<R*C; ++i)
+    for(std::size_t i=0; i<R; ++i)
     {
-        os << rhs[i];
-        if(i!=R*C-1){os << ", ";}
+        os << '(';
+        for(std::size_t j=0; j<R; ++j)
+        {
+            if(j!=0) {os << ',';}
+            os << mat(i, j);
+        }
+        os << ")\n";
     }
-    os << ')';
     return os;
 }
 
@@ -351,5 +373,6 @@ inline Matrix<realT, 3, 3> inverse(const Matrix<realT, 3, 3>& mat) noexcept
     return inverse(mat, determinant(mat));
 }
 
+} // math
 } // mjolnir
 #endif /* MJOLNIR_MATH_MATRIX */

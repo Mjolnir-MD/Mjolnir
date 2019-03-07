@@ -83,7 +83,7 @@ class GlobalPairInteraction<
 
                 const coordinate_type rij =
                     sys.adjust_direction(sys[j].position - sys[i].position);
-                const real_type l_sq = length_sq(rij);
+                const real_type l_sq = math::length_sq(rij);
 
                 if(r_cutoff_sq < l_sq) {continue;}
 
@@ -121,7 +121,7 @@ class GlobalPairInteraction<
 
                 const coordinate_type rij =
                     sys.adjust_direction(sys[j].position - sys[i].position);
-                const real_type l_sq = length_sq(rij);
+                const real_type l_sq = math::length_sq(rij);
 
                 if(r_cutoff_sq < l_sq) {continue;}
 

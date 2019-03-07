@@ -7,9 +7,28 @@
 
 namespace mjolnir
 {
+namespace math
+{
 
 template<typename realT, std::size_t N>
 using Vector = Matrix<realT, N, 1>;
+
+// use mjolnir::math::X() to access elements of vector.
+
+template<typename realT>
+inline realT  X(const Vector<realT, 3>& v) noexcept {return v[0];}
+template<typename realT>
+inline realT& X(Vector<realT, 3>& v) noexcept {return v[0];}
+
+template<typename realT>
+inline realT  Y(const Vector<realT, 3>& v) noexcept {return v[1];}
+template<typename realT>
+inline realT& Y(Vector<realT, 3>& v) noexcept {return v[1];}
+
+template<typename realT>
+inline realT  Z(const Vector<realT, 3>& v) noexcept {return v[2];}
+template<typename realT>
+inline realT& Z(Vector<realT, 3>& v) noexcept {return v[2];}
 
 // functions for vector 3d
 
@@ -51,22 +70,6 @@ inline realT length(const Vector<realT, 3>& lhs) noexcept
     return std::sqrt(length_sq(lhs));
 }
 
-template<typename realT>
-Vector<realT, 3>
-rotate(const realT angle, const Vector<realT, 3>& axis,
-       const Vector<realT, 3>& target) noexcept
-{
-    const realT half_angle     = angle / 2;
-    const realT sin_normalized = std::sin(half_angle) * rsqrt(length_sq(axis));
-    const quaternion<realT> Q{std::cos(half_angle),
-                              axis[0] * sin_normalized,
-                              axis[1] * sin_normalized,
-                              axis[2] * sin_normalized};
-    const quaternion<realT> P(0e0, target[0], target[1], target[2]);
-    const quaternion<realT> S(Q * P * conj(Q));
-
-    return Vector<realT, 3>{S[1], S[2], S[3]};
-}
-
+} // math
 } // mjolnir
 #endif /* MJOLNIR_VECTOR */

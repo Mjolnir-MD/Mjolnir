@@ -72,7 +72,7 @@ VelocityVerletIntegrator<traitsT>::step(
         pv.position = system.adjust_position(pv.position + disp);
         pv.force    = coordinate_type(real_type(0.0), real_type(0.0), real_type(0.0));
 
-        largest_disp2 = std::max(largest_disp2, length_sq(disp));
+        largest_disp2 = std::max(largest_disp2, math::length_sq(disp));
     }
 
     // update neighbor list; reduce margin, reconstruct the list if needed

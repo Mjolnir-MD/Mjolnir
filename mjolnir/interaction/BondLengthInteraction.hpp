@@ -88,8 +88,8 @@ void BondLengthInteraction<traitsT, potentialT>::calc_force(
         const auto dpos =
             sys.adjust_direction(sys[idx1].position - sys[idx0].position);
 
-        const real_type len2 = length_sq(dpos); // l^2
-        const real_type rlen = rsqrt(len2);     // 1/l
+        const real_type len2 = math::length_sq(dpos); // l^2
+        const real_type rlen = math::rsqrt(len2);     // 1/l
         const real_type force = -1 * idxp.second.derivative(len2 * rlen);
         // here, L^2 * (1 / L) = L.
 
@@ -108,7 +108,7 @@ BondLengthInteraction<traitsT, potentialT>::calc_energy(
     real_type E = 0.;
     for(const auto& idxp : this->potentials)
     {
-        E += idxp.second.potential(length(sys.adjust_direction(
+        E += idxp.second.potential(math::length(sys.adjust_direction(
                 sys[idxp.first[1]].position - sys[idxp.first[0]].position)));
     }
     return E;
