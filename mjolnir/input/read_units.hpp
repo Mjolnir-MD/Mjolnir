@@ -14,7 +14,7 @@ template<typename traitsT>
 std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_units(const toml::value& data), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = typename traitsT::real_type;
     using phys_type = physics::constants<real_type>;
     using math_type = math::constants<real_type>;

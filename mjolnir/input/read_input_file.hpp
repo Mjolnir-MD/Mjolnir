@@ -18,7 +18,7 @@ std::unique_ptr<SimulatorBase>
 read_boundary(const toml::table& root)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_boundary(const toml::Table& root), 0);
+    MJOLNIR_LOG_FUNCTION();
 
     // [simulator] can be provided in a different file. in that case, the table
     // has `file_name` field. In that case, file.input.path is also needed to
@@ -68,7 +68,7 @@ inline std::unique_ptr<SimulatorBase>
 read_precision(const toml::table& root)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_precision(const toml::Table& root), 0);
+    MJOLNIR_LOG_FUNCTION();
 
     // [simulator] can be provided in a different file. in that case, the table
     // has `file_name` field. In that case, input_path is also needed to
@@ -138,9 +138,8 @@ read_input_file(const std::string& filename)
 
     MJOLNIR_SET_DEFAULT_LOGGER(logger_name);
     MJOLNIR_GET_DEFAULT_LOGGER();
-
+    MJOLNIR_LOG_FUNCTION();
     MJOLNIR_LOG_NOTICE("the log file is `", logger_name, '`');
-    MJOLNIR_SCOPE(read_input_file(const toml::Table& root), 0);
 
     return read_precision(root); // read all the settings recursively...
 }

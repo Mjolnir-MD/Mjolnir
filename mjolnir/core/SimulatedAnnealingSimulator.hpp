@@ -111,7 +111,7 @@ template<typename traitsT, typename integratorT,
 inline bool SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::step()
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
-    MJOLNIR_SCOPE_DEBUG(SimulatedAnnealingSimulator::step, 0);
+    MJOLNIR_LOG_FUNCTION_DEBUG();
 
     if(step_count_ % save_step_ == 0)
     {
@@ -124,7 +124,7 @@ inline bool SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::step()
 
     if(this->step_count_ % each_step_ == 0)
     {
-        MJOLNIR_SCOPE_DEBUG(if(this->step_count_ % each_step == 0), 1);
+        MJOLNIR_LOG_SCOPE_DEBUG(if(this->step_count_ % each_step == 0));
 
         system_.attribute("temperature") =
             this->scheduler_.current(step_count_ * r_total_step_);

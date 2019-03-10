@@ -14,7 +14,7 @@ std::unique_ptr<ObserverBase<traitsT>>
 read_observer(const toml::table& root)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_observer(), 0);
+    MJOLNIR_LOG_FUNCTION();
 
     const auto& files  = toml::find<toml::value>(root, "files");
     const auto& output = toml::find<toml::value>(files, "output");

@@ -22,7 +22,7 @@ read_molecular_dynamics_simulator(
         const toml::table& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_molecular_dynamics_simulator(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = typename traitsT::real_type;
 
     const auto& integrator     = toml::find(simulator, "integrator");
@@ -77,7 +77,7 @@ read_steepest_descent_simulator(
         const toml::table& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_steepest_descent_simulator(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type      = typename traitsT::real_type;
     using simulator_type = SteepestDescentSimulator<traitsT>;
 
@@ -104,7 +104,7 @@ read_simulated_annealing_simulator(
         const toml::table& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_simulated_annealing_simulator(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type   = typename traitsT::real_type;
 
     const auto& integrator     = toml::find(simulator, "integrator");
@@ -182,7 +182,7 @@ std::unique_ptr<SimulatorBase>
 read_simulator_from_table(const toml::table& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_simulator_from_table(), 0);
+    MJOLNIR_LOG_FUNCTION();
 
     const auto type = toml::find<std::string>(simulator, "type");
     if(type == "MolecularDynamics")
@@ -218,13 +218,13 @@ std::unique_ptr<SimulatorBase>
 read_simulator(const toml::table& root)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_simulator(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = typename traitsT::real_type;
 
     const auto& simulator  = toml::find(root, "simulator");
     if(toml::get<toml::table>(simulator).count("file_name") == 1)
     {
-        MJOLNIR_SCOPE(simulator.count("file_name") == 1, 1);
+        MJOLNIR_LOG_SCOPE(if(toml::get<toml::table>(simulator).count("file_name") == 1));
 
         const auto input_path = read_input_path(root);
         const auto file_name  = toml::find<std::string>(simulator, "file_name");

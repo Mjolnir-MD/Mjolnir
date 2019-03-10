@@ -197,7 +197,7 @@ std::vector<std::pair<std::array<std::size_t, N>, potentialT>>
 read_local_potential(const toml::value& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_local_potential(), 0);
+    MJOLNIR_LOG_FUNCTION();
     MJOLNIR_LOG_INFO("as ", N, "-body interaction");
 
     using indices_t                = std::array<std::size_t, N>;
@@ -227,7 +227,7 @@ read_local_potentials(const toml::value& local,
                       const std::string& p1, const std::string& p2)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_local_potentials(), 0);
+    MJOLNIR_LOG_FUNCTION();
     MJOLNIR_LOG_INFO("as ", N, "-body interaction");
 
     using indices_t                = std::array<std::size_t, N>;

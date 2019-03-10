@@ -52,8 +52,7 @@ class ExclusionList
     void make(const System<traitsT>& sys, const PotentialT& pot)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_SCOPE(ExclusionList::make(), 0);
-
+        MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential = ", pot.name());
 
         const auto& topol = sys.topology();

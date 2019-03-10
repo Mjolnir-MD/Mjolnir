@@ -24,7 +24,7 @@ std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_global_pair_interaction(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_global_pair_interaction(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = typename traitsT::real_type;
 
     const auto potential = toml::find<std::string>(global, "potential");
@@ -84,7 +84,7 @@ std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_global_interaction(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_global_interaction(), 0);
+    MJOLNIR_LOG_FUNCTION();
     const auto interaction = toml::find<std::string>(global, "interaction");
 
     if(interaction == "Pair")

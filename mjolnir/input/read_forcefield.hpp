@@ -16,7 +16,7 @@ ForceField<traitsT>
 read_forcefield_from_table(const toml::value& ff, const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_forcefield_from_table(), 0);
+    MJOLNIR_LOG_FUNCTION();
 
     toml::array fflocal, ffglobal, ffexternal;
     if(toml::get<toml::table>(ff).count("local") == 1)
@@ -55,7 +55,7 @@ ForceField<traitsT>
 read_forcefield(const toml::table& root, std::size_t N)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_forcefield(), 0);
+    MJOLNIR_LOG_FUNCTION();
     if(N != 0) {MJOLNIR_LOG_NOTICE("reading ", N, "-th [[forcefield]].");}
     else       {MJOLNIR_LOG_NOTICE("reading [[forcefield]].");}
 
@@ -73,7 +73,7 @@ read_forcefield(const toml::table& root, std::size_t N)
     const auto& ff = toml::get<toml::table>(ffs.at(N));
     if(ff.count("file_name") == 1)
     {
-        MJOLNIR_SCOPE(ff.count("file_name") == 1, 1);
+        MJOLNIR_LOG_SCOPE(if(ff.count("file_name") == 1));
 
         const auto file_name = toml::find<std::string>(ff, "file_name");
         MJOLNIR_LOG_NOTICE("forcefield is defined in ", input_path, file_name);

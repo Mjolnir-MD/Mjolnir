@@ -141,7 +141,7 @@ class AxisAlignedPlane
         : origin_(0, 0, 0), margin_(margin), current_margin_(-1)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_SCOPE(AxisAlignedPlane::AxisAlignedPlane, 0);
+        MJOLNIR_LOG_FUNCTION();
 
         this->origin_[axis_index] = position;
 
@@ -169,7 +169,7 @@ class AxisAlignedPlane
     void initialize(const system_type& sys, const Potential& pot)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_SCOPE(AxisAlignedPlane::initialize, 0);
+        MJOLNIR_LOG_FUNCTION();
 
         // assuming pot is already initialized!
         this->cutoff_         = pot.max_cutoff_length();

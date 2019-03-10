@@ -69,7 +69,7 @@ std::unique_ptr<GlobalInteractionBase<traitsT>>
 read_spatial_partition(const toml::value& global, potentialT&& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_spatial_partition(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type      = typename traitsT::real_type;
     using parameter_type = typename potentialT::parameter_type;
 
