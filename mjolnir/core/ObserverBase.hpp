@@ -25,6 +25,8 @@ class ObserverBase
                             const system_type&, const forcefield_type&) = 0;
     virtual void output    (const std::size_t step,
                             const system_type&, const forcefield_type&) = 0;
+    virtual void finalize  (const std::size_t total_step,
+                            const system_type&, const forcefield_type&) = 0;
 
     // for testing purpose.
     virtual std::string const& prefix() const noexcept = 0;

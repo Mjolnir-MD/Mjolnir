@@ -50,6 +50,10 @@ class XYZObserver final : public ObserverBase<traitsT>
     void output(const std::size_t step,
                 const system_type& sys, const forcefield_type& ff) override;
 
+    void finalize(const std::size_t total_step,
+                  const system_type& sys, const forcefield_type& ff) override
+    {/* do nothing. */}
+
     std::string const& prefix() const noexcept override {return prefix_;}
 
   private:
