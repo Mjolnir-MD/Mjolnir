@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_UTIL_LOGGER_HPP
 #define MJOLNIR_UTIL_LOGGER_HPP
+#include <mjolnir/util/macro.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <array>
@@ -22,8 +23,10 @@ namespace mjolnir
  * - MJOLNIR_LOG_NOTICE -- write current progress and status to console.     *
  * - MJOLNIR_LOG_WARN   -- may not be wrong, but undesirable stuff happens.  *
  * - MJOLNIR_LOG_ERROR  -- something wrong.                                  *
+ *                                                                           *
+ * - MJOLNIR_LOG_SCOPE    -- helps logging by indentation.                   *
+ * - MJOLNIR_LOG_FUNCTION -- helps logging by indentation.                   *
  *
- * - MJOLNIR_SCOPE      -- helps logging by indentation.                     *
  * - MJOLNIR_GET_LOGGER -- get a logger for the current scope with name.     *
  * - MJOLNIR_GET_DEFAULT_LOGGER -- get a default logger.                     */
 
@@ -280,7 +283,7 @@ class basic_logger_manager
                       << std::endl;
             return;
         }
-        loggers_.emplace(fname, make_unique<logger_type>(fname));
+        loggers_.emplace(fname, ::mjolnir::make_unique<logger_type>(fname));
         return;
     }
 
@@ -331,10 +334,12 @@ class basic_scope
 
   public:
 
-    basic_scope(logger_type& trc, const std::string& name)
-      : start_(std::chrono::system_clock::now()), logger_(trc), name_(name)
+    basic_scope(logger_type& trc, std::string name, std::string loc)
+      : start_(std::chrono::system_clock::now()), logger_(trc),
+        name_(std::move(name)), location_(std::move(loc))
     {
         logger_.log(logger_type::Level::None, this->name_, " {");
+        logger_.log(logger_type::Level::None, "--> ", this->location_, ':');
         logger_.indent();
     }
     ~basic_scope()
@@ -344,7 +349,8 @@ class basic_scope
                     std::chrono::system_clock::now() - this->start_));
     }
 
-    std::string const& name() const noexcept {return name_;}
+    std::string const& name()     const noexcept {return name_;}
+    std::string const& location() const noexcept {return location_;}
 
   private:
 
@@ -373,35 +379,49 @@ class basic_scope
     std::chrono::system_clock::time_point start_;
     logger_type& logger_;
     std::string name_;
+    std::string location_;
 };
 
 using Logger        = basic_logger<char>;
 using LoggerManager = basic_logger_manager<char>;
 using Scope         = basic_scope<char>;
 
+// set name of the default log file.
 #define MJOLNIR_SET_DEFAULT_LOGGER(name)  LoggerManager::set_default_logger(name)
-#define MJOLNIR_GET_DEFAULT_LOGGER()      auto& l_o_g_g_e_r_ = LoggerManager::get_default_logger()
-#define MJOLNIR_GET_LOGGER(name)          auto& l_o_g_g_e_r_ = LoggerManager::get_logger(name)
+
+// get logger
+#define MJOLNIR_GET_DEFAULT_LOGGER() auto& l_o_g_g_e_r_ = LoggerManager::get_default_logger()
+#define MJOLNIR_GET_LOGGER(name)     auto& l_o_g_g_e_r_ = LoggerManager::get_logger(name)
+
+// normal log
 #define MJOLNIR_LOG_INFO(args...)         l_o_g_g_e_r_.log(Logger::Level::Info,   args)
 #define MJOLNIR_LOG_NOTICE(args...)       l_o_g_g_e_r_.log(Logger::Level::Notice, args)
 #define MJOLNIR_LOG_WARN(args...)         l_o_g_g_e_r_.log(Logger::Level::Warn,   args)
 #define MJOLNIR_LOG_ERROR(args...)        l_o_g_g_e_r_.log(Logger::Level::Error,  args)
+
+// no linefeed at the end of line.
 #define MJOLNIR_LOG_INFO_NO_LF(args...)   l_o_g_g_e_r_.log_no_lf(Logger::Level::Info,   args)
 #define MJOLNIR_LOG_NOTICE_NO_LF(args...) l_o_g_g_e_r_.log_no_lf(Logger::Level::Notice, args)
 #define MJOLNIR_LOG_WARN_NO_LF(args...)   l_o_g_g_e_r_.log_no_lf(Logger::Level::Warn,   args)
 #define MJOLNIR_LOG_ERROR_NO_LF(args...)  l_o_g_g_e_r_.log_no_lf(Logger::Level::Error,  args)
-#define MJOLNIR_SCOPE(name, id)           Scope s_c_o_p_e_##id (l_o_g_g_e_r_, #name)
 
+// write current scope to log file
+#define MJOLNIR_LOG_SCOPE(name) Scope s_c_o_p_e_##__LINE__ (l_o_g_g_e_r_, MJOLNIR_STRINGIZE(name), __FILE__ ":" MJOLNIR_STRINGIZE(__LINE__))
+#define MJOLNIR_LOG_FUNCTION()  Scope s_c_o_p_e_##__LINE__ (l_o_g_g_e_r_, MJOLNIR_FUNC_NAME,       __FILE__ ":" MJOLNIR_STRINGIZE(__LINE__))
+
+// loggers that are only enabled when MJOLNIR_DEBUG is defined
 #ifdef MJOLNIR_DEBUG
 #  define MJOLNIR_GET_DEFAULT_LOGGER_DEBUG() auto& l_o_g_g_e_r_ = LoggerManager::get_default_logger()
 #  define MJOLNIR_LOG_DEBUG(args...)         l_o_g_g_e_r_.log(Logger::Level::Debug, args)
 #  define MJOLNIR_LOG_DEBUG_NO_LF(args...)   l_o_g_g_e_r_.log_no_lf(Logger::Level::Debug, args)
-#  define MJOLNIR_SCOPE_DEBUG(name, id)      Scope s_c_o_p_e_##id (l_o_g_g_e_r_, #name)
+#  define MJOLNIR_LOG_SCOPE_DEBUG(name)      Scope s_c_o_p_e_##__LINE__ (l_o_g_g_e_r_, MJOLNIR_STRINGIZE(name), __FILE__ ":" MJOLNIR_STRINGIZE(__LINE__))
+#  define MJOLNIR_LOG_FUNCTION_DEBUG()       Scope s_c_o_p_e_##__LINE__ (l_o_g_g_e_r_, MJOLNIR_FUNC_NAME,       __FILE__ ":" MJOLNIR_STRINGIZE(__LINE__))
 #else
 #  define MJOLNIR_GET_DEFAULT_LOGGER_DEBUG() /**/
 #  define MJOLNIR_LOG_DEBUG(args...)         /**/
 #  define MJOLNIR_LOG_DEBUG_NO_LF(args...)   /**/
-#  define MJOLNIR_SCOPE_DEBUG(name, id)      /**/
+#  define MJOLNIR_LOG_SCOPE_DEBUG(name)      /**/
+#  define MJOLNIR_LOG_FUNCTION_DEBUG()       /**/
 #endif // MJOLNIR_DEBUG
 
 } // mjolnir
