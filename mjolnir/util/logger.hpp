@@ -334,9 +334,10 @@ class basic_scope
 
   public:
 
-    basic_scope(logger_type& trc, std::string name, std::string loc)
+    basic_scope(logger_type& trc,
+                const std::string& name, const std::string& loc)
       : start_(std::chrono::system_clock::now()), logger_(trc),
-        name_(std::move(name)), location_(std::move(loc))
+        name_(name), location_(loc)
     {
         logger_.log(logger_type::Level::None, this->name_, " {");
         logger_.log(logger_type::Level::None, "--> ", this->location_, ':');
