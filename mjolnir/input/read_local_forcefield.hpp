@@ -15,7 +15,7 @@ read_local_forcefield(
         const toml::array& interactions, const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_local_forcefield(), 0);
+    MJOLNIR_LOG_FUNCTION();
     MJOLNIR_LOG_INFO(interactions.size(), " local interactions are found.");
 
     LocalForceField<traitsT> lff;
@@ -23,7 +23,7 @@ read_local_forcefield(
     {
         if(toml::get<toml::table>(interaction).count("file_name") == 1)
         {
-            MJOLNIR_SCOPE(interaction.count("file_name") == 1, 1);
+            MJOLNIR_LOG_SCOPE(if(toml::get<toml::table>(interaction).count("file_name") == 1));
 
             const auto file_name = toml::find<std::string>(interaction, "file_name");
             if(toml::get<toml::table>(interaction).size() != 1)

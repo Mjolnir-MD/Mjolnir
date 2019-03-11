@@ -41,7 +41,7 @@ class GlobalPairInteraction<
     void initialize(const system_type& sys) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_SCOPE(GlobalPairInteraction<ExcludedVolumePotential>::initialize(), 0);
+        MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->partition_.initialize(sys, this->potential_);
     }
@@ -53,7 +53,7 @@ class GlobalPairInteraction<
     void update(const system_type& sys) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_SCOPE(GlobalPairInteraction<ExcludedVolumePotential>::update(), 0);
+        MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->potential_.update(sys);
         // potential update may change the cutoff length!
@@ -69,7 +69,7 @@ class GlobalPairInteraction<
     void calc_force(system_type& sys) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
-        MJOLNIR_SCOPE_DEBUG(GlobalPairInteraction<ExcludedVolumePotential>::calc_force(), 0);
+        MJOLNIR_LOG_FUNCTION_DEBUG();
 
         constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
         constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
@@ -108,7 +108,7 @@ class GlobalPairInteraction<
     real_type calc_energy(const system_type& sys) const override
     {
         MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
-        MJOLNIR_SCOPE_DEBUG(GlobalPairInteraction<ExcludedVolumePotential>::calc_force(), 0);
+        MJOLNIR_LOG_FUNCTION_DEBUG();
 
         real_type E(0);
 

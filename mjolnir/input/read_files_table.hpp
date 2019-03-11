@@ -10,7 +10,7 @@ namespace mjolnir
 inline std::string read_input_path(const toml::table& root)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_input_path(), 0);
+    MJOLNIR_LOG_FUNCTION();
 
     const auto& files = toml::find<toml::table>(root, "files");
 

@@ -116,7 +116,7 @@ class DebyeHuckelPotential
     void calc_parameters() noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_SCOPE(DebyeHuckelPotential::calc_parameters(), 0);
+        MJOLNIR_LOG_FUNCTION();
 
         using math_const =    math::constants<real_type>;
         using phys_const = physics::constants<real_type>;

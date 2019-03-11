@@ -21,7 +21,7 @@ std::unique_ptr<ExternalForceInteractionBase<traitsT>>
 read_external_distance_interaction(const toml::value& external, shapeT&& shape)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_global_distance_interaction(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = typename traitsT::real_type;
 
     const auto potential = toml::find<std::string>(external, "potential");
@@ -71,7 +71,7 @@ std::unique_ptr<ExternalForceInteractionBase<traitsT>>
 read_external_distance_interaction_shape(const toml::value& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_global_distance_interaction(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = typename traitsT::real_type;
 
     const auto shape = toml::find<toml::value>(external, "shape");
@@ -151,7 +151,7 @@ std::unique_ptr<ExternalForceInteractionBase<traitsT>>
 read_external_interaction(const toml::value& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_external_interaction(), 0);
+    MJOLNIR_LOG_FUNCTION();
     const auto interaction = toml::find<std::string>(external, "interaction");
 
     if(interaction == "Distance")

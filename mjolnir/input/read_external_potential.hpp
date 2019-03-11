@@ -21,7 +21,7 @@ ImplicitMembranePotential<realT>
 read_implicit_membrane_potential(const toml::value& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_implicit_membrane_potential(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = realT;
 
     const auto thickness = toml::find<real_type>(external, "thickness");
@@ -55,7 +55,7 @@ LennardJonesWallPotential<realT>
 read_lennard_jones_wall_potential(const toml::value& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_lennard_jones_wall_potential(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = realT;
 
     const auto& ps = toml::find<toml::array>(external, "parameters");
@@ -86,7 +86,7 @@ ExcludedVolumeWallPotential<realT>
 read_excluded_volume_wall_potential(const toml::value& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_excluded_volume_wall_potential(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = realT;
 
     const auto eps = toml::expect<real_type>(external, u8"ε").or_other(

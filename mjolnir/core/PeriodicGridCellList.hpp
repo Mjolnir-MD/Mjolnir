@@ -153,7 +153,7 @@ void PeriodicGridCellList<traitsT, parameterT>::make(
         const system_type& sys, const PotentialT& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
-    MJOLNIR_SCOPE_DEBUG(PeriodicGridCellList::make(), 0);
+    MJOLNIR_LOG_FUNCTION_DEBUG();
 
     neighbors_.clear();
     index_by_cell_.resize(sys.size());
@@ -235,7 +235,7 @@ void PeriodicGridCellList<traitsT, parameterT>::initialize(
         const system_type& sys, const PotentialT& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(PeriodicGridCellList::initialize(), 0);
+    MJOLNIR_LOG_FUNCTION();
 
     const real_type max_cutoff = pot.max_cutoff_length();
     this->set_cutoff(max_cutoff);

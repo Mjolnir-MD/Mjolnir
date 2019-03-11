@@ -161,7 +161,7 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
         const system_type& sys, const PotentialT& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
-    MJOLNIR_SCOPE_DEBUG(UnlimitedGridCellList<traitsT>::make(), 0);
+    MJOLNIR_LOG_FUNCTION_DEBUG();
 
     neighbors_.clear();
     index_by_cell_.resize(sys.size());
@@ -198,7 +198,7 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
     const real_type r_c2 = r_c * r_c;
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        MJOLNIR_SCOPE_DEBUG(for(std::size_t i=0; i<sys.size(); ++i), 0);
+        MJOLNIR_LOG_SCOPE_DEBUG(for(std::size_t i=0; i<sys.size(); ++i));
         const auto& ri   = sys[i].position;
         const auto& cell = cell_list_[this->calc_index(ri)];
 
@@ -241,7 +241,7 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::initialize(
         const system_type& sys, const PotentialT& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(UnlimitedGridCellList<traitsT>::initialize(), 0);
+    MJOLNIR_LOG_FUNCTION();
 
     MJOLNIR_LOG_INFO(pot.name(), " cutoff = ", pot.max_cutoff_length());
     MJOLNIR_LOG_INFO("dimension(independent from system size) = ", dim, 'x', dim, 'x', dim);

@@ -41,7 +41,7 @@ class GlobalPairInteraction<
     void initialize(const system_type& sys) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_SCOPE(GlobalPairInteraction<UniformLennardJonesPotential>::initialize(), 0);
+        MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->partition_.initialize(sys, this->potential_);
     }
@@ -53,7 +53,7 @@ class GlobalPairInteraction<
     void update(const system_type& sys) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_SCOPE(GlobalPairInteraction<UniformLennardJonesPotential>::update(), 0);
+        MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->potential_.update(sys);
         // potential update may change the cutoff length!

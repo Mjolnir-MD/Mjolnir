@@ -21,7 +21,7 @@ inline IgnoreMolecule<typename Topology::molecule_id_type>
 read_ignored_molecule(const toml::value& ignored_mol)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_ignored_molecule(), 0);
+    MJOLNIR_LOG_FUNCTION();
 
     const auto name = toml::get<std::string>(ignored_mol);
 
@@ -54,7 +54,7 @@ ExcludedVolumePotential<realT>
 read_excluded_volume_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_excluded_volume_potential(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = realT;
 
     const auto& ignore = toml::find<toml::value>(global, "ignore");
@@ -95,7 +95,7 @@ LennardJonesPotential<realT>
 read_lennard_jones_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_lennard_jones_potential(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = realT;
 
     const auto& ignore = toml::find<toml::value>(global, "ignore");
@@ -140,7 +140,7 @@ UniformLennardJonesPotential<realT>
 read_uniform_lennard_jones_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_uniform_lennard_jones_potential(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = realT;
 
     const auto& ignore = toml::find<toml::value>(global, "ignore");
@@ -171,7 +171,7 @@ DebyeHuckelPotential<realT>
 read_debye_huckel_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_debye_huckel_potential(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = realT;
 
     const auto& ignore = toml::find<toml::value>(global, "ignore");

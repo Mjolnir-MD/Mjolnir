@@ -23,7 +23,7 @@ std::unique_ptr<LocalInteractionBase<traitsT>>
 read_bond_length_interaction(const std::string& kind, const toml::value& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_bond_length_interaction(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = typename traitsT::real_type;
 
     const auto potential = toml::find<std::string>(local, "potential");
@@ -71,7 +71,7 @@ read_bond_angle_interaction(
     const toml::value& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_bond_angle_interaction(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = typename traitsT::real_type;
 
     const auto potential = toml::find<std::string>(local, "potential");
@@ -120,7 +120,7 @@ read_dihedral_angle_interaction(
     const toml::value& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_dihedral_angle_interaction(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type = typename traitsT::real_type;
 
     const auto potential = toml::find<std::string>(local, "potential");
@@ -203,7 +203,7 @@ std::unique_ptr<LocalInteractionBase<traitsT>>
 read_local_interaction(const toml::value& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_local_interaction(), 0);
+    MJOLNIR_LOG_FUNCTION();
 
     const auto interaction = toml::find<std::string>(local, "interaction");
     const auto kind        = toml::find<std::string>(local, "topology");

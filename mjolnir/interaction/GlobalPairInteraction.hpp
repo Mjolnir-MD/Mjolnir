@@ -35,7 +35,7 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
     void initialize(const system_type& sys) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_SCOPE(GlobalPairInteraction::initialize(), 0);
+        MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->partition_.initialize(sys, this->potential_);
     }
@@ -47,7 +47,7 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
     void update(const system_type& sys) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_SCOPE(GlobalPairInteraction::update(), 0);
+        MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->potential_.update(sys);
         // potential update may change the cutoff length!

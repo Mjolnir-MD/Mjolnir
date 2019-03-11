@@ -23,7 +23,7 @@ struct read_boundary_impl<UnlimitedBoundary<realT, coordT>>
     invoke(const toml::value& boundary)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_SCOPE(read_boundary_impl::invoke(), 0);
+        MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("no boundary is set. unlimited");
         return UnlimitedBoundary<realT, coordT>{};
     }
@@ -36,7 +36,7 @@ struct read_boundary_impl<CuboidalPeriodicBoundary<realT, coordT>>
     invoke(const toml::value& boundary)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_SCOPE(read_boundary_impl::invoke(), 0);
+        MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("shape of periodic boundary is cuboid");
 
         const auto upper = toml::find<std::array<realT, 3>>(boundary, "upper");
@@ -69,7 +69,7 @@ template<typename traitsT>
 System<traitsT> read_system_from_table(const toml::value& system)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_system_from_table(), 0);
+    MJOLNIR_LOG_FUNCTION();
     using real_type       = typename traitsT::real_type;
     using coordinate_type = typename traitsT::coordinate_type;
 
@@ -122,7 +122,7 @@ template<typename traitsT>
 System<traitsT> read_system(const toml::table& root, std::size_t N)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_SCOPE(read_system(), 0);
+    MJOLNIR_LOG_FUNCTION();
     if(N != 0) {MJOLNIR_LOG_NOTICE("reading ", N, "-th [[system]].");}
     else       {MJOLNIR_LOG_NOTICE("reading [[system]].");}
 
