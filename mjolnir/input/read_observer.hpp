@@ -3,6 +3,7 @@
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/ObserverBase.hpp>
 #include <mjolnir/core/XYZObserver.hpp>
+#include <mjolnir/core/DCDObserver.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
@@ -40,6 +41,12 @@ read_observer(const toml::table& root)
         MJOLNIR_LOG_NOTICE("output format is xyz.");
         return make_unique<observer_type>(file_prefix, progress_bar);
     }
+    if(format == "dcd")
+    {
+        using observer_type = DCDObserver<traitsT>;
+        MJOLNIR_LOG_NOTICE("output format is dcd.");
+        return make_unique<observer_type>(file_prefix, progress_bar);
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -47,6 +54,7 @@ read_observer(const toml::table& root)
             toml::find(output, "format"), "here", {
             "expected one of the following.",
             "- \"xyz\": the simplest ascii format",
+            "- \"dcd\": widely used DCD format"
             }));
     }
 }

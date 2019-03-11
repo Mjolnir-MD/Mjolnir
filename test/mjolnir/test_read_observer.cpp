@@ -11,24 +11,23 @@ BOOST_AUTO_TEST_CASE(read_observer)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    constexpr real_type tol = 1e-8;
     {
         const toml::table v = toml::table{{"files", toml::table{{"output",
-                toml::table{{"path", "./"}, {"prefix", "test"}}
+                toml::table{{"path", "./"}, {"prefix", "test"}, {"format", "xyz"}}
             }}
         }};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs.prefix() == "./test");
+        BOOST_TEST(obs->prefix() == "./test");
     }
     {
         const toml::table v = toml::table{{"files", toml::table{{"output",
-                toml::table{{"prefix", "test"}}
+                toml::table{{"prefix", "test"}, {"format", "xyz"}}
             }}
         }};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs.prefix() == "./test");
+        BOOST_TEST(obs->prefix() == "./test");
     }
 
     // XXX
@@ -38,11 +37,57 @@ BOOST_AUTO_TEST_CASE(read_observer)
     // It is not good. We need to find a way to avoid this dependency.
     {
         const toml::table v = toml::table{{"files", toml::table{{"output",
-                toml::table{{"path", "./test"}, {"prefix", "test"}}
+                toml::table{{"path", "./test"}, {"prefix", "test"}, {"format", "xyz"}}
             }}
         }};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs.prefix() == "./test/test");
+        BOOST_TEST(obs->prefix() == "./test/test");
+    }
+}
+
+// check that read_observer returns XYZObserver or not
+BOOST_AUTO_TEST_CASE(read_xyz_observer)
+{
+    mjolnir::LoggerManager::set_default_logger("test_read_observer.log");
+
+    using real_type = double;
+    using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    using observer_type = mjolnir::XYZObserver<traits_type>;
+    {
+        const toml::table files{
+            {"output", toml::table{{"path", "./"}, {"prefix", "test"}, {"format", "xyz"}}}
+        };
+
+        const toml::table v{{"files", files}};
+
+        const auto obs = mjolnir::read_observer<traits_type>(v);
+        BOOST_TEST(obs->prefix() == "./test");
+
+        const auto xyz = dynamic_cast<observer_type*>(obs.get());
+        BOOST_TEST(static_cast<bool>(xyz));
+    }
+}
+
+// check that read_observer returns DCDObserver or not
+BOOST_AUTO_TEST_CASE(read_dcd_observer)
+{
+    mjolnir::LoggerManager::set_default_logger("test_read_observer.log");
+
+    using real_type = double;
+    using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    using observer_type = mjolnir::DCDObserver<traits_type>;
+    {
+        const toml::table files{
+            {"output", toml::table{{"path", "./"}, {"prefix", "test"}, {"format", "dcd"}}}
+        };
+
+        const toml::table v{{"files", files}};
+
+        const auto obs = mjolnir::read_observer<traits_type>(v);
+        BOOST_TEST(obs->prefix() == "./test");
+
+        const auto dcd = dynamic_cast<observer_type*>(obs.get());
+        BOOST_TEST(static_cast<bool>(dcd));
     }
 }
