@@ -1,6 +1,8 @@
 #ifndef MJOLNIR_CORE_DCD_OBSERVER_HPP
 #define MJOLNIR_CORE_DCD_OBSERVER_HPP
 #include <mjolnir/core/ObserverBase.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/System.hpp>
 #include <mjolnir/util/progress_bar.hpp>
 #include <iostream>
 #include <fstream>
@@ -8,6 +10,74 @@
 
 namespace mjolnir
 {
+
+namespace detail
+{
+// it is a helper function to write value as an array of bytes
+template<typename T>
+void write_as_bytes(std::ostream& os, const T& v) noexcept
+{
+    using Type = typename std::remove_reference<T>::type;
+    os.write(reinterpret_cast<const char*>(std::addressof(v)), sizeof(Type));
+    return;
+}
+
+// it is a helper function to write unitcell flags.
+// for UnlimitedBoundary, returns zero.
+template<typename realT, typename coordT>
+std::int32_t unitcell_flag(const UnlimitedBoundary<realT, coordT>&) noexcept
+{
+    // no unitcell information needed. disable the flag
+    return 0;
+}
+// for CuboidalPeriodicBoundary, returns one.
+template<typename realT, typename coordT>
+std::int32_t unitcell_flag(const CuboidalPeriodicBoundary<realT, coordT>&) noexcept
+{
+    // unitcell information required. turn the flag on.
+    return 1;
+}
+
+// it is a helper function to write unitcell block if needed.
+// for UnlimitedBoundary, do nothing.
+template<typename realT, typename coordT>
+void write_unitcell_if_needed(std::ostream&,
+                              const UnlimitedBoundary<realT, coordT>&) noexcept
+{
+    return ; // do nothing. boundary does not exists.
+}
+// for CuboidalPeriodicBoundary, writes the boundary width and angles
+template<typename realT, typename coordT>
+void write_unitcell_if_needed(std::ostream& os,
+        const CuboidalPeriodicBoundary<realT, coordT>& boundary) noexcept
+{
+    // unit cell length
+    const double A = boundary.width()[0];
+    const double B = boundary.width()[1];
+    const double C = boundary.width()[2];
+
+    // angles are always 90 degree because it's cuboid.
+    // for earlier versions, it was a cosine value of the angle.
+    // Now it accepts degrees. For the clarity, I use degrees here.
+    const double alpha = 90.0;
+    const double beta  = 90.0;
+    const double gamma = 90.0;
+
+    const std::int32_t block_size = sizeof(double) * 6;
+    write_as_bytes(os, block_size);
+
+    // I'm serious. the order is correct.
+    write_as_bytes(os, A    );
+    write_as_bytes(os, gamma);
+    write_as_bytes(os, B    );
+    write_as_bytes(os, beta );
+    write_as_bytes(os, alpha);
+    write_as_bytes(os, C    );
+
+    write_as_bytes(os, block_size);
+    return ;
+}
+} // detail
 
 template<typename traitsT>
 class DCDObserver final : public ObserverBase<traitsT>
@@ -28,7 +98,7 @@ class DCDObserver final : public ObserverBase<traitsT>
         prefix_(filename_prefix),
         pos_name_(filename_prefix + std::string("_position.dcd")),
         vel_name_(filename_prefix + std::string("_velocity.dcd")),
-        ene_name_ (filename_prefix + std::string(".ene"))
+        ene_name_(filename_prefix + std::string(".ene"))
     {
         // clear files and throw an error if the files cannot be opened.
         this->clear_file(this->pos_name_);
@@ -42,8 +112,8 @@ class DCDObserver final : public ObserverBase<traitsT>
     {
         this->progress_bar_.reset(total_step); // set total_step
 
-        this->write_header(this->pos_name_, total_step, sys, ff, "CORD");
-        this->write_header(this->vel_name_, total_step, sys, ff, "VELO");
+        this->write_header(this->pos_name_, total_step, sys, ff);
+        this->write_header(this->vel_name_, total_step, sys, ff);
 
         // buffer to convert sys and dcd format
         this->buffer_x_.resize(sys.size());
@@ -60,20 +130,27 @@ class DCDObserver final : public ObserverBase<traitsT>
     {
         // update # of frames in the header region
         {
-            std::ofstream ofs(this->pos_name_, std::ios::binary | std::ios::app);
-            // skip the first block signature
-            ofs.seekp(sizeof(std::int32_t), std::ios::beg);
+            // both `in` and `out` flags are needed to keep the other parts of
+            // file. otherwise, we will lost almost everything by overwriting.
+            // Also `ate` should be used instead of `app`, because `app` moves
+            // the position automatically at the end when we call `write`.
+
+            std::ofstream ofs(this->pos_name_,
+                std::ios::binary | std::ios::ate | std::ios::in | std::ios::out);
+            // skip the first block size and the signature "CORD"
+            ofs.seekp(2 * sizeof(std::int32_t), std::ios::beg);
 
             const std::int32_t number_of_frames(this->number_of_frames_);
-            ofs.write(as_bytes(number_of_frames), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, number_of_frames);
         }
         {
-            std::ofstream ofs(this->vel_name_, std::ios::binary | std::ios::app);
-            // skip the first block signature
-            ofs.seekp(sizeof(std::int32_t), std::ios::beg);
+            std::ofstream ofs(this->vel_name_,
+                std::ios::binary | std::ios::ate | std::ios::in | std::ios::out);
+            // skip the first block size and the signature "CORD"
+            ofs.seekp(2 * sizeof(std::int32_t), std::ios::beg);
 
             const std::int32_t number_of_frames(this->number_of_frames_);
-            ofs.write(as_bytes(number_of_frames), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, number_of_frames);
         }
         return;
     }
@@ -96,15 +173,8 @@ class DCDObserver final : public ObserverBase<traitsT>
         return;
     }
 
-    template<typename T>
-    static const char* as_bytes(const T& v) noexcept
-    {
-        return reinterpret_cast<const char*>(std::addressof(v));
-    }
-
     void write_header(const std::string& fname, const std::size_t total_step_sz,
-                      const system_type& sys,   const forcefield_type& ff,
-                      const char* signature) const
+                      const system_type& sys,   const forcefield_type& ff) const
     {
         std::ofstream ofs(fname, std::ios::binary | std::ios::app);
         if(not ofs.good())
@@ -116,69 +186,68 @@ class DCDObserver final : public ObserverBase<traitsT>
         /* the first block */
         {
             const std::int32_t block_size(84);
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
-            ofs.write(signature,            4);
+            detail::write_as_bytes(ofs, block_size);
+            ofs.write("CORD", 4);
 
             const std::int32_t number_of_frames(0);
-            ofs.write(as_bytes(number_of_frames), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, number_of_frames);
 
             const std::int32_t index_of_first(0);
-            ofs.write(as_bytes(index_of_first), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, index_of_first);
 
             const std::int32_t save_interval(0);
-            ofs.write(as_bytes(save_interval), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, save_interval);
 
             const std::int32_t total_step(total_step_sz);
-            ofs.write(as_bytes(total_step), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, total_step);
 
-            const std::int32_t total_chains(1);
-            ofs.write(as_bytes(total_chains), sizeof(std::int32_t));
+            const std::int32_t total_chains(sys.topology().number_of_molecules());
+            detail::write_as_bytes(ofs, total_chains);
 
-            for(std::size_t i=0; i<4; ++i)
-            {
-                const std::int32_t zero(0);
-                ofs.write(as_bytes(zero), sizeof(std::int32_t));
-            }
+            const std::int32_t zero(0);
+            // 4 * integers with null flag
+            for(std::size_t i=0; i<4; ++i) {detail::write_as_bytes(ofs, zero);}
 
             const float delta_t(0.0f);
-            ofs.write(as_bytes(delta_t), sizeof(float));
+            detail::write_as_bytes(ofs, delta_t);
 
-            for(std::size_t i=0; i<9; ++i)
-            {
-                const std::int32_t zero(0);
-                ofs.write(as_bytes(zero), sizeof(std::int32_t));
-            }
+            const std::int32_t has_unitcell = detail::unitcell_flag(sys.boundary());
+            detail::write_as_bytes(ofs, has_unitcell);
+
+            // 8 * integers with null flag
+            for(std::size_t i=0; i<8; ++i) {detail::write_as_bytes(ofs, zero);}
 
             const std::int32_t version(24);
-            ofs.write(as_bytes(version), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, version);
 
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, block_size);
         }
 
         /* the second block */
         {
             const std::int32_t block_size(84);
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, block_size);
 
             const std::int32_t number_of_lines(1);
-            ofs.write(as_bytes(number_of_lines), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, number_of_lines);
+
             const char comment[80] = "Mjolnir -- copyright (c) Toru Niina 2016"
                                      "-now distributed under the MIT License.";
             ofs.write(comment, 80);
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
+
+            detail::write_as_bytes(ofs, block_size);
         }
 
         /* the third block */
         {
             const std::int32_t block_size(4);
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, block_size);
 
             const std::int32_t number_of_particles(sys.size());
-            ofs.write(as_bytes(number_of_particles), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, number_of_particles);
 
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, block_size);
         }
-
         return;
     }
 
@@ -214,10 +283,14 @@ inline void DCDObserver<traitsT>::output(
     assert(this->buffer_x_.size() == sys.size());
     assert(this->buffer_y_.size() == sys.size());
     assert(this->buffer_z_.size() == sys.size());
+
     // ------------------------------------------------------------------------
     // write position
     {
         std::ofstream ofs(this->pos_name_, std::ios::app | std::ios::binary);
+
+        detail::write_unitcell_if_needed(ofs, sys.boundary());
+
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             this->buffer_x_[i] = static_cast<float>(math::X(sys.position(i)));
@@ -226,28 +299,22 @@ inline void DCDObserver<traitsT>::output(
         }
         const std::int32_t block_size(sizeof(float) * sys.size());
         {
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
-            for(std::size_t i=0; i<sys.size(); ++i)
-            {
-                ofs.write(as_bytes(this->buffer_x_.at(i)), sizeof(float));
-            }
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, block_size);
+            ofs.write(reinterpret_cast<const char*>(this->buffer_x_.data()),
+                      block_size);
+            detail::write_as_bytes(ofs, block_size);
         }
         {
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
-            for(std::size_t i=0; i<sys.size(); ++i)
-            {
-                ofs.write(as_bytes(this->buffer_y_.at(i)), sizeof(float));
-            }
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, block_size);
+            ofs.write(reinterpret_cast<const char*>(this->buffer_y_.data()),
+                      block_size);
+            detail::write_as_bytes(ofs, block_size);
         }
         {
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
-            for(std::size_t i=0; i<sys.size(); ++i)
-            {
-                ofs.write(as_bytes(this->buffer_z_.at(i)), sizeof(float));
-            }
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, block_size);
+            ofs.write(reinterpret_cast<const char*>(this->buffer_z_.data()),
+                      block_size);
+            detail::write_as_bytes(ofs, block_size);
         }
     }
 
@@ -263,28 +330,22 @@ inline void DCDObserver<traitsT>::output(
         }
         const std::int32_t block_size(sizeof(float) * sys.size());
         {
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
-            for(std::size_t i=0; i<sys.size(); ++i)
-            {
-                ofs.write(as_bytes(this->buffer_x_.at(i)), sizeof(float));
-            }
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, block_size);
+            ofs.write(reinterpret_cast<const char*>(this->buffer_x_.data()),
+                      block_size);
+            detail::write_as_bytes(ofs, block_size);
         }
         {
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
-            for(std::size_t i=0; i<sys.size(); ++i)
-            {
-                ofs.write(as_bytes(this->buffer_y_.at(i)), sizeof(float));
-            }
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, block_size);
+            ofs.write(reinterpret_cast<const char*>(this->buffer_y_.data()),
+                      block_size);
+            detail::write_as_bytes(ofs, block_size);
         }
         {
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
-            for(std::size_t i=0; i<sys.size(); ++i)
-            {
-                ofs.write(as_bytes(this->buffer_z_.at(i)), sizeof(float));
-            }
-            ofs.write(as_bytes(block_size), sizeof(std::int32_t));
+            detail::write_as_bytes(ofs, block_size);
+            ofs.write(reinterpret_cast<const char*>(this->buffer_z_.data()),
+                      block_size);
+            detail::write_as_bytes(ofs, block_size);
         }
     }
 
