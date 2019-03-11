@@ -13,6 +13,21 @@ namespace math
 template<typename realT, std::size_t N>
 using Vector = Matrix<realT, N, 1>;
 
+template<typename charT, typename traitsT,
+         typename T, std::size_t R>
+std::basic_ostream<charT, traitsT>&
+operator<<(std::basic_ostream<charT, traitsT>& os, const Matrix<T, R, 1>& mat)
+{
+    os << '(';
+    for(std::size_t i=0; i<R; ++i)
+    {
+        if(i!=0) {os << ',';}
+        os << mat(i, 0);
+    }
+    os << ')';
+    return os;
+}
+
 // use mjolnir::math::X() to access elements of vector.
 
 template<typename realT>
