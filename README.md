@@ -71,6 +71,6 @@ $ ./bin/mjolnir input/sh3_AICG2+.toml
 
 This product is licensed under the terms of the [MIT License](LICENSE).
 
-- Copyright (c) 2016-2018 Toru Niina
+- Copyright (c) 2016-2019 Toru Niina
 
 All rights reserved.
