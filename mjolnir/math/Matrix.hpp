@@ -145,7 +145,7 @@ operator<<(std::basic_ostream<charT, traitsT>& os, const Matrix<T, R, C>& mat)
     for(std::size_t i=0; i<R; ++i)
     {
         os << '(';
-        for(std::size_t j=0; j<R; ++j)
+        for(std::size_t j=0; j<C; ++j)
         {
             if(j!=0) {os << ',';}
             os << mat(i, j);
