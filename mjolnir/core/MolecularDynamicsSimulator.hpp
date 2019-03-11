@@ -86,6 +86,7 @@ template<typename traitsT, typename integratorT>
 inline void MolecularDynamicsSimulator<traitsT, integratorT>::finalize()
 {
     observer_->output(this->step_count_, this->system_, this->ff_);
+    observer_->finalize(this->total_step_, this->system_, this->ff_);
     return;
 }
 

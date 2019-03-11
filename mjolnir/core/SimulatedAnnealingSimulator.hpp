@@ -142,7 +142,8 @@ template<typename traitsT, typename integratorT,
 inline void
 SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::finalize()
 {
-    observer_->output(this->step_count_, this->system_, this->ff_);
+    observer_->output  (this->step_count_, this->system_, this->ff_);
+    observer_->finalize(this->step_count_, this->system_, this->ff_);
     return;
 }
 
