@@ -104,7 +104,8 @@ inline bool SteepestDescentSimulator<traitsT>::step()
 template<typename traitsT>
 inline void SteepestDescentSimulator<traitsT>::finalize()
 {
-    this->observer_->output(this->step_count_, this->system_, this->ff_);
+    this->observer_->output  (this->step_count_, this->system_, this->ff_);
+    this->observer_->finalize(this->step_limit_, this->system_, this->ff_);
     return;
 }
 
