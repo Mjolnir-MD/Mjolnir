@@ -339,6 +339,11 @@ class basic_scope
       : start_(std::chrono::system_clock::now()), logger_(trc),
         name_(name), location_(loc)
     {
+#if !defined(MJOLNIR_DEBUG)
+        // remove template typenames (e.g. [with T = int]) from the name
+        // because it often become too long to read
+        name_.erase(std::find(name_.begin(), name_.end(), '['), name_.end());
+#endif
         logger_.log(logger_type::Level::None, this->name_, " {");
         logger_.log(logger_type::Level::None, "--> ", this->location_, ':');
         logger_.indent();
