@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_READ_OBSERVER_HPP
 #define MJOLNIR_READ_OBSERVER_HPP
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/core/ObserverBase.hpp>
+#include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/XYZObserver.hpp>
 #include <mjolnir/core/DCDObserver.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -11,7 +11,7 @@ namespace mjolnir
 {
 
 template<typename traitsT>
-std::unique_ptr<ObserverBase<traitsT>>
+ObserverContainer<traitsT>
 read_observer(const toml::table& root)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -20,8 +20,8 @@ read_observer(const toml::table& root)
     const auto& files  = toml::find<toml::value>(root, "files");
     const auto& output = toml::find<toml::value>(files, "output");
 
-    const auto progress_bar = toml::expect<bool>(output, "progress_bar")
-                                                .unwrap_or(true);
+    const auto progress_bar_enabled = toml::expect<bool>(output, "progress_bar")
+                                                        .unwrap_or(true);
 
     std::string output_path("./");
     if(toml::get<toml::table>(output).count("path") == 1)
@@ -34,18 +34,22 @@ read_observer(const toml::table& root)
 
     const std::string file_prefix = output_path + output_prefix;
 
+    ObserverContainer<traitsT> observers(progress_bar_enabled);
+
     const auto& format = toml::find<std::string>(output, "format");
     if(format == "xyz")
     {
         using observer_type = XYZObserver<traitsT>;
         MJOLNIR_LOG_NOTICE("output format is xyz.");
-        return make_unique<observer_type>(file_prefix, progress_bar);
+        observers.push_back(make_unique<observer_type>(file_prefix));
+        return observers;
     }
     if(format == "dcd")
     {
         using observer_type = DCDObserver<traitsT>;
         MJOLNIR_LOG_NOTICE("output format is dcd.");
-        return make_unique<observer_type>(file_prefix, progress_bar);
+        observers.push_back(make_unique<observer_type>(file_prefix));
+        return observers;
     }
     else
     {
