@@ -67,7 +67,7 @@ class ObserverContainer
     {
         for(const auto& obs : this->observers_)
         {
-            obs->initialize(total_step, sys, ff);
+            obs->finalize(total_step, sys, ff);
         }
 
         if(this->output_progress_)
