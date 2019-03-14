@@ -18,7 +18,17 @@ BOOST_AUTO_TEST_CASE(read_observer)
         }};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs->prefix() == "./test");
+        BOOST_TEST(obs.observers().size() == 2);
+        BOOST_TEST(obs.observers().at(0)->prefix() == "./test");
+        BOOST_TEST(obs.observers().at(1)->prefix() == "./test");
+
+        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
+                             obs.observers().at(0).get());
+        BOOST_TEST(static_cast<bool>(ene));
+
+        const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(
+                             obs.observers().at(1).get());
+        BOOST_TEST(static_cast<bool>(xyz));
     }
     {
         const toml::table v = toml::table{{"files", toml::table{{"output",
@@ -27,7 +37,17 @@ BOOST_AUTO_TEST_CASE(read_observer)
         }};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs->prefix() == "./test");
+        BOOST_TEST(obs.observers().size() == 2);
+        BOOST_TEST(obs.observers().at(0)->prefix() == "./test");
+        BOOST_TEST(obs.observers().at(1)->prefix() == "./test");
+
+        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
+                             obs.observers().at(0).get());
+        BOOST_TEST(static_cast<bool>(ene));
+
+        const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(
+                             obs.observers().at(1).get());
+        BOOST_TEST(static_cast<bool>(xyz));
     }
 
     // XXX
@@ -42,7 +62,18 @@ BOOST_AUTO_TEST_CASE(read_observer)
         }};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs->prefix() == "./test/test");
+
+        BOOST_TEST(obs.observers().size() == 2);
+        BOOST_TEST(obs.observers().at(0)->prefix() == "./test/test");
+        BOOST_TEST(obs.observers().at(1)->prefix() == "./test/test");
+
+        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
+                             obs.observers().at(0).get());
+        BOOST_TEST(static_cast<bool>(ene));
+
+        const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(
+                             obs.observers().at(1).get());
+        BOOST_TEST(static_cast<bool>(xyz));
     }
 }
 
@@ -62,9 +93,14 @@ BOOST_AUTO_TEST_CASE(read_xyz_observer)
         const toml::table v{{"files", files}};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs->prefix() == "./test");
+        BOOST_TEST(obs.observers().size() == 2);
 
-        const auto xyz = dynamic_cast<observer_type*>(obs.get());
+        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
+                             obs.observers().at(0).get());
+        BOOST_TEST(static_cast<bool>(ene));
+
+        const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(
+                             obs.observers().at(1).get());
         BOOST_TEST(static_cast<bool>(xyz));
     }
 }
@@ -85,9 +121,14 @@ BOOST_AUTO_TEST_CASE(read_dcd_observer)
         const toml::table v{{"files", files}};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs->prefix() == "./test");
+        BOOST_TEST(obs.observers().size() == 2);
 
-        const auto dcd = dynamic_cast<observer_type*>(obs.get());
+        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
+                             obs.observers().at(0).get());
+        BOOST_TEST(static_cast<bool>(ene));
+
+        const auto dcd = dynamic_cast<mjolnir::DCDObserver<traits_type>*>(
+                             obs.observers().at(1).get());
         BOOST_TEST(static_cast<bool>(dcd));
     }
 }
