@@ -1,7 +1,6 @@
 #ifndef MJOLNIR_CORE_XYZ_OBSERVER_HPP
 #define MJOLNIR_CORE_XYZ_OBSERVER_HPP
 #include <mjolnir/core/ObserverBase.hpp>
-#include <mjolnir/util/progress_bar.hpp>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -19,13 +18,11 @@ class XYZObserver final : public ObserverBase<traitsT>
     using coordinate_type   = typename base_type::coordinate_type;
     using system_type       = typename base_type::system_type;
     using forcefield_type   = typename base_type::forcefield_type;
-    using progress_bar_type = progress_bar<50>;
 
   public:
 
-    XYZObserver(const std::string& filename_prefix, bool output_progress = false)
-      : base_type(), output_progress_(output_progress), progress_bar_(1),
-        prefix_(filename_prefix),
+    XYZObserver(const std::string& filename_prefix)
+      : base_type(), prefix_(filename_prefix),
         xyz_name_(filename_prefix + std::string("_position.xyz")),
         vel_name_(filename_prefix + std::string("_velocity.xyz")),
         ene_name_(filename_prefix + std::string(".ene"))
@@ -40,8 +37,6 @@ class XYZObserver final : public ObserverBase<traitsT>
     void initialize(const std::size_t total_step,
                     const system_type& sys, const forcefield_type& ff) override
     {
-        this->progress_bar_.reset(total_step); // set total_step
-
         std::ofstream ofs(this->ene_name_, std::ios::app);
         ofs << "# timestep  " << ff.list_energy_name() << " kinetic_energy\n";
         return;
@@ -81,12 +76,10 @@ class XYZObserver final : public ObserverBase<traitsT>
 
   private:
 
-    bool output_progress_;
     std::string prefix_;
     std::string xyz_name_;
     std::string vel_name_;
     std::string ene_name_;
-    progress_bar_type progress_bar_;
 };
 
 template<typename traitsT>
@@ -120,14 +113,6 @@ inline void XYZObserver<traitsT>::output(
     ofs << ff.dump_energy(sys) << ' ';
     ofs << std::setw(14) << std::right << this->calc_kinetic_energy(sys) << '\n';
     ofs.close();
-
-    // XXX consider introducing template argument to remove this if-branching
-    //     at the compile time
-    if(this->output_progress_)
-    {
-        std::cerr << progress_bar_.format(step);
-        if(step == progress_bar_.total()){std::cerr << std::endl;}
-    }
     return ;
 }
 
