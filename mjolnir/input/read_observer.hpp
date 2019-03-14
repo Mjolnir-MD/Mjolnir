@@ -2,6 +2,7 @@
 #define MJOLNIR_READ_OBSERVER_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/ObserverContainer.hpp>
+#include <mjolnir/core/EnergyObserver.hpp>
 #include <mjolnir/core/XYZObserver.hpp>
 #include <mjolnir/core/DCDObserver.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -35,6 +36,9 @@ read_observer(const toml::table& root)
     const std::string file_prefix = output_path + output_prefix;
 
     ObserverContainer<traitsT> observers(progress_bar_enabled);
+
+    // Energy is always written to "prefix.ene".
+    observers.push_back(make_unique<EnergyObserver<traitsT>>(file_prefix));
 
     const auto& format = toml::find<std::string>(output, "format");
     if(format == "xyz")
