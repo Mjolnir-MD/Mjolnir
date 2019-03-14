@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_SIMULATED_ANNEALING_SIMULATOR_HPP
 #define MJOLNIR_SIMULATED_ANNEALING_SIMULATOR_HPP
 #include <mjolnir/core/SimulatorBase.hpp>
-#include <mjolnir/core/ObserverBase.hpp>
+#include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
 
@@ -40,15 +40,14 @@ template<typename traitsT, typename integratorT,
 class SimulatedAnnealingSimulator final : public SimulatorBase
 {
   public:
-    using traits_type        = traitsT;
-    using real_type          = typename traits_type::real_type;
-    using coordinate_type    = typename traits_type::coordinate_type;
-    using integrator_type    = integratorT;
-    using system_type        = System<traits_type>;
-    using forcefield_type    = ForceField<traits_type>;
-    using observer_base_type = ObserverBase<traits_type>;
-    using observer_type      = std::unique_ptr<observer_base_type>;
-    using scheduler_type     = scheduleT<real_type> ;
+    using traits_type     = traitsT;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
+    using integrator_type = integratorT;
+    using system_type     = System<traits_type>;
+    using forcefield_type = ForceField<traits_type>;
+    using observer_type   = ObserverContainer<traits_type>;
+    using scheduler_type  = scheduleT<real_type> ;
 
     SimulatedAnnealingSimulator(
         const std::size_t tstep,     const std::size_t sstep,
@@ -59,7 +58,7 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
       time_(0.0), r_total_step_(1.0 / tstep),
       each_step_(each_step), scheduler_(scheduler),
       system_(std::move(sys)), ff_(std::move(ff)),
-      integrator_(std::move(integr)), observer_(std::move(obs))
+      integrator_(std::move(integr)), observers_(std::move(obs))
     {}
     ~SimulatedAnnealingSimulator() override = default;
 
@@ -89,7 +88,7 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
     system_type     system_;
     forcefield_type ff_;
     integrator_type integrator_;
-    observer_type   observer_;
+    observer_type   observers_;
 };
 
 template<typename traitsT, typename integratorT,
@@ -102,7 +101,7 @@ SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::initialize()
     this->ff_.initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_);
 
-    observer_->initialize(this->total_step_, this->system_, this->ff_);
+    observers_.initialize(this->total_step_, this->system_, this->ff_);
     return;
 }
 
@@ -115,7 +114,7 @@ inline bool SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::step()
 
     if(step_count_ % save_step_ == 0)
     {
-        observer_->output(this->step_count_, this->system_, this->ff_);
+        observers_.output(this->step_count_, this->system_, this->ff_);
     }
 
     integrator_.step(this->time_, system_, ff_);
@@ -142,8 +141,8 @@ template<typename traitsT, typename integratorT,
 inline void
 SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::finalize()
 {
-    observer_->output  (this->step_count_, this->system_, this->ff_);
-    observer_->finalize(this->step_count_, this->system_, this->ff_);
+    observers_.output  (this->step_count_, this->system_, this->ff_);
+    observers_.finalize(this->step_count_, this->system_, this->ff_);
     return;
 }
 

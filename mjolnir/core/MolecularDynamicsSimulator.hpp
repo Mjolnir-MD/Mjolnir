@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_MOLECULAR_DYNAMICS_SIMULATOR
 #define MJOLNIR_MOLECULAR_DYNAMICS_SIMULATOR
 #include <mjolnir/core/SimulatorBase.hpp>
-#include <mjolnir/core/ObserverBase.hpp>
+#include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
 
@@ -12,14 +12,13 @@ template<typename traitsT, typename integratorT>
 class MolecularDynamicsSimulator final : public SimulatorBase
 {
   public:
-    using traits_type        = traitsT;
-    using real_type          = typename traits_type::real_type;
-    using coordinate_type    = typename traits_type::coordinate_type;
-    using integrator_type    = integratorT;
-    using system_type        = System<traits_type>;
-    using forcefield_type    = ForceField<traits_type>;
-    using observer_base_type = ObserverBase<traits_type>;
-    using observer_type      = std::unique_ptr<observer_base_type>;
+    using traits_type     = traitsT;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
+    using integrator_type = integratorT;
+    using system_type     = System<traits_type>;
+    using forcefield_type = ForceField<traits_type>;
+    using observer_type   = ObserverContainer<traits_type>;
 
     MolecularDynamicsSimulator(
             const std::size_t tstep, const std::size_t save_step,
@@ -27,7 +26,7 @@ class MolecularDynamicsSimulator final : public SimulatorBase
             integrator_type&& integr, observer_type&& obs)
     : total_step_(tstep), step_count_(0), save_step_(save_step), time_(0.),
       system_(std::move(sys)), ff_(std::move(ff)),
-      integrator_(std::move(integr)), observer_(std::move(obs))
+      integrator_(std::move(integr)), observers_(std::move(obs))
     {}
     ~MolecularDynamicsSimulator() override = default;
 
@@ -47,14 +46,14 @@ class MolecularDynamicsSimulator final : public SimulatorBase
     real_type  time() const noexcept {return time_;}
 
   protected:
-    std::size_t       total_step_;
-    std::size_t       step_count_;
-    std::size_t       save_step_;
-    real_type         time_;
-    system_type       system_;
-    forcefield_type   ff_;
-    integrator_type   integrator_;
-    observer_type     observer_;
+    std::size_t     total_step_;
+    std::size_t     step_count_;
+    std::size_t     save_step_;
+    real_type       time_;
+    system_type     system_;
+    forcefield_type ff_;
+    integrator_type integrator_;
+    observer_type   observers_;
 };
 
 template<typename traitsT, typename integratorT>
@@ -63,7 +62,7 @@ inline void MolecularDynamicsSimulator<traitsT, integratorT>::initialize()
     this->ff_.initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_);
 
-    observer_->initialize(this->total_step_, this->system_, this->ff_);
+    observers_.initialize(this->total_step_, this->system_, this->ff_);
     return;
 }
 
@@ -72,7 +71,7 @@ inline bool MolecularDynamicsSimulator<traitsT, integratorT>::step()
 {
     if(step_count_ % save_step_ == 0)
     {
-        observer_->output(this->step_count_, this->system_, this->ff_);
+        observers_.output(this->step_count_, this->system_, this->ff_);
     }
 
     integrator_.step(this->time_, system_, ff_);
@@ -85,8 +84,8 @@ inline bool MolecularDynamicsSimulator<traitsT, integratorT>::step()
 template<typename traitsT, typename integratorT>
 inline void MolecularDynamicsSimulator<traitsT, integratorT>::finalize()
 {
-    observer_->output(this->step_count_, this->system_, this->ff_);
-    observer_->finalize(this->total_step_, this->system_, this->ff_);
+    observers_.output(this->step_count_, this->system_, this->ff_);
+    observers_.finalize(this->total_step_, this->system_, this->ff_);
     return;
 }
 
