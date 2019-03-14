@@ -29,7 +29,12 @@ class ObserverContainer
     ObserverContainer(bool output_progress = false)
         : output_progress_(output_progress)
     {}
-    virtual ~ObserverContainer() = default;
+    ~ObserverContainer() = default;
+
+    ObserverContainer(const ObserverContainer&) = default;
+    ObserverContainer(ObserverContainer&&)      = default;
+    ObserverContainer& operator=(const ObserverContainer&) = default;
+    ObserverContainer& operator=(ObserverContainer&&)      = default;
 
     void initialize(const std::size_t total_step,
                     const system_type& sys, const forcefield_type& ff)
