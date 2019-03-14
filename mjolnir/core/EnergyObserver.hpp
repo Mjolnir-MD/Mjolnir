@@ -21,7 +21,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
 
   public:
 
-    EnergyObserver(const std::string& filename_prefix)
+    explicit EnergyObserver(const std::string& filename_prefix)
       : prefix_(filename_prefix), file_name_(filename_prefix + ".ene")
     {
         // clear files and throw an error if the files cannot be opened.

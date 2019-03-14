@@ -26,7 +26,7 @@ class ObserverContainer
 
   public:
 
-    ObserverContainer(bool output_progress = false)
+    explicit ObserverContainer(bool output_progress = false)
         : output_progress_(output_progress)
     {}
     ~ObserverContainer() = default;

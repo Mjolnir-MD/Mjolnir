@@ -21,7 +21,7 @@ class XYZObserver final : public ObserverBase<traitsT>
 
   public:
 
-    XYZObserver(const std::string& filename_prefix)
+    explicit XYZObserver(const std::string& filename_prefix)
       : base_type(), prefix_(filename_prefix),
         xyz_name_(filename_prefix + std::string("_position.xyz")),
         vel_name_(filename_prefix + std::string("_velocity.xyz")),
