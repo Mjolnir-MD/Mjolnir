@@ -18,7 +18,8 @@ BOOST_AUTO_TEST_CASE(read_observer)
         }};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs->prefix() == "./test");
+        BOOST_TEST(obs.observers().size() == 1);
+        BOOST_TEST(obs.observers().front()->prefix() == "./test");
     }
     {
         const toml::table v = toml::table{{"files", toml::table{{"output",
@@ -27,7 +28,8 @@ BOOST_AUTO_TEST_CASE(read_observer)
         }};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs->prefix() == "./test");
+        BOOST_TEST(obs.observers().size() == 1);
+        BOOST_TEST(obs.observers().front()->prefix() == "./test");
     }
 
     // XXX
@@ -42,7 +44,9 @@ BOOST_AUTO_TEST_CASE(read_observer)
         }};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs->prefix() == "./test/test");
+
+        BOOST_TEST(obs.observers().size() == 1);
+        BOOST_TEST(obs.observers().front()->prefix() == "./test/test");
     }
 }
 
@@ -61,7 +65,10 @@ BOOST_AUTO_TEST_CASE(read_xyz_observer)
 
         const toml::table v{{"files", files}};
 
-        const auto obs = mjolnir::read_observer<traits_type>(v);
+        const auto obs_cont = mjolnir::read_observer<traits_type>(v);
+        BOOST_TEST(obs_cont.observers().size() == 1);
+
+        const auto& obs      = obs_cont.observers().front();
         BOOST_TEST(obs->prefix() == "./test");
 
         const auto xyz = dynamic_cast<observer_type*>(obs.get());
@@ -84,7 +91,10 @@ BOOST_AUTO_TEST_CASE(read_dcd_observer)
 
         const toml::table v{{"files", files}};
 
-        const auto obs = mjolnir::read_observer<traits_type>(v);
+        const auto obs_cont = mjolnir::read_observer<traits_type>(v);
+        BOOST_TEST(obs_cont.observers().size() == 1);
+
+        const auto& obs = obs_cont.observers().front();
         BOOST_TEST(obs->prefix() == "./test");
 
         const auto dcd = dynamic_cast<observer_type*>(obs.get());
