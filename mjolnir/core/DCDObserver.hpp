@@ -95,12 +95,10 @@ class DCDObserver final : public ObserverBase<traitsT>
       : base_type(), prefix_(filename_prefix),
         pos_name_(filename_prefix + std::string("_position.dcd")),
         vel_name_(filename_prefix + std::string("_velocity.dcd")),
-        ene_name_(filename_prefix + std::string(".ene"))
     {
         // clear files and throw an error if the files cannot be opened.
         this->clear_file(this->pos_name_);
         this->clear_file(this->vel_name_);
-        this->clear_file(this->ene_name_);
     }
     ~DCDObserver() override = default;
 
@@ -114,11 +112,11 @@ class DCDObserver final : public ObserverBase<traitsT>
         this->buffer_x_.resize(sys.size());
         this->buffer_y_.resize(sys.size());
         this->buffer_z_.resize(sys.size());
-
-        std::ofstream ofs(this->ene_name_, std::ios::app);
-        ofs << "# timestep  " << ff.list_energy_name() << " kinetic_energy\n";
         return;
     }
+
+    void output(const std::size_t step,
+                const system_type& sys, const forcefield_type& ff) override;
 
     void finalize(const std::size_t,
                   const system_type&, const forcefield_type&) override
@@ -149,9 +147,6 @@ class DCDObserver final : public ObserverBase<traitsT>
         }
         return;
     }
-
-    void output(const std::size_t step,
-                const system_type& sys, const forcefield_type& ff) override;
 
     std::string const& prefix() const noexcept override {return prefix_;}
 
@@ -246,22 +241,11 @@ class DCDObserver final : public ObserverBase<traitsT>
         return;
     }
 
-    real_type calc_kinetic_energy(const system_type& sys) const
-    {
-        real_type k = 0.0;
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            k += math::length_sq(sys[i].velocity) * sys[i].mass;
-        }
-        return k * 0.5;
-    }
-
   private:
 
     std::string prefix_;
     std::string pos_name_;
     std::string vel_name_;
-    std::string ene_name_;
     std::size_t number_of_frames_;
     std::vector<float> buffer_x_;
     std::vector<float> buffer_y_;
@@ -340,18 +324,6 @@ inline void DCDObserver<traitsT>::output(
                       block_size);
             detail::write_as_bytes(ofs, block_size);
         }
-    }
-
-    // ------------------------------------------------------------------------
-    // write energy
-    {
-        std::ofstream ofs(this->ene_name_, std::ios::app);
-        // if the width exceeds, operator<<(std::ostream, std::string) ignores
-        // ostream::width and outputs whole string.
-        ofs << std::setw(11) << std::left << std::to_string(step) << ' ';
-        ofs << ff.dump_energy(sys) << ' ';
-        ofs << std::setw(14) << std::right << this->calc_kinetic_energy(sys) << '\n';
-        ofs.close();
     }
     return ;
 }
