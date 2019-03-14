@@ -24,7 +24,7 @@ class XYZObserver final : public ObserverBase<traitsT>
     explicit XYZObserver(const std::string& filename_prefix)
       : base_type(), prefix_(filename_prefix),
         xyz_name_(filename_prefix + std::string("_position.xyz")),
-        vel_name_(filename_prefix + std::string("_velocity.xyz")),
+        vel_name_(filename_prefix + std::string("_velocity.xyz"))
     {
         // clear files and throw an error if the files cannot be opened.
         this->clear_file(this->xyz_name_);
