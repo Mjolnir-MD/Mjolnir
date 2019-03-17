@@ -2,7 +2,6 @@
 #define MJOLNIR_TEST_UTIL_TRAITS_HPP
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
-#include <mjolnir/core/SystemMotionRemover.hpp>
 
 namespace mjolnir
 {
