@@ -58,7 +58,11 @@ inline void SteepestDescentSimulator<traitsT>::initialize()
 {
     this->ff_.initialize(this->system_);
 
-    this->observers_.initialize(this->step_limit_, this->system_, this->ff_);
+    // here, steepest_descent method has no physical `time`.
+    // There is nothing we can except filling it with zero or something
+    // that works as a marker.
+    this->observers_.initialize(this->step_limit_, /* dt */ real_type(0.0),
+                                this->system_, this->ff_);
     return;
 }
 
@@ -67,7 +71,8 @@ inline bool SteepestDescentSimulator<traitsT>::step()
 {
     if(step_count_ % save_step_ == 0)
     {
-        this->observers_.output(this->step_count_, this->system_, this->ff_);
+        this->observers_.output(this->step_count_, /* dt */ real_type(0.0),
+                                this->system_, this->ff_);
     }
 
     // calculate negative derivatives (-dV/dr)
@@ -103,8 +108,10 @@ inline bool SteepestDescentSimulator<traitsT>::step()
 template<typename traitsT>
 inline void SteepestDescentSimulator<traitsT>::finalize()
 {
-    this->observers_.output  (this->step_count_, this->system_, this->ff_);
-    this->observers_.finalize(this->step_limit_, this->system_, this->ff_);
+    this->observers_.output  (this->step_count_, /* dt */ real_type(0.0),
+                              this->system_, this->ff_);
+    this->observers_.finalize(this->step_limit_, /* dt */ real_type(0.0),
+                              this->system_, this->ff_);
     return;
 }
 
