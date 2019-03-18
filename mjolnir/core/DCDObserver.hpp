@@ -102,11 +102,11 @@ class DCDObserver final : public ObserverBase<traitsT>
     }
     ~DCDObserver() override = default;
 
-    void initialize(const std::size_t total_step,
+    void initialize(const std::size_t total_step, const real_type dt,
                     const system_type& sys, const forcefield_type& ff) override
     {
-        this->write_header(this->pos_name_, total_step, sys, ff);
-        this->write_header(this->vel_name_, total_step, sys, ff);
+        this->write_header(this->pos_name_, total_step, dt, sys, ff);
+        this->write_header(this->vel_name_, total_step, dt, sys, ff);
 
         // buffer to convert sys and dcd format
         this->buffer_x_.resize(sys.size());
@@ -115,10 +115,10 @@ class DCDObserver final : public ObserverBase<traitsT>
         return;
     }
 
-    void output(const std::size_t step,
+    void output(const std::size_t step, const real_type dt,
                 const system_type& sys, const forcefield_type& ff) override;
 
-    void finalize(const std::size_t,
+    void finalize(const std::size_t, const real_type dt,
                   const system_type&, const forcefield_type&) override
     {
         // update # of frames in the header region
@@ -163,8 +163,9 @@ class DCDObserver final : public ObserverBase<traitsT>
         return;
     }
 
-    void write_header(const std::string& fname, const std::size_t total_step_sz,
-                      const system_type& sys,   const forcefield_type& ff) const
+    void write_header(const std::string& fname,
+                      const std::size_t  total_step_sz, const real_type dt,
+                      const system_type& sys, const forcefield_type& ff) const
     {
         std::ofstream ofs(fname, std::ios::binary | std::ios::app);
         if(not ofs.good())
@@ -198,7 +199,7 @@ class DCDObserver final : public ObserverBase<traitsT>
             // 4 * integers with null flag
             for(std::size_t i=0; i<4; ++i) {detail::write_as_bytes(ofs, zero);}
 
-            const float delta_t(0.0f);
+            const float delta_t(dt);
             detail::write_as_bytes(ofs, delta_t);
 
             const std::int32_t has_unitcell = detail::unitcell_flag(sys.boundary());
@@ -254,7 +255,8 @@ class DCDObserver final : public ObserverBase<traitsT>
 
 template<typename traitsT>
 inline void DCDObserver<traitsT>::output(
-    const std::size_t step, const system_type& sys, const forcefield_type& ff)
+    const std::size_t step, const real_type dt,
+    const system_type& sys, const forcefield_type& ff)
 {
     number_of_frames_ += 1;
     assert(this->buffer_x_.size() == sys.size());

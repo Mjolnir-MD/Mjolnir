@@ -21,11 +21,11 @@ class ObserverBase
     ObserverBase() = default;
     virtual ~ObserverBase() = default;
 
-    virtual void initialize(const std::size_t total_step,
+    virtual void initialize(const std::size_t total_step, const real_type dt,
                             const system_type&, const forcefield_type&) = 0;
-    virtual void output    (const std::size_t step,
+    virtual void output    (const std::size_t step,       const real_type dt,
                             const system_type&, const forcefield_type&) = 0;
-    virtual void finalize  (const std::size_t total_step,
+    virtual void finalize  (const std::size_t total_step, const real_type dt,
                             const system_type&, const forcefield_type&) = 0;
 
     // for testing purpose.
