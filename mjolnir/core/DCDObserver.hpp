@@ -12,14 +12,6 @@ namespace mjolnir
 
 namespace detail
 {
-// it is a helper function to write value as an array of bytes
-template<typename T>
-void write_as_bytes(std::ostream& os, const T& v) noexcept
-{
-    using Type = typename std::remove_reference<T>::type;
-    os.write(reinterpret_cast<const char*>(std::addressof(v)), sizeof(Type));
-    return;
-}
 
 // it is a helper function to write unitcell flags.
 // for UnlimitedBoundary, returns zero.

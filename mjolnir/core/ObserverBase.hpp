@@ -32,5 +32,17 @@ class ObserverBase
     virtual std::string const& prefix() const noexcept = 0;
 };
 
+namespace detail
+{
+// it is a helper function to write value as an array of bytes
+template<typename T>
+void write_as_bytes(std::ostream& os, const T& v) noexcept
+{
+    using Type = typename std::remove_reference<T>::type;
+    os.write(reinterpret_cast<const char*>(std::addressof(v)), sizeof(Type));
+    return;
+}
+} // detail
+
 } // mjolnir
 #endif// MJOLNIR_CORE_OBSERVER_BASE_HPP
