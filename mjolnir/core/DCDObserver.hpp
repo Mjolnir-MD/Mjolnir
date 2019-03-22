@@ -177,17 +177,15 @@ class DCDObserver final : public ObserverBase<traitsT>
 
     // it is a helper function to write unitcell flags.
     // for UnlimitedBoundary, returns zero.
-    template<typename realT, typename coordT>
-    static std::int32_t
-    unitcell_flag(const UnlimitedBoundary<realT, coordT>&) noexcept
+    static std::int32_t unitcell_flag(
+        const UnlimitedBoundary<real_type, coordinate_type>&) noexcept
     {
         // no unitcell information needed. disable the flag
         return 0;
     }
     // for CuboidalPeriodicBoundary, returns one.
-    template<typename realT, typename coordT>
-    static std::int32_t
-    unitcell_flag(const CuboidalPeriodicBoundary<realT, coordT>&) noexcept
+    static std::int32_t unitcell_flag(
+        const CuboidalPeriodicBoundary<real_type, coordinate_type>&) noexcept
     {
         // unitcell information required. turn the flag on.
         return 1;
@@ -195,16 +193,14 @@ class DCDObserver final : public ObserverBase<traitsT>
 
     // it is a helper function to write unitcell block if needed.
     // for UnlimitedBoundary, do nothing.
-    template<typename realT, typename coordT>
-    static void write_unitcell_if_needed(
-            std::ostream&, const UnlimitedBoundary<realT, coordT>&) noexcept
+    static void write_unitcell_if_needed(std::ostream&,
+        const UnlimitedBoundary<real_type, coordinate_type>&) noexcept
     {
         return ; // do nothing. boundary does not exists.
     }
     // for CuboidalPeriodicBoundary, writes the boundary width and angles
-    template<typename realT, typename coordT>
     static void write_unitcell_if_needed(std::ostream& os,
-            const CuboidalPeriodicBoundary<realT, coordT>& boundary) noexcept
+        const CuboidalPeriodicBoundary<real_type, coordinate_type>& boundary) noexcept
     {
         // unit cell length
         const double A = boundary.width()[0];
