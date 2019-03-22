@@ -101,7 +101,8 @@ SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::initialize()
     this->ff_.initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_);
 
-    observers_.initialize(this->total_step_, this->system_, this->ff_);
+    observers_.initialize(this->total_step_, this->integrator_.delta_t(),
+                          this->system_, this->ff_);
     return;
 }
 
@@ -114,7 +115,8 @@ inline bool SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::step()
 
     if(step_count_ % save_step_ == 0)
     {
-        observers_.output(this->step_count_, this->system_, this->ff_);
+        observers_.output(this->step_count_, this->integrator_.delta_t(),
+                          this->system_, this->ff_);
     }
 
     integrator_.step(this->time_, system_, ff_);
@@ -141,8 +143,10 @@ template<typename traitsT, typename integratorT,
 inline void
 SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::finalize()
 {
-    observers_.output  (this->step_count_, this->system_, this->ff_);
-    observers_.finalize(this->step_count_, this->system_, this->ff_);
+    observers_.output  (this->step_count_, this->integrator_.delta_t(),
+                        this->system_, this->ff_);
+    observers_.finalize(this->step_count_, this->integrator_.delta_t(),
+                        this->system_, this->ff_);
     return;
 }
 

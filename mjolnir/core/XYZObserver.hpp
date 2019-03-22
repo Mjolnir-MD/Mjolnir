@@ -32,13 +32,13 @@ class XYZObserver final : public ObserverBase<traitsT>
     }
     ~XYZObserver() override = default;
 
-    void initialize(const std::size_t total_step,
+    void initialize(const std::size_t total_step, const real_type delta_t,
                     const system_type& sys, const forcefield_type& ff) override
     {
         // do nothing.
     }
 
-    void output(const std::size_t step,
+    void output(const std::size_t step, const real_type delta_t,
                 const system_type& sys, const forcefield_type& ff) override
     {
         // -------------------------------------------------------------------
@@ -73,7 +73,7 @@ class XYZObserver final : public ObserverBase<traitsT>
         return ;
     }
 
-    void finalize(const std::size_t total_step,
+    void finalize(const std::size_t total_step, const real_type delta_t,
                   const system_type& sys, const forcefield_type& ff) override
     {
         // do nothing.

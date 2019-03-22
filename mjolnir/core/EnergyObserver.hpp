@@ -29,7 +29,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
     }
     ~EnergyObserver() override = default;
 
-    void initialize(const std::size_t total_step,
+    void initialize(const std::size_t total_step, const real_type dt,
                     const system_type&, const forcefield_type& ff) override
     {
         std::ofstream ofs(this->file_name_, std::ios::app);
@@ -37,7 +37,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
         return;
     }
 
-    void output(const std::size_t step,
+    void output(const std::size_t step, const real_type dt,
                 const system_type& sys, const forcefield_type& ff) override
     {
         std::ofstream ofs(this->file_name_, std::ios::app);
@@ -50,7 +50,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
         return;
     }
 
-    void finalize(const std::size_t,
+    void finalize(const std::size_t, const real_type dt,
                   const system_type&, const forcefield_type&) override
     {/* do nothing. */}
 

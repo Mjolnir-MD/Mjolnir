@@ -36,22 +36,22 @@ class ObserverContainer
     ObserverContainer& operator=(const ObserverContainer&) = default;
     ObserverContainer& operator=(ObserverContainer&&)      = default;
 
-    void initialize(const std::size_t total_step,
+    void initialize(const std::size_t total_step, const real_type dt,
                     const system_type& sys, const forcefield_type& ff)
     {
         for(const auto& obs : observers_)
         {
-            obs->initialize(total_step, sys, ff);
+            obs->initialize(total_step, dt, sys, ff);
         }
 
         this->progress_bar_.reset(total_step); // set total_step as 100%.
     }
-    void output(const std::size_t step,
+    void output(const std::size_t step, const real_type dt,
                 const system_type& sys, const forcefield_type& ff)
     {
         for(const auto& obs : this->observers_)
         {
-            obs->output(step, sys, ff);
+            obs->output(step, dt, sys, ff);
         }   
 
         // this branching might be wiped out by introducing another parameter
@@ -62,12 +62,12 @@ class ObserverContainer
             std::cerr << this->progress_bar_.format(step);
         }
     }
-    void finalize(const std::size_t total_step,
+    void finalize(const std::size_t total_step, const real_type dt,
                   const system_type& sys, const forcefield_type& ff)
     {
         for(const auto& obs : this->observers_)
         {
-            obs->finalize(total_step, sys, ff);
+            obs->finalize(total_step, dt, sys, ff);
         }
 
         if(this->output_progress_)
