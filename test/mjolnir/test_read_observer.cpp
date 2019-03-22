@@ -132,3 +132,31 @@ BOOST_AUTO_TEST_CASE(read_dcd_observer)
         BOOST_TEST(static_cast<bool>(dcd));
     }
 }
+
+// check that read_observer returns TRRObserver or not
+BOOST_AUTO_TEST_CASE(read_trr_observer)
+{
+    mjolnir::LoggerManager::set_default_logger("test_read_observer.log");
+
+    using real_type = double;
+    using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    using observer_type = mjolnir::TRRObserver<traits_type>;
+    {
+        const toml::table files{
+            {"output", toml::table{{"path", "./"}, {"prefix", "test"}, {"format", "trr"}}}
+        };
+
+        const toml::table v{{"files", files}};
+
+        const auto obs = mjolnir::read_observer<traits_type>(v);
+        BOOST_TEST(obs.observers().size() == 2);
+
+        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
+                             obs.observers().at(0).get());
+        BOOST_TEST(static_cast<bool>(ene));
+
+        const auto trr = dynamic_cast<mjolnir::TRRObserver<traits_type>*>(
+                             obs.observers().at(1).get());
+        BOOST_TEST(static_cast<bool>(trr));
+    }
+}
