@@ -10,66 +10,6 @@
 namespace mjolnir
 {
 
-namespace detail
-{
-
-// it is a helper function to write unitcell flags.
-// for UnlimitedBoundary, returns zero.
-template<typename realT, typename coordT>
-std::int32_t unitcell_flag(const UnlimitedBoundary<realT, coordT>&) noexcept
-{
-    // no unitcell information needed. disable the flag
-    return 0;
-}
-// for CuboidalPeriodicBoundary, returns one.
-template<typename realT, typename coordT>
-std::int32_t unitcell_flag(const CuboidalPeriodicBoundary<realT, coordT>&) noexcept
-{
-    // unitcell information required. turn the flag on.
-    return 1;
-}
-
-// it is a helper function to write unitcell block if needed.
-// for UnlimitedBoundary, do nothing.
-template<typename realT, typename coordT>
-void write_unitcell_if_needed(std::ostream&,
-                              const UnlimitedBoundary<realT, coordT>&) noexcept
-{
-    return ; // do nothing. boundary does not exists.
-}
-// for CuboidalPeriodicBoundary, writes the boundary width and angles
-template<typename realT, typename coordT>
-void write_unitcell_if_needed(std::ostream& os,
-        const CuboidalPeriodicBoundary<realT, coordT>& boundary) noexcept
-{
-    // unit cell length
-    const double A = boundary.width()[0];
-    const double B = boundary.width()[1];
-    const double C = boundary.width()[2];
-
-    // angles are always 90 degree because it's cuboid.
-    // for earlier versions, it was a cosine value of the angle.
-    // Now it accepts degrees. For the clarity, I use degrees here.
-    const double alpha = 90.0;
-    const double beta  = 90.0;
-    const double gamma = 90.0;
-
-    const std::int32_t block_size = sizeof(double) * 6;
-    write_as_bytes(os, block_size);
-
-    // I'm serious. the order is correct.
-    write_as_bytes(os, A    );
-    write_as_bytes(os, gamma);
-    write_as_bytes(os, B    );
-    write_as_bytes(os, beta );
-    write_as_bytes(os, alpha);
-    write_as_bytes(os, C    );
-
-    write_as_bytes(os, block_size);
-    return ;
-}
-} // detail
-
 template<typename traitsT>
 class DCDObserver final : public ObserverBase<traitsT>
 {
@@ -194,7 +134,8 @@ class DCDObserver final : public ObserverBase<traitsT>
             const float delta_t(dt);
             detail::write_as_bytes(ofs, delta_t);
 
-            const std::int32_t has_unitcell = detail::unitcell_flag(sys.boundary());
+            const std::int32_t has_unitcell =
+                DCDObserver<traitsT>::unitcell_flag(sys.boundary());
             detail::write_as_bytes(ofs, has_unitcell);
 
             // 8 * integers with null flag
@@ -234,6 +175,64 @@ class DCDObserver final : public ObserverBase<traitsT>
         return;
     }
 
+    // it is a helper function to write unitcell flags.
+    // for UnlimitedBoundary, returns zero.
+    template<typename realT, typename coordT>
+    static std::int32_t
+    unitcell_flag(const UnlimitedBoundary<realT, coordT>&) noexcept
+    {
+        // no unitcell information needed. disable the flag
+        return 0;
+    }
+    // for CuboidalPeriodicBoundary, returns one.
+    template<typename realT, typename coordT>
+    static std::int32_t
+    unitcell_flag(const CuboidalPeriodicBoundary<realT, coordT>&) noexcept
+    {
+        // unitcell information required. turn the flag on.
+        return 1;
+    }
+
+    // it is a helper function to write unitcell block if needed.
+    // for UnlimitedBoundary, do nothing.
+    template<typename realT, typename coordT>
+    static void write_unitcell_if_needed(
+            std::ostream&, const UnlimitedBoundary<realT, coordT>&) noexcept
+    {
+        return ; // do nothing. boundary does not exists.
+    }
+    // for CuboidalPeriodicBoundary, writes the boundary width and angles
+    template<typename realT, typename coordT>
+    static void write_unitcell_if_needed(std::ostream& os,
+            const CuboidalPeriodicBoundary<realT, coordT>& boundary) noexcept
+    {
+        // unit cell length
+        const double A = boundary.width()[0];
+        const double B = boundary.width()[1];
+        const double C = boundary.width()[2];
+
+        // angles are always 90 degree because it's cuboid.
+        // for earlier versions, it was a cosine value of the angle.
+        // Now it accepts degrees. For the clarity, I use degrees here.
+        const double alpha = 90.0;
+        const double beta  = 90.0;
+        const double gamma = 90.0;
+
+        const std::int32_t block_size = sizeof(double) * 6;
+        detail::write_as_bytes(os, block_size);
+
+        // I'm serious. the order is correct.
+        detail::write_as_bytes(os, A    );
+        detail::write_as_bytes(os, gamma);
+        detail::write_as_bytes(os, B    );
+        detail::write_as_bytes(os, beta );
+        detail::write_as_bytes(os, alpha);
+        detail::write_as_bytes(os, C    );
+
+        detail::write_as_bytes(os, block_size);
+        return ;
+    }
+
   private:
 
     std::string prefix_;
@@ -260,7 +259,7 @@ inline void DCDObserver<traitsT>::output(
     {
         std::ofstream ofs(this->pos_name_, std::ios::app | std::ios::binary);
 
-        detail::write_unitcell_if_needed(ofs, sys.boundary());
+        DCDObserver<traitsT>::write_unitcell_if_needed(ofs, sys.boundary());
 
         for(std::size_t i=0; i<sys.size(); ++i)
         {
