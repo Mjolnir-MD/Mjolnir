@@ -5,6 +5,7 @@
 #include <mjolnir/core/EnergyObserver.hpp>
 #include <mjolnir/core/XYZObserver.hpp>
 #include <mjolnir/core/DCDObserver.hpp>
+#include <mjolnir/core/TRRObserver.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
@@ -30,10 +31,17 @@ void add_observer(ObserverContainer<traitsT>& observers,
         observers.push_back(make_unique<observer_type>(file_prefix));
         return;
     }
-    if(format == "dcd")
+    else if(format == "dcd")
     {
         using observer_type = DCDObserver<traitsT>;
         MJOLNIR_LOG_NOTICE("output dcd format.");
+        observers.push_back(make_unique<observer_type>(file_prefix));
+        return;
+    }
+    else if(format == "trr")
+    {
+        using observer_type = TRRObserver<traitsT>;
+        MJOLNIR_LOG_NOTICE("output trr format.");
         observers.push_back(make_unique<observer_type>(file_prefix));
         return;
     }
@@ -43,8 +51,9 @@ void add_observer(ObserverContainer<traitsT>& observers,
             "mjolnir::read_observer: output format not supported", format,
             "here", {
                 "expected one of the following.",
-                "- \"xyz\": the simplest ascii format",
-                "- \"dcd\": widely used binary format"
+                "- \"xyz\": the simplest ascii format.",
+                "- \"dcd\": binary format which contains normally positions."
+                "- \"trr\": binary format which contains positions, velocities, and forces."
             }));
     }
     return ;
