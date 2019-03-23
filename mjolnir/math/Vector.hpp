@@ -3,6 +3,7 @@
 #include <mjolnir/math/Matrix.hpp>
 #include <mjolnir/math/quaternion.hpp>
 #include <mjolnir/math/functions.hpp>
+#include <mjolnir/math/vector_util.hpp>
 #include <cmath>
 
 namespace mjolnir
@@ -13,20 +14,21 @@ namespace math
 template<typename realT, std::size_t N>
 using Vector = Matrix<realT, N, 1>;
 
-template<typename charT, typename traitsT,
-         typename T, std::size_t R>
-std::basic_ostream<charT, traitsT>&
-operator<<(std::basic_ostream<charT, traitsT>& os, const Matrix<T, R, 1>& mat)
+template<typename realT, std::size_t N>
+struct real_type_of<Vector<realT, N>>
 {
-    os << '(';
-    for(std::size_t i=0; i<R; ++i)
+    using type = realT;
+};
+
+template<typename realT, std::size_t N>
+struct make_coordinate_impl<Vector<realT, N>>
+{
+    static Vector<realT, N>
+    invoke(const realT x, const realT y, const realT z) noexcept
     {
-        if(i!=0) {os << ',';}
-        os << mat(i, 0);
+        return Vector<realT, N>(x, y, z);
     }
-    os << ')';
-    return os;
-}
+};
 
 // use mjolnir::math::X() to access elements of vector.
 
@@ -46,6 +48,14 @@ template<typename realT>
 inline realT& Z(Vector<realT, 3>& v)       noexcept {return v[2];}
 
 // functions for vector 3d
+
+template<typename charT, typename traitsT, typename T>
+std::basic_ostream<charT, traitsT>&
+operator<<(std::basic_ostream<charT, traitsT>& os, const Matrix<T, 3, 1>& vec)
+{
+    os << '(' << X(vec) << ',' << Y(vec) << ',' << Z(vec) << ')';
+    return os;
+}
 
 template<typename realT>
 inline realT
