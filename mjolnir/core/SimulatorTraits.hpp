@@ -10,8 +10,9 @@ struct SimulatorTraits
 {
     using real_type       = realT;
     using coordinate_type = math::Vector<real_type, 3>;
-    template<std::size_t N, std::size_t M>
-    using matrix_type = math::Matrix<real_type, N, M>;
+
+    using matrix33_type = math::Matrix<real_type, 3, 3>;
+    using matrix44_type = math::Matrix<real_type, 4, 4>;
 
     using boundary_type = boundaryT<real_type, coordinate_type>;
 };
