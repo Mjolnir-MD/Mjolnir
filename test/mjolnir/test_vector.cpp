@@ -27,9 +27,33 @@ tolerance<double>()
 {return boost::test_tools::tolerance(2.0 / std::pow(2, 14));}
 } // test
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_construction, Real, test_targets)
+{
+    using namespace mjolnir;
+    using mjolnir::math::X;
+    using mjolnir::math::Y;
+    using mjolnir::math::Z;
+
+    math::Vector<Real, 3> vec(1.0, 2.0, 3.0);
+    BOOST_TEST(X(vec) == 1.0);
+    BOOST_TEST(Y(vec) == 2.0);
+    BOOST_TEST(Z(vec) == 3.0);
+
+    X(vec) = 4.0;
+    Y(vec) = 5.0;
+    Z(vec) = 6.0;
+
+    BOOST_TEST(X(vec) == 4.0);
+    BOOST_TEST(Y(vec) == 5.0);
+    BOOST_TEST(Z(vec) == 6.0);
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_add, Real, test_targets)
 {
     using namespace mjolnir;
+    using mjolnir::math::X;
+    using mjolnir::math::Y;
+    using mjolnir::math::Z;
 
     std::mt19937 mt(seed);
     std::uniform_real_distribution<Real> uni(-100.0, 100.0);
@@ -39,15 +63,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_add, Real, test_targets)
         const math::Vector<Real, 3> lhs(uni(mt), uni(mt), uni(mt)),
                               rhs(uni(mt), uni(mt), uni(mt));
         const auto add = lhs + rhs;
-        BOOST_TEST(add[0] == lhs[0] + rhs[0], test::tolerance<Real>());
-        BOOST_TEST(add[1] == lhs[1] + rhs[1], test::tolerance<Real>());
-        BOOST_TEST(add[2] == lhs[2] + rhs[2], test::tolerance<Real>());
+        BOOST_TEST(X(add) == X(lhs) + X(rhs), test::tolerance<Real>());
+        BOOST_TEST(Y(add) == Y(lhs) + Y(rhs), test::tolerance<Real>());
+        BOOST_TEST(Z(add) == Z(lhs) + Z(rhs), test::tolerance<Real>());
     }
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_sub, Real, test_targets)
 {
     using namespace mjolnir;
+    using mjolnir::math::X;
+    using mjolnir::math::Y;
+    using mjolnir::math::Z;
 
     std::mt19937 mt(seed);
     std::uniform_real_distribution<Real> uni(-100.0, 100.0);
@@ -57,15 +84,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_sub, Real, test_targets)
         const math::Vector<Real, 3> lhs(uni(mt), uni(mt), uni(mt)),
                               rhs(uni(mt), uni(mt), uni(mt));
         const auto sub = lhs - rhs;
-        BOOST_TEST(sub[0] == lhs[0] - rhs[0], test::tolerance<Real>());
-        BOOST_TEST(sub[1] == lhs[1] - rhs[1], test::tolerance<Real>());
-        BOOST_TEST(sub[2] == lhs[2] - rhs[2], test::tolerance<Real>());
+        BOOST_TEST(X(sub) == X(lhs) - X(rhs), test::tolerance<Real>());
+        BOOST_TEST(Y(sub) == Y(lhs) - Y(rhs), test::tolerance<Real>());
+        BOOST_TEST(Z(sub) == Z(lhs) - Z(rhs), test::tolerance<Real>());
     }
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_mul, Real, test_targets)
 {
     using namespace mjolnir;
+    using mjolnir::math::X;
+    using mjolnir::math::Y;
+    using mjolnir::math::Z;
 
     std::mt19937 mt(seed);
     std::uniform_real_distribution<Real> uni(-100.0, 100.0);
@@ -75,9 +105,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_mul, Real, test_targets)
         const Real            lhs(uni(mt));
         const math::Vector<Real, 3> rhs(uni(mt), uni(mt), uni(mt));
         const auto mul = lhs * rhs;
-        BOOST_TEST(mul[0] == lhs * rhs[0], test::tolerance<Real>());
-        BOOST_TEST(mul[1] == lhs * rhs[1], test::tolerance<Real>());
-        BOOST_TEST(mul[2] == lhs * rhs[2], test::tolerance<Real>());
+        BOOST_TEST(X(mul) == lhs * X(rhs), test::tolerance<Real>());
+        BOOST_TEST(Y(mul) == lhs * Y(rhs), test::tolerance<Real>());
+        BOOST_TEST(Z(mul) == lhs * Z(rhs), test::tolerance<Real>());
     }
 
     for(std::size_t test_times=0; test_times<N; ++test_times)
@@ -85,15 +115,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_mul, Real, test_targets)
         const math::Vector<Real, 3> lhs(uni(mt), uni(mt), uni(mt));
         const Real            rhs(uni(mt));
         const auto mul = lhs * rhs;
-        BOOST_TEST(mul[0] == lhs[0] * rhs, test::tolerance<Real>());
-        BOOST_TEST(mul[1] == lhs[1] * rhs, test::tolerance<Real>());
-        BOOST_TEST(mul[2] == lhs[2] * rhs, test::tolerance<Real>());
+        BOOST_TEST(X(mul) == X(lhs) * rhs, test::tolerance<Real>());
+        BOOST_TEST(Y(mul) == Y(lhs) * rhs, test::tolerance<Real>());
+        BOOST_TEST(Z(mul) == Z(lhs) * rhs, test::tolerance<Real>());
     }
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_div, Real, test_targets)
 {
     using namespace mjolnir;
+    using mjolnir::math::X;
+    using mjolnir::math::Y;
+    using mjolnir::math::Z;
 
     std::mt19937 mt(seed);
     std::uniform_real_distribution<Real> uni(-100.0, 100.0);
@@ -103,15 +136,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_div, Real, test_targets)
         const math::Vector<Real, 3> lhs(uni(mt), uni(mt), uni(mt));
         const Real            rhs(uni(mt));
         const auto div = lhs / rhs;
-        BOOST_TEST(div[0] == lhs[0] / rhs, test::tolerance<Real>());
-        BOOST_TEST(div[1] == lhs[1] / rhs, test::tolerance<Real>());
-        BOOST_TEST(div[2] == lhs[2] / rhs, test::tolerance<Real>());
+        BOOST_TEST(X(div) == X(lhs) / rhs, test::tolerance<Real>());
+        BOOST_TEST(Y(div) == Y(lhs) / rhs, test::tolerance<Real>());
+        BOOST_TEST(Z(div) == Z(lhs) / rhs, test::tolerance<Real>());
     }
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_dot, Real, test_targets)
 {
     using namespace mjolnir;
+    using mjolnir::math::X;
+    using mjolnir::math::Y;
+    using mjolnir::math::Z;
 
     std::mt19937 mt(seed);
     std::uniform_real_distribution<Real> uni(-1.0, 1.0);
@@ -121,7 +157,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_dot, Real, test_targets)
         const math::Vector<Real, 3> lhs(uni(mt), uni(mt), uni(mt));
         const math::Vector<Real, 3> rhs(uni(mt), uni(mt), uni(mt));
         const Real dot = math::dot_product(lhs, rhs);
-        BOOST_TEST(dot == lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2],
+        BOOST_TEST(dot == X(lhs) * X(rhs) + Y(lhs) * Y(rhs) + Z(lhs) * Z(rhs),
                    test::tolerance<Real>());
     }
 }
@@ -129,6 +165,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_dot, Real, test_targets)
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_len, Real, test_targets)
 {
     using namespace mjolnir;
+    using mjolnir::math::X;
+    using mjolnir::math::Y;
+    using mjolnir::math::Z;
 
     std::mt19937 mt(seed);
     std::uniform_real_distribution<Real> uni(-1.0, 1.0);
@@ -149,6 +188,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_len, Real, test_targets)
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_cross_product, Real, test_targets)
 {
     using namespace mjolnir;
+    using mjolnir::math::X;
+    using mjolnir::math::Y;
+    using mjolnir::math::Z;
 
     std::mt19937 mt(seed);
     std::uniform_real_distribution<Real> uni(-1.0, 1.0);
