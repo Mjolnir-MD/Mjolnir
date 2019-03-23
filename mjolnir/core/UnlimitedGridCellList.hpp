@@ -88,16 +88,12 @@ class UnlimitedGridCellList
     // calc cell index of the position
     std::size_t calc_index(const coordinate_type& pos) const noexcept
     {
-        const auto x =
-            static_cast<std::int64_t>(std::floor(pos[0]*r_cell_size_)) % dim;
-        const auto y =
-            static_cast<std::int64_t>(std::floor(pos[1]*r_cell_size_)) % dim;
-        const auto z =
-            static_cast<std::int64_t>(std::floor(pos[2]*r_cell_size_)) % dim;
+        const auto x = static_cast<std::int64_t>(std::floor(math::X(pos) * r_cell_size_)) % dim;
+        const auto y = static_cast<std::int64_t>(std::floor(math::Y(pos) * r_cell_size_)) % dim;
+        const auto z = static_cast<std::int64_t>(std::floor(math::Z(pos) * r_cell_size_)) % dim;
 
-        return calc_index((x<0) ? x+dim : x,
-                          (y<0) ? y+dim : y,
-                          (z<0) ? z+dim : z);
+        return this->calc_index(
+                (x<0) ? x+dim : x, (y<0) ? y+dim : y, (z<0) ? z+dim : z);
     }
 
     std::size_t calc_index(const std::size_t x, const std::size_t y,

@@ -84,10 +84,10 @@ class PeriodicGridCellList
 
     std::size_t calc_index(const coordinate_type& pos) const noexcept
     {
-        return calc_index(
-            static_cast<std::size_t>(std::floor((pos[0]-lower_bound_[0])*r_x_)),
-            static_cast<std::size_t>(std::floor((pos[1]-lower_bound_[1])*r_y_)),
-            static_cast<std::size_t>(std::floor((pos[2]-lower_bound_[2])*r_z_)));
+        const auto ofs = pos - this->lower_bound_;
+        return this->calc_index(std::floor(math::X(ofs) * this->r_x_),
+                                std::floor(math::Y(ofs) * this->r_y_),
+                                std::floor(math::Z(ofs) * this->r_z_));
     }
 
     std::size_t calc_index(const std::size_t i, const std::size_t j,
@@ -246,9 +246,9 @@ void PeriodicGridCellList<traitsT, parameterT>::initialize(
     this->lower_bound_ = sys.boundary().lower_bound();
     const auto system_size = sys.boundary().width();
 
-    this->dim_x_ = std::max<std::size_t>(3, std::floor(system_size[0] * r_x_));
-    this->dim_y_ = std::max<std::size_t>(3, std::floor(system_size[1] * r_y_));
-    this->dim_z_ = std::max<std::size_t>(3, std::floor(system_size[2] * r_z_));
+    this->dim_x_ = std::max<std::size_t>(3, std::floor(math::X(system_size) * r_x_));
+    this->dim_y_ = std::max<std::size_t>(3, std::floor(math::Y(system_size) * r_y_));
+    this->dim_z_ = std::max<std::size_t>(3, std::floor(math::Z(system_size) * r_z_));
 
     MJOLNIR_LOG_INFO("dimension = ", dim_x_, 'x', dim_y_, 'x', dim_z_);
 
@@ -261,9 +261,9 @@ void PeriodicGridCellList<traitsT, parameterT>::initialize(
     }
 
     // it may expand cell a bit (to fit system range)
-    this->r_x_ = 1.0 / (system_size[0] / this->dim_x_);
-    this->r_y_ = 1.0 / (system_size[1] / this->dim_y_);
-    this->r_z_ = 1.0 / (system_size[2] / this->dim_z_);
+    this->r_x_ = 1.0 / (math::X(system_size) / this->dim_x_);
+    this->r_y_ = 1.0 / (math::Y(system_size) / this->dim_y_);
+    this->r_z_ = 1.0 / (math::Z(system_size) / this->dim_z_);
 
     MJOLNIR_LOG_DEBUG("reciplocal width of cells in x coordinate = ", r_x_);
     MJOLNIR_LOG_DEBUG("reciplocal width of cells in y coordinate = ", r_y_);

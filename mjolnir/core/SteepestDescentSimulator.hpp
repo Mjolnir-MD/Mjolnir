@@ -84,9 +84,9 @@ inline bool SteepestDescentSimulator<traitsT>::step()
     {
         const coordinate_type disp = this->h_ * this->system_[i].force;
 
-        max_diff = std::max(max_diff, std::abs(this->system_[i].force[0]));
-        max_diff = std::max(max_diff, std::abs(this->system_[i].force[1]));
-        max_diff = std::max(max_diff, std::abs(this->system_[i].force[2]));
+        max_diff = std::max(max_diff, std::abs(math::X(this->system_[i].force)));
+        max_diff = std::max(max_diff, std::abs(math::Y(this->system_[i].force)));
+        max_diff = std::max(max_diff, std::abs(math::Z(this->system_[i].force)));
 
         max_disp2 = std::max(max_disp2, math::length_sq(disp));
         system_[i].position = system_.adjust_position(system_[i].position + disp);

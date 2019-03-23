@@ -31,19 +31,19 @@ operator<<(std::basic_ostream<charT, traitsT>& os, const Matrix<T, R, 1>& mat)
 // use mjolnir::math::X() to access elements of vector.
 
 template<typename realT>
-inline realT  X(const Vector<realT, 3>& v) noexcept {return v[0];}
+inline realT  X(Vector<realT, 3> const& v) noexcept {return v[0];}
 template<typename realT>
-inline realT& X(Vector<realT, 3>& v) noexcept {return v[0];}
+inline realT& X(Vector<realT, 3>& v)       noexcept {return v[0];}
 
 template<typename realT>
-inline realT  Y(const Vector<realT, 3>& v) noexcept {return v[1];}
+inline realT  Y(Vector<realT, 3> const& v) noexcept {return v[1];}
 template<typename realT>
-inline realT& Y(Vector<realT, 3>& v) noexcept {return v[1];}
+inline realT& Y(Vector<realT, 3>& v)       noexcept {return v[1];}
 
 template<typename realT>
-inline realT  Z(const Vector<realT, 3>& v) noexcept {return v[2];}
+inline realT  Z(Vector<realT, 3> const& v) noexcept {return v[2];}
 template<typename realT>
-inline realT& Z(Vector<realT, 3>& v) noexcept {return v[2];}
+inline realT& Z(Vector<realT, 3>& v)       noexcept {return v[2];}
 
 // functions for vector 3d
 
@@ -51,32 +51,22 @@ template<typename realT>
 inline realT
 dot_product(const Vector<realT, 3>& lhs, const Vector<realT, 3>& rhs) noexcept
 {
-    return lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
+    return X(lhs) * X(rhs) + Y(lhs) * Y(rhs) + Z(lhs) * Z(rhs);
 }
 
 template<typename realT>
 inline Vector<realT, 3>
 cross_product(const Vector<realT, 3>& lhs, const Vector<realT, 3>& rhs) noexcept
 {
-    return Vector<realT, 3>(lhs[1] * rhs[2] - lhs[2] * rhs[1],
-                            lhs[2] * rhs[0] - lhs[0] * rhs[2],
-                            lhs[0] * rhs[1] - lhs[1] * rhs[0]);
-}
-
-template<typename realT>
-inline realT
-scalar_triple_product(const Vector<realT, 3>& lhs, const Vector<realT, 3>& mid,
-                      const Vector<realT, 3>& rhs) noexcept
-{
-    return (lhs[1] * mid[2] - lhs[2] * mid[1]) * rhs[0] +
-           (lhs[2] * mid[0] - lhs[0] * mid[2]) * rhs[1] +
-           (lhs[0] * mid[1] - lhs[1] * mid[0]) * rhs[2];
+    return Vector<realT, 3>(Y(lhs) * Z(rhs) - Z(lhs) * Y(rhs),
+                            Z(lhs) * X(rhs) - X(lhs) * Z(rhs),
+                            X(lhs) * Y(rhs) - Y(lhs) * X(rhs));
 }
 
 template<typename realT>
 inline realT length_sq(const Vector<realT, 3>& lhs) noexcept
 {
-    return lhs[0] * lhs[0] + lhs[1] * lhs[1] + lhs[2] * lhs[2];
+    return X(lhs) * X(lhs) + Y(lhs) * Y(lhs) + Z(lhs) * Z(lhs);
 }
 
 template<typename realT>
