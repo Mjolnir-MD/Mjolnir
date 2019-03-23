@@ -5,6 +5,7 @@
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <mjolnir/math/vector_util.hpp>
 #include <mjolnir/input/read_files_table.hpp>
 
 namespace mjolnir
@@ -93,7 +94,7 @@ System<traitsT> read_system_from_table(const toml::value& system)
                           toml::expect<vec_type>(p, "position")).unwrap();
         sys[i].velocity = toml::expect<vec_type>(p, "vel").or_other(
                           toml::expect<vec_type>(p, "velocity")).unwrap();
-        sys[i].force    = coordinate_type(0, 0, 0);
+        sys[i].force    = math::make_coordinate<coordinate_type>(0, 0, 0);
         sys[i].name     = toml::expect<std::string>(p, "name").unwrap_or("X");
         sys[i].group    = toml::expect<std::string>(p, "group").unwrap_or("NONE");
 

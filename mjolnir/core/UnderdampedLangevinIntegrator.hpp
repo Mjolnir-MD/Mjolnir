@@ -67,9 +67,10 @@ class UnderdampedLangevinIntegrator
 
     coordinate_type gen_gaussian_vec(const real_type coef)
     {
-        return coordinate_type(this->rng_.gaussian(0.0, coef),
-                               this->rng_.gaussian(0.0, coef),
-                               this->rng_.gaussian(0.0, coef));
+        return math::make_coordinate<coordinate_type>(
+                this->rng_.gaussian(0, coef),
+                this->rng_.gaussian(0, coef),
+                this->rng_.gaussian(0, coef));
     }
 
   private:
@@ -93,7 +94,7 @@ void UnderdampedLangevinIntegrator<traitsT>::initialize(
     this->update(system);
     for(std::size_t i=0; i<system.size(); ++i)
     {
-        system.force(i) = coordinate_type(0, 0, 0);
+        system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
     }
 
     // calculate force
@@ -137,7 +138,7 @@ UnderdampedLangevinIntegrator<traitsT>::step(
              one_minus_gamma_dt_over_2 + gamma_dt_over_2);
         v += (halfdt_ * one_minus_gamma_dt_over_2) * a;
 
-        f = coordinate_type(0, 0, 0);
+        f = math::make_coordinate<coordinate_type>(0, 0, 0);
 
         largest_disp2 = std::max(largest_disp2, math::length_sq(displacement));
     }

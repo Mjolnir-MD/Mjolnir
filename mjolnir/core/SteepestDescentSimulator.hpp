@@ -90,7 +90,7 @@ inline bool SteepestDescentSimulator<traitsT>::step()
 
         max_disp2 = std::max(max_disp2, math::length_sq(disp));
         system_[i].position = system_.adjust_position(system_[i].position + disp);
-        system_[i].force    = coordinate_type(0, 0, 0);
+        system_[i].force    = math::make_coordinate<coordinate_type>(0, 0, 0);
     }
 
     if(max_diff < this->threshold_)
