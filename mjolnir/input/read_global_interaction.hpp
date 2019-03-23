@@ -2,9 +2,9 @@
 #define MJOLNIR_READ_GLOBAL_INTERACTION_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/interaction/GlobalPairInteraction.hpp>
-#include <mjolnir/interaction/specialization/GlobalPairLennardJonesInteraction.hpp>
-#include <mjolnir/interaction/specialization/GlobalPairUniformLennardJonesInteraction.hpp>
-#include <mjolnir/interaction/specialization/GlobalPairExcludedVolumeInteraction.hpp>
+#include <mjolnir/interaction/GlobalPairLennardJonesInteraction.hpp>
+#include <mjolnir/interaction/GlobalPairUniformLennardJonesInteraction.hpp>
+#include <mjolnir/interaction/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
