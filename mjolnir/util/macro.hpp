@@ -13,6 +13,5 @@
 #else
 #  define MJOLNIR_FUNC_NAME __func__
 #endif
-// #endif
 
 #endif // MJOLNIR_UTIL_MACRO_HPP

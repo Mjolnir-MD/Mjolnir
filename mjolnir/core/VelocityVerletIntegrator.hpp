@@ -49,7 +49,7 @@ void VelocityVerletIntegrator<traitsT>::initialize(
 
     for(std::size_t i=0; i<system.size(); ++i)
     {
-        system[i].force = coordinate_type(real_type(0.0), real_type(0.0), real_type(0.0));
+        system[i].force = math::make_coordinate<coordinate_type>(0, 0, 0);
     }
     ff.calc_force(system);
     return;
@@ -70,7 +70,7 @@ VelocityVerletIntegrator<traitsT>::step(
         const auto disp = dt_ * pv.velocity;
 
         pv.position = system.adjust_position(pv.position + disp);
-        pv.force    = coordinate_type(real_type(0.0), real_type(0.0), real_type(0.0));
+        pv.force    = math::make_coordinate<coordinate_type>(0, 0, 0);
 
         largest_disp2 = std::max(largest_disp2, math::length_sq(disp));
     }

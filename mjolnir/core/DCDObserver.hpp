@@ -203,9 +203,9 @@ class DCDObserver final : public ObserverBase<traitsT>
         const CuboidalPeriodicBoundary<real_type, coordinate_type>& boundary) noexcept
     {
         // unit cell length
-        const double A = boundary.width()[0];
-        const double B = boundary.width()[1];
-        const double C = boundary.width()[2];
+        const double A = math::X(boundary.width());
+        const double B = math::Y(boundary.width());
+        const double C = math::Z(boundary.width());
 
         // angles are always 90 degree because it's cuboid.
         // for earlier versions, it was a cosine value of the angle.

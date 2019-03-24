@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_BOUNDARY_CONDITION
 #define MJOLNIR_BOUNDARY_CONDITION
+#include <mjolnir/math/math.hpp>
 #include <cstddef>
 
 namespace mjolnir
@@ -37,23 +38,23 @@ struct CuboidalPeriodicBoundary
 
     coordinate_type adjust_direction(coordinate_type dr) const noexcept
     {
-        if     (dr[0] <  -halfw_[0]) {dr[0] += width_[0];}
-        else if(dr[0] >=  halfw_[0]) {dr[0] -= width_[0];}
-        if     (dr[1] <  -halfw_[1]) {dr[1] += width_[1];}
-        else if(dr[1] >=  halfw_[1]) {dr[1] -= width_[1];}
-        if     (dr[2] <  -halfw_[2]) {dr[2] += width_[2];}
-        else if(dr[2] >=  halfw_[2]) {dr[2] -= width_[2];}
+        if     (math::X(dr) < -math::X(halfw_)) {math::X(dr) += math::X(width_);}
+        else if(math::X(dr) >= math::X(halfw_)) {math::X(dr) -= math::X(width_);}
+        if     (math::Y(dr) < -math::Y(halfw_)) {math::Y(dr) += math::Y(width_);}
+        else if(math::Y(dr) >= math::Y(halfw_)) {math::Y(dr) -= math::Y(width_);}
+        if     (math::Z(dr) < -math::Z(halfw_)) {math::Z(dr) += math::Z(width_);}
+        else if(math::Z(dr) >= math::Z(halfw_)) {math::Z(dr) -= math::Z(width_);}
         return dr;
     }
 
     coordinate_type adjust_position(coordinate_type pos) const noexcept
     {
-        if     (pos[0] <  lower_[0]) {pos[0] += width_[0];}
-        else if(pos[0] >= upper_[0]) {pos[0] -= width_[0];}
-        if     (pos[1] <  lower_[1]) {pos[1] += width_[1];}
-        else if(pos[1] >= upper_[1]) {pos[1] -= width_[1];}
-        if     (pos[2] <  lower_[2]) {pos[2] += width_[2];}
-        else if(pos[2] >= upper_[2]) {pos[2] -= width_[2];}
+        if     (math::X(pos) <  math::X(lower_)) {math::X(pos) += math::X(width_);}
+        else if(math::X(pos) >= math::X(upper_)) {math::X(pos) -= math::X(width_);}
+        if     (math::Y(pos) <  math::Y(lower_)) {math::Y(pos) += math::Y(width_);}
+        else if(math::Y(pos) >= math::Y(upper_)) {math::Y(pos) -= math::Y(width_);}
+        if     (math::Z(pos) <  math::Z(lower_)) {math::Z(pos) += math::Z(width_);}
+        else if(math::Z(pos) >= math::Z(upper_)) {math::Z(pos) -= math::Z(width_);}
         return pos;
     }
 

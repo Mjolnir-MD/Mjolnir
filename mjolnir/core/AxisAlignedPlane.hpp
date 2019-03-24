@@ -20,7 +20,7 @@ class PositiveXDirection
     static constexpr std::size_t index = 0; // index in coordinate_type
     static constexpr real_type   sign  = 1.0;
     static coordinate_type invoke(const real_type length = 1.0) noexcept
-    {return coordinate_type(length, 0, 0);}
+    {return math::make_coordinate<coordinate_type>(length, 0, 0);}
 };
 template<typename T>
 constexpr std::size_t PositiveXDirection<T>::index;
@@ -38,7 +38,7 @@ class NegativeXDirection
     static constexpr std::size_t index =  0;
     static constexpr real_type   sign  = -1.0;
     static coordinate_type invoke(const real_type length = 1.0) noexcept
-    {return coordinate_type(-length, 0, 0);}
+    {return math::make_coordinate<coordinate_type>(-length, 0, 0);}
 };
 template<typename T>
 constexpr std::size_t NegativeXDirection<T>::index;
@@ -56,7 +56,7 @@ class PositiveYDirection
     static constexpr std::size_t index = 1; // index in coordinate_type
     static constexpr real_type   sign  = 1.0;
     static coordinate_type invoke(const real_type length = 1.0) noexcept
-    {return coordinate_type(0, length, 0);}
+    {return math::make_coordinate<coordinate_type>(0, length, 0);}
 };
 template<typename T>
 constexpr std::size_t PositiveYDirection<T>::index;
@@ -74,7 +74,7 @@ class NegativeYDirection
     static constexpr std::size_t index =  1;
     static constexpr real_type   sign  = -1.0;
     static coordinate_type invoke(const real_type length = 1.0) noexcept
-    {return coordinate_type(0, -length, 0);}
+    {return math::make_coordinate<coordinate_type>(0, -length, 0);}
 };
 template<typename T>
 constexpr std::size_t NegativeYDirection<T>::index;
@@ -92,7 +92,7 @@ class PositiveZDirection
     static constexpr std::size_t index = 2; // index in coordinate_type
     static constexpr real_type   sign  = 1.0;
     static coordinate_type invoke(const real_type length = 1.0) noexcept
-    {return coordinate_type(0, 0, length);}
+    {return math::make_coordinate<coordinate_type>(0, 0, length);}
 };
 template<typename T>
 constexpr std::size_t PositiveZDirection<T>::index;
@@ -110,7 +110,7 @@ class NegativeZDirection
     static constexpr std::size_t index =  2;
     static constexpr real_type   sign  = -1.0;
     static coordinate_type invoke(const real_type length = 1.0) noexcept
-    {return coordinate_type(0, 0, -length);}
+    {return math::make_coordinate<coordinate_type>(0, 0, -length);}
 };
 template<typename T>
 constexpr std::size_t NegativeZDirection<T>::index;
