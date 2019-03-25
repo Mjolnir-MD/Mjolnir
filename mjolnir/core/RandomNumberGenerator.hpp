@@ -16,14 +16,21 @@ class RandomNumberGenerator
 
   public:
     RandomNumberGenerator(const std::uint32_t seed)
-        : seed_(seed), rng_(seed), uni_(0.0, 1.0), nrm_(0.0, 1.0)
+        : seed_(seed), rng_(seed), nrm_(0.0, 1.0)
     {}
     ~RandomNumberGenerator() = default;
 
+    real_type uniform_real01()
+    {
+        return std::generate_canonical<
+            real_type, std::numeric_limits<real_type>::digits
+            >(this->rng_);
+    }
     real_type uniform_real(const real_type min, const real_type max)
     {
-        return this->uni_(this->rng_) * (max - min) + min;
+        return this->uniform_real01() * (max - min) + min;
     }
+
     real_type gaussian(const real_type mean, const real_type stddev)
     {
         return this->nrm_(this->rng_) * stddev + mean;
@@ -32,8 +39,7 @@ class RandomNumberGenerator
   private:
     const std::uint32_t seed_;
     std::mt19937        rng_;
-    std::uniform_real_distribution<real_type> uni_;
-    std::normal_distribution<real_type>       nrm_;
+    std::normal_distribution<real_type> nrm_;
 };
 
 } // mjolnir
