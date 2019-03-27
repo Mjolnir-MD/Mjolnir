@@ -19,7 +19,7 @@ namespace mjolnir
 {
 
 // google with "empty base optimization(EBO)".
-// by using EBO, it compress the object size when `paramT` is a empty class.
+// By using EBO, we can compress the object size when `paramT` is a empty class.
 // without this, empty parameter type consumes 8 byte (on x86_64) because
 // std::size_t requires 8-byte alignment.
 
@@ -86,8 +86,12 @@ struct neighbor_element
     parameter_type const& parameter() const noexcept {return base_type::parameter();}
 
     std::size_t index;
+    // derived from neighbor_element_impl
+    // paramT param;
 };
 
+// Check the EBO works and the size of neighbor_element with empty class
+// is equal to the size of `std::size_t index;`.
 static_assert(sizeof(std::size_t) == sizeof(neighbor_element<empty_t>),
               "checking neighbor_element reduces size of empty object");
 
@@ -128,6 +132,9 @@ inline bool operator>=(
     return lhs.index >= rhs.index;
 }
 
+// ----------------------------------------------------------------------------
+// neighbor list
+
 template<typename parameterT>
 class NeighborList
 {
@@ -137,9 +144,35 @@ class NeighborList
     using container_type = std::vector<neighbor_type>;
     using range_type     = range<typename container_type::const_iterator>;
 
+    // XXX this contains the list in the following way.
+    //
+    // 1. The neighboring list that has interaction partners of each particle
+    //    and the parameter for each pairs (e.g. `q_i*q_j` for electrostatics).
+    //
+    //  __partner of p1__ __partner of p2___________ ____ ... pN__
+    // '                 '                          '             '
+    // |{p2,q12}|{p3,q13}|{p4,q24}|{p6,q26}|{p7,q27}|{    ...    }|
+    //   0th      1st      2nd      3rd      4th      5th ... M-1 th element
+    //
+    // 2. The range list that contains from where to where the partners are
+    //    contained.
+    //  +---- partner of p1 starts from 0th element of the above array
+    //  | +-- partner of p2 starts from 2nd element of the above array
+    //  v v
+    // |0|2|5|...|M|
+    //    ^ ^     ^
+    //    +-+-----+-- the last partner of p1 is 2-1 = 1.
+    //      +-----+-- the last pertner of p2 is 5-1 = 4.
+    //            +-- the last element of pN is M-1.
+    //
+    // This list should have N+1 elements because i-th and (i+1)-th elements of 
+    // the list is needed to obtain the partner.
+    //
+    // By doing this, we can reduce the memory resource to have the list.
+
   public:
 
-    NeighborList() = default;
+    NeighborList()  = default;
     ~NeighborList() = default;
     NeighborList(const NeighborList&) = default;
     NeighborList(NeighborList&&)      = default;
@@ -149,29 +182,39 @@ class NeighborList
     void clear()
     {
         this->neighbors_.clear();
-        this->ranges_.clear();
+        this->ranges_   .clear();
         return;
     }
 
     void reserve(std::size_t Nparticle, std::size_t Nneighbor)
     {
         this->neighbors_.reserve(Nparticle * Nneighbor);
-        this->ranges_   .reserve(Nparticle);
+        this->ranges_   .reserve(Nparticle + 1);
         return;
     }
 
+    // assign the partners in range [first, last) as the partner of particle i.
     template<typename Iterator>
     void add_list_for(const std::size_t i, Iterator first, Iterator last)
     {
-        if(this->ranges_.size() <= i)
-        {
-            this->ranges_.resize(i+1, {0,0});
-        }
-        ranges_[i].first  = neighbors_.size();
-        ranges_[i].second = neighbors_.size() + std::distance(first, last);
+        static_assert(std::is_same<
+            typename std::iterator_traits<Iterator>::value_type, neighbor_type
+            >::value, "The iterator must points neighbor type.");
 
-        // this might break iterator.
-        // this->ranges_ cannot contain pair of iteraor but indices.
+        if(this->ranges_.size() <= i+1)
+        {
+            this->ranges_.resize(i+2, 0);
+        }
+        this->ranges_[i]   = this->neighbors_.size();
+        this->ranges_[i+1] = this->neighbors_.size() + std::distance(first, last);
+
+        // allcoate if the current size is not enough.
+        // XXX
+        // This invalidates iterators because of the re-allocation.
+        // So the `ranges_` cannot have iterators.
+        // The elements of `ranges_` must be indices.
+        this->neighbors_.reserve(neighbors_.size() + std::distance(first, last));
+
         std::copy(first, last, std::back_inserter(this->neighbors_));
         return ;
     }
@@ -179,22 +222,21 @@ class NeighborList
     range_type operator[](const std::size_t i) const noexcept
     {
         return range_type{
-            this->neighbors_.begin() + this->ranges_[i].first,
-            this->neighbors_.begin() + this->ranges_[i].second
+            this->neighbors_.begin() + this->ranges_[i],
+            this->neighbors_.begin() + this->ranges_[i+1]
         };
     }
     range_type at(const std::size_t i) const
     {
         return range_type{
-            this->neighbors_.begin() + this->ranges_.at(i).first,
-            this->neighbors_.begin() + this->ranges_.at(i).second
+            this->neighbors_.begin() + this->ranges_.at(i),
+            this->neighbors_.begin() + this->ranges_.at(i+1)
         };
     }
 
   private:
-    container_type neighbors_;
-    std::vector<std::pair<std::size_t, std::size_t>> ranges_;
-    // consider to use flat_map when a few particle interacts?
+    container_type           neighbors_;
+    std::vector<std::size_t> ranges_;
 };
 
 } // mjolnir
