@@ -29,17 +29,23 @@ read_ignored_molecule(const toml::value& ignored_mol)
     {
         MJOLNIR_LOG_INFO("all the interactions"
                          "(both (inter|intra)-molecule) are included");
-        return make_unique<IgnoreNothing<typename Topology::molecule_id_type>>();
+        return IgnoreMolecule<typename Topology::molecule_id_type>{
+            make_unique<IgnoreNothing<typename Topology::molecule_id_type>>()
+        };
     }
     else if(name == "Self" || name == "Intra")
     {
         MJOLNIR_LOG_INFO("intra-molecule interaction is ignored");
-        return make_unique<IgnoreSelf<typename Topology::molecule_id_type>>();
+        return IgnoreMolecule<typename Topology::molecule_id_type>{
+            make_unique<IgnoreSelf<typename Topology::molecule_id_type>>()
+        };
     }
     else if(name == "Others" || name == "Inter")
     {
         MJOLNIR_LOG_INFO("inter-molecule interaction is ignored");
-        return make_unique<IgnoreOthers<typename Topology::molecule_id_type>>();
+        return IgnoreMolecule<typename Topology::molecule_id_type>{
+            make_unique<IgnoreOthers<typename Topology::molecule_id_type>>()
+        };
     }
     else
     {
