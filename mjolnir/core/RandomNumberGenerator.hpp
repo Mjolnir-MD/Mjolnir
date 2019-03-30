@@ -15,7 +15,7 @@ class RandomNumberGenerator
     using coordinate_type = typename traits_type::coordinate_type;
 
   public:
-    RandomNumberGenerator(const std::uint32_t seed)
+    explicit RandomNumberGenerator(const std::uint32_t seed)
         : seed_(seed), rng_(seed), nrm_(0.0, 1.0)
     {}
     ~RandomNumberGenerator() = default;

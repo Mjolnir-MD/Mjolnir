@@ -69,7 +69,6 @@ class GlobalPairInteraction<traitsT,
     {
         constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
         constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-        const     auto& param           = potential_.parameters();
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             for(const auto& ptnr : this->partition_.partners(i))
@@ -107,7 +106,6 @@ class GlobalPairInteraction<traitsT,
         constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
         constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
         constexpr auto  coef_at_cutoff  = potential_type::coef_at_cutoff;
-        const     auto& param           = potential_.parameters();
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             for(const auto& ptnr : this->partition_.partners(i))

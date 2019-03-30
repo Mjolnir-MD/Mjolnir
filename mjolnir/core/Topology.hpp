@@ -58,7 +58,7 @@ class Topology
     Topology& operator=(const Topology&) = default;
     Topology& operator=(Topology&&)      = default;
 
-    Topology(const std::size_t N)
+    explicit Topology(const std::size_t N)
         : nodes_(N, {uninitialized, "uninitialized", {}})
     {}
 

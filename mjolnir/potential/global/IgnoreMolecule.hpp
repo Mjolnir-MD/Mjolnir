@@ -70,13 +70,13 @@ struct IgnoreOthers: public IgnoreMoleculeBase<MoleculeID>
 template<typename MoleculeID>
 struct IgnoreMolecule
 {
-    IgnoreMolecule(const std::string& name): ignore_mol_(nullptr)
+    explicit IgnoreMolecule(const std::string& name): ignore_mol_(nullptr)
     {
         this->reset(name);
     }
 
     template<typename IgnoreSomething>
-    IgnoreMolecule(std::unique_ptr<IgnoreSomething>&& ptr)
+    explicit IgnoreMolecule(std::unique_ptr<IgnoreSomething>&& ptr)
         : ignore_mol_(std::move(ptr))
     {}
     ~IgnoreMolecule() = default;
