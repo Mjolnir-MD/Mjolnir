@@ -27,7 +27,7 @@ class VerletList
 
   public:
     VerletList() : margin_(0.5), current_margin_(-1.0){}
-    VerletList(const real_type mgn): margin_(mgn), current_margin_(-1.0){}
+    explicit VerletList(const real_type mgn): margin_(mgn), current_margin_(-1.0){}
 
     ~VerletList() = default;
     VerletList(VerletList const&) = default;

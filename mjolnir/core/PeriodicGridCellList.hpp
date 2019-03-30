@@ -42,7 +42,8 @@ class PeriodicGridCellList
   public:
 
     PeriodicGridCellList()
-        : margin_(1), current_margin_(-1), r_x_(-1), r_y_(-1), r_z_(-1)
+        : cutoff_(0), margin_(1), current_margin_(-1),
+          r_x_(-1), r_y_(-1), r_z_(-1), dim_x_(0), dim_y_(0), dim_z_(0),
     {}
     ~PeriodicGridCellList() = default;
     PeriodicGridCellList(PeriodicGridCellList const&) = default;
@@ -50,8 +51,9 @@ class PeriodicGridCellList
     PeriodicGridCellList& operator=(PeriodicGridCellList const&) = default;
     PeriodicGridCellList& operator=(PeriodicGridCellList &&)     = default;
 
-    PeriodicGridCellList(const real_type margin)
-        : margin_(margin), current_margin_(-1), r_x_(-1), r_y_(-1), r_z_(-1)
+    explicit PeriodicGridCellList(const real_type margin)
+        : cutoff_(0), margin_(margin), current_margin_(-1),
+          r_x_(-1), r_y_(-1), r_z_(-1), dim_x_(0), dim_y_(0), dim_z_(0),
     {}
 
     bool valid() const noexcept

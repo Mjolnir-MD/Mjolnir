@@ -19,7 +19,7 @@ class VelocityVerletIntegrator
 
   public:
 
-    VelocityVerletIntegrator(const real_type dt) noexcept
+    explicit VelocityVerletIntegrator(const real_type dt) noexcept
         : dt_(dt), halfdt_(dt / 2)
     {}
     ~VelocityVerletIntegrator() = default;

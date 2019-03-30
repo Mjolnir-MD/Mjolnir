@@ -53,7 +53,7 @@ class UnlimitedGridCellList
     UnlimitedGridCellList& operator=(UnlimitedGridCellList const&) = default;
     UnlimitedGridCellList& operator=(UnlimitedGridCellList &&)     = default;
 
-    UnlimitedGridCellList(const real_type margin)
+    explicit UnlimitedGridCellList(const real_type margin)
         : margin_(margin), current_margin_(-1.0), r_cell_size_(-1.0)
     {}
 

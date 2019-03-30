@@ -30,7 +30,7 @@ class progress_bar
         buffer_.fill('\0');
         buffer_.front() = '\r';
     }
-    progress_bar(std::size_t tot) : total_(tot), r_total_(1.0 / tot)
+    explicit progress_bar(std::size_t tot) : total_(tot), r_total_(1.0 / tot)
     {
         buffer_.fill('\0');
         buffer_.front() = '\r';
