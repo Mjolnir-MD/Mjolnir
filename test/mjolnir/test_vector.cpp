@@ -185,6 +185,26 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_len, Real, test_targets)
     }
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_rlen, Real, test_targets)
+{
+    using namespace mjolnir;
+    using mjolnir::math::X;
+    using mjolnir::math::Y;
+    using mjolnir::math::Z;
+
+    std::mt19937 mt(seed);
+    std::uniform_real_distribution<Real> uni(-1.0, 1.0);
+
+    for(std::size_t test_times=0; test_times<N; ++test_times)
+    {
+        const math::Vector<Real, 3> lhs(uni(mt), uni(mt), uni(mt));
+        const Real len  = math::length(lhs);
+        const Real rlen = math::rlength(lhs);
+        BOOST_TEST(rlen * len == Real(1.0), test::tolerance<Real>());
+        BOOST_TEST(rlen == Real(1) / len,   test::tolerance<Real>());
+    }
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_cross_product, Real, test_targets)
 {
     using namespace mjolnir;
