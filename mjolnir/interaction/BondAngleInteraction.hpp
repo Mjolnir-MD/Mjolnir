@@ -99,7 +99,7 @@ BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const no
         const coordinate_type r_kj =
             sys.adjust_direction(sys[idx2].position - sys[idx1].position);
 
-        const real_type       inv_len_r_kj = math::rlength_sq(r_kj);
+        const real_type       inv_len_r_kj = math::rlength(r_kj);
         const coordinate_type r_kj_reg     = r_kj * inv_len_r_kj;
 
         const real_type dot_ijk   = math::dot_product(r_ij_reg, r_kj_reg);
