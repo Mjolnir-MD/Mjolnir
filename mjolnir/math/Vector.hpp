@@ -85,6 +85,13 @@ inline realT length(const Vector<realT, 3>& lhs) noexcept
     return std::sqrt(length_sq(lhs));
 }
 
+template<typename realT>
+inline realT rlength(const Vector<realT, 3>& lhs) noexcept
+{
+    return ::mjolnir::math::rsqrt(length_sq(lhs));
+}
+
+
 } // math
 } // mjolnir
 #endif /* MJOLNIR_VECTOR */

@@ -85,13 +85,15 @@ void GlobalPairInteraction<traitsT, potT, spaceT>::calc_force(
 
             const coordinate_type rij =
                 sys.adjust_direction(sys[j].position - sys[i].position);
-            const real_type l = math::length(rij);
+            const real_type l2 = math::length_sq(rij); // |rij|^2
+            const real_type rl = math::rsqrt(l2);      // 1 / |rij|
+            const real_type l  = l2 * rl;              // |rij|^2 / |rij|
             const real_type f_mag = potential_.derivative(l, param);
 
             // if length exceeds cutoff, potential returns just 0.
             if(f_mag == 0.0){continue;}
 
-            const coordinate_type f = rij * (f_mag / l);
+            const coordinate_type f = rij * (f_mag * rl);
             sys[i].force += f;
             sys[j].force -= f;
         }

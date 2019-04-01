@@ -90,9 +90,9 @@ class GlobalPairInteraction<
 
                 MJOLNIR_LOG_DEBUG("calculating force between ", i, " and ", j);
 
-                const real_type rcp_l_sq = 1 / l_sq;
-                const real_type s2l2   = sigma_sq * rcp_l_sq;
-                const real_type s6l6   = s2l2 * s2l2 * s2l2;
+                const real_type rcp_l_sq = real_type(1) / l_sq;
+                const real_type s2l2     = sigma_sq * rcp_l_sq;
+                const real_type s6l6     = s2l2 * s2l2 * s2l2;
 
                 const coordinate_type f = rij *
                     (-epsilon12 * s6l6 * s6l6 * rcp_l_sq);
