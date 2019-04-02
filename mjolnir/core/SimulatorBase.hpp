@@ -11,6 +11,7 @@ class SimulatorBase
 
     virtual void initialize() = 0;
     virtual bool step()       = 0;
+    virtual void run()        = 0;
     virtual void finalize()   = 0;
 };
 

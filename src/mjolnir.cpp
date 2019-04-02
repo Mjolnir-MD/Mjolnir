@@ -19,7 +19,7 @@ int main(int argc, char** argv)
     const auto start = std::chrono::system_clock::now();
     std::cerr << "start running simulation" << std::endl;
 
-    while(simulator->step()){/* do nothing */;}
+    simulator->run();
 
     simulator->finalize();
 

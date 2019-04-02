@@ -64,6 +64,7 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
 
     void initialize() override;
     bool step()       override;
+    void run()        override;
     void finalize()   override;
 
     real_type calc_energy() const {return this->ff_.calc_energy(this->system_);}
@@ -136,6 +137,20 @@ inline bool SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::step()
     this->integrator_.update(system_);
 
     return step_count_ < total_step_;
+}
+
+template<typename traitsT, typename integratorT, template<typename> class scheduleT>
+inline void SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::run()
+{
+    MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+    MJOLNIR_LOG_FUNCTION_DEBUG();
+
+    for(std::size_t i=0; i<total_step_; ++i)
+    {
+        this->step();
+    }
+    assert(this->step_count_ == total_step_);
+    return;
 }
 
 template<typename traitsT, typename integratorT,
