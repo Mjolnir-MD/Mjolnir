@@ -32,6 +32,7 @@ class SteepestDescentSimulator final : public SimulatorBase
 
     void initialize() override;
     bool step()       override;
+    void run()        override;
     void finalize()   override;
 
     real_type calc_energy() const {return this->ff_.calc_energy(this->system_);}
@@ -103,6 +104,13 @@ inline bool SteepestDescentSimulator<traitsT>::step()
 
     ++step_count_;
     return this->step_count_ < this->step_limit_;
+}
+
+template<typename traitsT>
+inline void SteepestDescentSimulator<traitsT>::run()
+{
+    while(this->step()){/* do nothing */;}
+    return;
 }
 
 template<typename traitsT>

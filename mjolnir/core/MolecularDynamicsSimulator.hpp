@@ -32,6 +32,7 @@ class MolecularDynamicsSimulator final : public SimulatorBase
 
     void initialize() override;
     bool step()       override;
+    void run()        override;
     void finalize()   override;
 
     real_type calc_energy() const {return this->ff_.calc_energy(this->system_);}
@@ -81,6 +82,17 @@ inline bool MolecularDynamicsSimulator<traitsT, integratorT>::step()
     this->time_ = this->step_count_ * integrator_.delta_t();
 
     return step_count_ < total_step_;
+}
+
+template<typename traitsT, typename integratorT>
+inline void MolecularDynamicsSimulator<traitsT, integratorT>::run()
+{
+    for(std::size_t i=0; i<total_step_; ++i)
+    {
+        this->step();
+    }
+    assert(this->step_count_ == total_step_);
+    return;
 }
 
 template<typename traitsT, typename integratorT>
