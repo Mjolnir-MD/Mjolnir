@@ -79,14 +79,19 @@ before_install:
     tar xf cmake-3.11.2-Linux-x86_64.tar.gz -C cmake --strip-components=1
     export PATH=${TRAVIS_BUILD_DIR}/cmake/bin:${PATH}
   else
-    brew install cmake
-    brew upgrade cmake
+    brew install cmake boost
+    brew upgrade cmake boost
   fi
 - cmake --version
 
 script:
 - mkdir build
 - cd build
-- cmake -DCMAKE_CXX_COMPILER=$COMPILER ..
+- |
+  if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+    cmake -DCMAKE_CXX_COMPILER=$COMPILER ..
+  else
+    cmake -DCMAKE_CXX_COMPILER=$COMPILER -DBOOST_ROOT=/usr/local/Cellar/boost/1.69.0/ ..
+  fi
 - make
 - ctest --output-on-failure
