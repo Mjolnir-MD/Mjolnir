@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_UTIL_ALIGNED_STORAGE_HPP
 #define MJOLNIR_UTIL_ALIGNED_STORAGE_HPP
 #include <type_traits>
+#include <utility>
 #include <array>
 #include <cstdint>
 
@@ -49,6 +50,9 @@ struct alignas(Align) aligned_storage
 
 static_assert(alignof(aligned_storage<std::int32_t, 64>) == 64, "");
 static_assert(sizeof (aligned_storage<std::int32_t, 64>) == 64, "");
+
+static_assert(alignof(aligned_storage<std::pair<std::int32_t, std::int64_t>, 64>) == 64, "");
+static_assert(sizeof (aligned_storage<std::pair<std::int32_t, std::int64_t>, 64>) == 64, "");
 
 } // mjolnir
 #endif// MJOLNIR_UTIL_ALIGNED_STORAGE_HPP
