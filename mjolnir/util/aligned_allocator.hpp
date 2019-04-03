@@ -139,7 +139,7 @@ class aligned_allocator
     aligned_allocator& operator=(const aligned_allocator&) noexcept = default;
 
     template<typename U, std::size_t B>
-    aligned_allocator(const aligned_allocator<U, B>&) noexcept {}
+    explicit aligned_allocator(const aligned_allocator<U, B>&) noexcept {}
     template<typename U, std::size_t B>
     aligned_allocator& operator=(const aligned_allocator<U, B>&) noexcept
     {return *this;}
