@@ -8,7 +8,7 @@
 namespace mjolnir
 {
 
-template<typename T, std::size_t Align = 64>
+template<typename T, std::size_t Align>
 struct alignas(Align) aligned_storage
 {
   public:
