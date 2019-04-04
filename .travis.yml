@@ -104,7 +104,7 @@ script:
 - cd build
 - |
   if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-    cmake -DCMAKE_CXX_COMPILER=$COMPILER -FIND_BOOST=ON ..
+    cmake -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON ..
   else
     cmake -DCMAKE_CXX_COMPILER=$COMPILER -DBOOST_ROOT=/usr/local/Cellar/boost/1.67.0_1/ ..
   fi
