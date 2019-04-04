@@ -247,7 +247,7 @@ class basic_logger
         os << arg1;
         return output_message(os, std::forward<T_args>(args)...);
     }
-    static void output_message(ostream_type& os) {return;}
+    static void output_message(ostream_type&) {return;}
 
   private:
 
