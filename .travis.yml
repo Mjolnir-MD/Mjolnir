@@ -9,63 +9,81 @@ matrix:
     env: COMPILER="g++-7"
     addons:
       apt:
+        update: true
         sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
         packages:
         - g++-7
+        - boost1.68
   - os: linux
     language: cpp
     compiler: gcc
     env: COMPILER="g++-6"
     addons:
       apt:
+        update: true
         sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
         packages:
         - g++-6
+        - boost1.68
   - os: linux
     language: cpp
     compiler: gcc
     env: COMPILER="g++-5"
     addons:
       apt:
+        update: true
         sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
         packages:
         - g++-5
+        - boost1.68
   - os: linux
     language: cpp
     compiler: clang
     env: COMPILER="clang++-7"
     addons:
       apt:
+        update: true
         sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
         - llvm-toolchain-trusty-7
         packages:
         - clang-7
+        - boost1.68
   - os: linux
     language: cpp
     compiler: clang
     env: COMPILER="clang++-6.0"
     addons:
       apt:
+        update: true
         sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
         - llvm-toolchain-trusty-6.0
         packages:
         - clang-6.0
+        - boost1.68
   - os: linux
     language: cpp
     compiler: clang
     env: COMPILER="clang++-5.0"
     addons:
       apt:
+        update: true
         sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
         - llvm-toolchain-trusty-5.0
         packages:
         - clang-5.0
+        - boost1.68
   - os: osx
     language: cpp
     compiler: clang
@@ -86,7 +104,7 @@ script:
 - cd build
 - |
   if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-    cmake -DCMAKE_CXX_COMPILER=$COMPILER ..
+    cmake -DCMAKE_CXX_COMPILER=$COMPILER -FIND_BOOST=ON ..
   else
     cmake -DCMAKE_CXX_COMPILER=$COMPILER -DBOOST_ROOT=/usr/local/Cellar/boost/1.67.0_1/ ..
   fi
