@@ -1,7 +1,12 @@
 #define BOOST_TEST_MODULE "test_vector"
 
-#include <boost/mpl/list.hpp>
+#ifdef BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#else
 #include <boost/test/included/unit_test.hpp>
+#endif
+
+#include <boost/mpl/list.hpp>
 #include <mjolnir/math/Vector.hpp>
 
 #include <random>

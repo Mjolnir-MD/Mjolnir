@@ -1,6 +1,10 @@
 #define BOOST_TEST_MODULE "test_read_simulator"
 
+#ifdef BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#else
 #include <boost/test/included/unit_test.hpp>
+#endif
 #include <test/util/make_empty_input.hpp>
 #include <mjolnir/input/read_simulator.hpp>
 

@@ -1,6 +1,11 @@
 #define BOOST_TEST_MODULE "test_flexible_local_dihedral_potential"
 
+#ifdef BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#else
 #include <boost/test/included/unit_test.hpp>
+#endif
+
 #include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
 #include <mjolnir/math/constants.hpp>
 

@@ -1,6 +1,11 @@
 #define BOOST_TEST_MODULE "test_gocontact_potential"
 
+#ifdef BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#else
 #include <boost/test/included/unit_test.hpp>
+#endif
+
 #include <mjolnir/potential/local/GoContactPotential.hpp>
 
 BOOST_AUTO_TEST_CASE(GoContact_double)
