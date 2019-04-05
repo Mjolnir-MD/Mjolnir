@@ -26,9 +26,10 @@ if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/toml/toml.hpp")
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()
 
-if(BOOST_ROOT)
+option(FIND_BOOST "find boost library" OFF)
+if(BOOST_ROOT OR FIND_BOOST)
     # if BOOST_ROOT is manually defined, use the library.
-    find_package(Boost 1.67.0 REQUIRED)
+    find_package(Boost 1.67.0 REQUIRED COMPONENTS unit_test_framework)
     include_directories(${Boost_INCLUDE_DIRS})
 else()
     if(EXISTS "${PROJECT_SOURCE_DIR}/extlib/boost_1_69_0/boost/version.hpp")

@@ -9,63 +9,81 @@ matrix:
     env: COMPILER="g++-7"
     addons:
       apt:
+        update: true
         sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
         packages:
         - g++-7
+        - boost1.68
   - os: linux
     language: cpp
     compiler: gcc
     env: COMPILER="g++-6"
     addons:
       apt:
+        update: true
         sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
         packages:
         - g++-6
+        - boost1.68
   - os: linux
     language: cpp
     compiler: gcc
     env: COMPILER="g++-5"
     addons:
       apt:
+        update: true
         sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
         packages:
         - g++-5
+        - boost1.68
   - os: linux
     language: cpp
     compiler: clang
     env: COMPILER="clang++-7"
     addons:
       apt:
+        update: true
         sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
         - llvm-toolchain-trusty-7
         packages:
         - clang-7
+        - boost1.68
   - os: linux
     language: cpp
     compiler: clang
     env: COMPILER="clang++-6.0"
     addons:
       apt:
+        update: true
         sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
         - llvm-toolchain-trusty-6.0
         packages:
         - clang-6.0
+        - boost1.68
   - os: linux
     language: cpp
     compiler: clang
     env: COMPILER="clang++-5.0"
     addons:
       apt:
+        update: true
         sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
         - llvm-toolchain-trusty-5.0
         packages:
         - clang-5.0
+        - boost1.68
   - os: osx
     language: cpp
     compiler: clang
@@ -78,15 +96,17 @@ before_install:
     travis_retry wget "https://cmake.org/files/v3.11/cmake-3.11.2-Linux-x86_64.tar.gz"
     tar xf cmake-3.11.2-Linux-x86_64.tar.gz -C cmake --strip-components=1
     export PATH=${TRAVIS_BUILD_DIR}/cmake/bin:${PATH}
-  else
-    brew install cmake
-    brew upgrade cmake
   fi
 - cmake --version
 
 script:
 - mkdir build
 - cd build
-- cmake -DCMAKE_CXX_COMPILER=$COMPILER ..
+- |
+  if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+    cmake -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON ..
+  else
+    cmake -DCMAKE_CXX_COMPILER=$COMPILER -DBOOST_ROOT=/usr/local/Cellar/boost/1.67.0_1/ ..
+  fi
 - make
 - ctest --output-on-failure

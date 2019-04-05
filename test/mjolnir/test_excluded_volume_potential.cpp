@@ -1,6 +1,11 @@
 #define BOOST_TEST_MODULE "test_excluded_volume_potential"
 
+#ifdef BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#else
 #include <boost/test/included/unit_test.hpp>
+#endif
+
 #include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
 
 BOOST_AUTO_TEST_CASE(EXV_double)

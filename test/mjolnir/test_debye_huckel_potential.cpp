@@ -1,6 +1,11 @@
 #define BOOST_TEST_MODULE "test_debye_huckel_potential"
 
+#ifdef BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#else
 #include <boost/test/included/unit_test.hpp>
+#endif
+
 #include <test/util/traits.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>

@@ -1,5 +1,9 @@
 #define BOOST_TEST_MODULE "test_unit_conversion"
+#ifdef BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#else
 #include <boost/test/included/unit_test.hpp>
+#endif
 #include <boost/mpl/list.hpp>
 #include <test/util/make_empty_input.hpp>
 #include <test/util/traits.hpp>
