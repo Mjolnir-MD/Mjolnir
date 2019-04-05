@@ -1,6 +1,10 @@
 #define BOOST_TEST_MODULE "test_throw_exception"
 
+#ifdef BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#else
 #include <boost/test/included/unit_test.hpp>
+#endif
 #include <mjolnir/util/throw_exception.hpp>
 #include <stdexcept>
 

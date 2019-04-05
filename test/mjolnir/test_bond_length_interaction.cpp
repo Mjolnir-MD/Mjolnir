@@ -1,6 +1,11 @@
 #define BOOST_TEST_MODULE "test_bond_length_interaction"
 
+#ifdef BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#else
 #include <boost/test/included/unit_test.hpp>
+#endif
+
 #include <test/util/traits.hpp>
 #include <mjolnir/interaction/BondLengthInteraction.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>

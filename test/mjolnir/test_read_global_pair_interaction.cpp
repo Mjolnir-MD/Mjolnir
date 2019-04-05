@@ -1,6 +1,11 @@
 #define BOOST_TEST_MODULE "test_read_global_pair_interaction"
 
+#ifdef BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#else
 #include <boost/test/included/unit_test.hpp>
+#endif
+
 #include <mjolnir/input/read_global_interaction.hpp>
 
 BOOST_AUTO_TEST_CASE(read_global_pair_exv)

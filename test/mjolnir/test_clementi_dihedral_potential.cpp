@@ -1,5 +1,10 @@
 #define BOOST_TEST_MODULE "test_clementi_dihedral_potential"
+
+#ifdef BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#else
 #include <boost/test/included/unit_test.hpp>
+#endif
 
 #include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
 #include <mjolnir/math/constants.hpp>
