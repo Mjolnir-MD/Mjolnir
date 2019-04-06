@@ -17,7 +17,6 @@ std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
     MJOLNIR_LOG_FUNCTION();
     using real_type = typename traitsT::real_type;
     using phys_type = physics::constants<real_type>;
-    using math_type = math::constants<real_type>;
     using unit_type = unit::constants<real_type>;
 
     const auto& units  = toml::find<toml::value>(data,  "units");
