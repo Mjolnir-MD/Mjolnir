@@ -21,12 +21,8 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
     typedef traits::coordinate_type            coord_type;
     typedef traits::boundary_type              boundary_type;
     typedef mjolnir::System<traits>            system_type;
-    typedef system_type::particle_type         particle_type;
     typedef mjolnir::HarmonicPotential<real_type> harmonic_type;
     typedef mjolnir::DihedralAngleInteraction<traits, harmonic_type> dihedral_angle_type;
-    typedef dihedral_angle_type::connection_kind_type connection_kind_type;
-
-    auto normalize = [](const coord_type& v){return v / mjolnir::math::length(v);};
 
     const real_type k(1e0);
     const real_type native(mjolnir::math::constants<real_type>::pi * 2.0 / 3.0);
@@ -39,10 +35,37 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
     const coord_type pos3(0e0, 0e0, 0e0);
 
     system_type sys(4, boundary_type{});
-    sys.at(0) = {1.0, 1.0, pos1,              coord_type(0,0,0), coord_type(0,0,0)};
-    sys.at(1) = {1.0, 1.0, pos2,              coord_type(0,0,0), coord_type(0,0,0)};
-    sys.at(2) = {1.0, 1.0, pos3,              coord_type(0,0,0), coord_type(0,0,0)};
-    sys.at(3) = {1.0, 1.0, coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)};
+
+    sys.at(0).mass = 1.0;
+    sys.at(1).mass = 1.0;
+    sys.at(2).mass = 1.0;
+    sys.at(3).mass = 1.0;
+    sys.at(0).rmass = 1.0;
+    sys.at(1).rmass = 1.0;
+    sys.at(2).rmass = 1.0;
+    sys.at(3).rmass = 1.0;
+
+    sys.at(0).position = pos1;
+    sys.at(1).position = pos2;
+    sys.at(2).position = pos3;
+    sys.at(3).position = coord_type(0,0,0);
+    sys.at(0).velocity = coord_type(0,0,0);
+    sys.at(1).velocity = coord_type(0,0,0);
+    sys.at(2).velocity = coord_type(0,0,0);
+    sys.at(3).velocity = coord_type(0,0,0);
+    sys.at(0).force    = coord_type(0,0,0);
+    sys.at(1).force    = coord_type(0,0,0);
+    sys.at(2).force    = coord_type(0,0,0);
+    sys.at(3).force    = coord_type(0,0,0);
+
+    sys.at(0).name  = "X";
+    sys.at(1).name  = "X";
+    sys.at(2).name  = "X";
+    sys.at(3).name  = "X";
+    sys.at(0).group = "NONE";
+    sys.at(1).group = "NONE";
+    sys.at(2).group = "NONE";
+    sys.at(3).group = "NONE";
 
     const real_type dtheta = mjolnir::math::constants<real_type>::pi / 1800.0;
     for(int i = -1800; i < 1800; ++i)

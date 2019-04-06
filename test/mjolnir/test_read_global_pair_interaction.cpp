@@ -16,7 +16,6 @@ BOOST_AUTO_TEST_CASE(read_global_pair_exv)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     using potential_type = mjolnir::ExcludedVolumePotential<real_type>;
     using parameter_type = typename potential_type::parameter_type;
-    constexpr real_type tol = 1e-8;
     {
         const toml::table v = toml::table{
             {"interaction",       toml::value("Pair")},
@@ -50,7 +49,6 @@ BOOST_AUTO_TEST_CASE(read_global_pair_dh)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     using potential_type = mjolnir::DebyeHuckelPotential<real_type>;
     using parameter_type = typename potential_type::parameter_type;
-    constexpr real_type tol = 1e-8;
     {
         const toml::table v = toml::table{
             {"interaction",       toml::value("Pair")},
@@ -88,7 +86,6 @@ BOOST_AUTO_TEST_CASE(read_global_pair_lj)
     using potential_type = mjolnir::LennardJonesPotential<real_type>;
     using parameter_type = typename potential_type::parameter_type;
 
-    constexpr real_type tol = 1e-8;
     {
         const toml::table v = toml::table{
             {"interaction",       toml::value("Pair")},
@@ -127,7 +124,6 @@ BOOST_AUTO_TEST_CASE(read_global_pair_uni_lj)
     using potential_type = mjolnir::UniformLennardJonesPotential<real_type>;
     using parameter_type = typename potential_type::parameter_type;
 
-    constexpr real_type tol = 1e-8;
     {
         const toml::table v = toml::table{
             {"interaction",       toml::value("Pair")},

@@ -97,7 +97,6 @@ BOOST_AUTO_TEST_CASE(read_steepest_descent_simulator)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    constexpr real_type tol = 1e-8;
     auto root = mjolnir::test::make_empty_input();
     {
         const toml::table v{

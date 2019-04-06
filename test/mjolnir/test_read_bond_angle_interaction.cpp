@@ -15,7 +15,6 @@ BOOST_AUTO_TEST_CASE(read_bond_angle_harmonic)
 
     using real_type = double;
     using traits_type = mjolnir::test::traits<real_type>;
-    constexpr real_type tol = 1e-8;
     {
         const toml::table v = toml::table{
             {"interaction", toml::value("BondAngle")},
@@ -39,7 +38,6 @@ BOOST_AUTO_TEST_CASE(read_bond_angle_flexible_local)
 
     using real_type = double;
     using traits_type = mjolnir::test::traits<real_type>;
-    constexpr real_type tol = 1e-8;
     {
         const toml::table v = toml::table{
             {"interaction", toml::value("BondAngle")},
@@ -63,7 +61,6 @@ BOOST_AUTO_TEST_CASE(read_bond_angle_gaussian)
 
     using real_type = double;
     using traits_type = mjolnir::test::traits<real_type>;
-    constexpr real_type tol = 1e-8;
     {
         const toml::table v = toml::table{
             {"interaction", toml::value("BondAngle")},

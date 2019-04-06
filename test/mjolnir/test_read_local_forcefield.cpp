@@ -18,12 +18,11 @@ BOOST_AUTO_TEST_CASE(read_empty_local_forcefield)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    constexpr real_type tol = 1e-8;
     {
         const toml::array v{};
         const auto ff = mjolnir::read_local_forcefield<traits_type>(v, "./");
         BOOST_TEST(ff.empty());
-        BOOST_TEST(ff.size() == 0);
+        BOOST_TEST(ff.size() == 0u);
     }
 }
 
@@ -33,7 +32,6 @@ BOOST_AUTO_TEST_CASE(read_local_forcefield)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    constexpr real_type tol = 1e-8;
     {
         const toml::array v{
             toml::table{
@@ -46,7 +44,7 @@ BOOST_AUTO_TEST_CASE(read_local_forcefield)
 
         const auto lff = mjolnir::read_local_forcefield<traits_type>(v, "./");
         BOOST_TEST(!lff.empty());
-        BOOST_TEST(lff.size() == 1);
+        BOOST_TEST(lff.size() == 1u);
 
         const auto& interaction_ptr = *lff.begin();
         BOOST_TEST(static_cast<bool>(interaction_ptr));
@@ -64,7 +62,6 @@ BOOST_AUTO_TEST_CASE(read_several_local_forcefield)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    constexpr real_type tol = 1e-8;
     {
         const toml::array v{toml::table{
                 {"interaction", toml::value("BondAngle")},
@@ -81,7 +78,7 @@ BOOST_AUTO_TEST_CASE(read_several_local_forcefield)
 
         const auto lff = mjolnir::read_local_forcefield<traits_type>(v, "./");
         BOOST_TEST(!lff.empty());
-        BOOST_TEST(lff.size() == 2);
+        BOOST_TEST(lff.size() == 2u);
 
         using bond_length_interaction = mjolnir::BondLengthInteraction<
             traits_type, mjolnir::HarmonicPotential<real_type>>;

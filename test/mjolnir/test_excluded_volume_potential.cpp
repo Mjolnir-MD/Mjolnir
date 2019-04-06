@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(EXV_float)
         const real_type dpot = (pot1 - pot2) / (2 * h);
         const real_type deri = exv.derivative(0, 1, x);
 
-        BOOST_TEST(dpot == deri, boost::test_tools::tolerance(h));
+        BOOST_TEST(dpot == deri, boost::test_tools::tolerance(tol));
     }
 }
 

@@ -94,7 +94,6 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_geometry_periodic)
         const real_type  dist = xyplane.calc_distance(pos, bdry);
         const coord_type fdir = xyplane.calc_force_direction(pos, bdry);
 
-        const real_type sign = (pos[2] <= 50.0) ? 1.0    : -1.0;
         const real_type d    = (pos[2] <= 50.0) ? pos[2] : pos[2] - 100.0;
 
         BOOST_TEST(fdir[0] == 0.0, boost::test_tools::tolerance(tol));
@@ -133,13 +132,9 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_neighbors_unlimited)
 {
     mjolnir::LoggerManager::set_default_logger("test_AxisAlignedPlane");
     using traits = mjolnir::test::traits<double>;
-    using real_type     = typename traits::real_type;
     using coord_type    = typename traits::coordinate_type;
     using boundary_type = typename traits::boundary_type;
     using system_type   = mjolnir::System<traits>;
-    using particle_type = typename system_type::particle_type;
-
-    constexpr traits::real_type tol = 1e-8;
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<double> uni(-10, 10);

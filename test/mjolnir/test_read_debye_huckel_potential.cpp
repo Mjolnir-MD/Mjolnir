@@ -36,10 +36,10 @@ BOOST_AUTO_TEST_CASE(read_debye_huckel_double)
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
-        BOOST_TEST(g.ignore_within().size() == 2);
+        BOOST_TEST(g.ignore_within().size() == 2u);
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
-        BOOST_TEST(g.charges().size() == 2);
+        BOOST_TEST(g.charges().size() == 2u);
         BOOST_TEST(g.charges().at(0)  ==  1.0, boost::test_tools::tolerance(tol));
         BOOST_TEST(g.charges().at(1)  == -1.0, boost::test_tools::tolerance(tol));
     }
@@ -72,10 +72,10 @@ BOOST_AUTO_TEST_CASE(read_debye_huckel_float)
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
-        BOOST_TEST(g.ignore_within().size() == 2);
+        BOOST_TEST(g.ignore_within().size() == 2u);
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
-        BOOST_TEST(g.charges().size() == 2);
+        BOOST_TEST(g.charges().size() == 2u);
         BOOST_TEST(g.charges().at(0)  ==  1.0f, boost::test_tools::tolerance(tol));
         BOOST_TEST(g.charges().at(1)  == -1.0f, boost::test_tools::tolerance(tol));
     }

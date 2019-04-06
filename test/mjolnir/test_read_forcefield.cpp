@@ -13,7 +13,6 @@ BOOST_AUTO_TEST_CASE(read_empty_forcefield)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    constexpr real_type tol = 1e-8;
     {
         const toml::table v = toml::table{
             {"local",       toml::array{}},
@@ -23,9 +22,9 @@ BOOST_AUTO_TEST_CASE(read_empty_forcefield)
 
         const auto ff = mjolnir::read_forcefield_from_table<traits_type>(v, "./");
 
-        BOOST_TEST(ff.local().size()    == 0);
-        BOOST_TEST(ff.global().size()   == 0);
-        BOOST_TEST(ff.external().size() == 0);
+        BOOST_TEST(ff.local().size()    == 0u);
+        BOOST_TEST(ff.global().size()   == 0u);
+        BOOST_TEST(ff.external().size() == 0u);
     }
 }
 
@@ -35,7 +34,6 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    constexpr real_type tol = 1e-8;
     {
         const toml::table v = toml::table{
             {"local",       toml::array{
@@ -104,9 +102,9 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield)
         };
 
         const auto ff = mjolnir::read_forcefield_from_table<traits_type>(v, "./");
-        BOOST_TEST(ff.local().size()    == 2);
-        BOOST_TEST(ff.global().size()   == 2);
-        BOOST_TEST(ff.external().size() == 2);
+        BOOST_TEST(ff.local().size()    == 2u);
+        BOOST_TEST(ff.global().size()   == 2u);
+        BOOST_TEST(ff.external().size() == 2u);
 
         // contents are tested in the individual test codes
     }

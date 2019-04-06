@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE(read_input_path)
             }}
         };
         const auto input_path = mjolnir::read_input_path(t);
-        BOOST_TEST("./input/");
+        BOOST_TEST(input_path == "./input/");
     }
     {
         const toml::table t = toml::table{
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(read_input_path)
             }}
         };
         const auto input_path = mjolnir::read_input_path(t);
-        BOOST_TEST("./input/");
+        BOOST_TEST(input_path == "./input/");
     }
     {
         const toml::table t = toml::table{
@@ -39,13 +39,13 @@ BOOST_AUTO_TEST_CASE(read_input_path)
             }}
         };
         const auto input_path = mjolnir::read_input_path(t);
-        BOOST_TEST("./");
+        BOOST_TEST(input_path == "./");
     }
     {
         const toml::table t = toml::table{
             {"files", toml::table{}}
         };
         const auto input_path = mjolnir::read_input_path(t);
-        BOOST_TEST("./");
+        BOOST_TEST(input_path == "./");
     }
 }

@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(read_system_with_unlimited_boundary)
         };
 
         const auto sys = mjolnir::read_system_from_table<traits_type>(v);
-        BOOST_TEST(sys.size() == 3);
+        BOOST_TEST(sys.size() == 3u);
 
         BOOST_TEST(sys.mass(0) == 1.0, boost::test_tools::tolerance(tol));
         BOOST_TEST(sys.mass(1) == 2.0, boost::test_tools::tolerance(tol));
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(read_system_with_cuboidal_periodic_boundary)
         BOOST_TEST(sys.boundary().upper_bound().at(1) == 11.0, boost::test_tools::tolerance(tol));
         BOOST_TEST(sys.boundary().upper_bound().at(2) == 12.0, boost::test_tools::tolerance(tol));
 
-        BOOST_TEST(sys.size() == 3);
+        BOOST_TEST(sys.size() == 3u);
 
         BOOST_TEST(sys.mass(0) == 1.0, boost::test_tools::tolerance(tol));
         BOOST_TEST(sys.mass(1) == 2.0, boost::test_tools::tolerance(tol));

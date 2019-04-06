@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(read_underdamped_langevin_integrator)
 
         const auto integr = mjolnir::read_underdamped_langevin_integrator<traits_type>(v);
         BOOST_TEST(integr.delta_t() == 0.1, boost::test_tools::tolerance(tol));
-        BOOST_TEST(integr.parameters().size() == 2);
+        BOOST_TEST(integr.parameters().size() == 2u);
         BOOST_TEST(integr.parameters().at(0) == 0.1, boost::test_tools::tolerance(tol));
         BOOST_TEST(integr.parameters().at(1) == 0.2, boost::test_tools::tolerance(tol));
     }
