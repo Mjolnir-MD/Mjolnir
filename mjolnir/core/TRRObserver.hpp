@@ -40,8 +40,8 @@ class TRRObserver final : public ObserverBase<traitsT>
     }
     ~TRRObserver() override = default;
 
-    void initialize(const std::size_t total_step, const real_type dt,
-                    const system_type& sys, const forcefield_type& ff) override
+    void initialize(const std::size_t,  const real_type,
+                    const system_type&, const forcefield_type&) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -59,7 +59,7 @@ class TRRObserver final : public ObserverBase<traitsT>
     void output(const std::size_t step, const real_type dt,
                 const system_type& sys, const forcefield_type& ff) override;
 
-    void finalize(const std::size_t, const real_type dt,
+    void finalize(const std::size_t, const real_type,
                   const system_type&, const forcefield_type&) override
     {
         return; // do nothing.
@@ -138,7 +138,7 @@ class TRRObserver final : public ObserverBase<traitsT>
 template<typename traitsT>
 inline void TRRObserver<traitsT>::output(
     const std::size_t step, const real_type dt,
-    const system_type& sys, const forcefield_type& ff)
+    const system_type& sys, const forcefield_type&)
 {
     using self_type = TRRObserver<traitsT>;
     std::ofstream ofs(this->trr_name_, std::ios::app | std::ios::binary);

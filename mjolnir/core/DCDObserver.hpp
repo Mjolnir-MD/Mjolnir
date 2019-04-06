@@ -50,7 +50,7 @@ class DCDObserver final : public ObserverBase<traitsT>
     void output(const std::size_t step, const real_type dt,
                 const system_type& sys, const forcefield_type& ff) override;
 
-    void finalize(const std::size_t, const real_type dt,
+    void finalize(const std::size_t, const real_type,
                   const system_type&, const forcefield_type&) override
     {
         // update # of frames in the header region
@@ -97,7 +97,7 @@ class DCDObserver final : public ObserverBase<traitsT>
 
     void write_header(const std::string& fname,
                       const std::size_t  total_step_sz, const real_type dt,
-                      const system_type& sys, const forcefield_type& ff) const
+                      const system_type& sys, const forcefield_type&) const
     {
         std::ofstream ofs(fname, std::ios::binary | std::ios::app);
         if(not ofs.good())
@@ -242,8 +242,8 @@ class DCDObserver final : public ObserverBase<traitsT>
 
 template<typename traitsT>
 inline void DCDObserver<traitsT>::output(
-    const std::size_t step, const real_type dt,
-    const system_type& sys, const forcefield_type& ff)
+    const std::size_t, const real_type,
+    const system_type& sys, const forcefield_type&)
 {
     number_of_frames_ += 1;
     assert(this->buffer_x_.size() == sys.size());
