@@ -342,7 +342,11 @@ class basic_scope
 #if !defined(MJOLNIR_DEBUG)
         // remove template typenames (e.g. [with T = int]) from the name
         // because it often become too long to read
-        name_.erase(name_.begin() + name.find('['), name_.end());
+        const auto offset = name_.find('[');
+        if(offset != std::string::npos)
+        {
+            name_.erase(name_.begin() + offset, name_.end());
+        }
 #endif
         logger_.log(logger_type::Level::None, this->name_, " {");
         logger_.log(logger_type::Level::None, "--> ", this->location_, ':');
