@@ -89,8 +89,7 @@ class Topology
                          const connection_kind_type& kind) const;
 
     std::vector<connection_kind_type>
-    list_connections_between(const std::size_t i, const std::size_t j,
-                             const connection_kind_type& kind) const;
+    list_connections_between(const std::size_t i, const std::size_t j) const;
 
     //! reset molecule_id of all the particles
     void construct_molecules();
@@ -241,8 +240,7 @@ Topology::list_adjacent_within(
 }
 
 inline std::vector<typename Topology::connection_kind_type>
-Topology::list_connections_between(const std::size_t i, const std::size_t j,
-                                   const connection_kind_type& kind) const
+Topology::list_connections_between(const std::size_t i, const std::size_t j) const
 {
     std::vector<connection_kind_type> connections;
     for(const auto& edge : this->nodes_.at(i).adjacents)
