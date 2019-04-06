@@ -21,7 +21,7 @@ template<typename realT, typename coordT>
 struct read_boundary_impl<UnlimitedBoundary<realT, coordT>>
 {
     static UnlimitedBoundary<realT, coordT>
-    invoke(const toml::value& boundary)
+    invoke(const toml::value&)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();

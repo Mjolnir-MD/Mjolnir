@@ -160,7 +160,7 @@ class AxisAlignedPlane
     //XXX take care. the actual force that would be applied to a particle is
     //    `-dV/dx * calc_force_direction()`.
     coordinate_type calc_force_direction(
-            const coordinate_type& pos, const boundary_type& bd) const
+            const coordinate_type&, const boundary_type&) const
     {
         return normal_axis_type::invoke();
     }

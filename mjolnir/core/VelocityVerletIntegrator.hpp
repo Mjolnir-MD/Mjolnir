@@ -34,7 +34,7 @@ class VelocityVerletIntegrator
         dt_ = dt; halfdt_ = dt / 2;
     }
 
-    void update(const system_type& sys) const noexcept {/* do nothing */}
+    void update(const system_type&) const noexcept {/* do nothing */}
 
   private:
     real_type dt_;      //!< dt

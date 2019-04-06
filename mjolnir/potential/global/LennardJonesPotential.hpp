@@ -108,7 +108,7 @@ class LennardJonesPotential
 
     // nothing to do when system parameters change.
     template<typename traitsT>
-    void update(const System<traitsT>& sys) const noexcept {return;}
+    void update(const System<traitsT>&) const noexcept {return;}
 
     // e.g. `{"bond", 3}` means ignore particles connected within 3 "bond"s
     std::vector<std::pair<connection_kind_type, std::size_t>>

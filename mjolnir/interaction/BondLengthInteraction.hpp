@@ -45,7 +45,7 @@ class BondLengthInteraction : public LocalInteractionBase<traitsT>
     void      calc_force (system_type&)       const noexcept override;
     real_type calc_energy(const system_type&) const noexcept override;
 
-    void initialize(const system_type& sys) override
+    void initialize(const system_type&) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();

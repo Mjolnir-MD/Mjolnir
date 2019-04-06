@@ -34,7 +34,7 @@ struct IgnoreNothing: public IgnoreMoleculeBase<MoleculeID>
     IgnoreNothing()           = default;
     ~IgnoreNothing() override = default;
 
-    bool is_ignored(const MoleculeID& i, const MoleculeID& j) const noexcept override
+    bool is_ignored(const MoleculeID&, const MoleculeID&) const noexcept override
     {
         return false;
     }
