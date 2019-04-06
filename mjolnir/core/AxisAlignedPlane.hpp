@@ -138,7 +138,7 @@ class AxisAlignedPlane
   public:
 
     AxisAlignedPlane(const real_type position, const real_type margin = 1)
-        : origin_(0, 0, 0), margin_(margin), current_margin_(-1)
+        : margin_(margin), current_margin_(-1), origin_(0, 0, 0)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();

@@ -40,7 +40,7 @@ class DebyeHuckelPotential
     DebyeHuckelPotential(container_type charges,
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol)
-        : charges_(std::move(charges)), temperature_(300.0), ion_conc_(0.1),
+        : temperature_(300.0), ion_conc_(0.1), charges_(std::move(charges)),
           ignore_molecule_(std::move(ignore_mol)),
           ignore_within_  (exclusions.begin(), exclusions.end())
     {
