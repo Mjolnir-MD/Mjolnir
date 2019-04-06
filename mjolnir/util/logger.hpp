@@ -247,7 +247,7 @@ class basic_logger
         os << arg1;
         return output_message(os, std::forward<T_args>(args)...);
     }
-    static void output_message(ostream_type& os) {return;}
+    static void output_message(ostream_type&) {return;}
 
   private:
 
@@ -342,7 +342,11 @@ class basic_scope
 #if !defined(MJOLNIR_DEBUG)
         // remove template typenames (e.g. [with T = int]) from the name
         // because it often become too long to read
-        name_.erase(std::find(name_.begin(), name_.end(), '['), name_.end());
+        const auto offset = name_.find('[');
+        if(offset != std::string::npos)
+        {
+            name_.erase(name_.begin() + offset, name_.end());
+        }
 #endif
         logger_.log(logger_type::Level::None, this->name_, " {");
         logger_.log(logger_type::Level::None, "--> ", this->location_, ':');
@@ -400,16 +404,16 @@ using Scope         = basic_scope<char>;
 #define MJOLNIR_GET_LOGGER(name)     auto& l_o_g_g_e_r_ = LoggerManager::get_logger(name)
 
 // normal log
-#define MJOLNIR_LOG_INFO(args...)         l_o_g_g_e_r_.log(Logger::Level::Info,   args)
-#define MJOLNIR_LOG_NOTICE(args...)       l_o_g_g_e_r_.log(Logger::Level::Notice, args)
-#define MJOLNIR_LOG_WARN(args...)         l_o_g_g_e_r_.log(Logger::Level::Warn,   args)
-#define MJOLNIR_LOG_ERROR(args...)        l_o_g_g_e_r_.log(Logger::Level::Error,  args)
+#define MJOLNIR_LOG_INFO(...)   l_o_g_g_e_r_.log(Logger::Level::Info,   __VA_ARGS__)
+#define MJOLNIR_LOG_NOTICE(...) l_o_g_g_e_r_.log(Logger::Level::Notice, __VA_ARGS__)
+#define MJOLNIR_LOG_WARN(...)   l_o_g_g_e_r_.log(Logger::Level::Warn,   __VA_ARGS__)
+#define MJOLNIR_LOG_ERROR(...)  l_o_g_g_e_r_.log(Logger::Level::Error,  __VA_ARGS__)
 
 // no linefeed at the end of line.
-#define MJOLNIR_LOG_INFO_NO_LF(args...)   l_o_g_g_e_r_.log_no_lf(Logger::Level::Info,   args)
-#define MJOLNIR_LOG_NOTICE_NO_LF(args...) l_o_g_g_e_r_.log_no_lf(Logger::Level::Notice, args)
-#define MJOLNIR_LOG_WARN_NO_LF(args...)   l_o_g_g_e_r_.log_no_lf(Logger::Level::Warn,   args)
-#define MJOLNIR_LOG_ERROR_NO_LF(args...)  l_o_g_g_e_r_.log_no_lf(Logger::Level::Error,  args)
+#define MJOLNIR_LOG_INFO_NO_LF(...)   l_o_g_g_e_r_.log_no_lf(Logger::Level::Info,   __VA_ARGS__)
+#define MJOLNIR_LOG_NOTICE_NO_LF(...) l_o_g_g_e_r_.log_no_lf(Logger::Level::Notice, __VA_ARGS__)
+#define MJOLNIR_LOG_WARN_NO_LF(...)   l_o_g_g_e_r_.log_no_lf(Logger::Level::Warn,   __VA_ARGS__)
+#define MJOLNIR_LOG_ERROR_NO_LF(...)  l_o_g_g_e_r_.log_no_lf(Logger::Level::Error,  __VA_ARGS__)
 
 // write current scope to log file
 #define MJOLNIR_LOG_SCOPE(name) Scope s_c_o_p_e_##__LINE__ (l_o_g_g_e_r_, MJOLNIR_STRINGIZE(name), __FILE__ ":" MJOLNIR_STRINGIZE(__LINE__))
@@ -418,14 +422,14 @@ using Scope         = basic_scope<char>;
 // loggers that are only enabled when MJOLNIR_DEBUG is defined
 #ifdef MJOLNIR_DEBUG
 #  define MJOLNIR_GET_DEFAULT_LOGGER_DEBUG() auto& l_o_g_g_e_r_ = LoggerManager::get_default_logger()
-#  define MJOLNIR_LOG_DEBUG(args...)         l_o_g_g_e_r_.log(Logger::Level::Debug, args)
-#  define MJOLNIR_LOG_DEBUG_NO_LF(args...)   l_o_g_g_e_r_.log_no_lf(Logger::Level::Debug, args)
+#  define MJOLNIR_LOG_DEBUG(...)             l_o_g_g_e_r_.log(Logger::Level::Debug, __VA_ARGS__)
+#  define MJOLNIR_LOG_DEBUG_NO_LF(...)       l_o_g_g_e_r_.log_no_lf(Logger::Level::Debug, __VA_ARGS__)
 #  define MJOLNIR_LOG_SCOPE_DEBUG(name)      Scope s_c_o_p_e_##__LINE__ (l_o_g_g_e_r_, MJOLNIR_STRINGIZE(name), __FILE__ ":" MJOLNIR_STRINGIZE(__LINE__))
 #  define MJOLNIR_LOG_FUNCTION_DEBUG()       Scope s_c_o_p_e_##__LINE__ (l_o_g_g_e_r_, MJOLNIR_FUNC_NAME,       __FILE__ ":" MJOLNIR_STRINGIZE(__LINE__))
 #else
 #  define MJOLNIR_GET_DEFAULT_LOGGER_DEBUG() /**/
-#  define MJOLNIR_LOG_DEBUG(args...)         /**/
-#  define MJOLNIR_LOG_DEBUG_NO_LF(args...)   /**/
+#  define MJOLNIR_LOG_DEBUG(...)             /**/
+#  define MJOLNIR_LOG_DEBUG_NO_LF(...)       /**/
 #  define MJOLNIR_LOG_SCOPE_DEBUG(name)      /**/
 #  define MJOLNIR_LOG_FUNCTION_DEBUG()       /**/
 #endif // MJOLNIR_DEBUG

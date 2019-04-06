@@ -27,7 +27,7 @@ struct sumup_potential_impl<Last, Last, realT, Potentials ...>
 {
     using real_type = realT;
     inline static real_type
-    invoke(const real_type x, const std::tuple<Potentials...>& pots) noexcept
+    invoke(const real_type, const std::tuple<Potentials...>&) noexcept
     {
         return 0;
     }
@@ -50,9 +50,9 @@ struct sumup_derivative_impl<Last, Last, realT, Potentials ...>
 {
     using real_type = realT;
     inline static real_type
-    invoke(const real_type x, const std::tuple<Potentials...>& pots) noexcept
+    invoke(const real_type, const std::tuple<Potentials...>&) noexcept
     {
-        return 0.0;
+        return 0;
     }
 };
 
@@ -73,7 +73,7 @@ struct update_all_impl<Last, Last, Potentials...>
 {
     template<typename T>
     inline static void
-    invoke(const System<T>& sys, const std::tuple<Potentials...>& pots) noexcept
+    invoke(const System<T>&, const std::tuple<Potentials...>&) noexcept
     {
         return;
     }

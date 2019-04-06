@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(read_observer)
         }};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs.observers().size() == 2);
+        BOOST_TEST(obs.observers().size() == 2u);
         BOOST_TEST(obs.observers().at(0)->prefix() == "./test");
         BOOST_TEST(obs.observers().at(1)->prefix() == "./test");
 
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(read_observer)
         }};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs.observers().size() == 2);
+        BOOST_TEST(obs.observers().size() == 2u);
         BOOST_TEST(obs.observers().at(0)->prefix() == "./test");
         BOOST_TEST(obs.observers().at(1)->prefix() == "./test");
 
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(read_observer)
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
 
-        BOOST_TEST(obs.observers().size() == 2);
+        BOOST_TEST(obs.observers().size() == 2u);
         BOOST_TEST(obs.observers().at(0)->prefix() == "./test/test");
         BOOST_TEST(obs.observers().at(1)->prefix() == "./test/test");
 
@@ -89,7 +89,6 @@ BOOST_AUTO_TEST_CASE(read_xyz_observer)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using observer_type = mjolnir::XYZObserver<traits_type>;
     {
         const toml::table files{
             {"output", toml::table{{"path", "./"}, {"prefix", "test"}, {"format", "xyz"}}}
@@ -98,7 +97,7 @@ BOOST_AUTO_TEST_CASE(read_xyz_observer)
         const toml::table v{{"files", files}};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs.observers().size() == 2);
+        BOOST_TEST(obs.observers().size() == 2u);
 
         const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
                              obs.observers().at(0).get());
@@ -117,7 +116,6 @@ BOOST_AUTO_TEST_CASE(read_dcd_observer)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using observer_type = mjolnir::DCDObserver<traits_type>;
     {
         const toml::table files{
             {"output", toml::table{{"path", "./"}, {"prefix", "test"}, {"format", "dcd"}}}
@@ -126,7 +124,7 @@ BOOST_AUTO_TEST_CASE(read_dcd_observer)
         const toml::table v{{"files", files}};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs.observers().size() == 2);
+        BOOST_TEST(obs.observers().size() == 2u);
 
         const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
                              obs.observers().at(0).get());
@@ -145,7 +143,6 @@ BOOST_AUTO_TEST_CASE(read_trr_observer)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using observer_type = mjolnir::TRRObserver<traits_type>;
     {
         const toml::table files{
             {"output", toml::table{{"path", "./"}, {"prefix", "test"}, {"format", "trr"}}}
@@ -154,7 +151,7 @@ BOOST_AUTO_TEST_CASE(read_trr_observer)
         const toml::table v{{"files", files}};
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs.observers().size() == 2);
+        BOOST_TEST(obs.observers().size() == 2u);
 
         const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
                              obs.observers().at(0).get());

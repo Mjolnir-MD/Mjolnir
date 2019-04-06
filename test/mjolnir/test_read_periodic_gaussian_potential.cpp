@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(read_local_potential_periodic_gaussian_double)
 
         const std::array<std::size_t, 2> ref_idx{{1, 2}};
 
-        BOOST_TEST(g.size() == 1);
+        BOOST_TEST(g.size() == 1u);
         BOOST_TEST(g.at(0).first == ref_idx);
         BOOST_TEST(g.at(0).second.k()     == 3.14,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.at(0).second.sigma() == 0.577, boost::test_tools::tolerance(tol));
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(read_local_potential_periodic_gaussian_float)
 
         const std::array<std::size_t, 2> ref_idx{{1, 2}};
 
-        BOOST_TEST(g.size() == 1);
+        BOOST_TEST(g.size() == 1u);
         BOOST_TEST(g.at(0).first == ref_idx);
         BOOST_TEST(g.at(0).second.k()     == 3.14f,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.at(0).second.sigma() == 0.577f, boost::test_tools::tolerance(tol));

@@ -78,7 +78,7 @@ class ExcludedVolumeWallPotential
 
     // nothing to do when system parameters change.
     template<typename T>
-    void update(const System<T>& sys) const noexcept {return;}
+    void update(const System<T>&) const noexcept {return;}
 
     const char* name() const noexcept {return "ExcludedVolumeWall";}
 

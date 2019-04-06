@@ -11,36 +11,36 @@ BOOST_AUTO_TEST_CASE(test_construction)
     {
         mjolnir::static_string<8> str;
         BOOST_TEST(str.empty());
-        BOOST_TEST(str.size()     == 0);
-        BOOST_TEST(str.length()   == 0);
-        BOOST_TEST(str.capacity() == 7);
-        BOOST_TEST(str.max_size() == 7);
+        BOOST_TEST(str.size()     == 0u);
+        BOOST_TEST(str.length()   == 0u);
+        BOOST_TEST(str.capacity() == 7u);
+        BOOST_TEST(str.max_size() == 7u);
     }
     {
         mjolnir::static_string<8> str("hello");
         BOOST_TEST(!str.empty());
-        BOOST_TEST(str.size()     == 5);
-        BOOST_TEST(str.length()   == 5);
-        BOOST_TEST(str.capacity() == 7);
-        BOOST_TEST(str.max_size() == 7);
+        BOOST_TEST(str.size()     == 5u);
+        BOOST_TEST(str.length()   == 5u);
+        BOOST_TEST(str.capacity() == 7u);
+        BOOST_TEST(str.max_size() == 7u);
     }
 
     {
         mjolnir::static_string<8> str(std::string("hello"));
         BOOST_TEST(!str.empty());
-        BOOST_TEST(str.size()     == 5);
-        BOOST_TEST(str.length()   == 5);
-        BOOST_TEST(str.capacity() == 7);
-        BOOST_TEST(str.max_size() == 7);
+        BOOST_TEST(str.size()     == 5u);
+        BOOST_TEST(str.length()   == 5u);
+        BOOST_TEST(str.capacity() == 7u);
+        BOOST_TEST(str.max_size() == 7u);
     }
 
     {
         mjolnir::static_string<8> str(mjolnir::static_string<6>("hello"));
         BOOST_TEST(!str.empty());
-        BOOST_TEST(str.size()     == 5);
-        BOOST_TEST(str.length()   == 5);
-        BOOST_TEST(str.capacity() == 7);
-        BOOST_TEST(str.max_size() == 7);
+        BOOST_TEST(str.size()     == 5u);
+        BOOST_TEST(str.length()   == 5u);
+        BOOST_TEST(str.capacity() == 7u);
+        BOOST_TEST(str.max_size() == 7u);
     }
 
     {
@@ -61,32 +61,32 @@ BOOST_AUTO_TEST_CASE(test_substitution)
 {
     mjolnir::static_string<8> str;
     BOOST_TEST(str.empty());
-    BOOST_TEST(str.size()     == 0);
-    BOOST_TEST(str.length()   == 0);
-    BOOST_TEST(str.capacity() == 7);
-    BOOST_TEST(str.max_size() == 7);
+    BOOST_TEST(str.size()     == 0u);
+    BOOST_TEST(str.length()   == 0u);
+    BOOST_TEST(str.capacity() == 7u);
+    BOOST_TEST(str.max_size() == 7u);
 
     str = "hello";
 
     BOOST_TEST(!str.empty());
-    BOOST_TEST(str.size()     == 5);
-    BOOST_TEST(str.length()   == 5);
-    BOOST_TEST(str.capacity() == 7);
-    BOOST_TEST(str.max_size() == 7);
+    BOOST_TEST(str.size()     == 5u);
+    BOOST_TEST(str.length()   == 5u);
+    BOOST_TEST(str.capacity() == 7u);
+    BOOST_TEST(str.max_size() == 7u);
 
     str = std::string("hello");
     BOOST_TEST(!str.empty());
-    BOOST_TEST(str.size()     == 5);
-    BOOST_TEST(str.length()   == 5);
-    BOOST_TEST(str.capacity() == 7);
-    BOOST_TEST(str.max_size() == 7);
+    BOOST_TEST(str.size()     == 5u);
+    BOOST_TEST(str.length()   == 5u);
+    BOOST_TEST(str.capacity() == 7u);
+    BOOST_TEST(str.max_size() == 7u);
 
     str = mjolnir::static_string<6>("hello");
     BOOST_TEST(!str.empty());
-    BOOST_TEST(str.size()     == 5);
-    BOOST_TEST(str.length()   == 5);
-    BOOST_TEST(str.capacity() == 7);
-    BOOST_TEST(str.max_size() == 7);
+    BOOST_TEST(str.size()     == 5u);
+    BOOST_TEST(str.length()   == 5u);
+    BOOST_TEST(str.capacity() == 7u);
+    BOOST_TEST(str.max_size() == 7u);
 }
 
 BOOST_AUTO_TEST_CASE(test_access)
@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(test_concatenation)
     {
         mjolnir::static_string<8> str1("hello "), str2("world");
         BOOST_TEST(str1 + str2 == "hello world");
-        BOOST_TEST((str1 + str2).capacity() == 15);
+        BOOST_TEST((str1 + str2).capacity() == 15u);
     }
     {
         std::string str1("hello");

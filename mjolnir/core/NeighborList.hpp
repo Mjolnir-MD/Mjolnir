@@ -37,8 +37,8 @@ struct neighbor_element_impl<paramT, true> : private paramT // for EBO
 {
     using parameter_type = paramT;
 
-    explicit neighbor_element_impl(const parameter_type& p) {}
-    explicit neighbor_element_impl(parameter_type&& p)      {}
+    explicit neighbor_element_impl(const parameter_type&) {}
+    explicit neighbor_element_impl(parameter_type&&)      {}
 
     parameter_type&       parameter()       noexcept {return *this;}
     parameter_type const& parameter() const noexcept {return *this;}

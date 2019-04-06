@@ -54,9 +54,8 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
         const std::size_t each_step, scheduler_type&&  scheduler,
         system_type&&     sys,       forcefield_type&& ff,
         integrator_type&& integr,    observer_type&&   obs)
-    : total_step_(tstep), step_count_(0), save_step_(sstep),
-      time_(0.0), r_total_step_(1.0 / tstep),
-      each_step_(each_step), scheduler_(scheduler),
+    : total_step_(tstep), step_count_(0), save_step_(sstep), each_step_(each_step),
+      time_(0.0), r_total_step_(1.0 / tstep), scheduler_(scheduler),
       system_(std::move(sys)), ff_(std::move(ff)),
       integrator_(std::move(integr)), observers_(std::move(obs))
     {}

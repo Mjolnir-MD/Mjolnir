@@ -21,7 +21,7 @@ template<typename realT, typename coordT>
 struct read_boundary_impl<UnlimitedBoundary<realT, coordT>>
 {
     static UnlimitedBoundary<realT, coordT>
-    invoke(const toml::value& boundary)
+    invoke(const toml::value&)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -126,8 +126,6 @@ System<traitsT> read_system(const toml::table& root, std::size_t N)
     MJOLNIR_LOG_FUNCTION();
     if(N != 0) {MJOLNIR_LOG_NOTICE("reading ", N, "-th [[system]].");}
     else       {MJOLNIR_LOG_NOTICE("reading [[system]].");}
-
-    using real_type       = typename traitsT::real_type;
 
     const auto& system_params = toml::find<toml::array>(root, "systems");
     if(system_params.size() <= N)

@@ -9,7 +9,7 @@ namespace mjolnir
 namespace detail
 {
 
-inline void concat_args_to_string_impl(std::ostringstream& oss)
+inline void concat_args_to_string_impl(std::ostringstream&)
 {
     return;
 }

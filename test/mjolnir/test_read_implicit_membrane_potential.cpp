@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(read_implicit_membrane_double)
         };
         const auto g = mjolnir::read_implicit_membrane_potential<real_type>(v);
 
-        BOOST_TEST(g.hydrophobicities().size()     == 2);
+        BOOST_TEST(g.hydrophobicities().size()     == 2u);
         BOOST_TEST(g.hydrophobicities().at(0)      == 2.0,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.hydrophobicities().at(1)      == 2.0,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.half_thick()            == 3.14 * 0.5, boost::test_tools::tolerance(tol));
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(read_implicit_membrane_float)
         };
         const auto g = mjolnir::read_implicit_membrane_potential<real_type>(v);
 
-        BOOST_TEST(g.hydrophobicities().size()     == 2);
+        BOOST_TEST(g.hydrophobicities().size()     == 2u);
         BOOST_TEST(g.hydrophobicities().at(0)      == 2.0f,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.hydrophobicities().at(1)      == 2.0f,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.half_thick()             == 3.14f * 0.5f, boost::test_tools::tolerance(tol));

@@ -37,10 +37,10 @@ BOOST_AUTO_TEST_CASE(read_excluded_volume_double)
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
-        BOOST_TEST(g.ignore_within().size() == 2);
+        BOOST_TEST(g.ignore_within().size() == 2u);
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
-        BOOST_TEST(g.parameters().size() == 2);
+        BOOST_TEST(g.parameters().size() == 2u);
         BOOST_TEST(g.parameters().at(0)  == 2.0,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.parameters().at(1)  == 2.0,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.epsilon()           == 3.14, boost::test_tools::tolerance(tol));
@@ -76,10 +76,10 @@ BOOST_AUTO_TEST_CASE(read_excluded_volume_float)
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
-        BOOST_TEST(g.ignore_within().size() == 2);
+        BOOST_TEST(g.ignore_within().size() == 2u);
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
-        BOOST_TEST(g.parameters().size() == 2);
+        BOOST_TEST(g.parameters().size() == 2u);
         BOOST_TEST(g.parameters().at(0)  == 2.0f,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.parameters().at(1)  == 2.0f,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.epsilon()           == 3.14f, boost::test_tools::tolerance(tol));

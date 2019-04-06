@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(read_lennard_jones_wall_double)
         };
         const auto g = mjolnir::read_lennard_jones_wall_potential<real_type>(v);
 
-        BOOST_TEST(g.parameters().size() == 4);
+        BOOST_TEST(g.parameters().size() == 4u);
         BOOST_TEST(g.parameters().at(0).first  == 2.0,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.parameters().at(1).first  == 2.0,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.parameters().at(2).first  == 2.0,  boost::test_tools::tolerance(tol));
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(read_lennard_jones_wall_float)
         };
         const auto g = mjolnir::read_lennard_jones_wall_potential<real_type>(v);
 
-        BOOST_TEST(g.parameters().size() == 4);
+        BOOST_TEST(g.parameters().size() == 4u);
         BOOST_TEST(g.parameters().at(0).first  == 2.0f, boost::test_tools::tolerance(tol));
         BOOST_TEST(g.parameters().at(1).first  == 2.0f, boost::test_tools::tolerance(tol));
         BOOST_TEST(g.parameters().at(2).first  == 2.0f, boost::test_tools::tolerance(tol));

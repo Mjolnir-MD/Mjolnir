@@ -20,10 +20,8 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
     typedef traits::coordinate_type            coord_type;
     typedef traits::boundary_type              boundary_type;
     typedef mjolnir::System<traits>            system_type;
-    typedef system_type::particle_type         particle_type;
     typedef mjolnir::HarmonicPotential<real_type> harmonic_type;
     typedef mjolnir::BondLengthInteraction<traits, harmonic_type> bond_length_type;
-    typedef bond_length_type::connection_kind_type connection_kind_type;
 
     auto normalize = [](const coord_type& v){return v / mjolnir::math::length(v);};
 
@@ -34,8 +32,23 @@ BOOST_AUTO_TEST_CASE(BondLength_calc_force)
     bond_length_type interaction("none", {{ {{0,1}}, potential}});
 
     system_type sys(2, boundary_type{});
-    sys.at(0) = {1.0, 1.0, coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)};
-    sys.at(1) = {1.0, 1.0, coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)};
+
+    sys.at(0).mass = 1.0;
+    sys.at(1).mass = 1.0;
+    sys.at(0).rmass = 1.0;
+    sys.at(1).rmass = 1.0;
+
+    sys.at(0).position = coord_type(0,0,0);
+    sys.at(1).position = coord_type(0,0,0);
+    sys.at(0).velocity = coord_type(0,0,0);
+    sys.at(1).velocity = coord_type(0,0,0);
+    sys.at(0).force    = coord_type(0,0,0);
+    sys.at(1).force    = coord_type(0,0,0);
+
+    sys.at(0).name  = "X";
+    sys.at(1).name  = "X";
+    sys.at(0).group = "NONE";
+    sys.at(1).group = "NONE";
 
     const real_type dr = 1e-3;
     real_type dist = 1e0;

@@ -18,12 +18,11 @@ BOOST_AUTO_TEST_CASE(read_empty_external_forcefield)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    constexpr real_type tol = 1e-8;
     {
         const toml::array v{};
         const auto ff = mjolnir::read_external_forcefield<traits_type>(v, "./");
         BOOST_TEST(ff.empty());
-        BOOST_TEST(ff.size() == 0);
+        BOOST_TEST(ff.size() == 0u);
     }
 }
 
@@ -33,7 +32,6 @@ BOOST_AUTO_TEST_CASE(read_external_forcefield)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    constexpr real_type tol = 1e-8;
     {
         const toml::array v{toml::table{
             {"interaction",       toml::value("Distance")},
@@ -51,7 +49,7 @@ BOOST_AUTO_TEST_CASE(read_external_forcefield)
 
         const auto ff = mjolnir::read_external_forcefield<traits_type>(v, "./");
         BOOST_TEST(!ff.empty());
-        BOOST_TEST(ff.size() == 1);
+        BOOST_TEST(ff.size() == 1u);
 
         const auto& interaction_ptr = *ff.begin();
         BOOST_TEST(static_cast<bool>(interaction_ptr));
@@ -70,7 +68,6 @@ BOOST_AUTO_TEST_CASE(read_several_external_forcefield)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    constexpr real_type tol = 1e-8;
     {
         const toml::array v{toml::table{
                 {"interaction",       toml::value("Distance")},
@@ -98,7 +95,7 @@ BOOST_AUTO_TEST_CASE(read_several_external_forcefield)
 
         const auto ff = mjolnir::read_external_forcefield<traits_type>(v, "./");
         BOOST_TEST(!ff.empty());
-        BOOST_TEST(ff.size() == 2);
+        BOOST_TEST(ff.size() == 2u);
 
         using exv_interaction = mjolnir::ExternalDistanceInteraction<
             traits_type, mjolnir::ExcludedVolumeWallPotential<real_type>,

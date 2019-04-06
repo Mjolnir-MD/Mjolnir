@@ -23,7 +23,6 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
     typedef mjolnir::System<traits>            system_type;
     typedef mjolnir::HarmonicPotential<real_type> harmonic_type;
     typedef mjolnir::BondAngleInteraction<traits, harmonic_type> bond_angle_type;
-    typedef bond_angle_type::connection_kind_type connection_kind_type;
 
     auto normalize = [](const coord_type& v){return v / mjolnir::math::length(v);};
 
@@ -36,11 +35,32 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
     const coord_type pos1(1., 0., 0.);
     const coord_type pos2(0., 0., 0.);
     system_type sys(3, boundary_type{});
-    sys.at(0) = {1.0, 1.0, pos1,              coord_type(0,0,0), coord_type(0,0,0)};
-    sys.at(1) = {1.0, 1.0, pos2,              coord_type(0,0,0), coord_type(0,0,0)};
-    sys.at(2) = {1.0, 1.0, coord_type(0,0,0), coord_type(0,0,0), coord_type(0,0,0)};
 
-    const std::size_t N = 1800;
+    sys.at(0).mass = 1.0;
+    sys.at(1).mass = 1.0;
+    sys.at(2).mass = 1.0;
+    sys.at(0).rmass = 1.0;
+    sys.at(1).rmass = 1.0;
+    sys.at(2).rmass = 1.0;
+
+    sys.at(0).position = pos1;
+    sys.at(1).position = pos2;
+    sys.at(2).position = coord_type(0,0,0);
+    sys.at(0).velocity = coord_type(0,0,0);
+    sys.at(1).velocity = coord_type(0,0,0);
+    sys.at(2).velocity = coord_type(0,0,0);
+    sys.at(0).force    = coord_type(0,0,0);
+    sys.at(1).force    = coord_type(0,0,0);
+    sys.at(2).force    = coord_type(0,0,0);
+
+    sys.at(0).name  = "X";
+    sys.at(1).name  = "X";
+    sys.at(2).name  = "X";
+    sys.at(0).group = "NONE";
+    sys.at(1).group = "NONE";
+    sys.at(2).group = "NONE";
+
+    const int N = 1800;
     const real_type dtheta = mjolnir::math::constants<real_type>::pi  / N;
     for(int i = 1; i < N; ++i)
     {

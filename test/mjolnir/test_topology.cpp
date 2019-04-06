@@ -40,20 +40,20 @@ BOOST_AUTO_TEST_CASE(topology_list_within)
         const auto adj3 = top.list_adjacent_within(i, 3, "bond");
         for(const auto t : adj3)
         {
-            BOOST_CHECK(0 <= t && t < N);
+            BOOST_TEST(t < N);
             const auto i_ = static_cast<std::int32_t>(i);
             const auto t_ = static_cast<std::int32_t>(t);
             const auto diff = std::abs(i_ - t_);
-            BOOST_CHECK(diff <= 3);
+            BOOST_TEST(diff <= 3);
         }
 
         if(4 <= i && i <= N-4)
         {
-            BOOST_CHECK_EQUAL(adj3.size(), 7);
+            BOOST_TEST(adj3.size() == 7u);
         }
 
         const auto adj_b3 = top.list_adjacent_within(i, 3, "bond");
-        BOOST_CHECK_EQUAL(adj3.size(), adj_b3.size());
+        BOOST_TEST(adj3.size() == adj_b3.size());
 
         if(adj3.size() == adj_b3.size())
         {
@@ -63,10 +63,10 @@ BOOST_AUTO_TEST_CASE(topology_list_within)
         }
 
         const auto adj_c3 = top.list_adjacent_within(i, 3, "contact");
-        BOOST_CHECK_EQUAL(adj_c3.size(), 1);
+        BOOST_TEST(adj_c3.size() == 1u);
         if(!adj_c3.empty())
         {
-            BOOST_CHECK_EQUAL(adj_c3.front(), i);
+            BOOST_TEST(adj_c3.front() == i);
         }
     }
 }
@@ -89,16 +89,16 @@ BOOST_AUTO_TEST_CASE(topology_contacts_list_within)
         const auto adj3 = top.list_adjacent_within(i, 3, "bond");
         for(const auto t : adj3)
         {
-            BOOST_CHECK(0 <= t && t < N);
+            BOOST_TEST(t < N);
             const auto i_ = static_cast<std::int32_t>(i);
             const auto t_ = static_cast<std::int32_t>(t);
             const auto diff = std::abs(i_ - t_);
-            BOOST_CHECK(diff <= 3);
+            BOOST_TEST(diff <= 3);
         }
 
         if(4 <= i && i <= N-4)
         {
-            BOOST_CHECK_EQUAL(adj3.size(), 7);
+            BOOST_TEST(adj3.size() == 7u);
         }
     }
     for(std::size_t i=0; i<N; ++i)

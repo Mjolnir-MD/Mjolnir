@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(read_local_potential_harmonic_double)
 
         const std::array<std::size_t, 2> ref_idx{{1, 2}};
 
-        BOOST_TEST(g.size() == 1);
+        BOOST_TEST(g.size() == 1u);
         BOOST_TEST(g.at(0).first == ref_idx);
         BOOST_TEST(g.at(0).second.k()  == 3.14,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.at(0).second.v0() == 2.71,  boost::test_tools::tolerance(tol));
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(read_local_potential_harmonic_float)
 
         const std::array<std::size_t, 2> ref_idx{{1, 2}};
 
-        BOOST_TEST(g.size() == 1);
+        BOOST_TEST(g.size() == 1u);
         BOOST_TEST(g.at(0).first == ref_idx);
         BOOST_TEST(g.at(0).second.k()  == 3.14f,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.at(0).second.v0() == 2.71f,  boost::test_tools::tolerance(tol));

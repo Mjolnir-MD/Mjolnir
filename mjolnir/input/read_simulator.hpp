@@ -23,7 +23,6 @@ read_molecular_dynamics_simulator(
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type = typename traitsT::real_type;
 
     const auto& integrator     = toml::find(simulator, "integrator");
     const auto integrator_type = toml::find<std::string>(integrator, "type");
@@ -219,7 +218,6 @@ read_simulator(const toml::table& root)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type = typename traitsT::real_type;
 
     const auto& simulator  = toml::find(root, "simulator");
     if(toml::get<toml::table>(simulator).count("file_name") == 1)
