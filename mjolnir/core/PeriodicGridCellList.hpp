@@ -273,20 +273,24 @@ void PeriodicGridCellList<traitsT, parameterT>::initialize(
 
     this->cell_list_.resize(dim_x_ * dim_y_ * dim_z_);
 
-    for(int x = 0; x < dim_x_; ++x)
+    const int dimx = dim_x_;
+    const int dimy = dim_y_;
+    const int dimz = dim_x_;
+
+    for(int x = 0; x < dimx; ++x)
     {
-    for(int y = 0; y < dim_y_; ++y)
+    for(int y = 0; y < dimy; ++y)
     {
-    for(int z = 0; z < dim_z_; ++z)
+    for(int z = 0; z < dimz; ++z)
     {
         auto& cell = this->cell_list_[calc_index(x, y, z)];
 
-        const std::size_t x_prev = (x ==        0) ? dim_x_-1 : x-1;
-        const std::size_t x_next = (x == dim_x_-1) ?        0 : x+1;
-        const std::size_t y_prev = (y ==        0) ? dim_y_-1 : y-1;
-        const std::size_t y_next = (y == dim_y_-1) ?        0 : y+1;
-        const std::size_t z_prev = (z ==        0) ? dim_z_-1 : z-1;
-        const std::size_t z_next = (z == dim_z_-1) ?        0 : z+1;
+        const std::size_t x_prev = (x ==        0) ? dimx - 1 : x - 1;
+        const std::size_t x_next = (x == dimx - 1) ?        0 : x + 1;
+        const std::size_t y_prev = (y ==        0) ? dimy - 1 : y - 1;
+        const std::size_t y_next = (y == dimy - 1) ?        0 : y + 1;
+        const std::size_t z_prev = (z ==        0) ? dimz - 1 : z - 1;
+        const std::size_t z_next = (z == dimz - 1) ?        0 : z + 1;
 
         cell.second[ 0] = calc_index(x_prev, y_prev, z_prev);
         cell.second[ 1] = calc_index(x,      y_prev, z_prev);
