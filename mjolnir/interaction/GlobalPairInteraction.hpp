@@ -60,8 +60,8 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
         return;
     }
 
-    void      calc_force (system_type&)             override;
-    real_type calc_energy(const system_type&) const override;
+    void      calc_force (system_type&)       const noexcept override;
+    real_type calc_energy(const system_type&) const noexcept override;
 
     std::string name() const override
     {return "Pair:"_s + potential_type::name();}
@@ -74,7 +74,7 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
 
 template<typename traitsT, typename potT, typename spaceT>
 void GlobalPairInteraction<traitsT, potT, spaceT>::calc_force(
-        system_type& sys)
+        system_type& sys) const noexcept
 {
     for(std::size_t i=0; i<sys.size(); ++i)
     {
@@ -104,7 +104,7 @@ void GlobalPairInteraction<traitsT, potT, spaceT>::calc_force(
 template<typename traitsT, typename potT, typename spaceT>
 typename GlobalPairInteraction<traitsT, potT, spaceT>::real_type
 GlobalPairInteraction<traitsT, potT, spaceT>::calc_energy(
-        const system_type& sys) const
+        const system_type& sys) const noexcept
 {
     real_type e = 0.0;
     for(std::size_t i=0; i<sys.size(); ++i)

@@ -64,7 +64,7 @@ class ExternalForceField
         }
     }
 
-    void calc_force(system_type& sys) const
+    void calc_force(system_type& sys) const noexcept
     {
         for(const auto& item : this->interactions_)
         {
@@ -72,7 +72,7 @@ class ExternalForceField
         }
         return;
     }
-    real_type calc_energy(const system_type& sys) const
+    real_type calc_energy(const system_type& sys) const noexcept
     {
         real_type energy = 0.0;
         for(const auto& item : this->interactions_)

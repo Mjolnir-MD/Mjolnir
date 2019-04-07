@@ -66,7 +66,7 @@ class GlobalPairInteraction<
         return;
     }
 
-    void calc_force(system_type& sys) override
+    void calc_force(system_type& sys) const noexcept override
     {
         constexpr auto cutoff_ratio    = potential_type::cutoff_ratio;
         constexpr auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
@@ -101,7 +101,7 @@ class GlobalPairInteraction<
         return ;
     }
 
-    real_type calc_energy(const system_type& sys) const override
+    real_type calc_energy(const system_type& sys) const noexcept override
     {
         real_type E(0);
 
