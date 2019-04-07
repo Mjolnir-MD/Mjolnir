@@ -66,7 +66,7 @@ class GlobalPairInteraction<
         return;
     }
 
-    void calc_force(system_type& sys) override
+    void calc_force(system_type& sys) const noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
         MJOLNIR_LOG_FUNCTION_DEBUG();
@@ -104,7 +104,7 @@ class GlobalPairInteraction<
         return ;
     }
 
-    real_type calc_energy(const system_type& sys) const override
+    real_type calc_energy(const system_type& sys) const noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
         MJOLNIR_LOG_FUNCTION_DEBUG();

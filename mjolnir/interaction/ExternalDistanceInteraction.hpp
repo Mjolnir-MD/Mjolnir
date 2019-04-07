@@ -33,8 +33,8 @@ class ExternalDistanceInteraction final
     ~ExternalDistanceInteraction() override = default;
 
     // calculate force, update spatial partition (reduce margin) inside.
-    void      calc_force (system_type&)             override;
-    real_type calc_energy(system_type const&) const override;
+    void      calc_force (system_type&)       const noexcept override;
+    real_type calc_energy(system_type const&) const noexcept override;
 
     /*! @brief initialize spatial partition (e.g. CellList)                   *
      *  @details before calling `calc_(force|energy)`, this should be called. */
@@ -70,7 +70,7 @@ class ExternalDistanceInteraction final
 
 template<typename traitsT, typename potT, typename spaceT>
 void ExternalDistanceInteraction<traitsT, potT, spaceT>::calc_force(
-        system_type& sys)
+        system_type& sys) const noexcept
 {
     for(std::size_t i : this->shape_.neighbors())
     {
@@ -89,7 +89,7 @@ void ExternalDistanceInteraction<traitsT, potT, spaceT>::calc_force(
 template<typename traitsT, typename potT, typename spaceT>
 typename ExternalDistanceInteraction<traitsT, potT, spaceT>::real_type
 ExternalDistanceInteraction<traitsT, potT, spaceT>::calc_energy(
-        const system_type& sys) const
+        const system_type& sys) const noexcept
 {
     real_type E = 0.0;
     for(std::size_t i : this->shape_.neighbors())

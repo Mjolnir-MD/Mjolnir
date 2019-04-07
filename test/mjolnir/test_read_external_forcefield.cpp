@@ -113,7 +113,8 @@ BOOST_AUTO_TEST_CASE(read_several_external_forcefield)
         for(const auto& interaction_ptr : ff)
         {
             BOOST_TEST(static_cast<bool>(interaction_ptr));
-            found[typeid(*interaction_ptr)] = true;
+            const auto& deref = *interaction_ptr;
+            found[typeid(deref)] = true;
         }
         BOOST_TEST(found[typeid(exv_interaction)]);
         BOOST_TEST(found[typeid( lj_interaction)]);

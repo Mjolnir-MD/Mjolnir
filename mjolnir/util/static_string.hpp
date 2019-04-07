@@ -57,7 +57,7 @@ class static_string
 
   public:
 
-    static_string() : size_(0), buffer_{0} {}
+    static_string() : size_(0) {buffer_.fill('\0');}
     ~static_string() = default;
     static_string(static_string const&) = default;
     static_string(static_string &&)     = default;

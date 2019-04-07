@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
         {
             mjolnir::static_string<8> str("hello, world!");
         }
-        catch(std::length_error)
+        catch(std::length_error const&)
         {
             thrown = true;
         }

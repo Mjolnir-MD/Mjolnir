@@ -109,7 +109,7 @@ struct tuple_output_helper<N, N>
 {
     template<typename charT, typename traits, typename ... Ts>
     static std::basic_ostream<charT, traits>&
-    invoke(std::basic_ostream<charT, traits>& os, const std::tuple<Ts...>& t)
+    invoke(std::basic_ostream<charT, traits>& os, const std::tuple<Ts...>&)
     {
         static_assert(N == sizeof...(Ts), "");
         return os;
