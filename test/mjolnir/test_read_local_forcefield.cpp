@@ -92,7 +92,8 @@ BOOST_AUTO_TEST_CASE(read_several_local_forcefield)
         for(const auto& interaction_ptr : lff)
         {
             BOOST_TEST(static_cast<bool>(interaction_ptr));
-            found[typeid(*interaction_ptr)] = true;
+            const auto& deref = *interaction_ptr;
+            found[typeid(deref)] = true;
         }
         BOOST_TEST(found[typeid(bond_length_interaction)]);
         BOOST_TEST(found[typeid(bond_angle_interaction)]);
