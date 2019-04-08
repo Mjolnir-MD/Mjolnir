@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_READ_UNIT_SYSTEM_HPP
-#define MJOLNIR_READ_UNIT_SYSTEM_HPP
+#ifndef MJOLNIR_INPUT_READ_UNIT_SYSTEM_HPP
+#define MJOLNIR_INPUT_READ_UNIT_SYSTEM_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/core/Unit.hpp>

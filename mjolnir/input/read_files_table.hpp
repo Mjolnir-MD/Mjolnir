@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_READ_FILES_TABLE_H
-#define MJOLNIR_READ_FILES_TABLE_H
+#ifndef MJOLNIR_INPUT_READ_FILES_TABLE_HPP
+#define MJOLNIR_INPUT_READ_FILES_TABLE_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/util/logger.hpp>
 

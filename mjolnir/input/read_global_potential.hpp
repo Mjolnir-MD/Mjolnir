@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_READ_GLOBAL_POTENTIAL_HPP
-#define MJOLNIR_READ_GLOBAL_POTENTIAL_HPP
+#ifndef MJOLNIR_INPUT_READ_GLOBAL_POTENTIAL_HPP
+#define MJOLNIR_INPUT_READ_GLOBAL_POTENTIAL_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>

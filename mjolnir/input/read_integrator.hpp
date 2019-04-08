@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_READ_INTEGRATOR
-#define MJOLNIR_READ_INTEGRATOR
+#ifndef MJOLNIR_INPUT_READ_INTEGRATOR_HPP
+#define MJOLNIR_INPUT_READ_INTEGRATOR_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/VelocityVerletIntegrator.hpp>
 #include <mjolnir/core/UnderdampedLangevinIntegrator.hpp>

@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_READ_INPUT_FILE
-#define MJOLNIR_READ_INPUT_FILE
+#ifndef MJOLNIR_INPUT_READ_INPUT_FILE_HPP
+#define MJOLNIR_INPUT_READ_INPUT_FILE_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorBase.hpp>
