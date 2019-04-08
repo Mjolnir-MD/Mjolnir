@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_CORE_VERLET_LIST
-#define MJOLNIR_CORE_VERLET_LIST
+#ifndef MJOLNIR_CORE_VERLET_LIST_HPP
+#define MJOLNIR_CORE_VERLET_LIST_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
 #include <mjolnir/core/ExclusionList.hpp>

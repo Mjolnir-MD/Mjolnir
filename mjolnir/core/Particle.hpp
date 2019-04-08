@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_PARTICLE_HPP
-#define MJOLNIR_PARTICLE_HPP
+#ifndef MJOLNIR_CORE_PARTICLE_HPP
+#define MJOLNIR_CORE_PARTICLE_HPP
 #include <mjolnir/util/static_string.hpp>
 
 namespace mjolnir

@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_MOLECULAR_DYNAMICS_SIMULATOR
-#define MJOLNIR_MOLECULAR_DYNAMICS_SIMULATOR
+#ifndef MJOLNIR_CORE_MOLECULAR_DYNAMICS_SIMULATOR_HPP
+#define MJOLNIR_CORE_MOLECULAR_DYNAMICS_SIMULATOR_HPP
 #include <mjolnir/core/SimulatorBase.hpp>
 #include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/System.hpp>

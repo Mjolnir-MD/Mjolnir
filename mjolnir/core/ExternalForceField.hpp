@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_EXTERNAL_FORCE_FIELD
-#define MJOLNIR_EXTERNAL_FORCE_FIELD
+#ifndef MJOLNIR_CORE_EXTERNAL_FORCE_FIELD_HPP
+#define MJOLNIR_CORE_EXTERNAL_FORCE_FIELD_HPP
 #include <mjolnir/core/ExternalForceInteractionBase.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <utility>

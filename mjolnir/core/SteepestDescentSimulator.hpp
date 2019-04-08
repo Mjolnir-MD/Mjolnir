@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_STEEPEST_DESCENT_SIMULATOR
-#define MJOLNIR_STEEPEST_DESCENT_SIMULATOR
+#ifndef MJOLNIR_CORE_STEEPEST_DESCENT_SIMULATOR_HPP
+#define MJOLNIR_CORE_STEEPEST_DESCENT_SIMULATOR_HPP
 #include <mjolnir/core/SimulatorBase.hpp>
 #include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/System.hpp>

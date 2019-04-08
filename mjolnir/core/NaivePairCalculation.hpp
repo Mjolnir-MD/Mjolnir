@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_CORE_NAIVE_PAIR_CALCULATION
-#define MJOLNIR_CORE_NAIVE_PAIR_CALCULATION
+#ifndef MJOLNIR_CORE_NAIVE_PAIR_CALCULATION_HPP
+#define MJOLNIR_CORE_NAIVE_PAIR_CALCULATION_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
 #include <mjolnir/core/ExclusionList.hpp>

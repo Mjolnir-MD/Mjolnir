@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_CORE_TOPOLOGY_H
-#define MJOLNIR_CORE_TOPOLOGY_H
+#ifndef MJOLNIR_CORE_TOPOLOGY_HPP
+#define MJOLNIR_CORE_TOPOLOGY_HPP
 #include <mjolnir/util/throw_exception.hpp>
 #include <utility>
 #include <algorithm>
