@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_UNIFORM_LENNARD_JONES_POTENTIAL
-#define MJOLNIR_UNIFORM_LENNARD_JONES_POTENTIAL
+#ifndef MJOLNIR_POTENTIAL_GLOBAL_UNIFORM_LENNARD_JONES_POTENTIAL_HPP
+#define MJOLNIR_POTENTIAL_GLOBAL_UNIFORM_LENNARD_JONES_POTENTIAL_HPP
 #include <mjolnir/potential/global/IgnoreMolecule.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>

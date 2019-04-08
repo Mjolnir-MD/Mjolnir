@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
-#define MJOLNIR_EXCLUDED_VOLUME_POTENTIAL
+#ifndef MJOLNIR_POTENTIAL_GLOBAL_EXCLUDED_VOLUME_POTENTIAL_HPP
+#define MJOLNIR_POTENTIAL_GLOBAL_EXCLUDED_VOLUME_POTENTIAL_HPP
 #include <mjolnir/potential/global/IgnoreMolecule.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>
