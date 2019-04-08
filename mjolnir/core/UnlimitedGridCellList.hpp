@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_UNLIMITED_GRID_CELL_LIST
-#define MJOLNIR_UNLIMITED_GRID_CELL_LIST
+#ifndef MJOLNIR_CORE_UNLIMITED_GRID_CELL_LIST_HPP
+#define MJOLNIR_CORE_UNLIMITED_GRID_CELL_LIST_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
 #include <mjolnir/core/ExclusionList.hpp>

@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_READ_OBSERVER_HPP
-#define MJOLNIR_READ_OBSERVER_HPP
+#ifndef MJOLNIR_INPUT_READ_OBSERVER_HPP
+#define MJOLNIR_INPUT_READ_OBSERVER_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/EnergyObserver.hpp>

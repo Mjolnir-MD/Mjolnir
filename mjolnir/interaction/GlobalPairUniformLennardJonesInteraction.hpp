@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_GLOBAL_PAIR_UNIFORM_LENNARD_JONES_INTEARACTION
-#define MJOLNIR_GLOBAL_PAIR_UNIFORM_LENNARD_JONES_INTEARACTION
+#ifndef MJOLNIR_INTEARACTION_GLOBAL_PAIR_UNIFORM_LENNARD_JONES_INTEARACTION_HPP
+#define MJOLNIR_INTEARACTION_GLOBAL_PAIR_UNIFORM_LENNARD_JONES_INTEARACTION_HPP
 #include <mjolnir/interaction/GlobalPairInteraction.hpp>
 #include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>

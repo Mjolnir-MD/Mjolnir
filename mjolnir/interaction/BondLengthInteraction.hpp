@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_BOND_LENGTH_INTERACTION
-#define MJOLNIR_BOND_LENGTH_INTERACTION
+#ifndef MJOLNIR_INTERACTION_BOND_LENGTH_INTERACTION_HPP
+#define MJOLNIR_INTERACTION_BOND_LENGTH_INTERACTION_HPP
 #include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/string.hpp>

@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_FORCE_FIELD
-#define MJOLNIR_FORCE_FIELD
+#ifndef MJOLNIR_CORE_FORCE_FIELD_HPP
+#define MJOLNIR_CORE_FORCE_FIELD_HPP
 #include <mjolnir/core/LocalForceField.hpp>
 #include <mjolnir/core/GlobalForceField.hpp>
 #include <mjolnir/core/ExternalForceField.hpp>

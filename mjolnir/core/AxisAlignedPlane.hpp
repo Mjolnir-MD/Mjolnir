@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_AXIS_ALIGNED_PLANE_HPP
-#define MJOLNIR_AXIS_ALIGNED_PLANE_HPP
+#ifndef MJOLNIR_CORE_AXIS_ALIGNED_PLANE_HPP
+#define MJOLNIR_CORE_AXIS_ALIGNED_PLANE_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>

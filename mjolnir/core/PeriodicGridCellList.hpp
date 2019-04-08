@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_PERIODIC_GRID_CELL_LIST
-#define MJOLNIR_PERIODIC_GRID_CELL_LIST
+#ifndef MJOLNIR_CORE_PERIODIC_GRID_CELL_LIST_HPP
+#define MJOLNIR_CORE_PERIODIC_GRID_CELL_LIST_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
 #include <mjolnir/core/ExclusionList.hpp>

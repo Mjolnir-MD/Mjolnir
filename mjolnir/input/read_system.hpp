@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_READ_SYSTEM
-#define MJOLNIR_READ_SYSTEM
+#ifndef MJOLNIR_INPUT_READ_SYSTEM_HPP
+#define MJOLNIR_INPUT_READ_SYSTEM_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>

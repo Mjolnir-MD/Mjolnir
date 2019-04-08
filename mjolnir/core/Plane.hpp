@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_PLANE_HPP
-#define MJOLNIR_PLANE_HPP
+#ifndef MJOLNIR_CORE_PLANE_HPP
+#define MJOLNIR_CORE_PLANE_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 

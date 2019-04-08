@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_IGNORE_MOLECULE_HPP
-#define MJOLNIR_IGNORE_MOLECULE_HPP
+#ifndef MJOLNIR_POTENTIAL_GLOBAL_IGNORE_MOLECULE_HPP
+#define MJOLNIR_POTENTIAL_GLOBAL_IGNORE_MOLECULE_HPP
 #include <mjolnir/util/throw_exception.hpp>
 #include <string>
 #include <memory>

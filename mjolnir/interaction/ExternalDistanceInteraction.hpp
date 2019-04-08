@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_BOX_INTEARACTION_BASE
-#define MJOLNIR_BOX_INTEARACTION_BASE
+#ifndef MJOLNIR_INTERACTION_EXTERNAL_DISTANCE_INTERACTION_HPP
+#define MJOLNIR_INTERACTION_EXTERNAL_DISTANCE_INTERACTION_HPP
 #include <mjolnir/core/ExternalForceInteractionBase.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/string.hpp>

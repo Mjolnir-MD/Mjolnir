@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_SYSTEM_HPP
-#define MJOLNIR_SYSTEM_HPP
+#ifndef MJOLNIR_CORE_SYSTEM_HPP
+#define MJOLNIR_CORE_SYSTEM_HPP
 #include <mjolnir/core/Particle.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <vector>

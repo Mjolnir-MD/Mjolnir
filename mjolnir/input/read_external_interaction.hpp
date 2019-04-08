@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_READ_EXTERNAL_INTERACTION_HPP
-#define MJOLNIR_READ_EXTERNAL_INTERACTION_HPP
+#ifndef MJOLNIR_INPUT_READ_EXTERNAL_INTERACTION_HPP
+#define MJOLNIR_INPUT_READ_EXTERNAL_INTERACTION_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/interaction/ExternalDistanceInteraction.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>

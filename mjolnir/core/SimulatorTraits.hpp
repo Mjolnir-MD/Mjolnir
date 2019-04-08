@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_DEFAULT_TRAITS
-#define MJOLNIR_DEFAULT_TRAITS
+#ifndef MJOLNIR_CORE_SIMULATOR_TRAITS_HPP
+#define MJOLNIR_CORE_SIMULATOR_TRAITS_HPP
 #include <mjolnir/math/Vector.hpp>
 
 namespace mjolnir

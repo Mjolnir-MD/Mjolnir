@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_DEBYE_HUCKEL_POTENTIAL
-#define MJOLNIR_DEBYE_HUCKEL_POTENTIAL
+#ifndef MJOLNIR_POTENTIAL_GLOBAL_DEBYE_HUCKEL_POTENTIAL_HPP
+#define MJOLNIR_POTENTIAL_GLOBAL_DEBYE_HUCKEL_POTENTIAL_HPP
 #include <mjolnir/potential/global/IgnoreMolecule.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/core/System.hpp>

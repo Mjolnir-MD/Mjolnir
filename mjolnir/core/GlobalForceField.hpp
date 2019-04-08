@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_GLOBAL_FORCE_FIELD
-#define MJOLNIR_GLOBAL_FORCE_FIELD
+#ifndef MJOLNIR_CORE_GLOBAL_FORCE_FIELD_HPP
+#define MJOLNIR_CORE_GLOBAL_FORCE_FIELD_HPP
 #include <mjolnir/core/GlobalInteractionBase.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <vector>

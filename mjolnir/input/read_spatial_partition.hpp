@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_READ_SPATIAL_PARTITION
-#define MJOLNIR_READ_SPATIAL_PARTITION
+#ifndef MJOLNIR_INPUT_READ_SPATIAL_PARTITION_HPP
+#define MJOLNIR_INPUT_READ_SPATIAL_PARTITION_HPP
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/UnlimitedGridCellList.hpp>
 #include <mjolnir/core/PeriodicGridCellList.hpp>

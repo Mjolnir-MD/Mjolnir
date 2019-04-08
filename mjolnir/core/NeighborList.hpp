@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_NEIGHBOR_LIST_HPP
-#define MJOLNIR_NEIGHBOR_LIST_HPP
+#ifndef MJOLNIR_CORE_NEIGHBOR_LIST_HPP
+#define MJOLNIR_CORE_NEIGHBOR_LIST_HPP
 #include <mjolnir/util/range.hpp>
 #include <mjolnir/util/empty.hpp>
 #include <type_traits>

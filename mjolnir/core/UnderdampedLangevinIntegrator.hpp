@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_UNDERDAMPED_LANGEVIN_INTEGRATOR
-#define MJOLNIR_UNDERDAMPED_LANGEVIN_INTEGRATOR
+#ifndef MJOLNIR_CORE_UNDERDAMPED_LANGEVIN_INTEGRATOR_HPP
+#define MJOLNIR_CORE_UNDERDAMPED_LANGEVIN_INTEGRATOR_HPP
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>

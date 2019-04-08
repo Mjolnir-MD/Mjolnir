@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_BOUNDARY_CONDITION
-#define MJOLNIR_BOUNDARY_CONDITION
+#ifndef MJOLNIR_CORE_BOUNDARY_CONDITION_HPP
+#define MJOLNIR_CORE_BOUNDARY_CONDITION_HPP
 #include <mjolnir/math/math.hpp>
 #include <cstddef>
 

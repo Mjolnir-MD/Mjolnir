@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_READ_GLOBAL_FORCEFIELD_HPP
-#define MJOLNIR_READ_GLOBAL_FORCEFIELD_HPP
+#ifndef MJOLNIR_INPUT_READ_GLOBAL_FORCEFIELD_HPP
+#define MJOLNIR_INPUT_READ_GLOBAL_FORCEFIELD_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/util/logger.hpp>

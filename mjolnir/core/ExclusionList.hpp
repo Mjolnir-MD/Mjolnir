@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_EXCLUSION_LIST_HPP
-#define MJOLNIR_EXCLUSION_LIST_HPP
+#ifndef MJOLNIR_CORE_EXCLUSION_LIST_HPP
+#define MJOLNIR_CORE_EXCLUSION_LIST_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/util/range.hpp>
 #include <mjolnir/util/logger.hpp>

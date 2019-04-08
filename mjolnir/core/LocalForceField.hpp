@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_LOCAL_FORCE_FIELD
-#define MJOLNIR_LOCAL_FORCE_FIELD
+#ifndef MJOLNIR_CORE_LOCAL_FORCE_FIELD_HPP
+#define MJOLNIR_CORE_LOCAL_FORCE_FIELD_HPP
 #include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <utility>

@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_READ_LOCAL_POTENTIAL_HPP
-#define MJOLNIR_READ_LOCAL_POTENTIAL_HPP
+#ifndef MJOLNIR_INPUT_READ_LOCAL_POTENTIAL_HPP
+#define MJOLNIR_INPUT_READ_LOCAL_POTENTIAL_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/potential/local/GoContactPotential.hpp>

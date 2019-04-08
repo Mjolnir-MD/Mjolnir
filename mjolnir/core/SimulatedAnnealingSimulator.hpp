@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_SIMULATED_ANNEALING_SIMULATOR_HPP
-#define MJOLNIR_SIMULATED_ANNEALING_SIMULATOR_HPP
+#ifndef MJOLNIR_CORE_SIMULATED_ANNEALING_SIMULATOR_HPP
+#define MJOLNIR_CORE_SIMULATED_ANNEALING_SIMULATOR_HPP
 #include <mjolnir/core/SimulatorBase.hpp>
 #include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/System.hpp>

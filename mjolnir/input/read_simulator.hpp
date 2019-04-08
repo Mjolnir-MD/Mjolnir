@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_READ_SIMULATOR
-#define MJOLNIR_READ_SIMULATOR
+#ifndef MJOLNIR_INPUT_READ_SIMULATOR_HPP
+#define MJOLNIR_INPUT_READ_SIMULATOR_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/MolecularDynamicsSimulator.hpp>
 #include <mjolnir/core/SteepestDescentSimulator.hpp>
