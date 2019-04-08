@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_MATH_MATRIX
-#define MJOLNIR_MATH_MATRIX
+#ifndef MJOLNIR_MATH_MATRIX_HPP
+#define MJOLNIR_MATH_MATRIX_HPP
 #include <mjolnir/util/type_traits.hpp>
 #include <algorithm>
 #include <array>

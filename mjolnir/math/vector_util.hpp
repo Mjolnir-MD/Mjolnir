@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_MATH_VECTOR_UTIL_H
-#define MJOLNIR_MATH_VECTOR_UTIL_H
+#ifndef MJOLNIR_MATH_VECTOR_UTIL_HPP
+#define MJOLNIR_MATH_VECTOR_UTIL_HPP
 
 // these codes are for buffering difference between implementations.
 
