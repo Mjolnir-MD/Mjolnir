@@ -79,13 +79,13 @@ class ForceField
         external_.update_margin(dmargin, sys);
     }
 
-    void calc_force(system_type& sys)
+    void calc_force(system_type& sys) const noexcept
     {
         local_   .calc_force(sys);
         global_  .calc_force(sys);
         external_.calc_force(sys);
     }
-    real_type calc_energy(const system_type& sys) const
+    real_type calc_energy(const system_type& sys) const noexcept
     {
         return local_.calc_energy(sys) + global_.calc_energy(sys) +
             external_.calc_energy(sys);
