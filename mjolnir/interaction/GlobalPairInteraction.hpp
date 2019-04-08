@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_GLOBAL_PAIR_INTEARACTION
-#define MJOLNIR_GLOBAL_PAIR_INTEARACTION
+#ifndef MJOLNIR_INTEARACTION_GLOBAL_PAIR_INTEARACTION_HPP
+#define MJOLNIR_INTEARACTION_GLOBAL_PAIR_INTEARACTION_HPP
 #include <mjolnir/core/GlobalInteractionBase.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/logger.hpp>

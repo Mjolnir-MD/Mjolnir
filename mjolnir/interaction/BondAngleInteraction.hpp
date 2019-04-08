@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_CORE_BOND_ANGLE_INTERACTION
-#define MJOLNIR_CORE_BOND_ANGLE_INTERACTION
+#ifndef MJOLNIR_INTERACTION_BOND_ANGLE_INTERACTION_HPP
+#define MJOLNIR_INTERACTION_BOND_ANGLE_INTERACTION_HPP
 #include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/math/constants.hpp>
