@@ -7,7 +7,7 @@
 #endif
 
 #include <test/util/traits.hpp>
-#include <mjolnir/interaction/DihedralAngleInteraction.hpp>
+#include <mjolnir/interaction/local/DihedralAngleInteraction.hpp>
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
