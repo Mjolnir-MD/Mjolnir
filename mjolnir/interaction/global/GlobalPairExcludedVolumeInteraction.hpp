@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_INTERACTION_GLOBAL_PAIR_EXCLUDED_VOLUME_INTEARACTION_HPP
 #define MJOLNIR_INTERACTION_GLOBAL_PAIR_EXCLUDED_VOLUME_INTEARACTION_HPP
-#include <mjolnir/interaction/GlobalPairInteraction.hpp>
+#include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
 #include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <memory>

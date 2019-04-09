@@ -1,9 +1,9 @@
 #ifndef MJOLNIR_INPUT_READ_LOCAL_INTERACTION_HPP
 #define MJOLNIR_INPUT_READ_LOCAL_INTERACTION_HPP
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/interaction/BondLengthInteraction.hpp>
-#include <mjolnir/interaction/BondAngleInteraction.hpp>
-#include <mjolnir/interaction/DihedralAngleInteraction.hpp>
+#include <mjolnir/interaction/local/BondLengthInteraction.hpp>
+#include <mjolnir/interaction/local/BondAngleInteraction.hpp>
+#include <mjolnir/interaction/local/DihedralAngleInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
