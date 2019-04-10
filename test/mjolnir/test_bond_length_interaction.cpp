@@ -7,7 +7,7 @@
 #endif
 
 #include <test/util/traits.hpp>
-#include <mjolnir/interaction/BondLengthInteraction.hpp>
+#include <mjolnir/interaction/local/BondLengthInteraction.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 

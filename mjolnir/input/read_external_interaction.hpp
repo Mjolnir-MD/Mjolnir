@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_INPUT_READ_EXTERNAL_INTERACTION_HPP
 #define MJOLNIR_INPUT_READ_EXTERNAL_INTERACTION_HPP
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/interaction/ExternalDistanceInteraction.hpp>
+#include <mjolnir/interaction/external/ExternalDistanceInteraction.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>

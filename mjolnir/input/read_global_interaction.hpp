@@ -1,10 +1,10 @@
 #ifndef MJOLNIR_INPUT_READ_GLOBAL_INTERACTION_HPP
 #define MJOLNIR_INPUT_READ_GLOBAL_INTERACTION_HPP
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/interaction/GlobalPairInteraction.hpp>
-#include <mjolnir/interaction/GlobalPairLennardJonesInteraction.hpp>
-#include <mjolnir/interaction/GlobalPairUniformLennardJonesInteraction.hpp>
-#include <mjolnir/interaction/GlobalPairExcludedVolumeInteraction.hpp>
+#include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
+#include <mjolnir/interaction/global/GlobalPairLennardJonesInteraction.hpp>
+#include <mjolnir/interaction/global/GlobalPairUniformLennardJonesInteraction.hpp>
+#include <mjolnir/interaction/global/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>

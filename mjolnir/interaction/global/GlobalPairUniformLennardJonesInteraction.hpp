@@ -1,18 +1,18 @@
-#ifndef MJOLNIR_INTERACTION_GLOBAL_PAIR_EXCLUDED_VOLUME_INTEARACTION_HPP
-#define MJOLNIR_INTERACTION_GLOBAL_PAIR_EXCLUDED_VOLUME_INTEARACTION_HPP
-#include <mjolnir/interaction/GlobalPairInteraction.hpp>
-#include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
+#ifndef MJOLNIR_INTEARACTION_GLOBAL_PAIR_UNIFORM_LENNARD_JONES_INTEARACTION_HPP
+#define MJOLNIR_INTEARACTION_GLOBAL_PAIR_UNIFORM_LENNARD_JONES_INTEARACTION_HPP
+#include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
+#include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <memory>
 
 namespace mjolnir
 {
 
-// specialization for Pair<ExcludedVolume>
+// specialization for GlobalPair<LennardJones>
 template<typename traitsT, typename partitionT>
 class GlobalPairInteraction<
     traitsT,
-    ExcludedVolumePotential<typename traitsT::real_type>,
+    UniformLennardJonesPotential<typename traitsT::real_type>,
     partitionT
     > final : public GlobalInteractionBase<traitsT>
 {
@@ -21,7 +21,7 @@ class GlobalPairInteraction<
     using traits_type     = traitsT;
     using partition_type  = partitionT;
     using base_type       = GlobalInteractionBase<traits_type>;
-    using potential_type  = ExcludedVolumePotential<typename traitsT::real_type>;
+    using potential_type  = UniformLennardJonesPotential<typename traits_type::real_type>;
 
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
@@ -68,34 +68,31 @@ class GlobalPairInteraction<
 
     void calc_force(system_type& sys) const noexcept override
     {
-        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
-        MJOLNIR_LOG_FUNCTION_DEBUG();
+        constexpr auto cutoff_ratio    = potential_type::cutoff_ratio;
+        constexpr auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
+        const     auto sigma           = this->potential_.sigma();
+        const     auto sigma_sq        = sigma * sigma;
+        const     auto r_cutoff_sq     = cutoff_ratio_sq * sigma_sq;
+        const     auto epsilon         = this->potential_.epsilon();
 
-        constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
-        constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-        const     auto  epsilon12       = 12 * potential_.epsilon();
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             for(const auto& ptnr : this->partition_.partners(i))
             {
-                const auto  j     = ptnr.index;
-                const auto& param = ptnr.parameter(); // sum of radius
+                const auto j = ptnr.index;
 
                 const coordinate_type rij =
                     sys.adjust_direction(sys[j].position - sys[i].position);
                 const real_type l_sq = math::length_sq(rij);
 
-                const real_type sigma_sq = param * param;
-                if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
+                if(r_cutoff_sq < l_sq) {continue;}
 
-                MJOLNIR_LOG_DEBUG("calculating force between ", i, " and ", j);
-
-                const real_type rcp_l_sq = real_type(1) / l_sq;
-                const real_type s2l2     = sigma_sq * rcp_l_sq;
-                const real_type s6l6     = s2l2 * s2l2 * s2l2;
+                const real_type rcp_l_sq = 1 / l_sq;
+                const real_type s2l2 = sigma_sq * rcp_l_sq;
+                const real_type s6l6 = s2l2 * s2l2 * s2l2;
 
                 const coordinate_type f = rij *
-                    (-epsilon12 * s6l6 * s6l6 * rcp_l_sq);
+                    (24 * epsilon * (s6l6 - 2 * s6l6 * s6l6) * rcp_l_sq);
 
                 sys[i].force += f;
                 sys[j].force -= f;
@@ -106,42 +103,39 @@ class GlobalPairInteraction<
 
     real_type calc_energy(const system_type& sys) const noexcept override
     {
-        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
-        MJOLNIR_LOG_FUNCTION_DEBUG();
-
         real_type E(0);
 
-        constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
-        constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-        constexpr auto  coef_at_cutoff  = potential_type::coef_at_cutoff;
-        const     auto  epsilon         = potential_.epsilon();
+        constexpr auto cutoff_ratio    = potential_type::cutoff_ratio;
+        constexpr auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
+        constexpr auto coef_at_cutoff  = potential_type::coef_at_cutoff;
+        const     auto sigma           = this->potential_.sigma();
+        const     auto sigma_sq        = sigma * sigma;
+        const     auto r_cutoff_sq     = cutoff_ratio_sq * sigma_sq;
+        const     auto epsilon         = this->potential_.epsilon();
+
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             for(const auto& ptnr : this->partition_.partners(i))
             {
-                const auto  j     = ptnr.index;
-                const auto& param = ptnr.parameter();
+                const auto j = ptnr.index;
 
                 const coordinate_type rij =
                     sys.adjust_direction(sys[j].position - sys[i].position);
                 const real_type l_sq = math::length_sq(rij);
 
-                const real_type sigma_sq = param * param;
-                if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
-
-                MJOLNIR_LOG_DEBUG("calculating energy between ", i, " and ", j);
+                if(r_cutoff_sq < l_sq) {continue;}
 
                 const real_type s2l2 = sigma_sq / l_sq;
                 const real_type s6l6 = s2l2 * s2l2 * s2l2;
 
-                E += epsilon * (s6l6 * s6l6 - coef_at_cutoff);
+                E += 4 * epsilon * (s6l6 * s6l6 - s6l6 - coef_at_cutoff);
             }
         }
         return E;
     }
 
     std::string name() const override
-    {return "GlobalPairExcludedVolumeInteraction";}
+    {return "GlobalPairUniformLennardJonesInteraction";}
 
   private:
 
