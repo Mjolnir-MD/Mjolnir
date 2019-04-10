@@ -24,6 +24,7 @@ set(TEST_NAMES
     test_implicit_membrane_potential
     test_excluded_volume_wall_potential
     test_lennard_jones_wall_potential
+    test_harmonic_restraint_potential
     test_axis_aligned_plane_shape
 
     test_read_harmonic_potential
