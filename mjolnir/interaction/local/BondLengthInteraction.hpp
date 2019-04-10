@@ -12,7 +12,7 @@ namespace mjolnir
 
 /*! @brief calculate energy and force of Bond length type local interaction */
 template<typename traitsT, typename potentialT>
-class BondLengthInteraction : public LocalInteractionBase<traitsT>
+class BondLengthInteraction final : public LocalInteractionBase<traitsT>
 {
   public:
     using traits_type          = traitsT;
