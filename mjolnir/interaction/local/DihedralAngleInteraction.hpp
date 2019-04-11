@@ -13,7 +13,7 @@ namespace mjolnir
 // The implementation is based on the article written by H. Bekker,
 // H.J.C. Berendsen and W.F. van Gunsteren (1995) J. Comput. Chem.
 template<typename traitsT, typename potentialT>
-class DihedralAngleInteraction : public LocalInteractionBase<traitsT>
+class DihedralAngleInteraction final : public LocalInteractionBase<traitsT>
 {
   public:
     using traits_type          = traitsT;

@@ -74,10 +74,10 @@ void NaivePairCalculation<traitsT, parameterT>::make(
         const system_type& sys, const PotentialT& pot)
 {
     this->neighbors_.clear();
-    for(std::size_t i=0, sz = sys.size()-1; i < sz; ++i)
+    for(std::size_t i=0; i < sys.size(); ++i)
     {
         std::vector<neighbor_type> partners;
-        for(std::size_t j=i+1; j<sys.size(); ++j)
+        for(std::size_t j=i+1; j < sys.size(); ++j)
         {
             if(this->exclusion_.is_excluded(i, j))
             {
