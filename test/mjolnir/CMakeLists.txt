@@ -18,14 +18,16 @@ set(TEST_NAMES
     test_uniform_lennard_jones_potential
     test_excluded_volume_potential
     test_debye_huckel_potential
-    test_bond_length_interaction
-    test_bond_angle_interaction
-    test_dihedral_angle_interaction
     test_implicit_membrane_potential
     test_excluded_volume_wall_potential
     test_lennard_jones_wall_potential
     test_harmonic_restraint_potential
     test_axis_aligned_plane_shape
+
+    test_bond_length_interaction
+    test_bond_angle_interaction
+    test_dihedral_angle_interaction
+    test_position_restraint_interaction
 
     test_read_harmonic_potential
     test_read_go_contact_potential
