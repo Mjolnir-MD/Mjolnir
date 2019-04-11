@@ -47,6 +47,7 @@ set(TEST_NAMES
     test_read_bond_angle_interaction
     test_read_dihedral_angle_interaction
     test_read_global_pair_interaction
+    test_read_position_restraint_interaction
 
     test_read_local_forcefield
     test_read_global_forcefield
