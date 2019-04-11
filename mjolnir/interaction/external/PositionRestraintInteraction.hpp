@@ -80,7 +80,7 @@ void PositionRestraintInteraction<traitsT, potT>::calc_force(
         const auto dV   = this->potential_.derivative(pid, dist);
         if(dV == 0.0){continue;}
 
-        sys.force(pid) -= dV * dr; // F = -dU
+        sys.force(pid) += dV * dr;
     }
     return ;
 }
