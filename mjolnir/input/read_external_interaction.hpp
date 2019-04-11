@@ -154,7 +154,7 @@ read_external_position_restraint_interaction(const toml::value& external)
 
     std::vector<std::pair<std::size_t, coordinate_type>> points;
 
-    const auto& parameters = toml::find<toml::array>(external, "parameter");
+    const auto& parameters = toml::find<toml::array>(external, "parameters");
     for(const auto& parameter : parameters)
     {
         const auto index    = toml::find<std::size_t>(parameter, "index");
