@@ -76,11 +76,12 @@ void PositionRestraintInteraction<traitsT, potT>::calc_force(
         const auto& r_i = sys.position(pid);
         const auto  dr  = sys.adjust_direction(pos - r_i);
 
-        const auto dist = math::length(dr);
+        const auto rlen = math::rlength(dr); // 1 / |dr|
+        const auto dist = math::length_sq(dr) * rlen;
         const auto dV   = this->potential_.derivative(pid, dist);
         if(dV == 0.0){continue;}
 
-        sys.force(pid) += dV * dr;
+        sys.force(pid) += (dV * rlen) * dr;
     }
     return ;
 }
