@@ -53,7 +53,7 @@ class HarmonicRestraintPotential
         retval.reserve(this->params_.size());
         for(std::size_t i=0; i<this->params_.size(); ++i)
         {
-            if(this->params_[i].second != real_type(0.0))
+            if(this->params_[i].first != real_type(0.0))
             {
                 retval.push_back(i);
             }
