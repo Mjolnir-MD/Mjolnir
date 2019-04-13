@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_INPUT_READ_EXTERNAL_POTENTIAL_HPP
 #define MJOLNIR_INPUT_READ_EXTERNAL_POTENTIAL_HPP
 #include <extlib/toml/toml.hpp>
+#include <mjolnir/potential/external/HarmonicRestraintPotential.hpp>
 #include <mjolnir/potential/external/ImplicitMembranePotential.hpp>
 #include <mjolnir/potential/external/LennardJonesWallPotential.hpp>
 #include <mjolnir/potential/external/ExcludedVolumeWallPotential.hpp>
@@ -108,6 +109,37 @@ read_excluded_volume_wall_potential(const toml::value& external)
         MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", rad);
     }
     return ExcludedVolumeWallPotential<real_type>(eps, std::move(params));
+}
+
+template<typename realT>
+HarmonicRestraintPotential<realT>
+read_harmonic_restraint_potential(const toml::value& external)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type = realT;
+    using potential_type = HarmonicRestraintPotential<real_type>;
+    using parameter_type = typename potential_type::parameter_type;
+
+    const auto& ps = toml::find<toml::array>(external, "parameters");
+    MJOLNIR_LOG_INFO("number of parameters = ", ps.size());
+
+    std::vector<parameter_type> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        const auto idx = toml::find<std::size_t>(param, "index");
+        const auto k   = toml::find<real_type  >(param, "k");
+        const auto v0  = toml::find<real_type  >(param, "v0");
+        if(params.size() <= idx)
+        {
+            params.resize(idx+1, parameter_type(0, 0));
+        }
+        params.at(idx) = parameter_type(k, v0);
+
+        MJOLNIR_LOG_INFO("idx = ", idx, ", k = ", k, ", v0 = ", v0);
+    }
+    return HarmonicRestraintPotential<real_type>(std::move(params));
 }
 
 } // mjolnir
