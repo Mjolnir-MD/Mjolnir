@@ -16,12 +16,14 @@ BOOST_AUTO_TEST_CASE(read_dihedral_angle_harmonic)
     using real_type = double;
     using traits_type = mjolnir::test::traits<real_type>;
     {
-        const toml::table v = toml::table{
-            {"interaction", toml::value("DihedralAngle")},
-            {"potential",   toml::value("Harmonic")},
-            {"topology",    toml::value("bond")},
-            {"parameters",  toml::value(toml::array(/*empty*/))}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction = "DihedralAngle"
+            potential   = "Harmonic"
+            topology    = "none"
+            parameters  = []
+        )"_toml;
+
         const auto base = mjolnir::read_local_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
@@ -39,12 +41,14 @@ BOOST_AUTO_TEST_CASE(read_dihedral_angle_go_contact)
     using real_type = double;
     using traits_type = mjolnir::test::traits<real_type>;
     {
-        const toml::table v = toml::table{
-            {"interaction", toml::value("DihedralAngle")},
-            {"potential",   toml::value("ClementiDihedral")},
-            {"topology",    toml::value("contact")},
-            {"parameters",  toml::value(toml::array(/*empty*/))}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction = "DihedralAngle"
+            potential   = "ClementiDihedral"
+            topology    = "none"
+            parameters  = []
+        )"_toml;
+
         const auto base = mjolnir::read_local_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
@@ -62,12 +66,14 @@ BOOST_AUTO_TEST_CASE(read_dihedral_angle_gaussian)
     using real_type = double;
     using traits_type = mjolnir::test::traits<real_type>;
     {
-        const toml::table v = toml::table{
-            {"interaction", toml::value("DihedralAngle")},
-            {"potential",   toml::value("Gaussian")},
-            {"topology",    toml::value("none")},
-            {"parameters",  toml::value(toml::array(/*empty*/))}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction = "DihedralAngle"
+            potential   = "Gaussian"
+            topology    = "none"
+            parameters  = []
+        )"_toml;
+
         const auto base = mjolnir::read_local_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
@@ -85,12 +91,14 @@ BOOST_AUTO_TEST_CASE(read_dihedral_angle_periodic_gaussian)
     using real_type = double;
     using traits_type = mjolnir::test::traits<real_type>;
     {
-        const toml::table v = toml::table{
-            {"interaction", toml::value("DihedralAngle")},
-            {"potential",   toml::value("PeriodicGaussian")},
-            {"topology",    toml::value("none")},
-            {"parameters",  toml::value(toml::array(/*empty*/))}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction = "DihedralAngle"
+            potential   = "PeriodicGaussian"
+            topology    = "none"
+            parameters  = []
+        )"_toml;
+
         const auto base = mjolnir::read_local_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
@@ -108,12 +116,14 @@ BOOST_AUTO_TEST_CASE(read_dihedral_angle_flexible_local)
     using real_type = double;
     using traits_type = mjolnir::test::traits<real_type>;
     {
-        const toml::table v = toml::table{
-            {"interaction", toml::value("DihedralAngle")},
-            {"potential",   toml::value("FlexibleLocalDihedral")},
-            {"topology",    toml::value("none")},
-            {"parameters",  toml::value(toml::array(/*empty*/))}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction = "DihedralAngle"
+            potential   = "FlexibleLocalDihedral"
+            topology    = "none"
+            parameters  = []
+        )"_toml;
+
         const auto base = mjolnir::read_local_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 

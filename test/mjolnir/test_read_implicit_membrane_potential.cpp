@@ -14,23 +14,23 @@ BOOST_AUTO_TEST_CASE(read_implicit_membrane_double)
     using real_type = double;
     constexpr real_type tol = 1e-8;
     {
-        const toml::value v = toml::table{
-            {"interaction",       toml::value("Distance")},
-            {"potential",         toml::value("Excludedvolume_wallWall")},
-            {"shape", toml::value(toml::table{
-                    {"name",     toml::value("AxisAlignedPlane")},
-                    {"axis",     toml::value("-X")},
-                    {"position", toml::value(1.0)},
-                    {"margin",   toml::value(0.5)}
-            })},
-            {"thickness",             toml::value(3.14)},
-            {"interaction_magnitude", toml::value(6.28)},
-            {"bend",                  toml::value(9.42)},
-            {"parameters",            toml::value(toml::array{
-                toml::table{{"index", 0}, {"hydrophobicity", 2.0}},
-                toml::table{{"index", 1}, {"hydrophobicity", 2.0}}
-            })}
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            interaction    = "Distance"
+            potential      = "ExcludedVolumeWall"
+            shape.name     = "AxisAlignedPlane"
+            shape.axis     = "-X"
+            shape.position = 1.0
+            shape.margin   = 0.5
+            thickness      = 3.14
+            interaction_magnitude = 6.28
+            bend                  = 9.42
+            parameters = [
+                {index = 0, hydrophobicity = 2.0},
+                {index = 1, hydrophobicity = 2.0},
+            ]
+        )"_toml;
+
         const auto g = mjolnir::read_implicit_membrane_potential<real_type>(v);
 
         BOOST_TEST(g.hydrophobicities().size()     == 2u);
@@ -49,23 +49,23 @@ BOOST_AUTO_TEST_CASE(read_implicit_membrane_float)
     constexpr real_type tol = 1e-4;
 
     {
-        const toml::value v = toml::table{
-            {"interaction",       toml::value("Distance")},
-            {"potential",         toml::value("Excludedvolume_wallWall")},
-            {"shape", toml::value(toml::table{
-                    {"name",     toml::value("AxisAlignedPlane")},
-                    {"axis",     toml::value("-X")},
-                    {"position", toml::value(1.0)},
-                    {"margin",   toml::value(0.5)}
-            })},
-            {"thickness",             toml::value(3.14)},
-            {"interaction_magnitude", toml::value(6.28)},
-            {"bend",                  toml::value(9.42)},
-            {"parameters",            toml::value(toml::array{
-                toml::table{{"index", 0}, {"hydrophobicity", 2.0}},
-                toml::table{{"index", 1}, {"hydrophobicity", 2.0}}
-            })}
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            interaction    = "Distance"
+            potential      = "ExcludedVolumeWall"
+            shape.name     = "AxisAlignedPlane"
+            shape.axis     = "-X"
+            shape.position = 1.0
+            shape.margin   = 0.5
+            thickness      = 3.14
+            interaction_magnitude = 6.28
+            bend                  = 9.42
+            parameters = [
+                {index = 0, hydrophobicity = 2.0},
+                {index = 1, hydrophobicity = 2.0},
+            ]
+        )"_toml;
+
         const auto g = mjolnir::read_implicit_membrane_potential<real_type>(v);
 
         BOOST_TEST(g.hydrophobicities().size()     == 2u);

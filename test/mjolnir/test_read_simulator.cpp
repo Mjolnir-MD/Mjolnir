@@ -17,17 +17,17 @@ BOOST_AUTO_TEST_CASE(read_newtonian_molecular_dynamics_simulator)
     constexpr real_type tol = 1e-8;
     auto root = mjolnir::test::make_empty_input();
     {
-        const toml::table v = toml::table{
-            {"type",          toml::value("MolecularDynamics")},
-            {"integrator",    toml::value(toml::table{
-                {"type", toml::value("VelocityVerlet")}
-            })},
-            {"precision",     toml::value("double")},
-            {"boundary_type", toml::value("Unlimited")},
-            {"delta_t",       toml::value(0.1)},
-            {"total_step",    toml::value(100)},
-            {"save_step",     toml::value(10)}
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            type            = "MolecularDynamics"
+            integrator.type = "VelocityVerlet"
+            precision       = "double"
+            boundary_type   = "Unlimited"
+            delta_t         = 0.1
+            total_step      = 100
+            save_step       = 10
+        )"_toml;
+
         root["simulator"] = v;
         const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
@@ -58,19 +58,19 @@ BOOST_AUTO_TEST_CASE(read_langevin_molecular_dynamics_simulator)
     auto root = mjolnir::test::make_empty_input();
 
     {
-        const toml::table v{
-            {"type",          toml::value("MolecularDynamics")},
-            {"integrator",    toml::value(toml::table{
-                {"type", toml::value("UnderdampedLangevin")},
-                {"seed", toml::value(12345)},
-                {"parameters",    toml::array{}}
-            })},
-            {"precision",     toml::value("double")},
-            {"boundary_type", toml::value("Unlimited")},
-            {"total_step",    toml::value(100)},
-            {"save_step",     toml::value(10)},
-            {"delta_t",       toml::value(0.1)}
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            type            = "MolecularDynamics"
+            integrator.type = "UnderdampedLangevin"
+            integrator.seed = 12345
+            integrator.parameters = []
+            precision       = "double"
+            boundary_type   = "Unlimited"
+            delta_t         = 0.1
+            total_step      = 100
+            save_step       = 10
+        )"_toml;
+
         root["simulator"] = v;
         const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
@@ -99,15 +99,17 @@ BOOST_AUTO_TEST_CASE(read_steepest_descent_simulator)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     auto root = mjolnir::test::make_empty_input();
     {
-        const toml::table v{
-            {"type",          toml::value("SteepestDescent")},
-            {"precision",     toml::value("double")},
-            {"boundary_type", toml::value("Unlimited")},
-            {"step_limit",    toml::value(100)},
-            {"save_step",     toml::value(10)},
-            {"delta",         toml::value(0.1)},
-            {"threshold",     toml::value(0.0)} // it never ends until hit the limit
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            type            = "SteepestDescent"
+            precision       = "double"
+            boundary_type   = "Unlimited"
+            delta           = 0.1
+            step_limit      = 100
+            save_step       = 10
+            threshold       = 0.0
+        )"_toml;
+
         root["simulator"] = v;
         const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
@@ -136,25 +138,24 @@ BOOST_AUTO_TEST_CASE(read_simulated_annealing_simulator)
     constexpr real_type tol = 1e-8;
     auto root = mjolnir::test::make_empty_input();
     {
-        const toml::table v{
-            {"type",          toml::value("SimulatedAnnealing")},
-            {"integrator",    toml::value(toml::table{
-                {"type", toml::value("UnderdampedLangevin")},
-                {"seed",          toml::value(12345)},
-                {"parameters",    toml::array{}}
-            })},
-            {"precision",     toml::value("double")},
-            {"boundary_type", toml::value("Unlimited")},
-            {"total_step",    toml::value(100)},
-            {"save_step",     toml::value(10)},
-            {"schedule",    toml::value(toml::table{
-                {"type",  toml::value("linear")},
-                {"begin", toml::value(300.0)},
-                {"end",   toml::value( 10.0)}
-            })},
-            {"each_step",     toml::value( 1)},
-            {"delta_t",       toml::value(0.1)}
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            type            = "SimulatedAnnealing"
+            integrator.type = "UnderdampedLangevin"
+            integrator.seed = 12345
+            integrator.parameters = []
+            precision       = "double"
+            boundary_type   = "Unlimited"
+            total_step      = 100
+            save_step       = 10
+            each_step       = 1
+            delta_t         = 0.1
+            schedule.type  = "linear"
+            schedule.begin = 300.0
+            schedule.end   =  10.0
+
+        )"_toml;
+
         root["simulator"] = v;
         const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));

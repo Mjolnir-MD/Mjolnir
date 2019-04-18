@@ -33,13 +33,13 @@ BOOST_AUTO_TEST_CASE(read_local_forcefield)
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
-        const toml::array v{
-            toml::table{
-                {"interaction", toml::value("BondAngle")},
-                {"potential",   toml::value("Harmonic")},
-                {"topology",    toml::value("none")},
-                {"parameters",  toml::value(toml::array(/*empty*/))}
-            }
+        using namespace toml::literals;
+        const toml::array v{u8R"(
+                interaction = "BondAngle"
+                potential   = "Harmonic"
+                topology    = "none"
+                parameters  = []
+            )"_toml
         };
 
         const auto lff = mjolnir::read_local_forcefield<traits_type>(v, "./");
@@ -63,17 +63,18 @@ BOOST_AUTO_TEST_CASE(read_several_local_forcefield)
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
-        const toml::array v{toml::table{
-                {"interaction", toml::value("BondAngle")},
-                {"potential",   toml::value("Harmonic")},
-                {"topology",    toml::value("none")},
-                {"parameters",  toml::value(toml::array(/*empty*/))}
-            }, toml::table{
-                {"interaction", toml::value("BondLength")},
-                {"potential",   toml::value("Harmonic")},
-                {"topology",    toml::value("bond")},
-                {"parameters",  toml::value(toml::array(/*empty*/))}
-            }
+        using namespace toml::literals;
+        const toml::array v{u8R"(
+                interaction = "BondAngle"
+                potential   = "Harmonic"
+                topology    = "none"
+                parameters  = []
+            )"_toml, u8R"(
+                interaction = "BondLength"
+                potential   = "Harmonic"
+                topology    = "bond"
+                parameters  = []
+            )"_toml
         };
 
         const auto lff = mjolnir::read_local_forcefield<traits_type>(v, "./");

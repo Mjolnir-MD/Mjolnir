@@ -15,21 +15,20 @@ BOOST_AUTO_TEST_CASE(read_debye_huckel_double)
     using real_type = double;
     constexpr real_type tol = 1e-8;
     {
-        const toml::value v = toml::table{
-            {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("DebyeHuckel")},
-            {"spatial_partition", toml::value(toml::table{
-                        {"type", toml::value("Nothing")}
-            })},
-            {"ignore",            toml::value(toml::table{
-                {"molecule",         toml::value("Nothing")},
-                {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-            })},
-            {"parameters",        toml::value(toml::array{
-                toml::table{{"index", 0}, {"charge",  1.0}},
-                toml::table{{"index", 1}, {"charge", -1.0}}
-            })}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction                     = "Pair"
+            potential                       = "DebyeHuckel"
+            spatial_partition.type          = "Nothing"
+            ignore.molecule                 = "Nothing"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            parameters = [
+                {index = 0, charge =  1.0},
+                {index = 1, charge = -1.0},
+            ]
+        )"_toml;
+
         const auto g = mjolnir::read_debye_huckel_potential<real_type>(v);
 
         const auto ignore_within = g.ignore_within();
@@ -51,21 +50,20 @@ BOOST_AUTO_TEST_CASE(read_debye_huckel_float)
     using real_type = float;
     constexpr real_type tol = 1e-4;
     {
-        const toml::value v = toml::table{
-            {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("ExcludedVolume")},
-            {"spatial_partition", toml::value(toml::table{
-                        {"type", toml::value("Nothing")}
-            })},
-            {"ignore",            toml::value(toml::table{
-                {"molecule",         toml::value("Nothing")},
-                {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-            })},
-            {"parameters",        toml::value(toml::array{
-                toml::table{{"index", 0}, {"charge", 1.0}},
-                toml::table{{"index", 1}, {"charge", -1.0}}
-            })}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction                     = "Pair"
+            potential                       = "DebyeHuckel"
+            spatial_partition.type          = "Nothing"
+            ignore.molecule                 = "Nothing"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            parameters = [
+                {index = 0, charge =  1.0},
+                {index = 1, charge = -1.0},
+            ]
+        )"_toml;
+
         const auto g = mjolnir::read_debye_huckel_potential<real_type>(v);
 
         const auto ignore_within = g.ignore_within();
