@@ -14,19 +14,18 @@ BOOST_AUTO_TEST_CASE(read_uniform_lennard_jones_double)
     using real_type = double;
     constexpr real_type tol = 1e-8;
     {
-        const toml::value v = toml::table{
-            {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("UniformLennardJones")},
-            {"spatial_partition", toml::value(toml::table{
-                        {"type", toml::value("Nothing")}
-            })},
-            {"ignore",            toml::value(toml::table{
-                {"molecule",         toml::value("Nothing")},
-                {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-            })},
-            {"sigma",   2.0},
-            {"epsilon", 1.5},
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            interaction = "Pair"
+            potential   = "UniformLennardJones"
+            spatial_partition.type  = "CellList"
+            ignore.molecule         = "Nothing"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            sigma   = 2.0
+            epsilon = 1.5
+        )"_toml;
+
         const auto g = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
 
         const auto ignore_within = g.ignore_within();
@@ -40,19 +39,18 @@ BOOST_AUTO_TEST_CASE(read_uniform_lennard_jones_double)
         BOOST_TEST(g.epsilon() == 1.5,  boost::test_tools::tolerance(tol));
     }
     {
-        const toml::value v = toml::table{
-            {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("UniformLennardJones")},
-            {"spatial_partition", toml::value(toml::table{
-                        {"type", toml::value("Nothing")}
-            })},
-            {"ignore",            toml::value(toml::table{
-                {"molecule",         toml::value("Nothing")},
-                {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-            })},
-            {u8"σ", 2.0},
-            {u8"ε", 1.5},
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            interaction = "Pair"
+            potential   = "UniformLennardJones"
+            spatial_partition.type  = "CellList"
+            ignore.molecule         = "Nothing"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            "σ" = 2.0
+            "ε" = 1.5
+        )"_toml;
+
         const auto g = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
 
         const auto ignore_within = g.ignore_within();
@@ -74,19 +72,18 @@ BOOST_AUTO_TEST_CASE(read_uniform_lennard_jones_float)
     constexpr real_type tol = 1e-4;
 
     {
-        const toml::value v = toml::table{
-            {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("UniformLennardJones")},
-            {"spatial_partition", toml::value(toml::table{
-                        {"type", toml::value("Nothing")}
-            })},
-            {"ignore",            toml::value(toml::table{
-                {"molecule",         toml::value("Nothing")},
-                {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-            })},
-            {"sigma",   2.0},
-            {"epsilon", 1.5},
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            interaction = "Pair"
+            potential   = "UniformLennardJones"
+            spatial_partition.type  = "CellList"
+            ignore.molecule         = "Nothing"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            sigma   = 2.0
+            epsilon = 1.5
+        )"_toml;
+
         const auto g = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
 
         const auto ignore_within = g.ignore_within();
@@ -100,19 +97,18 @@ BOOST_AUTO_TEST_CASE(read_uniform_lennard_jones_float)
         BOOST_TEST(g.epsilon() == 1.5f,  boost::test_tools::tolerance(tol));
     }
     {
-        const toml::value v = toml::table{
-            {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("UniformLennardJones")},
-            {"spatial_partition", toml::value(toml::table{
-                        {"type", toml::value("Nothing")}
-            })},
-            {"ignore",            toml::value(toml::table{
-                {"molecule",         toml::value("Nothing")},
-                {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-            })},
-            {u8"σ", 2.0},
-            {u8"ε", 1.5},
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            interaction = "Pair"
+            potential   = "UniformLennardJones"
+            spatial_partition.type  = "CellList"
+            ignore.molecule         = "Nothing"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            "σ" = 2.0
+            "ε" = 1.5
+        )"_toml;
+
         const auto g = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
 
         const auto ignore_within = g.ignore_within();

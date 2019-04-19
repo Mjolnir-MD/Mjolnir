@@ -15,11 +15,13 @@ BOOST_AUTO_TEST_CASE(read_flexible_local_dihedral_double)
     using real_type = double;
     constexpr real_type tol = 1e-8;
     {
-        const toml::value v = toml::table{
-            {"indices", toml::value({1, 2})},
-            {"k",       toml::value(3.14)},
-            {"coef",    toml::value{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0}}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            indices = [1, 2, 3, 4]
+            k       = 3.14
+            coef    = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
+        )"_toml;
+
         const auto g = mjolnir::read_flexible_local_dihedral_potential<real_type>(v);
         BOOST_TEST(g.k()       == 3.14, boost::test_tools::tolerance(tol));
         BOOST_TEST(g.coef()[0] ==  1.0, boost::test_tools::tolerance(tol));
@@ -39,11 +41,13 @@ BOOST_AUTO_TEST_CASE(read_flexible_local_dihedral_float)
     constexpr real_type tol = 1e-4;
 
     {
-        const toml::value v = toml::table{
-            {"indices", toml::value({1, 2})},
-            {"k",       toml::value(3.14)},
-            {"coef",    toml::value{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0}}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            indices = [1, 2, 3, 4]
+            k       = 3.14
+            coef    = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
+        )"_toml;
+
         const auto g = mjolnir::read_flexible_local_dihedral_potential<real_type>(v);
         BOOST_TEST(g.k()     == 3.14f,  boost::test_tools::tolerance(tol));
         BOOST_TEST(g.coef()[0] ==  1.0f, boost::test_tools::tolerance(tol));
@@ -63,13 +67,13 @@ BOOST_AUTO_TEST_CASE(read_local_potential_flexible_local_dihedral_double)
     using real_type = double;
     constexpr real_type tol = 1e-8;
     {
-        const toml::value v = toml::table{
-            {"parameters", toml::value({toml::table{
-                {"indices", toml::value({1, 2, 3, 4})},
-                {"k",       toml::value(3.14)},
-                {"coef",    toml::value{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0}}
-                }})}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            parameters = [
+                {indices = [1, 2, 3, 4], k = 3.14, coef = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]}
+            ]
+        )"_toml;
+
         const auto g = mjolnir::read_local_potential<4,
               mjolnir::FlexibleLocalDihedralPotential<real_type>>(v);
 
@@ -95,13 +99,13 @@ BOOST_AUTO_TEST_CASE(read_local_potential_flexible_local_dihedral_float)
     constexpr real_type tol = 1e-4;
 
     {
-        const toml::value v = toml::table{
-            {"parameters", toml::value({toml::table{
-                {"indices", toml::value({1, 2, 3, 4})},
-                {"k",       toml::value(3.14)},
-                {"coef",    toml::value{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0}}
-                }})}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            parameters = [
+                {indices = [1, 2, 3, 4], k = 3.14, coef = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]}
+            ]
+        )"_toml;
+
         const auto g = mjolnir::read_local_potential<4,
               mjolnir::FlexibleLocalDihedralPotential<real_type>>(v);
 

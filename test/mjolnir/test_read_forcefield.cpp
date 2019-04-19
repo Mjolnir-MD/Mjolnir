@@ -35,71 +35,45 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield)
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
-        const toml::table v = toml::table{
-            {"local",       toml::array{
-                toml::table{
-                    {"interaction", toml::value("BondAngle")},
-                    {"potential",   toml::value("Harmonic")},
-                    {"topology",    toml::value("none")},
-                    {"parameters",  toml::value(toml::array(/*empty*/))}
-                }, toml::table{
-                    {"interaction", toml::value("BondLength")},
-                    {"potential",   toml::value("Harmonic")},
-                    {"topology",    toml::value("bond")},
-                    {"parameters",  toml::value(toml::array(/*empty*/))}
-                }
-            }},
-            {"global",      toml::array{
-                toml::table{
-                    {"interaction",       toml::value("Pair")},
-                    {"potential",         toml::value("ExcludedVolume")},
-                    {"spatial_partition", toml::value(toml::table{
-                                {"type", toml::value("Naive")}
-                    })},
-                    {"epsilon",           toml::value(3.14)},
-                    {"ignore",            toml::value(toml::table{
-                        {"molecule",         toml::value("Nothing")},
-                        {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-                    })},
-                    {"parameters",        toml::value(toml::array())}
-                }, toml::table{
-                    {"interaction",       toml::value("Pair")},
-                    {"potential",         toml::value("LennardJones")},
-                    {"spatial_partition", toml::value(toml::table{
-                                {"type", toml::value("Naive")}
-                    })},
-                    {"ignore",            toml::value(toml::table{
-                        {"molecule",         toml::value("Nothing")},
-                        {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-                    })},
-                    {"parameters",        toml::value(toml::array{})}
-                }
-            }},
-            {"external",    toml::array{
-                toml::table{
-                    {"interaction",       toml::value("Distance")},
-                    {"potential",         toml::value("ExcludedVolumeWall")},
-                    {"shape", toml::value(toml::table{
-                            {"name",     toml::value("AxisAlignedPlane")},
-                            {"axis",     toml::value("+X")},
-                            {"position", toml::value(1.0)},
-                            {"margin",   toml::value(0.5)}
-                    })},
-                    {"epsilon",           toml::value(3.14)},
-                    {"parameters",        toml::value(toml::array{})}
-                }, toml::table{
-                    {"interaction",       toml::value("Distance")},
-                    {"potential",         toml::value("LennardJonesWall")},
-                    {"shape", toml::value(toml::table{
-                            {"name",     toml::value("AxisAlignedPlane")},
-                            {"axis",     toml::value("+X")},
-                            {"position", toml::value(1.0)},
-                            {"margin",   toml::value(0.5)}
-                    })},
-                    {"parameters",        toml::value(toml::array{})}
-                }
-            }}
-        };
+        using namespace toml::literals;
+        const toml::table v = toml::get<toml::table>(u8R"(
+            [[local]]
+                interaction = "BondLength"
+                potential   = "Harmonic"
+                topology    = "bond"
+                parameters  = []
+            [[local]]
+                interaction = "BondAngle"
+                potential   = "Harmonic"
+                topology    = "none"
+                parameters  = []
+            [[global]]
+                interaction = "Pair"
+                potential   = "ExcludedVolume"
+                epsilon     = 3.14
+                parameters  = []
+                ignore.molecule = "Nothing"
+                ignore.particles_within = {bond = 3, contact = 1}
+                spatial_partition.type = "Naive"
+            [[global]]
+                interaction = "Pair"
+                potential   = "LennardJones"
+                parameters  = []
+                ignore.molecule = "Nothing"
+                ignore.particles_within = {bond = 3, contact = 1}
+                spatial_partition.type = "Naive"
+            [[external]]
+                interaction = "Distance"
+                potential   = "ExcludedVolumeWall"
+                epsilon     = 3.14
+                parameters  = []
+                shape = {name = "AxisAlignedPlane", axis="+X", position=1.0, margin=0.5}
+            [[external]]
+                interaction = "Distance"
+                potential   = "LennardJonesWall"
+                parameters  = []
+                shape = {name = "AxisAlignedPlane", axis="+X", position=1.0, margin=0.5}
+        )"_toml);
 
         const auto ff = mjolnir::read_forcefield_from_table<traits_type>(v, "./");
         BOOST_TEST(ff.local().size()    == 2u);

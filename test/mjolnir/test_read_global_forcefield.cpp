@@ -33,19 +33,17 @@ BOOST_AUTO_TEST_CASE(read_global_forcefield)
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
-        const toml::array v{toml::table{
-            {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("ExcludedVolume")},
-            {"spatial_partition", toml::value(toml::table{
-                        {"type", toml::value("Naive")}
-            })},
-            {"epsilon",           toml::value(3.14)},
-            {"ignore",            toml::value(toml::table{
-                {"molecule",         toml::value("Nothing")},
-                {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-            })},
-            {"parameters",        toml::value(toml::array())}
-            }
+        using namespace toml::literals;
+        const toml::array v{u8R"(
+            interaction                     = "Pair"
+            potential                       = "ExcludedVolume"
+            spatial_partition.type          = "Naive"
+            epsilon                         = 3.14
+            ignore.molecule                 = "Nothing"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            parameters = []
+            )"_toml
         };
 
         const auto ff = mjolnir::read_global_forcefield<traits_type>(v, "./");
@@ -73,30 +71,25 @@ BOOST_AUTO_TEST_CASE(read_several_global_forcefield)
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
-        const toml::array v{toml::table{
-                {"interaction",       toml::value("Pair")},
-                {"potential",         toml::value("ExcludedVolume")},
-                {"spatial_partition", toml::value(toml::table{
-                            {"type", toml::value("Naive")}
-                })},
-                {"epsilon",           toml::value(3.14)},
-                {"ignore",            toml::value(toml::table{
-                    {"molecule",         toml::value("Nothing")},
-                    {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-                })},
-                {"parameters",        toml::value(toml::array())}
-            }, toml::table{
-                {"interaction",       toml::value("Pair")},
-                {"potential",         toml::value("LennardJones")},
-                {"spatial_partition", toml::value(toml::table{
-                            {"type", toml::value("Naive")}
-                })},
-                {"ignore",            toml::value(toml::table{
-                    {"molecule",         toml::value("Nothing")},
-                    {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-                })},
-                {"parameters",        toml::value(toml::array{})}
-            }
+        using namespace toml::literals;
+        const toml::array v{u8R"(
+            interaction                     = "Pair"
+            potential                       = "ExcludedVolume"
+            spatial_partition.type          = "Naive"
+            epsilon                         = 3.14
+            ignore.molecule                 = "Nothing"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            parameters = []
+            )"_toml, u8R"(
+            interaction                     = "Pair"
+            potential                       = "LennardJones"
+            spatial_partition.type          = "Naive"
+            ignore.molecule                 = "Nothing"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            parameters = []
+            )"_toml
         };
 
         const auto ff = mjolnir::read_global_forcefield<traits_type>(v, "./");
