@@ -84,7 +84,7 @@ inline void* aligned_alloc(std::size_t alignment, std::size_t size)
         const std::size_t offset = alignment - minimum_align;
         void* const ptr = std::malloc(size + sizeof(void*) + offset);
 
-        // prepair space to write the original ptr.
+        // prepare space to write the original ptr.
         void* aligned_ptr =
             reinterpret_cast<void*>(reinterpret_cast<void**>(ptr) + 1);
                 
