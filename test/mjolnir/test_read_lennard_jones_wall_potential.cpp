@@ -15,22 +15,22 @@ BOOST_AUTO_TEST_CASE(read_lennard_jones_wall_double)
     using real_type = double;
     constexpr real_type tol = 1e-8;
     {
-        const toml::value v = toml::table{
-            {"interaction",       toml::value("Distance")},
-            {"potential",         toml::value("LennardJonesWall")},
-            {"shape", toml::value(toml::table{
-                    {"name",     toml::value("AxisAlignedPlane")},
-                    {"axis",     toml::value("-X")},
-                    {"position", toml::value(1.0)},
-                    {"margin",   toml::value(0.5)}
-            })},
-            {"parameters",        toml::value(toml::array{
-                toml::table{{"index", 0}, {"sigma", 2.0}, {"epsilon", 1.5}},
-                toml::table{{"index", 1}, {u8"σ",   2.0}, {u8"ε",     1.5}},
-                toml::table{{"index", 2}, {u8"σ",   2.0}, {"epsilon", 1.5}},
-                toml::table{{"index", 3}, {"sigma", 2.0}, {u8"ε",     1.5}}
-            })}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction    = "Distance"
+            potential      = "LennardJonesWall"
+            shape.name     = "AxisAlignedPlane"
+            shape.axis     = "+X"
+            shape.position = 1.0
+            shape.margin   = 0.5
+            parameters     = [
+                {index = 0, sigma = 2.0, epsilon = 1.5},
+                {index = 1, "σ"   = 2.0, epsilon = 1.5},
+                {index = 2, sigma = 2.0, "ε"     = 1.5},
+                {index = 3, "σ"   = 2.0, "ε"     = 1.5},
+            ]
+        )"_toml;
+
         const auto g = mjolnir::read_lennard_jones_wall_potential<real_type>(v);
 
         BOOST_TEST(g.parameters().size() == 4u);
@@ -52,22 +52,22 @@ BOOST_AUTO_TEST_CASE(read_lennard_jones_wall_float)
     constexpr real_type tol = 1e-4;
 
     {
-        const toml::value v = toml::table{
-            {"interaction",       toml::value("Distance")},
-            {"potential",         toml::value("LennardJonesWall")},
-            {"shape", toml::value(toml::table{
-                    {"name",     toml::value("AxisAlignedPlane")},
-                    {"axis",     toml::value("-X")},
-                    {"position", toml::value(1.0)},
-                    {"margin",   toml::value(0.5)}
-            })},
-            {"parameters",        toml::value(toml::array{
-                toml::table{{"index", 0}, {"sigma", 2.0}, {"epsilon", 1.5}},
-                toml::table{{"index", 1}, {u8"σ",   2.0}, {u8"ε",     1.5}},
-                toml::table{{"index", 2}, {u8"σ",   2.0}, {"epsilon", 1.5}},
-                toml::table{{"index", 3}, {"sigma", 2.0}, {u8"ε",     1.5}}
-            })}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction    = "Distance"
+            potential      = "LennardJonesWall"
+            shape.name     = "AxisAlignedPlane"
+            shape.axis     = "+X"
+            shape.position = 1.0
+            shape.margin   = 0.5
+            parameters     = [
+                {index = 0, sigma = 2.0, epsilon = 1.5},
+                {index = 1, "σ"   = 2.0, epsilon = 1.5},
+                {index = 2, sigma = 2.0, "ε"     = 1.5},
+                {index = 3, "σ"   = 2.0, "ε"     = 1.5},
+            ]
+        )"_toml;
+
         const auto g = mjolnir::read_lennard_jones_wall_potential<real_type>(v);
 
         BOOST_TEST(g.parameters().size() == 4u);

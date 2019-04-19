@@ -17,19 +17,18 @@ BOOST_AUTO_TEST_CASE(read_global_pair_exv)
     using potential_type = mjolnir::ExcludedVolumePotential<real_type>;
     using parameter_type = typename potential_type::parameter_type;
     {
-        const toml::table v = toml::table{
-            {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("ExcludedVolume")},
-            {"spatial_partition", toml::value(toml::table{
-                        {"type", toml::value("Naive")}
-            })},
-            {"epsilon",           toml::value(3.14)},
-            {"ignore",            toml::value(toml::table{
-                {"molecule",         toml::value("Nothing")},
-                {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-            })},
-            {"parameters",        toml::value(toml::array())}
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            interaction = "Pair"
+            potential   = "ExcludedVolume"
+            spatial_partition.type  = "Naive"
+            ignore.molecule         = "Nothing"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            epsilon    = 3.14
+            parameters = []
+        )"_toml;
+
         const auto base = mjolnir::read_global_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
@@ -50,21 +49,20 @@ BOOST_AUTO_TEST_CASE(read_global_pair_dh)
     using potential_type = mjolnir::DebyeHuckelPotential<real_type>;
     using parameter_type = typename potential_type::parameter_type;
     {
-        const toml::table v = toml::table{
-            {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("DebyeHuckel")},
-            {"spatial_partition", toml::value(toml::table{
-                        {"type", toml::value("Naive")}
-            })},
-            {"ignore",            toml::value(toml::table{
-                {"molecule",         toml::value("Nothing")},
-                {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-            })},
-            {"parameters",        toml::value(toml::array{
-                toml::table{{"index", 0}, {"charge",  1.0}},
-                toml::table{{"index", 1}, {"charge", -1.0}}
-            })}
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            interaction = "Pair"
+            potential   = "DebyeHuckel"
+            spatial_partition.type  = "Naive"
+            ignore.molecule         = "Nothing"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            parameters = [
+                {index = 0, charge =  1.0},
+                {index = 1, charge = -1.0},
+            ]
+        )"_toml;
+
         const auto base = mjolnir::read_global_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
@@ -87,23 +85,22 @@ BOOST_AUTO_TEST_CASE(read_global_pair_lj)
     using parameter_type = typename potential_type::parameter_type;
 
     {
-        const toml::table v = toml::table{
-            {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("LennardJones")},
-            {"spatial_partition", toml::value(toml::table{
-                        {"type", toml::value("Naive")}
-            })},
-            {"ignore",            toml::value(toml::table{
-                {"molecule",         toml::value("Nothing")},
-                {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-            })},
-            {"parameters",        toml::value(toml::array{
-                toml::table{{"index", 0}, {"sigma", 2.0}, {"epsilon", 1.5}},
-                toml::table{{"index", 1}, {u8"σ",   2.0}, {u8"ε",     1.5}},
-                toml::table{{"index", 2}, {u8"σ",   2.0}, {"epsilon", 1.5}},
-                toml::table{{"index", 3}, {"sigma", 2.0}, {u8"ε",     1.5}}
-            })}
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            interaction = "Pair"
+            potential   = "LennardJones"
+            spatial_partition.type  = "Naive"
+            ignore.molecule         = "Nothing"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            parameters = [
+                {index = 0, sigma = 2.0, epsilon = 1.5},
+                {index = 1, sigma = 2.0, "ε"     = 1.5},
+                {index = 2, "σ"   = 2.0, epsilon = 1.5},
+                {index = 3, "σ"   = 2.0, "ε"     = 1.5},
+            ]
+        )"_toml;
+
         const auto base = mjolnir::read_global_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
@@ -125,19 +122,18 @@ BOOST_AUTO_TEST_CASE(read_global_pair_uni_lj)
     using parameter_type = typename potential_type::parameter_type;
 
     {
-        const toml::table v = toml::table{
-            {"interaction",       toml::value("Pair")},
-            {"potential",         toml::value("UniformLennardJones")},
-            {"spatial_partition", toml::value(toml::table{
-                        {"type", toml::value("Naive")}
-            })},
-            {"ignore",            toml::value(toml::table{
-                {"molecule",         toml::value("Nothing")},
-                {"particles_within", toml::table{{"bond", 3}, {"contact", 1}}},
-            })},
-            {"sigma",   2.0},
-            {"epsilon", 1.5},
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            interaction = "Pair"
+            potential   = "UniformLennardJones"
+            spatial_partition.type  = "Naive"
+            ignore.molecule         = "Nothing"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            sigma   = 2.0
+            epsilon = 1.5
+        )"_toml;
+
         const auto base = mjolnir::read_global_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 

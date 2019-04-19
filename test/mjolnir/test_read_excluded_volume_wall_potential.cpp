@@ -15,21 +15,21 @@ BOOST_AUTO_TEST_CASE(read_excluded_volume_wall_double)
     using real_type = double;
     constexpr real_type tol = 1e-8;
     {
-        const toml::value v = toml::table{
-            {"interaction",       toml::value("Distance")},
-            {"potential",         toml::value("ExcludedvolumeWall")},
-            {"shape", toml::value(toml::table{
-                    {"name",     toml::value("AxisAlignedPlane")},
-                    {"axis",     toml::value("-X")},
-                    {"position", toml::value(1.0)},
-                    {"margin",   toml::value(0.5)}
-            })},
-            {"epsilon",           toml::value(3.14)},
-            {"parameters",        toml::value(toml::array{
-                toml::table{{"index", 0}, {"radius", 2.0}},
-                toml::table{{"index", 1}, {"radius", 2.0}}
-            })}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction    = "Distance"
+            potential      = "ExcludedVolumeWall"
+            shape.name     = "AxisAlignedPlane"
+            shape.axis     = "-X"
+            shape.position = 1.0
+            shape.margin   = 0.5
+            epsilon        = 3.14
+            parameters     = [
+                {index = 0, radius = 2.0},
+                {index = 1, radius = 2.0},
+            ]
+        )"_toml;
+
         const auto g = mjolnir::read_excluded_volume_wall_potential<real_type>(v);
 
         BOOST_TEST(g.parameters().size() == 2u);
@@ -46,21 +46,21 @@ BOOST_AUTO_TEST_CASE(read_excluded_volume_wall_float)
     constexpr real_type tol = 1e-4;
 
     {
-        const toml::value v = toml::table{
-            {"interaction",       toml::value("Distance")},
-            {"potential",         toml::value("ExcludedVolumeWall")},
-            {"shape", toml::value(toml::table{
-                    {"name",     toml::value("AxisAlignedPlane")},
-                    {"axis",     toml::value("-X")},
-                    {"position", toml::value(1.0)},
-                    {"margin",   toml::value(0.5)}
-            })},
-            {"epsilon",           toml::value(3.14)},
-            {"parameters",        toml::value(toml::array{
-                toml::table{{"index", 0}, {"radius", 2.0}},
-                toml::table{{"index", 1}, {"radius", 2.0}}
-            })}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction             = "Distance"
+            potential               = "ExcludedVolumeWall"
+            shape.name              = "AxisAlignedPlane"
+            shape.axis              = "-X"
+            shape.position          = 1.0
+            shape.margin            = 0.5
+            epsilon                 = 3.14
+            parameters  = [
+                {index = 0, radius = 2.0},
+                {index = 1, radius = 2.0},
+            ]
+        )"_toml;
+
         const auto g = mjolnir::read_excluded_volume_wall_potential<real_type>(v);
 
         BOOST_TEST(g.parameters().size() == 2u);

@@ -17,10 +17,13 @@ BOOST_AUTO_TEST_CASE(read_observer)
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
-        const toml::table v = toml::table{{"files", toml::table{{"output",
-                toml::table{{"path", "./"}, {"prefix", "test"}, {"format", "xyz"}}
-            }}
-        }};
+        using namespace toml::literals;
+        const toml::table v = toml::get<toml::table>(u8R"(
+            [files]
+            output.path   = "./"
+            output.prefix = "test"
+            output.format = "xyz"
+        )"_toml);
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
         BOOST_TEST(obs.observers().size() == 2u);
@@ -36,10 +39,12 @@ BOOST_AUTO_TEST_CASE(read_observer)
         BOOST_TEST(static_cast<bool>(xyz));
     }
     {
-        const toml::table v = toml::table{{"files", toml::table{{"output",
-                toml::table{{"prefix", "test"}, {"format", "xyz"}}
-            }}
-        }};
+        using namespace toml::literals;
+        const toml::table v = toml::get<toml::table>(u8R"(
+            [files]
+            output.prefix = "test"
+            output.format = "xyz"
+        )"_toml);
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
         BOOST_TEST(obs.observers().size() == 2u);
@@ -61,10 +66,13 @@ BOOST_AUTO_TEST_CASE(read_observer)
     // It strongly depends on the directory structure...
     // It is not good. We need to find a way to avoid this dependency.
     {
-        const toml::table v = toml::table{{"files", toml::table{{"output",
-                toml::table{{"path", "./test"}, {"prefix", "test"}, {"format", "xyz"}}
-            }}
-        }};
+        using namespace toml::literals;
+        const toml::table v = toml::get<toml::table>(u8R"(
+            [files]
+            output.path   = "./test"
+            output.prefix = "test"
+            output.format = "xyz"
+        )"_toml);
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
 
@@ -90,11 +98,13 @@ BOOST_AUTO_TEST_CASE(read_xyz_observer)
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
-        const toml::table files{
-            {"output", toml::table{{"path", "./"}, {"prefix", "test"}, {"format", "xyz"}}}
-        };
-
-        const toml::table v{{"files", files}};
+        using namespace toml::literals;
+        const toml::table v = toml::get<toml::table>(u8R"(
+            [files]
+            output.path   = "./"
+            output.prefix = "test"
+            output.format = "xyz"
+        )"_toml);
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
         BOOST_TEST(obs.observers().size() == 2u);
@@ -117,11 +127,13 @@ BOOST_AUTO_TEST_CASE(read_dcd_observer)
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
-        const toml::table files{
-            {"output", toml::table{{"path", "./"}, {"prefix", "test"}, {"format", "dcd"}}}
-        };
-
-        const toml::table v{{"files", files}};
+        using namespace toml::literals;
+        const toml::table v = toml::get<toml::table>(u8R"(
+            [files]
+            output.path   = "./"
+            output.prefix = "test"
+            output.format = "dcd"
+        )"_toml);
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
         BOOST_TEST(obs.observers().size() == 2u);
@@ -144,11 +156,13 @@ BOOST_AUTO_TEST_CASE(read_trr_observer)
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
-        const toml::table files{
-            {"output", toml::table{{"path", "./"}, {"prefix", "test"}, {"format", "trr"}}}
-        };
-
-        const toml::table v{{"files", files}};
+        using namespace toml::literals;
+        const toml::table v = toml::get<toml::table>(u8R"(
+            [files]
+            output.path   = "./"
+            output.prefix = "test"
+            output.format = "trr"
+        )"_toml);
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
         BOOST_TEST(obs.observers().size() == 2u);

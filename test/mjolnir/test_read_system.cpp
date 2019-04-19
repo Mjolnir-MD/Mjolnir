@@ -18,29 +18,16 @@ BOOST_AUTO_TEST_CASE(read_system_with_unlimited_boundary)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     constexpr real_type tol = 1e-8;
     {
-        const toml::table v = toml::table{
-            {"boundary_shape", toml::table{/*empty*/}},
-            {"attributes", toml::table{
-                {"test_attr", toml::value(3.14)}
-            }},
-            {"particles", toml::array{toml::table{
-                {"m", 1.0},
-                {"pos",   toml::array{1.0, 2.0, 3.0}},
-                {"vel",   toml::array{1.1, 2.1, 3.1}},
-                {"name",  toml::value("testnm")},
-                {"group", toml::value("testgrp")}
-            }, toml::table{
-                {"mass", 2.0},
-                {"position", toml::array{1.2, 2.2, 3.2}},
-                {"velocity", toml::array{1.3, 2.3, 3.3}},
-                {"name",     toml::value("testnm")},
-                {"group",    toml::value("testgrp")}
-            }, toml::table{
-                {"m", 3.0},
-                {"pos", toml::array{1.4, 2.4, 3.4}},
-                {"vel", toml::array{1.5, 2.5, 3.5}}
-            }}}
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            boundary_shape = {}
+            attributes = {test_attr = 3.14}
+            particles  = [
+                {m = 1.0, pos = [1.0, 2.0, 3.0], vel = [1.1, 2.1, 3.1], name = "testnm", group = "testgrp"},
+                {m = 2.0, pos = [1.2, 2.2, 3.2], vel = [1.3, 2.3, 3.3], name = "testnm", group = "testgrp"},
+                {m = 3.0, pos = [1.4, 2.4, 3.4], vel = [1.5, 2.5, 3.5]}
+            ]
+        )"_toml;
 
         const auto sys = mjolnir::read_system_from_table<traits_type>(v);
         BOOST_TEST(sys.size() == 3u);
@@ -104,32 +91,17 @@ BOOST_AUTO_TEST_CASE(read_system_with_cuboidal_periodic_boundary)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::CuboidalPeriodicBoundary>;
     constexpr real_type tol = 1e-8;
     {
-        const toml::table v = toml::table{
-            {"boundary_shape", toml::table{
-                {"upper", toml::array{10.0, 11.0, 12.0}},
-                {"lower", toml::array{ 0.0,  1.0,  2.0}}
-            }},
-            {"attributes", toml::table{
-                {"test_attr", toml::value(3.14)}
-            }},
-            {"particles", toml::array{toml::table{
-                {"m", 1.0},
-                {"pos",   toml::array{1.0, 2.0, 3.0}},
-                {"vel",   toml::array{1.1, 2.1, 3.1}},
-                {"name",  toml::value("testnm")},
-                {"group", toml::value("testgrp")}
-            }, toml::table{
-                {"mass", 2.0},
-                {"position", toml::array{1.2, 2.2, 3.2}},
-                {"velocity", toml::array{1.3, 2.3, 3.3}},
-                {"name",     toml::value("testnm")},
-                {"group",    toml::value("testgrp")}
-            }, toml::table{
-                {"m", 3.0},
-                {"pos", toml::array{1.4, 2.4, 3.4}},
-                {"vel", toml::array{1.5, 2.5, 3.5}}
-            }}}
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            boundary_shape.upper = [10.0, 11.0, 12.0]
+            boundary_shape.lower = [ 0.0,  1.0,  2.0]
+            attributes = {test_attr = 3.14}
+            particles  = [
+                {m = 1.0, pos = [1.0, 2.0, 3.0], vel = [1.1, 2.1, 3.1], name = "testnm", group = "testgrp"},
+                {m = 2.0, pos = [1.2, 2.2, 3.2], vel = [1.3, 2.3, 3.3], name = "testnm", group = "testgrp"},
+                {m = 3.0, pos = [1.4, 2.4, 3.4], vel = [1.5, 2.5, 3.5]}
+            ]
+        )"_toml;
 
         const auto sys = mjolnir::read_system_from_table<traits_type>(v);
 

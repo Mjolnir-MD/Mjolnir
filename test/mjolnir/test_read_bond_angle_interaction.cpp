@@ -16,12 +16,14 @@ BOOST_AUTO_TEST_CASE(read_bond_angle_harmonic)
     using real_type = double;
     using traits_type = mjolnir::test::traits<real_type>;
     {
-        const toml::table v = toml::table{
-            {"interaction", toml::value("BondAngle")},
-            {"potential",   toml::value("Harmonic")},
-            {"topology",    toml::value("none")},
-            {"parameters",  toml::value(toml::array(/*empty*/))}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction = "BondAngle"
+            potential   = "Harmonic"
+            topology    = "none"
+            parameters  = [] # empty
+        )"_toml;
+
         const auto base = mjolnir::read_local_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
@@ -39,12 +41,14 @@ BOOST_AUTO_TEST_CASE(read_bond_angle_flexible_local)
     using real_type = double;
     using traits_type = mjolnir::test::traits<real_type>;
     {
-        const toml::table v = toml::table{
-            {"interaction", toml::value("BondAngle")},
-            {"potential",   toml::value("FlexibleLocalAngle")},
-            {"topology",    toml::value("none")},
-            {"parameters",  toml::value(toml::array(/*empty*/))}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction = "BondAngle"
+            potential   = "FlexibleLocalAngle"
+            topology    = "none"
+            parameters  = [] # empty
+        )"_toml;
+
         const auto base = mjolnir::read_local_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
@@ -62,12 +66,14 @@ BOOST_AUTO_TEST_CASE(read_bond_angle_gaussian)
     using real_type = double;
     using traits_type = mjolnir::test::traits<real_type>;
     {
-        const toml::table v = toml::table{
-            {"interaction", toml::value("BondAngle")},
-            {"potential",   toml::value("Gaussian")},
-            {"topology",    toml::value("none")},
-            {"parameters",  toml::value(toml::array(/*empty*/))}
-        };
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction = "BondAngle"
+            potential   = "Gaussian"
+            topology    = "none"
+            parameters  = [] # empty
+        )"_toml;
+
         const auto base = mjolnir::read_local_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 

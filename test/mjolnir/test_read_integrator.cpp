@@ -17,9 +17,10 @@ BOOST_AUTO_TEST_CASE(read_velocity_verlet_integrator)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     constexpr real_type tol = 1e-8;
     {
-        const toml::table v = toml::table{
-            {"delta_t",       toml::value(0.1)},
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            delta_t = 0.1
+        )"_toml;
 
         const auto integr = mjolnir::read_velocity_verlet_integrator<traits_type>(v);
         BOOST_TEST(integr.delta_t() == 0.1, boost::test_tools::tolerance(tol));
@@ -34,16 +35,15 @@ BOOST_AUTO_TEST_CASE(read_underdamped_langevin_integrator)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     constexpr real_type tol = 1e-8;
     {
-        const toml::table v = toml::table{
-            {"delta_t",       toml::value(0.1)},
-            {"integrator",    toml::table{
-                {"seed",        toml::value(1234)},
-                {"parameters",  toml::value(toml::array{
-                    toml::table{{"index", toml::value(0)}, {"gamma", toml::value(0.1)}},
-                    toml::table{{"index", toml::value(1)}, {u8"γ",   toml::value(0.2)}}
-                })}}
-            }
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+            delta_t = 0.1
+            integrator.seed = 1234
+            integrator.parameters = [
+                {index = 0, gamma = 0.1},
+                {index = 1, "γ"   = 0.2},
+            ]
+        )"_toml;
 
         const auto integr = mjolnir::read_underdamped_langevin_integrator<traits_type>(v);
         BOOST_TEST(integr.delta_t() == 0.1, boost::test_tools::tolerance(tol));
