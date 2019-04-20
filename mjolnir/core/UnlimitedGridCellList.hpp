@@ -164,7 +164,7 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
 
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        index_by_cell_[i] = std::make_pair(i, calc_index(sys[i].position));
+        index_by_cell_[i] = std::make_pair(i, calc_index(sys.position(i)));
     }
     std::sort(this->index_by_cell_.begin(), this->index_by_cell_.end(),
         [](const particle_cell_idx_pair& lhs, const particle_cell_idx_pair& rhs)
@@ -195,10 +195,10 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         MJOLNIR_LOG_SCOPE_DEBUG(for(std::size_t i=0; i<sys.size(); ++i));
-        const auto& ri   = sys[i].position;
+        const auto& ri   = sys.position(i);
         const auto& cell = cell_list_[this->calc_index(ri)];
 
-        MJOLNIR_LOG_DEBUG("particle position ", sys[i].position);
+        MJOLNIR_LOG_DEBUG("particle position ", sys.position(i));
         MJOLNIR_LOG_DEBUG("cell index ",        calc_index(ri));
         MJOLNIR_LOG_DEBUG("making verlet list for index ", i);
 
@@ -214,7 +214,7 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
                     continue;
                 }
 
-                const auto& rj = sys[j].position;
+                const auto& rj = sys.position(j);
                 if(math::length_sq(sys.adjust_direction(rj - ri)) < r_c2)
                 {
                     MJOLNIR_LOG_DEBUG("add index ", j, " to verlet list ", i);
