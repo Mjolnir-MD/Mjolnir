@@ -54,7 +54,7 @@ class ExcludedVolumePotential
     ExcludedVolumePotential& operator=(const ExcludedVolumePotential&) = default;
     ExcludedVolumePotential& operator=(ExcludedVolumePotential&&)      = default;
 
-    parameter_type prepair_params(std::size_t i, std::size_t j) const noexcept
+    parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
         return this->radii_[i] + this->radii_[j];
     }
@@ -63,12 +63,12 @@ class ExcludedVolumePotential
     real_type potential(const std::size_t i, const std::size_t j,
                         const real_type r) const noexcept
     {
-        return this->potential(r, this->prepair_params(i, j));
+        return this->potential(r, this->prepare_params(i, j));
     }
     real_type derivative(const std::size_t i, const std::size_t j,
                          const real_type r) const noexcept
     {
-        return this->derivative(r, this->prepair_params(i, j));
+        return this->derivative(r, this->prepare_params(i, j));
     }
 
     real_type potential(const real_type r, const parameter_type& d) const noexcept

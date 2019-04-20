@@ -46,7 +46,7 @@ class UniformLennardJonesPotential
     {}
     ~UniformLennardJonesPotential() = default;
 
-    parameter_type prepair_params(std::size_t, std::size_t) const noexcept
+    parameter_type prepare_params(std::size_t, std::size_t) const noexcept
     {
         return parameter_type{}; // no pre-calculated parameter
     }
@@ -55,12 +55,12 @@ class UniformLennardJonesPotential
     real_type potential(const std::size_t i, const std::size_t j,
                         const real_type r) const noexcept
     {
-        return this->potential(r, this->prepair_params(i, j));
+        return this->potential(r, this->prepare_params(i, j));
     }
     real_type derivative(const std::size_t i, const std::size_t j,
                          const real_type r) const noexcept
     {
-        return this->derivative(r, this->prepair_params(i, j));
+        return this->derivative(r, this->prepare_params(i, j));
     }
 
     real_type

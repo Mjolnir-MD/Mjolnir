@@ -49,7 +49,7 @@ class DebyeHuckelPotential
     }
     ~DebyeHuckelPotential() = default;
 
-    parameter_type prepair_params(std::size_t i, std::size_t j) const noexcept
+    parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
         return this->inv_4_pi_eps0_epsk_ * this->charges_[i] * this->charges_[j];
     }
@@ -57,12 +57,12 @@ class DebyeHuckelPotential
     real_type potential(const std::size_t i, const std::size_t j,
                         const real_type   r) const noexcept
     {
-        return this->potential(r, this->prepair_params(i, j));
+        return this->potential(r, this->prepare_params(i, j));
     }
     real_type derivative(const std::size_t i, const std::size_t j,
                          const real_type   r) const noexcept
     {
-        return this->derivative(r, this->prepair_params(i, j));
+        return this->derivative(r, this->prepare_params(i, j));
     }
 
     real_type potential(const real_type r, const parameter_type& p) const noexcept
