@@ -83,7 +83,7 @@ void NaivePairCalculation<traitsT, parameterT>::make(
             {
                 continue;
             }
-            partners.emplace_back(j, pot.prepair_params(i, j));
+            partners.emplace_back(j, pot.prepare_params(i, j));
         }
         this->neighbors_.add_list_for(i, partners.begin(), partners.end());
     }

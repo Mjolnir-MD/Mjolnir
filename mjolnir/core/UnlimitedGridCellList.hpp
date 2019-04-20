@@ -218,7 +218,7 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
                 if(math::length_sq(sys.adjust_direction(rj - ri)) < r_c2)
                 {
                     MJOLNIR_LOG_DEBUG("add index ", j, " to verlet list ", i);
-                    partner.emplace_back(j, pot.prepair_params(i, j));
+                    partner.emplace_back(j, pot.prepare_params(i, j));
                 }
             }
         }

@@ -123,7 +123,7 @@ void VerletList<traitsT, parameterT>::make(
             const auto& rj = sys[j].position;
             if(math::length_sq(sys.adjust_direction(rj - ri)) < rc2)
             {
-                partners.emplace_back(j, pot.prepair_params(i, j));
+                partners.emplace_back(j, pot.prepare_params(i, j));
             }
         }
         this->neighbors_.add_list_for(i, partners.begin(), partners.end());
