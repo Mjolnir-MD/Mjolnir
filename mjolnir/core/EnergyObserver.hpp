@@ -74,7 +74,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
         real_type k = 0.0;
         for(std::size_t i=0; i<sys.size(); ++i)
         {
-            k += math::length_sq(sys[i].velocity) * sys[i].mass;
+            k += math::length_sq(sys.velocity(i)) * sys.mass(i);
         }
         return k * 0.5;
     }
