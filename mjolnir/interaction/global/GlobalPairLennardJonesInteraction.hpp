@@ -77,7 +77,7 @@ class GlobalPairInteraction<traitsT,
                 const auto& param = ptnr.parameter();
 
                 const coordinate_type rij =
-                    sys.adjust_direction(sys[j].position - sys[i].position);
+                    sys.adjust_direction(sys.position(j) - sys.position(i));
                 const real_type l_sq = math::length_sq(rij);
 
                 const real_type sigma_sq = param.first * param.first;
@@ -92,8 +92,8 @@ class GlobalPairInteraction<traitsT,
                 const coordinate_type f = rij *
                     (24 * epsilon * (s6l6 - 2 * s6l6 * s6l6) * rcp_l_sq);
 
-                sys[i].force += f;
-                sys[j].force -= f;
+                sys.force(i) += f;
+                sys.force(j) -= f;
             }
         }
         return ;
@@ -114,7 +114,7 @@ class GlobalPairInteraction<traitsT,
                 const auto& param = ptnr.parameter();
 
                 const coordinate_type rij =
-                    sys.adjust_direction(sys[j].position - sys[i].position);
+                    sys.adjust_direction(sys.position(j) - sys.position(i));
                 const real_type l_sq = math::length_sq(rij);
 
                 const real_type sigma_sq = param.first * param.first;

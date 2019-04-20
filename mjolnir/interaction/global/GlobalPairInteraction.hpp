@@ -84,7 +84,7 @@ void GlobalPairInteraction<traitsT, potT, spaceT>::calc_force(
             const auto& param = ptnr.parameter();
 
             const coordinate_type rij =
-                sys.adjust_direction(sys[j].position - sys[i].position);
+                sys.adjust_direction(sys.position(j) - sys.position(i));
             const real_type l2 = math::length_sq(rij); // |rij|^2
             const real_type rl = math::rsqrt(l2);      // 1 / |rij|
             const real_type l  = l2 * rl;              // |rij|^2 / |rij|
@@ -94,8 +94,8 @@ void GlobalPairInteraction<traitsT, potT, spaceT>::calc_force(
             if(f_mag == 0.0){continue;}
 
             const coordinate_type f = rij * (f_mag * rl);
-            sys[i].force += f;
-            sys[j].force -= f;
+            sys.force(i) += f;
+            sys.force(j) -= f;
         }
     }
     return ;
@@ -115,7 +115,7 @@ GlobalPairInteraction<traitsT, potT, spaceT>::calc_energy(
             const auto& param = ptnr.parameter();
 
             const real_type l = math::length(
-                sys.adjust_direction(sys[j].position - sys[i].position));
+                sys.adjust_direction(sys.position(j) - sys.position(i)));
             e += potential_.potential(l, param);
         }
     }
