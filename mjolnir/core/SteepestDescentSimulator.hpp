@@ -83,15 +83,15 @@ inline bool SteepestDescentSimulator<traitsT>::step()
     real_type max_diff  = 0.0; // to check the convergence
     for(std::size_t i=0; i<this->system_.size(); ++i)
     {
-        const coordinate_type disp = this->h_ * this->system_[i].force;
+        const coordinate_type disp = this->h_ * this->system_.force(i);
 
-        max_diff = std::max(max_diff, std::abs(math::X(this->system_[i].force)));
-        max_diff = std::max(max_diff, std::abs(math::Y(this->system_[i].force)));
-        max_diff = std::max(max_diff, std::abs(math::Z(this->system_[i].force)));
+        max_diff = std::max(max_diff, std::abs(math::X(this->system_.force(i))));
+        max_diff = std::max(max_diff, std::abs(math::Y(this->system_.force(i))));
+        max_diff = std::max(max_diff, std::abs(math::Z(this->system_.force(i))));
 
         max_disp2 = std::max(max_disp2, math::length_sq(disp));
-        system_[i].position = system_.adjust_position(system_[i].position + disp);
-        system_[i].force    = math::make_coordinate<coordinate_type>(0, 0, 0);
+        system_.position(i) = system_.adjust_position(system_.position(i) + disp);
+        system_.force   (i) = math::make_coordinate<coordinate_type>(0, 0, 0);
     }
 
     if(max_diff < this->threshold_)

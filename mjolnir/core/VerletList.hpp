@@ -110,7 +110,7 @@ void VerletList<traitsT, parameterT>::make(
     const real_type rc2 = rc * rc;
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        const auto& ri = sys[i].position;
+        const auto& ri = sys.position(i);
 
         std::vector<neighbor_type> partners;
         for(std::size_t j=i+1; j<sys.size(); ++j)
@@ -120,7 +120,7 @@ void VerletList<traitsT, parameterT>::make(
                 continue;
             }
 
-            const auto& rj = sys[j].position;
+            const auto& rj = sys.position(j);
             if(math::length_sq(sys.adjust_direction(rj - ri)) < rc2)
             {
                 partners.emplace_back(j, pot.prepare_params(i, j));

@@ -234,7 +234,7 @@ void AxisAlignedPlane<traitsT, NormalAxis>::make(const system_type& sys)
 
     for(std::size_t i : this->participant_)
     {
-        const auto d = this->calc_distance(sys[i].position, sys.boundary());
+        const auto d = this->calc_distance(sys.position(i), sys.boundary());
         if(d * d <= thr2)
         {
             this->neighbors_.push_back(i);

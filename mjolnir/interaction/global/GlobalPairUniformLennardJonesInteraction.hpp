@@ -82,7 +82,7 @@ class GlobalPairInteraction<
                 const auto j = ptnr.index;
 
                 const coordinate_type rij =
-                    sys.adjust_direction(sys[j].position - sys[i].position);
+                    sys.adjust_direction(sys.position(j) - sys.position(i));
                 const real_type l_sq = math::length_sq(rij);
 
                 if(r_cutoff_sq < l_sq) {continue;}
@@ -94,8 +94,8 @@ class GlobalPairInteraction<
                 const coordinate_type f = rij *
                     (24 * epsilon * (s6l6 - 2 * s6l6 * s6l6) * rcp_l_sq);
 
-                sys[i].force += f;
-                sys[j].force -= f;
+                sys.force(i) += f;
+                sys.force(j) -= f;
             }
         }
         return ;

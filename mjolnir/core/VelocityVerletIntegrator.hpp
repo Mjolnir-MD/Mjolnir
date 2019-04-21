@@ -49,7 +49,7 @@ void VelocityVerletIntegrator<traitsT>::initialize(
 
     for(std::size_t i=0; i<system.size(); ++i)
     {
-        system[i].force = math::make_coordinate<coordinate_type>(0, 0, 0);
+        system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
     }
     ff.calc_force(system);
     return;

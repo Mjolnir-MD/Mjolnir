@@ -74,14 +74,14 @@ void ExternalDistanceInteraction<traitsT, potT, spaceT>::calc_force(
 {
     for(std::size_t i : this->shape_.neighbors())
     {
-        const auto& ri = sys[i].position;
+        const auto& ri = sys.position(i);
 
         const real_type dist = this->shape_.calc_distance(ri, sys.boundary());
         const real_type dV   = this->potential_.derivative(i, dist);
         if(dV == 0.0){continue;}
 
         const auto f = shape_.calc_force_direction(ri, sys.boundary());
-        sys[i].force += -dV * f;
+        sys.force(i) += -dV * f;
     }
     return ;
 }
@@ -94,7 +94,7 @@ ExternalDistanceInteraction<traitsT, potT, spaceT>::calc_energy(
     real_type E = 0.0;
     for(std::size_t i : this->shape_.neighbors())
     {
-        const auto&    ri = sys[i].position;
+        const auto&    ri = sys.position(i);
         const real_type d = this->shape_.calc_distance(ri, sys.boundary());
         E += this->potential_.potential(i, d);
     }

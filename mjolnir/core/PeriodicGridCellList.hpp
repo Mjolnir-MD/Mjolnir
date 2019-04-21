@@ -162,7 +162,7 @@ void PeriodicGridCellList<traitsT, parameterT>::make(
 
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        index_by_cell_[i] = std::make_pair(i, calc_index(sys[i].position));
+        index_by_cell_[i] = std::make_pair(i, calc_index(sys.position(i)));
     }
 
     std::sort(this->index_by_cell_.begin(), this->index_by_cell_.end(),
@@ -196,10 +196,10 @@ void PeriodicGridCellList<traitsT, parameterT>::make(
     const real_type r_c2 = r_c * r_c;
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        const auto& ri = sys[i].position;
+        const auto& ri = sys.position(i);
         const auto& cell = cell_list_[calc_index(ri)];
 
-        MJOLNIR_LOG_DEBUG("particle position", sys[i].position);
+        MJOLNIR_LOG_DEBUG("particle position", sys.position(i));
         MJOLNIR_LOG_DEBUG("making verlet list for index", i);
         MJOLNIR_LOG_DEBUG("except list for ", i, "-th value");
 
@@ -215,7 +215,7 @@ void PeriodicGridCellList<traitsT, parameterT>::make(
                     continue;
                 }
 
-                if(math::length_sq(sys.adjust_direction(sys[j].position - ri)) < r_c2)
+                if(math::length_sq(sys.adjust_direction(sys.position(j) - ri)) < r_c2)
                 {
                     MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
                     partner.emplace_back(j, pot.prepare_params(i, j));

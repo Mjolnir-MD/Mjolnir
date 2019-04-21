@@ -90,11 +90,11 @@ DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const noexce
         const std::size_t idx3 = idxp.first[3];
 
         const coordinate_type r_ij =
-            sys.adjust_direction(sys[idx0].position - sys[idx1].position);
+            sys.adjust_direction(sys.position(idx0) - sys.position(idx1));
         const coordinate_type r_kj =
-            sys.adjust_direction(sys[idx2].position - sys[idx1].position);
+            sys.adjust_direction(sys.position(idx2) - sys.position(idx1));
         const coordinate_type r_lk =
-            sys.adjust_direction(sys[idx3].position - sys[idx2].position);
+            sys.adjust_direction(sys.position(idx3) - sys.position(idx2));
         const coordinate_type r_kl = real_type(-1.0) * r_lk;
 
         const real_type r_kj_lensq  = math::length_sq(r_kj);
@@ -129,10 +129,10 @@ DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const noexce
         const real_type coef_ijk = math::dot_product(r_ij, r_kj) * r_kj_rlensq;
         const real_type coef_jkl = math::dot_product(r_kl, r_kj) * r_kj_rlensq;
 
-        sys[idx0].force += Fi;
-        sys[idx1].force += (coef_ijk - real_type(1.0)) * Fi - coef_jkl * Fl;
-        sys[idx2].force += (coef_jkl - real_type(1.0)) * Fl - coef_ijk * Fi;
-        sys[idx3].force += Fl;
+        sys.force(idx0) += Fi;
+        sys.force(idx1) += (coef_ijk - real_type(1.0)) * Fi - coef_jkl * Fl;
+        sys.force(idx2) += (coef_jkl - real_type(1.0)) * Fl - coef_ijk * Fi;
+        sys.force(idx3) += Fl;
     }
     return;
 }
@@ -146,11 +146,11 @@ DihedralAngleInteraction<traitsT, potentialT>::calc_energy(
     for(const auto& idxp : this->potentials)
     {
         const coordinate_type r_ij = sys.adjust_direction(
-                sys[idxp.first[0]].position - sys[idxp.first[1]].position);
+                sys.position(idxp.first[0]) - sys.position(idxp.first[1]));
         const coordinate_type r_kj = sys.adjust_direction(
-                sys[idxp.first[2]].position - sys[idxp.first[1]].position);
+                sys.position(idxp.first[2]) - sys.position(idxp.first[1]));
         const coordinate_type r_lk = sys.adjust_direction(
-                sys[idxp.first[3]].position - sys[idxp.first[2]].position);
+                sys.position(idxp.first[3]) - sys.position(idxp.first[2]));
         const real_type r_kj_lensq_inv = real_type(1.0) / math::length_sq(r_kj);
 
         const coordinate_type n = math::cross_product(r_kj, real_type(-1.0) * r_lk);

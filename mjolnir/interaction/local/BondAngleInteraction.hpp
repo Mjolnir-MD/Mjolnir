@@ -91,13 +91,13 @@ BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const no
         const std::size_t idx2 = idxp.first[2];
 
         const coordinate_type r_ij =
-            sys.adjust_direction(sys[idx0].position - sys[idx1].position);
+            sys.adjust_direction(sys.position(idx0) - sys.position(idx1));
 
         const real_type       inv_len_r_ij = math::rlength(r_ij);
         const coordinate_type r_ij_reg     = r_ij * inv_len_r_ij;
 
         const coordinate_type r_kj =
-            sys.adjust_direction(sys[idx2].position - sys[idx1].position);
+            sys.adjust_direction(sys.position(idx2) - sys.position(idx1));
 
         const real_type       inv_len_r_kj = math::rlength(r_kj);
         const coordinate_type r_kj_reg     = r_kj * inv_len_r_kj;
@@ -118,9 +118,9 @@ BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const no
         const coordinate_type Fk =
             (coef_inv_sin * inv_len_r_kj) * (cos_theta * r_kj_reg - r_ij_reg);
 
-        sys[idx0].force += Fi;
-        sys[idx1].force -= (Fi + Fk);
-        sys[idx2].force += Fk;
+        sys.force(idx0) += Fi;
+        sys.force(idx1) -= (Fi + Fk);
+        sys.force(idx2) += Fk;
     }
     return;
 }
@@ -138,9 +138,9 @@ BondAngleInteraction<traitsT, potentialT>::calc_energy(
         const std::size_t idx2 = idxp.first[2];
 
         const coordinate_type v_2to1 =
-            sys.adjust_direction(sys[idx0].position - sys[idx1].position);
+            sys.adjust_direction(sys.position(idx0) - sys.position(idx1));
         const coordinate_type v_2to3 =
-            sys.adjust_direction(sys[idx2].position - sys[idx1].position);
+            sys.adjust_direction(sys.position(idx2) - sys.position(idx1));
 
         const real_type lensq_v21   = math::length_sq(v_2to1);
         const real_type lensq_v23   = math::length_sq(v_2to3);
