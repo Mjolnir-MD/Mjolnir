@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_INPUT_READ_UTILITY_HPP
 #define MJOLNIR_INPUT_READ_UTILITY_HPP
 #include <mjolnir/util/throw_exception.hpp>
+#include <mjolnir/util/logger.hpp>
 #include <extlib/toml/toml.hpp>
 #include <type_traits>
 #include <algorithm>
@@ -42,6 +43,16 @@ template<typename T, typename F>
 std::vector<T> read_array(const toml::value& v, F&& reader)
 {
     static_assert(std::is_default_constructible<T>::value, "");
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+
+    // This function is for logging. It always formats toml value as inline.
+    const auto format_inline = [](const toml::value& v) -> std::string {
+        return toml::format(v,
+            /* width      = */ std::numeric_limits<std::size_t>::max(),
+            /* float prec = */ 6, /* force_inline = */true);
+    };
+
     if(v.is_array())
     {
         const auto& arr = toml::get<toml::array>(v);
@@ -51,6 +62,8 @@ std::vector<T> read_array(const toml::value& v, F&& reader)
         }
 
         std::vector<T> vec(arr.size());
+        MJOLNIR_LOG_INFO(arr.size(), " parameters found.");
+
         if(arr.front().is_table())
         {
             std::string msg;
@@ -71,6 +84,9 @@ std::vector<T> read_array(const toml::value& v, F&& reader)
                 }
                 vec.at(i) = reader(item);
                 idxs.push_back(i);
+
+                MJOLNIR_LOG_INFO(i, "-th parameter, ", format_inline(item),
+                                 ", has been read.");
             }
 
             if(maybe_exhaustive)
@@ -116,6 +132,10 @@ std::vector<T> read_array(const toml::value& v, F&& reader)
             const auto dflt = reader(toml::find<toml::value>(v, "default"));
             std::vector<T> vec(len, dflt);
 
+            MJOLNIR_LOG_INFO("number of parameters are ", len);
+            MJOLNIR_LOG_INFO("values of default parameter is ",
+                             format_inline(toml::find<toml::value>(v, "default")));
+
             if(tab.count("values") == 1)
             {
                 for(const auto& sp_val : toml::find<toml::array>(v, "values"))
@@ -128,6 +148,9 @@ std::vector<T> read_array(const toml::value& v, F&& reader)
                             " length of array", sp_val, "here"));
                     }
                     vec.at(idx) = reader(sp_val);
+
+                    MJOLNIR_LOG_INFO("overwrite ", idx, "-th parameter by ",
+                                     format_inline(sp_val));
                 }
             }
             return vec;

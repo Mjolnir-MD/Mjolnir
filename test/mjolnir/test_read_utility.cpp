@@ -9,6 +9,7 @@
 
 BOOST_AUTO_TEST_CASE(test_read_array_from_table)
 {
+    mjolnir::LoggerManager::set_default_logger("test_read_utility.log");
     const auto reader = [](const toml::value& v) -> std::pair<double, int> {
         const auto a = toml::find<double>(v, "a");
         const auto b = toml::find<int   >(v, "b");
@@ -131,6 +132,7 @@ BOOST_AUTO_TEST_CASE(test_read_array_from_table)
 
 BOOST_AUTO_TEST_CASE(test_read_array_from_array)
 {
+    mjolnir::LoggerManager::set_default_logger("test_read_utility.log");
     const auto reader = [](const toml::value& v) -> std::pair<double, int> {
         const auto a = toml::find<double>(v, "a");
         const auto b = toml::find<int   >(v, "b");
