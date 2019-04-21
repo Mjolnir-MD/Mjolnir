@@ -51,4 +51,22 @@ BOOST_AUTO_TEST_CASE(read_underdamped_langevin_integrator)
         BOOST_TEST(integr.parameters().at(0) == 0.1, boost::test_tools::tolerance(tol));
         BOOST_TEST(integr.parameters().at(1) == 0.2, boost::test_tools::tolerance(tol));
     }
+
+    {
+        using namespace toml::literals;
+        const auto v = u8R"(
+            delta_t = 0.1
+            integrator.seed = 1234
+            integrator.parameters.default = {gamma = 0.1}
+            integrator.parameters.size    = 100
+        )"_toml;
+
+        const auto integr = mjolnir::read_underdamped_langevin_integrator<traits_type>(v);
+        BOOST_TEST(integr.delta_t() == 0.1, boost::test_tools::tolerance(tol));
+        BOOST_TEST(integr.parameters().size() == 100u);
+        for(const auto g : integr.parameters())
+        {
+            BOOST_TEST(g == 0.1, boost::test_tools::tolerance(tol));
+        }
+    }
 }
