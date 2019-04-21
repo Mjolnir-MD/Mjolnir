@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_INPUT_READ_INTEGRATOR_HPP
 #define MJOLNIR_INPUT_READ_INTEGRATOR_HPP
 #include <extlib/toml/toml.hpp>
+#include <mjolnir/input/read_utility.hpp>
 #include <mjolnir/core/VelocityVerletIntegrator.hpp>
 #include <mjolnir/core/UnderdampedLangevinIntegrator.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -36,21 +37,22 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
 
     const auto& integrator = toml::find(simulator, "integrator");
 
-    const auto seed       = toml::find<std::uint32_t>(integrator, "seed");
-    const auto parameters = toml::find<toml::array  >(integrator, "parameters");
-
-    std::vector<real_type> gamma(parameters.size());
-    for(const auto& params : parameters)
+    const auto seed         = toml::find<std::uint32_t>(integrator, "seed");
+    const auto gamma_reader = [](const toml::value& v) -> real_type
     {
-        const auto idx = toml::find<std::size_t>(params, "index");
-        const auto  gm = toml::expect<real_type>(params, u8"γ").or_other(
-                         toml::expect<real_type>(params, "gamma")).unwrap();
-        if(gamma.size() <= idx){gamma.resize(idx+1);}
-        gamma.at(idx) = gm;
+        const auto& tab = toml::get<toml::table>(v);
+        if(tab.count(u8"γ") == 1)
+        {
+            return toml::find<real_type>(tab, u8"γ");
+        }
+        return toml::find<real_type>(tab, "gamma");
+    };
 
-        MJOLNIR_LOG_INFO("idx = ", idx, ", gamma = ", gm);
-    }
-    return UnderdampedLangevinIntegrator<traitsT>(delta_t, std::move(gamma),
+    auto parameters = read_array<real_type>(
+            toml::find(integrator, "parameters"), gamma_reader);
+
+    return UnderdampedLangevinIntegrator<traitsT>(
+            delta_t, std::move(parameters),
             RandomNumberGenerator<traitsT>(seed));
 }
 
