@@ -43,9 +43,9 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
         const auto& tab = toml::get<toml::table>(v);
         if(tab.count(u8"γ") == 1)
         {
-            return toml::find<real_type>(tab, u8"γ");
+            return toml::find<real_type>(v, u8"γ");
         }
-        return toml::find<real_type>(tab, "gamma");
+        return toml::find<real_type>(v, "gamma");
     };
 
     auto parameters = read_array<real_type>(
