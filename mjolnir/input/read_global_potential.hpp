@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_INPUT_READ_GLOBAL_POTENTIAL_HPP
 #define MJOLNIR_INPUT_READ_GLOBAL_POTENTIAL_HPP
 #include <extlib/toml/toml.hpp>
+#include <mjolnir/input/read_utility.hpp>
 #include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
 #include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
@@ -76,23 +77,14 @@ read_excluded_volume_potential(const toml::value& global)
     const real_type eps = toml::find<real_type>(global, "epsilon");
     MJOLNIR_LOG_INFO("epsilon = ", eps);
 
-    const auto& ps = toml::find<toml::array>(global, "parameters");
-    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-    std::vector<real_type> params;
-    params.reserve(ps.size());
-    for(const auto& param : ps)
-    {
-        const auto idx = toml::find<std::size_t>(param, "index");
-        if(params.size() <= idx) {params.resize(idx+1, 0.);}
-        const auto radius = toml::find<real_type>(param, "radius");
-        params.at(idx) = radius;
-
-        MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
-    }
+    const auto radius_reader = [](const toml::value& v) -> real_type {
+        return toml::find<real_type>(v, "radius");
+    };
+    auto parameters = read_array<real_type>(
+            toml::find(global, "parameters"), radius_reader);
 
     return ExcludedVolumePotential<realT>(
-        eps, std::move(params), ignore_particle_within,
+        eps, std::move(parameters), ignore_particle_within,
         read_ignored_molecule(toml::find<toml::value>(ignore, "molecule")));
 }
 
@@ -114,30 +106,22 @@ read_lennard_jones_potential(const toml::value& global)
             " within ", connection.second, " will be ignored");
     }
 
-    const auto& ps = toml::find<toml::array>(global, "parameters");
-    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+    using parameter_type = std::pair<real_type, real_type>;
 
-    std::vector<std::pair<real_type, real_type>> params;
-    params.reserve(ps.size());
-    for(const auto& param : ps)
+    const auto lj_reader = [](const toml::value& v) -> parameter_type
     {
-        const auto idx = toml::find<std::size_t>(param, "index");
-        if(params.size() <= idx)
-        {
-            const std::pair<real_type, real_type> dummy{0., 0.};
-            params.resize(idx+1, dummy);
-        }
-        const auto sigma   = toml::expect<real_type>(param, u8"σ").or_other(
-                             toml::expect<real_type>(param, "sigma")).unwrap();
-        const auto epsilon = toml::expect<real_type>(param, u8"ε").or_other(
-                             toml::expect<real_type>(param, "epsilon")).unwrap();
-        params.at(idx) = std::make_pair(sigma, epsilon);
+        const auto sigma   = toml::expect<real_type>(v, u8"σ").or_other(
+                             toml::expect<real_type>(v, "sigma")).unwrap();
+        const auto epsilon = toml::expect<real_type>(v, u8"ε").or_other(
+                             toml::expect<real_type>(v, "epsilon")).unwrap();
+        return std::make_pair(sigma, epsilon);
+    };
 
-        MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma, ", epsilon = ", epsilon);
-    }
+    auto parameters = read_array<parameter_type>(
+            toml::find(global, "parameters"), lj_reader);
 
     return LennardJonesPotential<realT>(
-        std::move(params), ignore_particle_within,
+        std::move(parameters), ignore_particle_within,
         read_ignored_molecule(toml::find<toml::value>(ignore, "molecule")));
 }
 
@@ -190,24 +174,14 @@ read_debye_huckel_potential(const toml::value& global)
             " within ", connection.second, " will be ignored");
     }
 
-    const auto& ps = toml::find<toml::array>(global, "parameters");
-    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+    const auto charge_reader = [](const toml::value& v) -> real_type {
+        return toml::find<real_type>(v, "charge");
+    };
+    auto parameters = read_array<real_type>(
+            toml::find(global, "parameters"), charge_reader);
 
-    std::vector<real_type> params;
-    params.reserve(ps.size());
-    for(const auto& param : ps)
-    {
-        const auto idx    = toml::find<std::size_t>(param, "index");
-        const auto charge = toml::find<real_type  >(param, "charge");
-        if(params.size() <= idx)
-        {
-            params.resize(idx+1, 0.);
-        }
-        params.at(idx) = charge;
-        MJOLNIR_LOG_INFO("idx = ", idx, ", charge = ", charge);
-    }
     return DebyeHuckelPotential<realT>(
-        std::move(params), ignore_particle_within,
+        std::move(parameters), ignore_particle_within,
         read_ignored_molecule(toml::find<toml::value>(ignore, "molecule")));
 }
 
