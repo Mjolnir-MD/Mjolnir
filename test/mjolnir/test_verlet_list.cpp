@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "test_bond_angle_interaction"
+#define BOOST_TEST_MODULE "test_verlet_list"
 
 #ifdef BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
