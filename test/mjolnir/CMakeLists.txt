@@ -30,6 +30,8 @@ set(TEST_NAMES
     test_global_pair_interaction
     test_position_restraint_interaction
 
+    test_verlet_list
+
     test_read_harmonic_potential
     test_read_go_contact_potential
     test_read_clementi_dihedral_potential
