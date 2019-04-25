@@ -81,6 +81,9 @@ class FlexibleLocalDihedralPotential
     real_type                       k()    const noexcept {return k_;}
     std::array<real_type, 7> const& coef() const noexcept {return term_;}
 
+    real_type cutoff() const noexcept // no cutoff exists.
+    {return std::numeric_limits<real_type>::infinity();}
+
   private:
     real_type min_energy;
     real_type k_;

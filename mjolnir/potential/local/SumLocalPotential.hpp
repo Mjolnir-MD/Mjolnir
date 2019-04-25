@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_POTENTIAL_LOCAL_SUM_LOCAL_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_LOCAL_SUM_LOCAL_POTENTIAL_HPP
 #include <tuple>
+#include <limits>
 
 namespace mjolnir
 {
@@ -141,6 +142,9 @@ class SumLocalPotential
     {
         return detail::collect_name_impl<0, size, Potentials...>::invoke();
     }
+
+    real_type cutoff() const noexcept // no cutoff exists.
+    {return std::numeric_limits<real_type>::infinity();}
 
   private:
     potentials_type potentials_;

@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_POTENTIAL_LOCAL_HARMONIC_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_LOCAL_HARMONIC_POTENTIAL_HPP
+#include <limits>
 
 namespace mjolnir
 {
@@ -37,6 +38,9 @@ class HarmonicPotential
 
     real_type k()  const noexcept {return k_;}
     real_type v0() const noexcept {return v0_;}
+
+    real_type cutoff() const noexcept // no cutoff exists.
+    {return std::numeric_limits<real_type>::infinity();}
 
   private:
 

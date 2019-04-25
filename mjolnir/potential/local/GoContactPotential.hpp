@@ -58,8 +58,10 @@ class GoContactPotential
 
     static const char* name() noexcept {return "GoContact";}
 
-    real_type k()  const noexcept {return epsilon_;}
-    real_type v0() const noexcept {return v0_;}
+    real_type k()      const noexcept {return epsilon_;}
+    real_type v0()     const noexcept {return v0_;}
+
+    real_type cutoff() const noexcept {return this->v0_ * cutoff_ratio;}
 
   private:
 
