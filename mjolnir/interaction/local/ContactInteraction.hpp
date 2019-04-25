@@ -60,7 +60,7 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
         MJOLNIR_LOG_INFO("potential = ", potential_type::name(),
                          ", number of bonds = ", potentials.size());
 
-        this->cutoff_ = std::max_element(potentials_.begin(), potentials_.end(),
+        this->cutoff_ = std::max_element(potentials.begin(), potentials.end(),
             [](const potential_index_pair& lhs, const potential_index_pair& rhs)
             {
                 return lhs.second.cutoff() < rhs.second.cutoff();
@@ -76,7 +76,7 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
             item.second.update(sys);
         }
 
-        this->cutoff_ = std::max_element(potentials_.begin(), potentials_.end(),
+        this->cutoff_ = std::max_element(potentials.begin(), potentials.end(),
             [](const potential_index_pair& lhs, const potential_index_pair& rhs)
             {
                 return lhs.second.cutoff() < rhs.second.cutoff();
