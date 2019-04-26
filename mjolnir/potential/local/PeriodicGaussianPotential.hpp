@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_POTENTIAL_LOCAL_ANGULAR_GAUSSIAN_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_LOCAL_ANGULAR_GAUSSIAN_POTENTIAL_HPP
 #include <mjolnir/math/math.hpp>
+#include <limits>
 
 namespace mjolnir
 {
@@ -50,6 +51,9 @@ class PeriodicGaussianPotential
     real_type k()     const noexcept {return k_;}
     real_type sigma() const noexcept {return sigma_;}
     real_type v0()    const noexcept {return v0_;}
+
+    real_type cutoff() const noexcept // no cutoff exists.
+    {return std::numeric_limits<real_type>::infinity();}
 
   private:
 
