@@ -2,6 +2,7 @@
 #define MJOLNIR_POTENTIAL_LOCAL_FLEXIBLE_LOCAL_ANGLE_POTENTIAL_HPP
 #include <array>
 #include <algorithm>
+#include <limits>
 #include <cassert>
 #include <cmath>
 
@@ -104,6 +105,9 @@ class FlexibleLocalAnglePotential
     real_type                        k()   const noexcept {return k_;}
     std::array<real_type, 10> const& y()   const noexcept {return ys_;}
     std::array<real_type, 10> const& d2y() const noexcept {return d2ys_;}
+
+    real_type cutoff() const noexcept // no cutoff exists.
+    {return std::numeric_limits<real_type>::infinity();}
 
   private:
 

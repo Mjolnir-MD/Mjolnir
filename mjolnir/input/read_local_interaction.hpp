@@ -2,6 +2,7 @@
 #define MJOLNIR_INPUT_READ_LOCAL_INTERACTION_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/interaction/local/BondLengthInteraction.hpp>
+#include <mjolnir/interaction/local/ContactInteraction.hpp>
 #include <mjolnir/interaction/local/BondAngleInteraction.hpp>
 #include <mjolnir/interaction/local/DihedralAngleInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
@@ -58,6 +59,43 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
             toml::find<toml::value>(local, "potential"), "here", {
             "expected value is one of the following.",
             "- \"Harmonic\" : well-known harmonic potential",
+            "- \"GoContact\": r^12 - r^10 type native contact potential",
+            "- \"Gaussian\" : well-known gaussian potential"
+            }));
+    }
+}
+
+template<typename traitsT>
+std::unique_ptr<LocalInteractionBase<traitsT>>
+read_contact_interaction(const std::string& kind, const toml::value& local)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type = typename traitsT::real_type;
+
+    const auto potential = toml::find<std::string>(local, "potential");
+    if(potential == "GoContact")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is 10-12 Go contact.");
+        using potentialT = GoContactPotential<real_type>;
+
+        return make_unique<ContactInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<2, potentialT>(local));
+    }
+    else if(potential == "Gaussian")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Gaussian.");
+        using potentialT = GaussianPotential<real_type>;
+
+        return make_unique<ContactInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<2, potentialT>(local));
+    }
+    else
+    {
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_bond_length_interaction: invalid potential",
+            toml::find<toml::value>(local, "potential"), "here", {
+            "expected value is one of the following.",
             "- \"GoContact\": r^12 - r^10 type native contact potential",
             "- \"Gaussian\" : well-known gaussian potential"
             }));
@@ -213,6 +251,11 @@ read_local_interaction(const toml::value& local)
     {
         MJOLNIR_LOG_NOTICE("Bond Length interaction found.");
         return read_bond_length_interaction<traitsT>(kind, local);
+    }
+    else if(interaction == "Contact")
+    {
+        MJOLNIR_LOG_NOTICE("Contact interaction found.");
+        return read_contact_interaction<traitsT>(kind, local);
     }
     else if(interaction == "BondAngle")
     {

@@ -27,6 +27,7 @@ set(TEST_NAMES
     test_bond_length_interaction
     test_bond_angle_interaction
     test_dihedral_angle_interaction
+    test_contact_interaction
     test_global_pair_interaction
     test_position_restraint_interaction
 
