@@ -21,12 +21,12 @@ read_local_forcefield(
     LocalForceField<traitsT> lff;
     for(const auto& interaction : interactions)
     {
-        if(toml::get<toml::table>(interaction).count("file_name") == 1)
+        if(interaction.as_table().count("file_name") == 1)
         {
-            MJOLNIR_LOG_SCOPE(if(toml::get<toml::table>(interaction).count("file_name") == 1));
+            MJOLNIR_LOG_SCOPE(if(interaction.as_table().count("file_name") == 1));
 
             const auto file_name = toml::find<std::string>(interaction, "file_name");
-            if(toml::get<toml::table>(interaction).size() != 1)
+            if(interaction.as_table().size() != 1)
             {
                 MJOLNIR_LOG_WARN(
                     "[[forcefields.local]] has `file_name` and other keys.");
@@ -42,7 +42,7 @@ read_local_forcefield(
             if(ff_file.count("forcefield") == 1)
             {
                 const auto& ff_tab = toml::find(ff_file, "forcefield");
-                if(toml::get<toml::table>(ff_tab).count("local") == 1)
+                if(ff_tab.as_table().count("local") == 1)
                 {
                     lff.emplace(read_local_interaction<traitsT>(
                             toml::find(ff_tab, "local")));

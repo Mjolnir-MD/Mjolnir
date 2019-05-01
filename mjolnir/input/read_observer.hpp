@@ -73,7 +73,7 @@ read_observer(const toml::table& root)
     const auto progress_bar_enabled = toml::expect<bool>(output, "progress_bar")
                                                         .unwrap_or(true);
     std::string output_path("./");
-    if(toml::get<toml::table>(output).count("path") == 1)
+    if(output.as_table().count("path") == 1)
     {
         output_path = toml::find<std::string>(output, "path");
         if(output_path.back() != '/') {output_path += '/';}

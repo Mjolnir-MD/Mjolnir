@@ -25,7 +25,7 @@ read_boundary(const toml::table& root)
     // determine the location of the file.
     toml::value boundary;
     const auto& simulator = toml::find(root, "simulator");
-    if(toml::get<toml::table>(simulator).count("file_name") == 1)
+    if(simulator.as_table().count("file_name") == 1)
     {
         const auto filename   = toml::find<std::string>(simulator, "file_name");
         const auto input_path = read_input_path(root);
@@ -76,7 +76,7 @@ read_precision(const toml::table& root)
     toml::value prec;
 
     const auto& simulator = toml::find(root, "simulator");
-    if(toml::get<toml::table>(simulator).count("file_name") == 1)
+    if(simulator.as_table().count("file_name") == 1)
     {
         const auto filename   = toml::find<std::string>(simulator, "file_name");
         const auto input_path = read_input_path(root);
