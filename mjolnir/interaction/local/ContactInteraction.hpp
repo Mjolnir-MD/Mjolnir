@@ -107,16 +107,19 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
         this->active_contacts_.clear();
         this->active_contacts_.reserve(potentials.size());
 
-        const real_type threshold = this->cutoff_ * (real_type(1) + this->margin_);
-        const real_type threshold_sq = threshold * threshold;
+        // absolute length of margin (this->margin_ is a relative length).
+        const real_type abs_margin = this->cutoff_ * this->margin_;
 
         for(std::size_t i=0; i < this->potentials.size(); ++i)
         {
-            const auto pos0 = sys.position(this->potentials[i].first[0]);
-            const auto pos1 = sys.position(this->potentials[i].first[1]);
+            const auto& pot = this->potentials[i];
+            const auto pos0 = sys.position(pot.first[0]);
+            const auto pos1 = sys.position(pot.first[1]);
             const auto dpos = sys.adjust_direction(pos1 - pos0);
             const auto len2 = math::length_sq(dpos);
-            if(len2 < threshold_sq)
+
+            const auto rc = pot.second.cutoff() + abs_margin;
+            if(len2 < rc * rc)
             {
                 this->active_contacts_.push_back(i);
             }

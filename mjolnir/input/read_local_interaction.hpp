@@ -73,6 +73,12 @@ read_contact_interaction(const std::string& kind, const toml::value& local)
     MJOLNIR_LOG_FUNCTION();
     using real_type = typename traitsT::real_type;
 
+    real_type margin = 0.5; // default value
+    if(local.as_table().count("margin") == 1)
+    {
+        margin = toml::find<real_type>(local, "margin");
+    }
+
     const auto potential = toml::find<std::string>(local, "potential");
     if(potential == "GoContact")
     {
@@ -80,7 +86,7 @@ read_contact_interaction(const std::string& kind, const toml::value& local)
         using potentialT = GoContactPotential<real_type>;
 
         return make_unique<ContactInteraction<traitsT, potentialT>>(
-                kind, read_local_potential<2, potentialT>(local));
+                kind, read_local_potential<2, potentialT>(local), margin);
     }
     else if(potential == "Gaussian")
     {
@@ -88,7 +94,7 @@ read_contact_interaction(const std::string& kind, const toml::value& local)
         using potentialT = GaussianPotential<real_type>;
 
         return make_unique<ContactInteraction<traitsT, potentialT>>(
-                kind, read_local_potential<2, potentialT>(local));
+                kind, read_local_potential<2, potentialT>(local), margin);
     }
     else
     {

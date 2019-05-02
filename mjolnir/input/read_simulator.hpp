@@ -220,15 +220,15 @@ read_simulator(const toml::table& root)
     MJOLNIR_LOG_FUNCTION();
 
     const auto& simulator  = toml::find(root, "simulator");
-    if(toml::get<toml::table>(simulator).count("file_name") == 1)
+    if(simulator.as_table().count("file_name") == 1)
     {
-        MJOLNIR_LOG_SCOPE(if(toml::get<toml::table>(simulator).count("file_name") == 1));
+        MJOLNIR_LOG_SCOPE(if(simulator.as_table().count("file_name") == 1));
 
         const auto input_path = read_input_path(root);
         const auto file_name  = toml::find<std::string>(simulator, "file_name");
         MJOLNIR_LOG_INFO("file_name = ", file_name);
 
-        if(toml::get<toml::table>(simulator).size() != 1)
+        if(simulator.as_table().size() != 1)
         {
             MJOLNIR_LOG_WARN("[simulator] has `file_name` key and other keys.");
             MJOLNIR_LOG_WARN("When `file_name` is provided, other values are "
