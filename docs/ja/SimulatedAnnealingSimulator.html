@@ -1,0 +1,1077 @@
+
+<!DOCTYPE HTML>
+<html lang="ja" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>SimulatedAnnealing · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-hints/plugin-hints.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-prism/prism.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-anchors/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-collapsible-chapters/collapsible-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-versions/plugin.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="SteepestDescentSimulator.html" />
+    
+    
+    <link rel="prev" href="MolecularDynamicsSimulator.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="検索すると入力" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="Overview.html">
+            
+                <a href="Overview.html">
+            
+                    
+                    Overview
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="Files.html">
+            
+                <a href="Files.html">
+            
+                    
+                    Files
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="Units.html">
+            
+                <a href="Units.html">
+            
+                    
+                    Units
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="Simulator.html">
+            
+                <a href="Simulator.html">
+            
+                    
+                    Simulator
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.5.1" data-path="MolecularDynamicsSimulator.html">
+            
+                <a href="MolecularDynamicsSimulator.html">
+            
+                    
+                    MolecularDynamics
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.5.2" data-path="SimulatedAnnealingSimulator.html">
+            
+                <a href="SimulatedAnnealingSimulator.html">
+            
+                    
+                    SimulatedAnnealing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.3" data-path="SteepestDescentSimulator.html">
+            
+                <a href="SteepestDescentSimulator.html">
+            
+                    
+                    SteepestDescent
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="Integrator.html">
+            
+                <a href="Integrator.html">
+            
+                    
+                    Integrator
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.6.1" data-path="UnderdampedLangevinIntegrator.html">
+            
+                <a href="UnderdampedLangevinIntegrator.html">
+            
+                    
+                    UnderdampedLangevin
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.2" data-path="VelocityVerletIntegrator.html">
+            
+                <a href="VelocityVerletIntegrator.html">
+            
+                    
+                    VelocityVerlet
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="System.html">
+            
+                <a href="System.html">
+            
+                    
+                    System
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.7.1" data-path="Topology.html">
+            
+                <a href="Topology.html">
+            
+                    
+                    Topology
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="ForceField.html">
+            
+                <a href="ForceField.html">
+            
+                    
+                    ForceField
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.8.1" data-path="LocalForceField.html">
+            
+                <a href="LocalForceField.html">
+            
+                    
+                    LocalForceField
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.8.1.1" data-path="BondLengthInteraction.html">
+            
+                <a href="BondLengthInteraction.html">
+            
+                    
+                    BondLengthInteraction
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.8.1.1.1" data-path="HarmonicPotential.html">
+            
+                <a href="HarmonicPotential.html">
+            
+                    
+                    Harmonic
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.1.1.2" data-path="GaussianPotential.html">
+            
+                <a href="GaussianPotential.html">
+            
+                    
+                    Gaussian
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.1.1.3" data-path="GoContactPotential.html">
+            
+                <a href="GoContactPotential.html">
+            
+                    
+                    GoContact
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.1.2" data-path="ContactInteraction.html">
+            
+                <a href="ContactInteraction.html">
+            
+                    
+                    ConcactInteraction
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.8.1.2.1" data-path="GaussianPotential.html">
+            
+                <a href="GaussianPotential.html">
+            
+                    
+                    Gaussian
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.1.2.2" data-path="GoContactPotential.html">
+            
+                <a href="GoContactPotential.html">
+            
+                    
+                    GoContact
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.1.3" data-path="BondAngleInteraction.html">
+            
+                <a href="BondAngleInteraction.html">
+            
+                    
+                    BondAngleInteraction
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.8.1.3.1" data-path="HarmonicPotential.html">
+            
+                <a href="HarmonicPotential.html">
+            
+                    
+                    Harmonic
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.1.3.2" data-path="GaussianPotential.html">
+            
+                <a href="GaussianPotential.html">
+            
+                    
+                    Gaussian
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.1.3.3" data-path="FlexibleLocalAnglePotential.html">
+            
+                <a href="FlexibleLocalAnglePotential.html">
+            
+                    
+                    FlexibleLocal
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.1.4" data-path="DihedralAngleInteraction.html">
+            
+                <a href="DihedralAngleInteraction.html">
+            
+                    
+                    DihedralAngleInteraction
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.8.1.4.1" data-path="HarmonicPotential.html">
+            
+                <a href="HarmonicPotential.html">
+            
+                    
+                    Harmonic
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.1.4.2" data-path="GaussianPotential.html">
+            
+                <a href="GaussianPotential.html">
+            
+                    
+                    Gaussian
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.1.4.3" data-path="PeriodicGaussianPotential.html">
+            
+                <a href="PeriodicGaussianPotential.html">
+            
+                    
+                    PeriodicGaussian
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.1.4.4" data-path="FlexibleLocalDihedralPotential.html">
+            
+                <a href="FlexibleLocalDihedralPotential.html">
+            
+                    
+                    FlexibleLocal
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.1.4.5" data-path="ClementiDihedralPotential.html">
+            
+                <a href="ClementiDihedralPotential.html">
+            
+                    
+                    ClementiDihedral
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.2" data-path="GlobalForceField.html">
+            
+                <a href="GlobalForceField.html">
+            
+                    
+                    GlobalForceField
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.8.2.1" data-path="GlobalPairInteraction.html">
+            
+                <a href="GlobalPairInteraction.html">
+            
+                    
+                    GlobalPairInteraction
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.8.2.1.1" data-path="LennardJonesPotential.html">
+            
+                <a href="LennardJonesPotential.html">
+            
+                    
+                    LennardJones
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.2.1.2" data-path="ExcludedVolumePotential.html">
+            
+                <a href="ExcludedVolumePotential.html">
+            
+                    
+                    ExcludedVolume
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.2.1.3" data-path="DebyeHuckelPotential.html">
+            
+                <a href="DebyeHuckelPotential.html">
+            
+                    
+                    DebyeHuckel
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.3" data-path="ExternalForceField.html">
+            
+                <a href="ExternalForceField.html">
+            
+                    
+                    ExternalForceField
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.8.3.1" data-path="ExternalDistanceInteraction.html">
+            
+                <a href="ExternalDistanceInteraction.html">
+            
+                    
+                    ExternalDistanceInteraction
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.8.3.1.1" data-path="LennardJonesWallPotential.html">
+            
+                <a href="LennardJonesWallPotential.html">
+            
+                    
+                    LennardJonesWall
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.3.1.2" data-path="ExcludedVolumeWallPotential.html">
+            
+                <a href="ExcludedVolumeWallPotential.html">
+            
+                    
+                    ExcludedVolumeWall
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.3.1.3" data-path="ImplicitMembranePotential.html">
+            
+                <a href="ImplicitMembranePotential.html">
+            
+                    
+                    ImplicitMembrane
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8.3.2" data-path="PositionRestraintInteraction.html">
+            
+                <a href="PositionRestraintInteraction.html">
+            
+                    
+                    PositionRestraintInteraction
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.8.3.2.1" data-path="HarmonicRestraintPotential.html">
+            
+                <a href="HarmonicRestraintPotential.html">
+            
+                    
+                    HarmonicRestraint
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="Observer.html">
+            
+                <a href="Observer.html">
+            
+                    
+                    Observer
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.9.1" data-path="XYZObserver.html">
+            
+                <a href="XYZObserver.html">
+            
+                    
+                    XYZObserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9.2" data-path="DCDObserver.html">
+            
+                <a href="DCDObserver.html">
+            
+                    
+                    DCDObserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9.3" data-path="TRRObserver.html">
+            
+                <a href="TRRObserver.html">
+            
+                    
+                    TRRObserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            GitBookで公開 
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >SimulatedAnnealing</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="simulatedannealing"><a name="simulatedannealing" class="plugin-anchor" href="#simulatedannealing"><i class="fa fa-link" aria-hidden="true"></i></a>SimulatedAnnealing</h1>
+<p>&#x713C;&#x304D;&#x306A;&#x307E;&#x3057;&#xFF08;Simulated Annealing&#xFF09;&#x6CD5;&#x306E;&#x305F;&#x3081;&#x306E;&#x30B7;&#x30DF;&#x30E5;&#x30EC;&#x30FC;&#x30BF;&#x3067;&#x3059;&#x3002;</p>
+<p>&#x4E00;&#x3064;&#x306E;<a href="System.html"><code>System</code></a>&#x3001;&#x4E00;&#x3064;&#x306E;<a href="ForceField.html"><code>ForceField</code></a>&#x3092;&#x6307;&#x5B9A;&#x3057;&#x3066;&#x3001;
+&#x305D;&#x308C;&#x3092;&#x4F7F;&#x3063;&#x3066;&#x713C;&#x304D;&#x306A;&#x307E;&#x3057;&#x6CD5;&#x3092;&#x884C;&#x3044;&#x307E;&#x3059;&#x3002;</p>
+<h2 id="&#x4F8B;"><a name="&#x4F8B;" class="plugin-anchor" href="#&#x4F8B;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x4F8B;</h2>
+<pre class="language-"><code class="lang-toml"><span class="token punctuation">[</span><span class="token table class-name">simulator</span><span class="token punctuation">]</span>
+<span class="token key property">type</span>           <span class="token punctuation">=</span> <span class="token string">&quot;SimulatedAnnealing&quot;</span>
+<span class="token key property">boundary_type</span>  <span class="token punctuation">=</span> <span class="token string">&quot;Unlimited&quot;</span>
+<span class="token key property">precision</span>      <span class="token punctuation">=</span> <span class="token string">&quot;double&quot;</span>
+<span class="token key property">delta_t</span>        <span class="token punctuation">=</span> <span class="token number">0.1</span>
+<span class="token key property">total_step</span>     <span class="token punctuation">=</span> <span class="token number">50_000</span>
+<span class="token key property">save_step</span>      <span class="token punctuation">=</span> <span class="token number">100</span>
+<span class="token key property">each_step</span>      <span class="token punctuation">=</span> <span class="token number">100</span>
+<span class="token key property">schedule.type</span>  <span class="token punctuation">=</span> <span class="token string">&quot;linear&quot;</span>
+<span class="token key property">schedule.begin</span> <span class="token punctuation">=</span> <span class="token number">300</span>
+<span class="token key property">schedule.end</span>   <span class="token punctuation">=</span> <span class="token number">150</span>
+<span class="token punctuation">[</span><span class="token table class-name">simulator.integrator</span><span class="token punctuation">]</span>
+<span class="token key property">type</span> <span class="token punctuation">=</span> <span class="token string">&quot;UnderdampedLangevin&quot;</span>
+<span class="token comment"># ...</span>
+</code></pre>
+<h2 id="&#x5165;&#x529B;"><a name="&#x5165;&#x529B;" class="plugin-anchor" href="#&#x5165;&#x529B;"><i class="fa fa-link" aria-hidden="true"></i></a>&#x5165;&#x529B;</h2>
+<p>&#x4EE5;&#x4E0B;&#x306E;&#x30D1;&#x30E9;&#x30E1;&#x30FC;&#x30BF;&#x3092;&#x53D6;&#x308A;&#x307E;&#x3059;&#x3002;</p>
+<ul>
+<li><code>type</code>: &#x6587;&#x5B57;&#x5217;&#x578B;<ul>
+<li>&#x30B7;&#x30DF;&#x30E5;&#x30EC;&#x30FC;&#x30BF;&#x306E;&#x7A2E;&#x985E;&#x3092;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;&#x3053;&#x306E;&#x30B7;&#x30DF;&#x30E5;&#x30EC;&#x30FC;&#x30BF;&#x3092;&#x4F7F;&#x3046;&#x5834;&#x5408;&#x3001;<code>&quot;SimulatedAnnealing&quot;</code>&#x3067;&#x3059;&#x3002;</li>
+</ul>
+</li>
+<li><code>boundary_type</code>: &#x6587;&#x5B57;&#x5217;&#x578B;<ul>
+<li>&#x5883;&#x754C;&#x6761;&#x4EF6;&#x306E;&#x7A2E;&#x985E;&#x3092;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;&#x5177;&#x4F53;&#x7684;&#x306A;&#x5927;&#x304D;&#x3055;&#x306F;<a href="System.html"><code>System</code></a>&#x3067;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;</li>
+<li><code>&quot;Unlimited&quot;</code>: &#x5883;&#x754C;&#x6761;&#x4EF6;&#x3092;&#x8A2D;&#x5B9A;&#x3057;&#x307E;&#x305B;&#x3093;&#x3002;&#x30B7;&#x30DF;&#x30E5;&#x30EC;&#x30FC;&#x30B7;&#x30E7;&#x30F3;&#x30DC;&#x30C3;&#x30AF;&#x30B9;&#x306F;&#x7121;&#x9650;&#x5927;&#x306E;&#x5927;&#x304D;&#x3055;&#x306B;&#x306A;&#x308A;&#x307E;&#x3059;&#x3002;</li>
+<li><code>&quot;PeriodicCuboid&quot;</code>: &#x76F4;&#x65B9;&#x4F53;&#x578B;&#x306E;&#x5468;&#x671F;&#x5883;&#x754C;&#x6761;&#x4EF6;&#x3092;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;</li>
+</ul>
+</li>
+<li><code>precision</code>: &#x6587;&#x5B57;&#x5217;&#x578B;<ul>
+<li>&#x30B7;&#x30DF;&#x30E5;&#x30EC;&#x30FC;&#x30B7;&#x30E7;&#x30F3;&#x306B;&#x7528;&#x3044;&#x308B;&#x6D6E;&#x52D5;&#x5C0F;&#x6570;&#x70B9;&#x6570;&#x578B;&#x306E;&#x7A2E;&#x985E;&#x3092;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;</li>
+<li><code>&quot;float&quot;</code>: 32bit&#x6D6E;&#x52D5;&#x5C0F;&#x6570;&#x70B9;&#x6570;&#x3092;&#x4F7F;&#x7528;&#x3057;&#x307E;&#x3059;&#x3002;</li>
+<li><code>&quot;double&quot;</code>: 64bit&#x6D6E;&#x52D5;&#x5C0F;&#x6570;&#x70B9;&#x6570;&#x3092;&#x4F7F;&#x7528;&#x3057;&#x307E;&#x3059;&#x3002;</li>
+</ul>
+</li>
+<li><code>delta_t</code>: &#x6D6E;&#x52D5;&#x5C0F;&#x6570;&#x70B9;&#x6570;&#x578B;<ul>
+<li>&#x30B7;&#x30DF;&#x30E5;&#x30EC;&#x30FC;&#x30B7;&#x30E7;&#x30F3;&#x306E;&#x6642;&#x9593;&#x523B;&#x307F;&#x3092;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;</li>
+<li>&#x6642;&#x9593;&#x306E;&#x5358;&#x4F4D;&#x306F;<a href="Units.html"><code>units</code></a>&#x3067;&#x6307;&#x5B9A;&#x3057;&#x305F;&#x5358;&#x4F4D;&#x7CFB;&#x306B;&#x4F9D;&#x5B58;&#x3057;&#x307E;&#x3059;&#x3002;</li>
+</ul>
+</li>
+<li><code>total_step</code>: &#x6574;&#x6570;&#x578B;<ul>
+<li>&#x5B9F;&#x884C;&#x3059;&#x308B;&#x30B9;&#x30C6;&#x30C3;&#x30D7;&#x6570;&#x3092;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;</li>
+</ul>
+</li>
+<li><code>save_step</code>: &#x6574;&#x6570;&#x578B;<ul>
+<li>&#x4F55;&#x30B9;&#x30C6;&#x30C3;&#x30D7;&#x304A;&#x304D;&#x306B;&#x72B6;&#x614B;&#x3092;&#x51FA;&#x529B;&#x3059;&#x308B;&#x304B;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;</li>
+</ul>
+</li>
+<li><code>each_step</code>: &#x6574;&#x6570;&#x578B;<ul>
+<li>&#x4F55;&#x30B9;&#x30C6;&#x30C3;&#x30D7;&#x304A;&#x304D;&#x306B;&#x6E29;&#x5EA6;&#x3092;&#x5909;&#x66F4;&#x3059;&#x308B;&#x304B;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;</li>
+</ul>
+</li>
+<li><code>schedule</code>: &#x30C6;&#x30FC;&#x30D6;&#x30EB;&#x578B;<ul>
+<li>&#x3069;&#x306E;&#x3088;&#x3046;&#x306B;&#x6E29;&#x5EA6;&#x3092;&#x5909;&#x66F4;&#x3059;&#x308B;&#x304B;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;</li>
+</ul>
+</li>
+<li><code>integrator</code>: &#x30C6;&#x30FC;&#x30D6;&#x30EB;&#x578B;<ul>
+<li>&#x6642;&#x9593;&#x7A4D;&#x5206;&#x306E;&#x65B9;&#x6CD5;&#x3092;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;&#x7A4D;&#x5206;&#x65B9;&#x6CD5;&#x306B;&#x3088;&#x3063;&#x3066;&#x5FC5;&#x8981;&#x306A;&#x30D1;&#x30E9;&#x30E1;&#x30FC;&#x30BF;&#x304C;&#x7570;&#x306A;&#x308A;&#x307E;&#x3059;&#x3002;</li>
+</ul>
+</li>
+</ul>
+<h3 id="schedule"><a name="schedule" class="plugin-anchor" href="#schedule"><i class="fa fa-link" aria-hidden="true"></i></a><code>schedule</code></h3>
+<p><code>simulator.schedule</code>&#x30C6;&#x30FC;&#x30D6;&#x30EB;&#x306F;&#x3001;&#x4EE5;&#x4E0B;&#x306E;&#x30D1;&#x30E9;&#x30E1;&#x30FC;&#x30BF;&#x3092;&#x53D6;&#x308A;&#x307E;&#x3059;&#x3002;</p>
+<ul>
+<li><code>type</code>: &#x6587;&#x5B57;&#x5217;&#x578B;<ul>
+<li>&#x6E29;&#x5EA6;&#x306E;&#x5909;&#x5316;&#x3055;&#x305B;&#x65B9;&#x3092;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;&#x4EE5;&#x4E0B;&#x306E;&#x7A2E;&#x985E;&#x304C;&#x30B5;&#x30DD;&#x30FC;&#x30C8;&#x3055;&#x308C;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;</li>
+<li><code>&quot;linear&quot;</code>: &#x7DDA;&#x5F62;&#x306B;&#x5909;&#x5316;&#x3055;&#x305B;&#x307E;&#x3059;&#x3002;</li>
+</ul>
+</li>
+<li><code>begin</code>: &#x6D6E;&#x52D5;&#x5C0F;&#x6570;&#x70B9;&#x6570;&#x578B;<ul>
+<li><code>&quot;linear&quot;</code>&#x306A;&#x6E29;&#x5EA6;&#x5909;&#x5316;&#x306B;&#x304A;&#x3044;&#x3066;&#x3001;&#x6642;&#x523B;0&#x3067;&#x306E;&#x6E29;&#x5EA6;&#x3092;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;&#x5358;&#x4F4D;&#x306F;[K]&#x3067;&#x3059;&#x3002;</li>
+</ul>
+</li>
+<li><code>end</code>: &#x6D6E;&#x52D5;&#x5C0F;&#x6570;&#x70B9;&#x6570;&#x578B;<ul>
+<li><code>&quot;linear&quot;</code>&#x306A;&#x6E29;&#x5EA6;&#x5909;&#x5316;&#x306B;&#x304A;&#x3044;&#x3066;&#x3001;&#x6700;&#x7D42;&#x6642;&#x523B;&#x3067;&#x306E;&#x6E29;&#x5EA6;&#x3092;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;&#x5358;&#x4F4D;&#x306F;[K]&#x3067;&#x3059;&#x3002;</li>
+</ul>
+</li>
+</ul>
+<h3 id="integrator"><a name="integrator" class="plugin-anchor" href="#integrator"><i class="fa fa-link" aria-hidden="true"></i></a><code>integrator</code></h3>
+<ul>
+<li><code>type</code>: &#x6587;&#x5B57;&#x5217;&#x578B;<ul>
+<li>&#x7A4D;&#x5206;&#x65B9;&#x6CD5;&#x306E;&#x7A2E;&#x985E;&#x3092;&#x6307;&#x5B9A;&#x3057;&#x307E;&#x3059;&#x3002;<code>MolecularDynamics</code>&#x3068;&#x306F;&#x7570;&#x306A;&#x308A;&#x3001;&#x6E29;&#x5EA6;&#x4E00;&#x5B9A;&#x306E;&#x624B;&#x6CD5;&#x3057;&#x304B;&#x4F7F;&#x7528;&#x3067;&#x304D;&#x307E;&#x305B;&#x3093;&#x3002;<ul>
+<li><a href="UnderdampedLangevinIntegrator.html">&quot;UnderdampedLangevin&quot;</a><ul>
+<li>NVT&#x4E00;&#x5B9A;&#x306E;&#x30E9;&#x30F3;&#x30B8;&#x30E5;&#x30D0;&#x30F3;&#x65B9;&#x7A0B;&#x5F0F;&#x306B;&#x57FA;&#x3065;&#x304F;&#x30B7;&#x30DF;&#x30E5;&#x30EC;&#x30FC;&#x30B7;&#x30E7;&#x30F3;&#x3092;&#x884C;&#x3044;&#x307E;&#x3059;&#x3002;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="MolecularDynamicsSimulator.html" class="navigation navigation-prev " aria-label="Previous page: MolecularDynamics">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="SteepestDescentSimulator.html" class="navigation navigation-next " aria-label="Next page: SteepestDescent">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"SimulatedAnnealing","level":"1.5.2","depth":2,"next":{"title":"SteepestDescent","level":"1.5.3","depth":2,"path":"SteepestDescentSimulator.md","ref":"SteepestDescentSimulator.md","articles":[]},"previous":{"title":"MolecularDynamics","level":"1.5.1","depth":2,"path":"MolecularDynamicsSimulator.md","ref":"MolecularDynamicsSimulator.md","articles":[]},"dir":"ltr"},"config":{"plugins":["mathjax","prism","-highlight","hints","github","anchors","fontsettings","search","back-to-top-button","collapsible-chapters","expandable-chapters","versions"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"prism":{},"github":{"url":"https://github.com/Mjolnir-MD/Mjolnir"},"search":{},"collapsible-chapters":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"family":"sans","size":2,"theme":"white"},"back-to-top-button":{},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"versions":{"type":"branches","options":[{"text":"日本語","value":"../ja/","selected":true},{"text":"English","value":"../en/"}]},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"expandable-chapters":{}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"language":"ja","gitbook":"*"},"file":{"path":"SimulatedAnnealingSimulator.md","mtime":"2019-05-02T11:53:30.232Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-05-02T11:54:14.530Z"},"basePath":".","book":{"language":"ja"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="https://cdn.mathjax.org/mathjax/2.6-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-mathjax/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-collapsible-chapters/collapsible-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-versions/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+
+    </body>
+</html>
+
