@@ -1,0 +1,34 @@
+version: 2.1
+executors:
+  default:
+    docker:
+      - image: circleci/node:8.11.4
+
+jobs:
+  deploy:
+    executor:
+      name: default
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "36:0b:d2:cf:5e:48:fc:80:2b:43:bc:90:bd:4c:77:5b"
+      - checkout
+      - run:
+          name: install dependencies
+          command: |
+              npm install gitbook-cli
+              git config --global user.name  "ToruNiina"
+              git config --global user.email "niina.toru.68u@gmail.com"
+              ./node_modules/gitbook-cli/bin/gitbook.js install ./book ./docs
+              ./node_modules/gitbook-cli/bin/gitbook.js build   ./book ./docs
+              git add ./docs
+              git commit --allow-empty -m '[ci skip] update docs'
+              git push git@github.com:Mjolnir-MD/Mjolnir.git master
+workflows:
+  setup_and_deploy:
+    jobs:
+      - deploy:
+          name: update docs
+          filters:
+            branches:
+              only: master
