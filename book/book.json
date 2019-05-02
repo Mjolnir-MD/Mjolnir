@@ -1,0 +1,30 @@
+{
+    "plugins": ["mathjax",
+                "hints",
+                "prism",
+                "-highlight",
+                "github",
+                "anchors",
+                "fontsettings",
+                "search",
+                "back-to-top-button",
+                "collapsible-chapters",
+                "expandable-chapters",
+                "versions"
+    ],
+    "pluginsConfig": {
+        "github":{"url":"https://github.com/Mjolnir-MD/Mjolnir"},
+        "versions": {
+            "options": [
+                {
+                    "text":"日本語",
+                    "value":"ja/"
+                },
+                {
+                    "text":"English",
+                    "value":"en/"
+                }
+            ]
+        }
+    }
+}
