@@ -15,41 +15,18 @@ namespace mjolnir
 
 template<typename realT>
 std::unique_ptr<SimulatorBase>
-read_boundary(const toml::table& root)
+read_boundary(const toml::table& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
-    // [simulator] can be provided in a different file. in that case, the table
-    // has `file_name` field. In that case, file.input.path is also needed to
-    // determine the location of the file.
-    toml::value boundary;
-    const auto& simulator = toml::find(root, "simulator");
-    if(simulator.as_table().count("file_name") == 1)
-    {
-        const auto filename   = toml::find<std::string>(simulator, "file_name");
-        const auto input_path = read_input_path(root);
-        const auto simfile    = toml::parse(input_path + filename);
-        if(simfile.count("simulator") != 1)
-        {
-            throw_exception<std::out_of_range>("[error] mjolnir::read_simulator: "
-                "table [simulator] not found in the toml file\n --> ",
-                input_path, filename, "\n | the file should define [simulator] "
-                "table and define values in it.");
-        }
-        boundary = toml::find(simfile.at("simulator"), "boundary_type");
-    }
-    else
-    {
-        boundary = toml::find(simulator, "boundary_type");
-    }
-
-    if(toml::get<std::string>(boundary) == "Unlimited")
+    const auto boundary = toml::find<std::string>(simulator, "boundary_type");
+    if(boundary == "Unlimited")
     {
         MJOLNIR_LOG_NOTICE("Boundary Condition is Unlimited");
         return read_units<SimulatorTraits<realT, UnlimitedBoundary>>(root);
     }
-    else if(toml::get<std::string>(boundary) == "PeriodicCuboid")
+    else if(boundary == "PeriodicCuboid")
     {
         MJOLNIR_LOG_NOTICE("Boundary Condition is CuboidalPeriodic");
         return read_units<SimulatorTraits<realT, CuboidalPeriodicBoundary>>(root);
@@ -65,45 +42,21 @@ read_boundary(const toml::table& root)
 }
 
 inline std::unique_ptr<SimulatorBase>
-read_precision(const toml::table& root)
+read_precision(const toml::table& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
-    // [simulator] can be provided in a different file. in that case, the table
-    // has `file_name` field. In that case, input_path is also needed to
-    // determine the location of the file.
-    toml::value prec;
-
-    const auto& simulator = toml::find(root, "simulator");
-    if(simulator.as_table().count("file_name") == 1)
-    {
-        const auto filename   = toml::find<std::string>(simulator, "file_name");
-        const auto input_path = read_input_path(root);
-        const auto simfile    = toml::parse(input_path + filename);
-        if(simfile.count("simulator") != 1)
-        {
-            throw_exception<std::out_of_range>("[error] mjolnir::read_simulator: "
-                "table [simulator] not found in the toml file\n --> ",
-                input_path, filename, "\n | the file should define [simulator] "
-                "table and define values in it.");
-        }
-        prec = toml::find(simfile.at("simulator"), "precision");
-    }
-    else
-    {
-        prec = toml::find(simulator, "precision");
-    }
-
-    if(toml::get<std::string>(prec) == "double")
+    const auto prec = toml::find<std::string>(simulator, "precision");
+    if(prec == "double")
     {
         MJOLNIR_LOG_NOTICE("precision is double");
-        return read_boundary<double>(root);
+        return read_boundary<double>(root, simulator);
     }
-    else if(toml::get<std::string>(prec) == "float")
+    else if(prec == "float")
     {
         MJOLNIR_LOG_NOTICE("precision is float");
-        return read_boundary<float>(root);
+        return read_boundary<float>(root, simulator);
     }
     else
     {
@@ -141,7 +94,30 @@ read_input_file(const std::string& filename)
     MJOLNIR_LOG_FUNCTION();
     MJOLNIR_LOG_NOTICE("the log file is `", logger_name, '`');
 
-    return read_precision(root); // read all the settings recursively...
+    // the most of important flags are defined in [simulator], like
+    // `precision = "float"`, `boundary_type = "Unlimited"`.
+    // Those values should be read before others.
+    // Thus first read [simulator] here and pass it to the latter functions.
+
+    const auto& simulator = toml::find(root, "simulator");
+    if(simulator.as_table().count("file_name") == 1)
+    {
+        // [simulator] can be provided in a different file. In that case, the
+        // table has `file_name` field. In that case, input_path is also needed
+        // to determine the location of the file.
+        const auto filename   = toml::find<std::string>(simulator, "file_name");
+        const auto input_path = read_input_path(root);
+        const auto simfile    = toml::parse(input_path + filename);
+        if(simfile.count("simulator") != 1)
+        {
+            throw_exception<std::out_of_range>("[error] mjolnir::read_simulator: "
+                "table [simulator] not found in the toml file\n --> ",
+                input_path, filename, "\n | the file should define [simulator] "
+                "table and define values in it.");
+        }
+        return read_precision(root, simfile.at("simulator"));
+    }
+    return read_precision(root, simulator);
 }
 
 }// mjolnir
