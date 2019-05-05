@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_UTIL_ALIGNED_ALLOCATOR_HPP
 #define MJOLNIR_UTIL_ALIGNED_ALLOCATOR_HPP
+#include <mjolnir/math/compiletime.hpp> // for constexpr max(a, b)
 #include <type_traits>
 #include <memory>
 #include <limits>
