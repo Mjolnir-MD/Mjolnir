@@ -59,7 +59,7 @@ class Topology
     Topology& operator=(Topology&&)      = default;
 
     explicit Topology(const std::size_t N)
-        : nodes_(N, {uninitialized, "uninitialized", {}})
+        : num_molecules_(1), nodes_(N, {uninitialized, "uninitialized", {}})
     {}
 
     void        clear()                {return nodes_.clear();}
