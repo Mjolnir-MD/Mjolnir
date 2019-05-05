@@ -78,6 +78,7 @@ class Matrix
     {
         static_assert(std::is_convertible<T, value_type>::value, "");
         for(std::size_t i=0; i<total_size; ++i){this->values_[i] = rhs[i];}
+        return *this;
     }
 
     template<typename T>
