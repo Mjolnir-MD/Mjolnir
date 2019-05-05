@@ -34,7 +34,8 @@ read_boundary(const toml::table& root, const toml::value& simulator)
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
-            "mjolnir::read_boundary: invalid boundary", boundary, "here", {
+            "mjolnir::read_boundary: invalid boundary",
+            toml::find(simulator, "boundary_type"), "here", {
             "- \"Unlimited\"     : no boundary condition. infinite space",
             "- \"PeriodicCuboid\": periodic boundary with cuboidal shape"
             }));
@@ -61,7 +62,8 @@ read_precision(const toml::table& root, const toml::value& simulator)
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
-            "mjolnir::read_precision: invalid precision", prec, "here", {
+            "mjolnir::read_precision: invalid precision",
+            toml::find(simulator, "precition"), "here", {
             "expected value is one of the following.",
             "- \"double\": 64 bit floating-point",
             "- \"float\" : 32 bit floating-point"
