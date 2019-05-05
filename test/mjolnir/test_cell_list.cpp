@@ -62,12 +62,12 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary)
     constexpr double margin = 0.25; // threshold = 2.0 * (1+0.25) = 2.5
     constexpr double threshold = cutoff * (1.0 + margin);
 
-    const auto distribute_particle = [L](std::mt19937& mt) -> coordinate_type
+    const auto distribute_particle = [](std::mt19937& mt, double l) -> coordinate_type
     {
         return coordinate_type(
-            L * std::generate_canonical<real_type, std::numeric_limits<real_type>::digits>(mt),
-            L * std::generate_canonical<real_type, std::numeric_limits<real_type>::digits>(mt),
-            L * std::generate_canonical<real_type, std::numeric_limits<real_type>::digits>(mt)
+            l * std::generate_canonical<real_type, std::numeric_limits<real_type>::digits>(mt),
+            l * std::generate_canonical<real_type, std::numeric_limits<real_type>::digits>(mt),
+            l * std::generate_canonical<real_type, std::numeric_limits<real_type>::digits>(mt)
         );
     };
 
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary)
     for(std::size_t i=0; i < N; ++i)
     {
         sys.at(i).mass     = 1.0;
-        sys.at(i).position = distribute_particle(mt);
+        sys.at(i).position = distribute_particle(mt, L);
     }
     sys.topology().construct_molecules();
 
@@ -133,12 +133,12 @@ BOOST_AUTO_TEST_CASE(test_CellList_PeriodicBoundary)
     constexpr double margin = 0.5;
     constexpr double threshold = cutoff * (1.0 + margin);
 
-    const auto distribute_particle = [L](std::mt19937& mt) -> coordinate_type
+    const auto distribute_particle = [](std::mt19937& mt, double l) -> coordinate_type
     {
         return coordinate_type(
-            L * std::generate_canonical<real_type, std::numeric_limits<real_type>::digits>(mt),
-            L * std::generate_canonical<real_type, std::numeric_limits<real_type>::digits>(mt),
-            L * std::generate_canonical<real_type, std::numeric_limits<real_type>::digits>(mt)
+            l * std::generate_canonical<real_type, std::numeric_limits<real_type>::digits>(mt),
+            l * std::generate_canonical<real_type, std::numeric_limits<real_type>::digits>(mt),
+            l * std::generate_canonical<real_type, std::numeric_limits<real_type>::digits>(mt)
         );
     };
 
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_PeriodicBoundary)
     for(std::size_t i=0; i < N; ++i)
     {
         sys.at(i).mass     = 1.0;
-        sys.at(i).position = distribute_particle(mt);
+        sys.at(i).position = distribute_particle(mt, L);
     }
     sys.topology().construct_molecules();
 
