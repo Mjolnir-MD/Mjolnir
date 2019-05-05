@@ -123,14 +123,16 @@ class aligned_allocator
     using const_reference = value_type const&;
     using propagate_on_container_move_assignment = std::true_type;
 
+    // use the maximum alignment in {Alignment, alignof(T), alignof(void*)}.
+    static constexpr std::size_t alignment = compiletime::max(
+            Alignment, compiletime::max(alignof(T), alignof(void*))
+        );
+
     template<typename U>
     struct rebind
     {
-        using other = aligned_allocator<U, std::alignment_of<U>::value>;
+        using other = aligned_allocator<U, alignment>;
     };
-
-    static constexpr std::size_t alignment =
-        (Alignment > sizeof(void*)) ? Alignment : sizeof(void*);
 
   public:
 
