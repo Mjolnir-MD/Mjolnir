@@ -26,7 +26,7 @@ struct dummy_potential
     using molecule_id_type     = typename topology_type::molecule_id_type;
     using connection_kind_type = typename topology_type::connection_kind_type;
 
-    dummy_potential(const real_type cutoff): cutoff_(cutoff) {}
+    explicit dummy_potential(const real_type cutoff): cutoff_(cutoff) {}
 
     real_type max_cutoff_length() const noexcept {return this->cutoff_;}
 
