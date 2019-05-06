@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.9) # FindOpenMP
 enable_testing()
 project(mjolnir)
 
@@ -9,14 +9,8 @@ set(CMAKE_CXX_EXTENSIONS       OFF) # not gnu11, c++11
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/extlib)
 
-option(DEBUG "dump debug information" OFF)
-if(DEBUG)
-    add_definitions(-DMJOLNIR_DEBUG)
-endif()
-option(USE_APPROX "use approximation instruction for time-consuming math functions" OFF)
-if(USE_APPROX)
-    add_definitions(-DMJOLNIR_WITH_APPROX)
-endif()
+# -----------------------------------------------------------------------------
+# find compilation flags
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-Wall"      MJOLNIR_COMPILER_HAS_WALL)
@@ -39,6 +33,34 @@ check_cxx_compiler_flag("-mtune=native" MJOLNIR_COMPILER_HAS_MTUNE_NATIVE)
 if(MJOLNIR_COMPILER_HAS_MTUNE_NATIVE)
     add_definitions(-mtune=native)
 endif()
+
+# -----------------------------------------------------------------------------
+# check input
+
+option(DEBUG "dump debug information" OFF)
+if(DEBUG)
+    add_definitions(-DMJOLNIR_DEBUG)
+endif()
+
+option(USE_APPROX "use approximation instruction for time-consuming math functions" OFF)
+if(USE_APPROX)
+    add_definitions(-DMJOLNIR_WITH_APPROX)
+endif()
+
+option(USE_OPENMP "use OpenMP for CPU parallelization" ON)
+if(USE_OPENMP)
+    find_package(OpenMP)
+    if(OpenMP_FOUND)
+        message(STATUS "OpenMP ${OpenMP_VERSION} found")
+        add_definitions(-DMJOLNIR_WITH_OPENMP)
+        message(STATUS "adding OpenMP flags ${OpenMP_CXX_FLAGS} ...")
+        add_definitions("${OpenMP_CXX_FLAGS}")
+    else()
+        message(WARNING "OpenMP not found. OpenMP support is disabled.")
+    endif()
+endif()
+
+# -----------------------------------------------------------------------------
 
 if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/toml/toml.hpp")
     execute_process(COMMAND git submodule update --init --recursive
