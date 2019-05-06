@@ -69,7 +69,7 @@ set(TEST_NAMES
     test_read_input_path
     )
 
-add_definitions("-O2 -march=native -mtune=native")
+add_definitions("-O2")
 
 if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
     message(STATUS "boost_unit_test_framework precompiled library found -> ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}")

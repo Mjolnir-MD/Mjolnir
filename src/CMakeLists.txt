@@ -1,7 +1,7 @@
 add_executable(mjolnir mjolnir.cpp)
 set_target_properties(mjolnir
     PROPERTIES
-    COMPILE_FLAGS "-Ofast -march=native -mtune=native"
+    COMPILE_FLAGS "-Ofast"
     RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
 )
 
