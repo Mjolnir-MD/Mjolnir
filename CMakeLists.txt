@@ -2,11 +2,9 @@ cmake_minimum_required(VERSION 3.0)
 enable_testing()
 project(mjolnir)
 
-# the reference says it enables compiler's extension also (e.g. -std=gnu11,
-# not -std=c++11). it's not so nice, so just add `std=c++11` instead.
-# set(${CMAKE_CXX_STANDARD} 11)
-# later we may need to prepare nicer stuff to set compilation flags depending
-# on the environment.
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD          11) # use c++11
+set(CMAKE_CXX_EXTENSIONS       OFF) # not gnu11, c++11
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/extlib)
