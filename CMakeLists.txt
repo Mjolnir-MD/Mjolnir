@@ -2,11 +2,9 @@ cmake_minimum_required(VERSION 3.0)
 enable_testing()
 project(mjolnir)
 
-# the reference says it enables compiler's extension also (e.g. -std=gnu11,
-# not -std=c++11). it's not so nice, so just add `std=c++11` instead.
-# set(${CMAKE_CXX_STANDARD} 11)
-# later we may need to prepare nicer stuff to set compilation flags depending
-# on the environment.
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD          11) # use c++11
+set(CMAKE_CXX_EXTENSIONS       OFF) # not gnu11, c++11
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/extlib)
@@ -32,6 +30,14 @@ endif()
 check_cxx_compiler_flag("-Wpedantic" MJOLNIR_COMPILER_HAS_WPEDANTIC)
 if(MJOLNIR_COMPILER_HAS_WPEDANTIC)
     add_definitions(-Wpedantic)
+endif()
+check_cxx_compiler_flag("-march=native" MJOLNIR_COMPILER_HAS_MARCH_NATIVE)
+if(MJOLNIR_COMPILER_HAS_MARCH_NATIVE)
+    add_definitions(-march=native)
+endif()
+check_cxx_compiler_flag("-mtune=native" MJOLNIR_COMPILER_HAS_MTUNE_NATIVE)
+if(MJOLNIR_COMPILER_HAS_MTUNE_NATIVE)
+    add_definitions(-mtune=native)
 endif()
 
 if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/toml/toml.hpp")
