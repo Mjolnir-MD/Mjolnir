@@ -21,7 +21,7 @@ jobs:
               git config --global user.email "niina.toru.68u@gmail.com"
               ./node_modules/gitbook-cli/bin/gitbook.js install ./book
               ./node_modules/gitbook-cli/bin/gitbook.js build   ./book
-              cd _book/
+              cd ./book/_book/
               git init
               git commit --allow-empty -m '[ci skip] update docs'
               git checkout -b gh-pages
