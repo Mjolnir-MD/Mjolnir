@@ -19,11 +19,15 @@ jobs:
               npm install gitbook-cli
               git config --global user.name  "ToruNiina"
               git config --global user.email "niina.toru.68u@gmail.com"
-              ./node_modules/gitbook-cli/bin/gitbook.js install ./book ./docs
-              ./node_modules/gitbook-cli/bin/gitbook.js build   ./book ./docs
-              git add ./docs
+              ./node_modules/gitbook-cli/bin/gitbook.js install ./book
+              ./node_modules/gitbook-cli/bin/gitbook.js build   ./book
+              cd _book/
+              git init
               git commit --allow-empty -m '[ci skip] update docs'
-              git push git@github.com:Mjolnir-MD/Mjolnir.git master
+              git checkout -b gh-pages
+              git add ./
+              git commit -am '[ci skip] update docs'
+              git push --force git@github.com:Mjolnir-MD/Mjolnir.git gh-pages
 workflows:
   setup_and_deploy:
     jobs:
