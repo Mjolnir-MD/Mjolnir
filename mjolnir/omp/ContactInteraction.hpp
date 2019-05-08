@@ -76,9 +76,10 @@ class ContactInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
     real_type calc_energy(const system_type& sys) const noexcept override
     {
         real_type E = 0.0;
-        for(const std::size_t active_contact : active_contacts_)
+#pragma omp parallel for reduction(+:E)
+        for(std::size_t i=0; i<active_contacts_.size(); ++i)
         {
-            const auto& idxp = this->potentials[active_contact];
+            const auto& idxp = this->potentials[active_contacts_[i]];
             E += idxp.second.potential(math::length(sys.adjust_direction(
                     sys.position(idxp.first[1]) - sys.position(idxp.first[0]))));
         }

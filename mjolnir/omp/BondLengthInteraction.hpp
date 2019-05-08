@@ -68,8 +68,10 @@ class BondLengthInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
     real_type calc_energy(const system_type& sys) const noexcept override
     {
         real_type E = 0.;
-        for(const auto& idxp : this->potentials)
+#pragma omp parallel for reduction(+:E)
+        for(std::size_t i=0; i<this->potentials.size(); ++i)
         {
+            const auto& idxp = this->potentials[i];
             E += idxp.second.potential(math::length(sys.adjust_direction(
                     sys.position(idxp.first[1]) - sys.position(idxp.first[0]))));
         }

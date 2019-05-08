@@ -89,8 +89,10 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
     real_type calc_energy(const system_type& sys) const noexcept override
     {
         real_type E = 0.0;
-        for(const auto& idxp : this->potentials)
+#pragma omp parallel for reduction(+:E)
+        for(std::size_t i=0; i<this->potentials.size(); ++i)
         {
+            const auto& idxp = this->potentials[i];
             const std::size_t idx0 = idxp.first[0];
             const std::size_t idx1 = idxp.first[1];
             const std::size_t idx2 = idxp.first[2];
