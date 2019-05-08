@@ -30,10 +30,12 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             std::vector<real_type> gamma, rng_type&& rng)
         : dt_(dt), halfdt_(dt / 2), halfdt2_(dt * dt / 2),
           rng_(std::move(rng)),
-          sqrt_gamma_over_mass_(gamma.size()),
-          acceleration_(gamma.size())
+          gammas_(std::move(gamma)),
+          sqrt_gamma_over_mass_(gammas_.size()),
+          acceleration_(gammas_.size())
     {
-        gammas_ = std::move(gamma);
+        assert(this->sqrt_gamma_over_mass_.size() == this->gammas_.size());
+        assert(this->acceleration_.size()         == this->gammas_.size());
     }
     ~UnderdampedLangevinIntegrator() = default;
 
