@@ -149,10 +149,5 @@ class GlobalPairInteraction<
     partition_type partition_;
 };
 
-static_assert(std::is_base_of<
-    GlobalInteractionBase<OpenMPSimulatorTraits<double, UnlimitedBoundary>>,
-    GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>, ExcludedVolumePotential<double>, UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, double>>
-    >::value, "");
-
 } // mjolnir
 #endif /* MJOLNIR_GLOBAL_PAIR_INTEARACTION */
