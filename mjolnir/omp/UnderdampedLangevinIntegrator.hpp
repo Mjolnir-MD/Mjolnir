@@ -27,7 +27,7 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
   public:
 
     UnderdampedLangevinIntegrator(const real_type dt,
-            std::vector<real_type> gamma, rng_type&& rng)
+            std::vector<real_type>&& gamma, rng_type&& rng)
         : dt_(dt), halfdt_(dt / 2), halfdt2_(dt * dt / 2),
           rng_(std::move(rng)),
           gammas_(std::move(gamma)),
