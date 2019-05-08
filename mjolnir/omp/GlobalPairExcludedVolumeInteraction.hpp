@@ -115,6 +115,8 @@ class GlobalPairInteraction<
         constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
         constexpr auto  coef_at_cutoff  = potential_type::coef_at_cutoff;
         const     auto  epsilon         = potential_.epsilon();
+
+#pragma omp parallel for reduction(+:E)
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             for(const auto& ptnr : this->partition_.partners(i))
