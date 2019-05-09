@@ -46,6 +46,38 @@ struct dummy_potential
     real_type cutoff_;
 };
 
+// has non-empty parameter type.
+template<typename T>
+struct dummy_potential_2
+{
+    using real_type      = T;
+    using parameter_type = std::pair<std::size_t, std::size_t>;
+
+    using topology_type        = mjolnir::Topology;
+    using molecule_id_type     = typename topology_type::molecule_id_type;
+    using connection_kind_type = typename topology_type::connection_kind_type;
+
+    explicit dummy_potential_2(const real_type cutoff): cutoff_(cutoff) {}
+
+    real_type max_cutoff_length() const noexcept {return this->cutoff_;}
+
+    parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
+    {
+        return parameter_type{i, j};
+    }
+
+    bool is_ignored_molecule(std::size_t, std::size_t) const {return false;}
+
+    std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within() const
+    {
+        return std::vector<std::pair<connection_kind_type, std::size_t>>{};
+    }
+
+    std::string name() const {return "dummy potential";}
+
+    real_type cutoff_;
+};
+
 BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary)
 {
     mjolnir::LoggerManager::set_default_logger("test_verlet_list.log");
@@ -53,7 +85,6 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary)
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
-    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -70,48 +101,111 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary)
         );
     };
 
-    dummy_potential<real_type> pot(cutoff);
-
-    mjolnir::System<traits_type> sys(N, boundary_type{});
-
-    std::mt19937 mt(123456789);
-    for(std::size_t i=0; i < N; ++i)
     {
-        sys.at(i).mass     = 1.0;
-        sys.at(i).position = distribute_particle(mt, L);
-    }
-    sys.topology().construct_molecules();
+        dummy_potential<real_type> pot(cutoff);
+        using parameter_type  = typename dummy_potential<real_type>::parameter_type;
 
-    mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
+        mjolnir::System<traits_type> sys(N, boundary_type{});
 
-    using neighbor_type = typename decltype(vlist)::neighbor_type;
-
-    BOOST_TEST(!vlist.valid());
-
-    vlist.initialize(sys, pot);
-    vlist.make(sys, pot);
-    BOOST_TEST(vlist.valid());
-
-    for(std::size_t i=0; i<N; ++i)
-    {
-        for(std::size_t j=i+1; j<N; ++j)
+        std::mt19937 mt(123456789);
+        for(std::size_t i=0; i < N; ++i)
         {
-            const auto partners = vlist.partners(i);
-            if(std::find_if(partners.begin(), partners.end(),
-                [=](const neighbor_type& elem) -> bool {return elem.index == j;}
-                        ) == partners.end())
+            sys.at(i).mass     = 1.0;
+            sys.at(i).position = distribute_particle(mt, L);
+        }
+        sys.topology().construct_molecules();
+
+        mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
+
+        using neighbor_type = typename decltype(vlist)::neighbor_type;
+
+        BOOST_TEST(!vlist.valid());
+
+        vlist.initialize(sys, pot);
+        vlist.make(sys, pot);
+        BOOST_TEST(vlist.valid());
+
+        for(std::size_t i=0; i<N; ++i)
+        {
+            for(std::size_t j=i+1; j<N; ++j)
             {
-                // should be enough distant (>= threshold)
-                const auto dist = mjolnir::math::length(sys.adjust_direction(
-                            sys.position(j) - sys.position(i)));
-                BOOST_TEST(dist >= threshold);
+                const auto partners = vlist.partners(i);
+                if(std::find_if(partners.begin(), partners.end(),
+                    [=](const neighbor_type& elem) -> bool {return elem.index == j;}
+                            ) == partners.end())
+                {
+                    // should be enough distant (>= threshold)
+                    const auto dist = mjolnir::math::length(sys.adjust_direction(
+                                sys.position(j) - sys.position(i)));
+                    BOOST_TEST(dist >= threshold);
+                }
+                else
+                {
+                    // should be enough close (< threshold)
+                    const auto dist = mjolnir::math::length(sys.adjust_direction(
+                                sys.position(j) - sys.position(i)));
+                    BOOST_TEST(dist < threshold);
+                }
             }
-            else
+        }
+    }
+
+    {
+        dummy_potential_2<real_type> pot(cutoff);
+        using parameter_type  = typename dummy_potential_2<real_type>::parameter_type;
+
+        mjolnir::System<traits_type> sys(N, boundary_type{});
+
+        std::mt19937 mt(123456789);
+        for(std::size_t i=0; i < N; ++i)
+        {
+            sys.at(i).mass     = 1.0;
+            sys.at(i).position = distribute_particle(mt, L);
+        }
+        sys.topology().construct_molecules();
+
+        mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
+
+        using neighbor_type = typename decltype(vlist)::neighbor_type;
+
+        BOOST_TEST(!vlist.valid());
+
+        vlist.initialize(sys, pot);
+        vlist.make(sys, pot);
+        BOOST_TEST(vlist.valid());
+
+        for(std::size_t i=0; i<N; ++i)
+        {
+            for(std::size_t j=i+1; j<N; ++j)
             {
-                // should be enough close (< threshold)
-                const auto dist = mjolnir::math::length(sys.adjust_direction(
-                            sys.position(j) - sys.position(i)));
-                BOOST_TEST(dist < threshold);
+                const auto partners = vlist.partners(i);
+                if(std::find_if(partners.begin(), partners.end(),
+                    [=](const neighbor_type& elem) -> bool {return elem.index == j;}
+                            ) == partners.end())
+                {
+                    // should be enough distant (>= threshold)
+                    const auto dist = mjolnir::math::length(sys.adjust_direction(
+                                sys.position(j) - sys.position(i)));
+                    BOOST_TEST(dist >= threshold);
+                }
+                else
+                {
+                    // should be enough close (< threshold)
+                    const auto dist = mjolnir::math::length(sys.adjust_direction(
+                                sys.position(j) - sys.position(i)));
+                    BOOST_TEST(dist < threshold);
+                }
+            }
+        }
+
+        // check parameter_type.
+        for(std::size_t i=0; i<N; ++i)
+        {
+            for(const auto& p_j : vlist.partners(i))
+            {
+                const std::size_t j = p_j.index;
+                BOOST_TEST(p_j.parameter().first  == pot.prepare_params(i, j).first);
+                BOOST_TEST(p_j.parameter().second == pot.prepare_params(i, j).second);
             }
         }
     }
@@ -124,7 +218,6 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary)
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
-    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -141,48 +234,112 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary)
         );
     };
 
-    dummy_potential<real_type> pot(cutoff);
-
-    mjolnir::System<traits_type> sys(N, boundary_type(coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
-
-    std::mt19937 mt(123456789);
-    for(std::size_t i=0; i < N; ++i)
     {
-        sys.at(i).mass     = 1.0;
-        sys.at(i).position = distribute_particle(mt, L);
-    }
-    sys.topology().construct_molecules();
+        dummy_potential<real_type> pot(cutoff);
+        using parameter_type  = typename dummy_potential<real_type>::parameter_type;
 
-    mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
-    using neighbor_type = typename decltype(vlist)::neighbor_type;
+        mjolnir::System<traits_type> sys(N, boundary_type(coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
 
-    BOOST_TEST(!vlist.valid());
-
-    vlist.initialize(sys, pot);
-    vlist.make(sys, pot);
-    BOOST_TEST(vlist.valid());
-
-    for(std::size_t i=0; i<N; ++i)
-    {
-        for(std::size_t j=i+1; j<N; ++j)
+        std::mt19937 mt(123456789);
+        for(std::size_t i=0; i < N; ++i)
         {
-            const auto partners = vlist.partners(i);
-            if(std::find_if(partners.begin(), partners.end(),
-                    [=](const neighbor_type& elem){return elem.index == j;}
-                        ) == partners.end())
+            sys.at(i).mass     = 1.0;
+            sys.at(i).position = distribute_particle(mt, L);
+        }
+        sys.topology().construct_molecules();
+
+        mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
+        using neighbor_type = typename decltype(vlist)::neighbor_type;
+
+        BOOST_TEST(!vlist.valid());
+
+        vlist.initialize(sys, pot);
+        vlist.make(sys, pot);
+        BOOST_TEST(vlist.valid());
+
+        for(std::size_t i=0; i<N; ++i)
+        {
+            for(std::size_t j=i+1; j<N; ++j)
             {
-                // should be enough distant (>= threshold)
-                const auto dist = mjolnir::math::length(sys.adjust_direction(
-                            sys.position(j) - sys.position(i)));
-                BOOST_TEST(dist >= threshold);
-            }
-            else
-            {
-                // should be enough close (< threshold)
-                const auto dist = mjolnir::math::length(sys.adjust_direction(
-                            sys.position(j) - sys.position(i)));
-                BOOST_TEST(dist < threshold);
+                const auto partners = vlist.partners(i);
+                if(std::find_if(partners.begin(), partners.end(),
+                        [=](const neighbor_type& elem){return elem.index == j;}
+                            ) == partners.end())
+                {
+                    // should be enough distant (>= threshold)
+                    const auto dist = mjolnir::math::length(sys.adjust_direction(
+                                sys.position(j) - sys.position(i)));
+                    BOOST_TEST(dist >= threshold);
+                }
+                else
+                {
+                    // should be enough close (< threshold)
+                    const auto dist = mjolnir::math::length(sys.adjust_direction(
+                                sys.position(j) - sys.position(i)));
+                    BOOST_TEST(dist < threshold);
+                }
             }
         }
     }
+
+    {
+        dummy_potential_2<real_type> pot(cutoff);
+        using parameter_type  = typename dummy_potential_2<real_type>::parameter_type;
+
+        mjolnir::System<traits_type> sys(N, boundary_type(coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
+
+        std::mt19937 mt(123456789);
+        for(std::size_t i=0; i < N; ++i)
+        {
+            sys.at(i).mass     = 1.0;
+            sys.at(i).position = distribute_particle(mt, L);
+        }
+        sys.topology().construct_molecules();
+
+        mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
+
+        using neighbor_type = typename decltype(vlist)::neighbor_type;
+
+        BOOST_TEST(!vlist.valid());
+
+        vlist.initialize(sys, pot);
+        vlist.make(sys, pot);
+        BOOST_TEST(vlist.valid());
+
+        for(std::size_t i=0; i<N; ++i)
+        {
+            for(std::size_t j=i+1; j<N; ++j)
+            {
+                const auto partners = vlist.partners(i);
+                if(std::find_if(partners.begin(), partners.end(),
+                    [=](const neighbor_type& elem) -> bool {return elem.index == j;}
+                            ) == partners.end())
+                {
+                    // should be enough distant (>= threshold)
+                    const auto dist = mjolnir::math::length(sys.adjust_direction(
+                                sys.position(j) - sys.position(i)));
+                    BOOST_TEST(dist >= threshold);
+                }
+                else
+                {
+                    // should be enough close (< threshold)
+                    const auto dist = mjolnir::math::length(sys.adjust_direction(
+                                sys.position(j) - sys.position(i)));
+                    BOOST_TEST(dist < threshold);
+                }
+            }
+        }
+
+        // check parameter_type.
+        for(std::size_t i=0; i<N; ++i)
+        {
+            for(const auto& p_j : vlist.partners(i))
+            {
+                const std::size_t j = p_j.index;
+                BOOST_TEST(p_j.parameter().first  == pot.prepare_params(i, j).first);
+                BOOST_TEST(p_j.parameter().second == pot.prepare_params(i, j).second);
+            }
+        }
+    }
+
 }
