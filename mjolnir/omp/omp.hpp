@@ -24,6 +24,8 @@
 #include <mjolnir/omp/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/omp/GlobalPairLennardJonesInteraction.hpp>
 #include <mjolnir/omp/GlobalPairUniformLennardJonesInteraction.hpp>
+#include <mjolnir/omp/PositionRestraintInteraction.hpp>
+#include <mjolnir/omp/ExternalDistanceInteraction.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/System.hpp>
 #include <mjolnir/omp/UnderdampedLangevinIntegrator.hpp>
