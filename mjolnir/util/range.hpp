@@ -8,8 +8,14 @@ namespace mjolnir
 template<typename Iterator>
 struct range
 {
-    using iterator = Iterator;
+    using iterator         = Iterator;
     using reverse_iterator = std::reverse_iterator<iterator>;
+    using value_type       = typename std::iterator_traits<iterator>::value_type;
+    using reference        = typename std::iterator_traits<iterator>::reference;
+
+    static_assert(std::is_same<std::random_access_iterator_tag,
+        typename std::iterator_traits<iterator>::iterator_category
+        >::value, "mjolnir::range assumes iterator to be randomly accessible");
 
     range(iterator b, iterator e) noexcept
         : begin_(b), end_(e), sz_(std::distance(b, e))
