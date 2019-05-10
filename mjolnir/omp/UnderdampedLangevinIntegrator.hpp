@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_UNDERDAMPED_LANGEVIN_INTEGRATOR
-#define MJOLNIR_UNDERDAMPED_LANGEVIN_INTEGRATOR
+#ifndef MJOLNIR_OMP_UNDERDAMPED_LANGEVIN_INTEGRATOR
+#define MJOLNIR_OMP_UNDERDAMPED_LANGEVIN_INTEGRATOR
 #include <mjolnir/util/aligned_allocator.hpp>
 #include <mjolnir/core/UnderdampedLangevinIntegrator.hpp>
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
@@ -7,11 +7,7 @@
 namespace mjolnir
 {
 
-// Simple underdamped Langevin integrator.
-// The implementation is based on the article written by J. D. Honeycutt and
-// D. Thirumalai (1992) Biopolymers and also the article written by Z. Guo and
-// D. Thirumalai (1995) Biopolymers. Same algorithm used as default Langevin
-// integrator in CafeMol that is developed by H. Kenzaki et al., (2011) JCTC.
+// a specialization of UnderdampedLangevinIntegrator for OpenMP implementation.
 template<typename realT, template<typename, typename> class boundaryT>
 class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 {
@@ -52,7 +48,9 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
 #pragma omp parallel
         {
-            // calculate force
+            // calc_force uses `nowait` to speedup. To do that, it needs to be
+            // inside a parallel region. So, only for this, we need to wrap
+            // `calc_force` with `parallel` region.
             ff.calc_force(sys);
         }
 
@@ -95,11 +93,15 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             largest_disp2 = std::max(largest_disp2, math::length_sq(displacement));
         }
 
-        // update neighbor list; reduce margin, reconstruct the list if needed
+        // This function parallelize itself inside. `parallel` block is not
+        // needed here to parallelize it.
         ff.update_margin(2 * std::sqrt(largest_disp2), sys);
 
 #pragma omp parallel
         {
+            // XXX: calc_force uses `nowait` to speedup. To do that, it needs
+            // to be inside a parallel region. So, only for this, we need to
+            // wrap `calc_force` with `parallel` region.
             ff.calc_force(sys);
         }
 
