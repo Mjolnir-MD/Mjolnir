@@ -3,7 +3,6 @@
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/sort.hpp>
 #include <mjolnir/core/UnlimitedGridCellList.hpp>
-#include <mjolnir/core/ParallelNeighborList.hpp>
 
 namespace mjolnir
 {
@@ -20,7 +19,7 @@ class UnlimitedGridCellList<
     using coordinate_type     = typename traits_type::coordinate_type;
     using exclusion_list_type = ExclusionList;
     using parameter_type      = parameterT;
-    using neighbor_list_type  = ParallelNeighborList<parameter_type>;
+    using neighbor_list_type  = NeighborList<parameter_type>;
     using neighbor_type       = typename neighbor_list_type::neighbor_type;
     using range_type          = typename neighbor_list_type::range_type;
 
@@ -151,16 +150,18 @@ class UnlimitedGridCellList<
             index_by_cell_[i] = std::make_pair(i, calc_index(sys.position(i)));
         }
 
+        MJOLNIR_LOG_INFO("cell indices calculated");
+
         omp::sort(this->index_by_cell_, this->index_by_cell_buf_,
                   [](const particle_cell_idx_pair& lhs,
                      const particle_cell_idx_pair& rhs) noexcept -> bool {
                       return lhs.second < rhs.second;
                   });
 
+        MJOLNIR_LOG_INFO("particle id & cell indices are sorted");
+
         // assign first and last iterator for each cells
-        // Also, search the max number of particles in a cell
-        std::size_t max_neighbors = 0;
-#pragma omp parallel for reduction(max:max_neighbors)
+#pragma omp parallel for
         for(std::size_t cell_idx=0; cell_idx<cell_list_.size(); ++cell_idx)
         {
             auto iter = std::find_if(index_by_cell_.cbegin(), index_by_cell_.cend(),
@@ -178,21 +179,14 @@ class UnlimitedGridCellList<
                 ++iter;
             }
             cell_list_[cell_idx].first = make_range(first, iter);
-            max_neighbors = std::max(max_neighbors,
-                                     std::size_t(std::distance(first, iter)));
         }
 
-        MJOLNIR_LOG_INFO("max number of particles per cell is ", max_neighbors);
-
-        // resize neighbor list by the max number of interacting-particles
-        this->neighbors_.resize(sys.size(), max_neighbors * 27);
+        MJOLNIR_LOG_INFO("ranges are determined");
 
         const real_type r_c  = cutoff_ * (1 + margin_);
         const real_type r_c2 = r_c * r_c;
 
-        std::size_t max_neighbors_actual = 0;
         std::vector<neighbor_type> partner;
-#pragma omp parallel for private(partner) reduction(max: max_neighbors_actual)
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             const auto& ri   = sys.position(i);
@@ -218,11 +212,11 @@ class UnlimitedGridCellList<
             }
             // make the result consistent with NaivePairCalculation...
             std::sort(partner.begin(), partner.end());
-            this->neighbors_.add_list_for(i, partner.begin(), partner.end());
 
-            max_neighbors_actual = std::max(max_neighbors_actual, partner.size());
+            this->neighbors_.add_list_for(i, partner.begin(), partner.end());
         }
-        MJOLNIR_LOG_INFO("actual number of partners is ", max_neighbors_actual);
+
+        MJOLNIR_LOG_INFO("ranges are determined");
 
         this->current_margin_ = cutoff_ * margin_;
         return ;
