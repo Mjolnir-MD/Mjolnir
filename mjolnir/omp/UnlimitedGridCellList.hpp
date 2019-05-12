@@ -186,6 +186,13 @@ class UnlimitedGridCellList<
         const real_type r_c  = cutoff_ * (1 + margin_);
         const real_type r_c2 = r_c * r_c;
 
+//XXX ParallelNeighborList consumes quite a lot of memory resources and makes
+//XXX both construction and access slower (especially when system has a small
+//XXX number of particles). Because of this, after some benchmarking, I found
+//XXX that normal NeighborList works good for most of the cases. Some part of
+//XXX neighbor-list construction cannot be parallelized, but it becomes still
+//XXX faster.
+
         std::vector<neighbor_type> partner;
         for(std::size_t i=0; i<sys.size(); ++i)
         {

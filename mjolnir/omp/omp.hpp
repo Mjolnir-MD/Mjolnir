@@ -27,6 +27,7 @@
 #include <mjolnir/omp/PositionRestraintInteraction.hpp>
 #include <mjolnir/omp/ExternalDistanceInteraction.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
+#include <mjolnir/omp/UnlimitedGridCellList.hpp>
 #include <mjolnir/omp/System.hpp>
 #include <mjolnir/omp/UnderdampedLangevinIntegrator.hpp>
 
