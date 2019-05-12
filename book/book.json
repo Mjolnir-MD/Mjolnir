@@ -13,7 +13,8 @@
                 "versions"
     ],
     "pluginsConfig": {
-        "github":{"url":"https://github.com/Mjolnir-MD/Mjolnir"},
+        "github"  : {"url":"https://github.com/Mjolnir-MD/Mjolnir"},
+        "mathjax" : {"forceSVG": true},
         "versions": {
             "options": [
                 {
