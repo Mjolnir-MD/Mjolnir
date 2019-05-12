@@ -137,7 +137,8 @@ class UnlimitedGridCellList<
         MJOLNIR_LOG_FUNCTION();
 
         neighbors_.clear();
-        if(index_by_cell_.size() != sys.size())
+        if(index_by_cell_    .size() != sys.size() ||
+           index_by_cell_buf_.size() != sys.size())
         {
             index_by_cell_    .resize(sys.size());
             index_by_cell_buf_.resize(sys.size());
