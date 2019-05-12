@@ -30,6 +30,7 @@ jobs:
               git init
               git commit --allow-empty -m '[ci skip] update docs'
               git checkout -b gh-pages
+              touch .nojekyll
               git add ./
               git commit -am '[ci skip] update docs'
               git push --force git@github.com:Mjolnir-MD/Mjolnir.git gh-pages
