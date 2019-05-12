@@ -133,9 +133,6 @@ class UnlimitedGridCellList<
     template<typename PotentialT>
     void make  (const system_type& sys, const PotentialT& pot)
     {
-        MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_LOG_FUNCTION();
-
         neighbors_.clear();
         if(index_by_cell_    .size() != sys.size() ||
            index_by_cell_buf_.size() != sys.size())
@@ -151,15 +148,11 @@ class UnlimitedGridCellList<
             index_by_cell_[i] = std::make_pair(i, calc_index(sys.position(i)));
         }
 
-        MJOLNIR_LOG_INFO("cell indices calculated");
-
         omp::sort(this->index_by_cell_, this->index_by_cell_buf_,
                   [](const particle_cell_idx_pair& lhs,
                      const particle_cell_idx_pair& rhs) noexcept -> bool {
                       return lhs.second < rhs.second;
                   });
-
-        MJOLNIR_LOG_INFO("particle id & cell indices are sorted");
 
         // assign first and last iterator for each cells
 #pragma omp parallel for
@@ -181,8 +174,6 @@ class UnlimitedGridCellList<
             }
             cell_list_[cell_idx].first = make_range(first, iter);
         }
-
-        MJOLNIR_LOG_INFO("ranges are determined");
 
         const real_type r_c  = cutoff_ * (1 + margin_);
         const real_type r_c2 = r_c * r_c;
@@ -223,8 +214,6 @@ class UnlimitedGridCellList<
 
             this->neighbors_.add_list_for(i, partner.begin(), partner.end());
         }
-
-        MJOLNIR_LOG_INFO("ranges are determined");
 
         this->current_margin_ = cutoff_ * margin_;
         return ;
