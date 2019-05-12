@@ -12,7 +12,7 @@ template<typename realT, template<typename, typename> class boundaryT,
 class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
 {
   public:
-    using traits_type         = traitsT;
+    using traits_type         = OpenMPSimulatorTraits<realT, boundaryT>;
     using system_type         = System<traits_type>;
     using real_type           = typename traits_type::real_type;
     using coordinate_type     = typename traits_type::coordinate_type;
@@ -223,6 +223,7 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
             const auto& ri = sys.position(i);
             const auto& cell = cell_list_[calc_index(ri)];
 
+            partner.clear();
             for(std::size_t cidx : cell.second) // for all adjacent cells...
             {
                 for(auto pici : cell_list_[cidx].first)
