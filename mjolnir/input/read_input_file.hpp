@@ -36,15 +36,19 @@ read_concurrency(const toml::table& root, const toml::value& simulator)
         MJOLNIR_LOG_NOTICE("execute on single core");
         return read_units<SimulatorTraits<realT, boundaryT>>(root);
     }
-#ifdef MJOLNIR_WITH_OPENMP
     else if(concurrency.is_string() &&
            (concurrency.as_string() == "openmp" ||
             concurrency.as_string() == "OpenMP"))
     {
+#ifdef MJOLNIR_WITH_OPENMP
         MJOLNIR_LOG_NOTICE("execute on ", omp_get_max_threads() ," cores with openmp");
         return read_units<OpenMPSimulatorTraits<realT, boundaryT>>(root);
-    }
+#else
+        MJOLNIR_LOG_WARN("OpenMP flag is set, but OpenMP is not enabled when building.");
+        MJOLNIR_LOG_WARN("Cannot use OpenMP, running with single core.");
+        return read_units<SimulatorTraits<realT, boundaryT>>(root);
 #endif
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
