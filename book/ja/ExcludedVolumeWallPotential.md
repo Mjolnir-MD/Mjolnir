@@ -3,7 +3,7 @@
 空間中の形状と粒子の間に適用される、逆12乗の斥力ポテンシャルです。
 
 {% math %}
-U(x) = \epsilon\left(\frac{\r_0}{x}\right)^{12}
+U(x) = \epsilon\left(\frac{r_0}{x}\right)^{12}
 {% endmath %}
 
 ## 例
