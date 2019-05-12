@@ -17,7 +17,7 @@ template<typename Value, typename Alloc, typename Comparator>
 void sort(std::vector<Value, Alloc>& vec, std::vector<Value, Alloc>& buf,
           Comparator comp)
 {
-    const auto max_threads = omp_get_max_threads();
+    const std::size_t max_threads = omp_get_max_threads();
     if(max_threads == 1 || vec.size() < max_threads * 4)
     {
         std::sort(vec.begin(), vec.end(), comp);
