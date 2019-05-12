@@ -6,7 +6,7 @@ matrix:
   - os: linux
     language: cpp
     compiler: gcc
-    env: COMPILER="g++-7"
+    env: COMPILER="g++-7" OPENMP="OFF"
     addons:
       apt:
         update: true
@@ -19,7 +19,7 @@ matrix:
   - os: linux
     language: cpp
     compiler: gcc
-    env: COMPILER="g++-6"
+    env: COMPILER="g++-6" OPENMP="OFF"
     addons:
       apt:
         update: true
@@ -32,7 +32,7 @@ matrix:
   - os: linux
     language: cpp
     compiler: gcc
-    env: COMPILER="g++-5"
+    env: COMPILER="g++-5" OPENMP="OFF"
     addons:
       apt:
         update: true
@@ -45,7 +45,7 @@ matrix:
   - os: linux
     language: cpp
     compiler: clang
-    env: COMPILER="clang++-7"
+    env: COMPILER="clang++-7" OPENMP="OFF"
     addons:
       apt:
         update: true
@@ -59,7 +59,7 @@ matrix:
   - os: linux
     language: cpp
     compiler: clang
-    env: COMPILER="clang++-6.0"
+    env: COMPILER="clang++-6.0" OPENMP="OFF"
     addons:
       apt:
         update: true
@@ -73,7 +73,7 @@ matrix:
   - os: linux
     language: cpp
     compiler: clang
-    env: COMPILER="clang++-5.0"
+    env: COMPILER="clang++-5.0" OPENMP="OFF"
     addons:
       apt:
         update: true
@@ -87,7 +87,7 @@ matrix:
   - os: osx
     language: cpp
     compiler: clang
-    env: COMPILER="clang++"
+    env: COMPILER="clang++" OPENMP="OFF"
 
 before_install:
 - |
@@ -104,9 +104,9 @@ script:
 - cd build
 - |
   if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-    cmake -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON ..
+    cmake -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON -DUSE_OPENMP=$OPENMP ..
   else
-    cmake -DCMAKE_CXX_COMPILER=$COMPILER -DBOOST_ROOT=/usr/local/Cellar/boost/1.67.0_1/ ..
+    cmake -DCMAKE_CXX_COMPILER=$COMPILER -DBOOST_ROOT=/usr/local/Cellar/boost/1.67.0_1/ -DUSE_OPENMP=$OPENMP ..
   fi
 - make
 - ctest --output-on-failure
