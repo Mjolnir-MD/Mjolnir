@@ -1,14 +1,19 @@
 set(TEST_NAMES
     test_omp_sort
     test_omp_random_number_generator
+
     test_omp_bond_length_interaction
     test_omp_contact_interaction
     test_omp_bond_angle_interaction
     test_omp_dihedral_angle_interaction
+
     test_omp_global_lennard_jones_interaction
     test_omp_global_uniform_lennard_jones_interaction
     test_omp_global_excluded_volume_interaction
     test_omp_global_debye_huckel_interaction
+
+    test_omp_external_distance_interaction
+    test_omp_position_restraint_interaction
     )
 
 add_definitions("-O2")
