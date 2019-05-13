@@ -13,11 +13,11 @@ class GlobalPairInteraction<
     OpenMPSimulatorTraits<realT, boundaryT>,
     UniformLennardJonesPotential<realT>,
     partitionT
-    > final : public GlobalInteractionBase<SimulatorTraits<realT, boundaryT>>
+    > final : public GlobalInteractionBase<OpenMPSimulatorTraits<realT, boundaryT>>
 {
   public:
 
-    using traits_type     = SimulatorTraits<realT, boundaryT>;
+    using traits_type     = OpenMPSimulatorTraits<realT, boundaryT>;
     using base_type       = GlobalInteractionBase<traits_type>;
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
