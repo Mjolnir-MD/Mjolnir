@@ -20,25 +20,25 @@ namespace mjolnir
 
 template<typename realT, template<typename, typename> class boundaryT>
 std::unique_ptr<SimulatorBase>
-read_concurrency(const toml::table& root, const toml::value& simulator)
+read_parallelism(const toml::table& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
-    if(simulator.as_table().count("concurrency") == 0)
+    if(simulator.as_table().count("parallelism") == 0)
     {
         return read_units<SimulatorTraits<realT, boundaryT>>(root);
     }
 
-    const auto concurrency = toml::find(simulator, "concurrency");
-    if(concurrency.is_string() && concurrency.as_string() == "sequencial")
+    const auto parallelism = toml::find(simulator, "parallelism");
+    if(parallelism.is_string() && parallelism.as_string() == "sequencial")
     {
         MJOLNIR_LOG_NOTICE("execute on single core");
         return read_units<SimulatorTraits<realT, boundaryT>>(root);
     }
-    else if(concurrency.is_string() &&
-           (concurrency.as_string() == "openmp" ||
-            concurrency.as_string() == "OpenMP"))
+    else if(parallelism.is_string() &&
+           (parallelism.as_string() == "openmp" ||
+            parallelism.as_string() == "OpenMP"))
     {
 #ifdef MJOLNIR_WITH_OPENMP
         MJOLNIR_LOG_NOTICE("execute on ", omp_get_max_threads() ," cores with openmp");
@@ -52,8 +52,8 @@ read_concurrency(const toml::table& root, const toml::value& simulator)
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
-            "mjolnir::read_concurrency: invalid variable ",
-            toml::find(simulator, "concurrency"), "here", {
+            "mjolnir::read_parallelism: invalid variable ",
+            toml::find(simulator, "parallelism"), "here", {
             "- \"sequencial\": run with only 1 core (default)",
             "- \"openmp\"    : use openmp to parallelize."
             }));
@@ -71,12 +71,12 @@ read_boundary(const toml::table& root, const toml::value& simulator)
     if(boundary == "Unlimited")
     {
         MJOLNIR_LOG_NOTICE("Boundary Condition is Unlimited");
-        return read_concurrency<realT, UnlimitedBoundary>(root, simulator);
+        return read_parallelism<realT, UnlimitedBoundary>(root, simulator);
     }
     else if(boundary == "PeriodicCuboid")
     {
         MJOLNIR_LOG_NOTICE("Boundary Condition is CuboidalPeriodic");
-        return read_concurrency<realT, CuboidalPeriodicBoundary>(root, simulator);
+        return read_parallelism<realT, CuboidalPeriodicBoundary>(root, simulator);
     }
     else
     {
