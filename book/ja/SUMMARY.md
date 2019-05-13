@@ -1,6 +1,7 @@
 # Summary
 
 - [Introduction](README.md)
+- [Installation](Installation.md)
 - [Reference](Reference.md)
   - [Files](refs/Files.md)
   - [Units](refs/Units.md)
