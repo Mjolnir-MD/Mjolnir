@@ -68,7 +68,7 @@ void sort(std::vector<Value, Alloc>& vec, std::vector<Value, Alloc>& buf,
                 last   += delta * subrange_size;
                 last    = std::min(last, static_cast<int>(range_size));
             }
-            else
+            else if(thread_id % delta == 0)
             {
                 std::copy(vec.begin() + first, vec.begin() + last, buf.begin() + first);
             }
