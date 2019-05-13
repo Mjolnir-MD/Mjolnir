@@ -35,7 +35,6 @@ void sort(std::vector<Value, Alloc>& vec, std::vector<Value, Alloc>& buf,
         const auto range_size    = vec.size();
         const auto subrange_size = (range_size % num_threads == 0) ?
             (range_size / num_threads) : (range_size / num_threads + 1);
-
         const auto offset = thread_id * subrange_size;
 
         if(offset < range_size)
@@ -69,6 +68,11 @@ void sort(std::vector<Value, Alloc>& vec, std::vector<Value, Alloc>& buf,
                 last   += delta * subrange_size;
                 last    = std::min(last, static_cast<int>(range_size));
             }
+            else
+            {
+                std::copy(vec.begin() + first, vec.begin() + last, buf.begin() + first);
+            }
+
             delta *= 2;
             num_ranges = (num_ranges + 1) / 2;
 #pragma omp barrier
