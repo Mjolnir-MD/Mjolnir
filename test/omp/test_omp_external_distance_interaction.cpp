@@ -106,6 +106,9 @@ BOOST_AUTO_TEST_CASE(omp_ExternalDistacne_calc_force)
         sequencial_interaction_type seq_interaction(
                 std::move(seq_xyplane), potential_type(potential));
 
+        interaction    .initialize(sys);
+        seq_interaction.initialize(seq_sys);
+
 #pragma omp parallel
         {
             // calculate forces with openmp

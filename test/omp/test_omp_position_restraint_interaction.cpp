@@ -95,6 +95,9 @@ BOOST_AUTO_TEST_CASE(omp_PositionRestraint)
         sequencial_interaction_type seq_interaction(
                 positions, potential_type(potential));
 
+        interaction    .initialize(sys);
+        seq_interaction.initialize(seq_sys);
+
 #pragma omp parallel
         {
             // calculate forces with openmp

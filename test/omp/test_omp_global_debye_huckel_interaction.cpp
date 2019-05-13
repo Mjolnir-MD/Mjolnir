@@ -112,6 +112,9 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_DebyeHuckel_calc_force)
         sequencial_interaction_type seq_interaction(
                 potential_type(potential), std::move(seq_celllist));
 
+        interaction    .initialize(sys);
+        seq_interaction.initialize(seq_sys);
+
 #pragma omp parallel
         {
             // calculate forces with openmp
