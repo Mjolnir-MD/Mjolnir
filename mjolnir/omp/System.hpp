@@ -110,6 +110,23 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
         return forces_threads_[thread_num][particle_id];
     }
 
+    void merge_forces() noexcept
+    {
+#pragma omp parallel for
+        for(std::size_t i=0; i<this->size(); ++i)
+        {
+            this->force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
+            for(std::size_t thread_id=0, max_threads=omp_get_max_threads();
+                    thread_id < max_threads; ++thread_id)
+            {
+                this->force(i) += this->force_thread(thread_id, i);
+                this->force_thread(thread_id, i) =
+                    math::make_coordinate<coordinate_type>(0, 0, 0);
+            }
+        }
+        return;
+    }
+
     static_string_type const& name(std::size_t i) const noexcept {return names_[i];}
     static_string_type&       name(std::size_t i)       noexcept {return names_[i];}
     static_string_type const& group(std::size_t i) const noexcept {return groups_[i];}

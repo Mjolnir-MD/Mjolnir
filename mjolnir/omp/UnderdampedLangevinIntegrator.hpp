@@ -54,6 +54,9 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             ff.calc_force(sys);
         }
 
+        // merge thread-local forces into master
+        sys.merge_forces();
+
 #pragma omp parallel for
         for(std::size_t i=0; i<sys.size(); ++i)
         {
@@ -99,24 +102,14 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
 #pragma omp parallel
         {
-            // XXX: calc_force uses `nowait` to speedup. To do that, it needs
-            // to be inside a parallel region. So, only for this, we need to
-            // wrap `calc_force` with `parallel` region.
+            // calc_force uses `nowait` to speedup. To do that, it needs to be
+            // inside a parallel region. So, only for this, we need to wrap
+            // `calc_force` with `parallel` region.
             ff.calc_force(sys);
         }
 
-#pragma omp parallel for
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
-            for(std::size_t thread_id=0, max_threads=omp_get_max_threads();
-                    thread_id < max_threads; ++thread_id)
-            {
-                sys.force(i) += sys.force_thread(thread_id, i);
-                sys.force_thread(thread_id, i) = 
-                    math::make_coordinate<coordinate_type>(0, 0, 0);
-            }
-        }
+        // merge thread-local forces into master
+        sys.merge_forces();
 
         // calc a(t+dt) and v(t+dt), generate noise
 #pragma omp parallel for
