@@ -13,9 +13,10 @@
 
 
 // It tests that ...
-// - 
-//
-//
+// - RandomNumberGenerator<OpenMPSimulatorTraits> can generate random numbers
+//   in parallel
+// - RandomNumberGenerator<OpenMPSimulatorTraits>'s can generate the same
+//   sequence of random numbers if they are initialized with the same seed.
 BOOST_AUTO_TEST_CASE(test_omp_random_number_generator)
 {
     BOOST_TEST_WARN(omp_get_max_threads() > 2);
