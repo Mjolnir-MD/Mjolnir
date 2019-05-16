@@ -12,6 +12,7 @@
 type           = "SimulatedAnnealing"
 boundary_type  = "Unlimited"
 precision      = "double"
+parallelism    = "OpenMP" # optional
 delta_t        = 0.1
 total_step     = 50_000
 save_step      = 100
@@ -38,6 +39,10 @@ type = "UnderdampedLangevin"
   - シミュレーションに用いる浮動小数点数型の種類を指定します。
   - `"float"`: 32bit浮動小数点数を使用します。
   - `"double"`: 64bit浮動小数点数を使用します。
+- `parallelism`: 文字列型(省略可)
+  - 並列化する際の実装を選択します。
+  - `"OpenMP"`: OpenMPを使った実装を使用します。
+  - `"sequencial"`: 並列化を行いません。省略した場合はこれが選択されます。
 - `delta_t`: 浮動小数点数型
   - シミュレーションの時間刻みを指定します。
   - 時間の単位は[`units`](Units.md)で指定した単位系に依存します。
