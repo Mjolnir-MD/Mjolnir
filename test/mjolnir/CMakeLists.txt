@@ -53,6 +53,7 @@ set(TEST_NAMES
     test_read_bond_length_interaction
     test_read_bond_angle_interaction
     test_read_dihedral_angle_interaction
+    test_read_dummy_interaction
     test_read_global_pair_interaction
     test_read_position_restraint_interaction
 
