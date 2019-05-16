@@ -38,9 +38,10 @@ class Topology
     using connection_kind_type = std::string;
     using edge_type = std::pair<std::size_t, connection_kind_type>;
 
-
-    static constexpr molecule_id_type uninitialized =
-        std::numeric_limits<molecule_id_type>::max();
+    static constexpr molecule_id_type uninitialized() noexcept
+    {
+        return std::numeric_limits<molecule_id_type>::max();
+    }
 
     struct node
     {
@@ -59,7 +60,7 @@ class Topology
     Topology& operator=(Topology&&)      = default;
 
     explicit Topology(const std::size_t N)
-        : num_molecules_(1), nodes_(N, {uninitialized, "uninitialized", {}})
+        : num_molecules_(1), nodes_(N, {uninitialized(), "uninitialized", {}})
     {}
 
     void        clear()                {return nodes_.clear();}
@@ -131,7 +132,6 @@ class Topology
     std::vector<node>   nodes_;
     // each node corresponds to the particle having the same idx in a system.
 };
-constexpr typename Topology::molecule_id_type Topology::uninitialized;
 
 inline void Topology::add_connection(
         const std::size_t i, const std::size_t j,
@@ -259,7 +259,7 @@ Topology::construct_molecules()
     if(this->nodes_.empty()){return;}
     for(auto& node : nodes_)
     {
-        node.molecule_id = uninitialized;
+        node.molecule_id = uninitialized();
     }
 
     molecule_id_type next_molecule_id = 0;
@@ -269,13 +269,13 @@ Topology::construct_molecules()
         {
             if(edge.second != "bond") {continue;}
             const auto& adj = this->nodes_.at(edge.first);
-            if(adj.molecule_id != uninitialized)
+            if(adj.molecule_id != uninitialized())
             {
                 node.molecule_id = adj.molecule_id;
                 break;
             }
         }
-        if(node.molecule_id == uninitialized)
+        if(node.molecule_id == uninitialized())
         {
             node.molecule_id = next_molecule_id++;
         }
