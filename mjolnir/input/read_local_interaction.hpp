@@ -5,6 +5,7 @@
 #include <mjolnir/interaction/local/ContactInteraction.hpp>
 #include <mjolnir/interaction/local/BondAngleInteraction.hpp>
 #include <mjolnir/interaction/local/DihedralAngleInteraction.hpp>
+#include <mjolnir/interaction/local/DummyInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -238,6 +239,51 @@ read_dihedral_angle_interaction(
     }
 }
 
+
+template<typename traitsT>
+std::unique_ptr<LocalInteractionBase<traitsT>>
+read_dummy_interaction(const std::string& kind, const toml::value& local)
+{
+    // It does not require `potential` field because this interaction does not
+    // calculate force or energy.
+    //
+    // ```toml
+    // [[forcefields.local]]
+    // interaction = "Dummy"
+    // topology  = "bond"
+    // parameters = [
+    //     {indices = [0, 1]},
+    //     # ...
+    // ]
+    // ```
+    //
+    // So, unlike other interactions, it reads particle indices here.
+
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using indices_type = std::array<std::size_t, 2>;
+
+    if(local.as_table().count("potential") == 1)
+    {
+        MJOLNIR_LOG_WARN("Dummy Interaction has a `potential` field.");
+        MJOLNIR_LOG_WARN("It is for defining unusual topology.");
+        MJOLNIR_LOG_WARN("Potential parameters are ignored.");
+    }
+
+    const auto& params = toml::find<toml::array>(local, "parameters");
+    MJOLNIR_LOG_NOTICE("-- ", params.size(), " bonds are found.");
+
+    std::vector<indices_type> indices_list;
+    indices_list.reserve(params.size());
+    for(const auto& item : params)
+    {
+        const auto indices = toml::find<indices_type>(item, "indices");
+        MJOLNIR_LOG_INFO("idxs = ", indices);
+        indices_list.push_back(indices);
+    }
+    return make_unique<DummyInteraction<traitsT>>(kind, std::move(indices_list));
+}
+
 // ----------------------------------------------------------------------------
 // general read_local_interaction function
 // ----------------------------------------------------------------------------
@@ -273,6 +319,11 @@ read_local_interaction(const toml::value& local)
         MJOLNIR_LOG_NOTICE("Dihedral Angle interaction found.");
         return read_dihedral_angle_interaction<traitsT>(kind, local);
     }
+    else if(interaction == "Dummy")
+    {
+        MJOLNIR_LOG_NOTICE("Dummy interaction found.");
+        return read_dummy_interaction<traitsT>(kind, local);
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -282,6 +333,7 @@ read_local_interaction(const toml::value& local)
             "- \"BondLength\"    : 2-body well-known chemical bond interaction",
             "- \"BondAngle\"     : 3-body well-known bond angle interaction",
             "- \"DihedralAngle\" : 4-body well-known dihedral angle interaction",
+            "- \"Dummy\"         : To represent a strange topology. It does nothing",
             }));
     }
 }
