@@ -55,7 +55,7 @@ class GlobalPairInteraction<
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->potential_.update(sys);
         // potential update may change the cutoff length!
-        this->partition_.reconstruct(sys, this->potential_);
+        this->partition_.initialize(sys, this->potential_);
     }
 
     void update_margin(const real_type dmargin, const system_type& sys) override
