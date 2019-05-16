@@ -61,14 +61,6 @@ class Plane
         return;
     }
 
-    //! update exclusion list and cutoff length.
-    template<typename Potential>
-    void reconstruct(const system_type& sys, const Potential& pot)
-    {
-        this->initialize(sys, pot);
-        return;
-    }
-
     void make  (const system_type& sys);
     void update(const real_type dm, const system_type& sys);
 

@@ -122,13 +122,6 @@ class UnlimitedGridCellList<
         return;
     }
 
-    template<typename PotentialT>
-    void reconstruct(const system_type& sys, const PotentialT& pot)
-    {
-        this->initialize(sys, pot); // do the same thing as `initialize`
-        return;
-    }
-
     //XXX do NOT call this from parallel region
     template<typename PotentialT>
     void make  (const system_type& sys, const PotentialT& pot)

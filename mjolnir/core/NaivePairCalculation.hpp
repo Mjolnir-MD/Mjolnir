@@ -37,13 +37,6 @@ class NaivePairCalculation
     void initialize (const system_type& sys, const PotentialT& pot);
 
     template<typename PotentialT>
-    void reconstruct(const system_type& sys, const PotentialT& pot)
-    {
-        this->initialize(sys, pot); // do the same thing as `initialize`
-        return;
-    }
-
-    template<typename PotentialT>
     void make  (const system_type& sys, const PotentialT& pot);
 
     template<typename PotentialT>
