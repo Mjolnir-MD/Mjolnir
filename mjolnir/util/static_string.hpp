@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_UTIL_STATIC_STRING_HPP
 #define MJOLNIR_UTIL_STATIC_STRING_HPP
 #include <mjolnir/util/throw_exception.hpp>
+#include <array>
 #include <string>
 #include <stdexcept>
 #include <istream>
