@@ -1,9 +1,7 @@
-#ifndef MJOLNIR_INTEARACTION_GLOBAL_PAIR_LENNARD_JONES_INTEARACTION_HPP
-#define MJOLNIR_INTEARACTION_GLOBAL_PAIR_LENNARD_JONES_INTEARACTION_HPP
-#include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
-#include <mjolnir/potential/global/LennardJonesPotential.hpp>
-#include <mjolnir/core/SimulatorTraits.hpp>
-#include <memory>
+#ifndef MJOLNIR_OMP_GLOBAL_PAIR_UNIFORM_LENNARD_JONES_INTEARACTION_HPP
+#define MJOLNIR_OMP_GLOBAL_PAIR_UNIFORM_LENNARD_JONES_INTEARACTION_HPP
+#include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
+#include <mjolnir/interaction/global/GlobalPairUniformLennardJonesInteraction.hpp>
 
 namespace mjolnir
 {
@@ -12,20 +10,20 @@ namespace mjolnir
 template<typename realT, template<typename, typename> class boundaryT,
          typename partitionT>
 class GlobalPairInteraction<
-    SimulatorTraits<realT, boundaryT>,
-    LennardJonesPotential<realT>,
+    OpenMPSimulatorTraits<realT, boundaryT>,
+    UniformLennardJonesPotential<realT>,
     partitionT
-    > final : public GlobalInteractionBase<SimulatorTraits<realT, boundaryT>>
+    > final : public GlobalInteractionBase<OpenMPSimulatorTraits<realT, boundaryT>>
 {
   public:
 
-    using traits_type     = SimulatorTraits<realT, boundaryT>;
+    using traits_type     = OpenMPSimulatorTraits<realT, boundaryT>;
     using base_type       = GlobalInteractionBase<traits_type>;
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
-    using potential_type  = LennardJonesPotential<realT>;
+    using potential_type  = UniformLennardJonesPotential<real_type>;
     using partition_type  = partitionT;
 
   public:
@@ -68,23 +66,25 @@ class GlobalPairInteraction<
 
     void calc_force(system_type& sys) const noexcept override
     {
-        constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
-        constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
+        constexpr auto cutoff_ratio    = potential_type::cutoff_ratio;
+        constexpr auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
+        const     auto sigma           = this->potential_.sigma();
+        const     auto sigma_sq        = sigma * sigma;
+        const     auto r_cutoff_sq     = cutoff_ratio_sq * sigma_sq;
+        const     auto epsilon         = this->potential_.epsilon();
+
+#pragma omp for nowait
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             for(const auto& ptnr : this->partition_.partners(i))
             {
-                const auto  j     = ptnr.index;
-                const auto& param = ptnr.parameter();
+                const auto j = ptnr.index;
 
                 const coordinate_type rij =
                     sys.adjust_direction(sys.position(j) - sys.position(i));
                 const real_type l_sq = math::length_sq(rij);
 
-                const real_type sigma_sq = param.first * param.first;
-                if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
-
-                const real_type epsilon = param.second;
+                if(r_cutoff_sq < l_sq) {continue;}
 
                 const real_type rcp_l_sq = 1 / l_sq;
                 const real_type s2l2 = sigma_sq * rcp_l_sq;
@@ -93,8 +93,9 @@ class GlobalPairInteraction<
                 const coordinate_type f = rij *
                     (24 * epsilon * (s6l6 - 2 * s6l6 * s6l6) * rcp_l_sq);
 
-                sys.force(i) += f;
-                sys.force(j) -= f;
+                const std::size_t thread_id = omp_get_thread_num();
+                sys.force_thread(thread_id, i) += f;
+                sys.force_thread(thread_id, j) -= f;
             }
         }
         return ;
@@ -104,24 +105,26 @@ class GlobalPairInteraction<
     {
         real_type E(0);
 
-        constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
-        constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-        constexpr auto  coef_at_cutoff  = potential_type::coef_at_cutoff;
+        constexpr auto cutoff_ratio    = potential_type::cutoff_ratio;
+        constexpr auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
+        constexpr auto coef_at_cutoff  = potential_type::coef_at_cutoff;
+        const     auto sigma           = this->potential_.sigma();
+        const     auto sigma_sq        = sigma * sigma;
+        const     auto r_cutoff_sq     = cutoff_ratio_sq * sigma_sq;
+        const     auto epsilon         = this->potential_.epsilon();
+
+#pragma omp parallel for reduction(+:E)
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             for(const auto& ptnr : this->partition_.partners(i))
             {
-                const auto  j     = ptnr.index;
-                const auto& param = ptnr.parameter();
+                const auto j = ptnr.index;
 
                 const coordinate_type rij =
-                    sys.adjust_direction(sys.position(j) - sys.position(i));
+                    sys.adjust_direction(sys[j].position - sys[i].position);
                 const real_type l_sq = math::length_sq(rij);
 
-                const real_type sigma_sq = param.first * param.first;
-                if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
-
-                const real_type epsilon = param.second;
+                if(r_cutoff_sq < l_sq) {continue;}
 
                 const real_type s2l2 = sigma_sq / l_sq;
                 const real_type s6l6 = s2l2 * s2l2 * s2l2;
@@ -133,7 +136,7 @@ class GlobalPairInteraction<
     }
 
     std::string name() const override
-    {return "GlobalPairLennardJonesInteraction";}
+    {return "GlobalPairUniformLennardJonesInteraction";}
 
   private:
 

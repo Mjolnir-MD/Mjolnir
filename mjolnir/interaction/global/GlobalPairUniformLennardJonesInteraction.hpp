@@ -9,24 +9,24 @@ namespace mjolnir
 {
 
 // specialization for GlobalPair<LennardJones>
-template<typename traitsT, typename partitionT>
+template<typename realT, template<typename, typename> class boundaryT,
+         typename partitionT>
 class GlobalPairInteraction<
-    traitsT,
-    UniformLennardJonesPotential<typename traitsT::real_type>,
+    SimulatorTraits<realT, boundaryT>,
+    UniformLennardJonesPotential<realT>,
     partitionT
-    > final : public GlobalInteractionBase<traitsT>
+    > final : public GlobalInteractionBase<SimulatorTraits<realT, boundaryT>>
 {
   public:
 
-    using traits_type     = traitsT;
-    using partition_type  = partitionT;
+    using traits_type     = SimulatorTraits<realT, boundaryT>;
     using base_type       = GlobalInteractionBase<traits_type>;
-    using potential_type  = UniformLennardJonesPotential<typename traits_type::real_type>;
-
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
+    using potential_type  = UniformLennardJonesPotential<real_type>;
+    using partition_type  = partitionT;
 
   public:
     GlobalPairInteraction()  = default;

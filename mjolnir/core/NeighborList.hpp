@@ -40,6 +40,13 @@ struct neighbor_element_impl<paramT, true> : private paramT // for EBO
     explicit neighbor_element_impl(const parameter_type&) {}
     explicit neighbor_element_impl(parameter_type&&)      {}
 
+    neighbor_element_impl()  = default;
+    ~neighbor_element_impl() = default;
+    neighbor_element_impl(const neighbor_element_impl&) = default;
+    neighbor_element_impl(neighbor_element_impl&&)      = default;
+    neighbor_element_impl& operator=(const neighbor_element_impl&) = default;
+    neighbor_element_impl& operator=(neighbor_element_impl&&)      = default;
+
     parameter_type&       parameter()       noexcept {return *this;}
     parameter_type const& parameter() const noexcept {return *this;}
 };
@@ -51,6 +58,13 @@ struct neighbor_element_impl<paramT, false>
 
     explicit neighbor_element_impl(const parameter_type& p): param(p) {}
     explicit neighbor_element_impl(parameter_type&& p): param(std::move(p)) {}
+
+    neighbor_element_impl()  = default;
+    ~neighbor_element_impl() = default;
+    neighbor_element_impl(const neighbor_element_impl&) = default;
+    neighbor_element_impl(neighbor_element_impl&&)      = default;
+    neighbor_element_impl& operator=(const neighbor_element_impl&) = default;
+    neighbor_element_impl& operator=(neighbor_element_impl&&)      = default;
 
     parameter_type&       parameter()       noexcept {return param;}
     parameter_type const& parameter() const noexcept {return param;}
@@ -85,9 +99,8 @@ struct neighbor_element
     parameter_type&       parameter()       noexcept {return base_type::parameter();}
     parameter_type const& parameter() const noexcept {return base_type::parameter();}
 
+    // paramT param; // derived from neighbor_element_impl
     std::size_t index;
-    // derived from neighbor_element_impl
-    // paramT param;
 };
 
 // Check the EBO works and the size of neighbor_element with empty class
@@ -165,7 +178,7 @@ class NeighborList
     //      +-----+-- the last pertner of p2 is 5-1 = 4.
     //            +-- the last element of pN is M-1.
     //
-    // This list should have N+1 elements because i-th and (i+1)-th elements of 
+    // This list should have N+1 elements because i-th and (i+1)-th elements of
     // the list is needed to obtain the partner.
     //
     // By doing this, we can reduce the memory resource to have the list.
