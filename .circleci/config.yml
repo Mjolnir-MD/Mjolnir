@@ -19,12 +19,18 @@ jobs:
               npm install gitbook-cli
               git config --global user.name  "ToruNiina"
               git config --global user.email "niina.toru.68u@gmail.com"
-              ./node_modules/gitbook-cli/bin/gitbook.js install ./book
-              ./node_modules/gitbook-cli/bin/gitbook.js build   ./book
-              cd ./book/_book/
+              cd book
+              ../node_modules/gitbook-cli/bin/gitbook.js install
+              cd node_modules/mathjax-node/lib
+              sed -i -e 's/processExpression/toSpeech/g' mj-single.js
+              sed -i -e 's/processExpression/toSpeech/g' mj-page.js
+              cd -
+              ../node_modules/gitbook-cli/bin/gitbook.js build
+              cd _book/
               git init
               git commit --allow-empty -m '[ci skip] update docs'
               git checkout -b gh-pages
+              touch .nojekyll
               git add ./
               git commit -am '[ci skip] update docs'
               git push --force git@github.com:Mjolnir-MD/Mjolnir.git gh-pages
