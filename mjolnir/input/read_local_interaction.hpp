@@ -263,6 +263,11 @@ read_dummy_interaction(const std::string& kind, const toml::value& local)
     MJOLNIR_LOG_FUNCTION();
     using indices_type = std::array<std::size_t, 2>;
 
+    if(kind == "none")
+    {
+        MJOLNIR_LOG_WARN("Dummy potential got `none`. It has no effect.");
+        MJOLNIR_LOG_WARN("It is for defining unusual topology.");
+    }
     if(local.as_table().count("potential") == 1)
     {
         MJOLNIR_LOG_WARN("Dummy Interaction has a `potential` field.");
