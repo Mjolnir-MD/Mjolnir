@@ -33,6 +33,7 @@
         - [PeriodicGaussian](refs/PeriodicGaussianPotential.md)
         - [FlexibleLocal](refs/FlexibleLocalDihedralPotential.md)
         - [ClementiDihedral](refs/ClementiDihedralPotential.md)
+      - [DummyInteraction](refs/DummyInteraction.md)
     - [GlobalForceField](refs/GlobalForceField.md)
       - [GlobalPairInteraction](refs/GlobalPairInteraction.md)
         - [LennardJones](refs/LennardJonesPotential.md)
