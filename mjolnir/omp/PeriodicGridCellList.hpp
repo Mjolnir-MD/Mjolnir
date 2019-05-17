@@ -157,13 +157,6 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
     }
 
     template<typename PotentialT>
-    void reconstruct(const system_type& sys, const PotentialT& pot)
-    {
-        this->initialize(sys, pot); // do the same thing as `initialize`
-        return;
-    }
-
-    template<typename PotentialT>
     void make  (const system_type& sys, const PotentialT& pot)
     {
         neighbors_.clear();
