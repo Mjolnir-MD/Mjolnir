@@ -7,14 +7,13 @@
 #endif
 
 #include <mjolnir/input/read_local_interaction.hpp>
-#include <test/util/traits.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
 
 BOOST_AUTO_TEST_CASE(read_dummy_interaction)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_dummy_interaction.log");
 
-    using real_type = double;
-    using traits_type = mjolnir::test::traits<real_type>;
+    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -55,7 +54,5 @@ BOOST_AUTO_TEST_CASE(read_dummy_interaction)
         BOOST_TEST(adj_2.size() == 2u);
         BOOST_TEST(adj_2.at(0)  == 1u);
         BOOST_TEST(adj_2.at(1)  == 2u);
-
-
     }
 }

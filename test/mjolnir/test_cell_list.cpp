@@ -6,7 +6,6 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <test/util/traits.hpp>
 #include <mjolnir/util/empty.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>

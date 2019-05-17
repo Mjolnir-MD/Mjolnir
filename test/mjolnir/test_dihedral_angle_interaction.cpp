@@ -6,7 +6,8 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <test/util/traits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/interaction/local/DihedralAngleInteraction.hpp>
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
@@ -14,15 +15,15 @@
 
 BOOST_AUTO_TEST_CASE(DihedralAngle_force)
 {
-    typedef mjolnir::test::traits<double> traits;
-    constexpr traits::real_type tol = 1e-7;
+    using traits_type         = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type           = traits_type::real_type;
+    using coord_type          = traits_type::coordinate_type;
+    using boundary_type       = traits_type::boundary_type;
+    using system_type         = mjolnir::System<traits_type>;
+    using harmonic_type       = mjolnir::HarmonicPotential<real_type>;
+    using dihedral_angle_type = mjolnir::DihedralAngleInteraction<traits_type, harmonic_type>;
 
-    typedef traits::real_type real_type;
-    typedef traits::coordinate_type            coord_type;
-    typedef traits::boundary_type              boundary_type;
-    typedef mjolnir::System<traits>            system_type;
-    typedef mjolnir::HarmonicPotential<real_type> harmonic_type;
-    typedef mjolnir::DihedralAngleInteraction<traits, harmonic_type> dihedral_angle_type;
+    constexpr real_type tol = 1e-7;
 
     const real_type k(1e0);
     const real_type native(mjolnir::math::constants<real_type>::pi * 2.0 / 3.0);
