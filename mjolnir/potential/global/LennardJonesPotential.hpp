@@ -108,6 +108,10 @@ class LennardJonesPotential
 
     // nothing to do when system parameters change.
     template<typename traitsT>
+    void initialize(const System<traitsT>&) const noexcept {return;}
+
+    // nothing to do when system parameters change.
+    template<typename traitsT>
     void update(const System<traitsT>&) const noexcept {return;}
 
     // e.g. `{"bond", 3}` means ignore particles connected within 3 "bond"s

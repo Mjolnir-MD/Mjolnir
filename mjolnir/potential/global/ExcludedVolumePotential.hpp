@@ -93,6 +93,9 @@ class ExcludedVolumePotential
         return -12.0 * this->epsilon_ * dr12 * rinv;
     }
 
+    template<typename traitsT>
+    void initialize(const System<traitsT>&) const noexcept {return;}
+
     // nothing to be done if system parameter (e.g. temperature) changes
     template<typename traitsT>
     void update(const System<traitsT>&) const noexcept {return;}

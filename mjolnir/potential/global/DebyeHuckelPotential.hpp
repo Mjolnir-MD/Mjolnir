@@ -7,6 +7,7 @@
 #include <mjolnir/util/logger.hpp>
 #include <vector>
 #include <cmath>
+#include <cassert>
 
 namespace mjolnir
 {
@@ -82,10 +83,32 @@ class DebyeHuckelPotential
         return debye_length_ * cutoff_ratio;
     }
 
+    template<typename traitsT>
+    void initialize(const System<traitsT>& sys) noexcept
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+        if(!sys.has_attribute("temperature"))
+        {
+            MJOLNIR_LOG_ERROR("DebyeHuckel requires `temperature` attribute");
+        }
+        if(!sys.has_attribute("ionic_strength"))
+        {
+            MJOLNIR_LOG_ERROR("DebyeHuckel requires `ionic_strength` attribute");
+        }
+        this->temperature_ = sys.attribute("temperature");
+        this->ion_conc_    = sys.attribute("ionic_strength");
+        this->calc_parameters();
+        return;
+    }
+
     // for temperature/ionic concentration changes...
     template<typename traitsT>
     void update(const System<traitsT>& sys) noexcept
     {
+        assert(sys.has_attribute("temperature"));
+        assert(sys.has_attribute("ionic_strength"));
+
         this->temperature_ = sys.attribute("temperature");
         this->ion_conc_    = sys.attribute("ionic_strength");
         this->calc_parameters();
