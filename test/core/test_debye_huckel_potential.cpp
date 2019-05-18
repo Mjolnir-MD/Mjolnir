@@ -6,7 +6,6 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <test/util/traits.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/logger.hpp>

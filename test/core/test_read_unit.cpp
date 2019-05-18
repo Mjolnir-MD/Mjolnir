@@ -6,7 +6,6 @@
 #endif
 #include <boost/mpl/list.hpp>
 #include <test/util/make_empty_input.hpp>
-#include <test/util/traits.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/input/read_units.hpp>
 #include <mjolnir/util/string.hpp>
@@ -68,7 +67,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_input_angstrom_kcalmol, Real, test_targets)
 
     // update units and physical constants here
     phys::reset();
-    mjolnir::read_units<mjolnir::test::traits<Real>>(input);
+    mjolnir::read_units<mjolnir::SimulatorTraits<Real, mjolnir::UnlimitedBoundary>>(input);
 
     BOOST_TEST(phys::m_to_length() == unit::m_to_angstrom, test::tolerance<Real>());
     BOOST_TEST(phys::length_to_m() == unit::angstrom_to_m, test::tolerance<Real>());
@@ -107,7 +106,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_input_angstrom_kJmol, Real, test_targets)
 
     // reset units and physical constants here
     phys::reset();
-    mjolnir::read_units<mjolnir::test::traits<Real>>(input);
+    mjolnir::read_units<mjolnir::SimulatorTraits<Real, mjolnir::UnlimitedBoundary>>(input);
 
     BOOST_TEST(phys::m_to_length() == unit::m_to_angstrom, test::tolerance<Real>());
     BOOST_TEST(phys::length_to_m() == unit::angstrom_to_m, test::tolerance<Real>());
@@ -145,7 +144,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_input_nm_kcalmol, Real, test_targets)
 
     // update units and physical constants here
     phys::reset();
-    mjolnir::read_units<mjolnir::test::traits<Real>>(input);
+    mjolnir::read_units<mjolnir::SimulatorTraits<Real, mjolnir::UnlimitedBoundary>>(input);
 
     BOOST_TEST(phys::m_to_length() == unit::m_to_nm, test::tolerance<Real>());
     BOOST_TEST(phys::length_to_m() == unit::nm_to_m, test::tolerance<Real>());
@@ -183,7 +182,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_input_nm_kJmol, Real, test_targets)
 
     // update units and physical constants here
     phys::reset();
-    mjolnir::read_units<mjolnir::test::traits<Real>>(input);
+    mjolnir::read_units<mjolnir::SimulatorTraits<Real, mjolnir::UnlimitedBoundary>>(input);
 
     BOOST_TEST(phys::m_to_length() == unit::m_to_nm, test::tolerance<Real>());
     BOOST_TEST(phys::length_to_m() == unit::nm_to_m, test::tolerance<Real>());

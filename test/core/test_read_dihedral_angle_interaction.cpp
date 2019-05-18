@@ -6,15 +6,16 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/input/read_local_interaction.hpp>
-#include <test/util/traits.hpp>
 
 BOOST_AUTO_TEST_CASE(read_dihedral_angle_harmonic)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_dihedral_angle_interaction.log");
 
-    using real_type = double;
-    using traits_type = mjolnir::test::traits<real_type>;
+    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type   = traits_type::real_type;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -38,8 +39,8 @@ BOOST_AUTO_TEST_CASE(read_dihedral_angle_go_contact)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_dihedral_angle_interaction.log");
 
-    using real_type = double;
-    using traits_type = mjolnir::test::traits<real_type>;
+    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type   = traits_type::real_type;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -63,8 +64,8 @@ BOOST_AUTO_TEST_CASE(read_dihedral_angle_gaussian)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_dihedral_angle_interaction.log");
 
-    using real_type = double;
-    using traits_type = mjolnir::test::traits<real_type>;
+    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type   = traits_type::real_type;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -88,8 +89,8 @@ BOOST_AUTO_TEST_CASE(read_dihedral_angle_periodic_gaussian)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_dihedral_angle_interaction.log");
 
-    using real_type = double;
-    using traits_type = mjolnir::test::traits<real_type>;
+    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type   = traits_type::real_type;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -113,8 +114,8 @@ BOOST_AUTO_TEST_CASE(read_dihedral_angle_flexible_local)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_dihedral_angle_interaction.log");
 
-    using real_type = double;
-    using traits_type = mjolnir::test::traits<real_type>;
+    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type   = traits_type::real_type;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
