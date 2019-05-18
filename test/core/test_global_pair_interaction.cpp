@@ -6,7 +6,8 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <test/util/traits.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/NaivePairCalculation.hpp>
 #include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
 #include <mjolnir/potential/global/IgnoreMolecule.hpp>
@@ -17,7 +18,7 @@
 BOOST_AUTO_TEST_CASE(GlobalPairInteraction_double)
 {
     mjolnir::LoggerManager::set_default_logger("test_global_pair_interaction.log");
-    typedef mjolnir::test::traits<double> traits;
+    using traits = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     constexpr static traits::real_type tol = 1e-8;
 
     using real_type        = traits::real_type;

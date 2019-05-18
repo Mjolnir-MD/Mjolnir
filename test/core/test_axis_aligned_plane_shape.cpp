@@ -6,7 +6,8 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <test/util/traits.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>
 #include <mjolnir/util/make_unique.hpp>
@@ -16,18 +17,18 @@
 BOOST_AUTO_TEST_CASE(AxisAlignedPlane_PositiveZ_geometry_unlimited)
 {
     mjolnir::LoggerManager::set_default_logger("test_AxisAlignedPlane");
-    using traits = mjolnir::test::traits<double>;
-    using real_type     = typename traits::real_type;
-    using coord_type    = typename traits::coordinate_type;
-    using boundary_type = typename traits::boundary_type;
+    using traits_type   = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type     = typename traits_type::real_type;
+    using coord_type    = typename traits_type::coordinate_type;
+    using boundary_type = typename traits_type::boundary_type;
 
-    constexpr traits::real_type tol = 1e-8;
+    constexpr real_type tol = 1e-8;
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<double> uni(-100, 100);
 
     boundary_type bdry;
-    mjolnir::AxisAlignedPlane<traits, mjolnir::PositiveZDirection> xyplane(0.0);
+    mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveZDirection> xyplane(0.0);
 
     for(std::size_t i=0; i<100000; ++i)
     {
@@ -45,18 +46,18 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_PositiveZ_geometry_unlimited)
 BOOST_AUTO_TEST_CASE(AxisAlignedPlane_NegativeZ_geometry_unlimited)
 {
     mjolnir::LoggerManager::set_default_logger("test_AxisAlignedPlane");
-    using traits = mjolnir::test::traits<double>;
-    using real_type     = typename traits::real_type;
-    using coord_type    = typename traits::coordinate_type;
-    using boundary_type = typename traits::boundary_type;
+    using traits_type   = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type     = typename traits_type::real_type;
+    using coord_type    = typename traits_type::coordinate_type;
+    using boundary_type = typename traits_type::boundary_type;
 
-    static constexpr traits::real_type tol = 1e-8;
+    constexpr real_type tol = 1e-8;
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<double> uni(-100, 100);
 
     boundary_type bdry;
-    mjolnir::AxisAlignedPlane<traits, mjolnir::NegativeZDirection> xyplane(0.0);
+    mjolnir::AxisAlignedPlane<traits_type, mjolnir::NegativeZDirection> xyplane(0.0);
 
     for(std::size_t i=0; i<100000; ++i)
     {
@@ -74,19 +75,19 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_NegativeZ_geometry_unlimited)
 BOOST_AUTO_TEST_CASE(AxisAlignedPlane_geometry_periodic)
 {
     mjolnir::LoggerManager::set_default_logger("test_AxisAlignedPlane");
-    using traits = mjolnir::test::traits<double, mjolnir::CuboidalPeriodicBoundary>;
-    using real_type     = typename traits::real_type;
-    using coord_type    = typename traits::coordinate_type;
-    using boundary_type = typename traits::boundary_type;
+    using traits_type   = mjolnir::SimulatorTraits<double, mjolnir::CuboidalPeriodicBoundary>;
+    using real_type     = typename traits_type::real_type;
+    using coord_type    = typename traits_type::coordinate_type;
+    using boundary_type = typename traits_type::boundary_type;
 
-    constexpr traits::real_type tol = 1e-8;
+    constexpr real_type tol = 1e-8;
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<double> uni(0, 100);
 
     const coord_type lower(0, 0, 0), upper(100, 100, 100);
     boundary_type bdry(lower, upper);
-    mjolnir::AxisAlignedPlane<traits, mjolnir::PositiveZDirection> xyplane(0.0);
+    mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveZDirection> xyplane(0.0);
 
     for(std::size_t i=0; i<100000; ++i)
     {
@@ -131,10 +132,10 @@ struct dummy_potential
 BOOST_AUTO_TEST_CASE(AxisAlignedPlane_neighbors_unlimited)
 {
     mjolnir::LoggerManager::set_default_logger("test_AxisAlignedPlane");
-    using traits = mjolnir::test::traits<double>;
-    using coord_type    = typename traits::coordinate_type;
-    using boundary_type = typename traits::boundary_type;
-    using system_type   = mjolnir::System<traits>;
+    using traits_type   = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using coord_type    = typename traits_type::coordinate_type;
+    using boundary_type = typename traits_type::boundary_type;
+    using system_type   = mjolnir::System<traits_type>;
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<double> uni(-10, 10);
@@ -150,7 +151,7 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_neighbors_unlimited)
     }
 
     dummy_potential<double> dummy; dummy.cutoff = 1.0; dummy.N = 1000;
-    mjolnir::AxisAlignedPlane<traits, mjolnir::PositiveZDirection>
+    mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveZDirection>
         xyplane(0.0, 0.0); // no mergin here
     xyplane.initialize(sys, dummy);
 

@@ -6,7 +6,8 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <test/util/traits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/interaction/local/ContactInteraction.hpp>
 #include <mjolnir/potential/local/GoContactPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
@@ -15,15 +16,15 @@ BOOST_AUTO_TEST_CASE(Contact_calc_force)
 {
     mjolnir::LoggerManager::set_default_logger("test_Contact_calc_force");
 
-    typedef mjolnir::test::traits<double> traits;
-    constexpr static traits::real_type tol = 1e-8;
+    using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type        = traits_type::real_type;
+    using coord_type       = traits_type::coordinate_type;
+    using boundary_type    = traits_type::boundary_type;
+    using system_type      = mjolnir::System<traits_type>;
+    using potential_type   = mjolnir::GoContactPotential<real_type>;
+    using interaction_type = mjolnir::ContactInteraction<traits_type, potential_type>;
 
-    typedef traits::real_type real_type;
-    typedef traits::coordinate_type            coord_type;
-    typedef traits::boundary_type              boundary_type;
-    typedef mjolnir::System<traits>            system_type;
-    typedef mjolnir::GoContactPotential<real_type>   potential_type;
-    typedef mjolnir::ContactInteraction<traits, potential_type> interaction_type;
+    constexpr real_type tol = 1e-8;
 
     auto normalize = [](const coord_type& v){return v / mjolnir::math::length(v);};
 
