@@ -24,7 +24,11 @@ struct dummy_potential
     using molecule_id_type     = typename topology_type::molecule_id_type;
     using connection_kind_type = typename topology_type::connection_kind_type;
 
-    explicit dummy_potential(const real_type cutoff): cutoff_(cutoff) {}
+    explicit dummy_potential(const real_type cutoff, const std::size_t N)
+        : cutoff_(cutoff), participants_(N)
+    {
+        std::iota(participants_.begin(), participants_.end(), 0u);
+    }
 
     real_type max_cutoff_length() const noexcept {return this->cutoff_;}
 
@@ -40,9 +44,15 @@ struct dummy_potential
         return std::vector<std::pair<connection_kind_type, std::size_t>>{};
     }
 
+    std::vector<std::size_t> const& participants() const noexcept
+    {
+        return this->participants_;
+    }
+
     std::string name() const {return "dummy potential";}
 
     real_type cutoff_;
+    std::vector<std::size_t> participants_;
 };
 
 // has non-empty parameter type.
@@ -56,7 +66,11 @@ struct dummy_potential_2
     using molecule_id_type     = typename topology_type::molecule_id_type;
     using connection_kind_type = typename topology_type::connection_kind_type;
 
-    explicit dummy_potential_2(const real_type cutoff): cutoff_(cutoff) {}
+    explicit dummy_potential_2(const real_type cutoff, const std::size_t N)
+        : cutoff_(cutoff), participants_(N)
+    {
+        std::iota(participants_.begin(), participants_.end(), 0u);
+    }
 
     real_type max_cutoff_length() const noexcept {return this->cutoff_;}
 
@@ -72,9 +86,15 @@ struct dummy_potential_2
         return std::vector<std::pair<connection_kind_type, std::size_t>>{};
     }
 
+    std::vector<std::size_t> const& participants() const noexcept
+    {
+        return this->participants_;
+    }
+
     std::string name() const {return "dummy potential";}
 
     real_type cutoff_;
+    std::vector<std::size_t> participants_;
 };
 
 BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary)
@@ -101,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary)
     };
 
     {
-        dummy_potential<real_type> pot(cutoff);
+        dummy_potential<real_type> pot(cutoff, N);
         using parameter_type  = typename dummy_potential<real_type>::parameter_type;
 
         mjolnir::System<traits_type> sys(N, boundary_type{});
@@ -150,7 +170,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary)
     }
 
     {
-        dummy_potential_2<real_type> pot(cutoff);
+        dummy_potential_2<real_type> pot(cutoff, N);
         using parameter_type  = typename dummy_potential_2<real_type>::parameter_type;
 
         mjolnir::System<traits_type> sys(N, boundary_type{});
@@ -234,7 +254,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary)
     };
 
     {
-        dummy_potential<real_type> pot(cutoff);
+        dummy_potential<real_type> pot(cutoff, N);
         using parameter_type  = typename dummy_potential<real_type>::parameter_type;
 
         mjolnir::System<traits_type> sys(N, boundary_type(coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
@@ -282,7 +302,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary)
     }
 
     {
-        dummy_potential_2<real_type> pot(cutoff);
+        dummy_potential_2<real_type> pot(cutoff, N);
         using parameter_type  = typename dummy_potential_2<real_type>::parameter_type;
 
         mjolnir::System<traits_type> sys(N, boundary_type(coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
