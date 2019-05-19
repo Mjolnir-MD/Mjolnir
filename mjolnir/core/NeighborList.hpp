@@ -199,13 +199,6 @@ class NeighborList
         return;
     }
 
-    void reserve(std::size_t Nparticle, std::size_t Nneighbor)
-    {
-        this->neighbors_.reserve(Nparticle * Nneighbor);
-        this->ranges_   .reserve(Nparticle + 1);
-        return;
-    }
-
     // assign the partners in range [first, last) as the partner of particle i.
     template<typename Iterator>
     void add_list_for(const std::size_t i, Iterator first, Iterator last)
