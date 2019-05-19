@@ -272,8 +272,6 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::initialize(
     this->set_cutoff(pot.max_cutoff_length());
     this->exclusion_.make(sys, pot);
 
-    this->neighbors_.initialize(sys.size());
-
     // initialize cell list
     for(int x = 0; x < dim; ++x)
     for(int y = 0; y < dim; ++y)
