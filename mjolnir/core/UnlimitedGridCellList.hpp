@@ -152,12 +152,18 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
 
-    neighbors_.clear();
-    index_by_cell_.resize(sys.size());
+    // `participants` is a list that contains indices of particles that are
+    // related to the potential.
+    const auto& participants = pot.participants();
 
-    for(std::size_t i=0; i<sys.size(); ++i)
+    neighbors_.clear();
+    index_by_cell_.resize(participants.size());
+
+    for(std::size_t i=0; i<participants.size(); ++i)
     {
-        index_by_cell_[i] = std::make_pair(i, calc_index(sys.position(i)));
+        const auto idx = participants[i];
+        index_by_cell_[i] =
+            std::make_pair(idx, this->calc_index(sys.position(idx)));
     }
     std::sort(this->index_by_cell_.begin(), this->index_by_cell_.end(),
         [](const particle_cell_idx_pair& lhs, const particle_cell_idx_pair& rhs)
@@ -169,6 +175,7 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
         {
             if(iter == index_by_cell_.cend() || i != iter->second)
             {
+                MJOLNIR_LOG_DEBUG("cell ", i, " does not have a particle inside");
                 cell_list_[i].first = make_range(iter, iter);
                 continue;
             }
@@ -177,6 +184,8 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
             {
                 ++iter;
             }
+            MJOLNIR_LOG_DEBUG("cell ", i, " has ", std::distance(first, iter),
+                              " particle inside");
             cell_list_[i].first = make_range(first, iter);
         }
     }
@@ -185,38 +194,64 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
 
     const real_type r_c  = cutoff_ * (1 + margin_);
     const real_type r_c2 = r_c * r_c;
+
+    // To construct NeighborList correctly, we need to add partners to *all*
+    // the particles regardless of whether the particle is a participant or not.
+    //
+    // So the following code first check whether an i-th particle is a
+    // participant to skip needless calculation. But searching indices takes a
+    // time.
+    //
+    // Current implementation code assumes that `participants` is sorted
+    // (it IS sorted in potential::initialize()). With this assumption, we can
+    // skip searching by...
+    // - check the index is the same as the first element of `participant`.
+    // - if they are the same, pop the first element and calc neighbors.
+    // - otherwise, skip neighbor calculation and continue the loop.
+    //
+    // To emulate pop_front, it uses `participant_index` to represent the
+    // current `first element`.
+
+    std::vector<neighbor_type> partner;
+    std::size_t participant_index = 0;
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        MJOLNIR_LOG_SCOPE_DEBUG(for(std::size_t i=0; i<sys.size(); ++i));
-        const auto& ri   = sys.position(i);
-        const auto& cell = cell_list_[this->calc_index(ri)];
-
-        MJOLNIR_LOG_DEBUG("particle position ", sys.position(i));
-        MJOLNIR_LOG_DEBUG("cell index ",        calc_index(ri));
-        MJOLNIR_LOG_DEBUG("making verlet list for index ", i);
-
-        std::vector<neighbor_type> partner;
-        for(std::size_t cidx : cell.second) // for all adjacent cells...
+        partner.clear();
+        if(participant_index < participants.size() &&
+           participants[participant_index] == i)
         {
-            for(auto pici : cell_list_[cidx].first)
-            {
-                const auto j = pici.first;
-                MJOLNIR_LOG_DEBUG("looking particle ", j);
-                if(j <= i || this->exclusion_.is_excluded(i, j))
-                {
-                    continue;
-                }
+            ++participant_index;
 
-                const auto& rj = sys.position(j);
-                if(math::length_sq(sys.adjust_direction(rj - ri)) < r_c2)
+            const auto& ri   = sys.position(i);
+            const auto& cell = cell_list_[this->calc_index(ri)];
+
+            MJOLNIR_LOG_DEBUG("particle position ", sys.position(i));
+            MJOLNIR_LOG_DEBUG("cell index ",        calc_index(ri));
+            MJOLNIR_LOG_DEBUG("making verlet list for index ", i);
+
+            for(std::size_t cidx : cell.second) // for all adjacent cells...
+            {
+                MJOLNIR_LOG_DEBUG("neighbor cell index ", cidx);
+                for(auto pici : cell_list_[cidx].first)
                 {
-                    MJOLNIR_LOG_DEBUG("add index ", j, " to verlet list ", i);
-                    partner.emplace_back(j, pot.prepare_params(i, j));
+                    const auto j = pici.first;
+                    MJOLNIR_LOG_DEBUG("looking particle ", j);
+                    if(j <= i || this->exclusion_.is_excluded(i, j))
+                    {
+                        continue;
+                    }
+
+                    const auto& rj = sys.position(j);
+                    if(math::length_sq(sys.adjust_direction(rj - ri)) < r_c2)
+                    {
+                        MJOLNIR_LOG_DEBUG("add index ", j, " to list ", i);
+                        partner.emplace_back(j, pot.prepare_params(i, j));
+                    }
                 }
             }
+            // make the result consistent with NaivePairCalculation...
+            std::sort(partner.begin(), partner.end());
         }
-        // make the result consistent with NaivePairCalculation...
-        std::sort(partner.begin(), partner.end());
         this->neighbors_.add_list_for(i, partner.begin(), partner.end());
     }
 
