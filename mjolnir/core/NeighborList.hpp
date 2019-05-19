@@ -199,6 +199,12 @@ class NeighborList
         return;
     }
 
+    void initialize(const std::size_t N)
+    {
+        this->ranges_.resize(N+1, 0);
+        return;
+    }
+
     // assign the partners in range [first, last) as the partner of particle i.
     template<typename Iterator>
     void add_list_for(const std::size_t i, Iterator first, Iterator last)
