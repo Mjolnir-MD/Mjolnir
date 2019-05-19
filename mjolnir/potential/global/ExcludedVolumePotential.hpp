@@ -4,6 +4,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>
 #include <algorithm>
+#include <numeric>
 #include <memory>
 #include <cmath>
 
@@ -94,7 +95,12 @@ class ExcludedVolumePotential
     }
 
     template<typename traitsT>
-    void initialize(const System<traitsT>&) const noexcept {return;}
+    void initialize(const System<traitsT>& sys) noexcept
+    {
+        this->participants_.resize(sys.size());
+        std::iota(this->participants_.begin(), this->participants_.end(), 0u);
+        return;
+    }
 
     // nothing to be done if system parameter (e.g. temperature) changes
     template<typename traitsT>
@@ -125,10 +131,13 @@ class ExcludedVolumePotential
     std::vector<real_type>&       parameters()       noexcept {return this->radii_;}
     std::vector<real_type> const& parameters() const noexcept {return this->radii_;}
 
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+
   private:
 
     real_type epsilon_;
     std::vector<real_type> radii_;
+    std::vector<std::size_t> participants_;
 
     ignore_molecule_type ignore_molecule_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;

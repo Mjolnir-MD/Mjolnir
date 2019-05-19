@@ -6,6 +6,7 @@
 #include <mjolnir/util/empty.hpp>
 #include <vector>
 #include <algorithm>
+#include <numeric>
 #include <cmath>
 
 namespace mjolnir
@@ -94,7 +95,12 @@ class UniformLennardJonesPotential
     }
 
     template<typename traitsT>
-    void initialize(const System<traitsT>&) const noexcept {return;}
+    void initialize(const System<traitsT>& sys) noexcept
+    {
+        this->participants_.resize(sys.size());
+        std::iota(this->participants_.begin(), this->participants_.end(), 0u);
+        return;
+    }
 
     // nothing to do when system parameters change.
     template<typename traitsT>
@@ -118,9 +124,12 @@ class UniformLennardJonesPotential
     real_type& epsilon()       noexcept {return epsilon_;}
     real_type  epsilon() const noexcept {return epsilon_;}
 
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+
   private:
 
     real_type sigma_, epsilon_, r_cut_;
+    std::vector<std::size_t> participants_;
 
     ignore_molecule_type ignore_molecule_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;

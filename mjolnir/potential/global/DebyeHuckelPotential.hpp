@@ -6,6 +6,7 @@
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <vector>
+#include <numeric>
 #include <cmath>
 #include <cassert>
 
@@ -88,6 +89,10 @@ class DebyeHuckelPotential
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
+
+        this->participants_.resize(sys.size());
+        std::iota(this->participants_.begin(), this->participants_.end(), 0u);
+
         if(!sys.has_attribute("temperature"))
         {
             MJOLNIR_LOG_ERROR("DebyeHuckel requires `temperature` attribute");
@@ -130,6 +135,8 @@ class DebyeHuckelPotential
     // access to the parameters
     std::vector<real_type>&       charges()       noexcept {return charges_;}
     std::vector<real_type> const& charges() const noexcept {return charges_;}
+
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
 
     //XXX this one is calculated parameter, shouldn't be changed!
     real_type debye_length() const noexcept {return this->debye_length_;}
@@ -188,6 +195,7 @@ class DebyeHuckelPotential
     real_type debye_length_;
     real_type inv_debye_length_;
     container_type charges_;
+    std::vector<std::size_t> participants_;
 
     ignore_molecule_type ignore_molecule_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;

@@ -5,6 +5,7 @@
 #include <mjolnir/math/math.hpp>
 #include <vector>
 #include <algorithm>
+#include <numeric>
 #include <cmath>
 
 namespace mjolnir
@@ -106,9 +107,13 @@ class LennardJonesPotential
         return max_sigma * cutoff_ratio;
     }
 
-    // nothing to do when system parameters change.
     template<typename traitsT>
-    void initialize(const System<traitsT>&) const noexcept {return;}
+    void initialize(const System<traitsT>& sys) noexcept
+    {
+        this->participants_.resize(sys.size());
+        std::iota(this->participants_.begin(), this->participants_.end(), 0u);
+        return;
+    }
 
     // nothing to do when system parameters change.
     template<typename traitsT>
@@ -130,9 +135,12 @@ class LennardJonesPotential
     std::vector<parameter_type>&       parameters()       noexcept {return radii_;}
     std::vector<parameter_type> const& parameters() const noexcept {return radii_;}
 
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+
   private:
 
     container_type radii_;
+    std::vector<std::size_t> participants_;
 
     ignore_molecule_type ignore_molecule_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
