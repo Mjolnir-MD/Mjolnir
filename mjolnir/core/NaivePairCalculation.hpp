@@ -67,16 +67,30 @@ void NaivePairCalculation<traitsT, parameterT>::make(
         const system_type& sys, const PotentialT& pot)
 {
     this->neighbors_.clear();
+
+    const auto& participants = pot.participants();
+
+    std::vector<neighbor_type> partners;
+    std::size_t participant_index = 0;
     for(std::size_t i=0; i < sys.size(); ++i)
     {
-        std::vector<neighbor_type> partners;
-        for(std::size_t j=i+1; j < sys.size(); ++j)
+        partners.clear();
+        if(participant_index < participants.size() &&
+           participants[participant_index] == i)
         {
-            if(this->exclusion_.is_excluded(i, j))
+            ++participant_index;
+
+            for(auto iter = std::upper_bound(participants.begin(),
+                                             participants.end(), i);
+                    iter != participants.end(); ++iter)
             {
-                continue;
+                const std::size_t j = *iter;
+                if(this->exclusion_.is_excluded(i, j))
+                {
+                    continue;
+                }
+                partners.emplace_back(j, pot.prepare_params(i, j));
             }
-            partners.emplace_back(j, pot.prepare_params(i, j));
         }
         this->neighbors_.add_list_for(i, partners.begin(), partners.end());
     }
