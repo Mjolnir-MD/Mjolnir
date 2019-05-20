@@ -32,7 +32,8 @@ set(TEST_NAMES
     test_position_restraint_interaction
 
     test_neighbor_list
-    test_verlet_list
+    test_unlimited_verlet_list
+    test_periodic_verlet_list
     test_unlimited_cell_list
     test_periodic_cell_list
 
