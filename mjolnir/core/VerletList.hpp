@@ -99,27 +99,58 @@ void VerletList<traitsT, parameterT>::make(
 
     this->neighbors_.clear();
 
+    // `participants` is a list that contains indices of particles that are
+    // related to the potential.
+    const auto& participants = pot.participants();
+
+    // To construct NeighborList correctly, we need to add partners to *all*
+    // the particles regardless of whether the particle is a participant or not.
+    //
+    // So the following code first check whether an i-th particle is a
+    // participant to skip needless calculation. But searching indices takes a
+    // time.
+    //
+    // Current implementation code assumes that `participants` is sorted
+    // (it IS sorted in potential::initialize()). With this assumption, we can
+    // skip searching by...
+    // - check the index is the same as the first element of `participant`.
+    // - if they are the same, pop the first element and calc neighbors.
+    // - otherwise, skip neighbor calculation and continue the loop.
+    //
+    // To emulate pop_front (we can't use it here because `participants` is
+    // borrowed from `potential`), it uses `participant_index` to represent the
+    // current `first element`.
+
     const real_type rc = cutoff_ * (1. + margin_);
     const real_type rc2 = rc * rc;
+
+    std::vector<neighbor_type> partner;
+    std::size_t participant_index = 0;
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        const auto& ri = sys.position(i);
-
-        std::vector<neighbor_type> partners;
-        for(std::size_t j=i+1; j<sys.size(); ++j)
+        partner.clear();
+        if(participant_index < participants.size() &&
+           participants[participant_index] == i)
         {
-            if(this->exclusion_.is_excluded(i, j))
-            {
-                continue;
-            }
+            ++participant_index;
+            const auto& ri = sys.position(i);
 
-            const auto& rj = sys.position(j);
-            if(math::length_sq(sys.adjust_direction(rj - ri)) < rc2)
+            for(std::size_t j=i+1; j<sys.size(); ++j)
             {
-                partners.emplace_back(j, pot.prepare_params(i, j));
+                if(this->exclusion_.is_excluded(i, j))
+                {
+                    continue;
+                }
+
+                const auto& rj = sys.position(j);
+                if(math::length_sq(sys.adjust_direction(rj - ri)) < rc2)
+                {
+                    partner.emplace_back(j, pot.prepare_params(i, j));
+                }
             }
+            // because j is searched sequencially, sorting is not needed.
         }
-        this->neighbors_.add_list_for(i, partners.begin(), partners.end());
+        this->neighbors_.add_list_for(i, partner.begin(), partner.end());
     }
     this->current_margin_ = cutoff_ * margin_;
     return ;
