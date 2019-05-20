@@ -40,6 +40,7 @@ class GlobalPairInteraction<
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("With OpenMP: potential is ", this->name());
+        this->potential_.initialize(sys);
         this->partition_.initialize(sys, this->potential_);
     }
 
