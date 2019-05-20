@@ -159,6 +159,10 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
     template<typename PotentialT>
     void make  (const system_type& sys, const PotentialT& pot)
     {
+        // `participants` is a list that contains indices of particles that are
+        // related to the potential.
+        const auto& participants = pot.participants();
+
         neighbors_.clear();
         if(index_by_cell_    .size() != sys.size() ||
            index_by_cell_buf_.size() != sys.size())
@@ -168,9 +172,11 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
         }
 
 #pragma omp parallel for
-        for(std::size_t i=0; i<sys.size(); ++i)
+        for(std::size_t i=0; i<participants.size(); ++i)
         {
-            index_by_cell_[i] = std::make_pair(i, calc_index(sys.position(i)));
+            const auto idx = participants[i];
+            index_by_cell_[i] =
+                std::make_pair(idx, this->calc_index(sys.position(idx)));
         }
 
         omp::sort(this->index_by_cell_, this->index_by_cell_buf_,
@@ -211,30 +217,41 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
 //XXX faster.
 
         std::vector<neighbor_type> partner;
+        std::size_t participant_index = 0;
         for(std::size_t i=0; i<sys.size(); ++i)
         {
-            const auto& ri = sys.position(i);
-            const auto& cell = cell_list_[calc_index(ri)];
-
             partner.clear();
-            for(std::size_t cidx : cell.second) // for all adjacent cells...
+            if(participant_index < participants.size() &&
+               participants[participant_index] == i)
             {
-                for(auto pici : cell_list_[cidx].first)
-                {
-                    const auto j = pici.first;
-                    if(j <= i || this->exclusion_.is_excluded(i, j))
-                    {
-                        continue;
-                    }
+                ++participant_index;
 
-                    if(math::length_sq(sys.adjust_direction(sys.position(j) - ri)) < r_c2)
+                const auto& ri = sys.position(i);
+                const auto& cell = cell_list_[calc_index(ri)];
+
+                for(std::size_t cidx : cell.second) // for all adjacent cells...
+                {
+                    for(auto pici : cell_list_[cidx].first)
                     {
-                        partner.emplace_back(j, pot.prepare_params(i, j));
+                        const auto j = pici.first;
+                        if(j <= i || this->exclusion_.is_excluded(i, j))
+                        {
+                            continue;
+                        }
+                        // here we don't need to search `participants` because
+                        // cell list contains only participants. non-related
+                        // particles are already filtered.
+
+                        const auto& rj = sys.position(j);
+                        if(math::length_sq(sys.adjust_direction(rj - ri)) < r_c2)
+                        {
+                            partner.emplace_back(j, pot.prepare_params(i, j));
+                        }
                     }
                 }
+                // make the result consistent with NaivePairCalculation...
+                std::sort(partner.begin(), partner.end());
             }
-            // make the result consistent with NaivePairCalculation...
-            std::sort(partner.begin(), partner.end());
             this->neighbors_.add_list_for(i, partner.begin(), partner.end());
         }
 
