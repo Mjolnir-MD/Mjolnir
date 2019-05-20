@@ -135,8 +135,11 @@ void VerletList<traitsT, parameterT>::make(
             ++participant_index;
             const auto& ri = sys.position(i);
 
-            for(std::size_t j=i+1; j<sys.size(); ++j)
+            for(auto iter = std::upper_bound(participants.begin(),
+                                             participants.end(), i);
+                    iter != participants.end(); ++iter)
             {
+                const std::size_t j = *iter;
                 if(this->exclusion_.is_excluded(i, j))
                 {
                     continue;

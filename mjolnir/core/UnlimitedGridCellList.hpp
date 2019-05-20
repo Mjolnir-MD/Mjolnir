@@ -240,6 +240,9 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
                     {
                         continue;
                     }
+                    // here we don't need to search `participants` because
+                    // cell list contains only participants. non-related
+                    // particles are already filtered.
 
                     const auto& rj = sys.position(j);
                     if(math::length_sq(sys.adjust_direction(rj - ri)) < r_c2)
