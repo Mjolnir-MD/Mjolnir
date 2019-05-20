@@ -14,50 +14,9 @@
 #include <mjolnir/core/Topology.hpp>
 #include <random>
 
-template<typename T>
-struct dummy_potential
-{
-    using real_type      = T;
-    using parameter_type = mjolnir::empty_t;
-
-    using topology_type        = mjolnir::Topology;
-    using molecule_id_type     = typename topology_type::molecule_id_type;
-    using connection_kind_type = typename topology_type::connection_kind_type;
-
-    explicit dummy_potential(const real_type cutoff, const std::size_t N)
-        : cutoff_(cutoff), participants_(N)
-    {
-        std::iota(participants_.begin(), participants_.end(), 0u);
-    }
-
-    real_type max_cutoff_length() const noexcept {return this->cutoff_;}
-
-    parameter_type prepare_params(std::size_t, std::size_t) const noexcept
-    {
-        return parameter_type{};
-    }
-
-    bool is_ignored_molecule(std::size_t, std::size_t) const {return false;}
-
-    std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within() const
-    {
-        return std::vector<std::pair<connection_kind_type, std::size_t>>{};
-    }
-
-    std::vector<std::size_t> const& participants() const noexcept
-    {
-        return this->participants_;
-    }
-
-    std::string name() const {return "dummy potential";}
-
-    real_type cutoff_;
-    std::vector<std::size_t> participants_;
-};
-
 // has non-empty parameter type.
 template<typename T>
-struct dummy_potential_2
+struct dummy_potential
 {
     using real_type      = T;
     using parameter_type = std::pair<std::size_t, std::size_t>;
@@ -66,11 +25,10 @@ struct dummy_potential_2
     using molecule_id_type     = typename topology_type::molecule_id_type;
     using connection_kind_type = typename topology_type::connection_kind_type;
 
-    explicit dummy_potential_2(const real_type cutoff, const std::size_t N)
-        : cutoff_(cutoff), participants_(N)
-    {
-        std::iota(participants_.begin(), participants_.end(), 0u);
-    }
+    explicit dummy_potential(const real_type cutoff,
+                             const std::vector<std::size_t>& participants)
+        : cutoff_(cutoff), participants_(participants)
+    {}
 
     real_type max_cutoff_length() const noexcept {return this->cutoff_;}
 
@@ -120,112 +78,64 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary)
         );
     };
 
+    std::vector<std::size_t> participants(N);
+    std::iota(participants.begin(), participants.end(), 0);
+
+    dummy_potential<real_type> pot(cutoff, participants);
+    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
+
+    mjolnir::System<traits_type> sys(N, boundary_type{});
+
+    std::mt19937 mt(123456789);
+    for(std::size_t i=0; i < N; ++i)
     {
-        dummy_potential<real_type> pot(cutoff, N);
-        using parameter_type  = typename dummy_potential<real_type>::parameter_type;
+        sys.at(i).mass     = 1.0;
+        sys.at(i).position = distribute_particle(mt, L);
+    }
+    sys.topology().construct_molecules();
 
-        mjolnir::System<traits_type> sys(N, boundary_type{});
+    mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
 
-        std::mt19937 mt(123456789);
-        for(std::size_t i=0; i < N; ++i)
+    using neighbor_type = typename decltype(vlist)::neighbor_type;
+
+    BOOST_TEST(!vlist.valid());
+
+    vlist.initialize(sys, pot);
+    vlist.make(sys, pot);
+    BOOST_TEST(vlist.valid());
+
+    for(std::size_t i=0; i<N; ++i)
+    {
+        for(std::size_t j=i+1; j<N; ++j)
         {
-            sys.at(i).mass     = 1.0;
-            sys.at(i).position = distribute_particle(mt, L);
-        }
-        sys.topology().construct_molecules();
-
-        mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
-
-        using neighbor_type = typename decltype(vlist)::neighbor_type;
-
-        BOOST_TEST(!vlist.valid());
-
-        vlist.initialize(sys, pot);
-        vlist.make(sys, pot);
-        BOOST_TEST(vlist.valid());
-
-        for(std::size_t i=0; i<N; ++i)
-        {
-            for(std::size_t j=i+1; j<N; ++j)
+            const auto partners = vlist.partners(i);
+            if(std::find_if(partners.begin(), partners.end(),
+                [=](const neighbor_type& elem) -> bool {return elem.index == j;}
+                        ) == partners.end())
             {
-                const auto partners = vlist.partners(i);
-                if(std::find_if(partners.begin(), partners.end(),
-                    [=](const neighbor_type& elem) -> bool {return elem.index == j;}
-                            ) == partners.end())
-                {
-                    // should be enough distant (>= threshold)
-                    const auto dist = mjolnir::math::length(sys.adjust_direction(
-                                sys.position(j) - sys.position(i)));
-                    BOOST_TEST(dist >= threshold);
-                }
-                else
-                {
-                    // should be enough close (< threshold)
-                    const auto dist = mjolnir::math::length(sys.adjust_direction(
-                                sys.position(j) - sys.position(i)));
-                    BOOST_TEST(dist < threshold);
-                }
+                // should be enough distant (>= threshold)
+                const auto dist = mjolnir::math::length(sys.adjust_direction(
+                            sys.position(j) - sys.position(i)));
+                BOOST_TEST(dist >= threshold);
+            }
+            else
+            {
+                // should be enough close (< threshold)
+                const auto dist = mjolnir::math::length(sys.adjust_direction(
+                            sys.position(j) - sys.position(i)));
+                BOOST_TEST(dist < threshold);
             }
         }
     }
 
+    // check parameter_type.
+    for(std::size_t i=0; i<N; ++i)
     {
-        dummy_potential_2<real_type> pot(cutoff, N);
-        using parameter_type  = typename dummy_potential_2<real_type>::parameter_type;
-
-        mjolnir::System<traits_type> sys(N, boundary_type{});
-
-        std::mt19937 mt(123456789);
-        for(std::size_t i=0; i < N; ++i)
+        for(const auto& p_j : vlist.partners(i))
         {
-            sys.at(i).mass     = 1.0;
-            sys.at(i).position = distribute_particle(mt, L);
-        }
-        sys.topology().construct_molecules();
-
-        mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
-
-        using neighbor_type = typename decltype(vlist)::neighbor_type;
-
-        BOOST_TEST(!vlist.valid());
-
-        vlist.initialize(sys, pot);
-        vlist.make(sys, pot);
-        BOOST_TEST(vlist.valid());
-
-        for(std::size_t i=0; i<N; ++i)
-        {
-            for(std::size_t j=i+1; j<N; ++j)
-            {
-                const auto partners = vlist.partners(i);
-                if(std::find_if(partners.begin(), partners.end(),
-                    [=](const neighbor_type& elem) -> bool {return elem.index == j;}
-                            ) == partners.end())
-                {
-                    // should be enough distant (>= threshold)
-                    const auto dist = mjolnir::math::length(sys.adjust_direction(
-                                sys.position(j) - sys.position(i)));
-                    BOOST_TEST(dist >= threshold);
-                }
-                else
-                {
-                    // should be enough close (< threshold)
-                    const auto dist = mjolnir::math::length(sys.adjust_direction(
-                                sys.position(j) - sys.position(i)));
-                    BOOST_TEST(dist < threshold);
-                }
-            }
-        }
-
-        // check parameter_type.
-        for(std::size_t i=0; i<N; ++i)
-        {
-            for(const auto& p_j : vlist.partners(i))
-            {
-                const std::size_t j = p_j.index;
-                BOOST_TEST(p_j.parameter().first  == pot.prepare_params(i, j).first);
-                BOOST_TEST(p_j.parameter().second == pot.prepare_params(i, j).second);
-            }
+            const std::size_t j = p_j.index;
+            BOOST_TEST(p_j.parameter().first  == pot.prepare_params(i, j).first);
+            BOOST_TEST(p_j.parameter().second == pot.prepare_params(i, j).second);
         }
     }
 }
@@ -253,112 +163,64 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary)
         );
     };
 
+    std::vector<std::size_t> participants(N);
+    std::iota(participants.begin(), participants.end(), 0);
+
+    dummy_potential<real_type> pot(cutoff, participants);
+    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
+
+    mjolnir::System<traits_type> sys(N, boundary_type(coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
+
+    std::mt19937 mt(123456789);
+    for(std::size_t i=0; i < N; ++i)
     {
-        dummy_potential<real_type> pot(cutoff, N);
-        using parameter_type  = typename dummy_potential<real_type>::parameter_type;
+        sys.at(i).mass     = 1.0;
+        sys.at(i).position = distribute_particle(mt, L);
+    }
+    sys.topology().construct_molecules();
 
-        mjolnir::System<traits_type> sys(N, boundary_type(coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
+    mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
 
-        std::mt19937 mt(123456789);
-        for(std::size_t i=0; i < N; ++i)
+    using neighbor_type = typename decltype(vlist)::neighbor_type;
+
+    BOOST_TEST(!vlist.valid());
+
+    vlist.initialize(sys, pot);
+    vlist.make(sys, pot);
+    BOOST_TEST(vlist.valid());
+
+    for(std::size_t i=0; i<N; ++i)
+    {
+        for(std::size_t j=i+1; j<N; ++j)
         {
-            sys.at(i).mass     = 1.0;
-            sys.at(i).position = distribute_particle(mt, L);
-        }
-        sys.topology().construct_molecules();
-
-        mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
-        using neighbor_type = typename decltype(vlist)::neighbor_type;
-
-        BOOST_TEST(!vlist.valid());
-
-        vlist.initialize(sys, pot);
-        vlist.make(sys, pot);
-        BOOST_TEST(vlist.valid());
-
-        for(std::size_t i=0; i<N; ++i)
-        {
-            for(std::size_t j=i+1; j<N; ++j)
+            const auto partners = vlist.partners(i);
+            if(std::find_if(partners.begin(), partners.end(),
+                [=](const neighbor_type& elem) -> bool {return elem.index == j;}
+                        ) == partners.end())
             {
-                const auto partners = vlist.partners(i);
-                if(std::find_if(partners.begin(), partners.end(),
-                        [=](const neighbor_type& elem){return elem.index == j;}
-                            ) == partners.end())
-                {
-                    // should be enough distant (>= threshold)
-                    const auto dist = mjolnir::math::length(sys.adjust_direction(
-                                sys.position(j) - sys.position(i)));
-                    BOOST_TEST(dist >= threshold);
-                }
-                else
-                {
-                    // should be enough close (< threshold)
-                    const auto dist = mjolnir::math::length(sys.adjust_direction(
-                                sys.position(j) - sys.position(i)));
-                    BOOST_TEST(dist < threshold);
-                }
+                // should be enough distant (>= threshold)
+                const auto dist = mjolnir::math::length(sys.adjust_direction(
+                            sys.position(j) - sys.position(i)));
+                BOOST_TEST(dist >= threshold);
+            }
+            else
+            {
+                // should be enough close (< threshold)
+                const auto dist = mjolnir::math::length(sys.adjust_direction(
+                            sys.position(j) - sys.position(i)));
+                BOOST_TEST(dist < threshold);
             }
         }
     }
 
+    // check parameter_type.
+    for(std::size_t i=0; i<N; ++i)
     {
-        dummy_potential_2<real_type> pot(cutoff, N);
-        using parameter_type  = typename dummy_potential_2<real_type>::parameter_type;
-
-        mjolnir::System<traits_type> sys(N, boundary_type(coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
-
-        std::mt19937 mt(123456789);
-        for(std::size_t i=0; i < N; ++i)
+        for(const auto& p_j : vlist.partners(i))
         {
-            sys.at(i).mass     = 1.0;
-            sys.at(i).position = distribute_particle(mt, L);
-        }
-        sys.topology().construct_molecules();
-
-        mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
-
-        using neighbor_type = typename decltype(vlist)::neighbor_type;
-
-        BOOST_TEST(!vlist.valid());
-
-        vlist.initialize(sys, pot);
-        vlist.make(sys, pot);
-        BOOST_TEST(vlist.valid());
-
-        for(std::size_t i=0; i<N; ++i)
-        {
-            for(std::size_t j=i+1; j<N; ++j)
-            {
-                const auto partners = vlist.partners(i);
-                if(std::find_if(partners.begin(), partners.end(),
-                    [=](const neighbor_type& elem) -> bool {return elem.index == j;}
-                            ) == partners.end())
-                {
-                    // should be enough distant (>= threshold)
-                    const auto dist = mjolnir::math::length(sys.adjust_direction(
-                                sys.position(j) - sys.position(i)));
-                    BOOST_TEST(dist >= threshold);
-                }
-                else
-                {
-                    // should be enough close (< threshold)
-                    const auto dist = mjolnir::math::length(sys.adjust_direction(
-                                sys.position(j) - sys.position(i)));
-                    BOOST_TEST(dist < threshold);
-                }
-            }
-        }
-
-        // check parameter_type.
-        for(std::size_t i=0; i<N; ++i)
-        {
-            for(const auto& p_j : vlist.partners(i))
-            {
-                const std::size_t j = p_j.index;
-                BOOST_TEST(p_j.parameter().first  == pot.prepare_params(i, j).first);
-                BOOST_TEST(p_j.parameter().second == pot.prepare_params(i, j).second);
-            }
+            const std::size_t j = p_j.index;
+            BOOST_TEST(p_j.parameter().first  == pot.prepare_params(i, j).first);
+            BOOST_TEST(p_j.parameter().second == pot.prepare_params(i, j).second);
         }
     }
-
 }
