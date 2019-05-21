@@ -68,7 +68,7 @@ class GlobalPairInteraction<
     void calc_force (system_type& sys) const noexcept override
     {
 #pragma omp for nowait
-        for(std::size_t i=0; i<sys.size(); ++i)
+        for(const auto i : this->potential_.participants())
         {
             for(const auto& ptnr : this->partition_.partners(i))
             {
@@ -98,7 +98,7 @@ class GlobalPairInteraction<
     {
         real_type E = 0.0;
 #pragma omp parallel for reduction(+:E)
-        for(std::size_t i=0; i<sys.size(); ++i)
+        for(const auto i : this->potential_.participants())
         {
             for(const auto& ptnr : this->partition_.partners(i))
             {

@@ -75,7 +75,7 @@ class GlobalPairInteraction<
         const     auto epsilon         = this->potential_.epsilon();
 
 #pragma omp for nowait
-        for(std::size_t i=0; i<sys.size(); ++i)
+        for(const auto i : this->potential_.participants())
         {
             for(const auto& ptnr : this->partition_.partners(i))
             {
@@ -115,7 +115,7 @@ class GlobalPairInteraction<
         const     auto epsilon         = this->potential_.epsilon();
 
 #pragma omp parallel for reduction(+:E)
-        for(std::size_t i=0; i<sys.size(); ++i)
+        for(const auto i : this->potential_.participants())
         {
             for(const auto& ptnr : this->partition_.partners(i))
             {
