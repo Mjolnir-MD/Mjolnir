@@ -71,8 +71,9 @@ class GlobalPairInteraction<
         constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
 
 #pragma omp for nowait
-        for(const auto i : this->potential_.participants())
+        for(std::size_t idx=0; idx < this->potential_.participants().size(); ++idx)
         {
+            const auto i = this->potential_.participants()[idx];
             for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto  j     = ptnr.index;
@@ -110,8 +111,9 @@ class GlobalPairInteraction<
         constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
         constexpr auto  coef_at_cutoff  = potential_type::coef_at_cutoff;
 #pragma omp parallel for reduction(+:E)
-        for(const auto i : this->potential_.participants())
+        for(std::size_t idx=0; idx < this->potential_.participants().size(); ++idx)
         {
+            const auto i = this->potential_.participants()[idx];
             for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto  j     = ptnr.index;
