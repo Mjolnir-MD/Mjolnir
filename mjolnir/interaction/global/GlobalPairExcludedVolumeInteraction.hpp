@@ -75,7 +75,7 @@ class GlobalPairInteraction<
         constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
         constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
         const     auto  epsilon12       = 12 * potential_.epsilon();
-        for(std::size_t i=0; i<sys.size(); ++i)
+        for(const auto i : this->potential_.participants())
         {
             for(const auto& ptnr : this->partition_.partners(i))
             {
@@ -116,7 +116,7 @@ class GlobalPairInteraction<
         constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
         constexpr auto  coef_at_cutoff  = potential_type::coef_at_cutoff;
         const     auto  epsilon         = potential_.epsilon();
-        for(std::size_t i=0; i<sys.size(); ++i)
+        for(const auto i : this->potential_.participants())
         {
             for(const auto& ptnr : this->partition_.partners(i))
             {

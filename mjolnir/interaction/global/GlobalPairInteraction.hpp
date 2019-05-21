@@ -77,7 +77,7 @@ template<typename traitsT, typename potT, typename spaceT>
 void GlobalPairInteraction<traitsT, potT, spaceT>::calc_force(
         system_type& sys) const noexcept
 {
-    for(std::size_t i=0; i<sys.size(); ++i)
+    for(const auto i : this->potential_.participants())
     {
         for(const auto& ptnr : this->partition_.partners(i))
         {
@@ -108,7 +108,7 @@ GlobalPairInteraction<traitsT, potT, spaceT>::calc_energy(
         const system_type& sys) const noexcept
 {
     real_type e = 0.0;
-    for(std::size_t i=0; i<sys.size(); ++i)
+    for(const auto i : this->potential_.participants())
     {
         for(const auto& ptnr : this->partition_.partners(i))
         {
