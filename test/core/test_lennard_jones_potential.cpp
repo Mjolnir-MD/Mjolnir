@@ -10,15 +10,19 @@
 
 BOOST_AUTO_TEST_CASE(LennardJones_double)
 {
-    using real_type = double;
+    using real_type        = double;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
+    using potential_type   = mjolnir::LennardJonesPotential<real_type>;
+    using parameter_type   = potential_type::parameter_type;
+
     constexpr static std::size_t N = 10000;
     constexpr static real_type   h = 1e-6;
 
     const real_type sigma   = 3.0;
     const real_type epsilon = 1.0;
+    const parameter_type param{sigma, epsilon};
     mjolnir::LennardJonesPotential<real_type> lj{
-        {{sigma, epsilon}, {sigma, epsilon}}, {},
+        {{0, param}, {1, param}}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
     };
 
@@ -43,14 +47,17 @@ BOOST_AUTO_TEST_CASE(LennardJones_float)
 {
     using real_type = float;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
+    using potential_type   = mjolnir::LennardJonesPotential<real_type>;
+    using parameter_type   = potential_type::parameter_type;
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 0.002f;
     constexpr real_type tol = 0.005f;
 
     const real_type sigma   = 3.0f;
     const real_type epsilon = 1.0f;
+    const parameter_type param{sigma, epsilon};
     mjolnir::LennardJonesPotential<real_type> lj{
-        {{sigma, epsilon}, {sigma, epsilon}}, {},
+        {{0, param}, {1, param}}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
     };
     constexpr real_type cutoff = mjolnir::LennardJonesPotential<

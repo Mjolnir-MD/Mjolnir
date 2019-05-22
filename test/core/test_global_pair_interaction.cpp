@@ -26,14 +26,15 @@ BOOST_AUTO_TEST_CASE(GlobalPairInteraction_double)
     using boundary_type    = traits::boundary_type;
     using system_type      = mjolnir::System<traits>;
     using potential_type   = mjolnir::LennardJonesPotential<real_type>;
-    using partition_type   = mjolnir::NaivePairCalculation<traits, typename potential_type::parameter_type>;
+    using parameter_type   = typename potential_type::parameter_type;
+    using partition_type   = mjolnir::NaivePairCalculation<traits, parameter_type>;
     using interaction_type = mjolnir::GlobalPairInteraction<traits, potential_type, partition_type>;
 
     auto normalize = [](const coordinate_type& v){return v / mjolnir::math::length(v);};
 
-    potential_type   potential(std::vector<std::pair<real_type, real_type>>{
-            {/* sigma = */ 1.0, /* epsilon = */1.2},
-            {/* sigma = */ 1.0, /* epsilon = */1.2}
+    potential_type   potential(std::vector<std::pair<std::size_t, parameter_type>>{
+            {0, {/* sigma = */ 1.0, /* epsilon = */1.2}},
+            {1, {/* sigma = */ 1.0, /* epsilon = */1.2}}
         }, {}, typename potential_type::ignore_molecule_type("Nothing"));
 
     interaction_type interaction(potential_type{potential}, partition_type{});

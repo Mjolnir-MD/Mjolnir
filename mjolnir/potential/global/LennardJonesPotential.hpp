@@ -126,12 +126,7 @@ class LennardJonesPotential
     }
 
     template<typename traitsT>
-    void initialize(const System<traitsT>& sys) noexcept
-    {
-        this->participants_.resize(sys.size());
-        std::iota(this->participants_.begin(), this->participants_.end(), 0u);
-        return;
-    }
+    void initialize(const System<traitsT>&) noexcept {return;}
 
     // nothing to do when system parameters change.
     template<typename traitsT>
