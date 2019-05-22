@@ -18,7 +18,8 @@ BOOST_AUTO_TEST_CASE(EXV_double)
     const real_type sigma   = 3.0;
     const real_type epsilon = 1.0;
     mjolnir::ExcludedVolumePotential<real_type> exv{
-        epsilon, {sigma, sigma}, {}, mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
+        epsilon, {{0, sigma}, {1, sigma}}, {},
+        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
     };
 
     const real_type x_min = 0.8 * sigma;
@@ -50,7 +51,8 @@ BOOST_AUTO_TEST_CASE(EXV_float)
     const real_type epsilon = 1.0;
 
     mjolnir::ExcludedVolumePotential<real_type> exv{
-        epsilon, {sigma, sigma}, {}, mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
+        epsilon, {{0, sigma}, {1, sigma}}, {},
+        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
     };
     constexpr real_type cutoff =
         mjolnir::ExcludedVolumePotential<real_type>::cutoff_ratio;

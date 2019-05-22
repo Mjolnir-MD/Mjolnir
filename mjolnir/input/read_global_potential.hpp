@@ -79,20 +79,21 @@ read_excluded_volume_potential(const toml::value& global)
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
-    std::vector<real_type> params;
+    using parameter_type = typename ExcludedVolumePotential<realT>::parameter_type;
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
         const auto idx = toml::find<std::size_t>(param, "index");
-        if(params.size() <= idx) {params.resize(idx+1, 0.);}
         const auto radius = toml::find<real_type>(param, "radius");
-        params.at(idx) = radius;
 
+        params.emplace_back(idx, radius);
         MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
     }
 
     return ExcludedVolumePotential<realT>(
-        eps, std::move(params), ignore_particle_within,
+        eps, params, ignore_particle_within,
         read_ignored_molecule(toml::find<toml::value>(ignore, "molecule")));
 }
 
@@ -117,22 +118,19 @@ read_lennard_jones_potential(const toml::value& global)
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
-    std::vector<std::pair<real_type, real_type>> params;
+    using parameter_type = typename LennardJonesPotential<realT>::parameter_type;
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx = toml::find<std::size_t>(param, "index");
-        if(params.size() <= idx)
-        {
-            const std::pair<real_type, real_type> dummy{0., 0.};
-            params.resize(idx+1, dummy);
-        }
+        const auto idx     = toml::find<std::size_t>(param, "index");
         const auto sigma   = toml::expect<real_type>(param, u8"σ").or_other(
                              toml::expect<real_type>(param, "sigma")).unwrap();
         const auto epsilon = toml::expect<real_type>(param, u8"ε").or_other(
                              toml::expect<real_type>(param, "epsilon")).unwrap();
-        params.at(idx) = std::make_pair(sigma, epsilon);
 
+        params.emplace_back(idx, parameter_type{sigma, epsilon});
         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma, ", epsilon = ", epsilon);
     }
 
@@ -167,8 +165,18 @@ read_uniform_lennard_jones_potential(const toml::value& global)
     MJOLNIR_LOG_INFO("sigma   = ", sigma);
     MJOLNIR_LOG_INFO("epsilon = ", epsilon);
 
+    using parameter_type = typename UniformLennardJonesPotential<realT>::parameter_type;
+    std::vector<std::pair<std::size_t, parameter_type>> params;
+    if(global.as_table().count("parameters") == 1)
+    {
+        for(const auto& param : toml::find<toml::array>(global, "parameters"))
+        {
+            const auto idx = toml::find<std::size_t>(param, "index");
+            params.emplace_back(idx, parameter_type{});
+        }
+    }
     return UniformLennardJonesPotential<realT>(
-        sigma, epsilon, ignore_particle_within,
+        sigma, epsilon, params, ignore_particle_within,
         read_ignored_molecule(toml::find<toml::value>(ignore, "molecule")));
 }
 
@@ -193,17 +201,16 @@ read_debye_huckel_potential(const toml::value& global)
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
-    std::vector<real_type> params;
+    using parameter_type = typename DebyeHuckelPotential<realT>::parameter_type;
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
         const auto idx    = toml::find<std::size_t>(param, "index");
         const auto charge = toml::find<real_type  >(param, "charge");
-        if(params.size() <= idx)
-        {
-            params.resize(idx+1, 0.);
-        }
-        params.at(idx) = charge;
+
+        params.emplace_back(idx, parameter_type{charge});
         MJOLNIR_LOG_INFO("idx = ", idx, ", charge = ", charge);
     }
     return DebyeHuckelPotential<realT>(

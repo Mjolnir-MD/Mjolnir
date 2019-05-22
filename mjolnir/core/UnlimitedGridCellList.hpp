@@ -152,12 +152,18 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
 
-    neighbors_.clear();
-    index_by_cell_.resize(sys.size());
+    // `participants` is a list that contains indices of particles that are
+    // related to the potential.
+    const auto& participants = pot.participants();
 
-    for(std::size_t i=0; i<sys.size(); ++i)
+    neighbors_.clear();
+    index_by_cell_.resize(participants.size());
+
+    for(std::size_t i=0; i<participants.size(); ++i)
     {
-        index_by_cell_[i] = std::make_pair(i, calc_index(sys.position(i)));
+        const auto idx = participants[i];
+        index_by_cell_[i] =
+            std::make_pair(idx, this->calc_index(sys.position(idx)));
     }
     std::sort(this->index_by_cell_.begin(), this->index_by_cell_.end(),
         [](const particle_cell_idx_pair& lhs, const particle_cell_idx_pair& rhs)
@@ -169,6 +175,7 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
         {
             if(iter == index_by_cell_.cend() || i != iter->second)
             {
+                MJOLNIR_LOG_DEBUG("cell ", i, " does not have a particle inside");
                 cell_list_[i].first = make_range(iter, iter);
                 continue;
             }
@@ -177,6 +184,8 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
             {
                 ++iter;
             }
+            MJOLNIR_LOG_DEBUG("cell ", i, " has ", std::distance(first, iter),
+                              " particle inside");
             cell_list_[i].first = make_range(first, iter);
         }
     }
@@ -185,19 +194,23 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
 
     const real_type r_c  = cutoff_ * (1 + margin_);
     const real_type r_c2 = r_c * r_c;
-    for(std::size_t i=0; i<sys.size(); ++i)
+
+    std::vector<neighbor_type> partner;
+    for(std::size_t idx=0; idx<participants.size(); ++idx)
     {
-        MJOLNIR_LOG_SCOPE_DEBUG(for(std::size_t i=0; i<sys.size(); ++i));
-        const auto& ri   = sys.position(i);
+        partner.clear();
+        const auto   i = participants[idx];
+        const auto& ri = sys.position(i);
+
         const auto& cell = cell_list_[this->calc_index(ri)];
 
         MJOLNIR_LOG_DEBUG("particle position ", sys.position(i));
         MJOLNIR_LOG_DEBUG("cell index ",        calc_index(ri));
         MJOLNIR_LOG_DEBUG("making verlet list for index ", i);
 
-        std::vector<neighbor_type> partner;
         for(std::size_t cidx : cell.second) // for all adjacent cells...
         {
+            MJOLNIR_LOG_DEBUG("neighbor cell index ", cidx);
             for(auto pici : cell_list_[cidx].first)
             {
                 const auto j = pici.first;
@@ -206,11 +219,14 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
                 {
                     continue;
                 }
+                // here we don't need to search `participants` because
+                // cell list contains only participants. non-related
+                // particles are already filtered.
 
                 const auto& rj = sys.position(j);
                 if(math::length_sq(sys.adjust_direction(rj - ri)) < r_c2)
                 {
-                    MJOLNIR_LOG_DEBUG("add index ", j, " to verlet list ", i);
+                    MJOLNIR_LOG_DEBUG("add index ", j, " to list ", i);
                     partner.emplace_back(j, pot.prepare_params(i, j));
                 }
             }
@@ -219,7 +235,6 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
         std::sort(partner.begin(), partner.end());
         this->neighbors_.add_list_for(i, partner.begin(), partner.end());
     }
-
     this->current_margin_ = cutoff_ * margin_;
     return ;
 }

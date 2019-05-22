@@ -6,7 +6,9 @@
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <vector>
+#include <numeric>
 #include <cmath>
+#include <cassert>
 
 namespace mjolnir
 {
@@ -35,15 +37,34 @@ class DebyeHuckelPotential
     // r_cutoff = cutoff_ratio * debye_length
     static constexpr real_type cutoff_ratio = 5.5;
 
+    static constexpr parameter_type default_parameter() noexcept
+    {
+        return real_type(0);
+    }
+
   public:
 
-    DebyeHuckelPotential(container_type charges,
+    DebyeHuckelPotential(
+        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol)
-        : temperature_(300.0), ion_conc_(0.1), charges_(std::move(charges)),
+        : temperature_(300.0), ion_conc_(0.1),
           ignore_molecule_(std::move(ignore_mol)),
           ignore_within_  (exclusions.begin(), exclusions.end())
     {
+        this->parameters_  .reserve(parameters.size());
+        this->participants_.reserve(parameters.size());
+        for(const auto& idxp : parameters)
+        {
+            const auto idx = idxp.first;
+            this->participants_.push_back(idx);
+            if(idx >= this->parameters_.size())
+            {
+                this->parameters_.resize(idx+1, default_parameter());
+            }
+            this->parameters_.at(idx) = idxp.second;
+        }
+
         // XXX should be updated before use because T and ion conc are default!
         this->calc_parameters();
     }
@@ -51,7 +72,7 @@ class DebyeHuckelPotential
 
     parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
-        return this->inv_4_pi_eps0_epsk_ * this->charges_[i] * this->charges_[j];
+        return this->inv_4_pi_eps0_epsk_ * this->parameters_[i] * this->parameters_[j];
     }
 
     real_type potential(const std::size_t i, const std::size_t j,
@@ -82,10 +103,33 @@ class DebyeHuckelPotential
         return debye_length_ * cutoff_ratio;
     }
 
+    template<typename traitsT>
+    void initialize(const System<traitsT>& sys) noexcept
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        if(!sys.has_attribute("temperature"))
+        {
+            MJOLNIR_LOG_ERROR("DebyeHuckel requires `temperature` attribute");
+        }
+        if(!sys.has_attribute("ionic_strength"))
+        {
+            MJOLNIR_LOG_ERROR("DebyeHuckel requires `ionic_strength` attribute");
+        }
+        this->temperature_ = sys.attribute("temperature");
+        this->ion_conc_    = sys.attribute("ionic_strength");
+        this->calc_parameters();
+        return;
+    }
+
     // for temperature/ionic concentration changes...
     template<typename traitsT>
     void update(const System<traitsT>& sys) noexcept
     {
+        assert(sys.has_attribute("temperature"));
+        assert(sys.has_attribute("ionic_strength"));
+
         this->temperature_ = sys.attribute("temperature");
         this->ion_conc_    = sys.attribute("ionic_strength");
         this->calc_parameters();
@@ -105,8 +149,10 @@ class DebyeHuckelPotential
     static const char* name() noexcept {return "DebyeHuckel";}
 
     // access to the parameters
-    std::vector<real_type>&       charges()       noexcept {return charges_;}
-    std::vector<real_type> const& charges() const noexcept {return charges_;}
+    std::vector<real_type>&       charges()       noexcept {return parameters_;}
+    std::vector<real_type> const& charges() const noexcept {return parameters_;}
+
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
 
     //XXX this one is calculated parameter, shouldn't be changed!
     real_type debye_length() const noexcept {return this->debye_length_;}
@@ -164,7 +210,9 @@ class DebyeHuckelPotential
     real_type inv_4_pi_eps0_epsk_;
     real_type debye_length_;
     real_type inv_debye_length_;
-    container_type charges_;
+
+    container_type parameters_;
+    std::vector<std::size_t> participants_;
 
     ignore_molecule_type ignore_molecule_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;

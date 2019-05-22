@@ -99,15 +99,23 @@ void VerletList<traitsT, parameterT>::make(
 
     this->neighbors_.clear();
 
+    // `participants` is a list that contains indices of particles that are
+    // related to the potential.
+    const auto& participants = pot.participants();
+
     const real_type rc = cutoff_ * (1. + margin_);
     const real_type rc2 = rc * rc;
-    for(std::size_t i=0; i<sys.size(); ++i)
+
+    std::vector<neighbor_type> partner;
+    for(std::size_t idx=0; idx<participants.size(); ++idx)
     {
+        partner.clear();
+        const auto   i = participants[idx];
         const auto& ri = sys.position(i);
 
-        std::vector<neighbor_type> partners;
-        for(std::size_t j=i+1; j<sys.size(); ++j)
+        for(std::size_t jdx=idx+1; jdx<participants.size(); ++jdx)
         {
+            const auto j = participants[jdx];
             if(this->exclusion_.is_excluded(i, j))
             {
                 continue;
@@ -116,10 +124,11 @@ void VerletList<traitsT, parameterT>::make(
             const auto& rj = sys.position(j);
             if(math::length_sq(sys.adjust_direction(rj - ri)) < rc2)
             {
-                partners.emplace_back(j, pot.prepare_params(i, j));
+                partner.emplace_back(j, pot.prepare_params(i, j));
             }
         }
-        this->neighbors_.add_list_for(i, partners.begin(), partners.end());
+        // because j is searched sequencially, sorting is not needed.
+        this->neighbors_.add_list_for(i, partner.begin(), partner.end());
     }
     this->current_margin_ = cutoff_ * margin_;
     return ;

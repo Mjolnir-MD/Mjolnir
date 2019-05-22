@@ -43,6 +43,7 @@ class GlobalPairInteraction<
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
+        this->potential_.initialize(sys);
         this->partition_.initialize(sys, this->potential_);
     }
 
@@ -75,7 +76,7 @@ class GlobalPairInteraction<
         const     auto r_cutoff_sq     = cutoff_ratio_sq * sigma_sq;
         const     auto epsilon         = this->potential_.epsilon();
 
-        for(std::size_t i=0; i<sys.size(); ++i)
+        for(const auto i : this->potential_.participants())
         {
             for(const auto& ptnr : this->partition_.partners(i))
             {
@@ -113,7 +114,7 @@ class GlobalPairInteraction<
         const     auto r_cutoff_sq     = cutoff_ratio_sq * sigma_sq;
         const     auto epsilon         = this->potential_.epsilon();
 
-        for(std::size_t i=0; i<sys.size(); ++i)
+        for(const auto i : this->potential_.participants())
         {
             for(const auto& ptnr : this->partition_.partners(i))
             {

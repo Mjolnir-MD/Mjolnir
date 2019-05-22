@@ -31,8 +31,11 @@ set(TEST_NAMES
     test_global_pair_interaction
     test_position_restraint_interaction
 
-    test_verlet_list
-    test_cell_list
+    test_neighbor_list
+    test_unlimited_verlet_list
+    test_periodic_verlet_list
+    test_unlimited_cell_list
+    test_periodic_cell_list
 
     test_read_harmonic_potential
     test_read_go_contact_potential

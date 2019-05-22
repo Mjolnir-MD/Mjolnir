@@ -126,6 +126,10 @@ class UnlimitedGridCellList<
     template<typename PotentialT>
     void make  (const system_type& sys, const PotentialT& pot)
     {
+        // `participants` is a list that contains indices of particles that are
+        // related to the potential.
+        const auto& participants = pot.participants();
+
         neighbors_.clear();
         if(index_by_cell_    .size() != sys.size() ||
            index_by_cell_buf_.size() != sys.size())
@@ -135,10 +139,11 @@ class UnlimitedGridCellList<
         }
 
 #pragma omp parallel for
-        for(std::size_t i=0; i<sys.size(); ++i)
+        for(std::size_t i=0; i<participants.size(); ++i)
         {
-            // pairof {particle-idx, cell-idx}
-            index_by_cell_[i] = std::make_pair(i, calc_index(sys.position(i)));
+            const auto idx = participants[i];
+            index_by_cell_[i] =
+                std::make_pair(idx, this->calc_index(sys.position(idx)));
         }
 
         omp::sort(this->index_by_cell_, this->index_by_cell_buf_,
@@ -179,32 +184,42 @@ class UnlimitedGridCellList<
 //XXX faster.
 
         std::vector<neighbor_type> partner;
-        for(std::size_t i=0; i<sys.size(); ++i)
+        for(std::size_t idx=0; idx<participants.size(); ++idx)
         {
+            partner.clear();
+            const auto  i    = participants[idx];
             const auto& ri   = sys.position(i);
             const auto& cell = cell_list_[this->calc_index(ri)];
 
-            partner.clear();
+            MJOLNIR_LOG_DEBUG("particle position ", sys.position(i));
+            MJOLNIR_LOG_DEBUG("cell index ",        calc_index(ri));
+            MJOLNIR_LOG_DEBUG("making verlet list for index ", i);
+
             for(std::size_t cidx : cell.second) // for all adjacent cells...
             {
+                MJOLNIR_LOG_DEBUG("neighbor cell index ", cidx);
                 for(auto pici : cell_list_[cidx].first)
                 {
                     const auto j = pici.first;
+                    MJOLNIR_LOG_DEBUG("looking particle ", j);
                     if(j <= i || this->exclusion_.is_excluded(i, j))
                     {
                         continue;
                     }
+                    // here we don't need to search `participants` because
+                    // cell list contains only participants. non-related
+                    // particles are already filtered.
 
                     const auto& rj = sys.position(j);
                     if(math::length_sq(sys.adjust_direction(rj - ri)) < r_c2)
                     {
+                        MJOLNIR_LOG_DEBUG("add index ", j, " to list ", i);
                         partner.emplace_back(j, pot.prepare_params(i, j));
                     }
                 }
             }
             // make the result consistent with NaivePairCalculation...
             std::sort(partner.begin(), partner.end());
-
             this->neighbors_.add_list_for(i, partner.begin(), partner.end());
         }
 

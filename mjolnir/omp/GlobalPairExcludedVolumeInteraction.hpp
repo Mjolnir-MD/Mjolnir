@@ -40,6 +40,7 @@ class GlobalPairInteraction<
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("With OpenMP: potential is ", this->name());
+        this->potential_.initialize(sys);
         this->partition_.initialize(sys, this->potential_);
     }
 
@@ -73,8 +74,9 @@ class GlobalPairInteraction<
         const     auto  epsilon12       = 12 * potential_.epsilon();
 
 #pragma omp for nowait
-        for(std::size_t i=0; i<sys.size(); ++i)
+        for(std::size_t idx=0; idx < this->potential_.participants().size(); ++idx)
         {
+            const auto i = this->potential_.participants()[idx];
             for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto  j     = ptnr.index;
@@ -117,8 +119,9 @@ class GlobalPairInteraction<
         const     auto  epsilon         = potential_.epsilon();
 
 #pragma omp parallel for reduction(+:E)
-        for(std::size_t i=0; i<sys.size(); ++i)
+        for(std::size_t idx=0; idx < this->potential_.participants().size(); ++idx)
         {
+            const auto i = this->potential_.participants()[idx];
             for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto  j     = ptnr.index;

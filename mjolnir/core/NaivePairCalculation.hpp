@@ -64,14 +64,20 @@ void NaivePairCalculation<traitsT, parameterT>::initialize(
 template<typename traitsT, typename parameterT>
 template<typename PotentialT>
 void NaivePairCalculation<traitsT, parameterT>::make(
-        const system_type& sys, const PotentialT& pot)
+        const system_type&, const PotentialT& pot)
 {
     this->neighbors_.clear();
-    for(std::size_t i=0; i < sys.size(); ++i)
+
+    const auto& participants = pot.participants();
+
+    std::vector<neighbor_type> partners;
+    for(std::size_t idx=0; idx<participants.size(); ++idx)
     {
-        std::vector<neighbor_type> partners;
-        for(std::size_t j=i+1; j < sys.size(); ++j)
+        partners.clear();
+        const auto   i = participants[idx];
+        for(std::size_t jdx=idx+1; jdx<participants.size(); ++jdx)
         {
+            const auto j = participants[jdx];
             if(this->exclusion_.is_excluded(i, j))
             {
                 continue;

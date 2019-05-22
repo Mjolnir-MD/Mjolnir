@@ -5,6 +5,7 @@
 #include <mjolnir/math/math.hpp>
 #include <vector>
 #include <algorithm>
+#include <numeric>
 #include <cmath>
 
 namespace mjolnir
@@ -34,23 +35,41 @@ class LennardJonesPotential
         compiletime::pow<real_type>(1 / cutoff_ratio, 12u) -
         compiletime::pow<real_type>(1 / cutoff_ratio,  6u);
 
+    static constexpr parameter_type default_parameter() noexcept
+    {
+        return parameter_type{real_type(0), real_type(0)};
+    }
+
   public:
 
-    LennardJonesPotential(std::vector<parameter_type> radii,
-        const std::map<connection_kind_type, std::size_t>& exclusions,
+    LennardJonesPotential(
+        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
+        const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_molecule)
-        : radii_(std::move(radii)),
-          ignore_molecule_(std::move(ignore_molecule)),
+        : ignore_molecule_(std::move(ignore_molecule)),
           ignore_within_  (exclusions.begin(), exclusions.end())
-    {}
+    {
+        this->parameters_  .reserve(parameters.size());
+        this->participants_.reserve(parameters.size());
+        for(const auto& idxp : parameters)
+        {
+            const auto idx = idxp.first;
+            this->participants_.push_back(idx);
+            if(idx >= this->parameters_.size())
+            {
+                this->parameters_.resize(idx+1, default_parameter());
+            }
+            this->parameters_.at(idx) = idxp.second;
+        }
+    }
     ~LennardJonesPotential() = default;
 
     parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
-        const auto sgm1 = radii_[i].first;
-        const auto eps1 = radii_[i].second;
-        const auto sgm2 = radii_[j].first;
-        const auto eps2 = radii_[j].second;
+        const auto sgm1 = parameters_[i].first;
+        const auto eps1 = parameters_[i].second;
+        const auto sgm2 = parameters_[j].first;
+        const auto eps2 = parameters_[j].second;
 
         return std::make_pair((sgm1 + sgm2) / 2,
                              ((eps1 == eps2) ? eps1 : std::sqrt(eps1 * eps2)));
@@ -99,12 +118,15 @@ class LennardJonesPotential
     real_type max_cutoff_length() const noexcept
     {
         const real_type max_sigma = std::max_element(
-            this->radii_.cbegin(), this->radii_.cend(),
+            this->parameters_.cbegin(), this->parameters_.cend(),
             [](const parameter_type& lhs, const parameter_type& rhs) noexcept {
                 return lhs.first < rhs.first;
             })->first;
         return max_sigma * cutoff_ratio;
     }
+
+    template<typename traitsT>
+    void initialize(const System<traitsT>&) noexcept {return;}
 
     // nothing to do when system parameters change.
     template<typename traitsT>
@@ -123,12 +145,15 @@ class LennardJonesPotential
     static const char* name() noexcept {return "LennardJones";}
 
     // access to the parameters...
-    std::vector<parameter_type>&       parameters()       noexcept {return radii_;}
-    std::vector<parameter_type> const& parameters() const noexcept {return radii_;}
+    std::vector<parameter_type>&       parameters()       noexcept {return parameters_;}
+    std::vector<parameter_type> const& parameters() const noexcept {return parameters_;}
+
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
 
   private:
 
-    container_type radii_;
+    container_type parameters_;
+    std::vector<std::size_t> participants_;
 
     ignore_molecule_type ignore_molecule_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;

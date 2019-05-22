@@ -49,8 +49,13 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_DebyeHuckel_calc_force)
         omp_set_num_threads(num_thread);
         BOOST_TEST_MESSAGE("maximum number of threads = " << omp_get_max_threads());
 
-        potential_type potential(
-            std::vector<parameter_type>(N_particle, parameter_type(1.0)), {},
+        std::vector<std::pair<std::size_t, parameter_type>> parameters(N_particle);
+        for(std::size_t i=0; i<N_particle; ++i)
+        {
+            parameters[i] = std::make_pair(i, parameter_type{1.0});
+        }
+
+        potential_type potential(parameters, {},
             typename potential_type::ignore_molecule_type("Nothing"));
 
         rng_type    rng(123456789);
