@@ -200,17 +200,16 @@ read_debye_huckel_potential(const toml::value& global)
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
-    std::vector<real_type> params;
+    using parameter_type = typename DebyeHuckelPotential<realT>::parameter_type;
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
         const auto idx    = toml::find<std::size_t>(param, "index");
         const auto charge = toml::find<real_type  >(param, "charge");
-        if(params.size() <= idx)
-        {
-            params.resize(idx+1, 0.);
-        }
-        params.at(idx) = charge;
+
+        params.emplace_back(idx, parameter_type{charge});
         MJOLNIR_LOG_INFO("idx = ", idx, ", charge = ", charge);
     }
     return DebyeHuckelPotential<realT>(
