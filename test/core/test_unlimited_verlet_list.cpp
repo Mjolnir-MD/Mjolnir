@@ -104,11 +104,11 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_all)
     vlist.make(sys, pot);
     BOOST_TEST(vlist.valid());
 
-    for(std::size_t i=0; i<N; ++i)
+    for(const auto i : participants)
     {
+        const auto partners = vlist.partners(i);
         for(std::size_t j=i+1; j<N; ++j)
         {
-            const auto partners = vlist.partners(i);
             if(std::find_if(partners.begin(), partners.end(),
                 [=](const neighbor_type& elem) -> bool {return elem.index == j;}
                         ) == partners.end())
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_all)
     }
 
     // check parameter_type.
-    for(std::size_t i=0; i<N; ++i)
+    for(const auto i : participants)
     {
         for(const auto& p_j : vlist.partners(i))
         {
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_partial)
     vlist.make(sys, pot);
     BOOST_TEST(vlist.valid());
 
-    for(std::size_t i=0; i<N; ++i)
+    for(const auto i : participants)
     {
         const auto partners = vlist.partners(i);
 
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_partial_2)
     vlist.make(sys, pot);
     BOOST_TEST(vlist.valid());
 
-    for(std::size_t i=0; i<N; ++i)
+    for(const auto i : participants)
     {
         const auto partners = vlist.partners(i);
 
