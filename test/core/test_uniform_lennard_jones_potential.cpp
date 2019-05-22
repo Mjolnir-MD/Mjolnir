@@ -8,7 +8,7 @@
 #include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
-BOOST_AUTO_TEST_CASE(LennardJones_double)
+BOOST_AUTO_TEST_CASE(UniformLennardJones_double)
 {
     using real_type = double;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE(LennardJones_double)
     constexpr real_type sigma   = 3.0;
     constexpr real_type epsilon = 1.0;
     mjolnir::UniformLennardJonesPotential<real_type> lj{
-        sigma, epsilon, {}, mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
+        sigma, epsilon, {}, {}, mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
     };
     constexpr real_type cutoff =
         mjolnir::UniformLennardJonesPotential<real_type>::cutoff_ratio;
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(LennardJones_double)
     }
 }
 
-BOOST_AUTO_TEST_CASE(LennardJones_float)
+BOOST_AUTO_TEST_CASE(UniformLennardJones_float)
 {
     using real_type = float;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(LennardJones_float)
     constexpr real_type sigma   = 3.0;
     constexpr real_type epsilon = 1.0;
     mjolnir::UniformLennardJonesPotential<real_type> lj{
-        sigma, epsilon, {}, mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
+        sigma, epsilon, {}, {}, mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
     };
     constexpr real_type cutoff =
         mjolnir::UniformLennardJonesPotential<real_type>::cutoff_ratio;
