@@ -117,22 +117,19 @@ read_lennard_jones_potential(const toml::value& global)
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
-    std::vector<std::pair<real_type, real_type>> params;
+    using parameter_type = typename LennardJonesPotential<realT>::parameter_type;
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx = toml::find<std::size_t>(param, "index");
-        if(params.size() <= idx)
-        {
-            const std::pair<real_type, real_type> dummy{0., 0.};
-            params.resize(idx+1, dummy);
-        }
+        const auto idx     = toml::find<std::size_t>(param, "index");
         const auto sigma   = toml::expect<real_type>(param, u8"σ").or_other(
                              toml::expect<real_type>(param, "sigma")).unwrap();
         const auto epsilon = toml::expect<real_type>(param, u8"ε").or_other(
                              toml::expect<real_type>(param, "epsilon")).unwrap();
-        params.at(idx) = std::make_pair(sigma, epsilon);
 
+        params.emplace_back(idx, parameter_type{sigma, epsilon});
         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma, ", epsilon = ", epsilon);
     }
 
