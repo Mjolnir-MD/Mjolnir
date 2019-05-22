@@ -193,65 +193,43 @@ void PeriodicGridCellList<traitsT, parameterT>::make(
     const real_type r_c  = cutoff_ * (1. + margin_);
     const real_type r_c2 = r_c * r_c;
 
-    // To construct NeighborList correctly, we need to add partners to *all*
-    // the particles regardless of whether the particle is a participant or not.
-    //
-    // So the following code first check whether an i-th particle is a
-    // participant to skip needless calculation. But searching indices takes a
-    // time.
-    //
-    // Current implementation code assumes that `participants` is sorted
-    // (it IS sorted in potential::initialize()). With this assumption, we can
-    // skip searching by...
-    // - check the index is the same as the first element of `participant`.
-    // - if they are the same, pop the first element and calc neighbors.
-    // - otherwise, skip neighbor calculation and continue the loop.
-    //
-    // To emulate pop_front, it uses `participant_index` to represent the
-    // current `first element`.
-
     std::vector<neighbor_type> partner;
-    std::size_t participant_index = 0;
-    for(std::size_t i=0; i<sys.size(); ++i)
+    for(std::size_t idx=0; idx<participants.size(); ++idx)
     {
         partner.clear();
-        if(participant_index < participants.size() &&
-           participants[participant_index] == i)
+        const auto   i = participants[idx];
+        const auto& ri = sys.position(i);
+
+        const auto& cell = cell_list_[calc_index(ri)];
+
+        MJOLNIR_LOG_DEBUG("particle position", sys.position(i));
+        MJOLNIR_LOG_DEBUG("making verlet list for index", i);
+        MJOLNIR_LOG_DEBUG("except list for ", i, "-th value");
+
+        for(std::size_t cidx : cell.second) // for all adjacent cells...
         {
-            ++participant_index;
-
-            const auto& ri = sys.position(i);
-            const auto& cell = cell_list_[calc_index(ri)];
-
-            MJOLNIR_LOG_DEBUG("particle position", sys.position(i));
-            MJOLNIR_LOG_DEBUG("making verlet list for index", i);
-            MJOLNIR_LOG_DEBUG("except list for ", i, "-th value");
-
-            for(std::size_t cidx : cell.second) // for all adjacent cells...
+            for(auto pici : cell_list_[cidx].first)
             {
-                for(auto pici : cell_list_[cidx].first)
+                const auto j = pici.first;
+                MJOLNIR_LOG_DEBUG("looking particle", j);
+                if(j <= i || this->exclusion_.is_excluded(i, j))
                 {
-                    const auto j = pici.first;
-                    MJOLNIR_LOG_DEBUG("looking particle", j);
-                    if(j <= i || this->exclusion_.is_excluded(i, j))
-                    {
-                        continue;
-                    }
-                    // here we don't need to search `participants` because
-                    // cell list contains only participants. non-related
-                    // particles are already filtered.
+                    continue;
+                }
+                // here we don't need to search `participants` because
+                // cell list contains only participants. non-related
+                // particles are already filtered.
 
-                    const auto& rj = sys.position(j);
-                    if(math::length_sq(sys.adjust_direction(rj - ri)) < r_c2)
-                    {
-                        MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
-                        partner.emplace_back(j, pot.prepare_params(i, j));
-                    }
+                const auto& rj = sys.position(j);
+                if(math::length_sq(sys.adjust_direction(rj - ri)) < r_c2)
+                {
+                    MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
+                    partner.emplace_back(j, pot.prepare_params(i, j));
                 }
             }
-            // make the result consistent with NaivePairCalculation...
-            std::sort(partner.begin(), partner.end());
         }
+        // make the result consistent with NaivePairCalculation...
+        std::sort(partner.begin(), partner.end());
         this->neighbors_.add_list_for(i, partner.begin(), partner.end());
     }
 
