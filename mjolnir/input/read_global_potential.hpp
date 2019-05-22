@@ -79,20 +79,21 @@ read_excluded_volume_potential(const toml::value& global)
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
-    std::vector<real_type> params;
+    using parameter_type = typename ExcludedVolumePotential<realT>::parameter_type;
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
         const auto idx = toml::find<std::size_t>(param, "index");
-        if(params.size() <= idx) {params.resize(idx+1, 0.);}
         const auto radius = toml::find<real_type>(param, "radius");
-        params.at(idx) = radius;
 
+        params.emplace_back(idx, radius);
         MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
     }
 
     return ExcludedVolumePotential<realT>(
-        eps, std::move(params), ignore_particle_within,
+        eps, params, ignore_particle_within,
         read_ignored_molecule(toml::find<toml::value>(ignore, "molecule")));
 }
 

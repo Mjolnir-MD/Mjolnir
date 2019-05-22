@@ -39,16 +39,34 @@ class ExcludedVolumePotential
     constexpr static real_type coef_at_cutoff =
         compiletime::pow(1.0 / cutoff_ratio, 12);
 
+    static constexpr parameter_type default_parameter() noexcept
+    {
+        return parameter_type{0.0};
+    }
+
   public:
 
-    ExcludedVolumePotential(const real_type eps, container_type params,
-        const std::map<connection_kind_type, std::size_t>& exclusions,
+    ExcludedVolumePotential(const real_type eps,
+        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
+        const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_molecule)
         : epsilon_(eps),
-          radii_(std::move(params)),
           ignore_molecule_(std::move(ignore_molecule)),
           ignore_within_  (exclusions.begin(), exclusions.end())
-    {}
+    {
+        this->parameters_  .reserve(parameters.size());
+        this->participants_.reserve(parameters.size());
+        for(const auto& idxp : parameters)
+        {
+            const auto idx = idxp.first;
+            this->participants_.push_back(idx);
+            if(idx >= this->parameters_.size())
+            {
+                this->parameters_.resize(idx+1, default_parameter());
+            }
+            this->parameters_.at(idx) = idxp.second;
+        }
+    }
     ~ExcludedVolumePotential() = default;
     ExcludedVolumePotential(const ExcludedVolumePotential&) = default;
     ExcludedVolumePotential(ExcludedVolumePotential&&)      = default;
@@ -57,7 +75,7 @@ class ExcludedVolumePotential
 
     parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
-        return this->radii_[i] + this->radii_[j];
+        return this->parameters_[i] + this->parameters_[j];
     }
 
     // forwarding functions for clarity...
@@ -95,12 +113,7 @@ class ExcludedVolumePotential
     }
 
     template<typename traitsT>
-    void initialize(const System<traitsT>& sys) noexcept
-    {
-        this->participants_.resize(sys.size());
-        std::iota(this->participants_.begin(), this->participants_.end(), 0u);
-        return;
-    }
+    void initialize(const System<traitsT>&) noexcept {return;}
 
     // nothing to be done if system parameter (e.g. temperature) changes
     template<typename traitsT>
@@ -109,7 +122,7 @@ class ExcludedVolumePotential
     real_type max_cutoff_length() const
     {
         const real_type max_sigma =
-            *(std::max_element(radii_.cbegin(), radii_.cend()));
+            *(std::max_element(parameters_.cbegin(), parameters_.cend()));
         return 2 * max_sigma * cutoff_ratio;
     }
 
@@ -128,15 +141,15 @@ class ExcludedVolumePotential
     // access to the parameters
     real_type& epsilon()       noexcept {return this->epsilon_;}
     real_type  epsilon() const noexcept {return this->epsilon_;}
-    std::vector<real_type>&       parameters()       noexcept {return this->radii_;}
-    std::vector<real_type> const& parameters() const noexcept {return this->radii_;}
+    std::vector<real_type>&       parameters()       noexcept {return this->parameters_;}
+    std::vector<real_type> const& parameters() const noexcept {return this->parameters_;}
 
     std::vector<std::size_t> const& participants() const noexcept {return participants_;}
 
   private:
 
     real_type epsilon_;
-    std::vector<real_type> radii_;
+    std::vector<parameter_type> parameters_;
     std::vector<std::size_t> participants_;
 
     ignore_molecule_type ignore_molecule_;
