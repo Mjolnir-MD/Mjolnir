@@ -164,8 +164,18 @@ read_uniform_lennard_jones_potential(const toml::value& global)
     MJOLNIR_LOG_INFO("sigma   = ", sigma);
     MJOLNIR_LOG_INFO("epsilon = ", epsilon);
 
+    using parameter_type = typename UniformLennardJonesPotential<realT>::parameter_type;
+    std::vector<std::pair<std::size_t, parameter_type>> params;
+    if(global.as_table().count("parameters") == 1)
+    {
+        for(const auto& param : toml::find<toml::array>(global, "parameters"))
+        {
+            const auto idx = toml::find<std::size_t>(param, "index");
+            params.emplace_back(idx, parameter_type{});
+        }
+    }
     return UniformLennardJonesPotential<realT>(
-        sigma, epsilon, ignore_particle_within,
+        sigma, epsilon, params, ignore_particle_within,
         read_ignored_molecule(toml::find<toml::value>(ignore, "molecule")));
 }
 

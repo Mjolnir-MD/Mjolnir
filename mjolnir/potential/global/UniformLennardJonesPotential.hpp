@@ -36,15 +36,27 @@ class UniformLennardJonesPotential
         compiletime::pow<real_type>(1 / cutoff_ratio, 12u) -
         compiletime::pow<real_type>(1 / cutoff_ratio,  6u);
 
+    static constexpr parameter_type default_parameter() noexcept
+    {
+        return parameter_type{};
+    }
+
   public:
 
     UniformLennardJonesPotential(const real_type sgm, const real_type eps,
-        const std::map<connection_kind_type, std::size_t>& exclusions,
+        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
+        const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_molecule)
         : sigma_(sgm), epsilon_(eps), r_cut_(sgm * cutoff_ratio),
           ignore_molecule_(std::move(ignore_molecule)),
           ignore_within_(exclusions.begin(), exclusions.end())
-    {}
+    {
+        this->participants_.reserve(parameters.size());
+        for(const auto& idxp : parameters)
+        {
+            this->participants_.push_back(idxp.first);
+        }
+    }
     ~UniformLennardJonesPotential() = default;
 
     parameter_type prepare_params(std::size_t, std::size_t) const noexcept
@@ -97,8 +109,12 @@ class UniformLennardJonesPotential
     template<typename traitsT>
     void initialize(const System<traitsT>& sys) noexcept
     {
-        this->participants_.resize(sys.size());
-        std::iota(this->participants_.begin(), this->participants_.end(), 0u);
+        // if no participants are given, consider all the particles are related.
+        if(this->participants_.empty())
+        {
+            this->participants_.resize(sys.size());
+            std::iota(this->participants_.begin(), this->participants_.end(), 0u);
+        }
         return;
     }
 
