@@ -64,7 +64,7 @@ void NaivePairCalculation<traitsT, parameterT>::initialize(
 template<typename traitsT, typename parameterT>
 template<typename PotentialT>
 void NaivePairCalculation<traitsT, parameterT>::make(
-        const system_type& sys, const PotentialT& pot)
+        const system_type&, const PotentialT& pot)
 {
     this->neighbors_.clear();
 
