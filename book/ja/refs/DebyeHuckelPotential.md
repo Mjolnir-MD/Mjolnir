@@ -24,6 +24,6 @@ parameters = [
 ここでの設定の他に、[`System`](System.md)の`attribute`として`temperature`と`ionic_strength`を指定する必要があります。
 
 - `index`: 整数型
-  - パラメータが何番目の粒子のものかを指定します。最初の粒子は0番めです。
+  - パラメータが何番目の粒子のものかを指定します。番号は0から始まります。
 - `charge`: 浮動小数点数型
   - 電荷です。
