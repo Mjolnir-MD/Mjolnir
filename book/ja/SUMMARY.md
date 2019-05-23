@@ -37,6 +37,7 @@
     - [GlobalForceField](refs/GlobalForceField.md)
       - [GlobalPairInteraction](refs/GlobalPairInteraction.md)
         - [LennardJones](refs/LennardJonesPotential.md)
+        - [UniformLennardJones](refs/UniformLennardJonesPotential.md)
         - [ExcludedVolume](refs/ExcludedVolumePotential.md)
         - [DebyeHuckel](refs/DebyeHuckelPotential.md)
     - [ExternalForceField](refs/ExternalForceField.md)
