@@ -21,7 +21,7 @@
 #include <mjolnir/omp/ContactInteraction.hpp>
 #include <mjolnir/omp/BondAngleInteraction.hpp>
 #include <mjolnir/omp/DihedralAngleInteraction.hpp>
-#include <mjolnir/omp/GlobalPairDebyeHuckelInteraction.hpp>
+#include <mjolnir/omp/GlobalPairInteraction.hpp>
 #include <mjolnir/omp/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/omp/GlobalPairLennardJonesInteraction.hpp>
 #include <mjolnir/omp/GlobalPairUniformLennardJonesInteraction.hpp>

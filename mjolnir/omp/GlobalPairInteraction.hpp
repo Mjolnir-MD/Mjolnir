@@ -1,24 +1,21 @@
-#ifndef MJOLNIR_OMP_GLOBAL_PAIR_LENNARD_JONES_INTEARACTION_HPP
-#define MJOLNIR_OMP_GLOBAL_PAIR_LENNARD_JONES_INTEARACTION_HPP
-#include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
+#ifndef MJOLNIR_OMP_GLOBAL_PAIR_INTEARACTION_HPP
+#define MJOLNIR_OMP_GLOBAL_PAIR_INTEARACTION_HPP
 #include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
-#include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
+#include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 
 namespace mjolnir
 {
 
 template<typename realT, template<typename, typename> class boundaryT,
-         typename partitionT>
+         typename potentialT, typename partitionT>
 class GlobalPairInteraction<
     OpenMPSimulatorTraits<realT, boundaryT>,
-    DebyeHuckelPotential<realT>,
-    partitionT
+    potentialT, partitionT
     > final : public GlobalInteractionBase<OpenMPSimulatorTraits<realT, boundaryT>>
 {
   public:
-
     using traits_type     = OpenMPSimulatorTraits<realT, boundaryT>;
-    using potential_type  = DebyeHuckelPotential<realT>;
+    using potential_type  = potentialT;
     using partition_type  = partitionT;
     using base_type       = GlobalInteractionBase<traits_type>;
     using real_type       = typename base_type::real_type;
@@ -94,7 +91,6 @@ class GlobalPairInteraction<
         }
         return ;
     }
-
     real_type calc_energy(const system_type& sys) const noexcept override
     {
         real_type E = 0.0;
