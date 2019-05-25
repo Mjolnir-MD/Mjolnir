@@ -185,7 +185,7 @@ operator-(const Matrix<T, R, C>& lhs, const Matrix<T, R, C>& rhs) noexcept
 
 template<typename T, typename U, std::size_t R, std::size_t C>
 inline Matrix<T, R, C>
-operator*(const Matrix<T, R, C>& lhs, const U& rhs) noexcept
+operator*(const Matrix<T, R, C>& lhs, const U rhs) noexcept
 {
     static_assert(std::is_convertible<U, T>::value, "");
     Matrix<T, R, C> retval;
@@ -194,7 +194,7 @@ operator*(const Matrix<T, R, C>& lhs, const U& rhs) noexcept
 }
 template<typename T, typename U, std::size_t R, std::size_t C>
 inline Matrix<T, R, C>
-operator*(const U& lhs, const Matrix<T, R, C>& rhs) noexcept
+operator*(const U lhs, const Matrix<T, R, C>& rhs) noexcept
 {
     static_assert(std::is_convertible<U, T>::value, "");
     Matrix<T, R, C> retval;
@@ -204,7 +204,7 @@ operator*(const U& lhs, const Matrix<T, R, C>& rhs) noexcept
 
 template<typename T, typename U, std::size_t R, std::size_t C>
 inline Matrix<T, R, C>
-operator/(const Matrix<T, R, C>& lhs, const U& rhs) noexcept
+operator/(const Matrix<T, R, C>& lhs, const U rhs) noexcept
 {
     static_assert(std::is_convertible<U, T>::value, "");
     Matrix<T, R, C> retval;
