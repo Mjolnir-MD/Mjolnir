@@ -49,6 +49,7 @@ struct range
     }
 
     std::size_t size() const noexcept {return sz_;}
+    bool empty() const noexcept {return sz_ == 0u;}
 
     iterator begin_;
     iterator end_;
