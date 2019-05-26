@@ -1,7 +1,7 @@
 # Mjolnir
 
 [![Build Status](https://travis-ci.org/Mjolnir-MD/Mjolnir.svg?branch=master)](https://travis-ci.org/Mjolnir-MD/Mjolnir)
-[![CircleCI Status](https://circleci.com/gh/Mjolnir-MD/Mjolnir/tree/master.svg?style=svg)](https://circleci.com/gh/Mjolnir-MD/Mjolnir/tree/master))
+[![CircleCI Status](https://circleci.com/gh/Mjolnir-MD/Mjolnir/tree/master.svg?style=svg)](https://circleci.com/gh/Mjolnir-MD/Mjolnir/tree/master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b55282103ca74dd5b9b0022a3af99f3b)](https://www.codacy.com/app/ToruNiina/Mjolnir?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Mjolnir-MD/Mjolnir&amp;utm_campaign=Badge_Grade)
 [![Latest Version](https://img.shields.io/github/release/Mjolnir-MD/Mjolnir.svg)](https://github.com/Mjolnir-MD/Mjolnir/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
