@@ -77,35 +77,22 @@ else()
         message(STATUS "boost 1.69.0 exists.")
         include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_69_0)
     else()
+        message(STATUS "Boost library not found. Donwloading...")
 
-        find_program(WGET wget)
-        if(NOT WGET)
-            message(FATAL_ERROR "wget is not installed. Can't download BOOST library.")
+        file(DOWNLOAD https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.bz2
+            ${PROJECT_SOURCE_DIR}/extlib/boost_1_69_0.tar.bz2
+            EXPECTED_HASH SHA256=8f32d4617390d1c2d16f26a27ab60d97807b35440d45891fa340fc2648b04406
+            STATUS MJOLNIR_DOWNLOAD_BOOST_STATUS)
+
+        # check status
+        list(GET MJOLNIR_DOWNLOAD_BOOST_STATUS 0 MJOLNIR_DOWNLOAD_BOOST_RESULT)
+        if(NOT ${MJOLNIR_DOWNLOAD_BOOST_RESULT} EQUAL 0)
+            list(GET MJOLNIR_DOWNLOAD_BOOST_STATUS 1 MJOLNIR_DOWNLOAD_BOOST_ERROR)
+            message(FATAL_ERROR "failed to download Boost library."
+                ${MJOLNIR_DOWNLOAD_BOOST_ERROR})
         endif()
 
-        message(STATUS "downloading Boost to ./extlib/ ...")
-        execute_process(COMMAND "${WGET}" https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.bz2
-            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
-            RESULT_VARIABLE DOWNLOAD_BOOST_RESULT OUTPUT_QUIET ERROR_QUIET)
-        if(NOT ${DOWNLOAD_BOOST_RESULT} EQUAL "0")
-            message(FATAL_ERROR "failed to download Boost. please confirm network connections.")
-        endif()
-
-        execute_process(COMMAND which sha256sum RESULT_VARIABLE SHA256SUM_EXISTS OUTPUT_QUIET ERROR_QUIET)
-        execute_process(COMMAND which shasum    RESULT_VARIABLE SHASUM_EXISTS    OUTPUT_QUIET ERROR_QUIET)
-        if(${SHA256SUM_EXISTS} EQUAL "0")
-            execute_process(COMMAND sha256sum --check boost_1_69_0_tar_bz2_sha256sum.dat
-                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
-                RESULT_VARIABLE   DOWNLOADED_SHA256SUM_RESULT)
-        elseif(${SHASUM_EXISTS} EQUAL "0")
-            execute_process(COMMAND shasum --algorithm 256 --check boost_1_69_0_tar_bz2_sha256sum.dat
-                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
-                RESULT_VARIABLE   DOWNLOADED_SHA256SUM_RESULT)
-        endif()
-
-        if(NOT ${DOWNLOADED_SHA256SUM_RESULT} EQUAL "0")
-            message(FATAL_ERROR "boost_1_69_0.tar.bz2 has invalid sha256sum!")
-        endif()
+        message(STATUS "downloading completed. Unpacking...")
 
         execute_process(COMMAND tar xf boost_1_69_0.tar.bz2
             WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
