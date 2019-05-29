@@ -115,7 +115,7 @@ BAOABLangevinIntegrator<traitsT>::step(
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         const auto R  = this->gen_R(); // random gaussian vector (0 mean, 1 var)
-        const auto rm = sys.rmass(i);  // reciprocal math
+        const auto rm = sys.rmass(i);  // reciprocal mass
         auto&      p  = sys.position(i);
         auto&      v  = sys.velocity(i);
         auto&      f  = sys.force(i);
