@@ -8,8 +8,9 @@
 namespace mjolnir
 {
 
-// BAOAB Langevin integrator developed by the following paper
+// BAOAB Langevin integrator developed by the following papers
 // - Leimkuhler B, Matthews C. Appl. Math. Res. Exp. (2013)
+// - Leimkuhler B, Matthews C. J. Chem. Phys. (2013)
 template<typename traitsT>
 class BAOABLangevinIntegrator
 {
