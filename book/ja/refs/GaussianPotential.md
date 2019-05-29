@@ -17,7 +17,6 @@ U(v) = k\exp\left(\frac{-(v - v_0)^2}{2\sigma^2}\right)
 # ...
 parameters = [
     {indices = [0, 1], v0 = 1.0, k = 100.0, sigma = 5.0},
-    {indices = [0, 1], v0 = 1.0, k = 100.0, "σ"   = 5.0},
     # 必要に応じて続きます...
 ]
 ```
@@ -30,7 +29,6 @@ parameters = [
   - ポテンシャルの強さを指定します。
 - `sigma`: 浮動小数点数型
   - ポテンシャルが効果を及ぼす幅を指定します。
-  - `sigma`も、`"σ"`(GREEK SMALL LETTER SIGMA)も用いることができます。
 - `v0`: 浮動小数点数型
   - 最安定点を指定します。
 - `indices`: 整数の配列型
