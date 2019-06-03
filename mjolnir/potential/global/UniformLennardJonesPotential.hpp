@@ -4,6 +4,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/empty.hpp>
+#include <mjolnir/util/logger.hpp>
 #include <vector>
 #include <algorithm>
 #include <numeric>
