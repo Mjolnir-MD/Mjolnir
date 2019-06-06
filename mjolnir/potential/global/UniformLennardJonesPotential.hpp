@@ -4,6 +4,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/empty.hpp>
+#include <mjolnir/util/logger.hpp>
 #include <vector>
 #include <algorithm>
 #include <numeric>
@@ -109,9 +110,17 @@ class UniformLennardJonesPotential
     template<typename traitsT>
     void initialize(const System<traitsT>& sys) noexcept
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
         // if no participants are given, consider all the particles are related.
         if(this->participants_.empty())
         {
+            MJOLNIR_LOG_WARN("UniformLennardJonesPotential does not have any participants.");
+            MJOLNIR_LOG_WARN("All the particles are considered to be participants.");
+            MJOLNIR_LOG_WARN("To disable this potential, "
+                             "simply remove the part from the input file.");
+
             this->participants_.resize(sys.size());
             std::iota(this->participants_.begin(), this->participants_.end(), 0u);
         }
