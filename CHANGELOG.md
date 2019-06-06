@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.2.1
+
+### Fixed
+
+- incorrect include file in a test code
+
 ## 1.2.0
 
 ### Added
