@@ -23,7 +23,7 @@ integrator.type = "UnderdampedLangevin"
 integrator.seed = 12345
 integrator.parameters = [
     {index = 0, gamma = 1.0},
-    {index = 1, "γ"   = 1.0},
+    {index = 1, gamma = 1.0},
     # ... 必要に応じて続きます
 ]
 ```
@@ -35,4 +35,4 @@ integrator.parameters = [
 - `seed`: 整数型
   - 乱数のシードを設定します。
 - `parameters`: テーブルの配列型
-  - 各粒子の摩擦係数$$\gamma_i$$を指定します。`gamma`と`"γ"`のどちらでも構いません。
+  - 各粒子の摩擦係数$$\gamma_i$$を指定します。
