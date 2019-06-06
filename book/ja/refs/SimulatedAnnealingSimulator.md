@@ -73,5 +73,7 @@ type = "UnderdampedLangevin"
 
 - `type`: 文字列型
   - 積分方法の種類を指定します。`MolecularDynamics`とは異なり、温度一定の手法しか使用できません。
+    - ["BAOABLangevin"](BAOABLangevinIntegrator.md)
+      - NVT一定のランジュバン方程式に基づくシミュレーションを行います。
     - ["UnderdampedLangevin"](UnderdampedLangevinIntegrator.md)
       - NVT一定のランジュバン方程式に基づくシミュレーションを行います。

@@ -51,6 +51,8 @@ integrator.type = "VelocityVerlet"
 
 - `type`: 文字列型
   - 積分方法の種類を指定します。現在、以下の積分方法が利用可能です。
+    - ["BAOABLangevin"](BAOABLangevinIntegrator.md)
+      - NVT一定のランジュバン方程式に基づくシミュレーションを行います。
     - ["UnderdampedLangevin"](UnderdampedLangevinIntegrator.md)
       - NVT一定のランジュバン方程式に基づくシミュレーションを行います。
     - ["VelocityVerlet"](VelocityVerletIntegrator.md)
