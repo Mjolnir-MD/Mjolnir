@@ -103,8 +103,11 @@ class ForceField
     }
 
     local_forcefield_type    const& local()    const noexcept {return local_;}
+    local_forcefield_type    &      local()          noexcept {return local_;}
     global_forcefield_type   const& global()   const noexcept {return global_;}
+    global_forcefield_type   &      global()         noexcept {return global_;}
     external_forcefield_type const& external() const noexcept {return external_;}
+    external_forcefield_type &      external()       noexcept {return external_;}
 
   private:
 
