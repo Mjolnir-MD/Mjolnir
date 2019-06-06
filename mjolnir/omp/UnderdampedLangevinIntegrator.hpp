@@ -70,6 +70,7 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         {
             auto&       p = sys.position(i); // position of i-th particle
             auto&       v = sys.velocity(i); // ditto
+            auto&       f = sys.force(i);    // ditto
             const auto& a = this->acceleration_[i];
             auto    gamma = this->gammas_[i];
 
@@ -84,6 +85,9 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             v *= one_minus_gamma_dt_over_2 * (one_minus_gamma_dt_over_2 *
                  one_minus_gamma_dt_over_2 + gamma_dt_over_2);
             v += (halfdt_ * one_minus_gamma_dt_over_2) * a;
+
+            // clear force
+            f = math::make_coordinate<coordinate_type>(0, 0, 0);
 
             largest_disp2 = std::max(largest_disp2, math::length_sq(displacement));
         }
