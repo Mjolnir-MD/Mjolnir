@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_INPUT_READ_OBSERVER_HPP
 #define MJOLNIR_INPUT_READ_OBSERVER_HPP
 #include <extlib/toml/toml.hpp>
+#include <mjolnir/input/read_files_table.hpp>
 #include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/EnergyObserver.hpp>
 #include <mjolnir/core/XYZObserver.hpp>
@@ -72,12 +73,8 @@ read_observer(const toml::table& root)
 
     const auto progress_bar_enabled = toml::expect<bool>(output, "progress_bar")
                                                         .unwrap_or(true);
-    std::string output_path("./");
-    if(output.as_table().count("path") == 1)
-    {
-        output_path = toml::find<std::string>(output, "path");
-        if(output_path.back() != '/') {output_path += '/';}
-    }
+
+    const auto output_path   = read_output_path(root);
     const auto output_prefix = toml::find<std::string>(output, "prefix");
     MJOLNIR_LOG_NOTICE("output file prefix is `", output_path, output_prefix, '`');
 
