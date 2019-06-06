@@ -31,5 +31,6 @@
 #include <mjolnir/omp/UnlimitedGridCellList.hpp>
 #include <mjolnir/omp/PeriodicGridCellList.hpp>
 #include <mjolnir/omp/UnderdampedLangevinIntegrator.hpp>
+#include <mjolnir/omp/BAOABLangevinIntegrator.hpp>
 
 #endif// MJOLNIR_OMP_OMP_HPP
