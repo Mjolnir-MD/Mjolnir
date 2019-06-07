@@ -17,6 +17,7 @@
 
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
+#include <mjolnir/omp/ForceField.hpp>
 #include <mjolnir/omp/BondLengthInteraction.hpp>
 #include <mjolnir/omp/ContactInteraction.hpp>
 #include <mjolnir/omp/BondAngleInteraction.hpp>

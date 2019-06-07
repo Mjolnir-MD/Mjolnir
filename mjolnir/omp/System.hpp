@@ -115,7 +115,10 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
 #pragma omp parallel for
         for(std::size_t i=0; i<this->size(); ++i)
         {
-            this->force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
+            // sumup all the thread-local forces into the main force.
+            // XXX: keep the values in the main force! Some pre-omp interactions
+            //      may write its force in it. Clearing main force is a task
+            //      for Integrators.
             for(std::size_t thread_id=0, max_threads=omp_get_max_threads();
                     thread_id < max_threads; ++thread_id)
             {
