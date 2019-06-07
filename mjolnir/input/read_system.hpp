@@ -74,14 +74,14 @@ System<traitsT> read_system_from_table(const toml::value& system)
     using real_type       = typename traitsT::real_type;
     using coordinate_type = typename traitsT::coordinate_type;
 
-    MJOLNIR_LOG_NOTICE("start to read system ...");
+    MJOLNIR_LOG_NOTICE("reading system ...");
 
     const auto& boundary  = toml::find<toml::value>(system, "boundary_shape");
     const auto& particles = toml::find<toml::array>(system, "particles");
 
     System<traitsT> sys(particles.size(), read_boundary<traitsT>(boundary));
 
-    MJOLNIR_LOG_NOTICE(particles.size(), " particles are found. reading...");
+    MJOLNIR_LOG_NOTICE(particles.size(), " particles are found.");
     for(std::size_t i=0; i<particles.size(); ++i)
     {
         using vec_type = std::array<real_type, 3>;

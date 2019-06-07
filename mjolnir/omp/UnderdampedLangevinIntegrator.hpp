@@ -46,16 +46,7 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
 
-#pragma omp parallel
-        {
-            // calc_force uses `nowait` to speedup. To do that, it needs to be
-            // inside a parallel region. So, only for this, we need to wrap
-            // `calc_force` with `parallel` region.
-            ff.calc_force(sys);
-        }
-
-        // merge thread-local forces into master
-        sys.merge_forces();
+        ff.calc_force(sys);
 
 #pragma omp parallel for
         for(std::size_t i=0; i<sys.size(); ++i)
@@ -69,6 +60,7 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         }
         return;
     }
+
     real_type step(const real_type time, system_type& sys, forcefield_type& ff)
     {
         real_type largest_disp2(0.0);
@@ -78,6 +70,7 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         {
             auto&       p = sys.position(i); // position of i-th particle
             auto&       v = sys.velocity(i); // ditto
+            auto&       f = sys.force(i);    // ditto
             const auto& a = this->acceleration_[i];
             auto    gamma = this->gammas_[i];
 
@@ -93,23 +86,16 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
                  one_minus_gamma_dt_over_2 + gamma_dt_over_2);
             v += (halfdt_ * one_minus_gamma_dt_over_2) * a;
 
+            // clear force
+            f = math::make_coordinate<coordinate_type>(0, 0, 0);
+
             largest_disp2 = std::max(largest_disp2, math::length_sq(displacement));
         }
 
         // This function parallelize itself inside. `parallel` block is not
         // needed here to parallelize it.
         ff.update_margin(2 * std::sqrt(largest_disp2), sys);
-
-#pragma omp parallel
-        {
-            // calc_force uses `nowait` to speedup. To do that, it needs to be
-            // inside a parallel region. So, only for this, we need to wrap
-            // `calc_force` with `parallel` region.
-            ff.calc_force(sys);
-        }
-
-        // merge thread-local forces into master
-        sys.merge_forces();
+        ff.calc_force(sys);
 
         // calc a(t+dt) and v(t+dt), generate noise
 #pragma omp parallel for
