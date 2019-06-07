@@ -51,23 +51,16 @@ class TestPotential
 };
 } // mjolnir
 
-int main()
+// this function tries to inject a TestPotential and return true if succeed.
+template<typename traitsT>
+bool inject_test_potential(std::unique_ptr<mjolnir::SimulatorBase>& sim_base)
 {
-    // -----------------------------------------------------------------------
-    // read base setup
-
-    std::unique_ptr<mjolnir::SimulatorBase> sim_base =
-        mjolnir::read_input_file("test_BAOABIntegrator.toml");
-
-    // -----------------------------------------------------------------------
-    // setup external forcefield for testing and inject it into the simulator
-
-    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::CuboidalPeriodicBoundary>;
+    using traits_type     = traitsT;
     using integrator_type = mjolnir::BAOABLangevinIntegrator<traits_type>;
     using simulator_type  = mjolnir::MolecularDynamicsSimulator<traits_type, integrator_type>;
 
     using shape_type       = mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveXDirection>;
-    using potential_type   = mjolnir::TestPotential<double>;
+    using potential_type   = mjolnir::TestPotential<typename traits_type::real_type>;
     using interaction_type = mjolnir::ExternalDistanceInteraction<traits_type, potential_type, shape_type>;
 
     std::vector<std::size_t> ps(100);
@@ -76,17 +69,46 @@ int main()
     simulator_type* sim = dynamic_cast<simulator_type*>(sim_base.get());
     if(!sim)
     {
-        throw std::runtime_error("[error] MolecularDynamicsSimulator not loaded");
+        return false;
     }
+
     sim->forcefields().external().emplace(mjolnir::make_unique<interaction_type>(
             shape_type(0.0, 1.0), potential_type(std::move(ps))));
+
+    return true;
+}
+
+int main()
+{
+    // -----------------------------------------------------------------------
+    // read base setup
+
+    auto sim_base = mjolnir::read_input_file("test_BAOABIntegrator.toml");
+
+    // -----------------------------------------------------------------------
+    // setup external forcefield for testing and inject it into the simulator
+
+    bool injected = false;
+
+    // check default (sequencial) implementation
+    injected = inject_test_potential<mjolnir::SimulatorTraits<
+        double, mjolnir::CuboidalPeriodicBoundary>>(sim_base);
+
+    if(!injected)
+    {
+        // check OpenMP implementation
+        injected = inject_test_potential<mjolnir::OpenMPSimulatorTraits<
+            double, mjolnir::CuboidalPeriodicBoundary>>(sim_base);
+    }
+
+    assert(injected);
 
     // -----------------------------------------------------------------------
     // run simulation
 
-    sim->initialize();
-    sim->run();
-    sim->finalize();
+    sim_base->initialize();
+    sim_base->run();
+    sim_base->finalize();
 
     return 0;
 }

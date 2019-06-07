@@ -11,6 +11,7 @@ output.format = "xyz"
 type          = "MolecularDynamics"
 boundary_type = "PeriodicCuboid"
 precision     = "double"
+parallelism   = "sequencial" # or "OpenMP"
 delta_t       = 0.01
 total_step    = 10_000_000
 save_step     =      1_000
