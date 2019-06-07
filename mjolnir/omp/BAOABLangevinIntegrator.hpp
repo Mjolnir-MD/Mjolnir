@@ -42,15 +42,7 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         {
             sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
-
-#pragma omp parallel
-        {
-            // calc_force uses `nowait` to speedup. To do that, it needs to be
-            // inside a parallel region. So, only for this, we need to wrap
-            // `calc_force` with `parallel` region.
-            ff.calc_force(sys);
-        }
-        sys.merge_forces();
+        ff.calc_force(sys);
         return;
     }
 
@@ -89,16 +81,8 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         // update neighbor list; reduce margin, reconstruct the list if needed
         ff.update_margin(2 * std::sqrt(largest_disp2), sys);
 
-        // ------------------------------------------------------------------
-        // calc_force uses `nowait` to speedup. To do that, it needs to be
-        // inside a parallel region. So, only for this, we need to wrap
-        // `calc_force` with `parallel` region.
-#pragma omp parallel
-        {
-            // calc f(p(n+1))
-            ff.calc_force(sys);
-        }
-        sys.merge_forces();
+        // calc f(p(n+1))
+        ff.calc_force(sys);
 
         // ------------------------------------------------------------------
         // calc v(n+2/3) -> v(n+1)
