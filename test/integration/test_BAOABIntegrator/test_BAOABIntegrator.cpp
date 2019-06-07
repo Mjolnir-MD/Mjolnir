@@ -94,12 +94,14 @@ int main()
     injected = inject_test_potential<mjolnir::SimulatorTraits<
         double, mjolnir::CuboidalPeriodicBoundary>>(sim_base);
 
+#ifdef MJOLNIR_WITH_OPENMP
     if(!injected)
     {
         // check OpenMP implementation
         injected = inject_test_potential<mjolnir::OpenMPSimulatorTraits<
             double, mjolnir::CuboidalPeriodicBoundary>>(sim_base);
     }
+#endif
 
     assert(injected);
 
