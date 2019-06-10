@@ -7,11 +7,11 @@ namespace mjolnir
 
 // it calculates bond angle and directions of forces.
 //
-//        o r0
-//       /
-//   r1 o) <- bond angle
-//       \
-//        o r2
+//        o r0            |
+//       /                |
+//   r1 o) <- bond angle  |
+//       \                |
+//        o r2            |
 //
 // Note for developers: At first, this function was splitted from BondAngle-
 // Interaction. Then it turned out calling this from BondAngleInteraction::
