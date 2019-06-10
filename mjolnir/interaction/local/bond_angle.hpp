@@ -34,8 +34,7 @@ std::pair<typename traitsT::real_type,
 calc_bond_angle_force(const System<traitsT>& sys,
         const typename traitsT::coordinate_type& r0,
         const typename traitsT::coordinate_type& r1,
-        const typename traitsT::coordinate_type& r2,
-        const typename traitsT::coordinate_type& r3) const noexcept
+        const typename traitsT::coordinate_type& r2) noexcept
 {
     using real_type = typename traitsT::real_type;
     using coordinate_type = typename traitsT::coordinate_type;
@@ -57,13 +56,13 @@ calc_bond_angle_force(const System<traitsT>& sys,
     const auto sin_theta = std::sin(theta);
     const auto inv_sin   = (sin_theta > tol) ? real_type(1.0) / sin_theta :
                                                real_type(1.0) / tol;
-    std::array<coordinate_type, 3> f;
+    std::array<coordinate_type, 3> F;
     // take care about the indices.
-    F[0] = (coef_inv_sin * inv_len_r_ij) * (cos_theta * r_ij_reg - r_kj_reg);
-    F[2] = (coef_inv_sin * inv_len_r_kj) * (cos_theta * r_kj_reg - r_ij_reg);
+    F[0] = (inv_sin * inv_len_r_ij) * (cos_theta * r_ij_reg - r_kj_reg);
+    F[2] = (inv_sin * inv_len_r_kj) * (cos_theta * r_kj_reg - r_ij_reg);
     F[1] = -1 * (F[0] + F[2]);
 
-    return std::make_pair(theta, f);
+    return std::make_pair(theta, F);
 }
 
 template<typename traitsT>
@@ -71,8 +70,7 @@ typename traitsT::real_type
 calc_bond_angle(const System<traitsT>& sys,
         const typename traitsT::coordinate_type& r0,
         const typename traitsT::coordinate_type& r1,
-        const typename traitsT::coordinate_type& r2,
-        const typename traitsT::coordinate_type& r3) const noexcept
+        const typename traitsT::coordinate_type& r2) noexcept
 {
     using real_type = typename traitsT::real_type;
 
