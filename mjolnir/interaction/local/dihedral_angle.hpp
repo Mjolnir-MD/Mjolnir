@@ -41,7 +41,7 @@ calc_dihedral_angle_force(const System<traitsT>& sys,
         const typename traitsT::coordinate_type& r0,
         const typename traitsT::coordinate_type& r1,
         const typename traitsT::coordinate_type& r2,
-        const typename traitsT::coordinate_type& r3) const noexcept
+        const typename traitsT::coordinate_type& r3) noexcept
 {
     using real_type = typename traitsT::real_type;
     const auto r_ij = sys.adjust_direction(r0 - r1);
@@ -89,7 +89,7 @@ calc_dihedral_angle(const System<traitsT>& sys,
         const typename traitsT::coordinate_type& r0,
         const typename traitsT::coordinate_type& r1,
         const typename traitsT::coordinate_type& r2,
-        const typename traitsT::coordinate_type& r3) const noexcept
+        const typename traitsT::coordinate_type& r3) noexcept
 {
     using real_type = typename traitsT::real_type;
     const auto r_ij = sys.adjust_direction(r0 - r1);
