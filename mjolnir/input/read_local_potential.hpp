@@ -220,38 +220,42 @@ read_local_potential(const toml::value& local)
 }
 
 template<std::size_t N, typename realT,
-         typename potentialT1, typename potentialT2>
+         template <typename Real> class potential1T,
+         template <typename Real> class potential2T
+         >
 std::vector<std::pair<std::array<std::size_t, N>,
-            SumLocalPotential<realT, potentialT1, potentialT2>>>
-read_local_potentials(const toml::value& local,
-                      const std::string& p1, const std::string& p2)
+                      SumLocalPotential<realT, potential1T, potential2T>>>
+read_local_potentials(const toml::value& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
     MJOLNIR_LOG_INFO("as ", N, "-body interaction");
 
-    using indices_t                = std::array<std::size_t, N>;
-    using indices_potential_pair_t = std::pair<indices_t,
-        SumLocalPotential<realT, potentialT1, potentialT2>>;
+    using indices_type   = std::array<std::size_t, N>;
+    using potential_type = SumLocalPotential<realT, potential1T, potential2T>;
+    using indices_potential_pair_type = std::pair<indices_type, potential_type>;
 
-    const auto& params = toml::find<toml::Array>(local, "parameters");
+    const auto& params = toml::find<toml::array>(local, "parameters");
     MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
 
-    std::vector<indices_potential_pair_t> retval;
+    std::vector<indices_potential_pair_type> retval;
     retval.reserve(params.size());
     for(const auto& item : params)
     {
-        const auto indices = toml::find<indices_t>(item, "indices");
+        using real_type        = realT;
+        using potential_1_type = potential1T<real_type>;
+        using potential_2_type = potential2T<real_type>;
+
+        const auto indices = toml::find<indices_type>(item, "indices");
         MJOLNIR_LOG_INFO("idxs = ", indices);
 
-        const auto& pot1 = toml::find<toml::value>(item, p1);
-        const auto& pot2 = toml::find<toml::value>(item, p2);
+        const auto& pot1 = toml::find(item, potential_1_type::name());
+        const auto& pot2 = toml::find(item, potential_2_type::name());
 
-        retval.emplace_back(indices,
-            SumLocalPotential<realT, potentialT1, potentialT2>(
-                detail::read_local_potential_impl<potentialT1>::invoke(pot1),
-                detail::read_local_potential_impl<potentialT2>::invoke(pot2)
-            ));
+        retval.emplace_back(indices, potential_type(
+            detail::read_local_potential_impl<potential_1_type>::invoke(pot1),
+            detail::read_local_potential_impl<potential_2_type>::invoke(pot2))
+        );
     }
     return retval;
 }
