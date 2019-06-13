@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_INPUT_READ_FILES_TABLE_HPP
-#define MJOLNIR_INPUT_READ_FILES_TABLE_HPP
+#ifndef MJOLNIR_INPUT_READ_PATH_HPP
+#define MJOLNIR_INPUT_READ_PATH_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/util/logger.hpp>
 
@@ -49,4 +49,4 @@ inline std::string read_output_path(const toml::table& root)
 }
 
 } // mjolnir
-#endif// MJOLNIR_READ_FILES_TABLE_H
+#endif// MJOLNIR_READ_PATH_HPP
