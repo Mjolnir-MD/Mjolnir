@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_INPUT_READ_OBSERVER_HPP
 #define MJOLNIR_INPUT_READ_OBSERVER_HPP
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/input/read_files_table.hpp>
+#include <mjolnir/input/read_path.hpp>
 #include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/EnergyObserver.hpp>
 #include <mjolnir/core/XYZObserver.hpp>

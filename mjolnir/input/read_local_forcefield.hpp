@@ -4,7 +4,7 @@
 #include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_local_interaction.hpp>
-#include <mjolnir/input/read_files_table.hpp>
+#include <mjolnir/input/read_path.hpp>
 
 namespace mjolnir
 {

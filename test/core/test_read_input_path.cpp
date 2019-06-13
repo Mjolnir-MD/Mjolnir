@@ -5,7 +5,7 @@
 #else
 #include <boost/test/included/unit_test.hpp>
 #endif
-#include <mjolnir/input/read_files_table.hpp>
+#include <mjolnir/input/read_path.hpp>
 
 BOOST_AUTO_TEST_CASE(read_input_path)
 {
@@ -47,3 +47,4 @@ BOOST_AUTO_TEST_CASE(read_input_path)
         BOOST_TEST(input_path == "./");
     }
 }
+

@@ -7,7 +7,7 @@
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_units.hpp>
-#include <mjolnir/input/read_files_table.hpp>
+#include <mjolnir/input/read_path.hpp>
 
 #ifdef MJOLNIR_WITH_OPENMP
 #include <mjolnir/omp/omp.hpp>

@@ -6,7 +6,7 @@
 #include <mjolnir/input/read_local_forcefield.hpp>
 #include <mjolnir/input/read_global_forcefield.hpp>
 #include <mjolnir/input/read_external_forcefield.hpp>
-#include <mjolnir/input/read_files_table.hpp>
+#include <mjolnir/input/read_path.hpp>
 
 namespace mjolnir
 {
