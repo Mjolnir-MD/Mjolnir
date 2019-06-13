@@ -70,7 +70,7 @@ set(TEST_NAMES
     test_read_simulator
     test_read_system
     test_read_unit
-    test_read_input_path
+    test_read_path
     )
 
 add_definitions("-O2")
