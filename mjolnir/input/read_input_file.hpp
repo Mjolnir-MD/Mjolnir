@@ -7,7 +7,7 @@
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_units.hpp>
-#include <mjolnir/input/read_files_table.hpp>
+#include <mjolnir/input/read_path.hpp>
 
 #ifdef MJOLNIR_WITH_OPENMP
 #include <mjolnir/omp/omp.hpp>
@@ -127,9 +127,8 @@ read_input_file(const std::string& filename)
     std::cerr << " successfully parsed." << std::endl;
 
     // initializing logger by using output_path and output_prefix ...
-    const auto& files    = toml::find<toml::value>(root,   "files");
-    const auto& output   = toml::find<toml::value>(files,  "output");
-    const auto  out_path = toml::find<std::string>(output, "path");
+    const auto& output   = toml::find(toml::find(root, "files"), "output");
+    const auto  out_path = read_output_path(root);
 
     // XXX:  Here, this code assumes POSIX. it does not support windows.
     // TODO: Consider using Boost.filesystem to manage path and files
