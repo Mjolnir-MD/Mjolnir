@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.2.2
+
+### Fixed
+
+- VelocityVerletIntegrator for OpenMP implementation (PR #115)
+  - Do not use VelocityVerlet with OpenMP in v1.2.0 and v1.2.1
+- output path of log files when files.output.path does not have the last '/'
+
+### Misc
+
+- refactoring
+
 ## 1.2.1
 
 ### Fixed

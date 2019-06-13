@@ -169,8 +169,6 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_numerical_diff)
     harmonic_type potential{k, native};
     bond_angle_type interaction("none", {{ {{0,1,2}}, potential}});
 
-    const coord_type pos1;
-    const coord_type pos2;
     system_type sys(3, boundary_type{});
 
     sys.at(0).mass = 1.0;

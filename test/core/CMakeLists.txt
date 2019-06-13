@@ -26,7 +26,9 @@ set(TEST_NAMES
 
     test_bond_length_interaction
     test_bond_angle_interaction
+    test_bond_angle_utility_function
     test_dihedral_angle_interaction
+    test_dihedral_angle_utility_function
     test_contact_interaction
     test_global_pair_interaction
     test_position_restraint_interaction
@@ -73,7 +75,7 @@ set(TEST_NAMES
     test_read_integrator
     test_read_system
     test_read_unit
-    test_read_input_path
+    test_read_path
     )
 
 add_definitions("-O2")

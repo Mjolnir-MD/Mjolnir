@@ -11,7 +11,7 @@
 #include <mjolnir/input/read_forcefield.hpp>
 #include <mjolnir/input/read_integrator.hpp>
 #include <mjolnir/input/read_observer.hpp>
-#include <mjolnir/input/read_files_table.hpp>
+#include <mjolnir/input/read_path.hpp>
 
 namespace mjolnir
 {

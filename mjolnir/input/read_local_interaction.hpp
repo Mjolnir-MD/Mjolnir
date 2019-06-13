@@ -216,14 +216,12 @@ read_dihedral_angle_interaction(
     {
         MJOLNIR_LOG_NOTICE("-- potential function is "
                            "PeriodicGaussian + FlexibleLocalDihedral.");
-        using potential_1_T = PeriodicGaussianPotential<real_type>;
-        using potential_2_T = FlexibleLocalDihedralPotential<real_type>;
-        using potentialT    =
-            SumLocalPotential<real_type, potential_1_T, potential_2_T>;
+        using potentialT = SumLocalPotential<real_type,
+              PeriodicGaussianPotential, FlexibleLocalDihedralPotential>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(kind,
-            read_local_potentials<4, real_type, potential_1_T, potential_2_T>(
-                local, "PeriodicGaussian", "FlexibleLocalDihedral"));
+            read_local_potentials<4, real_type,
+                PeriodicGaussianPotential, FlexibleLocalDihedralPotential>(local));
     }
     else
     {
