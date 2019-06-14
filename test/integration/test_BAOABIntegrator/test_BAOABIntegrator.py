@@ -2,7 +2,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import math
-import os
 
 traj_hist, traj_bin_edges = np.histogram(\
         [float(line.split()[1]) for line in filter(lambda x: x[0] == 'X', \
