@@ -14,7 +14,7 @@ class TestPotential
 
   public:
 
-    TestPotential(std::vector<std::size_t>&& ps)
+    explicit TestPotential(std::vector<std::size_t>&& ps)
         : participants_(std::move(ps))
     {}
     ~TestPotential() = default;
@@ -88,10 +88,8 @@ int main()
     // -----------------------------------------------------------------------
     // setup external forcefield for testing and inject it into the simulator
 
-    bool injected = false;
-
     // check default (sequencial) implementation
-    injected = inject_test_potential<mjolnir::SimulatorTraits<
+    bool injected = inject_test_potential<mjolnir::SimulatorTraits<
         double, mjolnir::CuboidalPeriodicBoundary>>(sim_base);
 
 #ifdef MJOLNIR_WITH_OPENMP
@@ -103,7 +101,12 @@ int main()
     }
 #endif
 
-    assert(injected);
+    if(!injected)
+    {
+        std::cerr << "-- [error] the injection of TestPotential failed\n"
+                     "-- Please check the simulation setup." << std::endl;
+        return 1;
+    }
 
     // -----------------------------------------------------------------------
     // run simulation
