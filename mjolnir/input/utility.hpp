@@ -76,8 +76,8 @@ find_parameter(const toml::value& params, const toml::value& env,
 
     if(params.as_table().count(name2) == 1)
     {
-        MJOLNIR_LOG_WARN("[warning] deprecated name ", name2, " is used. Use ",
-                         name1, " instead.");
+        MJOLNIR_LOG_WARN("deprecated name \"", name2, "\" is used. Use \"",
+                         name1, "\" instead.");
     }
     if(p.is_string())
     {
