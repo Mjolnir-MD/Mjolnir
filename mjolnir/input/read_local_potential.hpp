@@ -1,6 +1,8 @@
 #ifndef MJOLNIR_INPUT_READ_LOCAL_POTENTIAL_HPP
 #define MJOLNIR_INPUT_READ_LOCAL_POTENTIAL_HPP
 #include <extlib/toml/toml.hpp>
+#include <mjolnir/input/utility.hpp>
+
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/potential/local/GoContactPotential.hpp>
 #include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
@@ -22,12 +24,13 @@ namespace mjolnir
 // {indices = [1, 2], k = 10.0, v0 = 1.0} <- a portion of this table, k and v0.
 // ]
 template<typename realT>
-HarmonicPotential<realT> read_harmonic_potential(const toml::value& param)
+HarmonicPotential<realT>
+read_harmonic_potential(const toml::value& param, const toml::value& env)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
-    const auto k  = toml::find<real_type>(param, "k" );
-    const auto v0 = toml::find<real_type>(param, "v0");
+    const auto k  = find_parameter<real_type>(param, env, "k" );
+    const auto v0 = find_parameter<real_type>(param, env, "v0");
 
     MJOLNIR_LOG_INFO("HarmonicPotential = {v0 = ", v0, ", k = ", k, '}');
     return HarmonicPotential<realT>(k, v0);
@@ -35,26 +38,27 @@ HarmonicPotential<realT> read_harmonic_potential(const toml::value& param)
 
 template<typename realT>
 GoContactPotential<realT>
-read_go_contact_potential(const toml::value& param)
+read_go_contact_potential(const toml::value& param, const toml::value& env)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
-    const auto k  = toml::find<real_type>(param, "k");
-    const auto v0 = toml::find<real_type>(param, "v0");
+    const auto k  = find_parameter<real_type>(param, env, "k");
+    const auto v0 = find_parameter<real_type>(param, env, "v0");
 
     MJOLNIR_LOG_INFO("GoContactPotential = {v0 = ", v0, ", k = ", k, '}');
     return GoContactPotential<realT>(k, v0);
 }
 
 template<typename realT>
-GaussianPotential<realT> read_gaussian_potential(const toml::value& param)
+GaussianPotential<realT>
+read_gaussian_potential(const toml::value& param, const toml::value& env)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
-    const auto v0    = toml::find<real_type>(param, "v0");
-    const auto k     = toml::find<real_type>(param, "k");
-    const auto sigma = toml::expect<real_type>(param, u8"σ").or_other(
-                       toml::expect<real_type>(param, "sigma")).unwrap();
+    const auto v0    = find_parameter<real_type>(param, env, "v0");
+    const auto k     = find_parameter<real_type>(param, env, "k");
+    const auto sigma = find_parameter<real_type>(param, env, "sigma", u8"σ");
+
     MJOLNIR_LOG_INFO("GaussianPotential = {v0 = ", v0, ", k = ", k,
                      ", sigma = ", sigma, '}');
     return GaussianPotential<realT>(k, sigma, v0);
@@ -62,14 +66,13 @@ GaussianPotential<realT> read_gaussian_potential(const toml::value& param)
 
 template<typename realT>
 PeriodicGaussianPotential<realT>
-read_periodic_gaussian_potential(const toml::value& param)
+read_periodic_gaussian_potential(const toml::value& param, const toml::value& env)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
-    const auto v0    = toml::find<real_type>(param, "v0");
-    const auto k     = toml::find<real_type>(param, "k");
-    const auto sigma = toml::expect<real_type>(param, u8"σ").or_other(
-                       toml::expect<real_type>(param, "sigma")).unwrap();
+    const auto v0    = find_parameter<real_type>(param, env, "v0");
+    const auto k     = find_parameter<real_type>(param, env, "k");
+    const auto sigma = find_parameter<real_type>(param, env, "sigma", u8"σ");
 
     MJOLNIR_LOG_INFO("PeriodicGaussianPotential = {v0 = ", v0, ", k = ", k,
                      ", sigma = ", sigma, '}');
@@ -78,13 +81,13 @@ read_periodic_gaussian_potential(const toml::value& param)
 
 template<typename realT>
 FlexibleLocalAnglePotential<realT>
-read_flexible_local_angle_potential(const toml::value& param)
+read_flexible_local_angle_potential(const toml::value& param, const toml::value& env)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
-    const auto k     = toml::find<real_type                >(param, "k");
-    const auto term1 = toml::find<std::array<real_type, 10>>(param, "y");
-    const auto term2 = toml::find<std::array<real_type, 10>>(param, "d2y");
+    const auto k     = find_parameter<real_type                >(param, env, "k");
+    const auto term1 = find_parameter<std::array<real_type, 10>>(param, env, "y");
+    const auto term2 = find_parameter<std::array<real_type, 10>>(param, env, "d2y");
 
     MJOLNIR_LOG_INFO("FlexibleLocalAngle = {k = ", k,
                      ", y = ", term1, ", d2y = ", term2, '}');
@@ -93,13 +96,13 @@ read_flexible_local_angle_potential(const toml::value& param)
 
 template<typename realT>
 ClementiDihedralPotential<realT>
-read_clementi_dihedral_potential(const toml::value& param)
+read_clementi_dihedral_potential(const toml::value& param, const toml::value& env)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
-    const auto v0 = toml::find<real_type>(param, "v0");
-    const auto k1 = toml::find<real_type>(param, "k1");
-    const auto k3 = toml::find<real_type>(param, "k3");
+    const auto v0 = find_parameter<real_type>(param, env, "v0");
+    const auto k1 = find_parameter<real_type>(param, env, "k1");
+    const auto k3 = find_parameter<real_type>(param, env, "k3");
 
     MJOLNIR_LOG_INFO("ClementiDihedral = {v0 = ", v0,
                      ", k1 = ", k1, ", k3 = ", k3, '}');
@@ -108,12 +111,12 @@ read_clementi_dihedral_potential(const toml::value& param)
 
 template<typename realT>
 FlexibleLocalDihedralPotential<realT>
-read_flexible_local_dihedral_potential(const toml::value& param)
+read_flexible_local_dihedral_potential(const toml::value& param, const toml::value& env)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
-    auto k    = toml::find<real_type               >(param, "k");
-    auto term = toml::find<std::array<real_type, 7>>(param, "coef");
+    auto k    = find_parameter<real_type               >(param, env, "k");
+    auto term = find_parameter<std::array<real_type, 7>>(param, env, "coef");
 
     MJOLNIR_LOG_INFO("FlexibleLocalDihedral = {k = ", k, ", coef = ", term, '}');
     return FlexibleLocalDihedralPotential<realT>(k, term);
@@ -135,57 +138,64 @@ template<typename potentialT> struct read_local_potential_impl;
 template<typename realT>
 struct read_local_potential_impl<HarmonicPotential<realT>>
 {
-    static HarmonicPotential<realT> invoke(const toml::value& param)
+    static HarmonicPotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
     {
-        return read_harmonic_potential<realT>(param);
+        return read_harmonic_potential<realT>(param, env);
     }
 };
 template<typename realT>
 struct read_local_potential_impl<GoContactPotential<realT>>
 {
-    static GoContactPotential<realT> invoke(const toml::value& param)
+    static GoContactPotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
     {
-        return read_go_contact_potential<realT>(param);
+        return read_go_contact_potential<realT>(param, env);
     }
 };
 template<typename realT>
 struct read_local_potential_impl<GaussianPotential<realT>>
 {
-    static GaussianPotential<realT> invoke(const toml::value& param)
+    static GaussianPotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
     {
-        return read_gaussian_potential<realT>(param);
+        return read_gaussian_potential<realT>(param, env);
     }
 };
 template<typename realT>
 struct read_local_potential_impl<PeriodicGaussianPotential<realT>>
 {
-    static PeriodicGaussianPotential<realT> invoke(const toml::value& param)
+    static PeriodicGaussianPotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
     {
-        return read_periodic_gaussian_potential<realT>(param);
+        return read_periodic_gaussian_potential<realT>(param, env);
     }
 };
 template<typename realT>
 struct read_local_potential_impl<FlexibleLocalAnglePotential<realT>>
 {
-    static FlexibleLocalAnglePotential<realT> invoke(const toml::value& param)
+    static FlexibleLocalAnglePotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
     {
-        return read_flexible_local_angle_potential<realT>(param);
+        return read_flexible_local_angle_potential<realT>(param, env);
     }
 };
 template<typename realT>
 struct read_local_potential_impl<ClementiDihedralPotential<realT>>
 {
-    static ClementiDihedralPotential<realT> invoke(const toml::value& param)
+    static ClementiDihedralPotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
     {
-        return read_clementi_dihedral_potential<realT>(param);
+        return read_clementi_dihedral_potential<realT>(param, env);
     }
 };
 template<typename realT>
 struct read_local_potential_impl<FlexibleLocalDihedralPotential<realT>>
 {
-    static FlexibleLocalDihedralPotential<realT> invoke(const toml::value& param)
+    static FlexibleLocalDihedralPotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
     {
-        return read_flexible_local_dihedral_potential<realT>(param);
+        return read_flexible_local_dihedral_potential<realT>(param, env);
     }
 };
 } // namespace detail
@@ -206,15 +216,18 @@ read_local_potential(const toml::value& local)
     const auto& params = toml::find<toml::array>(local, "parameters");
     MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
 
+    const auto& env = local.as_table().count("env") == 1 ?
+                      local.as_table().at("env") : toml::value{};
+
     std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
     for(const auto& item : params)
     {
-        const auto indices = toml::find<indices_t>(item, "indices");
+        const auto indices = find_parameter<indices_t>(item, env, "indices");
         MJOLNIR_LOG_INFO_NO_LF("idxs = ", indices, ", ");
 
         retval.emplace_back(indices,
-            detail::read_local_potential_impl<potentialT>::invoke(item));
+            detail::read_local_potential_impl<potentialT>::invoke(item, env));
     }
     return retval;
 }
@@ -238,6 +251,9 @@ read_local_potentials(const toml::value& local)
     const auto& params = toml::find<toml::array>(local, "parameters");
     MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
 
+    const auto& env = local.as_table().count("env") == 1 ?
+                      local.as_table().at("env") : toml::value{};
+
     std::vector<indices_potential_pair_type> retval;
     retval.reserve(params.size());
     for(const auto& item : params)
@@ -246,15 +262,15 @@ read_local_potentials(const toml::value& local)
         using potential_1_type = potential1T<real_type>;
         using potential_2_type = potential2T<real_type>;
 
-        const auto indices = toml::find<indices_type>(item, "indices");
+        const auto indices = find_parameter<indices_type>(item, env, "indices");
         MJOLNIR_LOG_INFO("idxs = ", indices);
 
-        const auto& pot1 = toml::find(item, potential_1_type::name());
-        const auto& pot2 = toml::find(item, potential_2_type::name());
+        const auto& pot1 = find_parameter<toml::value>(item, env, potential_1_type::name());
+        const auto& pot2 = find_parameter<toml::value>(item, env, potential_2_type::name());
 
         retval.emplace_back(indices, potential_type(
-            detail::read_local_potential_impl<potential_1_type>::invoke(pot1),
-            detail::read_local_potential_impl<potential_2_type>::invoke(pot2))
+            detail::read_local_potential_impl<potential_1_type>::invoke(pot1, env),
+            detail::read_local_potential_impl<potential_2_type>::invoke(pot2, env))
         );
     }
     return retval;
