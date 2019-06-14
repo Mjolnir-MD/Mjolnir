@@ -4,7 +4,7 @@ It runs a short-time MD simulation and compare the resulting distribution with
 a theoretical curve.
 
 ```console
-$ python3 test_BAOABIntegrator.py
+$ bash test_BAOABIntegrator.sh
 ```
 
 The potential used here is the same as the one used in the following paper.

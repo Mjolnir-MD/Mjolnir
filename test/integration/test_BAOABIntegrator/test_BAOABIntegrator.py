@@ -2,18 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import math
-import subprocess
 import os
-
-try:
-    os.mkdir("./data/")
-except FileExistsError:
-    pass
-
-print(80 * "=")
-print("Begin to run simulation. It would take some time.")
-print(80 * "=")
-subprocess.run("./test_BAOABIntegrator test_BAOABIntegrator.toml", shell=True)
 
 traj_hist, traj_bin_edges = np.histogram(\
         [float(line.split()[1]) for line in filter(lambda x: x[0] == 'X', \
