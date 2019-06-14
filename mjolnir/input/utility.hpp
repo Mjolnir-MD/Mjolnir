@@ -2,6 +2,8 @@
 #define MJOLNIR_INPUT_UTILITY_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/util/type_traits.hpp>
+#include <mjolnir/util/string.hpp>
+#include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
 {
@@ -11,6 +13,7 @@ typename std::enable_if<negation<std::is_same<T, std::string>>::value, T>::type
 find_parameter(const toml::value& params, const toml::value& env,
                const std::string& name)
 {
+    using ::mjolnir::literals::string_literals::operator"" _s;
     if(!params.is_table() || params.as_table().count(name) != 1)
     {
         throw std::out_of_range(toml::format_error("[error] value "_s + name +
@@ -23,7 +26,7 @@ find_parameter(const toml::value& params, const toml::value& env,
         const std::string& var = p.as_string();
         if(!env.is_table() || env.as_table().count(var) != 1)
         {
-            throw std::out_of_range(toml::format_error("[error] named variable "_s
+            throw std::out_of_range(toml::format_error("[error] named variable "_s +
                 var + " does not exists"_s, env, "in this table"_s));
         }
         return toml::get<T>(env.as_table().at(var));
@@ -71,7 +74,7 @@ find_parameter(const toml::value& params, const toml::value& env,
                             params.as_table().at(name1)          :
                             params.as_table().at(name2)          ;
 
-    if(params.as_table.count(name2) == 1)
+    if(params.as_table().count(name2) == 1)
     {
         MJOLNIR_LOG_WARN("[warning] deprecated name ", name2, " is used. Use ",
                          name1, " instead.");
@@ -82,7 +85,7 @@ find_parameter(const toml::value& params, const toml::value& env,
         const std::string& var = p.as_string();
         if(!env.is_table() || env.as_table().count(var) != 1)
         {
-            throw std::out_of_range(toml::format_error("[error] named variable "_s
+            throw std::out_of_range(toml::format_error("[error] named variable "_s +
                 var + " does not exists"_s, env, "in this table"_s));
         }
         return toml::get<T>(env.as_table().at(var));
