@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_INPUT_READ_GLOBAL_POTENTIAL_HPP
 #define MJOLNIR_INPUT_READ_GLOBAL_POTENTIAL_HPP
 #include <extlib/toml/toml.hpp>
+#include <mjolnir/input/utility.hpp>
 #include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
 #include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
@@ -73,6 +74,9 @@ read_excluded_volume_potential(const toml::value& global)
             " within ", connection.second, " will be ignored");
     }
 
+    const auto& env = global.as_table().count("env") == 1 ?
+                      global.as_table().at("env") : toml::value{};
+
     const real_type eps = toml::find<real_type>(global, "epsilon");
     MJOLNIR_LOG_INFO("epsilon = ", eps);
 
@@ -85,8 +89,8 @@ read_excluded_volume_potential(const toml::value& global)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx = toml::find<std::size_t>(param, "index");
-        const auto radius = toml::find<real_type>(param, "radius");
+        const auto idx    = find_parameter<std::size_t>(param, env, "index");
+        const auto radius = find_parameter<real_type  >(param, env, "radius");
 
         params.emplace_back(idx, radius);
         MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
@@ -115,6 +119,9 @@ read_lennard_jones_potential(const toml::value& global)
             " within ", connection.second, " will be ignored");
     }
 
+    const auto& env = global.as_table().count("env") == 1 ?
+                      global.as_table().at("env") : toml::value{};
+
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
@@ -124,11 +131,9 @@ read_lennard_jones_potential(const toml::value& global)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx     = toml::find<std::size_t>(param, "index");
-        const auto sigma   = toml::expect<real_type>(param, u8"σ").or_other(
-                             toml::expect<real_type>(param, "sigma")).unwrap();
-        const auto epsilon = toml::expect<real_type>(param, u8"ε").or_other(
-                             toml::expect<real_type>(param, "epsilon")).unwrap();
+        const auto idx     = find_parameter<std::size_t>(param, env, "index");
+        const auto sigma   = find_parameter<real_type>(param, env, "sigma",   u8"σ");
+        const auto epsilon = find_parameter<real_type>(param, env, "epsilon", u8"ε");
 
         params.emplace_back(idx, parameter_type{sigma, epsilon});
         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma, ", epsilon = ", epsilon);
@@ -157,6 +162,9 @@ read_uniform_lennard_jones_potential(const toml::value& global)
             " within ", connection.second, " will be ignored");
     }
 
+    const auto& env = global.as_table().count("env") == 1 ?
+                      global.as_table().at("env") : toml::value{};
+
     const auto sigma   = toml::expect<real_type>(global, u8"σ").or_other(
                          toml::expect<real_type>(global, "sigma")).unwrap();
     const auto epsilon = toml::expect<real_type>(global, u8"ε").or_other(
@@ -171,7 +179,7 @@ read_uniform_lennard_jones_potential(const toml::value& global)
     {
         for(const auto& param : toml::find<toml::array>(global, "parameters"))
         {
-            const auto idx = toml::find<std::size_t>(param, "index");
+            const auto idx = find_parameter<std::size_t>(param, env, "index");
             params.emplace_back(idx, parameter_type{});
         }
     }
@@ -198,6 +206,9 @@ read_debye_huckel_potential(const toml::value& global)
             " within ", connection.second, " will be ignored");
     }
 
+    const auto& env = global.as_table().count("env") == 1 ?
+                      global.as_table().at("env") : toml::value{};
+
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
@@ -207,8 +218,8 @@ read_debye_huckel_potential(const toml::value& global)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx    = toml::find<std::size_t>(param, "index");
-        const auto charge = toml::find<real_type  >(param, "charge");
+        const auto idx    = find_parameter<std::size_t>(param, env, "index");
+        const auto charge = find_parameter<real_type  >(param, env, "charge");
 
         params.emplace_back(idx, parameter_type{charge});
         MJOLNIR_LOG_INFO("idx = ", idx, ", charge = ", charge);
