@@ -7,13 +7,22 @@
 #endif
 
 #include <mjolnir/input/read_global_potential.hpp>
+#include <tuple>
 
-BOOST_AUTO_TEST_CASE(read_debye_huckel_double)
+using test_types = std::tuple<double, float>;
+
+constexpr inline float  tolerance_value(float)  noexcept {return 1e-4;}
+constexpr inline double tolerance_value(double) noexcept {return 1e-8;}
+
+template<typename Real>
+decltype(boost::test_tools::tolerance(std::declval<Real>()))
+tolerance() {return boost::test_tools::tolerance(tolerance_value(Real()));}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_noenv, T, test_types)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_debye_huckel.log");
 
-    using real_type = double;
-    constexpr real_type tol = 1e-8;
+    using real_type = T;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -51,20 +60,20 @@ BOOST_AUTO_TEST_CASE(read_debye_huckel_double)
         BOOST_TEST(g.participants().at(4)  ==   7u);
         BOOST_TEST(g.participants().at(5)  == 100u);
 
-        BOOST_TEST(g.charges().at(  0)  ==   1.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.charges().at(  1)  ==  -1.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.charges().at(  3)  ==   0.3, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.charges().at(  5)  ==   0.5, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.charges().at(  7)  ==   0.7, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.charges().at(100)  == 100.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(g.charges().at(  0)  == real_type(  1.0), tolerance<real_type>());
+        BOOST_TEST(g.charges().at(  1)  == real_type( -1.0), tolerance<real_type>());
+        BOOST_TEST(g.charges().at(  3)  == real_type(  0.3), tolerance<real_type>());
+        BOOST_TEST(g.charges().at(  5)  == real_type(  0.5), tolerance<real_type>());
+        BOOST_TEST(g.charges().at(  7)  == real_type(  0.7), tolerance<real_type>());
+        BOOST_TEST(g.charges().at(100)  == real_type(100.0), tolerance<real_type>());
     }
 }
 
-BOOST_AUTO_TEST_CASE(read_debye_huckel_float)
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_env, T, test_types)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_debye_huckel.log");
-    using real_type = float;
-    constexpr real_type tol = 1e-4;
+
+    using real_type = T;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -74,13 +83,16 @@ BOOST_AUTO_TEST_CASE(read_debye_huckel_float)
             ignore.molecule                 = "Nothing"
             ignore.particles_within.bond    = 3
             ignore.particles_within.contact = 1
+            env.positive = 1.0
+            env.negative = -1.0
+            env.toomuch  = 100.0
             parameters = [
-                {index =   0, charge =   1.0},
-                {index =   1, charge =  -1.0},
+                {index =   0, charge = "positive"},
+                {index =   1, charge = "negative"},
                 {index =   3, charge =   0.3},
                 {index =   5, charge =   0.5},
                 {index =   7, charge =   0.7},
-                {index = 100, charge = 100.0},
+                {index = 100, charge = "toomuch"},
             ]
         )"_toml;
 
@@ -102,10 +114,11 @@ BOOST_AUTO_TEST_CASE(read_debye_huckel_float)
         BOOST_TEST(g.participants().at(4)  ==   7u);
         BOOST_TEST(g.participants().at(5)  == 100u);
 
-        BOOST_TEST(g.charges().at(  0)  ==   1.0f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.charges().at(  1)  ==  -1.0f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.charges().at(  3)  ==   0.3f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.charges().at(  5)  ==   0.5f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.charges().at(  7)  ==   0.7f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.charges().at(100)  == 100.0f, boost::test_tools::tolerance(tol));
-    }}
+        BOOST_TEST(g.charges().at(  0)  == real_type(  1.0), tolerance<real_type>());
+        BOOST_TEST(g.charges().at(  1)  == real_type( -1.0), tolerance<real_type>());
+        BOOST_TEST(g.charges().at(  3)  == real_type(  0.3), tolerance<real_type>());
+        BOOST_TEST(g.charges().at(  5)  == real_type(  0.5), tolerance<real_type>());
+        BOOST_TEST(g.charges().at(  7)  == real_type(  0.7), tolerance<real_type>());
+        BOOST_TEST(g.charges().at(100)  == real_type(100.0), tolerance<real_type>());
+    }
+}

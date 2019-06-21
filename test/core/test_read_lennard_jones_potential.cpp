@@ -7,13 +7,22 @@
 #endif
 
 #include <mjolnir/input/read_global_potential.hpp>
+#include <tuple>
 
-BOOST_AUTO_TEST_CASE(read_lennard_jones_double)
+using test_types = std::tuple<double, float>;
+
+constexpr inline float  tolerance_value(float)  noexcept {return 1e-4;}
+constexpr inline double tolerance_value(double) noexcept {return 1e-8;}
+
+template<typename Real>
+decltype(boost::test_tools::tolerance(std::declval<Real>()))
+tolerance() {return boost::test_tools::tolerance(tolerance_value(Real()));}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_lennard_jones_noenv, T, test_types)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_lennard_jones.log");
 
-    using real_type = double;
-    constexpr real_type tol = 1e-8;
+    using real_type = T;
     {
         using namespace toml::literals;
         const auto v = u8R"(
@@ -53,30 +62,29 @@ BOOST_AUTO_TEST_CASE(read_lennard_jones_double)
         BOOST_TEST(g.participants().at(5)  ==   7u);
         BOOST_TEST(g.participants().at(6)  == 100u);
 
-        BOOST_TEST(g.parameters().at(  0).first  ==   2.0,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  1).first  ==   2.0,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  2).first  ==   2.0,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  3).first  ==   2.0,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  5).first  ==   5.0,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  7).first  ==   7.0,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(100).first  == 100.0,  boost::test_tools::tolerance(tol));
+        BOOST_TEST(g.parameters().at(  0).first  == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  1).first  == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  2).first  == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  3).first  == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  5).first  == real_type(  5.0), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  7).first  == real_type(  7.0), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(100).first  == real_type(100.0), tolerance<real_type>());
 
-        BOOST_TEST(g.parameters().at(  0).second == 1.5,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  1).second == 1.5,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  2).second == 1.5,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  3).second == 1.5,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  5).second == 0.5,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  7).second == 0.7,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(100).second == 0.1,  boost::test_tools::tolerance(tol));
+        BOOST_TEST(g.parameters().at(  0).second == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  1).second == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  2).second == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  3).second == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  5).second == real_type(0.5), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  7).second == real_type(0.7), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(100).second == real_type(0.1), tolerance<real_type>());
     }
 }
 
-BOOST_AUTO_TEST_CASE(read_lennard_jones_float)
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_lennard_jones_env, T, test_types)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_lennard_jones.log");
-    using real_type = float;
-    constexpr real_type tol = 1e-4;
 
+    using real_type = T;
     {
         using namespace toml::literals;
         const auto v = u8R"(
@@ -86,14 +94,17 @@ BOOST_AUTO_TEST_CASE(read_lennard_jones_float)
             ignore.molecule         = "Nothing"
             ignore.particles_within.bond    = 3
             ignore.particles_within.contact = 1
+            env.100   = 100.0
+            env.small = 0.1
+            env.half  = 0.5
             parameters = [
                 {index =   0, sigma =   2.0, epsilon = 1.5},
                 {index =   1, sigma =   2.0, "ε"     = 1.5},
                 {index =   2, "σ"   =   2.0, epsilon = 1.5},
                 {index =   3, "σ"   =   2.0, "ε"     = 1.5},
-                {index =   5, sigma =   5.0, epsilon = 0.5},
+                {index =   5, sigma =   5.0, epsilon = "half"},
                 {index =   7, sigma =   7.0, epsilon = 0.7},
-                {index = 100, sigma = 100.0, epsilon = 0.1},
+                {index = 100, sigma = "100", epsilon = "small"},
             ]
         )"_toml;
 
@@ -116,19 +127,20 @@ BOOST_AUTO_TEST_CASE(read_lennard_jones_float)
         BOOST_TEST(g.participants().at(5)  ==   7u);
         BOOST_TEST(g.participants().at(6)  == 100u);
 
-        BOOST_TEST(g.parameters().at(  0).first  ==   2.0f,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  1).first  ==   2.0f,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  2).first  ==   2.0f,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  3).first  ==   2.0f,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  5).first  ==   5.0f,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  7).first  ==   7.0f,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(100).first  == 100.0f,  boost::test_tools::tolerance(tol));
+        BOOST_TEST(g.parameters().at(  0).first  == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  1).first  == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  2).first  == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  3).first  == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  5).first  == real_type(  5.0), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  7).first  == real_type(  7.0), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(100).first  == real_type(100.0), tolerance<real_type>());
 
-        BOOST_TEST(g.parameters().at(  0).second == 1.5f,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  1).second == 1.5f,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  2).second == 1.5f,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  3).second == 1.5f,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  5).second == 0.5f,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(  7).second == 0.7f,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.parameters().at(100).second == 0.1f,  boost::test_tools::tolerance(tol));    }
+        BOOST_TEST(g.parameters().at(  0).second == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  1).second == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  2).second == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  3).second == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  5).second == real_type(0.5), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(  7).second == real_type(0.7), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(100).second == real_type(0.1), tolerance<real_type>());
+    }
 }

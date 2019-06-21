@@ -7,65 +7,78 @@
 #endif
 
 #include <mjolnir/input/read_local_potential.hpp>
+#include <tuple>
 
-BOOST_AUTO_TEST_CASE(read_flexible_local_dihedral_double)
+using test_types = std::tuple<double, float>;
+
+constexpr inline float  tolerance_value(float)  noexcept {return 1e-4;}
+constexpr inline double tolerance_value(double) noexcept {return 1e-8;}
+
+template<typename Real>
+decltype(boost::test_tools::tolerance(std::declval<Real>()))
+tolerance() {return boost::test_tools::tolerance(tolerance_value(Real()));}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_flexible_local_dihedral_noenv, T, test_types)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_flexible_local_dihedral.log");
 
-    using real_type = double;
-    constexpr real_type tol = 1e-8;
+    using real_type = T;
     {
         using namespace toml::literals;
+        const toml::value env;
         const toml::value v = u8R"(
             indices = [1, 2, 3, 4]
             k       = 3.14
             coef    = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
         )"_toml;
 
-        const auto g = mjolnir::read_flexible_local_dihedral_potential<real_type>(v);
-        BOOST_TEST(g.k()       == 3.14, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.coef()[0] ==  1.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.coef()[1] ==  2.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.coef()[2] ==  3.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.coef()[3] ==  4.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.coef()[4] ==  5.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.coef()[5] ==  6.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.coef()[6] ==  7.0, boost::test_tools::tolerance(tol));
+        const auto g = mjolnir::read_flexible_local_dihedral_potential<real_type>(v, env);
+        BOOST_TEST(g.k()       == real_type(3.14), tolerance<real_type>());
+        BOOST_TEST(g.coef()[0] == real_type( 1.0), tolerance<real_type>());
+        BOOST_TEST(g.coef()[1] == real_type( 2.0), tolerance<real_type>());
+        BOOST_TEST(g.coef()[2] == real_type( 3.0), tolerance<real_type>());
+        BOOST_TEST(g.coef()[3] == real_type( 4.0), tolerance<real_type>());
+        BOOST_TEST(g.coef()[4] == real_type( 5.0), tolerance<real_type>());
+        BOOST_TEST(g.coef()[5] == real_type( 6.0), tolerance<real_type>());
+        BOOST_TEST(g.coef()[6] == real_type( 7.0), tolerance<real_type>());
     }
 }
 
-BOOST_AUTO_TEST_CASE(read_flexible_local_dihedral_float)
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_flexible_local_dihedral_env, T, test_types)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_flexible_local_dihedral.log");
-    using real_type = float;
-    constexpr real_type tol = 1e-4;
 
+    using real_type = T;
     {
         using namespace toml::literals;
-        const toml::value v = u8R"(
+        const toml::value env = u8R"(
             indices = [1, 2, 3, 4]
             k       = 3.14
             coef    = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
         )"_toml;
+        const toml::value v = u8R"(
+            indices = "indices"
+            k       = "k"
+            coef    = "coef"
+        )"_toml;
 
-        const auto g = mjolnir::read_flexible_local_dihedral_potential<real_type>(v);
-        BOOST_TEST(g.k()     == 3.14f,  boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.coef()[0] ==  1.0f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.coef()[1] ==  2.0f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.coef()[2] ==  3.0f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.coef()[3] ==  4.0f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.coef()[4] ==  5.0f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.coef()[5] ==  6.0f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.coef()[6] ==  7.0f, boost::test_tools::tolerance(tol));
+        const auto g = mjolnir::read_flexible_local_dihedral_potential<real_type>(v, env);
+        BOOST_TEST(g.k()       == real_type(3.14), tolerance<real_type>());
+        BOOST_TEST(g.coef()[0] == real_type( 1.0), tolerance<real_type>());
+        BOOST_TEST(g.coef()[1] == real_type( 2.0), tolerance<real_type>());
+        BOOST_TEST(g.coef()[2] == real_type( 3.0), tolerance<real_type>());
+        BOOST_TEST(g.coef()[3] == real_type( 4.0), tolerance<real_type>());
+        BOOST_TEST(g.coef()[4] == real_type( 5.0), tolerance<real_type>());
+        BOOST_TEST(g.coef()[5] == real_type( 6.0), tolerance<real_type>());
+        BOOST_TEST(g.coef()[6] == real_type( 7.0), tolerance<real_type>());
     }
 }
 
-BOOST_AUTO_TEST_CASE(read_local_potential_flexible_local_dihedral_double)
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_local_potential_flexible_local_dihedral_noenv, T, test_types)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_flexible_local_dihedral.log");
 
-    using real_type = double;
-    constexpr real_type tol = 1e-8;
+    using real_type = T;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -81,28 +94,29 @@ BOOST_AUTO_TEST_CASE(read_local_potential_flexible_local_dihedral_double)
 
         BOOST_TEST(g.size() == 1u);
         BOOST_TEST(g.at(0).first == ref_idx);
-        BOOST_TEST(g.at(0).second.k()       == 3.14, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.at(0).second.coef()[0] ==  1.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.at(0).second.coef()[1] ==  2.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.at(0).second.coef()[2] ==  3.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.at(0).second.coef()[3] ==  4.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.at(0).second.coef()[4] ==  5.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.at(0).second.coef()[5] ==  6.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.at(0).second.coef()[6] ==  7.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(g.at(0).second.k()       == real_type(3.14), tolerance<real_type>());
+        BOOST_TEST(g.at(0).second.coef()[0] == real_type( 1.0), tolerance<real_type>());
+        BOOST_TEST(g.at(0).second.coef()[1] == real_type( 2.0), tolerance<real_type>());
+        BOOST_TEST(g.at(0).second.coef()[2] == real_type( 3.0), tolerance<real_type>());
+        BOOST_TEST(g.at(0).second.coef()[3] == real_type( 4.0), tolerance<real_type>());
+        BOOST_TEST(g.at(0).second.coef()[4] == real_type( 5.0), tolerance<real_type>());
+        BOOST_TEST(g.at(0).second.coef()[5] == real_type( 6.0), tolerance<real_type>());
+        BOOST_TEST(g.at(0).second.coef()[6] == real_type( 7.0), tolerance<real_type>());
     }
 }
 
-BOOST_AUTO_TEST_CASE(read_local_potential_flexible_local_dihedral_float)
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_local_potential_flexible_local_dihedral_env, T, test_types)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_flexible_local_dihedral.log");
-    using real_type = float;
-    constexpr real_type tol = 1e-4;
 
+    using real_type = T;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
+            env.pi = 3.14
+            env.coef = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
             parameters = [
-                {indices = [1, 2, 3, 4], k = 3.14, coef = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]}
+                {indices = [1, 2, 3, 4], k = "pi", coef = "coef"}
             ]
         )"_toml;
 
@@ -113,13 +127,13 @@ BOOST_AUTO_TEST_CASE(read_local_potential_flexible_local_dihedral_float)
 
         BOOST_TEST(g.size() == 1u);
         BOOST_TEST(g.at(0).first == ref_idx);
-        BOOST_TEST(g.at(0).second.k()       == 3.14f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.at(0).second.coef()[0] ==  1.0f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.at(0).second.coef()[1] ==  2.0f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.at(0).second.coef()[2] ==  3.0f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.at(0).second.coef()[3] ==  4.0f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.at(0).second.coef()[4] ==  5.0f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.at(0).second.coef()[5] ==  6.0f, boost::test_tools::tolerance(tol));
-        BOOST_TEST(g.at(0).second.coef()[6] ==  7.0f, boost::test_tools::tolerance(tol));
+        BOOST_TEST(g.at(0).second.k()       == real_type(3.14), tolerance<real_type>());
+        BOOST_TEST(g.at(0).second.coef()[0] == real_type( 1.0), tolerance<real_type>());
+        BOOST_TEST(g.at(0).second.coef()[1] == real_type( 2.0), tolerance<real_type>());
+        BOOST_TEST(g.at(0).second.coef()[2] == real_type( 3.0), tolerance<real_type>());
+        BOOST_TEST(g.at(0).second.coef()[3] == real_type( 4.0), tolerance<real_type>());
+        BOOST_TEST(g.at(0).second.coef()[4] == real_type( 5.0), tolerance<real_type>());
+        BOOST_TEST(g.at(0).second.coef()[5] == real_type( 6.0), tolerance<real_type>());
+        BOOST_TEST(g.at(0).second.coef()[6] == real_type( 7.0), tolerance<real_type>());
     }
 }

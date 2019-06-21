@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_INPUT_READ_EXTERNAL_POTENTIAL_HPP
 #define MJOLNIR_INPUT_READ_EXTERNAL_POTENTIAL_HPP
 #include <extlib/toml/toml.hpp>
+#include <mjolnir/input/utility.hpp>
 #include <mjolnir/potential/external/HarmonicRestraintPotential.hpp>
 #include <mjolnir/potential/external/ImplicitMembranePotential.hpp>
 #include <mjolnir/potential/external/LennardJonesWallPotential.hpp>
@@ -33,6 +34,9 @@ read_implicit_membrane_potential(const toml::value& external)
     MJOLNIR_LOG_INFO("magnitude = ", magnitude);
     MJOLNIR_LOG_INFO("bend      = ", bend     );
 
+    const auto& env = external.as_table().count("env") == 1 ?
+                      external.as_table().at("env") : toml::value{};
+
     const auto& ps = toml::find<toml::array>(external, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
@@ -40,8 +44,8 @@ read_implicit_membrane_potential(const toml::value& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx = toml::find<std::size_t>(param, "index");
-        const auto h   = toml::find<real_type  >(param, "hydrophobicity");
+        const auto idx = find_parameter<std::size_t>(param, env, "index");
+        const auto h   = find_parameter<real_type  >(param, env, "hydrophobicity");
         if(params.size() <= idx) {params.resize(idx+1, real_type(0.0));}
         params.at(idx) = h;
 
@@ -59,6 +63,9 @@ read_lennard_jones_wall_potential(const toml::value& external)
     MJOLNIR_LOG_FUNCTION();
     using real_type = realT;
 
+    const auto& env = external.as_table().count("env") == 1 ?
+                      external.as_table().at("env") : toml::value{};
+
     const auto& ps = toml::find<toml::array>(external, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
@@ -66,11 +73,9 @@ read_lennard_jones_wall_potential(const toml::value& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx = toml::find<std::size_t>(param, "index");
-        const auto s   = toml::expect<real_type>(param, u8"σ").or_other(
-                         toml::expect<real_type>(param, "sigma")).unwrap();
-        const auto e   = toml::expect<real_type>(param, u8"ε").or_other(
-                         toml::expect<real_type>(param, "epsilon")).unwrap();
+        const auto idx = find_parameter<std::size_t>(param, env, "index");
+        const auto s   = find_parameter<real_type>(param, env, "sigma", u8"σ");
+        const auto e   = find_parameter<real_type>(param, env, "epsilon", u8"ε");
         if(params.size() <= idx)
         {
             params.resize(idx+1, std::make_pair(real_type(0), real_type(0)));
@@ -94,6 +99,9 @@ read_excluded_volume_wall_potential(const toml::value& external)
                      toml::expect<real_type>(external, "epsilon")).unwrap();
     MJOLNIR_LOG_INFO("epsilon = ", eps);
 
+    const auto& env = external.as_table().count("env") == 1 ?
+                      external.as_table().at("env") : toml::value{};
+
     const auto& ps = toml::find<toml::array>(external, "parameters");
     MJOLNIR_LOG_INFO("number of parameters = ", ps.size());
 
@@ -101,8 +109,8 @@ read_excluded_volume_wall_potential(const toml::value& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx = toml::find<std::size_t>(param, "index");
-        const auto rad = toml::find<real_type>(param, "radius");
+        const auto idx = find_parameter<std::size_t>(param, env, "index");
+        const auto rad = find_parameter<real_type  >(param, env, "radius");
         if(params.size() <= idx) {params.resize(idx+1, real_type(0));}
         params.at(idx) = rad;
 
@@ -124,13 +132,16 @@ read_harmonic_restraint_potential(const toml::value& external)
     const auto& ps = toml::find<toml::array>(external, "parameters");
     MJOLNIR_LOG_INFO("number of parameters = ", ps.size());
 
+    const auto& env = external.as_table().count("env") == 1 ?
+                      external.as_table().at("env") : toml::value{};
+
     std::vector<parameter_type> params;
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx = toml::find<std::size_t>(param, "index");
-        const auto k   = toml::find<real_type  >(param, "k");
-        const auto v0  = toml::find<real_type  >(param, "v0");
+        const auto idx = find_parameter<std::size_t>(param, env, "index");
+        const auto k   = find_parameter<real_type  >(param, env, "k");
+        const auto v0  = find_parameter<real_type  >(param, env, "v0");
         if(params.size() <= idx)
         {
             params.resize(idx+1, parameter_type(0, 0));
