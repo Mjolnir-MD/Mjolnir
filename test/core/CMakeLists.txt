@@ -67,9 +67,12 @@ set(TEST_NAMES
     test_read_external_forcefield
     test_read_forcefield
 
+    test_read_molecular_dynamics_simulator
+    test_read_simulated_annealing_simulator
+    test_read_steepest_descent_simulator
+
     test_read_observer
     test_read_integrator
-    test_read_simulator
     test_read_system
     test_read_unit
     test_read_path

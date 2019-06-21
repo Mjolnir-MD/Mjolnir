@@ -10,6 +10,7 @@
     - [SimulatedAnnealing](refs/SimulatedAnnealingSimulator.md)
     - [SteepestDescent](refs/SteepestDescentSimulator.md)
   - [Integrator](refs/Integrator.md)
+    - [BAOABLangevin](refs/BAOABLangevinIntegrator.md)
     - [UnderdampedLangevin](refs/UnderdampedLangevinIntegrator.md)
     - [VelocityVerlet](refs/VelocityVerletIntegrator.md)
   - [System](refs/System.md)

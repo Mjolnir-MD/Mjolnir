@@ -57,6 +57,19 @@ read_molecular_dynamics_simulator(
                 read_underdamped_langevin_integrator<traitsT>(simulator),
                 read_observer<traitsT>(root));
     }
+    else if(integrator_type == "BAOABLangevin")
+    {
+        MJOLNIR_LOG_NOTICE("Integrator is BAOAB Langevin.");
+        using integrator_t = BAOABLangevinIntegrator<traitsT>;
+        using simulator_t  = MolecularDynamicsSimulator<traitsT, integrator_t>;
+
+        return make_unique<simulator_t>(
+                tstep, sstep,
+                read_system<traitsT>(root, 0),
+                read_forcefield<traitsT>(root, 0),
+                read_BAOAB_langevin_integrator<traitsT>(simulator),
+                read_observer<traitsT>(root));
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -152,6 +165,20 @@ read_simulated_annealing_simulator(
                     read_system<traitsT>(root, 0),
                     read_forcefield<traitsT>(root, 0),
                     read_underdamped_langevin_integrator<traitsT>(simulator),
+                    read_observer<traitsT>(root));
+        }
+        else if(integrator_type == "BAOABLangevin")
+        {
+            using integrator_t = BAOABLangevinIntegrator<traitsT>;
+            using simulator_t  = SimulatedAnnealingSimulator<
+                traitsT, integrator_t, LinearScheduler>;
+
+            MJOLNIR_LOG_NOTICE("Integrator is BAOAB Langevin.");
+            return make_unique<simulator_t>(tstep, sstep, each_step,
+                    LinearScheduler<real_type>(schedule_begin, schedule_end),
+                    read_system<traitsT>(root, 0),
+                    read_forcefield<traitsT>(root, 0),
+                    read_BAOAB_langevin_integrator<traitsT>(simulator),
                     read_observer<traitsT>(root));
         }
         else
