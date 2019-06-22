@@ -30,7 +30,6 @@
       - [DihedralAngleInteraction](refs/DihedralAngleInteraction.md)
         - [Harmonic](refs/HarmonicPotential.md)
         - [Gaussian](refs/GaussianPotential.md)
-        - [PeriodicGaussian](refs/PeriodicGaussianPotential.md)
         - [FlexibleLocal](refs/FlexibleLocalDihedralPotential.md)
         - [ClementiDihedral](refs/ClementiDihedralPotential.md)
       - [DummyInteraction](refs/DummyInteraction.md)
