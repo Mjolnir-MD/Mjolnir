@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(read_dihedral_angle_gaussian)
         BOOST_TEST(static_cast<bool>(base));
 
         const auto derv = dynamic_cast<mjolnir::DihedralAngleInteraction<
-            traits_type, mjolnir::GaussianPotential<real_type>>*
+            traits_type, mjolnir::PeriodicGaussianPotential<real_type>>*
             >(base.get()); // check the expected type is contained
         BOOST_TEST(static_cast<bool>(derv));
     }
