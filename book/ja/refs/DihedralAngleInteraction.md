@@ -5,7 +5,6 @@
 粒子`i`番目, `j`番目, `k`番目, `l`番目の粒子について、
 `i`, `j`, `k`がなす面と`j`, `k`, `l`のなす面のなす角に対してかかります。
 
-- [Harmonic](HarmonicPotential.md)
 - [ClementiDihedral](ClementiDihedralPotential.md)
 - [Gaussian](GaussianPotential.md)
 - [FlexibleLocalDihedral](FlexibleLocalDihedral.md)
@@ -30,7 +29,6 @@ parameters  = [
 - `interaction`: 文字列型
   - 結合角相互作用を使用する際は、`"BondAngle"`を指定します。
 - `potential`: 文字列型
-  - [`"Harmonic"`](HarmonicPotential.md): 調和振動子ポテンシャルを用います。
   - [`"ClementiDihedral"`](ClementiDihedralPotential.md): Clementi-Go力場に使用するポテンシャルです。
   - [`"Gaussian"`](GaussianPotential.md): ガウシアン型のポテンシャルを用います。
   - [`"FlexibleLocalDihedral"`](FlexibleLocalDihedral.md): AICG2+力場に使用するポテンシャルです。

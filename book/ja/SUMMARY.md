@@ -28,7 +28,6 @@
         - [Gaussian](refs/GaussianPotential.md)
         - [FlexibleLocal](refs/FlexibleLocalAnglePotential.md)
       - [DihedralAngleInteraction](refs/DihedralAngleInteraction.md)
-        - [Harmonic](refs/HarmonicPotential.md)
         - [Gaussian](refs/GaussianPotential.md)
         - [FlexibleLocal](refs/FlexibleLocalDihedralPotential.md)
         - [ClementiDihedral](refs/ClementiDihedralPotential.md)
