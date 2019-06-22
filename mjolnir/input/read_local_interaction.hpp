@@ -173,6 +173,8 @@ read_dihedral_angle_interaction(
     if(potential == "Harmonic")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Harmonic.");
+        MJOLNIR_LOG_WARN  ("[deprecated] There is a indifferentiable point.");
+        MJOLNIR_LOG_WARN  ("[deprecated] Reconsider to use different stuff.");
         using potentialT = HarmonicPotential<real_type>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
