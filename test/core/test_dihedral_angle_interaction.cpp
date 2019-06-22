@@ -10,7 +10,7 @@
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/interaction/local/DihedralAngleInteraction.hpp>
 #include <mjolnir/math/constants.hpp>
-#include <mjolnir/potential/local/HarmonicPotential.hpp>
+#include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 #include <random>
@@ -22,15 +22,16 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
     using coord_type          = traits_type::coordinate_type;
     using boundary_type       = traits_type::boundary_type;
     using system_type         = mjolnir::System<traits_type>;
-    using harmonic_type       = mjolnir::HarmonicPotential<real_type>;
-    using dihedral_angle_type = mjolnir::DihedralAngleInteraction<traits_type, harmonic_type>;
+    using potential_type      = mjolnir::ClementiDihedralPotential<real_type>;
+    using dihedral_angle_type = mjolnir::DihedralAngleInteraction<traits_type, potential_type>;
 
     constexpr real_type tol = 1e-7;
 
-    const real_type k(1e0);
+    const real_type k1(1e0);
+    const real_type k3(1e0);
     const real_type native(mjolnir::math::constants<real_type>::pi * 2.0 / 3.0);
 
-    harmonic_type potential{k, native};
+    potential_type potential{k1, k3, native};
     dihedral_angle_type interaction("none", {{ {{0,1,2,3}}, potential}});
 
     const coord_type pos1(1e0, 0e0, 1e0);
@@ -151,13 +152,14 @@ BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_numerical_diff)
     using coord_type          = traits_type::coordinate_type;
     using boundary_type       = traits_type::boundary_type;
     using system_type         = mjolnir::System<traits_type>;
-    using harmonic_type       = mjolnir::HarmonicPotential<real_type>;
-    using dihedral_angle_type = mjolnir::DihedralAngleInteraction<traits_type, harmonic_type>;
+    using potential_type       = mjolnir::ClementiDihedralPotential<real_type>;
+    using dihedral_angle_type = mjolnir::DihedralAngleInteraction<traits_type, potential_type>;
 
-    const real_type k(1e0);
+    const real_type k1(1e0);
+    const real_type k3(1e0);
     const real_type native(mjolnir::math::constants<real_type>::pi / 2.0);
 
-    harmonic_type potential{k, native};
+    potential_type potential{k1, k3, native};
     dihedral_angle_type interaction("none", {{ {{0,1,2,3}}, potential}});
 
     system_type sys(4, boundary_type{});
@@ -171,18 +173,18 @@ BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_numerical_diff)
     sys.at(2).rmass = 1.0;
     sys.at(3).rmass = 1.0;
 
-    sys.at(0).position = coord_type(1.0,  0.0, 1.0);
-    sys.at(1).position = coord_type(0.0,  0.0, 1.0);
-    sys.at(2).position = coord_type(0.0,  0.0, 0.0);
-    sys.at(3).position = coord_type(0.0, -1.0, 0.0);
-    sys.at(0).velocity = coord_type(0.0,  0.0, 0.0);
-    sys.at(1).velocity = coord_type(0.0,  0.0, 0.0);
-    sys.at(2).velocity = coord_type(0.0,  0.0, 0.0);
-    sys.at(3).velocity = coord_type(0.0,  0.0, 0.0);
-    sys.at(0).force    = coord_type(0.0,  0.0, 0.0);
-    sys.at(1).force    = coord_type(0.0,  0.0, 0.0);
-    sys.at(2).force    = coord_type(0.0,  0.0, 0.0);
-    sys.at(3).force    = coord_type(0.0,  0.0, 0.0);
+    sys.at(0).position = coord_type(2.0, 0.0,  1.0);
+    sys.at(1).position = coord_type(1.0, 1.0,  0.0);
+    sys.at(2).position = coord_type(0.0, 0.0,  0.0);
+    sys.at(3).position = coord_type(1.0, 1.0, -1.0);
+    sys.at(0).velocity = coord_type(0.0, 0.0,  0.0);
+    sys.at(1).velocity = coord_type(0.0, 0.0,  0.0);
+    sys.at(2).velocity = coord_type(0.0, 0.0,  0.0);
+    sys.at(3).velocity = coord_type(0.0, 0.0,  0.0);
+    sys.at(0).force    = coord_type(0.0, 0.0,  0.0);
+    sys.at(1).force    = coord_type(0.0, 0.0,  0.0);
+    sys.at(2).force    = coord_type(0.0, 0.0,  0.0);
+    sys.at(3).force    = coord_type(0.0, 0.0,  0.0);
 
     const auto init = sys;
 
