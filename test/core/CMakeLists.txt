@@ -47,6 +47,7 @@ set(TEST_NAMES
     test_read_periodic_gaussian_potential
     test_read_flexible_local_angle_potential
     test_read_flexible_local_dihedral_potential
+    test_read_cosine_potential
     test_read_excluded_volume_potential
     test_read_debye_huckel_potential
     test_read_lennard_jones_potential
