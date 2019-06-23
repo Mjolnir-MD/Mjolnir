@@ -32,6 +32,7 @@ parameters  = [
   - [`"ClementiDihedral"`](ClementiDihedralPotential.md): Clementi-Go力場に使用するポテンシャルです。
   - [`"Gaussian"`](GaussianPotential.md): ガウシアン型のポテンシャルを用います。
   - [`"FlexibleLocalDihedral"`](FlexibleLocalDihedral.md): AICG2+力場に使用するポテンシャルです。
+  - [`"Cosine"`](CosinePotential.md): コサイン関数を使った汎用的なポテンシャルです。
 - `topology`: 文字列型
   - [`"Topology"`](Topology.md)に設定する名前を指定します。
 - `parameters`: テーブルの配列型
