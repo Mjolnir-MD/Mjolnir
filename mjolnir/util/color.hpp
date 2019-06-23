@@ -117,7 +117,7 @@ std::basic_ostream<charT, traits>& nocolor(std::basic_ostream<charT, traits>& os
 template<typename charT, typename traits>
 struct basic_lock_nocolor
 {
-    basic_lock_nocolor(std::basic_ostream<charT, traits>& os) noexcept
+    explicit basic_lock_nocolor(std::basic_ostream<charT, traits>& os) noexcept
         : os_(std::addressof(os))
     {}
     ~basic_lock_nocolor() noexcept
