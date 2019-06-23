@@ -214,6 +214,14 @@ read_dihedral_angle_interaction(
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
             kind, read_local_potential<4, potentialT>(local));
     }
+    else if(potential == "Cosine")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Cosine.");
+        using potentialT = CosinePotential<real_type>;
+
+        return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
+            kind, read_local_potential<4, potentialT>(local));
+    }
     else if(potential == "Gaussian+FlexibleLocalDihedral")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is "
