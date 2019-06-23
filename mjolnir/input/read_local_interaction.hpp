@@ -173,6 +173,8 @@ read_dihedral_angle_interaction(
     if(potential == "Harmonic")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Harmonic.");
+        MJOLNIR_LOG_WARN  ("[deprecated] There is a indifferentiable point.");
+        MJOLNIR_LOG_WARN  ("[deprecated] Reconsider to use different stuff.");
         using potentialT = HarmonicPotential<real_type>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
@@ -189,14 +191,16 @@ read_dihedral_angle_interaction(
     else if(potential == "Gaussian")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Gaussian.");
-        using potentialT = GaussianPotential<real_type>;
+        using potentialT = PeriodicGaussianPotential<real_type>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
             kind, read_local_potential<4, potentialT>(local));
     }
     else if(potential == "PeriodicGaussian")
     {
+        // XXX remove this after v1.4.0
         MJOLNIR_LOG_NOTICE("-- potential function is PeriodicGaussian.");
+        MJOLNIR_LOG_WARN  ("[deprecated] \"Periodic\" is no longer needed.");
         using potentialT = PeriodicGaussianPotential<real_type>;
 
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
@@ -210,12 +214,23 @@ read_dihedral_angle_interaction(
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
             kind, read_local_potential<4, potentialT>(local));
     }
-    // XXX generalization of this feature is too difficult (technically it's
-    //     not so difficult, but practically, it makes the code messy...).
-    else if(potential == "PeriodicGaussian+FlexibleLocalDihedral")
+    else if(potential == "Gaussian+FlexibleLocalDihedral")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is "
+                           "Gaussian + FlexibleLocalDihedral.");
+        using potentialT = SumLocalPotential<real_type,
+              PeriodicGaussianPotential, FlexibleLocalDihedralPotential>;
+
+        return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(kind,
+            read_local_potentials<4, real_type,
+                PeriodicGaussianPotential, FlexibleLocalDihedralPotential>(local));
+    }
+    else if(potential == "PeriodicGaussian+FlexibleLocalDihedral")
+    {
+        // XXX remove this after v1.4.0
+        MJOLNIR_LOG_NOTICE("-- potential function is "
                            "PeriodicGaussian + FlexibleLocalDihedral.");
+        MJOLNIR_LOG_WARN  ("[deprecated] \"Periodic\" is no longer needed.");
         using potentialT = SumLocalPotential<real_type,
               PeriodicGaussianPotential, FlexibleLocalDihedralPotential>;
 
