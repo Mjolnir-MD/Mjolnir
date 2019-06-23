@@ -10,6 +10,7 @@ set(TEST_NAMES
     test_harmonic_potential
     test_gaussian_potential
     test_periodic_gaussian_potential
+    test_cosine_potential
     test_flp_angle_potential
     test_flp_dihedral_potential
     test_clementi_dihedral_potential
