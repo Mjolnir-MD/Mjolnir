@@ -1,11 +1,6 @@
 #ifndef MJOLNIR_UTILITY_COLOR_HPP
 #define MJOLNIR_UTILITY_COLOR_HPP
-#include <iostream>
-#include <cstdio> // ::fileno (on *nix)
-
-#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-#include <unistd.h> // ::isatty
-#endif
+#include <mjolnir/util/io.hpp>
 
 // This utility manipulators output some ANSI escape codes.
 // On Windows (not supported by Mjolnir currently), it does not check
@@ -15,31 +10,6 @@ namespace mjolnir
 {
 namespace io
 {
-namespace detail
-{
-
-template<typename charT, typename traits>
-bool isatty(const std::basic_ostream<charT, traits>& os) noexcept
-{
-#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-    if(std::addressof(os) == std::addressof(std::cout))
-    {
-        return ::isatty(::fileno(stdout)) != 0;
-    }
-    else if(std::addressof(os) == std::addressof(std::cerr))
-    {
-        return ::isatty(::fileno(stderr)) != 0;
-    }
-    return false;
-#elif defined(_WIN32)
-    // TODO? When I bought windows machine...
-    return true;
-#else
-#  error "unknown platform"
-#endif
-}
-
-} // detail
 
 template<typename charT, typename traits>
 std::basic_ostream<charT, traits>& red(std::basic_ostream<charT, traits>& os)
