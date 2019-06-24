@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_CORE_OBSERVER_CONTAINER_HPP
 #define MJOLNIR_CORE_OBSERVER_CONTAINER_HPP
+#include <mjolnir/util/io.hpp>
 #include <mjolnir/util/progress_bar.hpp>
 #include <mjolnir/core/ObserverBase.hpp>
 #include <vector>
@@ -27,7 +28,7 @@ class ObserverContainer
   public:
 
     explicit ObserverContainer(bool output_progress = false)
-        : output_progress_(output_progress)
+        : output_progress_(output_progress && io::detail::isatty(std::cerr))
     {}
     ~ObserverContainer() = default;
 
