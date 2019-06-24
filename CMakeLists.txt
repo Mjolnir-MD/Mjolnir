@@ -10,7 +10,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/extlib)
 
 # -----------------------------------------------------------------------------
-# find compilation flags
+# find compilation flags (for general)
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-Wall"      MJOLNIR_COMPILER_HAS_WALL)
@@ -25,17 +25,9 @@ check_cxx_compiler_flag("-Wpedantic" MJOLNIR_COMPILER_HAS_WPEDANTIC)
 if(MJOLNIR_COMPILER_HAS_WPEDANTIC)
     add_definitions(-Wpedantic)
 endif()
-check_cxx_compiler_flag("-march=native" MJOLNIR_COMPILER_HAS_MARCH_NATIVE)
-if(MJOLNIR_COMPILER_HAS_MARCH_NATIVE)
-    add_definitions(-march=native)
-endif()
-check_cxx_compiler_flag("-mtune=native" MJOLNIR_COMPILER_HAS_MTUNE_NATIVE)
-if(MJOLNIR_COMPILER_HAS_MTUNE_NATIVE)
-    add_definitions(-mtune=native)
-endif()
 
 # -----------------------------------------------------------------------------
-# check input
+# check input flags
 
 option(DEBUG "dump debug information" OFF)
 if(DEBUG)
