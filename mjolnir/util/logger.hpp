@@ -3,6 +3,7 @@
 #include <mjolnir/util/macro.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
+#include <mjolnir/util/color.hpp>
 #include <array>
 #include <vector>
 #include <map>
@@ -183,8 +184,16 @@ class basic_logger
         if(level == Level::Notice || level == Level::Warn || level == Level::Error)
         {
             // message is also printed to stderr
-            output_message(std::cerr, "-- ", this->stringize(level),
-                           std::forward<Ts>(args)...);
+            std::cerr << "-- ";
+            if(level == Level::Warn)
+            {
+                std::cerr << '[' << io::yellow << "warning" << io::nocolor << "] ";
+            }
+            else if(level == Level::Error)
+            {
+                std::cerr << '[' << io::red << "error" << io::nocolor << "] ";
+            }
+            output_message(std::cerr, std::forward<Ts>(args)...);
             std::cerr << std::endl;
         }
 
@@ -212,8 +221,16 @@ class basic_logger
         if(level == Level::Notice || level == Level::Warn || level == Level::Error)
         {
             // message is also printed to stderr
-            output_message(std::cerr, "-- ", this->stringize(level),
-                           std::forward<Ts>(args)...);
+            std::cerr << "-- ";
+            if(level == Level::Warn)
+            {
+                std::cerr << '[' << io::yellow << "warning" << io::nocolor << "] ";
+            }
+            else if(level == Level::Error)
+            {
+                std::cerr << '[' << io::red << "error" << io::nocolor << "] ";
+            }
+            output_message(std::cerr, std::forward<Ts>(args)...);
             std::cerr << std::flush; // no Line Feed
         }
 
