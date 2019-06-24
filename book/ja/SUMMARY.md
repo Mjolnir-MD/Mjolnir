@@ -32,6 +32,7 @@
         - [Gaussian](refs/GaussianPotential.md)
         - [FlexibleLocal](refs/FlexibleLocalDihedralPotential.md)
         - [ClementiDihedral](refs/ClementiDihedralPotential.md)
+        - [Cosine](refs/CosinePotential.md)
       - [DummyInteraction](refs/DummyInteraction.md)
     - [GlobalForceField](refs/GlobalForceField.md)
       - [GlobalPairInteraction](refs/GlobalPairInteraction.md)

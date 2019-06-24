@@ -10,6 +10,7 @@
 #include <mjolnir/potential/local/PeriodicGaussianPotential.hpp>
 #include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
 #include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
+#include <mjolnir/potential/local/CosinePotential.hpp>
 #include <mjolnir/potential/local/SumLocalPotential.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/string.hpp>
@@ -122,6 +123,20 @@ read_flexible_local_dihedral_potential(const toml::value& param, const toml::val
     return FlexibleLocalDihedralPotential<realT>(k, term);
 }
 
+template<typename realT>
+CosinePotential<realT>
+read_cosine_potential(const toml::value& param, const toml::value& env)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    using real_type = realT;
+    auto k  = find_parameter<real_type   >(param, env, "k");
+    auto n  = find_parameter<std::int32_t>(param, env, "n");
+    auto v0 = find_parameter<real_type   >(param, env, "v0");
+
+    MJOLNIR_LOG_INFO("CosinePotential = {k = ", k, ", n = ", n, ", v0 = ", v0, '}');
+    return CosinePotential<realT>(k, n, v0);
+}
+
 // ----------------------------------------------------------------------------
 // utility function to read local potentials
 // ----------------------------------------------------------------------------
@@ -196,6 +211,15 @@ struct read_local_potential_impl<FlexibleLocalDihedralPotential<realT>>
     invoke(const toml::value& param, const toml::value& env)
     {
         return read_flexible_local_dihedral_potential<realT>(param, env);
+    }
+};
+template<typename realT>
+struct read_local_potential_impl<CosinePotential<realT>>
+{
+    static CosinePotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
+    {
+        return read_cosine_potential<realT>(param, env);
     }
 };
 } // namespace detail
