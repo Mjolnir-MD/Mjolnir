@@ -1,9 +1,12 @@
+add_definitions(-Ofast)
+
 add_executable(test_BAOABIntegrator test_BAOABIntegrator.cpp)
 
 set_target_properties(test_BAOABIntegrator PROPERTIES
-    COMPILE_FLAGS "-Ofast"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
-if(USE_OPENMP AND OpenMP_CXX_FOUND)
+if(OpenMP_FOUND AND USE_OPENMP)
+    message(STATUS "adding OpenMP flags ${OpenMP_CXX_FLAGS} to test_BAOABIntegrator ...")
+    target_compile_options(test_BAOABIntegrator PUBLIC -DMJOLNIR_WITH_OPENMP ${OpenMP_CXX_FLAGS})
     target_link_libraries(test_BAOABIntegrator ${OpenMP_CXX_LIBRARIES})
 endif()

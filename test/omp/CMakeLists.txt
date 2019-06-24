@@ -18,6 +18,10 @@ set(TEST_NAMES
 
 add_definitions("-O2")
 
+if(NOT (OpenMP_FOUND AND USE_OPENMP))
+    message(FATAL_ERROR "Test codes for OpenMP implementation requires OpenMP library.")
+endif()
+
 if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
     message(STATUS "boost_unit_test_framework precompiled library found -> ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}")
     add_definitions(-DBOOST_TEST_DYN_LINK)
@@ -26,9 +30,13 @@ endif()
 
 foreach(TEST_NAME ${TEST_NAMES})
     add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+
     target_link_libraries(${TEST_NAME} ${OpenMP_CXX_LIBRARIES})
+    target_compile_options(${TEST_NAME} PUBLIC -DMJOLNIR_WITH_OPENMP ${OpenMP_CXX_FLAGS})
+
     if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
         target_link_libraries(${TEST_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
     endif (Boost_UNIT_TEST_FRAMEWORK_FOUND)
+
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} --log_level=warning WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 endforeach(TEST_NAME)
