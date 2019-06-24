@@ -52,7 +52,7 @@ class ObserverContainer
         for(const auto& obs : this->observers_)
         {
             obs->output(step, dt, sys, ff);
-        }   
+        }
 
         // this branching might be wiped out by introducing another parameter
         // to SimulatorTraits, but I don't think the cost of the implementation
