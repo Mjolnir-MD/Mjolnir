@@ -332,7 +332,7 @@ void PeriodicGridCellList<traitsT, parameterT>::initialize(
         assert(uniq == cell.second.end());
         for(auto i : cell.second)
         {
-            assert(0 <= i && i <= cell_list_.size());
+            assert(i <= cell_list_.size());
         }
     }
     }
