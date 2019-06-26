@@ -16,8 +16,6 @@ set(TEST_NAMES
     test_omp_position_restraint_interaction
     )
 
-add_definitions("-O2")
-
 if(NOT (OpenMP_FOUND AND USE_OPENMP))
     message(FATAL_ERROR "Test codes for OpenMP implementation requires OpenMP library.")
 endif()
