@@ -31,7 +31,16 @@ BOOST_AUTO_TEST_CASE(Harmonic_double)
         const real_type dpot = (pot1 - pot2) / (2 * h);
         const real_type deri = harmonic.derivative(x);
 
-        BOOST_TEST(dpot == deri, boost::test_tools::tolerance(h));
+        if(std::abs(pot1 / pot2 - 1.0) < h)
+        {
+            // pot1 and pot2 are almost the same, thus dpot ~ 0.0.
+            // to avoid numerical error in dpot, here it checks `deri ~ 0.0`.
+            BOOST_TEST(deri == 0.0, boost::test_tools::tolerance(h));
+        }
+        else
+        {
+            BOOST_TEST(dpot == deri, boost::test_tools::tolerance(h));
+        }
     }
 }
 
@@ -58,6 +67,15 @@ BOOST_AUTO_TEST_CASE(Harmonic_float)
         const real_type dpot = (pot1 - pot2) / (2 * h);
         const real_type deri = harmonic.derivative(x);
 
-        BOOST_TEST(dpot == deri, boost::test_tools::tolerance(h));
+        if(std::abs(pot1 / pot2 - 1.0f) < h)
+        {
+            // pot1 and pot2 are almost the same, thus dpot ~ 0.0.
+            // to avoid numerical error in dpot, here it checks `deri ~ 0.0`.
+            BOOST_TEST(deri == 0.0f, boost::test_tools::tolerance(h));
+        }
+        else
+        {
+            BOOST_TEST(dpot == deri, boost::test_tools::tolerance(h));
+        }
     }
 }

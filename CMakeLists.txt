@@ -10,7 +10,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/extlib)
 
 # -----------------------------------------------------------------------------
-# find compilation flags
+# add compilation flags (for general)
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-Wall"      MJOLNIR_COMPILER_HAS_WALL)
@@ -25,17 +25,39 @@ check_cxx_compiler_flag("-Wpedantic" MJOLNIR_COMPILER_HAS_WPEDANTIC)
 if(MJOLNIR_COMPILER_HAS_WPEDANTIC)
     add_definitions(-Wpedantic)
 endif()
-check_cxx_compiler_flag("-march=native" MJOLNIR_COMPILER_HAS_MARCH_NATIVE)
-if(MJOLNIR_COMPILER_HAS_MARCH_NATIVE)
-    add_definitions(-march=native)
-endif()
-check_cxx_compiler_flag("-mtune=native" MJOLNIR_COMPILER_HAS_MTUNE_NATIVE)
-if(MJOLNIR_COMPILER_HAS_MTUNE_NATIVE)
-    add_definitions(-mtune=native)
+
+# ----------------------------------------------------------------------------
+# add optimization flags
+
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
+    check_cxx_compiler_flag("-fast" MJOLNIR_COMPILER_HAS_FAST)
+    if(MJOLNIR_COMPILER_HAS_FAST)
+        add_definitions(-fast)
+    endif()
+    check_cxx_compiler_flag("-xHost" MJOLNIR_COMPILER_HAS_XHOST)
+    if(MJOLNIR_COMPILER_HAS_XHOST)
+        add_definitions(-xHost)
+    endif()
+else()
+    check_cxx_compiler_flag("-march=native" MJOLNIR_COMPILER_HAS_MARCH_NATIVE)
+    if(MJOLNIR_COMPILER_HAS_MARCH_NATIVE)
+        add_definitions(-march=native)
+    endif()
+    check_cxx_compiler_flag("-mtune=native" MJOLNIR_COMPILER_HAS_MTUNE_NATIVE)
+    if(MJOLNIR_COMPILER_HAS_MTUNE_NATIVE)
+        add_definitions(-mtune=native)
+    endif()
+    check_cxx_compiler_flag("-Ofast" MJOLNIR_COMPILER_HAS_OFAST)
+    check_cxx_compiler_flag("-O3"    MJOLNIR_COMPILER_HAS_O3)
+    if(MJOLNIR_COMPILER_HAS_OFAST)
+        add_definitions(-Ofast)
+    elseif(MJOLNIR_COMPILER_HAS_O3)
+        add_definitions(-O3)
+    endif()
 endif()
 
 # -----------------------------------------------------------------------------
-# check input
+# check input flags
 
 option(DEBUG "dump debug information" OFF)
 if(DEBUG)
@@ -52,9 +74,6 @@ if(USE_OPENMP)
     find_package(OpenMP)
     if(OpenMP_CXX_FOUND)
         message(STATUS "OpenMP ${OpenMP_CXX_VERSION} found")
-        add_definitions(-DMJOLNIR_WITH_OPENMP)
-        message(STATUS "adding OpenMP flags ${OpenMP_CXX_FLAGS} ...")
-        add_definitions("${OpenMP_CXX_FLAGS}")
     else()
         message(WARNING "OpenMP not found. OpenMP support is disabled.")
     endif()
