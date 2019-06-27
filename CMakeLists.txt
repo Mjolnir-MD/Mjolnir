@@ -64,7 +64,8 @@ if(DEBUG)
     add_definitions(-DMJOLNIR_DEBUG)
 endif()
 
-option(USE_APPROX "use approximation instruction for time-consuming math functions" OFF)
+option(USE_APPROX "\
+use approximation instruction for time-consuming math functions" OFF)
 if(USE_APPROX)
     add_definitions(-DMJOLNIR_WITH_APPROX)
 endif()
@@ -78,6 +79,10 @@ if(USE_OPENMP)
         message(WARNING "OpenMP not found. OpenMP support is disabled.")
     endif()
 endif()
+
+option(BUILD_INTEGRATION_TEST "\
+build integration test that does not run automatically \
+because it takes relatively long time" ON)
 
 # -----------------------------------------------------------------------------
 
