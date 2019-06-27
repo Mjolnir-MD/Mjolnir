@@ -1,5 +1,20 @@
 # Change Log
 
+## 1.3.0
+
+### Added
+
+- add BAOABLangevinIntegrator
+- add CosinePotential for DihedralAngleInteraction
+- enable to define variables in input files
+
+### Changed
+
+- upgrade toml11 to 2.4.0
+- disallow to use some of non-periodic potential with DihedralAngle
+- make special log message colorful
+- check isatty before printing a progress bar
+
 ## 1.2.2
 
 ### Fixed
