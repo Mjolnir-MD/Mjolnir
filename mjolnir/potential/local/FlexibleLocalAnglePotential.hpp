@@ -37,6 +37,7 @@ class FlexibleLocalAnglePotential
     static constexpr real_type rdtheta = 1.0 / dtheta;
 
   public:
+
     FlexibleLocalAnglePotential(const real_type k,
                                 const std::array<real_type, 10>& ys,
                                 const std::array<real_type, 10>& d2ys)
@@ -115,10 +116,15 @@ class FlexibleLocalAnglePotential
     {
         constexpr real_type one_over_six = real_type(1.0) / real_type(6.0);
 
-        const std::size_t n = std::floor((th - min_theta) * rdtheta);
+        std::size_t n = std::floor((th - min_theta) * rdtheta);
+
+        if     (thetas[n+1] < th) {n++;}
+        else if(th <   thetas[n]) {n--;}
         assert(n < 9);
-        const real_type   a = (thetas[n+1] - th) * rdtheta;
-        const real_type   b = (th - thetas[n  ]) * rdtheta;
+        assert(thetas[n] <= th && th <= thetas[n+1]);
+
+        const real_type a = (thetas[n+1] - th) * rdtheta;
+        const real_type b = (th - thetas[n  ]) * rdtheta;
 
         const real_type e1 = a * ys_[n] + b * ys_[n+1];
         const real_type e2 =
@@ -132,8 +138,13 @@ class FlexibleLocalAnglePotential
     {
         constexpr real_type one_over_six = real_type(1.0) / real_type(6.0);
 
-        const std::size_t n = std::floor((th - min_theta) * rdtheta);
+        std::size_t n = std::floor((th - min_theta) * rdtheta);
+
+        if     (thetas[n+1] < th) {n++;}
+        else if(th <   thetas[n]) {n--;}
         assert(n < 9);
+        assert(thetas[n] <= th && th <= thetas[n+1]);
+
         const real_type a = (thetas[n+1] - th) * rdtheta;
         const real_type b = (th - thetas[n  ]) * rdtheta;
 
