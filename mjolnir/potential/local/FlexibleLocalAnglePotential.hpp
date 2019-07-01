@@ -39,18 +39,6 @@ class FlexibleLocalAnglePotential
           dtheta((max_theta - min_theta) / 9.0), rdtheta(1.0 / dtheta),
           thetas(xs), ys_(ys), d2ys_(d2ys)
     {
-        // check the data points are evenly distributed.
-        for(std::size_t i=1; i < thetas.size(); ++i)
-        {
-            const auto x_prev = this->thetas[i-1];
-            const auto x_curr = this->thetas[i];
-            const auto dx_tmp = x_curr - x_prev;
-            if(std::abs(dx_tmp / this->dtheta - 1.0) > 1e-6)
-            {
-                throw_exception<std::runtime_error>("FlexibleLocalAnglePotential:"
-                    " data points are not evenly distributed");
-            }
-        }
         this->reset_energy_parameters();
     }
     FlexibleLocalAnglePotential(const real_type k,
@@ -108,6 +96,19 @@ class FlexibleLocalAnglePotential
 
     void reset_energy_parameters()
     {
+        // check the data points are evenly distributed.
+        for(std::size_t i=1; i < thetas.size(); ++i)
+        {
+            const auto x_prev = this->thetas[i-1];
+            const auto x_curr = this->thetas[i];
+            const auto dx_tmp = x_curr - x_prev;
+            if(std::abs(dx_tmp / this->dtheta - 1.0) > 1e-4)
+            {
+                throw_exception<std::runtime_error>("FlexibleLocalAnglePotential:"
+                    " data points are not evenly distributed");
+            }
+        }
+
         // set the range and the parameters from table
         // from cafemol3/mloop_flexible_local.F90
         const real_type center_th = (max_theta + min_theta) * 0.5;
