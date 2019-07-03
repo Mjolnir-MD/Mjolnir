@@ -32,8 +32,8 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_Harmonic)
 
     interaction_type interaction(
         std::vector<std::tuple<std::size_t, coordinate_type, potential_type>>{
-            {0, coordinate_type{0.0,0.0,0.0}, pot1},
-            {1, coordinate_type{0.0,0.0,0.0}, pot2}
+            std::make_tuple(0, coordinate_type{0.0,0.0,0.0}, pot1),
+            std::make_tuple(1, coordinate_type{0.0,0.0,0.0}, pot2)
         });
 
     system_type sys(2, boundary_type{});
