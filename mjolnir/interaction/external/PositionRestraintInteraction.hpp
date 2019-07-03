@@ -34,7 +34,7 @@ class PositionRestraintInteraction final
 
   public:
 
-    PositionRestraintInteraction(potential_container_type&& pots)
+    explicit PositionRestraintInteraction(potential_container_type&& pots)
         : potentials_(std::move(pots))
     {}
     ~PositionRestraintInteraction() override = default;
