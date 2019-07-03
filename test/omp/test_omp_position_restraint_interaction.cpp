@@ -9,7 +9,7 @@
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/potential/external/HarmonicRestraintPotential.hpp>
+#include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/omp/System.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/PositionRestraintInteraction.hpp>
@@ -25,8 +25,7 @@ BOOST_AUTO_TEST_CASE(omp_PositionRestraint)
     using coordinate_type  = typename traits_type::coordinate_type;
     using boundary_type    = typename traits_type::boundary_type;
     using system_type      = mjolnir::System<traits_type>;
-    using potential_type   = mjolnir::HarmonicRestraintPotential<real_type>;
-    using parameter_type   = typename potential_type::parameter_type;
+    using potential_type   = mjolnir::HarmonicPotential<real_type>;
     using interaction_type = mjolnir::PositionRestraintInteraction<traits_type, potential_type>;
     using rng_type         = mjolnir::RandomNumberGenerator<traits_type>;
 
@@ -46,12 +45,11 @@ BOOST_AUTO_TEST_CASE(omp_PositionRestraint)
         omp_set_num_threads(num_thread);
         BOOST_TEST_MESSAGE("maximum number of threads = " << omp_get_max_threads());
 
-        potential_type potential(
-            std::vector<parameter_type>(N_particle, parameter_type(1.0, 0.0)));
+        potential_type potential(1.0, 0.0);
 
         rng_type    rng(123456789);
         system_type sys(N_particle, boundary_type{});
-        std::vector<std::pair<std::size_t, coordinate_type>> positions;
+        std::vector<std::tuple<std::size_t, coordinate_type, potential_type>> positions;
 
         for(std::size_t i=0; i<sys.size(); ++i)
         {
@@ -66,8 +64,9 @@ BOOST_AUTO_TEST_CASE(omp_PositionRestraint)
             sys.name(i)     = "X";
             sys.group(i)    = "TEST";
 
-            positions.emplace_back(i, sys.position(i));
+            positions.emplace_back(i, sys.position(i), potential);
         }
+        std::vector<std::tuple<std::size_t, coordinate_type, potential_type>> positions2(positions);
 
         // add perturbation
         for(std::size_t i=0; i<sys.size(); ++i)
@@ -90,10 +89,8 @@ BOOST_AUTO_TEST_CASE(omp_PositionRestraint)
             seq_sys.group(i)    = sys.group(i);
         }
 
-        interaction_type            interaction(
-                positions, potential_type(potential));
-        sequencial_interaction_type seq_interaction(
-                positions, potential_type(potential));
+        interaction_type            interaction    (std::move(positions));
+        sequencial_interaction_type seq_interaction(std::move(positions2));
 
         interaction    .initialize(sys);
         seq_interaction.initialize(seq_sys);

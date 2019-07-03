@@ -8,6 +8,7 @@
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_external_potential.hpp>
+#include <mjolnir/input/read_local_potential.hpp>
 #include <memory>
 
 namespace mjolnir
@@ -147,31 +148,42 @@ template<typename traitsT>
 std::unique_ptr<ExternalForceInteractionBase<traitsT>>
 read_external_position_restraint_interaction(const toml::value& external)
 {
+    // [[forcefields.external]]
+    // interaction = "PositionRestraint"
+    // potential   = "Harmonic" # ----------------------------------------+
+    // parameters  = [                                                    |
+    //     {index = 0, position = [0.0, 0.0, 0.0], k = 0.1, v0 = 10.0},   v
+    //     #                                       ^^^^^^^^^^^^^^^^^^ Harmonic
+    //     # ...
+    // ]
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
     using real_type       = typename traitsT::real_type;
-    using coordinate_type = typename traitsT::coordinate_type;
 
-    std::vector<std::pair<std::size_t, coordinate_type>> points;
-
-    const auto& parameters = toml::find<toml::array>(external, "parameters");
-    for(const auto& parameter : parameters)
-    {
-        const auto index    = toml::find<std::size_t>(parameter, "index");
-        const auto position = toml::find<std::array<real_type, 3>>(parameter, "position");
-
-        points.emplace_back(index, position);
-    }
+    const auto& env = external.as_table().count("env") == 1 ?
+                      external.as_table().at("env") : toml::value{};
 
     const auto potential = toml::find<std::string>(external, "potential");
     if(potential == "Harmonic")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Harmonic.");
-        using potential_t   = HarmonicRestraintPotential<real_type>;
+        using potential_t   = HarmonicPotential<real_type>;
         using interaction_t = PositionRestraintInteraction<traitsT, potential_t>;
 
-        return make_unique<interaction_t>(std::move(points),
-             read_harmonic_restraint_potential<real_type>(external));
+        // container to put parameterjskl:w
+        typename interaction_t::potential_container_type potentials;
+
+        const auto& parameters = toml::find<toml::array>(external, "parameters");
+        potentials.reserve(parameters.size());
+
+        for(const auto& para : parameters)
+        {
+            const auto idx = find_parameter<std::size_t>(para, env, "index");
+            const auto pos = find_parameter<std::array<real_type, 3>>(para, env, "position");
+            const auto pot = read_harmonic_potential<real_type>(para, env);
+            potentials.emplace_back(idx, pos, pot);
+        }
+        return make_unique<interaction_t>(std::move(potentials));
     }
     else
     {

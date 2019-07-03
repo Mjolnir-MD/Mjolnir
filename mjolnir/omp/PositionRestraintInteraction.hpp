@@ -6,7 +6,12 @@
 namespace mjolnir
 {
 
-//! @brief Interaction between particles and points.
+// Interaction between particles and fixed points.
+//
+// XXX
+// It re-uses local potentials that can be found in mjolnir/potential/local/*,
+// e.g. HarmonicPotential, GaussianPotential, and so on.
+//
 template<typename realT, template<typename, typename> class boundaryT,
          typename potentialT>
 class PositionRestraintInteraction<
@@ -22,34 +27,35 @@ class PositionRestraintInteraction<
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
 
-    // list of {pair of a particle-id and a position at which
-    //          the particle would be restrained}
-    using shape_type = std::vector<std::pair<std::size_t, coordinate_type>>;
+    using potential_container_type = std::vector<
+            //        {particle-id, fixed point,    potential class}
+            std::tuple<std::size_t, coordinate_type, potential_type>
+        >;
 
   public:
 
-    PositionRestraintInteraction(
-        shape_type shape, potential_type pot)
-        : shape_(std::move(shape)), potential_(std::move(pot))
+    explicit PositionRestraintInteraction(potential_container_type&& pots)
+        : potentials_(std::move(pots))
     {}
     ~PositionRestraintInteraction() override = default;
 
     void calc_force (system_type& sys) const noexcept override
     {
 #pragma omp for nowait
-        for(std::size_t i=0; i<this->shape_.size(); ++i)
+        for(std::size_t i=0; i<this->potentials_.size(); ++i)
         {
-            const auto& pidpos = this->shape_[i];
+            const auto& pots = this->potentials_[i];
 
-            const auto  pid = pidpos.first;  // particle index
-            const auto& pos = pidpos.second; // restrained position
+            const auto  pid = std::get<0>(pots); // particle index
+            const auto& pos = std::get<1>(pots); // restrained position
+            const auto& pot = std::get<2>(pots); // potential form
 
             const auto& r_i = sys.position(pid);
             const auto  dr  = sys.adjust_direction(pos - r_i);
 
             const auto rlen = math::rlength(dr); // 1 / |dr|
             const auto dist = math::length_sq(dr) * rlen;
-            const auto dV   = this->potential_.derivative(pid, dist);
+            const auto dV   = pot.derivative(dist);
             if(dV == 0.0){continue;}
 
             sys.force_thread(omp_get_thread_num(), pid) += (dV * rlen) * dr;
@@ -61,34 +67,40 @@ class PositionRestraintInteraction<
     {
         real_type E = 0.0;
 #pragma omp parallel for reduction(+:E)
-        for(std::size_t i=0; i<this->shape_.size(); ++i)
+        for(std::size_t i=0; i<this->potentials_.size(); ++i)
         {
-            const auto& pidpos = this->shape_[i];
-            const auto  pid = pidpos.first;  // particle index
-            const auto& pos = pidpos.second; // restrained position
+            const auto& pots = this->potentials_[i];
+
+            const auto  pid = std::get<0>(pots); // particle index
+            const auto& pos = std::get<1>(pots); // restrained position
+            const auto& pot = std::get<2>(pots); // potential form
 
             const auto& r_i = sys.position(pid);
             const auto  dr  = sys.adjust_direction(pos - r_i);
 
             const auto dist = math::length(dr);
-            E += this->potential_.potential(pid, dist);
+            E += pot.potential(dist);
         }
         return E;
     }
 
-    /*! @brief initialize spatial partition (e.g. CellList)                   *
-     *  @details before calling `calc_(force|energy)`, this should be called. */
     void initialize(const system_type& sys) override
     {
         // update system parameters such as temperature, ionic-strength, etc.,
-        this->potential_.update(sys);
+        for(auto& pot : potentials_)
+        {
+            std::get<2>(pot).update(sys);
+        }
         return;
     }
 
     void update(const system_type& sys) override
     {
         // update system parameters such as temperature, ionic-strength, etc.
-        this->potential_.update(sys);
+        for(auto& pot : potentials_)
+        {
+            std::get<2>(pot).update(sys);
+        }
         return;
     }
 
@@ -96,12 +108,11 @@ class PositionRestraintInteraction<
     void update_margin(const real_type, const system_type&) override {return;}
 
     std::string name() const override
-    {return "PositionRestraint:"_s + potential_.name();}
+    {return "PositionRestraint:"_s + potential_type::name();}
 
   private:
 
-    shape_type     shape_;
-    potential_type potential_;
+    potential_container_type potentials_;
 };
 
 } // mjolnir
