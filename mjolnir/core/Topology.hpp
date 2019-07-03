@@ -46,7 +46,8 @@ class Topology
     struct node
     {
         std::size_t molecule_id;
-        std::string identifier;
+        std::string name;
+        std::string group;
         std::vector<edge_type> adjacents;
     };
 
@@ -60,22 +61,42 @@ class Topology
     Topology& operator=(Topology&&)      = default;
 
     explicit Topology(const std::size_t N)
-        : num_molecules_(1), nodes_(N, {uninitialized(), "uninitialized", {}})
+        : num_molecules_(1), nodes_(N, node{
+                uninitialized(), "uninitialized", "uninitialized", {}})
     {}
 
     void        clear()                {return nodes_.clear();}
     bool        empty() const noexcept {return nodes_.empty();}
     std::size_t size()  const noexcept {return nodes_.size();}
 
-    std::string&       identifier_of(const std::size_t i)
-    {return this->nodes_.at(i).identifier;}
-    std::string const& identifier_of(const std::size_t i) const
-    {return this->nodes_.at(i).identifier;}
+    std::string&       name_of(const std::size_t i)
+    {return this->nodes_.at(i).name;}
+    std::string const& name_of(const std::size_t i) const
+    {return this->nodes_.at(i).name;}
+    std::string&       name_of(const std::size_t i, const std::nothrow_t&) noexcept
+    {return this->nodes_[i].name;}
+    std::string const& name_of(const std::size_t i, const std::nothrow_t&) const noexcept
+    {return this->nodes_[i].name;}
 
-    molecule_id_type  molecule_of(const std::size_t idx) const
-    {return nodes_.at(idx).molecule_id;}
-    molecule_id_type& molecule_of(const std::size_t idx)
-    {return nodes_.at(idx).molecule_id;}
+    molecule_id_type  molecule_of(const std::size_t i) const
+    {return nodes_.at(i).molecule_id;}
+    molecule_id_type& molecule_of(const std::size_t i)
+    {return nodes_.at(i).molecule_id;}
+
+    molecule_id_type  molecule_of(const std::size_t i, const std::nothrow_t&) const
+    {return nodes_[i].molecule_id;}
+    molecule_id_type& molecule_of(const std::size_t i, const std::nothrow_t&)
+    {return nodes_[i].molecule_id;}
+
+    std::string&       group_of(const std::size_t i)
+    {return this->nodes_.at(i).group;}
+    std::string const& group_of(const std::size_t i) const
+    {return this->nodes_.at(i).group;}
+
+    std::string&       group_of(const std::size_t i, const std::nothrow_t&) noexcept
+    {return this->nodes_[i].group;}
+    std::string const& group_of(const std::size_t i, const std::nothrow_t&) const noexcept
+    {return this->nodes_[i].group;}
 
     void add_connection  (const std::size_t i, const std::size_t j,
                           const connection_kind_type& kind);
