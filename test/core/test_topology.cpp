@@ -161,3 +161,35 @@ BOOST_AUTO_TEST_CASE(topology_erase_connection)
         BOOST_CHECK(!(tmp.has_connection(i, i+1, "bond")));
     }
 }
+
+BOOST_AUTO_TEST_CASE(topology_construct_molecules)
+{
+    constexpr std::size_t N = 100;
+    static_assert(N > 50, "");
+
+    mjolnir::Topology top(N);
+    for(std::size_t i=1; i<N; ++i)
+    {
+        top.add_connection(i-1, i, "bond");
+    }
+    top.construct_molecules();
+
+    BOOST_TEST(top.number_of_molecules() == 1);
+    for(std::size_t i=0; i<N; ++i)
+    {
+        BOOST_TEST(top.molecule_of(i) == 0);
+    }
+
+    top.erase_connection(49, 50, "bond");
+    top.construct_molecules();
+
+    BOOST_TEST(top.number_of_molecules() == 2);
+    for(std::size_t i=0; i<50; ++i)
+    {
+        BOOST_TEST(top.molecule_of(i) == 0);
+    }
+    for(std::size_t i=50; i<N; ++i)
+    {
+        BOOST_TEST(top.molecule_of(i) == 1);
+    }
+}
