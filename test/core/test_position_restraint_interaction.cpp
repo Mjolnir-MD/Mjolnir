@@ -9,7 +9,7 @@
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/interaction/external/PositionRestraintInteraction.hpp>
-#include <mjolnir/potential/external/HarmonicRestraintPotential.hpp>
+#include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <random>
 
@@ -20,22 +20,21 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_Harmonic)
     using coordinate_type  = traits_type::coordinate_type;
     using boundary_type    = traits_type::boundary_type;
     using system_type      = mjolnir::System<traits_type>;
-    using potential_type   = mjolnir::HarmonicRestraintPotential<real_type>;
+    using potential_type   = mjolnir::HarmonicPotential<real_type>;
     using interaction_type = mjolnir::PositionRestraintInteraction<traits_type, potential_type>;
 
     constexpr real_type tol = 1e-8;
 
     auto normalize = [](const coordinate_type& v){return v / mjolnir::math::length(v);};
 
-    potential_type   potential(std::vector<std::pair<real_type, real_type>>{
-            {/*k =*/1.0, /*r0 =*/ 0.0},
-            {/*k =*/1.0, /*r0 =*/10.0},
-        });
+    const potential_type pot1{/*k =*/1.0, /*r0 =*/ 0.0};
+    const potential_type pot2{/*k =*/1.0, /*r0 =*/10.0};
+
     interaction_type interaction(
-        std::vector<std::pair<std::size_t, coordinate_type>>{
-            {0, coordinate_type{0.0,0.0,0.0}},
-            {1, coordinate_type{0.0,0.0,0.0}}
-        }, potential);
+        std::vector<std::tuple<std::size_t, coordinate_type, potential_type>>{
+            {0, coordinate_type{0.0,0.0,0.0}, pot1},
+            {1, coordinate_type{0.0,0.0,0.0}, pot2}
+        });
 
     system_type sys(2, boundary_type{});
 
@@ -66,7 +65,7 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_Harmonic)
         sys.force(0)    = coordinate_type(0, 0, 0);
 
         const auto dist = mjolnir::math::length(sys.position(0));
-        const auto deriv = potential.derivative(0, dist);
+        const auto deriv = pot1.derivative(dist);
         const auto coef  = std::abs(deriv);
 
         interaction.calc_force(sys);
@@ -92,7 +91,7 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_Harmonic)
         sys.position(1) += offset; // dist ~ 10.0 +- random vector
 
         const auto dist  = mjolnir::math::length(sys.position(1));
-        const auto deriv = potential.derivative(1, dist);
+        const auto deriv = pot2.derivative(dist);
         const auto coef  = std::abs(deriv);
 
         interaction.calc_force(sys);
