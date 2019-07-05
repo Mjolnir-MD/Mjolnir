@@ -84,6 +84,12 @@ option(BUILD_INTEGRATION_TEST "\
 build integration test that does not run automatically \
 because it takes relatively long time" ON)
 
+option(SEPARATE_BUILD "separate build" OFF)
+if(SEPARATE_BUILD)
+    add_definitions(-DMJOLNIR_SEPARATE_BUILD)
+    add_definitions(-flto)
+endif()
+
 # -----------------------------------------------------------------------------
 
 if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/toml/toml.hpp")
@@ -125,6 +131,11 @@ else()
         include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_69_0)
         message(STATUS "done.")
     endif()
+endif()
+
+set(mjolnir_source_files)
+if(SEPARATE_BUILD)
+    add_subdirectory(mjolnir)
 endif()
 
 add_subdirectory(src)

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 # add executables
 
-add_executable(mjolnir mjolnir.cpp)
+add_executable(mjolnir mjolnir.cpp ${mjolnir_source_files})
 set_target_properties(mjolnir PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 
