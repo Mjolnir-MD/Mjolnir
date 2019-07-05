@@ -56,5 +56,10 @@ class GaussianPotential
     real_type cutoff_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class GaussianPotential<double>;
+extern template class GaussianPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 } // mjolnir
 #endif /* MJOLNIR_GAUSSIAN_POTENTIAL */

@@ -54,5 +54,10 @@ class CosinePotential
     real_type   v0_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class CosinePotential<double>;
+extern template class CosinePotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 } // mjolnir
 #endif /* MJOLNIR_POTENTIAL_LOCAL_COSINE_POTENTIAL_HPP */

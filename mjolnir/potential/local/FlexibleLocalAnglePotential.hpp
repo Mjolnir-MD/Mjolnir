@@ -178,5 +178,10 @@ constexpr realT FlexibleLocalAnglePotential<realT>::rdtheta;
 template<typename realT>
 constexpr std::array<realT, 10> FlexibleLocalAnglePotential<realT>::thetas;
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class FlexibleLocalAnglePotential<double>;
+extern template class FlexibleLocalAnglePotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 } // mjolnir
 #endif // MJOLNIR_FLEXIBLE_LOCAL_ANGLE_POTENTIAL
