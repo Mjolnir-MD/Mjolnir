@@ -222,5 +222,10 @@ template<typename realT>
 constexpr typename DebyeHuckelPotential<realT>::real_type
 DebyeHuckelPotential<realT>::cutoff_ratio;
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class DebyeHuckelPotential<double>;
+extern template class DebyeHuckelPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 } // mjolnir
 #endif /* MJOLNIR_DEBYE_HUCKEL_POTENTIAL */

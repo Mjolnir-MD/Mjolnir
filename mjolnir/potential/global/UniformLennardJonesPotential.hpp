@@ -164,5 +164,10 @@ template<typename traitsT>
 constexpr typename UniformLennardJonesPotential<traitsT>::real_type
 UniformLennardJonesPotential<traitsT>::cutoff_ratio;
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class UniformLennardJonesPotential<double>;
+extern template class UniformLennardJonesPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 } // mjolnir
 #endif /* MJOLNIR_LENNARD_JONES_POTENTIAL */

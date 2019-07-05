@@ -160,5 +160,10 @@ template<typename realT>
 constexpr typename ExcludedVolumePotential<realT>::real_type
 ExcludedVolumePotential<realT>::cutoff_ratio;
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ExcludedVolumePotential<double>;
+extern template class ExcludedVolumePotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 } // mjolnir
 #endif /* MJOLNIR_EXCLUDED_VOLUME_POTENTIAL */

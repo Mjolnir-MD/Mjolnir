@@ -162,5 +162,10 @@ template<typename realT>
 constexpr typename LennardJonesPotential<realT>::real_type
 LennardJonesPotential<realT>::cutoff_ratio;
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class LennardJonesPotential<double>;
+extern template class LennardJonesPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 } // mjolnir
 #endif /* MJOLNIR_LENNARD_JONES_POTENTIAL */

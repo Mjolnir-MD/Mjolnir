@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_IGNORE_MOLECULE_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_IGNORE_MOLECULE_HPP
 #include <mjolnir/util/throw_exception.hpp>
+#include <mjolnir/core/Topology.hpp>
 #include <string>
 #include <memory>
 
@@ -118,6 +119,14 @@ struct IgnoreMolecule
 
     std::unique_ptr<IgnoreMoleculeBase<MoleculeID>> ignore_mol_;
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class IgnoreMoleculeBase<Topology::molecule_id_type>;
+extern template class IgnoreNothing     <Topology::molecule_id_type>;
+extern template class IgnoreSelf        <Topology::molecule_id_type>;
+extern template class IgnoreOthers      <Topology::molecule_id_type>;
+extern template class IgnoreMolecule    <Topology::molecule_id_type>;
+#endif// MJOLNIR_SEPARATE_BUILD
 
 } // mjolnir
 #endif// MJOLNIR_IGNORE_MOLECULE_HPP
