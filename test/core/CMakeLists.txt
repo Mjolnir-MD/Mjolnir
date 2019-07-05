@@ -22,7 +22,6 @@ set(TEST_NAMES
     test_implicit_membrane_potential
     test_excluded_volume_wall_potential
     test_lennard_jones_wall_potential
-    test_harmonic_restraint_potential
     test_axis_aligned_plane_shape
 
     test_bond_length_interaction
@@ -55,7 +54,6 @@ set(TEST_NAMES
     test_read_excluded_volume_wall_potential
     test_read_lennard_jones_wall_potential
     test_read_implicit_membrane_potential
-    test_read_harmonic_restraint_potential
 
     test_read_bond_length_interaction
     test_read_bond_angle_interaction
