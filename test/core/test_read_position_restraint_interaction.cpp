@@ -39,8 +39,8 @@ BOOST_AUTO_TEST_CASE(read_position_restraint_harmonic)
 
         BOOST_TEST(interaction.potentials().size() == 2u);
 
-        BOOST_TEST(std::get<0>(interaction.potentials().at(0)) ==   0);
-        BOOST_TEST(std::get<0>(interaction.potentials().at(1)) == 100);
+        BOOST_TEST(std::get<0>(interaction.potentials().at(0)) ==   0u);
+        BOOST_TEST(std::get<0>(interaction.potentials().at(1)) == 100u);
 
         BOOST_TEST(std::get<1>(interaction.potentials().at(0)).at(0) == 0.0);
         BOOST_TEST(std::get<1>(interaction.potentials().at(0)).at(1) == 0.0);

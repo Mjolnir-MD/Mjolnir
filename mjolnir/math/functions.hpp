@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_MATH_FUNCTIONS_HPP
 #define MJOLNIR_MATH_FUNCTIONS_HPP
+#include <algorithm>
 #include <cstdint>
 #include <cmath>
 

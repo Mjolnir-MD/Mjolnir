@@ -58,34 +58,31 @@ void VelocityVerletIntegrator<traitsT>::initialize(
 template<typename traitsT>
 typename VelocityVerletIntegrator<traitsT>::real_type
 VelocityVerletIntegrator<traitsT>::step(
-        const real_type time, system_type& system, forcefield_type& ff)
+        const real_type time, system_type& sys, forcefield_type& ff)
 {
     real_type largest_disp2(0);
-    for(std::size_t i=0; i<system.size(); ++i)
+    for(std::size_t i=0; i<sys.size(); ++i)
     {
-        auto pv = system[i]; // particle_view that points i-th particle.
+        sys.velocity(i) += (halfdt_ * sys.rmass(i)) * sys.force(i);
 
-        pv.velocity += (halfdt_ * pv.rmass) * pv.force;
+        const auto disp = dt_ * sys.velocity(i);
 
-        const auto disp = dt_ * pv.velocity;
-
-        pv.position = system.adjust_position(pv.position + disp);
-        pv.force    = math::make_coordinate<coordinate_type>(0, 0, 0);
+        sys.position(i) = sys.adjust_position(sys.position(i) + disp);
+        sys.force(i)    = math::make_coordinate<coordinate_type>(0, 0, 0);
 
         largest_disp2 = std::max(largest_disp2, math::length_sq(disp));
     }
 
     // update neighbor list; reduce margin, reconstruct the list if needed
-    ff.update_margin(2 * std::sqrt(largest_disp2), system);
+    ff.update_margin(2 * std::sqrt(largest_disp2), sys);
 
     // calc f(t+dt)
-    ff.calc_force(system);
+    ff.calc_force(sys);
 
     // calc v(t+dt)
-    for(std::size_t i=0; i<system.size(); ++i)
+    for(std::size_t i=0; i<sys.size(); ++i)
     {
-        auto pv = system[i];
-        pv.velocity += (halfdt_ * pv.rmass) * pv.force;
+        sys.velocity(i) += (halfdt_ * sys.rmass(i)) * sys.force(i);
     }
     return time + dt_;
 }
