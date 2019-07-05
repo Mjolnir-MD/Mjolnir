@@ -87,23 +87,23 @@ System<traitsT> read_system_from_table(const toml::value& system)
         using vec_type = std::array<real_type, 3>;
         const auto& p = particles.at(i);
 
-        sys[i].mass     = toml::expect<real_type>(p, "m").or_other(
+        sys.mass(i)     = toml::expect<real_type>(p, "m").or_other(
                           toml::expect<real_type>(p, "mass")).unwrap();
-        sys[i].rmass    = 1.0 / sys[i].mass;
-        sys[i].position = toml::expect<vec_type>(p, "pos").or_other(
+        sys.rmass(i)    = 1.0 / sys.mass(i);
+        sys.position(i) = toml::expect<vec_type>(p, "pos").or_other(
                           toml::expect<vec_type>(p, "position")).unwrap();
-        sys[i].velocity = toml::expect<vec_type>(p, "vel").or_other(
+        sys.velocity(i) = toml::expect<vec_type>(p, "vel").or_other(
                           toml::expect<vec_type>(p, "velocity")).unwrap();
-        sys[i].force    = math::make_coordinate<coordinate_type>(0, 0, 0);
-        sys[i].name     = toml::expect<std::string>(p, "name").unwrap_or("X");
-        sys[i].group    = toml::expect<std::string>(p, "group").unwrap_or("NONE");
+        sys.force(i)    = math::make_coordinate<coordinate_type>(0, 0, 0);
+        sys.name(i)     = toml::expect<std::string>(p, "name").unwrap_or("X");
+        sys.group(i)    = toml::expect<std::string>(p, "group").unwrap_or("NONE");
 
-        MJOLNIR_LOG_INFO("mass = ",        sys[i].mass,
-                          ", position = ", sys[i].position,
-                          ", velocity = ", sys[i].velocity,
-                          ", force = ",    sys[i].force,
-                          ", name = ",     sys[i].name,
-                          ", group = ",    sys[i].group);
+        MJOLNIR_LOG_INFO("mass = ",        sys.mass(i),
+                          ", position = ", sys.position(i),
+                          ", velocity = ", sys.velocity(i),
+                          ", force = ",    sys.force(i),
+                          ", name = ",     sys.name(i),
+                          ", group = ",    sys.group(i));
     }
     MJOLNIR_LOG_NOTICE("done.");
 
