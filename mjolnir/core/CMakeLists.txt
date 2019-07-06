@@ -1,5 +1,6 @@
 set(mjolnir_core_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/System.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/RandomNumberGenerator.cpp"
     )
 set(mjolnir_cpp_files
     ${mjolnir_cpp_files}
