@@ -130,6 +130,9 @@ class ExcludedVolumePotential
         return 2 * max_sigma * cutoff_ratio;
     }
 
+    // ------------------------------------------------------------------------
+    // ignore_xxx functions would be used in core/ExclusionLists.
+
     // e.g. "bond" -> 3 means ignore particles connected within 3 "bond"s
     std::vector<std::pair<connection_kind_type, std::size_t>>
     ignore_within() const {return ignore_within_;}
@@ -144,9 +147,15 @@ class ExcludedVolumePotential
     {
         return ignore_group_.is_ignored(i, j);
     }
+
+    // ------------------------------------------------------------------------
+    // used by Observer.
+
     static const char* name() noexcept {return "ExcludedVolume";}
 
-    // access to the parameters
+    // ------------------------------------------------------------------------
+    // the following accessers would be used in tests.
+
     real_type& epsilon()       noexcept {return this->epsilon_;}
     real_type  epsilon() const noexcept {return this->epsilon_;}
     std::vector<real_type>&       parameters()       noexcept {return this->parameters_;}

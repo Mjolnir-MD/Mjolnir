@@ -140,6 +140,9 @@ class DebyeHuckelPotential
         return;
     }
 
+    // ------------------------------------------------------------------------
+    // ignore_xxx functions would be used in core/ExclusionLists.
+
     // e.g. {"bond", 3} means ignore particles connected within 3 "bond"s
     std::vector<std::pair<connection_kind_type, std::size_t>>
     ignore_within() const {return ignore_within_;}
@@ -155,15 +158,19 @@ class DebyeHuckelPotential
         return ignore_group_.is_ignored(i, j);
     }
 
+    // ------------------------------------------------------------------------
+    // used by Observer.
     static const char* name() noexcept {return "DebyeHuckel";}
 
-    // access to the parameters
+    // ------------------------------------------------------------------------
+    // the following accessers would be used in tests.
+
+    // access to the parameters.
     std::vector<real_type>&       charges()       noexcept {return parameters_;}
     std::vector<real_type> const& charges() const noexcept {return parameters_;}
 
     std::vector<std::size_t> const& participants() const noexcept {return participants_;}
 
-    //XXX this one is calculated parameter, shouldn't be changed!
     real_type debye_length() const noexcept {return this->debye_length_;}
 
   private:

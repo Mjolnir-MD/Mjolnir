@@ -136,6 +136,9 @@ class LennardJonesPotential
     template<typename traitsT>
     void update(const System<traitsT>&) const noexcept {return;}
 
+    // ------------------------------------------------------------------------
+    // ignore_xxx functions would be used in core/ExclusionLists.
+
     // e.g. `{"bond", 3}` means ignore particles connected within 3 "bond"s
     std::vector<std::pair<connection_kind_type, std::size_t>>
     ignore_within() const {return ignore_within_;}
@@ -151,7 +154,12 @@ class LennardJonesPotential
         return ignore_group_.is_ignored(i, j);
     }
 
+    // ------------------------------------------------------------------------
+    // used by Observer.
     static const char* name() noexcept {return "LennardJones";}
+
+    // ------------------------------------------------------------------------
+    // the following accessers would be used in tests.
 
     // access to the parameters...
     std::vector<parameter_type>&       parameters()       noexcept {return parameters_;}

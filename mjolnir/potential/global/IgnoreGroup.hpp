@@ -5,6 +5,9 @@
 #include <memory>
 
 // These classes are to ignore inter- or intra-group interaction.
+//
+// These would be contained in a global potential class and ExclusionList
+// uses them indirectly.
 
 namespace mjolnir
 {
