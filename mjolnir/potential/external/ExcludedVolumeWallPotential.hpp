@@ -101,5 +101,10 @@ template<typename realT>
 constexpr typename ExcludedVolumeWallPotential<realT>::real_type
 ExcludedVolumeWallPotential<realT>::coef_at_cutoff;
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ExcludedVolumeWallPotential<double>;
+extern template class ExcludedVolumeWallPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 } // mjolnir
 #endif // MJOLNIR_EXTERNAL_EXCLUDED_VOLUME_WALL_POTENTIAL

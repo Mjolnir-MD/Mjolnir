@@ -93,5 +93,10 @@ template<typename realT>
 constexpr typename ImplicitMembranePotential<realT>::real_type
 ImplicitMembranePotential<realT>::cutoff_ratio;
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ImplicitMembranePotential<double>;
+extern template class ImplicitMembranePotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 } // mjolnir
 #endif /* MJOLNIR_IMPLICIT_MEMBRANE_POTENTIAL */
