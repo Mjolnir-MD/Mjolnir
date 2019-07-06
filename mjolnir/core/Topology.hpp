@@ -35,6 +35,7 @@ class Topology
   public:
 
     using molecule_id_type     = std::size_t;
+    using group_id_type        = std::string;
     using connection_kind_type = std::string;
     using edge_type = std::pair<std::size_t, connection_kind_type>;
 
@@ -45,9 +46,9 @@ class Topology
 
     struct node
     {
-        std::size_t molecule_id;
-        std::string name;
-        std::string group;
+        std::size_t   molecule_id;
+        std::string   name;
+        group_id_type group;
         std::vector<edge_type> adjacents;
     };
 
