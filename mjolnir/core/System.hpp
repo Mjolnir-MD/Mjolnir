@@ -2,6 +2,8 @@
 #define MJOLNIR_CORE_SYSTEM_HPP
 #include <mjolnir/core/Particle.hpp>
 #include <mjolnir/core/Topology.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
 #include <vector>
 #include <map>
 
@@ -123,6 +125,13 @@ class System
     static_string_container_type names_;
     static_string_container_type groups_;
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class System<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class System<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class System<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class System<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
 
 } // mjolnir
 #endif// MJOLNIR_SYSTEM_HPP

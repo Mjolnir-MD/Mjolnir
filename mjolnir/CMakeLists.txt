@@ -1,5 +1,5 @@
 set(mjolnir_cpp_files)
-# add_subdirectory(core       )
+add_subdirectory(core       )
 # add_subdirectory(input      )
 # add_subdirectory(interaction)
 # add_subdirectory(math       )
