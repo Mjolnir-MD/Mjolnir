@@ -19,12 +19,12 @@ namespace mjolnir
 // ============================================================================
 
 inline IgnoreMolecule<typename Topology::molecule_id_type>
-read_ignored_molecule(const toml::value& ignored_mol)
+read_ignored_molecule(const toml::value& ignore)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
-    const auto name = toml::get<std::string>(ignored_mol);
+    const auto name = toml::find<std::string>(ignore, "molecule");
 
     if(name == "Nothing")
     {
@@ -52,7 +52,55 @@ read_ignored_molecule(const toml::value& ignored_mol)
     {
         throw_exception<std::runtime_error>(toml::format_error(
             "[error] mjolnir::read_ignored_molecule: unknown setting",
-            ignored_mol, "expected (Nothing|Self|Others)."));
+            toml::find(ignore, "molecule"), "expected (Nothing|Self|Others)."));
+    }
+}
+
+inline IgnoreGroup<typename Topology::group_id_type>
+read_ignored_group(const toml::value& ignore)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using group_id_type = typename Topology::group_id_type;
+
+    if(ignore.as_table().count("group") == 0)
+    {
+        MJOLNIR_LOG_NOTICE("No `ignore.group` is provided. "
+                           "All the groups are taken into account.");
+        return IgnoreGroup<group_id_type>{
+            make_unique<IgnoreNoGroup<group_id_type>>()
+        };
+    }
+    const auto name = toml::find<std::string>(ignore, "group");
+
+    if(name == "Nothing")
+    {
+        MJOLNIR_LOG_INFO("all the interactions"
+                         "(both (inter|intra)-group) are included");
+        return IgnoreGroup<group_id_type>{
+            make_unique<IgnoreNoGroup<group_id_type>>()
+        };
+    }
+    else if(name == "Self" || name == "Intra")
+    {
+        MJOLNIR_LOG_INFO("intra-molecule interaction is ignored");
+        return IgnoreGroup<group_id_type>{
+            make_unique<IgnoreIntraGroup<group_id_type>>()
+        };
+    }
+    else if(name == "Others" || name == "Inter")
+    {
+        MJOLNIR_LOG_INFO("inter-molecule interaction is ignored");
+        return IgnoreGroup<group_id_type>{
+            make_unique<IgnoreInterGroup<group_id_type>>()
+        };
+    }
+    else
+    {
+        throw_exception<std::runtime_error>(toml::format_error(
+            "[error] mjolnir::read_ignored_group: unknown setting",
+            toml::find(ignore, "gruop"),
+            "expected (Nothing|(Self|Intra)|(Others|Inter))."));
     }
 }
 
@@ -98,7 +146,7 @@ read_excluded_volume_potential(const toml::value& global)
 
     return ExcludedVolumePotential<realT>(
         eps, params, ignore_particle_within,
-        read_ignored_molecule(toml::find<toml::value>(ignore, "molecule")));
+        read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
 
 template<typename realT>
@@ -141,7 +189,7 @@ read_lennard_jones_potential(const toml::value& global)
 
     return LennardJonesPotential<realT>(
         std::move(params), ignore_particle_within,
-        read_ignored_molecule(toml::find<toml::value>(ignore, "molecule")));
+        read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
 
 template<typename realT>
@@ -185,7 +233,7 @@ read_uniform_lennard_jones_potential(const toml::value& global)
     }
     return UniformLennardJonesPotential<realT>(
         sigma, epsilon, params, ignore_particle_within,
-        read_ignored_molecule(toml::find<toml::value>(ignore, "molecule")));
+        read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
 
 template<typename realT>
@@ -226,7 +274,7 @@ read_debye_huckel_potential(const toml::value& global)
     }
     return DebyeHuckelPotential<realT>(
         std::move(params), ignore_particle_within,
-        read_ignored_molecule(toml::find<toml::value>(ignore, "molecule")));
+        read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
 
 } // mjolnir
