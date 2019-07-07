@@ -173,5 +173,17 @@ System<traitsT> read_system(const toml::table& root, std::size_t N)
     return read_system_from_table<traitsT>(system_params.at(N));
 }
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template System<SimulatorTraits<double, UnlimitedBoundary>       > read_system_from_table<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::value& system);
+extern template System<SimulatorTraits<float,  UnlimitedBoundary>       > read_system_from_table<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::value& system);
+extern template System<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_system_from_table<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value& system);
+extern template System<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_system_from_table<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value& system);
+
+extern template System<SimulatorTraits<double, UnlimitedBoundary>       > read_system<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::table& root, std::size_t N);
+extern template System<SimulatorTraits<float,  UnlimitedBoundary>       > read_system<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::table& root, std::size_t N);
+extern template System<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_system<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::table& root, std::size_t N);
+extern template System<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_system<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::table& root, std::size_t N);
+#endif
+
 }//mjolnir
 #endif //MJOLNIR_READ_SYSTEM
