@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_UniformLennardJones_calc_force)
 
         potential_type potential(1.0, parameters, {},
             typename potential_type::ignore_molecule_type("Nothing"),
-            typename potential_type::ignore_group_type   ("Nothing")
+            typename potential_type::ignore_group_type   ({})
             );
 
         rng_type    rng(123456789);

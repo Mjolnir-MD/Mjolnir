@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(DH_double)
     mjolnir::DebyeHuckelPotential<real_type> dh(
         {{0u, charge}, {1u, charge}}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
-        mjolnir::IgnoreGroup   <group_id_type   >("Nothing")
+        mjolnir::IgnoreGroup   <group_id_type   >({})
         );
 
     const real_type x_min = 0.5 * dh.debye_length();
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(DH_float)
     mjolnir::DebyeHuckelPotential<real_type> dh(
         {{0u, charge}, {1u, charge}}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
-        mjolnir::IgnoreGroup   <group_id_type   >("Nothing")
+        mjolnir::IgnoreGroup   <group_id_type   >({})
         );
 
     const real_type x_min = 0.5 * dh.debye_length();

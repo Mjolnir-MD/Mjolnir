@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(GlobalPairInteraction_double)
             {0, {/* sigma = */ 1.0, /* epsilon = */1.2}},
             {1, {/* sigma = */ 1.0, /* epsilon = */1.2}}
         }, {}, typename potential_type::ignore_molecule_type("Nothing"),
-               typename potential_type::ignore_group_type   ("Nothing")
+               typename potential_type::ignore_group_type   ({})
         );
 
     interaction_type interaction(potential_type{potential}, partition_type{});
