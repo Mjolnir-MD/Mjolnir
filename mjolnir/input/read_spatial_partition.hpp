@@ -1,5 +1,9 @@
 #ifndef MJOLNIR_INPUT_READ_SPATIAL_PARTITION_HPP
 #define MJOLNIR_INPUT_READ_SPATIAL_PARTITION_HPP
+#include <extlib/toml/toml.hpp>
+#include <mjolnir/core/GlobalInteractionBase.hpp>
+#include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
+
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/UnlimitedGridCellList.hpp>
 #include <mjolnir/core/PeriodicGridCellList.hpp>
@@ -119,4 +123,63 @@ read_spatial_partition(const toml::value& global, potentialT&& pot)
 }
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+
+#include <mjolnir/core/SimulatorTraits.hpp>
+
+#include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
+#include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
+#include <mjolnir/potential/global/LennardJonesPotential.hpp>
+#include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
+
+namespace mjolnir
+{
+// D-H
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, DebyeHuckelPotential<double>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, DebyeHuckelPotential<double>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, DebyeHuckelPotential<double>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, DebyeHuckelPotential<double>&&);
+
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, DebyeHuckelPotential<float>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, DebyeHuckelPotential<float>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, DebyeHuckelPotential<float>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, DebyeHuckelPotential<float>&&);
+
+// EXV
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, ExcludedVolumePotential<double>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, ExcludedVolumePotential<double>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, ExcludedVolumePotential<double>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, ExcludedVolumePotential<double>&&);
+
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, ExcludedVolumePotential<float>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, ExcludedVolumePotential<float>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, ExcludedVolumePotential<float>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, ExcludedVolumePotential<float>&&);
+
+// L-J
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, LennardJonesPotential<double>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, LennardJonesPotential<double>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, LennardJonesPotential<double>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, LennardJonesPotential<double>&&);
+
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, LennardJonesPotential<float>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, LennardJonesPotential<float>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, LennardJonesPotential<float>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, LennardJonesPotential<float>&&);
+
+// UL-J
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, UniformLennardJonesPotential<double>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, UniformLennardJonesPotential<double>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, UniformLennardJonesPotential<double>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, UniformLennardJonesPotential<double>&&);
+
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, UniformLennardJonesPotential<float>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_spatial_partition(const toml::value&, UniformLennardJonesPotential<float>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, UniformLennardJonesPotential<float>&&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&, UniformLennardJonesPotential<float>&&);
+
+}
+#endif
+
 #endif// MJOLNIR_READ_SPATIAL_PARTITION
