@@ -115,5 +115,12 @@ std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
     return read_simulator<traitsT>(data);
 }
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<double, UnlimitedBoundary>>(const toml::table& data);
+extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<float,  UnlimitedBoundary>>(const toml::table& data);
+extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::table& data);
+extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::table& data);
+#endif
+
 } // mjolnir
 #endif// MJOLNIR_READ_UNIT_SYSTEM_HPP
