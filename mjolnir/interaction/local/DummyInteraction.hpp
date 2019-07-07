@@ -3,6 +3,7 @@
 #include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/util/empty.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <mjolnir/util/string.hpp>
 
 namespace mjolnir
 {
@@ -81,4 +82,22 @@ class DummyInteraction final : public LocalInteractionBase<traitsT>
 };
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize BondAngleInteraction with LocalPotentials
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+
+namespace mjolnir
+{
+
+// harmonic
+extern template class DummyInteraction<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class DummyInteraction<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class DummyInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class DummyInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif// MJOLNIR_INTERACTION_DUMMY_INTERACTION_HPP

@@ -171,4 +171,37 @@ void BondAngleInteraction<traitsT, potentialT>::write_topology(
 }
 
 }// mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize BondAngleInteraction with LocalPotentials
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/potential/local/HarmonicPotential.hpp>
+#include <mjolnir/potential/local/GaussianPotential.hpp>
+#include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
+
+namespace mjolnir
+{
+
+// harmonic
+extern template class BondAngleInteraction<SimulatorTraits<double, UnlimitedBoundary>, HarmonicPotential<double>>;
+extern template class BondAngleInteraction<SimulatorTraits<float,  UnlimitedBoundary>, HarmonicPotential<float> >;
+extern template class BondAngleInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, HarmonicPotential<double>>;
+extern template class BondAngleInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, HarmonicPotential<float> >;
+
+// gaussian
+extern template class BondAngleInteraction<SimulatorTraits<double, UnlimitedBoundary>, GaussianPotential<double>>;
+extern template class BondAngleInteraction<SimulatorTraits<float,  UnlimitedBoundary>, GaussianPotential<float> >;
+extern template class BondAngleInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>>;
+extern template class BondAngleInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> >;
+
+// FLP angle
+extern template class BondAngleInteraction<SimulatorTraits<double, UnlimitedBoundary>, FlexibleLocalAnglePotential<double>>;
+extern template class BondAngleInteraction<SimulatorTraits<float,  UnlimitedBoundary>, FlexibleLocalAnglePotential<float> >;
+extern template class BondAngleInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, FlexibleLocalAnglePotential<double>>;
+extern template class BondAngleInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, FlexibleLocalAnglePotential<float> >;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif /* MJOLNIR_BOND_ANGL_INTERACTION */

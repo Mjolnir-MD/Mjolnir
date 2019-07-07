@@ -130,4 +130,37 @@ void BondLengthInteraction<traitsT, potentialT>::write_topology(
 }
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize BondLengthInteraction with LocalPotentials
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/potential/local/HarmonicPotential.hpp>
+#include <mjolnir/potential/local/GoContactPotential.hpp>
+#include <mjolnir/potential/local/GaussianPotential.hpp>
+
+namespace mjolnir
+{
+
+// harmonic
+extern template class BondLengthInteraction<SimulatorTraits<double, UnlimitedBoundary>, HarmonicPotential<double>>;
+extern template class BondLengthInteraction<SimulatorTraits<float,  UnlimitedBoundary>, HarmonicPotential<float> >;
+extern template class BondLengthInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, HarmonicPotential<double>>;
+extern template class BondLengthInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, HarmonicPotential<float> >;
+
+// go-contact
+extern template class BondLengthInteraction<SimulatorTraits<double, UnlimitedBoundary>, GoContactPotential<double>>;
+extern template class BondLengthInteraction<SimulatorTraits<float,  UnlimitedBoundary>, GoContactPotential<float> >;
+extern template class BondLengthInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GoContactPotential<double>>;
+extern template class BondLengthInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GoContactPotential<float> >;
+
+// gaussian
+extern template class BondLengthInteraction<SimulatorTraits<double, UnlimitedBoundary>, GaussianPotential<double>>;
+extern template class BondLengthInteraction<SimulatorTraits<float,  UnlimitedBoundary>, GaussianPotential<float> >;
+extern template class BondLengthInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>>;
+extern template class BondLengthInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> >;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif /* MJOLNIR_BOND_LENGTH_INTERACTION */

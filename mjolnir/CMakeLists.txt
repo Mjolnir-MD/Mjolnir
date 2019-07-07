@@ -1,7 +1,7 @@
 set(mjolnir_cpp_files)
 add_subdirectory(core       )
 # add_subdirectory(input      )
-# add_subdirectory(interaction)
+add_subdirectory(interaction)
 # add_subdirectory(math       )
 # add_subdirectory(omp        )
 add_subdirectory(potential  )
