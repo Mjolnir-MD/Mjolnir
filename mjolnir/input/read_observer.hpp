@@ -105,4 +105,23 @@ read_observer(const toml::table& root)
 }
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+
+namespace mjolnir
+{
+extern template void add_observer<SimulatorTraits<double, UnlimitedBoundary>       >(ObserverContainer<SimulatorTraits<double, UnlimitedBoundary>       >& observers, const toml::value& format, const std::string& file_prefix);
+extern template void add_observer<SimulatorTraits<float,  UnlimitedBoundary>       >(ObserverContainer<SimulatorTraits<float,  UnlimitedBoundary>       >& observers, const toml::value& format, const std::string& file_prefix);
+extern template void add_observer<SimulatorTraits<double, CuboidalPeriodicBoundary>>(ObserverContainer<SimulatorTraits<double, CuboidalPeriodicBoundary>>& observers, const toml::value& format, const std::string& file_prefix);
+extern template void add_observer<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(ObserverContainer<SimulatorTraits<float,  CuboidalPeriodicBoundary>>& observers, const toml::value& format, const std::string& file_prefix);
+
+extern template ObserverContainer<SimulatorTraits<double, UnlimitedBoundary>       > read_observer<SimulatorTraits<double, UnlimitedBoundary>>(const toml::table& data);
+extern template ObserverContainer<SimulatorTraits<float,  UnlimitedBoundary>       > read_observer<SimulatorTraits<float,  UnlimitedBoundary>>(const toml::table& data);
+extern template ObserverContainer<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_observer<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::table& data);
+extern template ObserverContainer<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_observer<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::table& data);
+} // mjolnir
+#endif
+
 #endif// MJOLNIR_READ_OBSERVER_HPP

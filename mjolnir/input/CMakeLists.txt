@@ -1,4 +1,5 @@
 set(mjolnir_input_cpp_files
+    "${CMAKE_CURRENT_SOURCE_DIR}/read_observer.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_simulator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_spatial_partition.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_system.cpp"
