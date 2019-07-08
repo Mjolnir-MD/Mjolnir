@@ -80,7 +80,7 @@ class ExclusionList
                     {
                         MJOLNIR_LOG_INFO("molecule ", i, " and molecule ", j,
                             " will ignore each other on ", pot.name());
-                        this->ignored_mols_.push_back(i);
+                        this->ignored_mols_.push_back(j);
                         ++idx;
                     }
                 }
