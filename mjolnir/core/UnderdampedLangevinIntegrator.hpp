@@ -164,6 +164,12 @@ UnderdampedLangevinIntegrator<traitsT>::step(
     return time + dt_;
 }
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class UnderdampedLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class UnderdampedLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class UnderdampedLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class UnderdampedLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
 
 } // mjolnir
 #endif /* MJOLNIR_UNDERDAMPED_LANGEVIN_INTEGRATOR */
