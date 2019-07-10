@@ -106,4 +106,29 @@ inline void MolecularDynamicsSimulator<traitsT, integratorT>::finalize()
 }
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+#include <mjolnir/core/BAOABLangevinIntegrator.hpp>
+#include <mjolnir/core/UnderdampedLangevinIntegrator.hpp>
+#include <mjolnir/core/VelocityVerletIntegrator.hpp>
+namespace mjolnir
+{
+// BAOAB
+extern template class MolecularDynamicsSimulator<SimulatorTraits<double, UnlimitedBoundary>       , BAOABLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>       >>;
+extern template class MolecularDynamicsSimulator<SimulatorTraits<float,  UnlimitedBoundary>       , BAOABLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       >>;
+extern template class MolecularDynamicsSimulator<SimulatorTraits<double, CuboidalPeriodicBoundary>, BAOABLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+extern template class MolecularDynamicsSimulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>, BAOABLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
+// Langevin
+extern template class MolecularDynamicsSimulator<SimulatorTraits<double, UnlimitedBoundary>       , UnderdampedLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>       >>;
+extern template class MolecularDynamicsSimulator<SimulatorTraits<float,  UnlimitedBoundary>       , UnderdampedLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       >>;
+extern template class MolecularDynamicsSimulator<SimulatorTraits<double, CuboidalPeriodicBoundary>, UnderdampedLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+extern template class MolecularDynamicsSimulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UnderdampedLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
+// VelVerlet
+extern template class MolecularDynamicsSimulator<SimulatorTraits<double, UnlimitedBoundary>       , VelocityVerletIntegrator<SimulatorTraits<double, UnlimitedBoundary>       >>;
+extern template class MolecularDynamicsSimulator<SimulatorTraits<float,  UnlimitedBoundary>       , VelocityVerletIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       >>;
+extern template class MolecularDynamicsSimulator<SimulatorTraits<double, CuboidalPeriodicBoundary>, VelocityVerletIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+extern template class MolecularDynamicsSimulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>, VelocityVerletIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
+}
+#endif // SEPARATE_BUILD
+
 #endif /* MJOLNIR_MOLECULAR_DYNAMICS_SIMULATOR */
