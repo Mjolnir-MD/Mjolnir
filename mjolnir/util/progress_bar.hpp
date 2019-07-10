@@ -1,8 +1,9 @@
 #ifndef MJOLNIR_UTIL_PROGRESS_BAR_HPP
 #define MJOLNIR_UTIL_PROGRESS_BAR_HPP
+#include <array>
 #include <cstring>
 #include <cmath>
-#include <array>
+#include <cassert>
 
 namespace mjolnir
 {
