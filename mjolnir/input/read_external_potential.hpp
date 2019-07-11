@@ -118,5 +118,16 @@ read_excluded_volume_wall_potential(const toml::value& external)
     return ExcludedVolumeWallPotential<real_type>(eps, std::move(params));
 }
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template ImplicitMembranePotential<double> read_implicit_membrane_potential(const toml::value& external);
+extern template ImplicitMembranePotential<float > read_implicit_membrane_potential(const toml::value& external);
+
+extern template LennardJonesWallPotential<double> read_lennard_jones_wall_potential(const toml::value& external);
+extern template LennardJonesWallPotential<float > read_lennard_jones_wall_potential(const toml::value& external);
+
+extern template ExcludedVolumeWallPotential<double> read_excluded_volume_wall_potential(const toml::value& external);
+extern template ExcludedVolumeWallPotential<float > read_excluded_volume_wall_potential(const toml::value& external);
+#endif
+
 } // mjolnir
 #endif // MJOLNIR_READ_EXTERNAL_POTENTIAL_HPP
