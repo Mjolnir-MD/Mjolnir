@@ -127,7 +127,7 @@ class ExclusionList
                     {
                         MJOLNIR_LOG_INFO("group ", grp_name_i, " and ", grp_name_j,
                                          " ignores each other on ", pot.name());
-                        this->ignored_grps_.push_back(i);
+                        this->ignored_grps_.push_back(j);
                         ++idx;
                     }
                 }
