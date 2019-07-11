@@ -94,22 +94,19 @@ read_flexible_local_angle_potential(const toml::value& param, const toml::value&
     {
         const auto xs =
             find_parameter<std::array<real_type, 10>>(param, env, "x");
-
-        const auto dx = (xs.back() - xs.front()) /
-                        static_cast<real_type>(xs.size() - 1);
-        for(std::size_t i=1; i<xs.size(); ++i)
-        {
-            if(std::abs((xs.at(i) - xs.at(i-1)) / dx - 1) > 1e-4)
-            {
-                throw_exception<std::runtime_error>(toml::format_error("[error] "
-                    "mjolnir::read_flexible_local_angle_potential: data points "
-                    "are not evenly distributed", find_parameter<toml::value>(
-                    param, env, "x"), "here"));
-            }
-        }
         MJOLNIR_LOG_INFO("FlexibleLocalAngle = {k = ", k, ", x = ", xs,
                          ", y = ", term1, ", d2y = ", term2, '}');
-        return FlexibleLocalAnglePotential<realT>(k, xs, term1, term2);
+        try
+        {
+            return FlexibleLocalAnglePotential<realT>(k, xs, term1, term2);
+        }
+        catch (const std::runtime_error&)
+        {
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "mjolnir::read_flexible_local_angle_potential: data points "
+                "are not evenly distributed", find_parameter<toml::value>(
+                param, env, "x"), "here"));
+        }
     }
     else
     {
