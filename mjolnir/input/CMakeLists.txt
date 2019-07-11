@@ -1,4 +1,7 @@
 set(mjolnir_input_cpp_files
+    "${CMAKE_CURRENT_SOURCE_DIR}/read_global_forcefield.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/read_global_interaction.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/read_global_potential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_input_file.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_integrator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_local_forcefield.cpp"

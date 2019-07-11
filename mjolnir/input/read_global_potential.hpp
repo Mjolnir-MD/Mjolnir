@@ -229,5 +229,19 @@ read_debye_huckel_potential(const toml::value& global)
         read_ignored_molecule(toml::find<toml::value>(ignore, "molecule")));
 }
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template ExcludedVolumePotential<double> read_excluded_volume_potential(const toml::value& global);
+extern template ExcludedVolumePotential<float > read_excluded_volume_potential(const toml::value& global);
+
+extern template LennardJonesPotential<double> read_lennard_jones_potential(const toml::value& global);
+extern template LennardJonesPotential<float > read_lennard_jones_potential(const toml::value& global);
+
+extern template UniformLennardJonesPotential<double> read_uniform_lennard_jones_potential(const toml::value& global);
+extern template UniformLennardJonesPotential<float > read_uniform_lennard_jones_potential(const toml::value& global);
+
+extern template DebyeHuckelPotential<double> read_debye_huckel_potential(const toml::value& global);
+extern template DebyeHuckelPotential<float > read_debye_huckel_potential(const toml::value& global);
+#endif
+
 } // mjolnir
 #endif // MJOLNIR_READ_GLOBAL_POTENTIAL_HPP
