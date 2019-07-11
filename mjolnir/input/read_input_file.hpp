@@ -168,5 +168,15 @@ read_input_file(const std::string& filename)
     return read_precision(root, simulator);
 }
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template std::unique_ptr<SimulatorBase> read_parallelism<double, UnlimitedBoundary>(const toml::table& root, const toml::value& simulator);
+extern template std::unique_ptr<SimulatorBase> read_parallelism<float , UnlimitedBoundary>(const toml::table& root, const toml::value& simulator);
+extern template std::unique_ptr<SimulatorBase> read_parallelism<double, CuboidalPeriodicBoundary>(const toml::table& root, const toml::value& simulator);
+extern template std::unique_ptr<SimulatorBase> read_parallelism<float , CuboidalPeriodicBoundary>(const toml::table& root, const toml::value& simulator);
+
+extern template std::unique_ptr<SimulatorBase> read_boundary<double>(const toml::table& root, const toml::value& simulator);
+extern template std::unique_ptr<SimulatorBase> read_boundary<float >(const toml::table& root, const toml::value& simulator);
+#endif
+
 }// mjolnir
 #endif// MJOLNIR_READ_INPUT_FILE
