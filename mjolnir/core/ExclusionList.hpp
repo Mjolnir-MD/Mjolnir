@@ -160,7 +160,7 @@ class ExclusionList
                     {
                         MJOLNIR_LOG_INFO("molecule ", i, " and molecule ", j,
                             " will ignore each other on ", pot.name());
-                        this->ignored_mols_.push_back(i);
+                        this->ignored_mols_.push_back(j);
                         ++idx;
                     }
                 }
@@ -177,7 +177,6 @@ class ExclusionList
             for(std::size_t i=0; i<N; ++i)
             {
                 const std::size_t first = idx;
-
                 std::vector<std::size_t> ignored_particles{i};
                 for(const auto& connection : pot.ignore_within())
                 {
