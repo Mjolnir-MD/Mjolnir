@@ -109,5 +109,17 @@ read_forcefield(const toml::table& root, std::size_t N)
     return read_forcefield_from_table<traitsT>(ffs.at(N), input_path);
 }
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template ForceField<SimulatorTraits<double, UnlimitedBoundary>       > read_forcefield_from_table(const toml::value& ff, const std::string& input_path);
+extern template ForceField<SimulatorTraits<float,  UnlimitedBoundary>       > read_forcefield_from_table(const toml::value& ff, const std::string& input_path);
+extern template ForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_forcefield_from_table(const toml::value& ff, const std::string& input_path);
+extern template ForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_forcefield_from_table(const toml::value& ff, const std::string& input_path);
+
+extern template ForceField<SimulatorTraits<double, UnlimitedBoundary>       > read_forcefield(const toml::table& root, std::size_t N);
+extern template ForceField<SimulatorTraits<float,  UnlimitedBoundary>       > read_forcefield(const toml::table& root, std::size_t N);
+extern template ForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_forcefield(const toml::table& root, std::size_t N);
+extern template ForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_forcefield(const toml::table& root, std::size_t N);
+#endif
+
 } // mjolnir
 #endif// MJOLNIR_READ_FORCEFIELD_HPP
