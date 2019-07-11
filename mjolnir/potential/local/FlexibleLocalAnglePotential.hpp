@@ -102,7 +102,7 @@ class FlexibleLocalAnglePotential
             const auto x_prev = this->thetas[i-1];
             const auto x_curr = this->thetas[i];
             const auto dx_tmp = x_curr - x_prev;
-            if(std::abs(dx_tmp / this->dtheta - 1.0) > 1e-4)
+            if(std::abs(dx_tmp / this->dtheta - 1.0) > 1e-3)
             {
                 throw_exception<std::runtime_error>("FlexibleLocalAnglePotential:"
                     " data points are not evenly distributed");
