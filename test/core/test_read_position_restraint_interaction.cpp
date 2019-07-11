@@ -22,7 +22,8 @@ BOOST_AUTO_TEST_CASE(read_position_restraint_harmonic)
             interaction = "PositionRestraint"
             potential   = "Harmonic"
             parameters  = [
-                {position = [0.0, 0.0, 0.0], index = 0, k = 10.0, v0 = 0.0},
+                {position = [0.0, 0.0, 0.0], index =   0, k = 10.0, v0 =  0.0},
+                {position = [1.0,-1.0,10.0], index = 100, k = 3.14, v0 = 10.0},
             ]
             )"_toml;
 
@@ -30,8 +31,29 @@ BOOST_AUTO_TEST_CASE(read_position_restraint_harmonic)
         BOOST_TEST(static_cast<bool>(base));
 
         const auto derv = dynamic_cast<mjolnir::PositionRestraintInteraction<
-            traits_type, mjolnir::HarmonicRestraintPotential<real_type>>*
+            traits_type, mjolnir::HarmonicPotential<real_type>>*
             >(base.get()); // check the expected type is contained
         BOOST_TEST(static_cast<bool>(derv));
+
+        const auto& interaction = *derv;
+
+        BOOST_TEST(interaction.potentials().size() == 2u);
+
+        BOOST_TEST(std::get<0>(interaction.potentials().at(0)) ==   0u);
+        BOOST_TEST(std::get<0>(interaction.potentials().at(1)) == 100u);
+
+        BOOST_TEST(std::get<1>(interaction.potentials().at(0)).at(0) == 0.0);
+        BOOST_TEST(std::get<1>(interaction.potentials().at(0)).at(1) == 0.0);
+        BOOST_TEST(std::get<1>(interaction.potentials().at(0)).at(2) == 0.0);
+        BOOST_TEST(std::get<1>(interaction.potentials().at(1)).at(0) == 1.0);
+        BOOST_TEST(std::get<1>(interaction.potentials().at(1)).at(1) ==-1.0);
+        BOOST_TEST(std::get<1>(interaction.potentials().at(1)).at(2) ==10.0);
+
+
+        BOOST_TEST(std::get<2>(interaction.potentials().at(0)).k()  == 10.0);
+        BOOST_TEST(std::get<2>(interaction.potentials().at(1)).k()  == 3.14);
+        BOOST_TEST(std::get<2>(interaction.potentials().at(0)).v0() ==  0.0);
+        BOOST_TEST(std::get<2>(interaction.potentials().at(1)).v0() == 10.0);
+
     }
 }

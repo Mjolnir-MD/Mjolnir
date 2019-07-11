@@ -257,6 +257,7 @@ inline void
 Topology::construct_molecules()
 {
     if(this->nodes_.empty()){return;}
+    // reset molecule-ids
     for(auto& node : nodes_)
     {
         node.molecule_id = uninitialized();
@@ -265,9 +266,14 @@ Topology::construct_molecules()
     molecule_id_type next_molecule_id = 0;
     for(auto& node : nodes_)
     {
+        // look all the adjacents and update node by their molecule id
         for(const auto& edge : node.adjacents)
         {
+            // ignore all the edges that are not bonds
             if(edge.second != "bond") {continue;}
+
+            // if an adjacent that is connected by a "bond",
+            // it should be in the same molecule.
             const auto& adj = this->nodes_.at(edge.first);
             if(adj.molecule_id != uninitialized())
             {
@@ -275,12 +281,14 @@ Topology::construct_molecules()
                 break;
             }
         }
+        // if the molecule_id of this node is still not initialized, that means
+        // this node belongs to a new molecule.
         if(node.molecule_id == uninitialized())
         {
             node.molecule_id = next_molecule_id++;
         }
     }
-    this->num_molecules_ = ++next_molecule_id;
+    this->num_molecules_ = next_molecule_id;
     return;
 }
 
