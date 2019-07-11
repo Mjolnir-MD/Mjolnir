@@ -60,6 +60,12 @@ read_local_forcefield(
     }
     return lff;
 }
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template LocalForceField<SimulatorTraits<double, UnlimitedBoundary>       > read_local_forcefield(const toml::array& interactions, const std::string& input_path);
+extern template LocalForceField<SimulatorTraits<float,  UnlimitedBoundary>       > read_local_forcefield(const toml::array& interactions, const std::string& input_path);
+extern template LocalForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_local_forcefield(const toml::array& interactions, const std::string& input_path);
+extern template LocalForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_local_forcefield(const toml::array& interactions, const std::string& input_path);
+#endif
 
 } // mjolnir
 #endif// MJOLNIR_READ_LOCAL_FORCEFIELD_HPP

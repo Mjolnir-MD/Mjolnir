@@ -300,5 +300,32 @@ read_local_potentials(const toml::value& local)
     return retval;
 }
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template std::vector<std::pair<std::array<std::size_t, 2>, HarmonicPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 2>, HarmonicPotential<float >>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 3>, HarmonicPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 3>, HarmonicPotential<float >>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, HarmonicPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, HarmonicPotential<float >>> read_local_potential(const toml::value& local);
+
+extern template std::vector<std::pair<std::array<std::size_t, 4>, ClementiDihedralPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, ClementiDihedralPotential<float >>> read_local_potential(const toml::value& local);
+
+extern template std::vector<std::pair<std::array<std::size_t, 2>, GaussianPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 2>, GaussianPotential<float >>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 3>, GaussianPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 3>, GaussianPotential<float >>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, PeriodicGaussianPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, PeriodicGaussianPotential<float >>> read_local_potential(const toml::value& local);
+
+extern template std::vector<std::pair<std::array<std::size_t, 3>, FlexibleLocalAnglePotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 3>, FlexibleLocalAnglePotential<float >>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, FlexibleLocalDihedralPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, FlexibleLocalDihedralPotential<float >>> read_local_potential(const toml::value& local);
+
+extern template std::vector<std::pair<std::array<std::size_t, 4>, CosinePotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, CosinePotential<float >>> read_local_potential(const toml::value& local);
+#endif
+
 } // mjolnir
 #endif // MJOLNIR_READ_LOCAL_POTENTIAL_HPP
