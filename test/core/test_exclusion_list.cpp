@@ -529,7 +529,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
 
             sys.topology().construct_molecules();
 
-            BOOST_TEST(sys.topology().number_of_molecules() == 2);
+            BOOST_TEST(sys.topology().number_of_molecules() == 2u);
 
             mjolnir::ExclusionList exl;
             exl.make(sys, pot);
