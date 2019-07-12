@@ -28,14 +28,14 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_DebyeHuckel_calc_force)
     using system_type      = mjolnir::System<traits_type>;
     using potential_type   = mjolnir::DebyeHuckelPotential<real_type>;
     using parameter_type   = typename potential_type::parameter_type;
-    using partition_type   = mjolnir::UnlimitedGridCellList<traits_type, parameter_type, 8>;
+    using partition_type   = mjolnir::UnlimitedGridCellList<traits_type, parameter_type>;
     using interaction_type = mjolnir::GlobalPairInteraction<traits_type, potential_type, partition_type>;
     using rng_type         = mjolnir::RandomNumberGenerator<traits_type>;
 
     using sequencial_system_type      = mjolnir::System<
         mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>>;
     using sequencial_partition_type   = mjolnir::UnlimitedGridCellList<
-        mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>, parameter_type, 8>;
+        mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>, parameter_type>;
     using sequencial_interaction_type = mjolnir::GlobalPairInteraction<
         mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>,
         potential_type, sequencial_partition_type>;
