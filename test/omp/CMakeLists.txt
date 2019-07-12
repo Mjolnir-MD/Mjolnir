@@ -34,7 +34,6 @@ foreach(TEST_NAME ${TEST_NAMES})
     endif()
 
     target_link_libraries(${TEST_NAME} ${OpenMP_CXX_LIBRARIES})
-    target_compile_options(${TEST_NAME} PUBLIC -DMJOLNIR_WITH_OPENMP ${OpenMP_CXX_FLAGS})
 
     if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
         target_link_libraries(${TEST_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})

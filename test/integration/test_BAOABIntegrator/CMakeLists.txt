@@ -12,6 +12,5 @@ endif()
 
 if(OpenMP_FOUND AND USE_OPENMP)
     message(STATUS "adding OpenMP flags ${OpenMP_CXX_FLAGS} to test_BAOABIntegrator ...")
-    target_compile_options(test_BAOABIntegrator PUBLIC -DMJOLNIR_WITH_OPENMP ${OpenMP_CXX_FLAGS})
     target_link_libraries(test_BAOABIntegrator ${OpenMP_CXX_LIBRARIES})
 endif()
