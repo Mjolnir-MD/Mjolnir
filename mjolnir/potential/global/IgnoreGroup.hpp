@@ -66,6 +66,12 @@ struct IgnoreGroup
                ignore_list.end();
     }
 
+    // only for testing purpose
+    std::map<GroupID, std::vector<GroupID>> const& ignores() const noexcept
+    {
+        return this->ignores_;
+    }
+
   private:
 
     std::map<GroupID, std::vector<GroupID>> ignores_;
