@@ -14,8 +14,7 @@
 namespace mjolnir
 {
 
-// its good to use 2^N as dimI
-template<typename traitsT, typename parameterT, std::size_t dimI = 8>
+template<typename traitsT, typename parameterT>
 class UnlimitedGridCellList
 {
   public:
@@ -29,8 +28,8 @@ class UnlimitedGridCellList
     using neighbor_type       = typename neighbor_list_type::neighbor_type;
     using range_type          = typename neighbor_list_type::range_type;
 
-    constexpr static std::size_t  dim_size  = dimI;
-    constexpr static std::int64_t dim       = static_cast<std::int64_t>(dimI);
+    constexpr static std::size_t  dim_size  = 8;
+    constexpr static std::int64_t dim       = 8;
     constexpr static std::size_t total_size = dim_size * dim_size * dim_size;
     constexpr static real_type mesh_epsilon = 1e-6;
 
@@ -121,19 +120,19 @@ class UnlimitedGridCellList
     // first term of cell list contains first and last idx of index_by_cell
 };
 
-template<typename traitsT, typename parameterT, std::size_t N>
-constexpr std::size_t  UnlimitedGridCellList<traitsT, parameterT, N>::dim_size;
-template<typename traitsT, typename parameterT, std::size_t N>
-constexpr std::int64_t UnlimitedGridCellList<traitsT, parameterT, N>::dim;
-template<typename traitsT, typename parameterT, std::size_t N>
-constexpr std::size_t  UnlimitedGridCellList<traitsT, parameterT, N>::total_size;
-template<typename traitsT, typename parameterT, std::size_t N>
-constexpr typename UnlimitedGridCellList<traitsT, parameterT, N>::real_type
-UnlimitedGridCellList<traitsT, parameterT, N>::mesh_epsilon;
+template<typename traitsT, typename parameterT>
+constexpr std::size_t  UnlimitedGridCellList<traitsT, parameterT>::dim_size;
+template<typename traitsT, typename parameterT>
+constexpr std::int64_t UnlimitedGridCellList<traitsT, parameterT>::dim;
+template<typename traitsT, typename parameterT>
+constexpr std::size_t  UnlimitedGridCellList<traitsT, parameterT>::total_size;
+template<typename traitsT, typename parameterT>
+constexpr typename UnlimitedGridCellList<traitsT, parameterT>::real_type
+UnlimitedGridCellList<traitsT, parameterT>::mesh_epsilon;
 
-template<typename traitsT, typename parameterT, std::size_t N>
+template<typename traitsT, typename parameterT>
 template<typename PotentialT>
-void UnlimitedGridCellList<traitsT, parameterT, N>::update(
+void UnlimitedGridCellList<traitsT, parameterT>::update(
         const real_type dmargin, const system_type& sys, const PotentialT& pot)
 {
     this->current_margin_ -= dmargin;
@@ -144,9 +143,9 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::update(
     return ;
 }
 
-template<typename traitsT, typename parameterT, std::size_t N>
+template<typename traitsT, typename parameterT>
 template<typename PotentialT>
-void UnlimitedGridCellList<traitsT, parameterT, N>::make(
+void UnlimitedGridCellList<traitsT, parameterT>::make(
         const system_type& sys, const PotentialT& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
@@ -239,9 +238,9 @@ void UnlimitedGridCellList<traitsT, parameterT, N>::make(
     return ;
 }
 
-template<typename traitsT, typename parameterT, std::size_t N>
+template<typename traitsT, typename parameterT>
 template<typename PotentialT>
-void UnlimitedGridCellList<traitsT, parameterT, N>::initialize(
+void UnlimitedGridCellList<traitsT, parameterT>::initialize(
         const system_type& sys, const PotentialT& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();

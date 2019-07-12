@@ -7,10 +7,8 @@
 namespace mjolnir
 {
 
-template<typename realT, template<typename, typename> class boundaryT,
-         typename parameterT, std::size_t dimI>
-class UnlimitedGridCellList<
-    OpenMPSimulatorTraits<realT, boundaryT>, parameterT, dimI>
+template<typename realT, template<typename, typename> class boundaryT, typename parameterT>
+class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
 {
   public:
     using traits_type         = OpenMPSimulatorTraits<realT, boundaryT>;
@@ -23,8 +21,8 @@ class UnlimitedGridCellList<
     using neighbor_type       = typename neighbor_list_type::neighbor_type;
     using range_type          = typename neighbor_list_type::range_type;
 
-    constexpr static std::size_t  dim_size  = dimI;
-    constexpr static std::int64_t dim       = static_cast<std::int64_t>(dimI);
+    constexpr static std::size_t  dim_size  = 8;
+    constexpr static std::int64_t dim       = 8;
     constexpr static std::size_t total_size = dim_size * dim_size * dim_size;
     constexpr static real_type mesh_epsilon = 1e-6;
 
@@ -292,27 +290,22 @@ class UnlimitedGridCellList<
     // first term of cell list contains first and last idx of index_by_cell
 };
 
-template<typename realT, template<typename, typename> class boundaryT,
-         typename parameterT, std::size_t dimI>
+template<typename realT, template<typename, typename> class boundaryT, typename parameterT>
 constexpr std::size_t UnlimitedGridCellList<
-    OpenMPSimulatorTraits<realT, boundaryT>, parameterT, dimI>::dim_size;
+    OpenMPSimulatorTraits<realT, boundaryT>, parameterT>::dim_size;
 
-template<typename realT, template<typename, typename> class boundaryT,
-         typename parameterT, std::size_t dimI>
+template<typename realT, template<typename, typename> class boundaryT, typename parameterT>
 constexpr std::int64_t UnlimitedGridCellList<
-    OpenMPSimulatorTraits<realT, boundaryT>, parameterT, dimI>::dim;
+    OpenMPSimulatorTraits<realT, boundaryT>, parameterT>::dim;
 
-template<typename realT, template<typename, typename> class boundaryT,
-         typename parameterT, std::size_t dimI>
+template<typename realT, template<typename, typename> class boundaryT, typename parameterT>
 constexpr std::size_t UnlimitedGridCellList<
-    OpenMPSimulatorTraits<realT, boundaryT>, parameterT, dimI>::total_size;
+    OpenMPSimulatorTraits<realT, boundaryT>, parameterT>::total_size;
 
-template<typename realT, template<typename, typename> class boundaryT,
-         typename parameterT, std::size_t dimI>
+template<typename realT, template<typename, typename> class boundaryT, typename parameterT>
 constexpr typename UnlimitedGridCellList<
-    OpenMPSimulatorTraits<realT, boundaryT>, parameterT, dimI>::real_type
-    UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>,
-                          parameterT, dimI>::mesh_epsilon;
+    OpenMPSimulatorTraits<realT, boundaryT>, parameterT>::real_type
+    UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>::mesh_epsilon;
 
 } // mjolnir
 #endif/* MJOLNIR_UNLIMITED_GRID_CELL_LIST */
