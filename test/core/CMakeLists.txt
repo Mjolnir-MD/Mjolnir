@@ -56,6 +56,9 @@ set(TEST_NAMES
     test_read_lennard_jones_wall_potential
     test_read_implicit_membrane_potential
 
+    test_read_ignore_molecule
+    test_read_ignore_group
+
     test_read_bond_length_interaction
     test_read_bond_angle_interaction
     test_read_dihedral_angle_interaction
