@@ -106,11 +106,11 @@ read_ignored_group(const toml::value& ignore)
     if(group.as_table().count("inter") == 1)
     {
         const auto inter = toml::find(group, "inter");
-        for(auto intra : toml::find<
-            std::vector<std::pair<std::string, std::string>>>(group, "intra"))
+        for(auto inter : toml::find<
+            std::vector<std::pair<std::string, std::string>>>(group, "inter"))
         {
-            const auto fst = std::move(intra.first);
-            const auto snd = std::move(intra.second);
+            const auto fst = std::move(inter.first);
+            const auto snd = std::move(inter.second);
             if(ignores.count(fst) == 0) {ignores[fst] = {};}
             if(ignores.count(snd) == 0) {ignores[snd] = {};}
 
