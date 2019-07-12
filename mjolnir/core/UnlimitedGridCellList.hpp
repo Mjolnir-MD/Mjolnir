@@ -28,7 +28,7 @@ class UnlimitedGridCellList
     using neighbor_type       = typename neighbor_list_type::neighbor_type;
     using range_type          = typename neighbor_list_type::range_type;
 
-    constexpr static std::size_t  dim_size  = 8;
+    constexpr static std::size_t  dim_size  = 8u;
     constexpr static std::int64_t dim       = 8;
     constexpr static std::size_t total_size = dim_size * dim_size * dim_size;
     constexpr static real_type mesh_epsilon = 1e-6;
@@ -299,6 +299,21 @@ void UnlimitedGridCellList<traitsT, parameterT>::initialize(
     this->make(sys, pot);
     return;
 }
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, empty_t>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
 
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, double>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, float >;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+#endif
 } // mjolnir
 #endif/* MJOLNIR_UNLIMITED_GRID_CELL_LIST */

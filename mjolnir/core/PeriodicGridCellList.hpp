@@ -5,6 +5,7 @@
 #include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/util/range.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <mjolnir/util/empty.hpp>
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -341,6 +342,22 @@ void PeriodicGridCellList<traitsT, parameterT>::initialize(
     return;
 }
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class PeriodicGridCellList<SimulatorTraits<double, UnlimitedBoundary>, empty_t>;
+extern template class PeriodicGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
+extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
+extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+
+extern template class PeriodicGridCellList<SimulatorTraits<double, UnlimitedBoundary>, double>;
+extern template class PeriodicGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, float >;
+extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
+extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+
+extern template class PeriodicGridCellList<SimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
+extern template class PeriodicGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
+extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
+extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+#endif
 
 } // mjolnir
 #endif /* MJOLNIR_PERIODIC_GRID_CELL_LIST */

@@ -3,6 +3,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
 #include <mjolnir/core/ExclusionList.hpp>
+#include <mjolnir/util/empty.hpp>
 #include <algorithm>
 #include <limits>
 
@@ -133,6 +134,24 @@ void VerletList<traitsT, parameterT>::make(
     this->current_margin_ = cutoff_ * margin_;
     return ;
 }
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>, empty_t>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>, double>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>, float >;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+#endif
+
 
 } // mjolnir
 #endif/* MJOLNIR_CORE_VERLET_LIST */

@@ -22,7 +22,7 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
     using range_type          = typename neighbor_list_type::range_type;
 
     constexpr static std::size_t  dim_size  = 8;
-    constexpr static std::int64_t dim       = 8;
+    constexpr static std::int64_t dim       = static_cast<std::int64_t>(dim_size);
     constexpr static std::size_t total_size = dim_size * dim_size * dim_size;
     constexpr static real_type mesh_epsilon = 1e-6;
 

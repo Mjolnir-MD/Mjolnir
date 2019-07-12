@@ -3,6 +3,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
 #include <mjolnir/core/ExclusionList.hpp>
+#include <mjolnir/util/empty.hpp>
 
 namespace mjolnir
 {
@@ -88,6 +89,23 @@ void NaivePairCalculation<traitsT, parameterT>::make(
     }
     return;
 }
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>, empty_t>;
+extern template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
+extern template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
+extern template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+
+extern template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>, double>;
+extern template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>, float >;
+extern template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
+extern template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+
+extern template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
+extern template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
+extern template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
+extern template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+#endif
 
 } // mjolnir
 #endif /*MJOLNIR_CORE_NAIVE_PAIR_CALCULATION*/
