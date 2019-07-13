@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 # add executables
 
-message(STATUS ${mjolnir_source_files})
+# message(STATUS ${mjolnir_source_files})
 
 add_executable(mjolnir mjolnir.cpp)
 set_target_properties(mjolnir PROPERTIES
