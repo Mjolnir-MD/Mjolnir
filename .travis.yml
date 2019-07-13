@@ -6,7 +6,7 @@ matrix:
   - os: linux
     language: cpp
     compiler: gcc
-    env: COMPILER="g++-7"
+    env: COMPILER="g++-7" SEPARETE="ON"
     addons:
       apt:
         update: true
@@ -19,7 +19,20 @@ matrix:
   - os: linux
     language: cpp
     compiler: gcc
-    env: COMPILER="g++-6"
+    env: COMPILER="g++-7" SEPARETE="OFF"
+    addons:
+      apt:
+        update: true
+        sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-7
+        - boost1.68
+  - os: linux
+    language: cpp
+    compiler: gcc
+    env: COMPILER="g++-6" SEPARETE="OFF"
     addons:
       apt:
         update: true
@@ -32,7 +45,7 @@ matrix:
   - os: linux
     language: cpp
     compiler: gcc
-    env: COMPILER="g++-5"
+    env: COMPILER="g++-5" SEPARETE="OFF"
     addons:
       apt:
         update: true
@@ -45,7 +58,7 @@ matrix:
   - os: linux
     language: cpp
     compiler: clang
-    env: COMPILER="clang++-7"
+    env: COMPILER="clang++-7" SEPARETE="ON"
     addons:
       apt:
         update: true
@@ -59,7 +72,21 @@ matrix:
   - os: linux
     language: cpp
     compiler: clang
-    env: COMPILER="clang++-6.0"
+    env: COMPILER="clang++-7" SEPARETE="OFF"
+    addons:
+      apt:
+        update: true
+        sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
+        - ubuntu-toolchain-r-test
+        - llvm-toolchain-trusty-7
+        packages:
+        - clang-7
+        - boost1.68
+  - os: linux
+    language: cpp
+    compiler: clang
+    env: COMPILER="clang++-6.0" SEPARETE="OFF"
     addons:
       apt:
         update: true
@@ -73,7 +100,7 @@ matrix:
   - os: linux
     language: cpp
     compiler: clang
-    env: COMPILER="clang++-5.0"
+    env: COMPILER="clang++-5.0" SEPARETE="OFF"
     addons:
       apt:
         update: true
@@ -87,7 +114,11 @@ matrix:
   - os: osx
     language: cpp
     compiler: clang
-    env: COMPILER="clang++"
+    env: COMPILER="clang++" SEPARETE="ON"
+  - os: osx
+    language: cpp
+    compiler: clang
+    env: COMPILER="clang++" SEPARETE="OFF"
 
 before_install:
 - |
@@ -104,9 +135,9 @@ script:
 - cd build
 - |
   if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-    cmake -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON -DUSE_OPENMP=OFF -DBUILD_INTEGRATION_TEST=OFF ..
+    cmake -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON -DUSE_OPENMP=OFF -DBUILD_INTEGRATION_TEST=OFF -DSEPARETE_BUILD="${SEPARATE}" ..
   else
-    cmake -DCMAKE_CXX_COMPILER=$COMPILER -DBOOST_ROOT=/usr/local/Cellar/boost/1.67.0_1/ -DUSE_OPENMP=OFF -DBUILD_INTEGRATION_TEST=OFF ..
+    cmake -DCMAKE_CXX_COMPILER=$COMPILER -DBOOST_ROOT=/usr/local/Cellar/boost/1.67.0_1/ -DUSE_OPENMP=OFF -DBUILD_INTEGRATION_TEST=OFF -DSEPARETE_BUILD="${SEPARATE}" ..
   fi
 - make
 - ctest --output-on-failure
