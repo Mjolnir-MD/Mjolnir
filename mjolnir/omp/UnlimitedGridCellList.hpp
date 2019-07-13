@@ -307,5 +307,22 @@ constexpr typename UnlimitedGridCellList<
     OpenMPSimulatorTraits<realT, boundaryT>, parameterT>::real_type
     UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>::mesh_epsilon;
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, empty_t>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, double>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, float >;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+#endif
+
 } // mjolnir
 #endif/* MJOLNIR_UNLIMITED_GRID_CELL_LIST */

@@ -334,6 +334,22 @@ constexpr typename PeriodicGridCellList<
     PeriodicGridCellList<
         OpenMPSimulatorTraits<realT, boundaryT>, parameterT>::mesh_epsilon;
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, empty_t>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, double>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, float >;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+#endif
 
 } // mjolnir
 #endif /* MJOLNIR_PERIODIC_GRID_CELL_LIST */

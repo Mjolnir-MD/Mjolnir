@@ -12,6 +12,8 @@ set(mjolnir_omp_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/GlobalPairInteraction.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/GlobalPairLennardJonesInteraction.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/GlobalPairUniformLennardJonesInteraction.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/UnlimitedGridCellList.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/PeriodicGridCellList.cpp"
     )
 set(mjolnir_cpp_files
     ${mjolnir_cpp_files}
