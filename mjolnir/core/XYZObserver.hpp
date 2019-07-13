@@ -101,5 +101,12 @@ class XYZObserver final : public ObserverBase<traitsT>
     std::string vel_name_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class XYZObserver<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class XYZObserver<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class XYZObserver<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class XYZObserver<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 } // mjolnir
 #endif // MJOLNIR_CORE_XYZ_OBSERVER_HPP

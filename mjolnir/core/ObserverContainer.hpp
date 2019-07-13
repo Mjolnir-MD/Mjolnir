@@ -98,5 +98,12 @@ class ObserverContainer
     bool                           output_progress_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ObserverContainer<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ObserverContainer<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ObserverContainer<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ObserverContainer<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 } // mjolnir
 #endif// MJOLNIR_CORE_OBSERVER_HPP

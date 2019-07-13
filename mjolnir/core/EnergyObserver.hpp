@@ -85,6 +85,13 @@ class EnergyObserver final : public ObserverBase<traitsT>
     std::string file_name_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class EnergyObserver<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class EnergyObserver<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class EnergyObserver<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class EnergyObserver<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 
 } // mjolnir
 #endif//MJOLNIR_CORE_ENERGY_OBSERVER_HPP

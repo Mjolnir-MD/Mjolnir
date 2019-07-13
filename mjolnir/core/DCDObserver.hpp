@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <cassert>
 
 namespace mjolnir
 {
@@ -316,6 +317,13 @@ inline void DCDObserver<traitsT>::output(
     }
     return ;
 }
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class DCDObserver<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class DCDObserver<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class DCDObserver<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class DCDObserver<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
 
 } // mjolnir
 #endif // MJOLNIR_CORE_DCD_OBSERVER_HPP

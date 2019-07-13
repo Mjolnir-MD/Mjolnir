@@ -11,6 +11,12 @@ set(mjolnir_core_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/PeriodicGridCellList.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/VerletList.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/NaivePairCalculation.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ObserverBase.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/EnergyObserver.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/XYZObserver.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/DCDObserver.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/TRRObserver.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ObserverContainer.cpp"
     )
 set(mjolnir_cpp_files
     ${mjolnir_cpp_files}
