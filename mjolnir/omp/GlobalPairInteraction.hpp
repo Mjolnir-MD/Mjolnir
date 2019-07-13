@@ -1,7 +1,10 @@
 #ifndef MJOLNIR_OMP_GLOBAL_PAIR_INTEARACTION_HPP
 #define MJOLNIR_OMP_GLOBAL_PAIR_INTEARACTION_HPP
-#include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
+#include <mjolnir/omp/System.hpp>
+#include <mjolnir/omp/UnlimitedGridCellList.hpp>
+#include <mjolnir/omp/PeriodicGridCellList.hpp>
+#include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
 
 namespace mjolnir
 {
@@ -121,4 +124,44 @@ class GlobalPairInteraction<
 };
 
 } // mjolnir
+
+// specializations
+#include <mjolnir/omp/GlobalPairExcludedVolumeInteraction.hpp>
+#include <mjolnir/omp/GlobalPairLennardJonesInteraction.hpp>
+#include <mjolnir/omp/GlobalPairUniformLennardJonesInteraction.hpp>
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize BondAngleInteraction with LocalPotentials
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/NaivePairCalculation.hpp>
+#include <mjolnir/core/VerletList.hpp>
+#include <mjolnir/core/UnlimitedGridCellList.hpp>
+#include <mjolnir/core/PeriodicGridCellList.hpp>
+#include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
+
+namespace mjolnir
+{
+
+// EXV, L-J and UL-J have its own specialization, so DO NOT specialize here.
+
+// ============================================================================
+// D-H
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>, UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        typename DebyeHuckelPotential<double>::parameter_type>>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float> , UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        typename DebyeHuckelPotential<float>::parameter_type> >;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>, PeriodicGridCellList <OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, typename DebyeHuckelPotential<double>::parameter_type>>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float> , PeriodicGridCellList <OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, typename DebyeHuckelPotential<float>::parameter_type> >;
+// VerletList
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>, VerletList<OpenMPSimulatorTraits<double, UnlimitedBoundary>,                   typename DebyeHuckelPotential<double>::parameter_type>>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float> , VerletList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,                   typename DebyeHuckelPotential<float>::parameter_type> >;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>, VerletList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>,            typename DebyeHuckelPotential<double>::parameter_type>>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float> , VerletList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>,            typename DebyeHuckelPotential<float>::parameter_type> >;
+// Naive
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>, NaivePairCalculation<OpenMPSimulatorTraits<double, UnlimitedBoundary>,         typename DebyeHuckelPotential<double>::parameter_type>>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float> , NaivePairCalculation<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,         typename DebyeHuckelPotential<float>::parameter_type> >;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>, NaivePairCalculation<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>,  typename DebyeHuckelPotential<double>::parameter_type>>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float> , NaivePairCalculation<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>,  typename DebyeHuckelPotential<float>::parameter_type> >;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif /* MJOLNIR_GLOBAL_PAIR_INTEARACTION */
