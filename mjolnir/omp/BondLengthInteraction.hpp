@@ -126,7 +126,6 @@ class BondLengthInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 #ifdef MJOLNIR_SEPARATE_BUILD
 // explicitly specialize BondLengthInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
-#include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/potential/local/GoContactPotential.hpp>
 #include <mjolnir/potential/local/GaussianPotential.hpp>
