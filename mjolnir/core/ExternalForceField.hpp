@@ -119,5 +119,12 @@ class ExternalForceField
     container_type interactions_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ExternalForceField<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class ExternalForceField<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class ExternalForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ExternalForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 } // mjolnir
 #endif// MJOLNIR_EXTERNAL_FORCE_FIELD

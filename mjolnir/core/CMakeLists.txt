@@ -17,6 +17,13 @@ set(mjolnir_core_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/DCDObserver.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/TRRObserver.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ObserverContainer.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ForceField.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/LocalForceField.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/GlobalForceField.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ExternalForceField.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/LocalInteractionBase.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/GlobalInteractionBase.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ExternalForceInteractionBase.cpp"
     )
 set(mjolnir_cpp_files
     ${mjolnir_cpp_files}

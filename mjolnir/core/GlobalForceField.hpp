@@ -118,5 +118,12 @@ class GlobalForceField
     container_type interactions_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class GlobalForceField<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class GlobalForceField<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class GlobalForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class GlobalForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 } // mjolnir
 #endif /* MJOLNIR_GLOBAL_FORCE_FIELD */

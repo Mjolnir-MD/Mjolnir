@@ -116,5 +116,12 @@ class ForceField
     external_forcefield_type external_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ForceField<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class ForceField<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class ForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 } // mjolnir
 #endif /* MJOLNIR_FORCE_FIELD */

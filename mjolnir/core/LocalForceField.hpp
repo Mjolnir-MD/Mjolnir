@@ -131,5 +131,12 @@ class LocalForceField
     container_type interactions_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class LocalForceField<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class LocalForceField<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class LocalForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class LocalForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 } // mjolnir
 #endif /* MJOLNIR_LOCAL_FORCE_FIELD */
