@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_OMP_CONTACT_INTERACTION_HPP
 #define MJOLNIR_OMP_CONTACT_INTERACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
+#include <mjolnir/omp/System.hpp>
 #include <mjolnir/interaction/local/ContactInteraction.hpp>
 
 namespace mjolnir
@@ -184,4 +185,29 @@ class ContactInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 };
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize ContactInteraction with LocalPotentials
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/potential/local/GoContactPotential.hpp>
+#include <mjolnir/potential/local/GaussianPotential.hpp>
+
+namespace mjolnir
+{
+
+// go-contact
+extern template class ContactInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>, GoContactPotential<double>>;
+extern template class ContactInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, GoContactPotential<float> >;
+extern template class ContactInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, GoContactPotential<double>>;
+extern template class ContactInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, GoContactPotential<float> >;
+
+// gaussian
+extern template class ContactInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>, GaussianPotential<double>>;
+extern template class ContactInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, GaussianPotential<float> >;
+extern template class ContactInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>>;
+extern template class ContactInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> >;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif /* MJOLNIR_BOND_LENGTH_INTERACTION */

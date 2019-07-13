@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_OMP_BOND_ANGLE_INTERACTION_HPP
 #define MJOLNIR_OMP_BOND_ANGLE_INTERACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
+#include <mjolnir/omp/System.hpp>
 #include <mjolnir/interaction/local/BondAngleInteraction.hpp>
 
 namespace mjolnir
@@ -160,4 +161,36 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 };
 
 }// mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize BondAngleInteraction with LocalPotentials
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/potential/local/HarmonicPotential.hpp>
+#include <mjolnir/potential/local/GaussianPotential.hpp>
+#include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
+
+namespace mjolnir
+{
+
+// harmonic
+extern template class BondAngleInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>, HarmonicPotential<double>>;
+extern template class BondAngleInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, HarmonicPotential<float> >;
+extern template class BondAngleInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, HarmonicPotential<double>>;
+extern template class BondAngleInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, HarmonicPotential<float> >;
+
+// gaussian
+extern template class BondAngleInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>, GaussianPotential<double>>;
+extern template class BondAngleInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, GaussianPotential<float> >;
+extern template class BondAngleInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>>;
+extern template class BondAngleInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> >;
+
+// FLP angle
+extern template class BondAngleInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>, FlexibleLocalAnglePotential<double>>;
+extern template class BondAngleInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, FlexibleLocalAnglePotential<float> >;
+extern template class BondAngleInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, FlexibleLocalAnglePotential<double>>;
+extern template class BondAngleInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, FlexibleLocalAnglePotential<float> >;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif /* MJOLNIR_BOND_ANGL_INTERACTION */
