@@ -73,5 +73,12 @@ template<typename realT, template<typename, typename> class boundaryT>
 constexpr std::size_t
 RandomNumberGenerator<OpenMPSimulatorTraits<realT, boundaryT>>::cache_alignment;
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class RandomNumberGenerator<OpenMPSimulatorTraits<double, UnlimitedBoundary>>;
+extern template class RandomNumberGenerator<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class RandomNumberGenerator<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class RandomNumberGenerator<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 } // mjolnir
 #endif /*MJOLNIR_CORE_RANDOM_NUMBER_GENERATOR*/

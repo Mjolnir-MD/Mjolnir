@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_OMP_FORCE_FIELD_HPP
 #define MJOLNIR_OMP_FORCE_FIELD_HPP
 #include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/omp/System.hpp>
 
 namespace mjolnir
 {
@@ -108,6 +109,13 @@ class ForceField<OpenMPSimulatorTraits<realT, boundaryT>>
     global_forcefield_type   global_;
     external_forcefield_type external_;
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ForceField<OpenMPSimulatorTraits<double, UnlimitedBoundary>>;
+extern template class ForceField<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class ForceField<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ForceField<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
 
 } // mjolnir
 #endif /* MJOLNIR_FORCE_FIELD */

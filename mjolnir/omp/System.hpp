@@ -165,5 +165,12 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     static_string_container_type groups_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class System<OpenMPSimulatorTraits<double, UnlimitedBoundary>>;
+extern template class System<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class System<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class System<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 } // mjolnir
 #endif// MJOLNIR_SYSTEM_HPP
