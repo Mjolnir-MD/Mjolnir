@@ -98,11 +98,11 @@ struct IgnoreMolecule
         {
             ignore_mol_.reset(new IgnoreNothing<MoleculeID>);
         }
-        else if(name == "Self")
+        else if(name == "Self" || name == "Intra")
         {
             ignore_mol_.reset(new IgnoreSelf<MoleculeID>);
         }
-        else if(name == "Others")
+        else if(name == "Others" || name == "Inter")
         {
             ignore_mol_.reset(new IgnoreOthers<MoleculeID>);
         }

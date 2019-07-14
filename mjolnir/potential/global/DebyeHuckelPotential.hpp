@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_DEBYE_HUCKEL_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_DEBYE_HUCKEL_POTENTIAL_HPP
 #include <mjolnir/potential/global/IgnoreMolecule.hpp>
+#include <mjolnir/potential/global/IgnoreGroup.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/constants.hpp>
@@ -31,8 +32,10 @@ class DebyeHuckelPotential
     // topology stuff
     using topology_type        = Topology;
     using molecule_id_type     = typename topology_type::molecule_id_type;
+    using group_id_type        = typename topology_type::group_id_type;
     using connection_kind_type = typename topology_type::connection_kind_type;
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type    = IgnoreGroup   <group_id_type>;
 
     // r_cutoff = cutoff_ratio * debye_length
     static constexpr real_type cutoff_ratio = 5.5;
@@ -47,9 +50,10 @@ class DebyeHuckelPotential
     DebyeHuckelPotential(
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>& exclusions,
-        ignore_molecule_type ignore_mol)
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
         : temperature_(300.0), ion_conc_(0.1),
           ignore_molecule_(std::move(ignore_mol)),
+          ignore_group_   (std::move(ignore_grp)),
           ignore_within_  (exclusions.begin(), exclusions.end())
     {
         this->parameters_  .reserve(parameters.size());
@@ -136,6 +140,9 @@ class DebyeHuckelPotential
         return;
     }
 
+    // ------------------------------------------------------------------------
+    // ignore_xxx functions would be used in core/ExclusionLists.
+
     // e.g. {"bond", 3} means ignore particles connected within 3 "bond"s
     std::vector<std::pair<connection_kind_type, std::size_t>>
     ignore_within() const {return ignore_within_;}
@@ -145,16 +152,25 @@ class DebyeHuckelPotential
     {
         return ignore_molecule_.is_ignored(i, j);
     }
+    bool is_ignored_group(
+            const group_id_type& i, const group_id_type& j) const noexcept
+    {
+        return ignore_group_.is_ignored(i, j);
+    }
 
+    // ------------------------------------------------------------------------
+    // used by Observer.
     static const char* name() noexcept {return "DebyeHuckel";}
 
-    // access to the parameters
+    // ------------------------------------------------------------------------
+    // the following accessers would be used in tests.
+
+    // access to the parameters.
     std::vector<real_type>&       charges()       noexcept {return parameters_;}
     std::vector<real_type> const& charges() const noexcept {return parameters_;}
 
     std::vector<std::size_t> const& participants() const noexcept {return participants_;}
 
-    //XXX this one is calculated parameter, shouldn't be changed!
     real_type debye_length() const noexcept {return this->debye_length_;}
 
   private:
@@ -215,6 +231,7 @@ class DebyeHuckelPotential
     std::vector<std::size_t> participants_;
 
     ignore_molecule_type ignore_molecule_;
+    ignore_group_type    ignore_group_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 };
 

@@ -16,6 +16,7 @@ BOOST_AUTO_TEST_CASE(DH_double)
 
     using real_type = double;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
+    using group_id_type    = mjolnir::Topology::group_id_type;
 
     // to make the value realistic, we need to modify the unit system.
     using phys_type = mjolnir::physics::constants<real_type>;
@@ -40,7 +41,8 @@ BOOST_AUTO_TEST_CASE(DH_double)
     const real_type charge = 1.0;
     mjolnir::DebyeHuckelPotential<real_type> dh(
         {{0u, charge}, {1u, charge}}, {},
-        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
+        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
+        mjolnir::IgnoreGroup   <group_id_type   >({})
         );
 
     const real_type x_min = 0.5 * dh.debye_length();
@@ -63,6 +65,7 @@ BOOST_AUTO_TEST_CASE(DH_float)
 {
     using real_type = float;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
+    using group_id_type    = mjolnir::Topology::group_id_type;
 
     using phys_type = mjolnir::physics::constants<real_type>;
     using unit_type = mjolnir::unit::constants<real_type>;
@@ -86,7 +89,8 @@ BOOST_AUTO_TEST_CASE(DH_float)
     const real_type charge = 1.0;
     mjolnir::DebyeHuckelPotential<real_type> dh(
         {{0u, charge}, {1u, charge}}, {},
-        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
+        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
+        mjolnir::IgnoreGroup   <group_id_type   >({})
         );
 
     const real_type x_min = 0.5 * dh.debye_length();
@@ -104,4 +108,3 @@ BOOST_AUTO_TEST_CASE(DH_float)
         BOOST_TEST(dpot == deri, boost::test_tools::tolerance(h));
     }
 }
-

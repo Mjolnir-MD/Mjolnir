@@ -53,6 +53,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_lennard_jones_noenv, T, test_types)
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
+        BOOST_TEST(!g.is_ignored_molecule(0, 0));
+        BOOST_TEST(!g.is_ignored_molecule(0, 1));
+        BOOST_TEST(!g.is_ignored_molecule(1, 1));
+
         BOOST_TEST(g.participants().size() ==   7u);
         BOOST_TEST(g.participants().at(0)  ==   0u);
         BOOST_TEST(g.participants().at(1)  ==   1u);
@@ -118,6 +122,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_lennard_jones_env, T, test_types)
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
+        BOOST_TEST(!g.is_ignored_molecule(0, 0));
+        BOOST_TEST(!g.is_ignored_molecule(0, 1));
+        BOOST_TEST(!g.is_ignored_molecule(1, 1));
+
         BOOST_TEST(g.participants().size() ==   7u);
         BOOST_TEST(g.participants().at(0)  ==   0u);
         BOOST_TEST(g.participants().at(1)  ==   1u);
@@ -142,5 +150,138 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_lennard_jones_env, T, test_types)
         BOOST_TEST(g.parameters().at(  5).second == real_type(0.5), tolerance<real_type>());
         BOOST_TEST(g.parameters().at(  7).second == real_type(0.7), tolerance<real_type>());
         BOOST_TEST(g.parameters().at(100).second == real_type(0.1), tolerance<real_type>());
+    }
+}
+
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_lennard_jones_ignore_self, T, test_types)
+{
+    mjolnir::LoggerManager::set_default_logger("test_read_lennard_jones.log");
+
+    using real_type = T;
+    {
+        using namespace toml::literals;
+        const auto v = u8R"(
+            interaction = "Pair"
+            potential   = "LennardJones"
+            spatial_partition.type  = "Naive"
+            ignore.molecule         = "Self"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            parameters = [
+                {index =   0, sigma =   2.0, epsilon = 1.5},
+            ]
+        )"_toml;
+
+        const auto g = mjolnir::read_lennard_jones_potential<real_type>(v);
+
+        const auto ignore_within = g.ignore_within();
+        const std::map<std::string, std::size_t> within(
+                ignore_within.begin(), ignore_within.end());
+
+        BOOST_TEST(g.ignore_within().size() == 2u);
+        BOOST_TEST(within.at("bond")    == 3ul);
+        BOOST_TEST(within.at("contact") == 1ul);
+
+        BOOST_TEST( g.is_ignored_molecule(0, 0));
+        BOOST_TEST(!g.is_ignored_molecule(0, 1));
+        BOOST_TEST( g.is_ignored_molecule(1, 1));
+
+        // by default, no group is ignored
+        BOOST_TEST(!g.is_ignored_group("protein1", "protein1"));
+        BOOST_TEST(!g.is_ignored_group("protein1", "protein2"));
+        BOOST_TEST(!g.is_ignored_group("protein2", "protein2"));
+    }
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_lennard_jones_ignore_others, T, test_types)
+{
+    mjolnir::LoggerManager::set_default_logger("test_read_lennard_jones.log");
+
+    using real_type = T;
+    {
+        using namespace toml::literals;
+        const auto v = u8R"(
+            interaction = "Pair"
+            potential   = "LennardJones"
+            spatial_partition.type  = "Naive"
+            ignore.molecule         = "Others"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            parameters = [
+                {index =   0, sigma =   2.0, epsilon = 1.5},
+            ]
+        )"_toml;
+
+        const auto g = mjolnir::read_lennard_jones_potential<real_type>(v);
+
+        const auto ignore_within = g.ignore_within();
+        const std::map<std::string, std::size_t> within(
+                ignore_within.begin(), ignore_within.end());
+
+        BOOST_TEST(g.ignore_within().size() == 2u);
+        BOOST_TEST(within.at("bond")    == 3ul);
+        BOOST_TEST(within.at("contact") == 1ul);
+
+        BOOST_TEST(!g.is_ignored_molecule(0, 0));
+        BOOST_TEST( g.is_ignored_molecule(0, 1));
+        BOOST_TEST(!g.is_ignored_molecule(1, 1));
+
+        // by default, no group is ignored
+        BOOST_TEST(!g.is_ignored_group("protein1", "protein1"));
+        BOOST_TEST(!g.is_ignored_group("protein1", "protein2"));
+        BOOST_TEST(!g.is_ignored_group("protein2", "protein2"));
+    }
+}
+
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_lennard_jones_ignore_group, T, test_types)
+{
+    mjolnir::LoggerManager::set_default_logger("test_read_lennard_jones.log");
+
+    using real_type = T;
+    {
+        using namespace toml::literals;
+        const auto v = u8R"(
+            interaction = "Pair"
+            potential   = "LennardJones"
+            spatial_partition.type  = "Naive"
+            ignore.molecule         = "Nothing"
+            ignore.group.inter      = [
+                ["protein1", "protein2"], # between these
+                ["protein1", "protein3"],
+            ]
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            parameters = [
+                {index =   0, sigma =   2.0, epsilon = 1.5},
+            ]
+        )"_toml;
+
+        const auto g = mjolnir::read_lennard_jones_potential<real_type>(v);
+
+        const auto ignore_within = g.ignore_within();
+        const std::map<std::string, std::size_t> within(
+                ignore_within.begin(), ignore_within.end());
+
+        BOOST_TEST(g.ignore_within().size() == 2u);
+        BOOST_TEST(within.at("bond")    == 3ul);
+        BOOST_TEST(within.at("contact") == 1ul);
+
+        BOOST_TEST(!g.is_ignored_molecule(0, 0));
+        BOOST_TEST(!g.is_ignored_molecule(0, 1));
+        BOOST_TEST(!g.is_ignored_molecule(1, 1));
+
+        BOOST_TEST(!g.is_ignored_group("protein1", "protein1"));
+        BOOST_TEST( g.is_ignored_group("protein1", "protein2"));
+        BOOST_TEST( g.is_ignored_group("protein1", "protein3"));
+
+        BOOST_TEST( g.is_ignored_group("protein2", "protein1"));
+        BOOST_TEST(!g.is_ignored_group("protein2", "protein2"));
+        BOOST_TEST(!g.is_ignored_group("protein2", "protein3"));
+
+        BOOST_TEST( g.is_ignored_group("protein3", "protein1"));
+        BOOST_TEST(!g.is_ignored_group("protein3", "protein2"));
+        BOOST_TEST(!g.is_ignored_group("protein3", "protein3"));
     }
 }
