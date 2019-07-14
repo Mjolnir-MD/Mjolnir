@@ -114,10 +114,6 @@ matrix:
   - os: osx
     language: cpp
     compiler: clang
-    env: COMPILER="clang++" SEPARATE="ON"
-  - os: osx
-    language: cpp
-    compiler: clang
     env: COMPILER="clang++" SEPARATE="OFF"
 
 before_install:
@@ -139,5 +135,5 @@ script:
   else
     cmake -DCMAKE_CXX_COMPILER=$COMPILER -DBOOST_ROOT=/usr/local/Cellar/boost/1.67.0_1/ -DUSE_OPENMP=OFF -DBUILD_INTEGRATION_TEST=OFF -DSEPARATE_BUILD="${SEPARATE}" ..
   fi
-- make VERBOSE=1
+- make
 - ctest --output-on-failure
