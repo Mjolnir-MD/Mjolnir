@@ -20,8 +20,9 @@ namespace mjolnir
 {
 
 template<typename MoleculeID>
-struct IgnoreMoleculeBase
+class IgnoreMoleculeBase
 {
+  public:
     IgnoreMoleculeBase()          = default;
     virtual ~IgnoreMoleculeBase() = default;
 
@@ -30,8 +31,9 @@ struct IgnoreMoleculeBase
 };
 
 template<typename MoleculeID>
-struct IgnoreNothing: public IgnoreMoleculeBase<MoleculeID>
+class IgnoreNothing: public IgnoreMoleculeBase<MoleculeID>
 {
+  public:
     IgnoreNothing()           = default;
     ~IgnoreNothing() override = default;
 
@@ -43,8 +45,9 @@ struct IgnoreNothing: public IgnoreMoleculeBase<MoleculeID>
 };
 
 template<typename MoleculeID>
-struct IgnoreSelf: public IgnoreMoleculeBase<MoleculeID>
+class IgnoreSelf: public IgnoreMoleculeBase<MoleculeID>
 {
+  public:
     IgnoreSelf()           = default;
     ~IgnoreSelf() override = default;
 
@@ -56,8 +59,9 @@ struct IgnoreSelf: public IgnoreMoleculeBase<MoleculeID>
 };
 
 template<typename MoleculeID>
-struct IgnoreOthers: public IgnoreMoleculeBase<MoleculeID>
+class IgnoreOthers: public IgnoreMoleculeBase<MoleculeID>
 {
+  public:
     IgnoreOthers()           = default;
     ~IgnoreOthers() override = default;
 
@@ -69,8 +73,9 @@ struct IgnoreOthers: public IgnoreMoleculeBase<MoleculeID>
 };
 
 template<typename MoleculeID>
-struct IgnoreMolecule
+class IgnoreMolecule
 {
+  public:
     explicit IgnoreMolecule(const std::string& name): ignore_mol_(nullptr)
     {
         this->reset(name);
