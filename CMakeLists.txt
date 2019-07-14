@@ -90,6 +90,13 @@ option(SEPARATE_BUILD "separate build process. It reduces the compilation time \
 after building it once. But it possibly gains performance loss. So this is not \
 for users, but for developers who compile this application many time with small\
  changes." OFF)
+
+if(APPLE)
+    # With apple clang, `~destructor() = defualt` does not work and causes a
+    # linker error. So on apple, SEPARATE_BUILD option cannot be used.
+    set(SEPARATE_BUILD OFF)
+endif()
+
 if(SEPARATE_BUILD)
     add_definitions(-DMJOLNIR_SEPARATE_BUILD)
 #     add_definitions(-flto)
