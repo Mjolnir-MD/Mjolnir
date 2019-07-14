@@ -33,7 +33,7 @@ class ForceField
     {}
 
     ForceField()  = default;
-    ~ForceField() = default;
+    ~ForceField() {}
     ForceField(const ForceField&) = delete;
     ForceField(ForceField&&)      = default;
     ForceField& operator=(const ForceField&) = delete;
