@@ -16,8 +16,10 @@ namespace mjolnir
 {
 
 template<typename GroupID>
-struct IgnoreGroup
+class IgnoreGroup
 {
+  public:
+
     using group_id_type = GroupID;
 
     IgnoreGroup(std::map<GroupID, std::vector<GroupID>> ignore)
