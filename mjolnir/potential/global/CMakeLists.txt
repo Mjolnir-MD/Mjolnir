@@ -2,6 +2,7 @@ set(mjolnir_potential_global_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/DebyeHuckelPotential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ExcludedVolumePotential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/IgnoreMolecule.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/IgnoreGroup.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/LennardJonesPotential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/UniformLennardJonesPotential.cpp"
     )

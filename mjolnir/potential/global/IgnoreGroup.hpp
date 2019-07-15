@@ -1,7 +1,11 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_IGNORE_GROUP_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_IGNORE_GROUP_HPP
+#include <mjolnir/core/Topology.hpp>
+#include <utility>
+#include <algorithm>
 #include <vector>
 #include <map>
+#include <cassert>
 
 // These classes are to ignore inter- or intra-group interaction.
 //
@@ -76,6 +80,10 @@ struct IgnoreGroup
 
     std::map<GroupID, std::vector<GroupID>> ignores_;
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class IgnoreGroup<Topology::group_id_type>;
+#endif
 
 } // mjolnir
 #endif// MJOLNIR_POTENTIAL_GLOBAL_IGNORE_GROUP_HPP
