@@ -1,4 +1,4 @@
-dist: trusty
+dist: xenial
 language: cpp
 
 matrix:
@@ -6,7 +6,7 @@ matrix:
   - os: linux
     language: cpp
     compiler: gcc
-    env: COMPILER="g++-7" SEPARATE="ON"
+    env: COMPILER="g++-9" SEPARATE="ON"
     addons:
       apt:
         update: true
@@ -14,8 +14,34 @@ matrix:
         - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
         packages:
-        - g++-7
-        - boost1.68
+        - g++-9
+        - boost1.70
+  - os: linux
+    language: cpp
+    compiler: gcc
+    env: COMPILER="g++-9" SEPARATE="OFF"
+    addons:
+      apt:
+        update: true
+        sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-9
+        - boost1.70
+  - os: linux
+    language: cpp
+    compiler: gcc
+    env: COMPILER="g++-8" SEPARATE="OFF"
+    addons:
+      apt:
+        update: true
+        sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-8
+        - boost1.70
   - os: linux
     language: cpp
     compiler: gcc
@@ -28,47 +54,35 @@ matrix:
         - ubuntu-toolchain-r-test
         packages:
         - g++-7
-        - boost1.68
-  - os: linux
-    language: cpp
-    compiler: gcc
-    env: COMPILER="g++-6" SEPARATE="OFF"
-    addons:
-      apt:
-        update: true
-        sources:
-        - sourceline: 'ppa:mhier/libboost-latest'
-        - ubuntu-toolchain-r-test
-        packages:
-        - g++-6
-        - boost1.68
-  - os: linux
-    language: cpp
-    compiler: gcc
-    env: COMPILER="g++-5" SEPARATE="OFF"
-    addons:
-      apt:
-        update: true
-        sources:
-        - sourceline: 'ppa:mhier/libboost-latest'
-        - ubuntu-toolchain-r-test
-        packages:
-        - g++-5
-        - boost1.68
+        - boost1.70
   - os: linux
     language: cpp
     compiler: clang
-    env: COMPILER="clang++-7" SEPARATE="ON"
+    env: COMPILER="clang++-8" SEPARATE="ON"
     addons:
       apt:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
-        - llvm-toolchain-trusty-7
+        - llvm-toolchain-xenial-8
         packages:
-        - clang-7
-        - boost1.68
+        - clang-8
+        - boost1.70
+  - os: linux
+    language: cpp
+    compiler: clang
+    env: COMPILER="clang++-8" SEPARATE="OFF"
+    addons:
+      apt:
+        update: true
+        sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
+        - ubuntu-toolchain-r-test
+        - llvm-toolchain-xenial-8
+        packages:
+        - clang-8
+        - boost1.70
   - os: linux
     language: cpp
     compiler: clang
@@ -79,38 +93,10 @@ matrix:
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
         - ubuntu-toolchain-r-test
-        - llvm-toolchain-trusty-7
+        - llvm-toolchain-xenial-7
         packages:
         - clang-7
-        - boost1.68
-  - os: linux
-    language: cpp
-    compiler: clang
-    env: COMPILER="clang++-6.0" SEPARATE="OFF"
-    addons:
-      apt:
-        update: true
-        sources:
-        - sourceline: 'ppa:mhier/libboost-latest'
-        - ubuntu-toolchain-r-test
-        - llvm-toolchain-trusty-6.0
-        packages:
-        - clang-6.0
-        - boost1.68
-  - os: linux
-    language: cpp
-    compiler: clang
-    env: COMPILER="clang++-5.0" SEPARATE="OFF"
-    addons:
-      apt:
-        update: true
-        sources:
-        - sourceline: 'ppa:mhier/libboost-latest'
-        - ubuntu-toolchain-r-test
-        - llvm-toolchain-trusty-5.0
-        packages:
-        - clang-5.0
-        - boost1.68
+        - boost1.70
   - os: osx
     language: cpp
     compiler: clang
@@ -123,17 +109,14 @@ before_install:
     travis_retry wget "https://github.com/Kitware/CMake/releases/download/v3.14.5/cmake-3.14.5-Linux-x86_64.tar.gz"
     tar xf cmake-3.14.5-Linux-x86_64.tar.gz -C cmake --strip-components=1
     export PATH=${TRAVIS_BUILD_DIR}/cmake/bin:${PATH}
+  else
+    brew upgrade cmake boost
   fi
 - cmake --version
 
 script:
 - mkdir build
 - cd build
-- |
-  if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-    cmake -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON -DUSE_OPENMP=OFF -DBUILD_INTEGRATION_TEST=OFF -DSEPARATE_BUILD="${SEPARATE}" ..
-  else
-    cmake -DCMAKE_CXX_COMPILER=$COMPILER -DBOOST_ROOT=/usr/local/Cellar/boost/1.67.0_1/ -DUSE_OPENMP=OFF -DBUILD_INTEGRATION_TEST=OFF -DSEPARATE_BUILD="${SEPARATE}" ..
-  fi
+- cmake -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON -DUSE_OPENMP=OFF -DBUILD_INTEGRATION_TEST=OFF -DSEPARATE_BUILD="${SEPARATE}" ..
 - make
 - ctest --output-on-failure
