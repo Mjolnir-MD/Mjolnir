@@ -56,7 +56,8 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_LennardJones_calc_force)
         }
 
         potential_type potential(parameters, {},
-                typename potential_type::ignore_molecule_type("Nothing"));
+                typename potential_type::ignore_molecule_type("Nothing"),
+                typename potential_type::ignore_group_type({}));
 
         rng_type    rng(123456789);
         system_type sys(N_particle, boundary_type{});

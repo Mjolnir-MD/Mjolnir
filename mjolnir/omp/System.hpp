@@ -18,14 +18,13 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     using topology_type   = Topology;
     using attribute_type  = std::map<std::string, real_type>;
 
+    using string_type              = std::string;
     using particle_type            = Particle<real_type, coordinate_type>;
-    using static_string_type       = typename particle_type::static_string_type;
     using particle_view_type       = ParticleView<real_type, coordinate_type>;
     using particle_const_view_type = ParticleConstView<real_type, coordinate_type>;
 
     using real_container_type          = std::vector<real_type>;
     using coordinate_container_type    = std::vector<coordinate_type>;
-    using static_string_container_type = std::vector<static_string_type>;
 
     static constexpr std::size_t cache_alignment = 64;
 
@@ -42,8 +41,7 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
           forces_master_(num_particles),
           forces_threads_(omp_get_max_threads(),
               coordinate_container_type(num_particles),
-              cache_aligned_allocator<coordinate_container_type>{}),
-          names_    (num_particles), groups_    (num_particles)
+              cache_aligned_allocator<coordinate_container_type>{})
     {}
     ~System() = default;
 
@@ -59,7 +57,8 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
         return particle_view_type{
             masses_[i],    rmasses_[i],
             positions_[i], velocities_[i], forces_master_[i],
-            names_[i],     groups_[i]
+            this->topology_.name_of (i, std::nothrow),
+            this->topology_.group_of(i, std::nothrow)
         };
     }
     particle_const_view_type operator[](std::size_t i) const noexcept
@@ -67,7 +66,8 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
         return particle_const_view_type{
             masses_[i],    rmasses_[i],
             positions_[i], velocities_[i], forces_master_[i],
-            names_[i],     groups_[i]
+            this->topology_.name_of (i, std::nothrow),
+            this->topology_.group_of(i, std::nothrow)
         };
     }
     particle_view_type at(std::size_t i)
@@ -75,7 +75,7 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
         return particle_view_type{
             masses_.at(i),    rmasses_.at(i),
             positions_.at(i), velocities_.at(i), forces_master_.at(i),
-            names_.at(i),     groups_.at(i)
+            topology_.name_of(i), topology_.group_of(i)
         };
     }
     particle_const_view_type at(std::size_t i) const
@@ -83,7 +83,7 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
         return particle_const_view_type{
             masses_.at(i),    rmasses_.at(i),
             positions_.at(i), velocities_.at(i), forces_master_.at(i),
-            names_.at(i),     groups_.at(i)
+            topology_.name_of(i), topology_.group_of(i)
         };
     }
 
@@ -130,10 +130,10 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
         return;
     }
 
-    static_string_type const& name(std::size_t i) const noexcept {return names_[i];}
-    static_string_type&       name(std::size_t i)       noexcept {return names_[i];}
-    static_string_type const& group(std::size_t i) const noexcept {return groups_[i];}
-    static_string_type&       group(std::size_t i)       noexcept {return groups_[i];}
+    string_type const& name (std::size_t i) const noexcept {return topology_.name_of(i, std::nothrow);}
+    string_type&       name (std::size_t i)       noexcept {return topology_.name_of(i, std::nothrow);}
+    string_type const& group(std::size_t i) const noexcept {return topology_.group_of(i, std::nothrow);}
+    string_type&       group(std::size_t i)       noexcept {return topology_.group_of(i, std::nothrow);}
 
     boundary_type&       boundary()       noexcept {return boundary_;}
     boundary_type const& boundary() const noexcept {return boundary_;}
@@ -158,11 +158,12 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     coordinate_container_type    positions_;
     coordinate_container_type    velocities_;
     coordinate_container_type    forces_master_;
+    // thread-local forces
     std::vector<coordinate_container_type,
                 cache_aligned_allocator<coordinate_container_type>
         > forces_threads_;
-    static_string_container_type names_;
-    static_string_container_type groups_;
+
+    // names and groups are in Topology class
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD

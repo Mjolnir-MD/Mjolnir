@@ -122,3 +122,136 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_env, T, test_types)
         BOOST_TEST(g.charges().at(100)  == real_type(100.0), tolerance<real_type>());
     }
 }
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_ignore_self, T, test_types)
+{
+    mjolnir::LoggerManager::set_default_logger("test_read_debye_huckel.log");
+
+    using real_type = T;
+    {
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction                     = "Pair"
+            potential                       = "DebyeHuckel"
+            spatial_partition.type          = "Nothing"
+            ignore.molecule                 = "Self"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            parameters = [
+                {index =   0, charge = 1.0},
+            ]
+        )"_toml;
+
+        const auto g = mjolnir::read_debye_huckel_potential<real_type>(v);
+
+        const auto ignore_within = g.ignore_within();
+        const std::map<std::string, std::size_t> within(
+                ignore_within.begin(), ignore_within.end());
+
+        BOOST_TEST(g.ignore_within().size() == 2u);
+        BOOST_TEST(within.at("bond")    == 3ul);
+        BOOST_TEST(within.at("contact") == 1ul);
+
+        BOOST_TEST( g.is_ignored_molecule(0, 0));
+        BOOST_TEST(!g.is_ignored_molecule(0, 1));
+        BOOST_TEST( g.is_ignored_molecule(1, 1));
+
+        // by default, no group is ignored
+        BOOST_TEST(!g.is_ignored_group("protein1", "protein1"));
+        BOOST_TEST(!g.is_ignored_group("protein1", "protein2"));
+        BOOST_TEST(!g.is_ignored_group("protein2", "protein2"));
+    }
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_ignore_others, T, test_types)
+{
+    mjolnir::LoggerManager::set_default_logger("test_read_debye_huckel.log");
+
+    using real_type = T;
+    {
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction                     = "Pair"
+            potential                       = "DebyeHuckel"
+            spatial_partition.type          = "Nothing"
+            ignore.molecule                 = "Others"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            parameters = [
+                {index =   0, charge = 1.0},
+            ]
+        )"_toml;
+
+        const auto g = mjolnir::read_debye_huckel_potential<real_type>(v);
+
+        const auto ignore_within = g.ignore_within();
+        const std::map<std::string, std::size_t> within(
+                ignore_within.begin(), ignore_within.end());
+
+        BOOST_TEST(g.ignore_within().size() == 2u);
+        BOOST_TEST(within.at("bond")    == 3ul);
+        BOOST_TEST(within.at("contact") == 1ul);
+
+        BOOST_TEST(!g.is_ignored_molecule(0, 0));
+        BOOST_TEST( g.is_ignored_molecule(0, 1));
+        BOOST_TEST(!g.is_ignored_molecule(1, 1));
+
+        // by default, no group is ignored
+        BOOST_TEST(!g.is_ignored_group("protein1", "protein1"));
+        BOOST_TEST(!g.is_ignored_group("protein1", "protein2"));
+        BOOST_TEST(!g.is_ignored_group("protein2", "protein2"));
+    }
+}
+
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_ignore_group, T, test_types)
+{
+    mjolnir::LoggerManager::set_default_logger("test_read_debye_huckel.log");
+
+    using real_type = T;
+    {
+        using namespace toml::literals;
+        const toml::value v = u8R"(
+            interaction                     = "Pair"
+            potential                       = "DebyeHuckel"
+            spatial_partition.type          = "Nothing"
+            ignore.molecule                 = "Nothing"
+            ignore.particles_within.bond    = 3
+            ignore.particles_within.contact = 1
+            ignore.group.inter      = [
+                ["protein1", "protein2"], # between these
+                ["protein1", "protein3"],
+            ]
+            parameters = [
+                {index =   0, charge = 1.0},
+            ]
+        )"_toml;
+
+        const auto g = mjolnir::read_debye_huckel_potential<real_type>(v);
+
+        const auto ignore_within = g.ignore_within();
+        const std::map<std::string, std::size_t> within(
+                ignore_within.begin(), ignore_within.end());
+
+        BOOST_TEST(g.ignore_within().size() == 2u);
+        BOOST_TEST(within.at("bond")    == 3ul);
+        BOOST_TEST(within.at("contact") == 1ul);
+
+        BOOST_TEST(!g.is_ignored_molecule(0, 0));
+        BOOST_TEST(!g.is_ignored_molecule(0, 1));
+        BOOST_TEST(!g.is_ignored_molecule(1, 1));
+
+        BOOST_TEST(!g.is_ignored_group("protein1", "protein1"));
+        BOOST_TEST( g.is_ignored_group("protein1", "protein2"));
+        BOOST_TEST( g.is_ignored_group("protein1", "protein3"));
+
+        BOOST_TEST( g.is_ignored_group("protein2", "protein1"));
+        BOOST_TEST(!g.is_ignored_group("protein2", "protein2"));
+        BOOST_TEST(!g.is_ignored_group("protein2", "protein3"));
+
+        BOOST_TEST( g.is_ignored_group("protein3", "protein1"));
+        BOOST_TEST(!g.is_ignored_group("protein3", "protein2"));
+        BOOST_TEST(!g.is_ignored_group("protein3", "protein3"));
+
+    }
+}

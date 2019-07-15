@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_EXCLUDED_VOLUME_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_EXCLUDED_VOLUME_POTENTIAL_HPP
 #include <mjolnir/potential/global/IgnoreMolecule.hpp>
+#include <mjolnir/potential/global/IgnoreGroup.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>
 #include <algorithm>
@@ -29,8 +30,10 @@ class ExcludedVolumePotential
     // topology stuff
     using topology_type        = Topology;
     using molecule_id_type     = typename topology_type::molecule_id_type;
+    using group_id_type        = typename topology_type::group_id_type;
     using connection_kind_type = typename topology_type::connection_kind_type;
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type    = IgnoreGroup   <group_id_type>;
 
     // rc = 2.0 * sigma
     constexpr static real_type cutoff_ratio = 2.0;
@@ -49,9 +52,10 @@ class ExcludedVolumePotential
     ExcludedVolumePotential(const real_type eps,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
-        ignore_molecule_type ignore_molecule)
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
         : epsilon_(eps),
-          ignore_molecule_(std::move(ignore_molecule)),
+          ignore_molecule_(std::move(ignore_mol)),
+          ignore_group_   (std::move(ignore_grp)),
           ignore_within_  (exclusions.begin(), exclusions.end())
     {
         this->parameters_  .reserve(parameters.size());
@@ -126,6 +130,9 @@ class ExcludedVolumePotential
         return 2 * max_sigma * cutoff_ratio;
     }
 
+    // ------------------------------------------------------------------------
+    // ignore_xxx functions would be used in core/ExclusionLists.
+
     // e.g. "bond" -> 3 means ignore particles connected within 3 "bond"s
     std::vector<std::pair<connection_kind_type, std::size_t>>
     ignore_within() const {return ignore_within_;}
@@ -135,10 +142,20 @@ class ExcludedVolumePotential
     {
         return ignore_molecule_.is_ignored(i, j);
     }
+    bool is_ignored_group(
+            const group_id_type& i, const group_id_type& j) const noexcept
+    {
+        return ignore_group_.is_ignored(i, j);
+    }
+
+    // ------------------------------------------------------------------------
+    // used by Observer.
 
     static const char* name() noexcept {return "ExcludedVolume";}
 
-    // access to the parameters
+    // ------------------------------------------------------------------------
+    // the following accessers would be used in tests.
+
     real_type& epsilon()       noexcept {return this->epsilon_;}
     real_type  epsilon() const noexcept {return this->epsilon_;}
     std::vector<real_type>&       parameters()       noexcept {return this->parameters_;}
@@ -153,6 +170,7 @@ class ExcludedVolumePotential
     std::vector<std::size_t> participants_;
 
     ignore_molecule_type ignore_molecule_;
+    ignore_group_type    ignore_group_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 };
 

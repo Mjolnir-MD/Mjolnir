@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_UNIFORM_LENNARD_JONES_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_UNIFORM_LENNARD_JONES_POTENTIAL_HPP
 #include <mjolnir/potential/global/IgnoreMolecule.hpp>
+#include <mjolnir/potential/global/IgnoreGroup.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/empty.hpp>
@@ -27,8 +28,10 @@ class UniformLennardJonesPotential
     // topology stuff
     using topology_type        = Topology;
     using molecule_id_type     = typename topology_type::molecule_id_type;
+    using group_id_type        = typename topology_type::group_id_type;
     using connection_kind_type = typename topology_type::connection_kind_type;
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type    = IgnoreGroup   <group_id_type>;
 
     // rc = 2.5 * sigma
     constexpr static real_type cutoff_ratio = 2.5;
@@ -47,9 +50,10 @@ class UniformLennardJonesPotential
     UniformLennardJonesPotential(const real_type sgm, const real_type eps,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
-        ignore_molecule_type ignore_molecule)
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
         : sigma_(sgm), epsilon_(eps), r_cut_(sgm * cutoff_ratio),
-          ignore_molecule_(std::move(ignore_molecule)),
+          ignore_molecule_(std::move(ignore_mol)),
+          ignore_group_   (std::move(ignore_grp)),
           ignore_within_(exclusions.begin(), exclusions.end())
     {
         this->participants_.reserve(parameters.size());
@@ -131,6 +135,9 @@ class UniformLennardJonesPotential
     template<typename traitsT>
     void update(const System<traitsT>&) const noexcept {return;}
 
+    // ------------------------------------------------------------------------
+    // ignore_xxx functions would be used in core/ExclusionLists.
+
     // e.g. `3` means ignore particles connected within 3 "bond"s
     std::vector<std::pair<connection_kind_type, std::size_t>>
     ignore_within() const {return ignore_within_;}
@@ -140,8 +147,18 @@ class UniformLennardJonesPotential
     {
         return ignore_molecule_.is_ignored(i, j);
     }
+    bool is_ignored_group(
+            const group_id_type& i, const group_id_type& j) const noexcept
+    {
+        return ignore_group_.is_ignored(i, j);
+    }
 
+    // ------------------------------------------------------------------------
+    // used by Observer.
     static const char* name() noexcept {return "LennardJones";}
+
+    // ------------------------------------------------------------------------
+    // the following accessers would be used in tests.
 
     // access to the parameters...
     real_type& sigma()         noexcept {return sigma_;}
@@ -157,6 +174,7 @@ class UniformLennardJonesPotential
     std::vector<std::size_t> participants_;
 
     ignore_molecule_type ignore_molecule_;
+    ignore_group_type    ignore_group_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 };
 

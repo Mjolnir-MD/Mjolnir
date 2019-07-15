@@ -90,9 +90,30 @@ read_flexible_local_angle_potential(const toml::value& param, const toml::value&
     const auto term1 = find_parameter<std::array<real_type, 10>>(param, env, "y");
     const auto term2 = find_parameter<std::array<real_type, 10>>(param, env, "d2y");
 
-    MJOLNIR_LOG_INFO("FlexibleLocalAngle = {k = ", k,
-                     ", y = ", term1, ", d2y = ", term2, '}');
-    return FlexibleLocalAnglePotential<realT>(k, term1, term2);
+    if(param.as_table().count("x") == 1)
+    {
+        const auto xs =
+            find_parameter<std::array<real_type, 10>>(param, env, "x");
+        MJOLNIR_LOG_INFO("FlexibleLocalAngle = {k = ", k, ", x = ", xs,
+                         ", y = ", term1, ", d2y = ", term2, '}');
+        try
+        {
+            return FlexibleLocalAnglePotential<realT>(k, xs, term1, term2);
+        }
+        catch (const std::runtime_error&)
+        {
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "mjolnir::read_flexible_local_angle_potential: data points "
+                "are not evenly distributed", find_parameter<toml::value>(
+                param, env, "x"), "here"));
+        }
+    }
+    else
+    {
+        MJOLNIR_LOG_INFO("FlexibleLocalAngle = {k = ", k,
+                         ", y = ", term1, ", d2y = ", term2, '}');
+        return FlexibleLocalAnglePotential<realT>(k, term1, term2);
+    }
 }
 
 template<typename realT>

@@ -12,6 +12,7 @@ BOOST_AUTO_TEST_CASE(EXV_double)
 {
     using real_type = double;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
+    using group_id_type    = mjolnir::Topology::group_id_type;
     constexpr std::size_t N = 10000;
     constexpr real_type   h = 1e-6;
 
@@ -19,7 +20,8 @@ BOOST_AUTO_TEST_CASE(EXV_double)
     const real_type epsilon = 1.0;
     mjolnir::ExcludedVolumePotential<real_type> exv{
         epsilon, {{0, sigma}, {1, sigma}}, {},
-        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
+        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
+        mjolnir::IgnoreGroup   <group_id_type   >({})
     };
 
     const real_type x_min = 0.8 * sigma;
@@ -43,6 +45,7 @@ BOOST_AUTO_TEST_CASE(EXV_float)
 {
     using real_type = float;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
+    using group_id_type    = mjolnir::Topology::group_id_type;
     constexpr static std::size_t N = 1000;
     constexpr static real_type   h = 0.002;
     constexpr static real_type tol = 0.005;
@@ -52,7 +55,8 @@ BOOST_AUTO_TEST_CASE(EXV_float)
 
     mjolnir::ExcludedVolumePotential<real_type> exv{
         epsilon, {{0, sigma}, {1, sigma}}, {},
-        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing")
+        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
+        mjolnir::IgnoreGroup   <group_id_type   >({})
     };
     constexpr real_type cutoff =
         mjolnir::ExcludedVolumePotential<real_type>::cutoff_ratio;
