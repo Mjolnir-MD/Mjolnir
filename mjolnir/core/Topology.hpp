@@ -33,6 +33,7 @@ namespace mjolnir
 //
 // Since the members of this class are rarely called, in most cases, the speed
 // of these methods does not affect to the overall efficiency.class Topology
+class Topology
 {
   public:
 
