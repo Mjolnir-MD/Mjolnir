@@ -153,6 +153,10 @@ class LennardJonesPotential
     {
         return ignore_group_.is_ignored(i, j);
     }
+    bool has_interaction(const std::size_t i, const std::size_t i) const noexcept
+    {
+        return true;
+    }
 
     // ------------------------------------------------------------------------
     // used by Observer.
