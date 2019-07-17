@@ -87,6 +87,7 @@ struct dummy_potential
     {
         return ignore_group_.is_ignored(i, j);
     }
+    bool has_interaction(std::size_t, std::size_t) const noexcept {return true;}
 
     const char* name() const noexcept {return "dummy";}
 
