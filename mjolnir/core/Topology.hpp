@@ -19,17 +19,20 @@ namespace mjolnir
 //       it detemines "molecule"s.
 //
 // Most of the time, "molecule" defined by this class is equivalent to "chain".
-// the reason why it calls "chain" as molecule is that small molecules and
-// circular molecules are allowed.
-// considering lipids, "molecule" looks better than "chain" because they
-// are too small and in the most of the cases, there are many of them.
+// But calling "molecule" as "chain" is misreading because there can be a
+// circular molecule or tiny molecule that only has a few number of beads.
+// For example, lipid membrane is composed of a large number of lipid molecules
+// and people useally does not call each lipid as "chain".
 //
 // Generally, traversing graph takes time rather than finding value from
 // contiguous container. So there are ExclusionList class that stores the
-// connection information for NeighborLists (usually, nonlocal potentials are
-// ignored if the two particles are connected by covarent bond).
+// information for NeighborLists (usually, nonlocal potentials are ignored if
+// the two particles are connected by covarent bond). While the simulation,
+// ExclusionLists would be called many time, but Topology would only be called
+// to construct ExclusionList at the beginning ofjthe simulation.
+//
 // Since the members of this class are rarely called, in most cases, the speed
-// of these methods does not affect to the overall efficiency.
+// of these methods does not affect to the overall efficiency.class Topology
 class Topology
 {
   public:
