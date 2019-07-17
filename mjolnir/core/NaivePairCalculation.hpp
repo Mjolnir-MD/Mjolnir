@@ -83,7 +83,10 @@ void NaivePairCalculation<traitsT, parameterT>::make(
             {
                 continue;
             }
-            partners.emplace_back(j, pot.prepare_params(i, j));
+            if(pot.has_interaction(i, j)) // likely
+            {
+                partners.emplace_back(j, pot.prepare_params(i, j));
+            }
         }
         this->neighbors_.add_list_for(i, partners.begin(), partners.end());
     }

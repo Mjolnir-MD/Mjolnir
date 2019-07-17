@@ -117,11 +117,10 @@ void VerletList<traitsT, parameterT>::make(
         for(std::size_t jdx=idx+1; jdx<participants.size(); ++jdx)
         {
             const auto j = participants[jdx];
-            if(this->exclusion_.is_excluded(i, j))
+            if(this->exclusion_.is_excluded(i, j) || (!pot.has_interaction(i, j)))
             {
                 continue;
             }
-
             const auto& rj = sys.position(j);
             if(math::length_sq(sys.adjust_direction(rj - ri)) < rc2)
             {

@@ -214,7 +214,8 @@ void UnlimitedGridCellList<traitsT, parameterT>::make(
             {
                 const auto j = pici.first;
                 MJOLNIR_LOG_DEBUG("looking particle ", j);
-                if(j <= i || this->exclusion_.is_excluded(i, j))
+                if(j <= i || this->exclusion_.is_excluded(i, j) ||
+                             !pot.has_interaction(i, j))
                 {
                     continue;
                 }
