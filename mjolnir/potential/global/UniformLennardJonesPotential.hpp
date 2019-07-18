@@ -21,9 +21,10 @@ template<typename realT>
 class UniformLennardJonesPotential
 {
   public:
-    using real_type = realT;
-    using parameter_type = empty_t;
-    using container_type = empty_t;
+    using real_type           = realT;
+    using parameter_type      = empty_t; // no particle-specific parameter
+    using container_type      = empty_t; // no parameter, so no container there.
+    using pair_parameter_type = empty_t; // no particle-pair-specific parameter
 
     // topology stuff
     using topology_type        = Topology;
@@ -64,9 +65,9 @@ class UniformLennardJonesPotential
     }
     ~UniformLennardJonesPotential() = default;
 
-    parameter_type prepare_params(std::size_t, std::size_t) const noexcept
+    pair_parameter_type prepare_params(std::size_t, std::size_t) const noexcept
     {
-        return parameter_type{}; // no pre-calculated parameter
+        return pair_parameter_type{}; // no pre-calculated parameter
     }
 
     // forwarding functions for clarity...
@@ -82,7 +83,7 @@ class UniformLennardJonesPotential
     }
 
     real_type
-    potential(const real_type r, const parameter_type&) const noexcept
+    potential(const real_type r, const pair_parameter_type&) const noexcept
     {
         if(r_cut_ < r){return 0;}
 
@@ -94,7 +95,7 @@ class UniformLennardJonesPotential
     }
 
     real_type
-    derivative(const real_type r, const parameter_type&) const noexcept
+    derivative(const real_type r, const pair_parameter_type&) const noexcept
     {
         if(r_cut_ < r){return 0;}
 

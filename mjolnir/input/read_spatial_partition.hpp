@@ -75,7 +75,7 @@ read_spatial_partition(const toml::value& global, potentialT&& pot)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
     using real_type      = typename traitsT::real_type;
-    using parameter_type = typename potentialT::parameter_type;
+    using parameter_type = typename potentialT::pair_parameter_type;
 
     const auto& sp   = toml::find<toml::value>(global, "spatial_partition");
     const auto  type = toml::find<std::string>(sp,     "type");

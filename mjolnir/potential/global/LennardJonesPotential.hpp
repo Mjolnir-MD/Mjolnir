@@ -19,9 +19,16 @@ template<typename realT>
 class LennardJonesPotential
 {
   public:
-    using real_type = realT;
-    using parameter_type = std::pair<real_type, real_type>; // {sigma, epsilon}
-    using container_type = std::vector<parameter_type>;
+    using real_type            = realT;
+    using parameter_type       = std::pair<real_type, real_type>; // {sigma, epsilon}
+    using container_type       = std::vector<parameter_type>;
+
+    // `pair_parameter_type` is a parameter for a interacting pair.
+    // Although it is the same type as `parameter_type` in this potential,
+    // it can be different from normal parameter for each particle.
+    // This enables NeighborList to cache a value to calculate forces between
+    // the particles, e.g. by having (sigma_i + sigma_j)/2 for a pair of {i, j}.
+    using pair_parameter_type  = parameter_type;
 
     // topology stuff
     using topology_type        = Topology;
@@ -68,7 +75,7 @@ class LennardJonesPotential
     }
     ~LennardJonesPotential() = default;
 
-    parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
+    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
         const auto sgm1 = parameters_[i].first;
         const auto eps1 = parameters_[i].second;
@@ -91,7 +98,7 @@ class LennardJonesPotential
         return this->derivative(r, this->prepare_params(i, j));
     }
 
-    real_type potential(const real_type r, const parameter_type& p) const noexcept
+    real_type potential(const real_type r, const pair_parameter_type& p) const noexcept
     {
         const real_type sigma = p.first;
         if(sigma * cutoff_ratio < r){return 0;}
@@ -104,7 +111,7 @@ class LennardJonesPotential
         const real_type r12s12 = r6s6 * r6s6;
         return 4 * epsilon * (r12s12 - r6s6 - coef_at_cutoff);
     }
-    real_type derivative(const real_type r, const parameter_type& p) const noexcept
+    real_type derivative(const real_type r, const pair_parameter_type& p) const noexcept
     {
         const real_type sigma = p.first;
         if(sigma * cutoff_ratio < r){return 0;}

@@ -23,9 +23,16 @@ class ExcludedVolumePotential
 {
   public:
 
-    using real_type      = realT;
-    using parameter_type = real_type;
-    using container_type = std::vector<parameter_type>;
+    using real_type            = realT;
+    using parameter_type       = real_type;
+    using container_type       = std::vector<parameter_type>;
+
+    // `pair_parameter_type` is a parameter for a interacting pair.
+    // Although it is the same type as `parameter_type` in this potential,
+    // it can be different from normal parameter for each particle.
+    // This enables NeighborList to cache a value to calculate forces between
+    // the particles, e.g. by having (radius_i + radius_)/2 for a pair of {i, j}.
+    using pair_parameter_type  = parameter_type;
 
     // topology stuff
     using topology_type        = Topology;
@@ -77,7 +84,7 @@ class ExcludedVolumePotential
     ExcludedVolumePotential& operator=(const ExcludedVolumePotential&) = default;
     ExcludedVolumePotential& operator=(ExcludedVolumePotential&&)      = default;
 
-    parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
+    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
         return this->parameters_[i] + this->parameters_[j];
     }
@@ -94,7 +101,7 @@ class ExcludedVolumePotential
         return this->derivative(r, this->prepare_params(i, j));
     }
 
-    real_type potential(const real_type r, const parameter_type& d) const noexcept
+    real_type potential(const real_type r, const pair_parameter_type& d) const noexcept
     {
         if(d * cutoff_ratio < r){return 0.0;}
 
@@ -104,7 +111,7 @@ class ExcludedVolumePotential
         const real_type dr12 = dr6 * dr6;
         return this->epsilon_ * (dr12 - coef_at_cutoff);
     }
-    real_type derivative(const real_type r, const parameter_type& d) const noexcept
+    real_type derivative(const real_type r, const pair_parameter_type& d) const noexcept
     {
         if(d * cutoff_ratio < r){return 0.0;}
 
