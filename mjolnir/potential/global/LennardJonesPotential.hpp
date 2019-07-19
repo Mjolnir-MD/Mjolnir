@@ -141,7 +141,7 @@ class LennardJonesPotential
 
     // nothing to do when system parameters change.
     template<typename traitsT>
-    void update(const System<traitsT>&) const noexcept {return;}
+    void update(const System<traitsT>&) noexcept {return;}
 
     // ------------------------------------------------------------------------
     // ignore_xxx functions would be used in core/ExclusionLists.

@@ -128,7 +128,7 @@ class ExcludedVolumePotential
 
     // nothing to be done if system parameter (e.g. temperature) changes
     template<typename traitsT>
-    void update(const System<traitsT>&) const noexcept {return;}
+    void update(const System<traitsT>&) noexcept {return;}
 
     real_type max_cutoff_length() const
     {
