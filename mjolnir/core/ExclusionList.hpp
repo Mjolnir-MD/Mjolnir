@@ -177,7 +177,7 @@ class ExclusionList
             for(std::size_t i=0; i<N; ++i)
             {
                 const std::size_t first = idx;
-                std::vector<std::size_t> ignored_particles{i};
+                std::vector<std::size_t> ignored_particles{i}; // ignore itself
                 for(const auto& connection : pot.ignore_within())
                 {
                     const std::size_t dist = connection.second;
