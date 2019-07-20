@@ -2,7 +2,6 @@
 #define MJOLNIR_CORE_PERIODIC_GRID_CELL_LIST_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
-#include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/util/range.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/util/empty.hpp>
@@ -25,7 +24,6 @@ class PeriodicGridCellList
     using system_type         = System<traits_type>;
     using real_type           = typename traits_type::real_type;
     using coordinate_type     = typename traits_type::coordinate_type;
-    using exclusion_list_type = ExclusionList;
     using parameter_type      = parameterT;
     using neighbor_list_type  = NeighborList<parameter_type>;
     using neighbor_type       = typename neighbor_list_type::neighbor_type;
@@ -123,7 +121,6 @@ class PeriodicGridCellList
 
     coordinate_type     lower_bound_;
     neighbor_list_type  neighbors_;
-    exclusion_list_type exclusion_;
     cell_list_type      cell_list_;
     cell_index_container_type index_by_cell_;
     // index_by_cell_ has {particle idx, cell idx} and sorted by cell idx
@@ -213,8 +210,7 @@ void PeriodicGridCellList<traitsT, parameterT>::make(
             {
                 const auto j = pici.first;
                 MJOLNIR_LOG_DEBUG("looking particle", j);
-                if(j <= i || this->exclusion_.is_excluded(i, j) ||
-                             !pot.has_interaction(i, j))
+                if(j <= i || !pot.has_interaction(i, j))
                 {
                     continue;
                 }
@@ -249,7 +245,6 @@ void PeriodicGridCellList<traitsT, parameterT>::initialize(
 
     const real_type max_cutoff = pot.max_cutoff_length();
     this->set_cutoff(max_cutoff);
-    this->exclusion_.make(sys, pot);
 
     MJOLNIR_LOG_INFO(pot.name(), " cutoff = ", max_cutoff);
 

@@ -2,7 +2,6 @@
 #define MJOLNIR_CORE_NAIVE_PAIR_CALCULATION_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
-#include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/util/empty.hpp>
 
 namespace mjolnir
@@ -17,7 +16,6 @@ class NaivePairCalculation
     using boundary_type       = typename traits_type::boundary_type;
     using real_type           = typename traits_type::real_type;
     using coordinate_type     = typename traits_type::coordinate_type;
-    using exclusion_list_type = ExclusionList;
     using parameter_type      = parameterT;
     using neighbor_list_type  = NeighborList<parameter_type>;
     using neighbor_type       = typename neighbor_list_type::neighbor_type;
@@ -48,7 +46,6 @@ class NaivePairCalculation
 
   private:
 
-    exclusion_list_type exclusion_;
     neighbor_list_type  neighbors_;
 };
 
@@ -57,7 +54,6 @@ template<typename PotentialT>
 void NaivePairCalculation<traitsT, parameterT>::initialize(
         const system_type& sys, const PotentialT& pot)
 {
-    this->exclusion_.make(sys, pot);
     this->make(sys, pot);
     return;
 }
@@ -79,10 +75,6 @@ void NaivePairCalculation<traitsT, parameterT>::make(
         for(std::size_t jdx=idx+1; jdx<participants.size(); ++jdx)
         {
             const auto j = participants[jdx];
-            if(this->exclusion_.is_excluded(i, j))
-            {
-                continue;
-            }
             if(pot.has_interaction(i, j)) // likely
             {
                 partners.emplace_back(j, pot.prepare_params(i, j));

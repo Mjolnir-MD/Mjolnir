@@ -2,7 +2,6 @@
 #define MJOLNIR_CORE_VERLET_LIST_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
-#include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/util/empty.hpp>
 #include <algorithm>
 #include <limits>
@@ -19,7 +18,6 @@ class VerletList
     using boundary_type       = typename traits_type::boundary_type;
     using real_type           = typename traits_type::real_type;
     using coordinate_type     = typename traits_type::coordinate_type;
-    using exclusion_list_type = ExclusionList;
 
     using parameter_type      = parameterT;
     using neighbor_list_type  = NeighborList<parameter_type>;
@@ -45,7 +43,6 @@ class VerletList
     void initialize(const system_type& sys, const PotentialT& pot)
     {
         this->set_cutoff(pot.max_cutoff_length());
-        this->exclusion_.make(sys, pot);
         this->make(sys, pot);
         return;
     }
@@ -72,7 +69,6 @@ class VerletList
     real_type      margin_;
     real_type      current_margin_;
 
-    exclusion_list_type exclusion_;
     neighbor_list_type  neighbors_;
 };
 
@@ -117,7 +113,7 @@ void VerletList<traitsT, parameterT>::make(
         for(std::size_t jdx=idx+1; jdx<participants.size(); ++jdx)
         {
             const auto j = participants[jdx];
-            if(this->exclusion_.is_excluded(i, j) || (!pot.has_interaction(i, j)))
+            if(!pot.has_interaction(i, j))
             {
                 continue;
             }

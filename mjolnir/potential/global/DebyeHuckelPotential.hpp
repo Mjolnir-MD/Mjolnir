@@ -3,6 +3,7 @@
 #include <mjolnir/potential/global/IgnoreMolecule.hpp>
 #include <mjolnir/potential/global/IgnoreGroup.hpp>
 #include <mjolnir/core/Unit.hpp>
+#include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -43,6 +44,7 @@ class DebyeHuckelPotential
     using connection_kind_type = typename topology_type::connection_kind_type;
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
+    using exclusion_list_type  = ExclusionList;
 
     // r_cutoff = cutoff_ratio * debye_length
     static constexpr real_type cutoff_ratio = 5.5;
@@ -128,9 +130,7 @@ class DebyeHuckelPotential
         {
             MJOLNIR_LOG_ERROR("DebyeHuckel requires `ionic_strength` attribute");
         }
-        this->temperature_ = sys.attribute("temperature");
-        this->ion_conc_    = sys.attribute("ionic_strength");
-        this->calc_parameters();
+        this->update(sys); // calc parameters
         return;
     }
 
@@ -144,6 +144,9 @@ class DebyeHuckelPotential
         this->temperature_ = sys.attribute("temperature");
         this->ion_conc_    = sys.attribute("ionic_strength");
         this->calc_parameters();
+
+        // update exclusion list based on sys.topology()
+        exclusion_list_.make(sys, *this);
         return;
     }
 
@@ -151,8 +154,8 @@ class DebyeHuckelPotential
     // ignore_xxx functions would be used in core/ExclusionLists.
 
     // e.g. {"bond", 3} means ignore particles connected within 3 "bond"s
-    std::vector<std::pair<connection_kind_type, std::size_t>>
-    ignore_within() const {return ignore_within_;}
+    std::vector<std::pair<connection_kind_type, std::size_t>> const&
+    ignore_within() const noexcept {return ignore_within_;}
 
     bool is_ignored_molecule(
             const molecule_id_type& i, const molecule_id_type& j) const noexcept
@@ -164,9 +167,10 @@ class DebyeHuckelPotential
     {
         return ignore_group_.is_ignored(i, j);
     }
-    bool has_interaction(const std::size_t, const std::size_t) const noexcept
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
-        return true;
+        // if not excluded, the pair has interaction.
+        return !exclusion_list_.is_excluded(i, j);
     }
 
     // ------------------------------------------------------------------------
@@ -244,6 +248,8 @@ class DebyeHuckelPotential
     ignore_molecule_type ignore_molecule_;
     ignore_group_type    ignore_group_;
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
+
+    exclusion_list_type  exclusion_list_;
 };
 
 template<typename realT>
