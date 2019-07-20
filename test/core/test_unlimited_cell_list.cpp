@@ -7,6 +7,7 @@
 #endif
 
 #include <mjolnir/util/empty.hpp>
+#include <mjolnir/util/logger.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/UnlimitedGridCellList.hpp>
