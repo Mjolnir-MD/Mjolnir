@@ -102,9 +102,6 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_LennardJones_calc_force)
         sys    .topology().construct_molecules();
         seq_sys.topology().construct_molecules();
 
-        celllist    .initialize(sys,     potential);
-        seq_celllist.initialize(seq_sys, potential);
-
         interaction_type interaction(
                 potential_type(potential), std::move(celllist));
         sequencial_interaction_type seq_interaction(
