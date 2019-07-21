@@ -1,7 +1,5 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_LENNARD_JONES_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_LENNARD_JONES_POTENTIAL_HPP
-#include <mjolnir/potential/global/IgnoreMolecule.hpp>
-#include <mjolnir/potential/global/IgnoreGroup.hpp>
 #include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>
@@ -58,9 +56,7 @@ class LennardJonesPotential
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-        : ignore_molecule_(std::move(ignore_mol)),
-          ignore_group_   (std::move(ignore_grp)),
-          ignore_within_  (exclusions.begin(), exclusions.end())
+        : exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
@@ -155,31 +151,18 @@ class LennardJonesPotential
         MJOLNIR_LOG_FUNCTION();
 
         // update exclusion list based on sys.topology()
-        exclusion_list_.make(sys, *this);
+        exclusion_list_.make(sys);
         return;
-    }
-
-    // ------------------------------------------------------------------------
-    // ignore_xxx functions would be used in core/ExclusionLists.
-
-    // e.g. `{"bond", 3}` means ignore particles connected within 3 "bond"s
-    std::vector<std::pair<connection_kind_type, std::size_t>> const&
-    ignore_within() const noexcept {return ignore_within_;}
-
-    bool is_ignored_molecule(
-            const molecule_id_type& i, const molecule_id_type& j) const noexcept
-    {
-        return ignore_molecule_.is_ignored(i, j);
-    }
-    bool is_ignored_group(
-            const group_id_type& i, const group_id_type& j) const noexcept
-    {
-        return ignore_group_.is_ignored(i, j);
     }
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
         // if not excluded, the pair has interaction.
         return !exclusion_list_.is_excluded(i, j);
+    }
+    // for testing
+    exclusion_list_type const& exclusion_list() const noexcept
+    {
+        return exclusion_list_;
     }
 
     // ------------------------------------------------------------------------
@@ -199,10 +182,6 @@ class LennardJonesPotential
 
     container_type parameters_;
     std::vector<std::size_t> participants_;
-
-    ignore_molecule_type ignore_molecule_;
-    ignore_group_type    ignore_group_;
-    std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
 
     exclusion_list_type  exclusion_list_;
 };

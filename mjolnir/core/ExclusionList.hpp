@@ -1,5 +1,7 @@
 #ifndef MJOLNIR_CORE_EXCLUSION_LIST_HPP
 #define MJOLNIR_CORE_EXCLUSION_LIST_HPP
+#include <mjolnir/potential/global/IgnoreMolecule.hpp>
+#include <mjolnir/potential/global/IgnoreGroup.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/util/range.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -15,7 +17,7 @@ namespace mjolnir
 // are connected by a bond, some particular pairs of particles are excluded
 // from interacting pairs.
 // This class constructs a list that contains a list of pairs that are excluded
-// from interacting pairs using information in a topology and a potential class.
+// from interacting pairs using information in a topology.
 class ExclusionList
 {
   public:
@@ -24,9 +26,20 @@ class ExclusionList
     using group_id_type        = topology_type::group_id_type;
     using connection_kind_type = topology_type::connection_kind_type;
 
+    using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type    = IgnoreGroup   <group_id_type>;
+    using ignore_topology_type = // convert from map to vector to make loop fast
+        std::vector<std::pair<connection_kind_type, std::size_t>>;
+
   public:
 
-    ExclusionList() = default;
+    ExclusionList(
+        const std::map<connection_kind_type, std::size_t>& ignore_top,
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+        : ignore_molecule_(std::move(ignore_mol)),
+          ignore_group_   (std::move(ignore_grp)),
+          ignore_topology_(ignore_top.begin(), ignore_top.end())
+    {}
     ~ExclusionList() = default;
     ExclusionList(const ExclusionList&) = default;
     ExclusionList(ExclusionList&&)      = default;
@@ -67,15 +80,11 @@ class ExclusionList
         return false;
     }
 
-    // construct exclusion lists from topology and potential.
-    //
-    // This function may take a bit long time.
-    template<typename traitsT, typename PotentialT>
-    void make(const System<traitsT>& sys, const PotentialT& pot)
+    template<typename traitsT>
+    void make(const System<traitsT>& sys)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
-        MJOLNIR_LOG_INFO("potential = ", pot.name());
 
         const auto& topol = sys.topology();
         const std::size_t N = sys.size();
@@ -123,10 +132,10 @@ class ExclusionList
                 for(std::size_t j=0; j<Ngrps; ++j)
                 {
                     const auto& grp_name_j = this->grp_list_.at(j);
-                    if(pot.is_ignored_group(grp_name_i, grp_name_j))
+                    if(this->is_ignored_group(grp_name_i, grp_name_j))
                     {
-                        MJOLNIR_LOG_INFO("group ", grp_name_i, " and ", grp_name_j,
-                                         " ignores each other on ", pot.name());
+                        MJOLNIR_LOG_INFO("group ", grp_name_i, " and ",
+                                         grp_name_j, " ignores each other");
                         this->ignored_grps_.push_back(j);
                         ++idx;
                     }
@@ -156,10 +165,10 @@ class ExclusionList
                 const std::size_t first = idx;
                 for(std::size_t j=0; j<Nmols; ++j)
                 {
-                    if(pot.is_ignored_molecule(i, j))
+                    if(this->is_ignored_molecule(i, j))
                     {
                         MJOLNIR_LOG_INFO("molecule ", i, " and molecule ", j,
-                            " will ignore each other on ", pot.name());
+                                         " will ignore each other");
                         this->ignored_mols_.push_back(j);
                         ++idx;
                     }
@@ -178,7 +187,7 @@ class ExclusionList
             {
                 const std::size_t first = idx;
                 std::vector<std::size_t> ignored_particles{i}; // ignore itself
-                for(const auto& connection : pot.ignore_within())
+                for(const auto& connection : this->ignore_topology_)
                 {
                     const std::size_t dist = connection.second;
                     for(const auto j :
@@ -202,6 +211,24 @@ class ExclusionList
             }
         }
         return;
+    }
+
+    // ------------------------------------------------------------------------
+    // utilities
+
+    ignore_topology_type const& ignore_topology() const noexcept
+    {
+        return ignore_topology_;
+    }
+    bool is_ignored_molecule(
+            const molecule_id_type& i, const molecule_id_type& j) const noexcept
+    {
+        return ignore_molecule_.is_ignored(i, j);
+    }
+    bool is_ignored_group(
+            const group_id_type& i, const group_id_type& j) const noexcept
+    {
+        return ignore_group_.is_ignored(i, j);
     }
 
   private:
@@ -232,6 +259,10 @@ class ExclusionList
     }
 
   private:
+
+    ignore_molecule_type ignore_molecule_;
+    ignore_group_type    ignore_group_;
+    ignore_topology_type ignore_topology_;
 
     // It contains the same infromation as {topol.nodes_.molecule_id};
     std::vector<molecule_id_type> mol_ids_;
