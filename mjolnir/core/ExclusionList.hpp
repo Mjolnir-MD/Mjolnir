@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_CORE_EXCLUSION_LIST_HPP
 #define MJOLNIR_CORE_EXCLUSION_LIST_HPP
-#include <mjolnir/potential/global/IgnoreMolecule.hpp>
-#include <mjolnir/potential/global/IgnoreGroup.hpp>
+#include <mjolnir/core/IgnoreMolecule.hpp>
+#include <mjolnir/core/IgnoreGroup.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/util/range.hpp>
 #include <mjolnir/util/logger.hpp>

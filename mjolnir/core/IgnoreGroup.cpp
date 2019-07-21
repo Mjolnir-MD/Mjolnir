@@ -1,4 +1,4 @@
-#include <mjolnir/potential/global/IgnoreGroup.hpp>
+#include <mjolnir/core/IgnoreGroup.hpp>
 #include <mjolnir/core/Topology.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD

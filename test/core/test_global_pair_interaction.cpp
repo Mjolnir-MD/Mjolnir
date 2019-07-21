@@ -10,7 +10,6 @@
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/NaivePairCalculation.hpp>
 #include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
-#include <mjolnir/potential/global/IgnoreMolecule.hpp>
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <random>

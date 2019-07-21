@@ -11,8 +11,6 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/potential/global/IgnoreGroup.hpp>
-#include <mjolnir/potential/global/IgnoreMolecule.hpp>
 #include <limits>
 
 #include <mjolnir/core/ExclusionList.hpp>

@@ -11,6 +11,8 @@ set(mjolnir_core_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/PeriodicGridCellList.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/VerletList.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/NaivePairCalculation.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/IgnoreMolecule.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/IgnoreGroup.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ObserverBase.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/EnergyObserver.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/XYZObserver.cpp"

@@ -1,4 +1,4 @@
-#include <mjolnir/potential/global/IgnoreMolecule.hpp>
+#include <mjolnir/core/IgnoreMolecule.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"
