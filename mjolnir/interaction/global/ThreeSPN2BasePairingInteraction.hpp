@@ -173,8 +173,10 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             //
             // 1/2(1+cos(dphi)) f(dtheta1) f(dtheta2) U_attr(rij)
 
-            const auto f1 = base_pairing_potential_.f(bp_kind, theta1);
-            const auto f2 = base_pairing_potential_.f(bp_kind, theta2);
+            const auto theta1_0 = base_pairing_potential_.theta1_0(bp_kind);
+            const auto theta2_0 = base_pairing_potential_.theta2_0(bp_kind);
+            const auto f1 = base_pairing_potential_.f(theta1, theta1_0);
+            const auto f2 = base_pairing_potential_.f(theta2, theta2_0);
 
             if(f1 != real_type(0.0) && f2 != real_type(0.0))
             {
@@ -185,8 +187,8 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 //    Bi o =(= o Bj
                 //         phi
 
-                const auto df1 = base_pairing_potential_.df(bp_kind, theta1);
-                const auto df2 = base_pairing_potential_.df(bp_kind, theta2);
+                const auto df1 = base_pairing_potential_.df(theta1, theta1_0);
+                const auto df2 = base_pairing_potential_.df(theta2, theta2_0);
 
                 const auto rlBij_sq = rlBij * rlBij; // 1 / |Bij|^2
                 const auto R = -SBi + (-dot_SBiBj * rlBij_sq) * Bij;
@@ -645,8 +647,10 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
             //            1 - cos^2(K (theta - theta0)) ... pi/2K < abs(dtheta) < pi/K
             //            0                             ... pi/K  < abs(dtheta)
 
-            const auto f1 = base_pairing_potential_.f(bp_kind, theta1);
-            const auto f2 = base_pairing_potential_.f(bp_kind, theta2);
+            const auto theta1_0 = base_pairing_potential_.theta1_0(bp_kind);
+            const auto theta2_0 = base_pairing_potential_.theta2_0(bp_kind);
+            const auto f1 = base_pairing_potential_.f(theta1, theta1_0);
+            const auto f2 = base_pairing_potential_.f(theta2, theta2_0);
 
             if(f1 != real_type(0.0) && f2 != real_type(0.0)) // [[likely]]
             {
