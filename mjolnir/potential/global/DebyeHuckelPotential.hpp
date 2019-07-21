@@ -138,11 +138,18 @@ class DebyeHuckelPotential
     template<typename traitsT>
     void update(const System<traitsT>& sys) noexcept
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
         assert(sys.has_attribute("temperature"));
         assert(sys.has_attribute("ionic_strength"));
 
         this->temperature_ = sys.attribute("temperature");
         this->ion_conc_    = sys.attribute("ionic_strength");
+
+        MJOLNIR_LOG_INFO("temperature    = ", this->temperature_);
+        MJOLNIR_LOG_INFO("ionic strength = ", this->ion_conc_);
+
         this->calc_parameters();
 
         // update exclusion list based on sys.topology()
