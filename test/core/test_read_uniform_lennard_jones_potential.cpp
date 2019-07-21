@@ -42,31 +42,31 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_noenv, T, test_types)
             epsilon = 1.5
         )"_toml;
 
-        auto g = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
+        auto pot = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
 
-        const auto ignore_within = g.ignore_within();
+        const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
-        BOOST_TEST(g.ignore_within().size() == 2u);
+        BOOST_TEST(within.size() == 2u);
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
-        BOOST_TEST(g.sigma()   == real_type(2.0), tolerance<real_type>());
-        BOOST_TEST(g.epsilon() == real_type(1.5), tolerance<real_type>());
-        BOOST_TEST(g.participants().empty());
+        BOOST_TEST(pot.sigma()   == real_type(2.0), tolerance<real_type>());
+        BOOST_TEST(pot.epsilon() == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(pot.participants().empty());
 
-        g.initialize(sys);
-        BOOST_TEST(g.participants().size() == 10u);
-        BOOST_TEST(g.participants().at(0) == 0u);
-        BOOST_TEST(g.participants().at(1) == 1u);
-        BOOST_TEST(g.participants().at(2) == 2u);
-        BOOST_TEST(g.participants().at(3) == 3u);
-        BOOST_TEST(g.participants().at(4) == 4u);
-        BOOST_TEST(g.participants().at(5) == 5u);
-        BOOST_TEST(g.participants().at(6) == 6u);
-        BOOST_TEST(g.participants().at(7) == 7u);
-        BOOST_TEST(g.participants().at(8) == 8u);
-        BOOST_TEST(g.participants().at(9) == 9u);
+        pot.initialize(sys);
+        BOOST_TEST(pot.participants().size() == 10u);
+        BOOST_TEST(pot.participants().at(0) == 0u);
+        BOOST_TEST(pot.participants().at(1) == 1u);
+        BOOST_TEST(pot.participants().at(2) == 2u);
+        BOOST_TEST(pot.participants().at(3) == 3u);
+        BOOST_TEST(pot.participants().at(4) == 4u);
+        BOOST_TEST(pot.participants().at(5) == 5u);
+        BOOST_TEST(pot.participants().at(6) == 6u);
+        BOOST_TEST(pot.participants().at(7) == 7u);
+        BOOST_TEST(pot.participants().at(8) == 8u);
+        BOOST_TEST(pot.participants().at(9) == 9u);
     }
     {
         using namespace toml::literals;
@@ -81,31 +81,31 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_noenv, T, test_types)
             "ε" = 1.5
         )"_toml;
 
-        auto g = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
+        auto pot = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
 
-        const auto ignore_within = g.ignore_within();
+        const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
-        BOOST_TEST(g.ignore_within().size() == 2u);
+        BOOST_TEST(within.size() == 2u);
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
-        BOOST_TEST(g.sigma()   == real_type(2.0), tolerance<real_type>());
-        BOOST_TEST(g.epsilon() == real_type(1.5), tolerance<real_type>());
-        BOOST_TEST(g.participants().empty());
+        BOOST_TEST(pot.sigma()   == real_type(2.0), tolerance<real_type>());
+        BOOST_TEST(pot.epsilon() == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(pot.participants().empty());
 
-        g.initialize(sys);
-        BOOST_TEST(g.participants().size() == 10u);
-        BOOST_TEST(g.participants().at(0) == 0u);
-        BOOST_TEST(g.participants().at(1) == 1u);
-        BOOST_TEST(g.participants().at(2) == 2u);
-        BOOST_TEST(g.participants().at(3) == 3u);
-        BOOST_TEST(g.participants().at(4) == 4u);
-        BOOST_TEST(g.participants().at(5) == 5u);
-        BOOST_TEST(g.participants().at(6) == 6u);
-        BOOST_TEST(g.participants().at(7) == 7u);
-        BOOST_TEST(g.participants().at(8) == 8u);
-        BOOST_TEST(g.participants().at(9) == 9u);
+        pot.initialize(sys);
+        BOOST_TEST(pot.participants().size() == 10u);
+        BOOST_TEST(pot.participants().at(0) == 0u);
+        BOOST_TEST(pot.participants().at(1) == 1u);
+        BOOST_TEST(pot.participants().at(2) == 2u);
+        BOOST_TEST(pot.participants().at(3) == 3u);
+        BOOST_TEST(pot.participants().at(4) == 4u);
+        BOOST_TEST(pot.participants().at(5) == 5u);
+        BOOST_TEST(pot.participants().at(6) == 6u);
+        BOOST_TEST(pot.participants().at(7) == 7u);
+        BOOST_TEST(pot.participants().at(8) == 8u);
+        BOOST_TEST(pot.participants().at(9) == 9u);
     }
     {
         using namespace toml::literals;
@@ -127,26 +127,26 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_noenv, T, test_types)
             ]
         )"_toml;
 
-        auto g = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
+        auto pot = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
 
-        const auto ignore_within = g.ignore_within();
+        const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
-        BOOST_TEST(g.ignore_within().size() == 2u);
+        BOOST_TEST(within.size() == 2u);
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
-        BOOST_TEST(g.sigma()   == real_type(2.0), tolerance<real_type>());
-        BOOST_TEST(g.epsilon() == real_type(1.5), tolerance<real_type>());
-        BOOST_TEST(g.participants().size() == 5u);
+        BOOST_TEST(pot.sigma()   == real_type(2.0), tolerance<real_type>());
+        BOOST_TEST(pot.epsilon() == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(pot.participants().size() == 5u);
 
-        g.initialize(sys);
-        BOOST_TEST(g.participants().size() == 5u);
-        BOOST_TEST(g.participants().at(0)  == 1u);
-        BOOST_TEST(g.participants().at(1)  == 2u);
-        BOOST_TEST(g.participants().at(2)  == 3u);
-        BOOST_TEST(g.participants().at(3)  == 4u);
-        BOOST_TEST(g.participants().at(4)  == 5u);
+        pot.initialize(sys);
+        BOOST_TEST(pot.participants().size() == 5u);
+        BOOST_TEST(pot.participants().at(0)  == 1u);
+        BOOST_TEST(pot.participants().at(1)  == 2u);
+        BOOST_TEST(pot.participants().at(2)  == 3u);
+        BOOST_TEST(pot.participants().at(3)  == 4u);
+        BOOST_TEST(pot.participants().at(4)  == 5u);
     }
 }
 
@@ -181,26 +181,26 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_env, T, test_types)
             ]
         )"_toml;
 
-        auto g = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
+        auto pot = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
 
-        const auto ignore_within = g.ignore_within();
+        const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
-        BOOST_TEST(g.ignore_within().size() == 2u);
+        BOOST_TEST(within.size() == 2u);
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
-        BOOST_TEST(g.sigma()   == real_type(2.0), tolerance<real_type>());
-        BOOST_TEST(g.epsilon() == real_type(1.5), tolerance<real_type>());
-        BOOST_TEST(g.participants().size() == 5u);
+        BOOST_TEST(pot.sigma()   == real_type(2.0), tolerance<real_type>());
+        BOOST_TEST(pot.epsilon() == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(pot.participants().size() == 5u);
 
-        g.initialize(sys);
-        BOOST_TEST(g.participants().size() == 5u);
-        BOOST_TEST(g.participants().at(0)  == 1u);
-        BOOST_TEST(g.participants().at(1)  == 2u);
-        BOOST_TEST(g.participants().at(2)  == 3u);
-        BOOST_TEST(g.participants().at(3)  == 4u);
-        BOOST_TEST(g.participants().at(4)  == 5u);
+        pot.initialize(sys);
+        BOOST_TEST(pot.participants().size() == 5u);
+        BOOST_TEST(pot.participants().at(0)  == 1u);
+        BOOST_TEST(pot.participants().at(1)  == 2u);
+        BOOST_TEST(pot.participants().at(2)  == 3u);
+        BOOST_TEST(pot.participants().at(3)  == 4u);
+        BOOST_TEST(pot.participants().at(4)  == 5u);
     }
 }
 
@@ -227,19 +227,19 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_ignore_self, T, test_ty
             epsilon = 1.5
         )"_toml;
 
-        auto g = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
+        auto pot = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
 
-        const auto ignore_within = g.ignore_within();
+        const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
-        BOOST_TEST(g.ignore_within().size() == 2u);
+        BOOST_TEST(within.size() == 2u);
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST( g.is_ignored_molecule(0, 0));
-        BOOST_TEST(!g.is_ignored_molecule(0, 1));
-        BOOST_TEST( g.is_ignored_molecule(1, 1));
+        BOOST_TEST( pot.exclusion_list().is_ignored_molecule(0, 0));
+        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 1));
+        BOOST_TEST( pot.exclusion_list().is_ignored_molecule(1, 1));
     }
 }
 
@@ -266,19 +266,19 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_ignore_others, T, test_
             epsilon = 1.5
         )"_toml;
 
-        auto g = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
+        auto pot = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
 
-        const auto ignore_within = g.ignore_within();
+        const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
-        BOOST_TEST(g.ignore_within().size() == 2u);
+        BOOST_TEST(within.size() == 2u);
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST(!g.is_ignored_molecule(0, 0));
-        BOOST_TEST( g.is_ignored_molecule(0, 1));
-        BOOST_TEST(!g.is_ignored_molecule(1, 1));
+        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 0));
+        BOOST_TEST( pot.exclusion_list().is_ignored_molecule(0, 1));
+        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(1, 1));
     }
 }
 
@@ -309,30 +309,30 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_ignore_group, T, test_t
             epsilon = 1.5
         )"_toml;
 
-        auto g = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
+        auto pot = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
 
-        const auto ignore_within = g.ignore_within();
+        const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
-        BOOST_TEST(g.ignore_within().size() == 2u);
+        BOOST_TEST(within.size() == 2u);
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST(!g.is_ignored_molecule(0, 0));
-        BOOST_TEST(!g.is_ignored_molecule(0, 1));
-        BOOST_TEST(!g.is_ignored_molecule(1, 1));
+        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 0));
+        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 1));
+        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(1, 1));
 
-        BOOST_TEST(!g.is_ignored_group("protein1", "protein1"));
-        BOOST_TEST( g.is_ignored_group("protein1", "protein2"));
-        BOOST_TEST( g.is_ignored_group("protein1", "protein3"));
+        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein1", "protein1"));
+        BOOST_TEST( pot.exclusion_list().is_ignored_group("protein1", "protein2"));
+        BOOST_TEST( pot.exclusion_list().is_ignored_group("protein1", "protein3"));
 
-        BOOST_TEST( g.is_ignored_group("protein2", "protein1"));
-        BOOST_TEST(!g.is_ignored_group("protein2", "protein2"));
-        BOOST_TEST(!g.is_ignored_group("protein2", "protein3"));
+        BOOST_TEST( pot.exclusion_list().is_ignored_group("protein2", "protein1"));
+        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein2", "protein2"));
+        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein2", "protein3"));
 
-        BOOST_TEST( g.is_ignored_group("protein3", "protein1"));
-        BOOST_TEST(!g.is_ignored_group("protein3", "protein2"));
-        BOOST_TEST(!g.is_ignored_group("protein3", "protein3"));
+        BOOST_TEST( pot.exclusion_list().is_ignored_group("protein3", "protein1"));
+        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein3", "protein2"));
+        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein3", "protein3"));
     }
 }
