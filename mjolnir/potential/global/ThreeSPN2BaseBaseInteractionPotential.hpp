@@ -314,12 +314,20 @@ class ThreeSPN2BaseBaseInteractionPotential
             unit_converted = true;
         }
         // construct a exclusion list
+        this->update(sys);
         return;
     }
 
     // nothing to do when system parameters change.
     template<typename traitsT>
-    void update(const System<traitsT>&) noexcept {return;}
+    void update(const System<traitsT>&) noexcept
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        exclusion_list_.make(sys);
+        return;
+    }
 
     // ------------------------------------------------------------------------
     // to check bases has base-pairing interaction.
