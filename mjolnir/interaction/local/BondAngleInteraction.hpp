@@ -165,6 +165,7 @@ void BondAngleInteraction<traitsT, potentialT>::write_topology(
         const auto j = idxp.first[1];
         const auto k = idxp.first[2];
         topol.add_connection(i, j, this->kind_);
+        topol.add_connection(i, k, this->kind_);
         topol.add_connection(j, k, this->kind_);
     }
     return;

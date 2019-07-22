@@ -73,6 +73,7 @@ class DihedralAngleInteraction final : public LocalInteractionBase<traitsT>
     void write_topology(topology_type&) const override;
 
    private:
+
     connection_kind_type kind_;
     container_type potentials;
 };
@@ -185,7 +186,10 @@ void DihedralAngleInteraction<traitsT, potentialT>::write_topology(
         const auto k = idxp.first[2];
         const auto l = idxp.first[3];
         topol.add_connection(i, j, this->kind_);
+        topol.add_connection(i, k, this->kind_);
+        topol.add_connection(i, l, this->kind_);
         topol.add_connection(j, k, this->kind_);
+        topol.add_connection(j, l, this->kind_);
         topol.add_connection(k, l, this->kind_);
     }
     return;
