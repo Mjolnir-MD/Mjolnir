@@ -1,7 +1,6 @@
 #ifndef MJOLNIR_INTERACTION_GLOBAL_3SPN_BASE_BASE_INTERACTION_HPP
 #define MJOLNIR_INTERACTION_GLOBAL_3SPN_BASE_BASE_INTERACTION_HPP
-#include <mjolnir/potential/global/ThreeSPN2BasePairingPotential.hpp>
-#include <mjolnir/potential/global/ThreeSPN2CrossStackingPotential.hpp>
+#include <mjolnir/potential/global/ThreeSPN2BaseBaseInteractionPotential.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <memory>
 
@@ -34,8 +33,7 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
     using boundary_type   = typename base_type::boundary_type;
     using partition_type  = partitionT;
 
-    using base_pairing_potential   = ThreeSPN2BasePairingPotential<real_type>;
-    using cross_stacking_potential = ThreeSPN2CrossStackingPotential<real_type>;
+    using potential_type  = ThreeSPN2BaseBaseInteractionPotential<real_type>;
 
   public:
     ThreeSPN2BaseBaseInteraction()  = default;
@@ -76,9 +74,8 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
 
   private:
 
-    base_pairing_potential   base_pairing_potential_;
-    cross_stacking_potential cross_stacking_potential_;
-    partition_type           partition_;
+    potential_type potential_;
+    partition_type partition_;
 };
 
 template<typename traitsT, typename partitionT>
@@ -100,7 +97,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
 
             const auto Bij = sys.adjust_direction(rBj - rBi); // Bi -> Bj
             const auto lBij_sq = math::length_sq(Bij);
-            if(lBij_sq > base_pairing_potential_.cutoff_sq(bp_kind))
+            if(lBij_sq > potential_.cutoff_sq(bp_kind))
             {
                 continue;
             }
@@ -125,9 +122,9 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             // dU_rep = 2 a e exp(-a(r-r0)) (1-exp(-a(r-r0))) ... r  <  r0
             //        = 0                                     ... r0 <= r
             //
-            const auto r0   = base_pairing_potential_.r0(bp_kind);
-            const auto e_BP = base_pairing_potential_.epsilon(bp_kind);
-            const auto a_BP = base_pairing_potential_.alpha();
+            const auto r0   = potential_.r0(bp_kind);
+            const auto e_BP = potential_.epsilon(bp_kind);
+            const auto a_BP = potential_.alpha();
             if(lBij < r0)
             {
                 const auto term = std::exp(-a_BP * (lBij - r0));
@@ -173,10 +170,10 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             //
             // 1/2(1+cos(dphi)) f(dtheta1) f(dtheta2) U_attr(rij)
 
-            const auto theta1_0 = base_pairing_potential_.theta1_0(bp_kind);
-            const auto theta2_0 = base_pairing_potential_.theta2_0(bp_kind);
-            const auto f1 = base_pairing_potential_.f(theta1, theta1_0);
-            const auto f2 = base_pairing_potential_.f(theta2, theta2_0);
+            const auto theta1_0 = potential_.theta1_0(bp_kind);
+            const auto theta2_0 = potential_.theta2_0(bp_kind);
+            const auto f1 = potential_.f(bp_kind, theta1, theta1_0);
+            const auto f2 = potential_.f(bp_kind, theta2, theta2_0);
 
             if(f1 != real_type(0.0) && f2 != real_type(0.0))
             {
@@ -187,8 +184,8 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 //    Bi o =(= o Bj
                 //         phi
 
-                const auto df1 = base_pairing_potential_.df(theta1, theta1_0);
-                const auto df2 = base_pairing_potential_.df(theta2, theta2_0);
+                const auto df1 = potential_.df(theta1, theta1_0);
+                const auto df2 = potential_.df(theta2, theta2_0);
 
                 const auto rlBij_sq = rlBij * rlBij; // 1 / |Bij|^2
                 const auto R = -SBi + (-dot_SBiBj * rlBij_sq) * Bij;
@@ -331,11 +328,14 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             //  + f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
             //
 
-            const auto Bi3 = cross_stacking_potential_.parameters()[Bi].B3;
-            const auto Bj5 = cross_stacking_potential_.parameters()[Bj].B5;
+            // ----------------------------------------------------------------
+            // TODO: determines cross stacking direction by strand_index
 
-            const bool Bi3_exists = (Bi3 != cross_stacking_potential_.invalid());
-            const bool Bj5_exists = (Bj5 != cross_stacking_potential_.invalid());
+            const auto Bi3 = potential_.parameters()[Bi].B3_idx;
+            const auto Bj5 = potential_.parameters()[Bj].B5_idx;
+
+            const bool Bi3_exists = (Bi3 != potential_type::invalid());
+            const bool Bj5_exists = (Bj5 != potential_type::invalid());
 
             if(!Bi3_exists && !Bj5_exists)
             {
@@ -345,14 +345,15 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             const auto dot_SBiSBj = math::dor_product(SBi, SBj);
             const auto cos_theta3 = dot_SBiSBj * rlSBi * rlSBj;
             const auto theta3     = std::acos(math::clamp<real_type>(cos_theta3, -1, 1));
-            const auto f3         = cross_stacking_potential_.f(bp_kind, theta3);
+            const auto theta3_0   = potential_.theta3_0(bp_kind);
+            const auto f3         = potential_.f(bp_kind, theta3, theta3_0);
             if(f3 == real_type(0))
             {
                 // f(theta) == 0 means df(theta) is also zero.
                 // so here, both cross-stacking becomes zero. skip them.
                 continue;
             }
-            const auto df3 = cross_stacking_potential_.df(bp_kind, theta3);
+            const auto df3 = potential_.df(bp_kind, theta3);
 
             // ----------------------------------------------------------------
             // calc common part (same in between 3' and 5'), dtheta3/dr.
@@ -379,7 +380,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 //  3'    o -- o===o -- o     5'
                 //           Bi3   Bj5
 
-                const auto cs_kind = cross_stacking_potential_.cs5_kind(Bi, Bj5);
+                const auto cs_kind = potential_.cs5_kind(Bi, Bj5);
                 const auto& rBj5 = sys.position(Bj5);
 
                 const auto Bj5i     = sys.adjust_direction(rBi - rBj5);
@@ -390,12 +391,13 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 const auto cos_theta_CS = dot_theta_CS * rlSBi * rlBj5i;
                 const auto theta_CS     =
                     std::acos(math::clamp<real_type>(cos_theta_CS, -1, 1));
+                const auto theta_CS_0   = potential_.thetaCS_0(cs_kind);
 
-                const auto fCS  = cross_stacking_potential_.f(cs_kind, theta_CS);
+                const auto fCS  = potential_.f(cs_kind, theta_CS, theta_CS_0);
                 // if f == 0, df is also zero. if fCS == 0, no force there
                 if(fCS != real_type(0))
                 {
-                    const auto dfCS  = cross_stacking_potential_.df(cs_kind, theta_CS);
+                    const auto dfCS  = potential_.df(cs_kind, theta_CS);
 
                     // --------------------------------------------------------
                     // U_attr =
@@ -406,9 +408,9 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     //   0                                 ... (dr <= dr0)
                     //   2ae(1-exp(-a(r-r0)))exp(-a(r-r0)) ... (dr0 < dr)
                     //
-                    const auto e_CS  = cross_stacking_potential_.epsilon(cs_kind);
-                    const auto a_CS  = cross_stacking_potential_.alpha();
-                    const auto r0_CS = cross_stacking_potential_.r0(cs_kind);
+                    const auto e_CS  = potential_.epsilon(cs_kind);
+                    const auto a_CS  = potential_.alpha();
+                    const auto r0_CS = potential_.r0(cs_kind);
                     const auto lBj5i = lBj5i_sq * rlBj5i;
 
                     real_type U_attr_  = -e_CS;
@@ -471,7 +473,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 //  3'    o -- o===o -- o     5'
                 //           Bi3   Bj5
 
-                const auto cs_kind = cross_stacking_potential_.cs3_kind(Bj, Bi3);
+                const auto cs_kind = potential_.cs3_kind(Bj, Bi3);
                 const auto& rBi3   = sys.position(Bi3);
 
                 const auto Bi3j     = sys.adjust_direction(rBj - rBi3);
@@ -482,12 +484,13 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 const auto cos_theta_CS = dot_theta_CS * rlSBj * rlBi3j;
                 const auto theta_CS     =
                     std::acos(math::clamp<real_type>(cos_theta_CS, -1, 1));
+                const auto theta_CS_0   = potential_.thetaCS_0(cs_kind);
 
-                const auto fCS = cross_stacking_potential_.f(cs_kind, theta_CS);
+                const auto fCS = potential_.f(cs_kind, theta_CS, theta_CS_0);
                 // if f == 0, df is also zero. if fCS == 0, no force there
                 if(fCS != real_type(0))
                 {
-                    const auto dfCS  = cross_stacking_potential_.df(cs_kind, theta_CS);
+                    const auto dfCS  = potential_.df(cs_kind, theta_CS);
 
                     // --------------------------------------------------------
                     // U_attr =
@@ -498,9 +501,9 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     //   0                                 ... (dr <= dr0)
                     //   2ae(1-exp(-a(r-r0)))exp(-a(r-r0)) ... (dr0 < dr)
                     //
-                    const auto e_CS  = cross_stacking_potential_.epsilon(cs_kind);
-                    const auto a_CS  = cross_stacking_potential_.alpha();
-                    const auto r0_CS = cross_stacking_potential_.r0(cs_kind);
+                    const auto e_CS  = potential_.epsilon(cs_kind);
+                    const auto a_CS  = potential_.alpha();
+                    const auto r0_CS = potential_.r0(cs_kind);
                     const auto lBi3j = lBi3j_sq * rlBi3j;
 
                     real_type U_attr_  = -e_CS;
@@ -578,7 +581,7 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
             const auto Bij = sys.adjust_direction(rBj - rBi); // Bi -> Bj
 
             const auto lBij_sq = math::length_sq(Bij);
-            if(lBij_sq > base_pairing_potential_.cutoff_sq(bp_kind))
+            if(lBij_sq > potential_.cutoff_sq(bp_kind))
             {
                 continue;
             }
@@ -598,9 +601,9 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
             // ----------------------------------------------------------------
             // U_rep = e_ij (1 - exp(-a_ij (rij - r0_ij)))^2 ... rij < r0_ij
             //       = 0                                     ... r0_ij <= rij
-            const auto r0   = base_pairing_potential_.r0(bp_kind);
-            const auto e_BP = base_pairing_potential_.epsilon(bp_kind);
-            const auto a_BP = base_pairing_potential_.alpha();
+            const auto r0   = potential_.r0(bp_kind);
+            const auto e_BP = potential_.epsilon(bp_kind);
+            const auto a_BP = potential_.alpha();
             if(lBij < r0)
             {
                 const auto term = real_type(1.0) - std::exp(-a_BP * (lBij - r0));
@@ -647,10 +650,10 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
             //            1 - cos^2(K (theta - theta0)) ... pi/2K < abs(dtheta) < pi/K
             //            0                             ... pi/K  < abs(dtheta)
 
-            const auto theta1_0 = base_pairing_potential_.theta1_0(bp_kind);
-            const auto theta2_0 = base_pairing_potential_.theta2_0(bp_kind);
-            const auto f1 = base_pairing_potential_.f(theta1, theta1_0);
-            const auto f2 = base_pairing_potential_.f(theta2, theta2_0);
+            const auto theta1_0 = potential_.theta1_0(bp_kind);
+            const auto theta2_0 = potential_.theta2_0(bp_kind);
+            const auto f1 = potential_.f(bp_kind, theta1, theta1_0);
+            const auto f2 = potential_.f(bp_kind, theta2, theta2_0);
 
             if(f1 != real_type(0.0) && f2 != real_type(0.0)) // [[likely]]
             {
@@ -675,7 +678,7 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 const auto sign = -math::dot_product(SBi, n);
                 const auto phi  = std::copysign(std::acos(cos_phi), sign);
 
-                auto dphi = phi - base_pairing_potential_.phi_0(bp_kind);
+                auto dphi = phi - potential_.phi_0(bp_kind);
                 if     (pi   < dphi) {dphi -= two_pi;}
                 else if(dphi <  -pi) {dphi += two_pi;}
 
@@ -710,11 +713,11 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
             //  3'    o -- o===o -- o     5'
             //           Bi3   Bj5
 
-            const auto Bi3 = cross_stacking_potential_.parameters()[Bi].B3;
-            const auto Bj5 = cross_stacking_potential_.parameters()[Bj].B5;
+            const auto Bi3 = potential_.parameters()[Bi].B3_idx;
+            const auto Bj5 = potential_.parameters()[Bj].B5_idx;
 
-            const bool Bi3_exists = (Bi3 != cross_stacking_potential_.invalid());
-            const bool Bj5_exists = (Bj5 != cross_stacking_potential_.invalid());
+            const bool Bi3_exists = (Bi3 != potential_type::invalid());
+            const bool Bj5_exists = (Bj5 != potential_type::invalid());
 
             if(!Bi3_exists && !Bj5_exists)
             {
@@ -724,7 +727,8 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
             const auto dot_SBiSBj = math::dor_product(SBi, SBj);
             const auto cos_theta3 = dot_SBiSBj * rlSBi * rlSBj;
             const auto theta3     = std::acos(math::clamp<real_type>(cos_theta3, -1, 1));
-            const auto f3         = cross_stacking_potential_.f(bp_kind, theta3);
+            const auto theta3_0   = potential_.theta3_0(bp_kind);
+            const auto f3         = potential_.f(bp_kind, theta3);
             if(f3 == real_type(0))
             {
                 // both cross-stacking becomes zero. skip them.
@@ -746,7 +750,7 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 //  3'    o -- o===o -- o     5'
                 //           Bi3   Bj5
 
-                const auto cs_kind = cross_stacking_potential_.cs5_kind(Bi, Bj5);
+                const auto cs_kind = potential_.cs5_kind(Bi, Bj5);
                 const auto& rBj5 = sys.position(Bj5);
 
                 const auto Bj5i     = sys.adjust_direction(rBi - rBj5);
@@ -757,13 +761,14 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 const auto cos_theta_CS = dot_theta_CS * rlSBi * rlBj5i;
                 const auto theta_CS     =
                     std::acos(math::clamp<real_type>(cos_theta_CS, -1, 1));
+                const auto theta_CS_0   = potential_.thetaCS_0(cs_kind);
 
-                const auto fCS = cross_stacking_potential_.f(cs_kind, theta_CS);
+                const auto fCS = potential_.f(cs_kind, theta_CS, theta_CS_0);
                 if(fCS != real_type(0))
                 {
-                    const auto e_CS  = cross_stacking_potential_.epsilon(cs_kind);
-                    const auto a_CS  = cross_stacking_potential_.alpha();
-                    const auto r0_CS = cross_stacking_potential_.r0(cs_kind);
+                    const auto e_CS  = potential_.epsilon(cs_kind);
+                    const auto a_CS  = potential_.alpha();
+                    const auto r0_CS = potential_.r0(cs_kind);
                     const auto lBj5i = lBj5i_sq * rlBj5i;
 
                     // --------------------------------------------------------
@@ -798,7 +803,7 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 //  3'    o -- o===o -- o     5'
                 //           Bi3   Bj5
 
-                const auto cs_kind = cross_stacking_potential_.cs3_kind(Bj, Bi3);
+                const auto cs_kind = potential_.cs3_kind(Bj, Bi3);
                 const auto& rBi3   = sys.position(Bi3);
 
                 const auto Bi3j     = sys.adjust_direction(rBj - rBi3);
@@ -809,13 +814,14 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 const auto cos_theta_CS = dot_theta_CS * rlSBj * rlBi3j;
                 const auto theta_CS     =
                     std::acos(math::clamp<real_type>(cos_theta_CS, -1, 1));
+                const auto theta_CS_0   = potential_.thetaCS_0(cs_kind);
 
-                const auto fCS = cross_stacking_potential_.f(cs_kind, theta_CS);
+                const auto fCS = potential_.f(cs_kind, theta_CS, theta_CS_0);
                 if(fCS != real_type(0))
                 {
-                    const auto e_CS  = cross_stacking_potential_.epsilon(cs_kind);
-                    const auto a_CS  = cross_stacking_potential_.alpha();
-                    const auto r0_CS = cross_stacking_potential_.r0(cs_kind);
+                    const auto e_CS  = potential_.epsilon(cs_kind);
+                    const auto a_CS  = potential_.alpha();
+                    const auto r0_CS = potential_.r0(cs_kind);
                     const auto lBi3j = lBi3j_sq * rlBi3j;
 
                     // --------------------------------------------------------
