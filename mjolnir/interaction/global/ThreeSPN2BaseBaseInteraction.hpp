@@ -2,6 +2,7 @@
 #define MJOLNIR_INTERACTION_GLOBAL_3SPN_BASE_BASE_INTERACTION_HPP
 #include <mjolnir/potential/global/ThreeSPN2BaseBaseInteractionPotential.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/math/math.hpp>
 #include <memory>
 
 namespace mjolnir
@@ -84,19 +85,19 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
     constexpr auto pi     = math::constants<real_type>::pi;
     constexpr auto two_pi = math::constants<real_type>::two_pi;
 
-    for(const auto i : this->potential_.participants())
+    for(const auto Bi : this->potential_.participants())
     {
-        const auto& rBi = sys.position(i);
-        for(const auto& ptnr : this->partition_.partners(i))
+        const auto& rBi = sys.position(Bi);
+        for(const auto& ptnr : this->partition_.partners(Bi))
         {
-            const auto  j    = ptnr.index;
+            const auto  Bj   = ptnr.index;
             const auto& para = ptnr.parameter();
-            const auto& rBj  = sys.position(j);
+            const auto& rBj  = sys.position(Bj);
             const auto  bp_kind = para.bp_kind;
 
             const auto Bij = sys.adjust_direction(rBj - rBi); // Bi -> Bj
             const auto lBij_sq = math::length_sq(Bij);
-            if(lBij_sq > potential_.cutoff_sq(bp_kind))
+            if(lBij_sq > potential_.cutoff_sq())
             {
                 continue;
             }
@@ -123,7 +124,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             //
             const auto r0   = potential_.r0(bp_kind);
             const auto e_BP = potential_.epsilon(bp_kind);
-            const auto a_BP = potential_.alpha();
+            const auto a_BP = potential_.alpha(bp_kind);
             if(lBij < r0)
             {
                 const auto term = std::exp(-a_BP * (lBij - r0));
@@ -183,8 +184,8 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 //    Bi o =(= o Bj
                 //         phi
 
-                const auto df1 = potential_.df(theta1, theta1_0);
-                const auto df2 = potential_.df(theta2, theta2_0);
+                const auto df1 = potential_.df(bp_kind, theta1, theta1_0);
+                const auto df2 = potential_.df(bp_kind, theta2, theta2_0);
 
                 const auto rlBij_sq = rlBij * rlBij; // 1 / |Bij|^2
                 const auto R = -SBi + (-dot_SBiBj * rlBij_sq) * Bij;
@@ -200,7 +201,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 const auto phi = std::copysign(std::acos(cos_phi),
                                                -math::dot_product(SBi, n));
 
-                auto dphi = phi - this->potential_.phi_0(BP_kind);
+                auto dphi = phi - this->potential_.phi_0(bp_kind);
                 if(dphi < -pi) {dphi += two_pi;}
                 if(pi <= dphi) {dphi -= two_pi;}
                 const auto cos_dphi = std::cos(dphi);
@@ -319,7 +320,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             //  | P o        x        o P |
             //  |    \      / \      /    v
             //  3'    o -- o===o -- o     5'
-            //           Bi3   Bj5
+            //       Bj_next   Bj_next
             //
             // d/dr Vcs =
             //    df/dtheta3 f(theta_CS)  U_attr(eps, alp, rij) dtheta_3  /dr
@@ -327,19 +328,33 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             //  + f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
             //
 
+            const auto& Bi_para = potential_.parameters()[Bi];
+            const auto& Bj_para = potential_.parameters()[Bj];
+
             // ----------------------------------------------------------------
-            // TODO: determines cross stacking direction by strand_index
+            // check which one is the "sense" strand.
+            //   Actually, "sense" strand does not have physical meaning (the
+            //   same strand can form a contact).
+            //   It is a label to distinguish the direction of contact.
+            //   The important thing is that we need to be able to determine
+            //   which strand is the "sense" when we have a pair of strands and
+            //   the relationships should be kept while simulation.
 
-            const auto Bi3 = potential_.parameters()[Bi].B3_idx;
-            const auto Bj5 = potential_.parameters()[Bj].B5_idx;
+            const bool i_in_sense_strand = (Bi_para.strand_index < Bj_para.strand_index);
 
-            const bool Bi3_exists = (Bi3 != potential_type::invalid());
-            const bool Bj5_exists = (Bj5 != potential_type::invalid());
+            const auto Bi_next = i_in_sense_strand ? Bi_para.B3_idx : Bi_para.B5_idx;
+            const auto Bj_next = i_in_sense_strand ? Bj_para.B5_idx : Bj_para.B3_idx;
 
-            if(!Bi3_exists && !Bj5_exists)
+            const bool Bi_next_exists = (Bi_next != potential_type::invalid());
+            const bool Bj_next_exists = (Bj_next != potential_type::invalid());
+
+            if(!Bi_next_exists && !Bj_next_exists)
             {
                 continue; // if both interacting pair do not exist, do nothing.
             }
+
+            // ----------------------------------------------------------------
+            // calc common part, theta3 and dtheta3/dr.
 
             const auto dot_SBiSBj = math::dor_product(SBi, SBj);
             const auto cos_theta3 = dot_SBiSBj * rlSBi * rlSBj;
@@ -352,10 +367,11 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 // so here, both cross-stacking becomes zero. skip them.
                 continue;
             }
-            const auto df3 = potential_.df(bp_kind, theta3);
+            const auto df3 = potential_.df(bp_kind, theta3, theta3_0);
 
             // ----------------------------------------------------------------
-            // calc common part (same in between 3' and 5'), dtheta3/dr.
+            // force directions for dtheta3/dr
+
             const auto sin_theta3  = std::sin(cos_theta3);
             const auto rsin_theta3 = (sin_theta3 > tolerance) ?
                     (real_type(1) / sin_theta3) : (real_type(1) / tolerance);
@@ -365,11 +381,11 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             const auto fBi_theta3 = real_type(-1) * fSi_theta3;
             const auto fBj_theta3 = real_type(-1) * fSj_theta3;
 
-            // 5' adjacent of Base j might not exist, e.g., edge of the DNA.
-            if(Bj5_exists)
+            // adjacent of Base j exists. its not the edge of the strand.
+            if(Bj_next_exists)
             {
                 // ------------------------------------------------------------
-                // 5' cross stacking
+                // 5' cross stacking (the case if `Bi` is in sense strand)
                 //
                 //       Si   Bi   Bj   Sj
                 //  5'    o--> o===o <--o     3'
@@ -378,9 +394,17 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 //  |    \        \      /    v
                 //  3'    o -- o===o -- o     5'
                 //           Bi3   Bj5
+                //
+                // Hereafter, we use the notation illustrated above (excepting
+                // the index `Bj_next` that corresponds to Bj5).
 
-                const auto cs_kind = potential_.cs5_kind(Bi, Bj5);
-                const auto& rBj5 = sys.position(Bj5);
+                const auto& Bj_next_para = potential_.parameters()[Bj_next];
+
+                const auto cs_kind = i_in_sense_strand                 ?
+                    potential_.cs5_kind(Bi_para.base, Bj_next_para.base) :
+                    potential_.cs3_kind(Bi_para.base, Bj_next_para.base) ;
+
+                const auto& rBj5 = sys.position(Bj_next);
 
                 const auto Bj5i     = sys.adjust_direction(rBi - rBj5);
                 const auto lBj5i_sq = math::length_sq(lBj5i); // |Bj5i|^2
@@ -396,7 +420,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 // if f == 0, df is also zero. if fCS == 0, no force there
                 if(fCS != real_type(0))
                 {
-                    const auto dfCS  = potential_.df(cs_kind, theta_CS);
+                    const auto dfCS  = potential_.df(cs_kind, theta_CS, theta_CS_0);
 
                     // --------------------------------------------------------
                     // U_attr =
@@ -408,7 +432,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     //   2ae(1-exp(-a(r-r0)))exp(-a(r-r0)) ... (dr0 < dr)
                     //
                     const auto e_CS  = potential_.epsilon(cs_kind);
-                    const auto a_CS  = potential_.alpha();
+                    const auto a_CS  = potential_.alpha(cs_kind);
                     const auto r0_CS = potential_.r0(cs_kind);
                     const auto lBj5i = lBj5i_sq * rlBj5i;
 
@@ -446,23 +470,21 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                         const auto fSi  = coef_rsin * rlSBi  * (-cos_theta_CS * BSi_reg - Bj5i_reg);
                         const auto fBj5 = coef_rsin * rlBj5i * ( cos_theta_CS * Bj5i_reg + BSi_reg);
 
-                        sys.force(Si)  += fSi;
-                        sys.force(Bi)  -= (fSi + fBj5);
-                        sys.force(Bj5) += fBj5;
+                        sys.force(Si)      += fSi;
+                        sys.force(Bi)      -= (fSi + fBj5);
+                        sys.force(Bj_next) += fBj5;
                     }
                     // --------------------------------------------------------
                     // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
                     const auto coef = f3 * fCS * dU_attr * rlBj5i;
-                    sys.force(Bi)  -= coef * Bj5i;
-                    sys.force(Bj5) += coef * Bj5i;
+                    sys.force(Bi)      -= coef * Bj5i;
+                    sys.force(Bj_next) += coef * Bj5i;
                 }
             }
-            // 3' adjacent of Base i might not exist, e.g., edge of the DNA.
-            if(Bi3_exists)
+            if(Bi_next_exists)
             {
                 // ------------------------------------------------------------
-                // 3' cross stacking
-                // f(theta_3) f(theta_CS) U_attr(epsilon, alpha, rij)
+                // 3' cross stacking (the case `Bi` is in a sense strand)
                 //
                 //       Si   Bi   Bj   Sj
                 //  5'    o--> o===o <--o     3'
@@ -471,9 +493,17 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 //  |    \      /        /    v
                 //  3'    o -- o===o -- o     5'
                 //           Bi3   Bj5
+                //
+                // Hereafter, we use the notation illustrated above (excepting
+                // the index `Bi_next` that corresponds to Bi3).
 
-                const auto cs_kind = potential_.cs3_kind(Bj, Bi3);
-                const auto& rBi3   = sys.position(Bi3);
+                const auto& Bi_next_para = potential_.parameters()[Bi_next];
+
+                const auto cs_kind = i_in_sense_strand                 ?
+                    potential_.cs3_kind(Bj_para.base, Bi_next_para.base) :
+                    potential_.cs5_kind(Bj_para.base, Bi_next_para.base) ;
+
+                const auto& rBi3   = sys.position(Bi_next);
 
                 const auto Bi3j     = sys.adjust_direction(rBj - rBi3);
                 const auto lBi3j_sq = math::length_sq(lBi3j); // |Bi3j|^2
@@ -489,7 +519,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 // if f == 0, df is also zero. if fCS == 0, no force there
                 if(fCS != real_type(0))
                 {
-                    const auto dfCS  = potential_.df(cs_kind, theta_CS);
+                    const auto dfCS  = potential_.df(cs_kind, theta_CS, theta_CS_0);
 
                     // --------------------------------------------------------
                     // U_attr =
@@ -501,7 +531,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     //   2ae(1-exp(-a(r-r0)))exp(-a(r-r0)) ... (dr0 < dr)
                     //
                     const auto e_CS  = potential_.epsilon(cs_kind);
-                    const auto a_CS  = potential_.alpha();
+                    const auto a_CS  = potential_.alpha(cs_kind);
                     const auto r0_CS = potential_.r0(cs_kind);
                     const auto lBi3j = lBi3j_sq * rlBi3j;
 
@@ -540,15 +570,15 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                                           (-cos_theta_CS * BSj_reg - Bi3j_reg);
                         const auto fBi3 = coef_rsin * rlBi3j *
                                           ( cos_theta_CS * Bi3j_reg + BSj_reg);
-                        sys.force(Sj)  += fSj;
-                        sys.force(Bj)  -= (fSj + fBi3);
-                        sys.force(Bi3) += fBi3;
+                        sys.force(Sj)      += fSj;
+                        sys.force(Bj)      -= (fSj + fBi3);
+                        sys.force(Bi_next) += fBi3;
                     }
                     // --------------------------------------------------------
                     // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
                     const auto coef = f3 * fCS * dU_attr * rlBi3j;
-                    sys.force(Bj)  -= coef * Bi3j;
-                    sys.force(Bi3) += coef * Bi3j;
+                    sys.force(Bj)      -= coef * Bi3j;
+                    sys.force(Bi_next) += coef * Bi3j;
                 }
             }
         }
@@ -565,22 +595,22 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
     constexpr auto two_pi = math::constants<real_type>::two_pi;
 
     real_type E = 0.0;
-    for(const auto i : this->potential_.participants())
+    for(const auto Bi : this->potential_.participants())
     {
-        const auto& rBi = sys.position(i);
+        const auto& rBi = sys.position(Bi);
 
-        for(const auto& ptnr : this->partition_.partners(i))
+        for(const auto& ptnr : this->partition_.partners(Bi))
         {
-            const auto  j    = ptnr.index;
+            const auto  Bj   = ptnr.index;
             const auto& para = ptnr.parameter();
-            const auto& rBj  = sys.position(j);
+            const auto& rBj  = sys.position(Bj);
 
             const auto  bp_kind = para.bp_kind;
 
             const auto Bij = sys.adjust_direction(rBj - rBi); // Bi -> Bj
 
             const auto lBij_sq = math::length_sq(Bij);
-            if(lBij_sq > potential_.cutoff_sq(bp_kind))
+            if(lBij_sq > potential_.cutoff_sq())
             {
                 continue;
             }
@@ -602,7 +632,7 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
             //       = 0                                     ... r0_ij <= rij
             const auto r0   = potential_.r0(bp_kind);
             const auto e_BP = potential_.epsilon(bp_kind);
-            const auto a_BP = potential_.alpha();
+            const auto a_BP = potential_.alpha(bp_kind);
             if(lBij < r0)
             {
                 const auto term = real_type(1.0) - std::exp(-a_BP * (lBij - r0));
@@ -700,7 +730,7 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 E += 0.5 * (1 + cos_dphi) * f1 * f2 * U_attr;
             }
 
-            // ----------------------------------------------------------------
+            // ================================================================
             // cross stacking
             // f(theta_3) f(theta_CS) U_attr(epsilon, alpha, rij)
             //
@@ -710,15 +740,29 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
             //  | P o        x        o P |
             //  |    \      / \      /    v
             //  3'    o -- o===o -- o     5'
-            //           Bi3   Bj5
+            //       Bj_next   Bj_next
 
-            const auto Bi3 = potential_.parameters()[Bi].B3_idx;
-            const auto Bj5 = potential_.parameters()[Bj].B5_idx;
+            const auto& Bi_para = potential_.parameters()[Bi];
+            const auto& Bj_para = potential_.parameters()[Bj];
 
-            const bool Bi3_exists = (Bi3 != potential_type::invalid());
-            const bool Bj5_exists = (Bj5 != potential_type::invalid());
+            // ----------------------------------------------------------------
+            // check which one is the "sense" strand.
+            //   Actually, "sense" strand does not have physical meaning (the
+            //   same strand can form a contact).
+            //   It is a label to distinguish the direction of contact.
+            //   The important thing is that we need to be able to determine
+            //   which strand is the "sense" when we have a pair of strands and
+            //   the relationships should be kept while simulation.
 
-            if(!Bi3_exists && !Bj5_exists)
+            const bool i_in_sense_strand = (Bi_para.strand_index < Bj_para.strand_index);
+
+            const auto Bi_next = i_in_sense_strand ? Bi_para.B3_idx : Bi_para.B5_idx;
+            const auto Bj_next = i_in_sense_strand ? Bj_para.B5_idx : Bj_para.B3_idx;
+
+            const bool Bi_next_exists = (Bi_next != potential_type::invalid());
+            const bool Bj_next_exists = (Bj_next != potential_type::invalid());
+
+            if(!Bi_next_exists && !Bj_next_exists)
             {
                 continue; // if both interacting pair do not exist, do nothing.
             }
@@ -734,8 +778,8 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 continue;
             }
 
-            // 5' adjacent of Base j might not exist, e.g., edge of the DNA.
-            if(Bj5_exists)
+            // adjacent of Base Bj exists. its not the edge of the strand.
+            if(Bj_next_exists)
             {
                 // ----------------------------------------------------------------
                 // cross stacking
@@ -748,9 +792,17 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 //  |    \        \      /    v
                 //  3'    o -- o===o -- o     5'
                 //           Bi3   Bj5
+                //
+                // Hereafter, we use the notation illustrated above (excepting
+                // the index `Bj_next` that corresponds to Bj5).
 
-                const auto cs_kind = potential_.cs5_kind(Bi, Bj5);
-                const auto& rBj5 = sys.position(Bj5);
+                const auto& Bj_next_para = potential_.parameters()[Bj_next];
+
+                const auto cs_kind = i_in_sense_strand                 ?
+                    potential_.cs5_kind(Bi_para.base, Bj_next_para.base) :
+                    potential_.cs3_kind(Bi_para.base, Bj_next_para.base) ;
+
+                const auto& rBj5 = sys.position(Bj_next);
 
                 const auto Bj5i     = sys.adjust_direction(rBi - rBj5);
                 const auto lBj5i_sq = math::length_sq(lBj5i);
@@ -766,7 +818,7 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 if(fCS != real_type(0))
                 {
                     const auto e_CS  = potential_.epsilon(cs_kind);
-                    const auto a_CS  = potential_.alpha();
+                    const auto a_CS  = potential_.alpha(cs_kind);
                     const auto r0_CS = potential_.r0(cs_kind);
                     const auto lBj5i = lBj5i_sq * rlBj5i;
 
@@ -786,9 +838,7 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                     E += f3 * fCS * U_attr;
                 }
             }
-
-            // 3' adjacent of Base i might not exist, e.g., edge of the DNA.
-            if(Bi3_exists)
+            if(Bi_next_exists)
             {
                 // ----------------------------------------------------------------
                 // cross stacking
@@ -801,9 +851,17 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 //  |    \      /        /    v
                 //  3'    o -- o===o -- o     5'
                 //           Bi3   Bj5
+                //
+                // Hereafter, we use the notation illustrated above (excepting
+                // the index `Bi_next` that corresponds to Bi3).
 
-                const auto cs_kind = potential_.cs3_kind(Bj, Bi3);
-                const auto& rBi3   = sys.position(Bi3);
+                const auto& Bi_next_para = potential_.parameters()[Bi_next];
+
+                const auto cs_kind = i_in_sense_strand                   ?
+                    potential_.cs3_kind(Bj_para.base, Bi_next_para.base) :
+                    potential_.cs5_kind(Bj_para.base, Bi_next_para.base) ;
+
+                const auto& rBi3    = sys.position(Bi_next);
 
                 const auto Bi3j     = sys.adjust_direction(rBj - rBi3);
                 const auto lBi3j_sq = math::length_sq(lBi3j);
@@ -819,7 +877,7 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 if(fCS != real_type(0))
                 {
                     const auto e_CS  = potential_.epsilon(cs_kind);
-                    const auto a_CS  = potential_.alpha();
+                    const auto a_CS  = potential_.alpha(cs_kind);
                     const auto r0_CS = potential_.r0(cs_kind);
                     const auto lBi3j = lBi3j_sq * rlBi3j;
 
