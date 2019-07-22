@@ -4,6 +4,8 @@ data/*
 *.ene
 *.vel
 *.xyz
+*.dcd
+*.trr
 *.png
 *.log
 callgrind.*
