@@ -6,6 +6,7 @@
 #include <mjolnir/interaction/local/BondAngleInteraction.hpp>
 #include <mjolnir/interaction/local/DihedralAngleInteraction.hpp>
 #include <mjolnir/interaction/local/DummyInteraction.hpp>
+#include <mjolnir/interaction/local/ThreeSPN2BaseStackingInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -306,6 +307,20 @@ read_dummy_interaction(const std::string& kind, const toml::value& local)
     return make_unique<DummyInteraction<traitsT>>(kind, std::move(indices_list));
 }
 
+
+template<typename traitsT>
+std::unique_ptr<LocalInteractionBase<traitsT>>
+read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value& local)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type  = typename traitsT::real_type;
+    using potentialT = ThreeSPN2BaseStackingPotential<real_type>;
+
+    return make_unique<ThreeSPN2BaseStackingInteraction<traitsT>>(
+            kind, read_local_potential<3, potentialT>(local));
+}
+
 // ----------------------------------------------------------------------------
 // general read_local_interaction function
 // ----------------------------------------------------------------------------
@@ -345,6 +360,11 @@ read_local_interaction(const toml::value& local)
     {
         MJOLNIR_LOG_NOTICE("Dummy interaction found.");
         return read_dummy_interaction<traitsT>(kind, local);
+    }
+    else if(interaction == "3SPN2BaseStacking")
+    {
+        MJOLNIR_LOG_NOTICE("3SPN2BaseStacking interaction found.");
+        return read_3spn2_base_stacking_interaction<traitsT>(kind, local);
     }
     else
     {
