@@ -73,7 +73,7 @@ class ThreeSPN2BaseBaseInteractionPotential
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
         : cutoff_(18.0), cutoff_sq_(18.0*18.0),
           exclusion_list_(std::move(ignore_mol), std::move(ignore_grp),
-                          {{"next_nucleotide", 3}})
+                          {{"next_nucl", 3}})
     {
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());

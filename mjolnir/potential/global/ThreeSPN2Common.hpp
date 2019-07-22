@@ -4,6 +4,9 @@
 
 namespace mjolnir
 {
+namespace parameter_3SPN2
+{
+enum class bead_kind       : std::uint8_t {Phosphate, Sugar, Base};
 
 // X is for default parameter
 enum class base_kind       : std::uint8_t {A=0, T=1, G=2, C=3,  X};
@@ -37,5 +40,6 @@ enum class cross_stack_kind: std::uint8_t
     CA3 = 28, CT3 = 29, CG3 = 30, CC3 = 31
 };
 
+} // 3SPN2
 } // mjolnir
 #endif// MJOLNIR_POTENTIAL_GLOBAL_3SPN2_COMMON_HPP
