@@ -174,8 +174,8 @@ template<typename potentialT> struct read_local_potential_impl;
 template<typename realT>
 struct read_local_potential_impl<HarmonicPotential<realT>>
 {
-    static HarmonicPotential<realT>
-    invoke(const toml::value& param, const toml::value& env)
+    using result_type = HarmonicPotential<realT>;
+    static result_type invoke(const toml::value& param, const toml::value& env)
     {
         return read_harmonic_potential<realT>(param, env);
     }
@@ -183,8 +183,8 @@ struct read_local_potential_impl<HarmonicPotential<realT>>
 template<typename realT>
 struct read_local_potential_impl<GoContactPotential<realT>>
 {
-    static GoContactPotential<realT>
-    invoke(const toml::value& param, const toml::value& env)
+    using result_type = GoContactPotential<realT>;
+    static result_type invoke(const toml::value& param, const toml::value& env)
     {
         return read_go_contact_potential<realT>(param, env);
     }
@@ -192,8 +192,8 @@ struct read_local_potential_impl<GoContactPotential<realT>>
 template<typename realT>
 struct read_local_potential_impl<GaussianPotential<realT>>
 {
-    static GaussianPotential<realT>
-    invoke(const toml::value& param, const toml::value& env)
+    using result_type = GaussianPotential<realT>;
+    static result_type invoke(const toml::value& param, const toml::value& env)
     {
         return read_gaussian_potential<realT>(param, env);
     }
@@ -201,8 +201,8 @@ struct read_local_potential_impl<GaussianPotential<realT>>
 template<typename realT>
 struct read_local_potential_impl<PeriodicGaussianPotential<realT>>
 {
-    static PeriodicGaussianPotential<realT>
-    invoke(const toml::value& param, const toml::value& env)
+    using result_type = PeriodicGaussianPotential<realT>;
+    static result_type invoke(const toml::value& param, const toml::value& env)
     {
         return read_periodic_gaussian_potential<realT>(param, env);
     }
@@ -210,8 +210,8 @@ struct read_local_potential_impl<PeriodicGaussianPotential<realT>>
 template<typename realT>
 struct read_local_potential_impl<FlexibleLocalAnglePotential<realT>>
 {
-    static FlexibleLocalAnglePotential<realT>
-    invoke(const toml::value& param, const toml::value& env)
+    using result_type = FlexibleLocalAnglePotential<realT>;
+    static result_type invoke(const toml::value& param, const toml::value& env)
     {
         return read_flexible_local_angle_potential<realT>(param, env);
     }
@@ -219,8 +219,8 @@ struct read_local_potential_impl<FlexibleLocalAnglePotential<realT>>
 template<typename realT>
 struct read_local_potential_impl<ClementiDihedralPotential<realT>>
 {
-    static ClementiDihedralPotential<realT>
-    invoke(const toml::value& param, const toml::value& env)
+    using result_type = ClementiDihedralPotential<realT>;
+    static result_type invoke(const toml::value& param, const toml::value& env)
     {
         return read_clementi_dihedral_potential<realT>(param, env);
     }
@@ -228,8 +228,8 @@ struct read_local_potential_impl<ClementiDihedralPotential<realT>>
 template<typename realT>
 struct read_local_potential_impl<FlexibleLocalDihedralPotential<realT>>
 {
-    static FlexibleLocalDihedralPotential<realT>
-    invoke(const toml::value& param, const toml::value& env)
+    using result_type = FlexibleLocalDihedralPotential<realT>;
+    static result_type invoke(const toml::value& param, const toml::value& env)
     {
         return read_flexible_local_dihedral_potential<realT>(param, env);
     }
@@ -237,8 +237,8 @@ struct read_local_potential_impl<FlexibleLocalDihedralPotential<realT>>
 template<typename realT>
 struct read_local_potential_impl<CosinePotential<realT>>
 {
-    static CosinePotential<realT>
-    invoke(const toml::value& param, const toml::value& env)
+    using result_type = CosinePotential<realT>;
+    static result_type invoke(const toml::value& param, const toml::value& env)
     {
         return read_cosine_potential<realT>(param, env);
     }
@@ -248,7 +248,8 @@ struct read_local_potential_impl<CosinePotential<realT>>
 // this function reads particle indices on which the potential will be applied
 // and returns pairs of [indices, potential parameters].
 template<std::size_t N, typename potentialT>
-std::vector<std::pair<std::array<std::size_t, N>, potentialT>>
+std::vector<std::pair<std::array<std::size_t, N>,
+    typename detail::read_local_potential_impl<potentialT>::result_type>>
 read_local_potential(const toml::value& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
