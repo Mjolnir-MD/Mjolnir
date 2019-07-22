@@ -31,7 +31,7 @@ class ThreeSPN2BaseBaseInteractionPotential
 {
   public:
     using real_type = realT;
-    using base_kind        = parameter_3SPN2::bead_kind;
+    using base_kind        = parameter_3SPN2::base_kind;
     using base_pair_kind   = parameter_3SPN2::base_pair_kind;
     using cross_stack_kind = parameter_3SPN2::cross_stack_kind;
 
@@ -43,7 +43,7 @@ class ThreeSPN2BaseBaseInteractionPotential
     };
     struct pair_parameter_type
     {
-        base_pair_kind BP_kind;
+        base_pair_kind bp_kind;
         std::size_t    Si;
         std::size_t    Sj;
     };
@@ -56,6 +56,7 @@ class ThreeSPN2BaseBaseInteractionPotential
     using connection_kind_type = typename topology_type::connection_kind_type;
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
+    using exclusion_list_type  = ExclusionList;
 
     static constexpr std::size_t invalid() noexcept
     {
@@ -73,10 +74,10 @@ class ThreeSPN2BaseBaseInteractionPotential
 
     ThreeSPN2BaseBaseInteractionPotential(
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+        ignore_group_type ignore_grp)
         : cutoff_(18.0), cutoff_sq_(18.0*18.0),
-          exclusion_list_(std::move(ignore_mol), std::move(ignore_grp),
-                          {{"next_nucl", 3}})
+          exclusion_list_({{"next_nucl", 3}}, ignore_molecule_type("Nothing"),
+                          std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
@@ -140,7 +141,7 @@ class ThreeSPN2BaseBaseInteractionPotential
             case base_pair_kind::TA: {return this->epsilon_AT_;} // symmetric
             case base_pair_kind::GC: {return this->epsilon_GC_;}
             case base_pair_kind::CG: {return this->epsilon_GC_;} // symmetric
-            default{assert(false);}
+            default: {assert(false);}
         }
     }
     real_type epsilon(const cross_stack_kind cs) const noexcept
@@ -170,10 +171,10 @@ class ThreeSPN2BaseBaseInteractionPotential
             case base_pair_kind::TA: {return this->r0_AT_;} // symmetric
             case base_pair_kind::GC: {return this->r0_GC_;}
             case base_pair_kind::CG: {return this->r0_GC_;} // symmetric
-            default{assert(false);}
+            default: {assert(false);}
         }
     }
-    real_type r0(const cross_stac_kind cs) const noexcept
+    real_type r0(const cross_stack_kind cs) const noexcept
     {
         return r0_CS_[static_cast<std::uint8_t>(cs)];
     }
@@ -185,7 +186,7 @@ class ThreeSPN2BaseBaseInteractionPotential
             case base_pair_kind::TA: {return this->theta1_0_TA_;}
             case base_pair_kind::GC: {return this->theta1_0_GC_;}
             case base_pair_kind::CG: {return this->theta1_0_CG_;}
-            default{assert(false);}
+            default: {assert(false);}
         }
     }
     real_type theta2_0(const base_pair_kind bp) const noexcept
@@ -196,7 +197,7 @@ class ThreeSPN2BaseBaseInteractionPotential
             case base_pair_kind::TA: {return this->theta2_0_TA_;}
             case base_pair_kind::GC: {return this->theta2_0_GC_;}
             case base_pair_kind::CG: {return this->theta2_0_CG_;}
-            default{assert(false);}
+            default: {assert(false);}
         }
     }
     real_type theta3_0(const base_pair_kind bp) const noexcept
@@ -207,10 +208,10 @@ class ThreeSPN2BaseBaseInteractionPotential
             case base_pair_kind::TA: {return this->theta3_0_TA_;}
             case base_pair_kind::GC: {return this->theta3_0_GC_;}
             case base_pair_kind::CG: {return this->theta3_0_CG_;}
-            default{assert(false);}
+            default: {assert(false);}
         }
     }
-    real_type thetaCS_0(const cross_stac_kind cs) const noexcept
+    real_type thetaCS_0(const cross_stack_kind cs) const noexcept
     {
         return theta_CS_0_[static_cast<std::uint8_t>(cs)];
     }
@@ -222,7 +223,7 @@ class ThreeSPN2BaseBaseInteractionPotential
             case base_pair_kind::TA: {return this->phi_0_TA_;}
             case base_pair_kind::GC: {return this->phi_0_GC_;}
             case base_pair_kind::CG: {return this->phi_0_CG_;}
-            default{assert(false);}
+            default: {assert(false);}
         }
     }
 
@@ -323,7 +324,7 @@ class ThreeSPN2BaseBaseInteractionPotential
 
     // nothing to do when system parameters change.
     template<typename traitsT>
-    void update(const System<traitsT>&) noexcept
+    void update(const System<traitsT>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -336,6 +337,10 @@ class ThreeSPN2BaseBaseInteractionPotential
     // to check bases has base-pairing interaction.
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
+        if(exclusion_list_.is_excluded(i, j))
+        {
+            return false;
+        }
         switch(this->parameters_[i].base)
         {
             case base_kind::A: {return this->parameters_[j].base == base_kind::T;}
@@ -417,7 +422,7 @@ class ThreeSPN2BaseBaseInteractionPotential
     real_type K_BP_         = 12.0;
     real_type K_CS_         =  8.0;
     real_type pi_over_K_BP_ = math::constants<real_type>::pi / 12.0;
-    real_type pi_over_K_BP_ = math::constants<real_type>::pi /  8.0;
+    real_type pi_over_K_CS_ = math::constants<real_type>::pi /  8.0;
 
     real_type epsilon_AT_   = 16.73; // [kJ/mol]
     real_type epsilon_GC_   = 21.18; // [kJ/mol]

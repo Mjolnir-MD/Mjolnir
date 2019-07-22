@@ -31,6 +31,11 @@ class ThreeSPN2BaseStackingPotential
     ThreeSPN2BaseStackingPotential() = default;
     ~ThreeSPN2BaseStackingPotential() = default;
 
+    ThreeSPN2BaseStackingPotential(const ThreeSPN2BaseStackingPotential&) = default;
+    ThreeSPN2BaseStackingPotential(ThreeSPN2BaseStackingPotential&&)      = default;
+    ThreeSPN2BaseStackingPotential& operator=(const ThreeSPN2BaseStackingPotential&) = default;
+    ThreeSPN2BaseStackingPotential& operator=(ThreeSPN2BaseStackingPotential&&)      = default;
+
     template<typename traitsT>
     void initialize(const System<traitsT>& sys) noexcept
     {
@@ -88,7 +93,7 @@ class ThreeSPN2BaseStackingPotential
     }
 
     template<typename traitsT>
-    void update(const System<traitsT>& sys) noexcept {}
+    void update(const System<traitsT>&) noexcept {}
 
     base_stack_kind bs_kind(const base_kind lhs, const base_kind rhs) const noexcept
     {
@@ -113,9 +118,9 @@ class ThreeSPN2BaseStackingPotential
     {
         return epsilon_BS_[static_cast<std::uint8_t>(bs)];
     }
-    real_type alpha(const base_stack_kind bs) const noexcept
+    real_type alpha(const base_stack_kind) const noexcept
     {
-        this->alpha_BS_;
+        return this->alpha_BS_;
     }
 
     real_type K_BS()         const noexcept {return this->K_BS_;}

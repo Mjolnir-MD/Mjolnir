@@ -39,6 +39,7 @@ class ThreeSPN2ExcludedVolumePotential
     using connection_kind_type = typename topology_type::connection_kind_type;
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
+    using exclusion_list_type  = ExclusionList;
 
     static constexpr parameter_type default_parameter() noexcept
     {
@@ -49,11 +50,10 @@ class ThreeSPN2ExcludedVolumePotential
 
     ThreeSPN2ExcludedVolumePotential(
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-        : cutoff_(18.0), cutoff_sq_(18.0*18.0),
-          exclusion_list_(std::move(ignore_mol), std::move(ignore_grp),
-                          {{"next_nucl",   1}, {"3SPN2_bond",     1},
-                           {"3SPN2_angle", 1}, {"3SPN2_dihedral", 1}})
+        ignore_group_type ignore_grp)
+        : exclusion_list_({{"next_nucl",   1}, {"3SPN2_bond",     1},
+                           {"3SPN2_angle", 1}, {"3SPN2_dihedral", 1}},
+                          ignore_molecule_type("Nothing"), std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
@@ -68,7 +68,7 @@ class ThreeSPN2ExcludedVolumePotential
             this->parameters_.at(idx) = idxp.second;
         }
     }
-    ~ThreeSPN2BaseBaseInteractionPotential() = default;
+    ~ThreeSPN2ExcludedVolumePotential() = default;
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
@@ -107,7 +107,7 @@ class ThreeSPN2ExcludedVolumePotential
         const real_type r3s3   = r1s1 * r1s1 * r1s1;
         const real_type r6s6   = r3s3 * r3s3;
         const real_type r12s12 = r6s6 * r6s6;
-        return 12 * epsilon * rinv * (r6s6 - r12s12);
+        return 12 * epsilon_ * rinv * (r6s6 - r12s12);
     }
 
     real_type max_cutoff_length() const noexcept
@@ -183,7 +183,7 @@ class ThreeSPN2ExcludedVolumePotential
         this->within_3_nucl_.reserve(this->participants_.size() * 2);
 
         const auto is_base = [this](const std::size_t i) noexcept -> bool {
-            const auto bk = this->parameter_.at(i);
+            const auto bk = this->parameters_.at(i);
             return bk == bead_kind::Phosphate || bk == bead_kind::Sugar;
         };
         std::ptrdiff_t idx = 0;
@@ -197,7 +197,7 @@ class ThreeSPN2ExcludedVolumePotential
                 this->within_3_nucl_ranges_.emplace_back(first, first);
                 continue;
             }
-            auto within3 = list_adjacent_within(i, 3, "next_nucl");
+            auto within3 = topol.list_adjacent_within(i, 3, "next_nucl");
 
             // remove non-base stuff
             within3.erase(std::remove_if(within3.begin(), within3.end(), is_base),
@@ -249,7 +249,7 @@ class ThreeSPN2ExcludedVolumePotential
         }
 
         // if the bases can form a base-pairing, then it does not have interaction.
-        switch(i_kind.base)
+        switch(i_kind)
         {
             case bead_kind::BaseA: {return j_kind != bead_kind::BaseT;}
             case bead_kind::BaseT: {return j_kind != bead_kind::BaseA;}

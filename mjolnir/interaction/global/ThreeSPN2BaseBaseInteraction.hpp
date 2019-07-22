@@ -25,7 +25,7 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
 {
   public:
 
-    using traits_type     = SimulatorTraits<realT, boundaryT>;
+    using traits_type     = traitsT;
     using base_type       = GlobalInteractionBase<traits_type>;
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
@@ -83,6 +83,9 @@ template<typename traitsT, typename partitionT>
 void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
         system_type& sys) const noexcept
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+
     constexpr auto pi        = math::constants<real_type>::pi;
     constexpr auto two_pi    = math::constants<real_type>::two_pi;
     constexpr auto tolerance = math::tolerance<real_type>();
@@ -97,12 +100,15 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             const auto& rBj  = sys.position(Bj);
             const auto  bp_kind = para.bp_kind;
 
+            MJOLNIR_LOG_INFO("base ", Bi, " and ", Bj, ", bp = ", bp_kind);
+
             const auto Bij = sys.adjust_direction(rBj - rBi); // Bi -> Bj
             const auto lBij_sq = math::length_sq(Bij);
             if(lBij_sq > potential_.cutoff_sq())
             {
                 continue;
             }
+
             // ================================================================
             // base pairing
             //
@@ -114,6 +120,9 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
 
             const auto rlBij = math::rsqrt(lBij_sq); // 1 / |Bij|
             const auto lBij  = lBij_sq * rlBij;      // |Bij|
+
+            MJOLNIR_LOG_INFO("enough close to form a contact (r = ", lBij,
+                             " > rc = ", potential_.cutoff(), ")");
 
             const auto Bij_reg =  rlBij * Bij;
             const auto Bji_reg = -rlBij * Bij;
@@ -129,8 +138,10 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             const auto a_BP = potential_.alpha(bp_kind);
             if(lBij < r0)
             {
+                // remember that F = -dU. Here `coef` = -dU.
                 const auto term = std::exp(-a_BP * (lBij - r0));
-                const auto coef = 2 * a_BP * e_BP * term * (real_type(1) - term);
+                const auto coef = -2 * a_BP * e_BP * term * (real_type(1) - term);
+                MJOLNIR_LOG_INFO("feels repulsive force, ", coef, ".");
                 sys.force(Bi) += coef * Bji_reg;
                 sys.force(Bj) += coef * Bij_reg;
             }
@@ -156,7 +167,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             const auto lSBi_sq = math::length_sq(SBi); // |SBi|^2
             const auto lSBj_sq = math::length_sq(SBj); // |SBj|^2
             const auto rlSBi   = math::rsqrt(lSBi_sq); // 1 / |SBi|
-            const auto rlSBj   = math::rsqrt(lSBi_sq); // 1 / |SBj|
+            const auto rlSBj   = math::rsqrt(lSBj_sq); // 1 / |SBj|
             const auto BSi_reg = -rlSBi * SBi;
             const auto BSj_reg = -rlSBj * SBj;
 
@@ -233,7 +244,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     real_type dUm_attr_ =     0;
                     if(lBij > r0)
                     {
-                        const auto expm = std::exp(-a_BP * (dBij - r0));
+                        const auto expm = std::exp(-a_BP * (lBij - r0));
                         Um_attr_  += e_BP * (real_type(1.0) - expm) *
                                             (real_type(1.0) - expm);
                         dUm_attr_  = 2 * a_BP * e_BP * expm * (1 - expm);
@@ -246,7 +257,8 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     // -sin(dphi)/2 f(dtheta1) f(dtheta2) U_attr(Bij) dphi/dr
                     if(sin_dphi != real_type(0.0))
                     {
-                        const auto coef = real_type(-0.5) * sin_dphi * f1 * f2 * Um_attr;
+                        // remember that F = -dU. Here `coef` = -dU.
+                        const auto coef = real_type(0.5) * sin_dphi * f1 * f2 * Um_attr;
 
                         const auto fSi = ( coef * lBij / math::length_sq(m)) * m;
                         const auto fSj = (-coef * lBij / math::length_sq(n)) * n;
@@ -267,7 +279,8 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     // (1+cos(dphi))/2 df/dtheta1 f(dtheta2) U_attr(Bij) dtheta1/dr
                     if(df1 != real_type(0.0))
                     {
-                        const auto coef = dihd_term * df1 * f2 * Um_attr;
+                        // remember that F = -dU. Here `coef` = -dU.
+                        const auto coef = -dihd_term * df1 * f2 * Um_attr;
 
                         const auto sin_theta1 = std::sin(theta1);
                         const auto coef_rsin  = (sin_theta1 > tolerance) ?
@@ -286,7 +299,8 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     // (1+cos(dphi))/2 f(dtheta1) df/dtheta2 U_attr(Bij) dtheta2/dr
                     if(df2 != real_type(0.0))
                     {
-                        const auto coef = dihd_term * f1 * df2 * Um_attr;
+                        // remember that F = -dU. Here `coef` = -dU.
+                        const auto coef = -dihd_term * f1 * df2 * Um_attr;
 
                         const auto sin_theta2 = std::sin(theta2);
                         const auto coef_rsin  = (sin_theta2 > tolerance) ?
@@ -297,7 +311,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                         const auto fSj = (coef_rsin * rlSBj) *
                                          (cos_theta2 * BSj_reg - Bji_reg);
                         sys.force(Bi) += fBi;
-                        sys.force(Bj) -= (fBi + fSi);
+                        sys.force(Bj) -= (fBi + fSj);
                         sys.force(Sj) += fSj;
                     }
                     // --------------------------------------------------------
@@ -305,9 +319,10 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     // + 1/2 (1+cos(dphi)) f(dtheta1) f(dtheta2) dU_attr/dr  dBij/dr
                     if(dUm_attr != real_type(0.0))
                     {
-                        const auto coef = dihd_term * f1 * f2 * dUm_attr;
-                        sys.force(Bi) -= coef * Bij_reg;
-                        sys.force(Bj) -= coef * Bji_reg;
+                        // remember that F = -dU. Here `coef` = -dU.
+                        const auto coef = -dihd_term * f1 * f2 * dUm_attr;
+                        sys.force(Bi) += coef * Bji_reg;
+                        sys.force(Bj) += coef * Bij_reg;
                     }
                 }
             }
@@ -358,7 +373,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             // ----------------------------------------------------------------
             // calc common part, theta3 and dtheta3/dr.
 
-            const auto dot_SBiSBj = math::dor_product(SBi, SBj);
+            const auto dot_SBiSBj = math::dot_product(SBi, SBj);
             const auto cos_theta3 = dot_SBiSBj * rlSBi * rlSBj;
             const auto theta3     = std::acos(math::clamp<real_type>(cos_theta3, -1, 1));
             const auto theta3_0   = potential_.theta3_0(bp_kind);
@@ -409,7 +424,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 const auto& rBj5 = sys.position(Bj_next);
 
                 const auto Bj5i     = sys.adjust_direction(rBi - rBj5);
-                const auto lBj5i_sq = math::length_sq(lBj5i); // |Bj5i|^2
+                const auto lBj5i_sq = math::length_sq(Bj5i); // |Bj5i|^2
                 const auto rlBj5i   = math::rsqrt(lBj5i_sq);  // 1 / |Bj5i|
 
                 const auto dot_theta_CS = math::dot_product(SBi, Bj5i);
@@ -453,7 +468,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     // df/dtheta3 f(theta_CS)  U_attr(eps, alp, rij) dtheta_3 /dr
                     if(df3 != real_type(0))
                     {
-                        const auto coef = df3 * fCS * U_attr;
+                        const auto coef = -df3 * fCS * U_attr;
                         sys.force(Si) += coef * fSi_theta3;
                         sys.force(Sj) += coef * fSj_theta3;
                         sys.force(Bi) += coef * fBi_theta3;
@@ -463,7 +478,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     // f(theta_3) df/dtheta_CS U_attr(eps, alp, rij) dtheta_CS/dr
                     if(dfCS != real_type(0))
                     {
-                        const auto coef         = f3 * dfCS * U_attr;
+                        const auto coef         = -f3 * dfCS * U_attr;
                         const auto sin_theta_CS = std::sin(theta_CS);
                         const auto coef_rsin    = (sin_theta_CS > tolerance) ?
                                    (coef / sin_theta_CS) : (coef / tolerance);
@@ -478,7 +493,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     }
                     // --------------------------------------------------------
                     // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
-                    const auto coef = f3 * fCS * dU_attr * rlBj5i;
+                    const auto coef = -f3 * fCS * dU_attr * rlBj5i;
                     sys.force(Bi)      -= coef * Bj5i;
                     sys.force(Bj_next) += coef * Bj5i;
                 }
@@ -508,7 +523,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 const auto& rBi3   = sys.position(Bi_next);
 
                 const auto Bi3j     = sys.adjust_direction(rBj - rBi3);
-                const auto lBi3j_sq = math::length_sq(lBi3j); // |Bi3j|^2
+                const auto lBi3j_sq = math::length_sq(Bi3j); // |Bi3j|^2
                 const auto rlBi3j   = math::rsqrt(lBi3j_sq);  // 1 / |Bi3j|
 
                 const auto dot_theta_CS = math::dot_product(SBj, Bi3j);
@@ -552,7 +567,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     // df/dtheta3 f(theta_CS)  U_attr(eps, alp, rij) dtheta_3 /dr
                     if(df3 != real_type(0))
                     {
-                        const auto coef = df3 * fCS * U_attr;
+                        const auto coef = -df3 * fCS * U_attr;
                         sys.force(Si) += coef * fSi_theta3;
                         sys.force(Sj) += coef * fSj_theta3;
                         sys.force(Bi) += coef * fBi_theta3;
@@ -562,7 +577,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     // f(theta_3) df/dtheta_CS U_attr(eps, alp, rij) dtheta_CS/dr
                     if(dfCS != real_type(0))
                     {
-                        const auto coef         = f3 * dfCS * U_attr;
+                        const auto coef         = -f3 * dfCS * U_attr;
                         const auto sin_theta_CS = std::sin(theta_CS);
                         const auto coef_rsin    = (sin_theta_CS > tolerance) ?
                                    (coef / sin_theta_CS) : (coef / tolerance);
@@ -578,7 +593,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     }
                     // --------------------------------------------------------
                     // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
-                    const auto coef = f3 * fCS * dU_attr * rlBi3j;
+                    const auto coef = -f3 * fCS * dU_attr * rlBi3j;
                     sys.force(Bj)      -= coef * Bi3j;
                     sys.force(Bi_next) += coef * Bi3j;
                 }
@@ -595,7 +610,6 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
 {
     constexpr auto pi        = math::constants<real_type>::pi;
     constexpr auto two_pi    = math::constants<real_type>::two_pi;
-    constexpr auto tolerance = math::tolerance<real_type>();
 
     real_type E = 0.0;
     for(const auto Bi : this->potential_.participants())
@@ -663,7 +677,7 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
             const auto lSBj_sq = math::length_sq(SBj); // |SBj|^2
 
             const auto rlSBi = math::rsqrt(lSBi_sq); // 1 / |SBi|
-            const auto rlSBj = math::rsqrt(lSBi_sq); // 1 / |SBj|
+            const auto rlSBj = math::rsqrt(lSBj_sq); // 1 / |SBj|
 
             const auto dot_SBiBj = -math::dot_product(SBi, Bij);
             const auto dot_SBjBi =  math::dot_product(SBj, Bij);
@@ -703,7 +717,7 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 const auto S = math::dot_product(SBj, Bij_reg) * Bij_reg - SBj;
 
                 const auto dot_RS  = math::dot_product(R, S) *
-                                     math::rsqrt(R_lensq * S_lensq);
+                        math::rsqrt(math::length_sq(R) * math::length_sq(S));
                 const auto cos_phi = math::clamp<real_type>(dot_RS, -1, 1);
 
                 const auto n    =  math::cross_product(Bij, SBj);
@@ -770,11 +784,11 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 continue; // if both interacting pair do not exist, do nothing.
             }
 
-            const auto dot_SBiSBj = math::dor_product(SBi, SBj);
+            const auto dot_SBiSBj = math::dot_product(SBi, SBj);
             const auto cos_theta3 = dot_SBiSBj * rlSBi * rlSBj;
             const auto theta3     = std::acos(math::clamp<real_type>(cos_theta3, -1, 1));
             const auto theta3_0   = potential_.theta3_0(bp_kind);
-            const auto f3         = potential_.f(bp_kind, theta3);
+            const auto f3         = potential_.f(bp_kind, theta3, theta3_0);
             if(f3 == real_type(0))
             {
                 // both cross-stacking becomes zero. skip them.
@@ -808,7 +822,7 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 const auto& rBj5 = sys.position(Bj_next);
 
                 const auto Bj5i     = sys.adjust_direction(rBi - rBj5);
-                const auto lBj5i_sq = math::length_sq(lBj5i);
+                const auto lBj5i_sq = math::length_sq(Bj5i);
                 const auto rlBj5i   = math::rsqrt(lBj5i_sq);
 
                 const auto dot_theta_CS = math::dot_product(SBi, Bj5i);
@@ -867,7 +881,7 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
                 const auto& rBi3    = sys.position(Bi_next);
 
                 const auto Bi3j     = sys.adjust_direction(rBj - rBi3);
-                const auto lBi3j_sq = math::length_sq(lBi3j);
+                const auto lBi3j_sq = math::length_sq(Bi3j);
                 const auto rlBi3j   = math::rsqrt(lBi3j_sq);
 
                 const auto dot_theta_CS = math::dot_product(SBj, Bi3j);

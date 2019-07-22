@@ -48,6 +48,10 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
         : kind_(kind), parameters_(std::move(para)), potential_(std::move(pot))
     {}
     ~ThreeSPN2BaseStackingInteraction() = default;
+    ThreeSPN2BaseStackingInteraction(const ThreeSPN2BaseStackingInteraction&) = default;
+    ThreeSPN2BaseStackingInteraction(ThreeSPN2BaseStackingInteraction&&)      = default;
+    ThreeSPN2BaseStackingInteraction& operator=(const ThreeSPN2BaseStackingInteraction&) = default;
+    ThreeSPN2BaseStackingInteraction& operator=(ThreeSPN2BaseStackingInteraction&&)      = default;
 
     /*! @brief initialize spatial partition (e.g. CellList)                   *
      *  @details before calling `calc_(force|energy)`, this should be called. */
@@ -65,11 +69,9 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
         this->potential_.update(sys);
     }
 
-    void update_margin(const real_type dmargin, const system_type& sys) override
-    {
-        this->partition_.update(dmargin, sys, this->potential_);
-        return;
-    }
+    // do nothing. this is used to reduce margin of neighbor list, and added
+    // to this class for the consistency.
+    void update_margin(const real_type, const system_type&) override {return;}
 
     void      calc_force (system_type&)       const noexcept override;
     real_type calc_energy(const system_type&) const noexcept override;
@@ -150,8 +152,8 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
             const auto term = std::exp(-alp * (lBji - r0));
             const auto coef = 2 * alp * eps * term * (real_type(1) - term);
 
-            sys.force(Bi) += coef * Bji_reg;
-            sys.force(Bj) -= coef * Bji_reg;
+            sys.force(Bi) -= coef * Bji_reg;
+            sys.force(Bj) += coef * Bji_reg;
         }
 
         // --------------------------------------------------------------------
@@ -212,7 +214,7 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
         //
         if(df_theta != real_type(0.0))
         {
-            const auto coef = df_theta * U_attr;
+            const auto coef = -df_theta * U_attr;
 
             const auto sin_theta = std::sin(theta);
             const auto coef_rsin = (sin_theta > tolerance) ?
@@ -231,8 +233,8 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
         // = f(theta) dU_attr(rij) drij/dr
 
         const auto coef = f_theta * dU_attr;
-        sys.force(Bi) += coef * Bji_reg;
-        sys.force(Bj) -= coef * Bji_reg;
+        sys.force(Bi) -= coef * Bji_reg;
+        sys.force(Bj) += coef * Bji_reg;
     }
     return ;
 }
