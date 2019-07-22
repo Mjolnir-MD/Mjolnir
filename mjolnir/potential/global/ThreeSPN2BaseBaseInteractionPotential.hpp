@@ -31,6 +31,9 @@ class ThreeSPN2BaseBaseInteractionPotential
 {
   public:
     using real_type = realT;
+    using base_kind        = parameter_3SPN2::bead_kind;
+    using base_pair_kind   = parameter_3SPN2::base_pair_kind;
+    using cross_stack_kind = parameter_3SPN2::cross_stack_kind;
 
     struct parameter_type
     {

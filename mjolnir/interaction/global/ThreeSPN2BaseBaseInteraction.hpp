@@ -33,15 +33,16 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
     using boundary_type   = typename base_type::boundary_type;
     using partition_type  = partitionT;
 
-    using potential_type  = ThreeSPN2BaseBaseInteractionPotential<real_type>;
+    using base_kind        = parameter_3SPN2::bead_kind;
+    using base_pair_kind   = parameter_3SPN2::base_pair_kind;
+    using cross_stack_kind = parameter_3SPN2::cross_stack_kind;
+    using potential_type   = ThreeSPN2BaseBaseInteractionPotential<real_type>;
 
   public:
-    ThreeSPN2BaseBaseInteraction()  = default;
-    ~ThreeSPN2BaseBaseInteraction() = default;
-
     ThreeSPN2BaseBaseInteraction(potential_type&& pot, partition_type&& part)
         : potential_(std::move(pot)), partition_(std::move(part))
     {}
+    ~ThreeSPN2BaseBaseInteraction() = default;
 
     void initialize(const system_type& sys) override
     {
@@ -82,8 +83,9 @@ template<typename traitsT, typename partitionT>
 void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
         system_type& sys) const noexcept
 {
-    constexpr auto pi     = math::constants<real_type>::pi;
-    constexpr auto two_pi = math::constants<real_type>::two_pi;
+    constexpr auto pi        = math::constants<real_type>::pi;
+    constexpr auto two_pi    = math::constants<real_type>::two_pi;
+    constexpr auto tolerance = math::tolerance<real_type>();
 
     for(const auto Bi : this->potential_.participants())
     {
@@ -591,8 +593,9 @@ typename ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::real_type
 ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
         const system_type& sys) const noexcept
 {
-    constexpr auto pi     = math::constants<real_type>::pi;
-    constexpr auto two_pi = math::constants<real_type>::two_pi;
+    constexpr auto pi        = math::constants<real_type>::pi;
+    constexpr auto two_pi    = math::constants<real_type>::two_pi;
+    constexpr auto tolerance = math::tolerance<real_type>();
 
     real_type E = 0.0;
     for(const auto Bi : this->potential_.participants())
