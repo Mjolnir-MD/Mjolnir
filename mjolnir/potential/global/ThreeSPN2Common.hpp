@@ -6,7 +6,10 @@ namespace mjolnir
 {
 namespace parameter_3SPN2
 {
-enum class bead_kind       : std::uint8_t {Phosphate, Sugar, Base};
+enum class bead_kind: std::uint8_t
+{
+    Phosphate, Sugar, BaseA, BaseT, BaseG, BaseC, Unknown
+};
 
 // X is for default parameter
 enum class base_kind       : std::uint8_t {A=0, T=1, G=2, C=3,  X};
