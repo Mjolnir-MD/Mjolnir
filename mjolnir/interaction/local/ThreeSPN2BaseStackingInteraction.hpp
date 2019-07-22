@@ -26,7 +26,6 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
 {
   public:
     using traits_type          = traitsT;
-    using potential_type       = potentialT;
     using base_type            = LocalInteractionBase<traits_type>;
     using real_type            = typename base_type::real_type;
     using coordinate_type      = typename base_type::coordinate_type;
@@ -77,7 +76,7 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
 
     std::string name() const override {return "3SPN2BaseStacking"_s;}
 
-    void write_topology(topology_type&) const override
+    void write_topology(topology_type& topol) const override
     {
         if(this->kind_.empty() || this->kind_ == "none") {return;}
 
@@ -100,8 +99,8 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
     potential_type potential_;
 };
 
-template<typename traitsT, typename potT, typename spaceT>
-void ThreeSPN2BaseStackingInteraction<traitsT, potT, spaceT>::calc_force(
+template<typename traitsT>
+void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
         system_type& sys) const noexcept
 {
     constexpr auto tolerance = math::tolerance<real_type>();
@@ -146,7 +145,7 @@ void ThreeSPN2BaseStackingInteraction<traitsT, potT, spaceT>::calc_force(
         const auto r0  = potential_.r0(bs_kind);
         const auto eps = potential_.epsilon(bs_kind);
         const auto alp = potential_.alpha(bs_kind);
-        if(lBij < r0)
+        if(lBji < r0)
         {
             const auto term = std::exp(-alp * (lBji - r0));
             const auto coef = 2 * alp * eps * term * (real_type(1) - term);
@@ -169,8 +168,8 @@ void ThreeSPN2BaseStackingInteraction<traitsT, potT, spaceT>::calc_force(
         const auto rlSBi   = math::rsqrt(lSBi_sq);
         const auto SBi_reg = SBi * rlSBi;
 
-        const auto cos_SBij = math::dot_product(SBi_reg, Bji_reg);
-        const auto theta = std::acos(math::clamp<real_type>(cos_SBij, -1, 1));
+        const auto cos_theta = math::dot_product(SBi_reg, Bji_reg);
+        const auto theta = std::acos(math::clamp<real_type>(cos_theta, -1, 1));
 
         // ====================================================================
         // calc attractive part
@@ -198,7 +197,7 @@ void ThreeSPN2BaseStackingInteraction<traitsT, potT, spaceT>::calc_force(
 
         real_type U_attr_  = -eps;
         real_type dU_attr_ = 0.0;
-        if(r0 < lBij)
+        if(r0 < lBji)
         {
             const auto term = std::exp(-alp * (lBji - r0));
             U_attr_ += eps * (real_type(1) - term) * (real_type(1) - term);
@@ -238,9 +237,9 @@ void ThreeSPN2BaseStackingInteraction<traitsT, potT, spaceT>::calc_force(
     return ;
 }
 
-template<typename traitsT, typename potT, typename spaceT>
-typename ThreeSPN2BaseStackingInteraction<traitsT, potT, spaceT>::real_type
-ThreeSPN2BaseStackingInteraction<traitsT, potT, spaceT>::calc_energy(
+template<typename traitsT>
+typename ThreeSPN2BaseStackingInteraction<traitsT>::real_type
+ThreeSPN2BaseStackingInteraction<traitsT>::calc_energy(
         const system_type& sys) const noexcept
 {
     real_type E = 0.0;
@@ -282,7 +281,7 @@ ThreeSPN2BaseStackingInteraction<traitsT, potT, spaceT>::calc_energy(
         const auto r0  = potential_.r0(bs_kind);
         const auto eps = potential_.epsilon(bs_kind);
         const auto alp = potential_.alpha(bs_kind);
-        if(lBij < r0)
+        if(lBji < r0)
         {
             const auto term = real_type(1.0) - std::exp(-alp * (lBji - r0));
             E += eps * term * term;
@@ -315,7 +314,7 @@ ThreeSPN2BaseStackingInteraction<traitsT, potT, spaceT>::calc_energy(
         //   -e + e * (1 - exp(-a(r-r0)))^2 ... (otherwise)
         //
         real_type U_attr = -eps;
-        if(r0 < lBij)
+        if(r0 < lBji)
         {
             const auto term = real_type(1.0) - std::exp(-alp * (lBji - r0));
             U_attr += eps * term * term;
