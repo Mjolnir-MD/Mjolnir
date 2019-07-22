@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_POTENTIAL_LOCAL_3SPN2_BASE_STACKING_INTEARACTION_HPP
 #define MJOLNIR_POTENTIAL_LOCAL_3SPN2_BASE_STACKING_INTEARACTION_HPP
 #include <mjolnir/potential/global/ThreeSPN2Common.hpp>
+#include <mjolnir/core/Unit.hpp>
 
 namespace mjolnir
 {
@@ -23,6 +24,7 @@ class ThreeSPN2BaseStackingPotential
     using real_type       = realT;
     using base_kind       = parameter_3SPN2::base_kind;
     using base_stack_kind = parameter_3SPN2::base_stack_kind;
+    using parameter_type  = base_stack_kind;
 
   public:
 
@@ -137,7 +139,7 @@ class ThreeSPN2BaseStackingPotential
             return 0.0;
         }
     }
-    real_type df(const real_type theta, const real_type theta_0) const noexcept
+    real_type df(const real_type theta, const real_type theta0) const noexcept
     {
         const auto dtheta     = theta - theta0;
         const auto abs_dtheta = std::abs(dtheta);
