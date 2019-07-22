@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_POTENTIAL_GLOBAL_3SPN2_BASE_PAIRING_POTENTIAL_HPP
-#define MJOLNIR_POTENTIAL_GLOBAL_3SPN2_BASE_PAIRING_POTENTIAL_HPP
+#ifndef MJOLNIR_POTENTIAL_GLOBAL_3SPN2_BASE_BASE_POTENTIAL_HPP
+#define MJOLNIR_POTENTIAL_GLOBAL_3SPN2_BASE_BASE_POTENTIAL_HPP
 #include <mjolnir/potential/global/ThreeSPN2Common.hpp>
 #include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
@@ -25,9 +25,9 @@ namespace mjolnir
 // potentials. Please be careful.
 //
 // Note: an identifier starts with a digit is not allowed in C++ standard.
-//       see N3337 2.11 for detail. So `3SPN2BasePairing` is not a valid name.
+//       see N3337 2.11 for detail. So `3SPN2BaseBaseInteraction` is not a valid name.
 template<typename realT>
-class ThreeSPN2BasePairingPotential
+class ThreeSPN2BaseBaseInteractionPotential
 {
   public:
     using real_type = realT;
@@ -68,7 +68,7 @@ class ThreeSPN2BasePairingPotential
 
   public:
 
-    ThreeSPN2BasePairingPotential(
+    ThreeSPN2BaseBaseInteractionPotential(
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
         : cutoff_(18.0), cutoff_sq_(18.0*18.0),
@@ -88,7 +88,7 @@ class ThreeSPN2BasePairingPotential
             this->parameters_.at(idx) = idxp.second;
         }
     }
-    ~ThreeSPN2BasePairingPotential() = default;
+    ~ThreeSPN2BaseBaseInteractionPotential() = default;
 
     base_pair_kind bp_kind(const base_kind lhs, const base_kind rhs) const noexcept
     {
@@ -476,4 +476,4 @@ class ThreeSPN2BasePairingPotential
 };
 
 } // mjolnir
-#endif // MJOLNIR_POTENTIAL_GLOBAL_3SPN2_BASE_PAIRING_POTENTIAL_HPP
+#endif // MJOLNIR_POTENTIAL_GLOBAL_3SPN2_BASE_BASE_POTENTIAL_HPP

@@ -14,11 +14,10 @@ namespace mjolnir
 //
 // This interaction is deeply coupled with its potential, so it does not receive
 // a potential type as a template argument. It always uses the same potential,
-// `ThreeSPN2BasePairingPotential` and `ThreeSPN2CrossStackingPotential`.
+// `ThreeSPN2BaseBaseInteractionPotential`.
 //
 // It shares CellList between BasePairing and CrossStacking.
-// It constructs CellList with BasePairingPotential and re-use the pairs in
-// CrossStacking.
+// It constructs CellList for BasePairing and re-use the pairs for CrossStacking.
 //
 template<typename traitsT, typename partitionT>
 class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
