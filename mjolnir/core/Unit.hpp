@@ -40,7 +40,7 @@ struct constants
     static constexpr real_type m_to_nm        = 1e+9;  // 1 m  = 10^+9 nm
     static constexpr real_type nm_to_m        = 1e-9;  // 1 nm = 1e^-9 m
 
-    static constexpr real_type cal_to_J       = 4.1868; // the IT calorie
+    static constexpr real_type cal_to_J       = 4.184;
     static constexpr real_type J_to_cal       = 1.0 / cal_to_J;
 };
 
