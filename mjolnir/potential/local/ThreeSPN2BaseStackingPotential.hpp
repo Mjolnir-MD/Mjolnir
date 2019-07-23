@@ -58,9 +58,15 @@ class ThreeSPN2BaseStackingPotential
                                  unit::constants<real_type>::J_to_cal);
 
                 // convert from kJ/mol to kcal/mol (/= 4.18)
+                std::uint8_t idx = 0;
                 for(auto& epsilon : this->epsilon_BS_)
                 {
+                    const auto bs = static_cast<base_stack_kind>(idx);
+                    MJOLNIR_LOG_INFO_NO_LF("epsilon:", bs, " = ", epsilon,
+                                           " [kJ/mol] -> ");
                     epsilon *= unit::constants<real_type>::J_to_cal;
+                    MJOLNIR_LOG_INFO(epsilon, "[kcal/mol]");
+                    ++idx;
                 }
             }
 
@@ -75,16 +81,27 @@ class ThreeSPN2BaseStackingPotential
                                  unit::constants<real_type>::angstrom_to_nm);
 
                 // convert angstrom -> nm (* 0.1)
+                std::uint8_t idx = 0;
                 for(auto& r0_BS : this->r0_BS_)
                 {
+                    const auto bs = static_cast<base_stack_kind>(idx);
+                    MJOLNIR_LOG_INFO_NO_LF("r0:", bs, " = ", r0_BS,
+                                           " [angstrom] -> ");
                     r0_BS *= unit::constants<real_type>::angstrom_to_nm;
+                    MJOLNIR_LOG_INFO(r0_BS, "[nm]");
+                    ++idx;
                 }
             }
 
             MJOLNIR_LOG_INFO("angle parameters are convered into rad.");
+            std::uint8_t idx = 0;
             for(auto& theta0_BS : this->theta0_BS_)
             {
+                const auto bs = static_cast<base_stack_kind>(idx);
+                MJOLNIR_LOG_INFO_NO_LF("theta0:", bs, " = ", theta0_BS, " [deg] -> ");
                 theta0_BS *= (math::constants<real_type>::pi / 180.0);
+                MJOLNIR_LOG_INFO(theta0_BS, "[rad]");
+                ++idx;
             }
             unit_converted_ = true;
         }
