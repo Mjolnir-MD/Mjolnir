@@ -90,7 +90,7 @@ template<typename potentialT>
 void VerletList<traitsT, parameterT>::make(
         const system_type& sys, const potentialT& pot)
 {
-    static_assert(std::is_same<typename potentialT::parameter_type,
+    static_assert(std::is_same<typename potentialT::pair_parameter_type,
         parameter_type>::value, "VerletList: invalid template argumnet: "
         "potentialT::parameter_type should be equal to verletlist::parameterT");
 
