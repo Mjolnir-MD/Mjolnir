@@ -304,7 +304,7 @@ class ThreeSPN2ExcludedVolumePotential
     bool unit_converted_ = false;
     real_type epsilon_   = 1.0; // [kJ/mol]
     real_type sigma_P_   = 4.5; // [angstrom]
-    real_type sigma_S_   = 6.4;
+    real_type sigma_S_   = 6.2;
     real_type sigma_A_   = 5.4;
     real_type sigma_T_   = 7.1;
     real_type sigma_G_   = 4.9;

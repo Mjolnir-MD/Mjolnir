@@ -428,27 +428,27 @@ class ThreeSPN2BaseBaseInteractionPotential
     real_type epsilon_GC_   = 21.18; // [kJ/mol]
 
     real_type r0_AT_        = 5.941; // [angstrom]
-    real_type r0_GC_        = 5.518; // [angstrom]
+    real_type r0_GC_        = 5.530; // [angstrom]
 
     real_type theta1_0_AT_  = 156.54 / 180.0 * math::constants<real_type>::pi;
     real_type theta1_0_TA_  = 135.78 / 180.0 * math::constants<real_type>::pi;
-    real_type theta1_0_GC_  = 154.62 / 180.0 * math::constants<real_type>::pi;
-    real_type theta1_0_CG_  = 152.74 / 180.0 * math::constants<real_type>::pi;
+    real_type theta1_0_GC_  = 159.81 / 180.0 * math::constants<real_type>::pi;
+    real_type theta1_0_CG_  = 141.16 / 180.0 * math::constants<real_type>::pi;
 
     real_type theta2_0_AT_  = 135.78 / 180.0 * math::constants<real_type>::pi;
     real_type theta2_0_TA_  = 156.54 / 180.0 * math::constants<real_type>::pi;
-    real_type theta2_0_GC_  = 152.74 / 180.0 * math::constants<real_type>::pi;
-    real_type theta2_0_CG_  = 154.62 / 180.0 * math::constants<real_type>::pi;
+    real_type theta2_0_GC_  = 141.16 / 180.0 * math::constants<real_type>::pi;
+    real_type theta2_0_CG_  = 159.81 / 180.0 * math::constants<real_type>::pi;
 
     real_type theta3_0_AT_  = 116.09 / 180.0 * math::constants<real_type>::pi;
     real_type theta3_0_TA_  = 116.09 / 180.0 * math::constants<real_type>::pi;
-    real_type theta3_0_GC_  = 131.78 / 180.0 * math::constants<real_type>::pi;
-    real_type theta3_0_CG_  = 131.78 / 180.0 * math::constants<real_type>::pi;
+    real_type theta3_0_GC_  = 124.94 / 180.0 * math::constants<real_type>::pi;
+    real_type theta3_0_CG_  = 124.94 / 180.0 * math::constants<real_type>::pi;
 
     real_type phi_0_AT_     = -38.35 / 180.0 * math::constants<real_type>::pi;
     real_type phi_0_TA_     = -38.35 / 180.0 * math::constants<real_type>::pi;
-    real_type phi_0_GC_     = -45.81 / 180.0 * math::constants<real_type>::pi;
-    real_type phi_0_CG_     = -45.81 / 180.0 * math::constants<real_type>::pi;
+    real_type phi_0_GC_     = -42.98 / 180.0 * math::constants<real_type>::pi;
+    real_type phi_0_CG_     = -42.98 / 180.0 * math::constants<real_type>::pi;
 
     std::array<real_type, 32> epsilon_CS_ = {{ // [kJ/mol]
         /* AA5 */ 2.186, /* AT5 */ 2.774, /* AG5 */ 2.833, /* AC5 */ 1.951,
@@ -462,27 +462,27 @@ class ThreeSPN2BaseBaseInteractionPotential
         /* CA3 */ 2.539, /* CT3 */ 2.833, /* CG3 */ 1.129, /* CC3 */ 3.774
     }};
     std::array<real_type, 32> r0_CS_      = {{ // [angstrom]
-        /* AA5 */ 6.208, /* AT5 */ 6.876, /* AG5 */ 6.072, /* AC5 */ 6.941,
-        /* TA5 */ 6.876, /* TT5 */ 7.480, /* TG5 */ 6.771, /* TC5 */ 7.640,
-        /* GA5 */ 6.072, /* GT5 */ 6.771, /* GG5 */ 5.921, /* GC5 */ 6.792,
-        /* CA5 */ 6.941, /* CT5 */ 7.640, /* CG5 */ 6.792, /* CC5 */ 7.698,
+        /* AA5 */ 6.208, /* AT5 */ 6.876, /* AG5 */ 6.072, /* AC5 */ 6.811,
+        /* TA5 */ 6.876, /* TT5 */ 7.480, /* TG5 */ 6.771, /* TC5 */ 7.453,
+        /* GA5 */ 6.072, /* GT5 */ 6.771, /* GG5 */ 5.921, /* GC5 */ 6.688,
+        /* CA5 */ 6.811, /* CT5 */ 7.453, /* CG5 */ 6.688, /* CC5 */ 7.409,
 
-        /* AA3 */ 5.435, /* AT3 */ 6.295, /* AG3 */ 5.183, /* AC3 */ 5.965,
-        /* TA3 */ 6.295, /* TT3 */ 7.195, /* TG3 */ 6.028, /* TC3 */ 6.868,
-        /* GA3 */ 5.183, /* GT3 */ 6.028, /* GG3 */ 4.934, /* GC3 */ 5.684,
-        /* CA3 */ 5.965, /* CT3 */ 6.868, /* CG3 */ 5.684, /* CC3 */ 6.453
+        /* AA3 */ 5.435, /* AT3 */ 6.295, /* AG3 */ 5.183, /* AC3 */ 6.082,
+        /* TA3 */ 6.295, /* TT3 */ 7.195, /* TG3 */ 6.028, /* TC3 */ 6.981,
+        /* GA3 */ 5.183, /* GT3 */ 6.028, /* GG3 */ 4.934, /* GC3 */ 5.811,
+        /* CA3 */ 6.082, /* CT3 */ 6.981, /* CG3 */ 5.811, /* CC3 */ 6.757
     }};
     // XXX in [degree]. would be converted to [radian] in `initialize()`
     std::array<real_type, 32> theta_CS_0_ = {{
-        /* AA5 */ 154.38, /* AT5 */ 159.10, /* AG5 */ 152.46, /* AC5 */ 157.58,
-        /* TA5 */ 147.10, /* TT5 */ 153.79, /* TG5 */ 144.44, /* TC5 */ 148.59,
-        /* GA5 */ 154.69, /* GT5 */ 157.83, /* GG5 */ 153.43, /* GC5 */ 158.60,
-        /* CA5 */ 160.37, /* CT5 */ 164.45, /* CG5 */ 158.62, /* CC5 */ 162.73,
+        /* AA5 */ 154.38, /* AT5 */ 159.10, /* AG5 */ 152.46, /* AC5 */ 158.38,
+        /* TA5 */ 147.10, /* TT5 */ 153.79, /* TG5 */ 144.44, /* TC5 */ 151.48,
+        /* GA5 */ 154.69, /* GT5 */ 157.83, /* GG5 */ 153.43, /* GC5 */ 158.04,
+        /* CA5 */ 152.99, /* CT5 */ 159.08, /* CG5 */ 150.53, /* CC5 */ 157.17,
 
-        /* AA3 */ 116.88, /* AT3 */ 121.74, /* AG3 */ 114.23, /* AC3 */ 114.58,
-        /* TA3 */ 109.42, /* TT3 */ 112.95, /* TG3 */ 107.32, /* TC3 */ 106.41,
-        /* GA3 */ 119.34, /* GT3 */ 124.72, /* GG3 */ 116.51, /* GC3 */ 117.49,
-        /* CA3 */ 122.10, /* CT3 */ 125.80, /* CG3 */ 120.00, /* CC3 */ 119.67
+        /* AA3 */ 116.88, /* AT3 */ 121.74, /* AG3 */ 114.23, /* AC3 */ 119.06,
+        /* TA3 */ 109.42, /* TT3 */ 112.95, /* TG3 */ 107.32, /* TC3 */ 110.56,
+        /* GA3 */ 119.34, /* GT3 */ 124.72, /* GG3 */ 116.51, /* GC3 */ 121.98,
+        /* CA3 */ 114.60, /* CT3 */ 118.26, /* CG3 */ 112.45, /* CC3 */ 115.88
     }};
 
     container_type           parameters_;   // indices
