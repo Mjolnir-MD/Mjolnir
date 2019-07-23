@@ -46,9 +46,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(unit_conversion_energy, Real, test_targets)
 {
     using cs = mjolnir::unit::constants<Real>;
 
-    BOOST_TEST(Real(1.0)    * cs::cal_to_J == Real(4.1868), test::tolerance<Real>());
-    BOOST_TEST(Real(4.1868) * cs::J_to_cal == Real(1.0),    test::tolerance<Real>());
-    BOOST_TEST(cs::cal_to_J * cs::J_to_cal == Real(1.0),    test::tolerance<Real>());
+    BOOST_TEST(Real(1.0)    * cs::cal_to_J == Real(4.184), test::tolerance<Real>());
+    BOOST_TEST(Real(4.184)  * cs::J_to_cal == Real(1.0),   test::tolerance<Real>());
+    BOOST_TEST(cs::cal_to_J * cs::J_to_cal == Real(1.0),   test::tolerance<Real>());
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(read_input_angstrom_kcalmol, Real, test_targets)
