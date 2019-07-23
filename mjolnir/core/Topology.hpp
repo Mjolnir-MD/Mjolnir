@@ -132,17 +132,13 @@ class Topology
     {
         if(dist == 0)
         {
-            if(std::find(out.cbegin(), out.cend(), node_idx) != out.cend())
-            {
-                out.push_back(node_idx);
-            }
+            out.push_back(node_idx);
             return;
         }
 
         for(auto edge : this->nodes_.at(node_idx).adjacents)
         {
-            if(edge.second != kind ||
-               std::find(out.cbegin(), out.cend(), edge.first) != out.cend())
+            if(edge.second != kind)
             {
                 continue;
             }
@@ -250,8 +246,7 @@ Topology::list_adjacent_within(
 
     for(auto edge : this->nodes_.at(node_idx).adjacents)
     {
-        if(edge.second != kind || std::find(
-           retval.cbegin(), retval.cend(), edge.first) != retval.cend())
+        if(edge.second != kind)
         {
             continue;
         }
