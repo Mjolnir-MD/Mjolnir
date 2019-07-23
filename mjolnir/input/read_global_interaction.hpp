@@ -141,8 +141,8 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
             case 'C': p.base = base_kind::C; break;
             default: assert(false);
         }
-        const auto B5 = toml::find(param, "B3");
-        const auto B3 = toml::find(param, "B5");
+        const auto B5 = toml::find(param, "B5");
+        const auto B3 = toml::find(param, "B3");
         if(B5.is_string() && B5.as_string(std::nothrow) == "none")
         {
             p.B5_idx = potential_type::invalid();
