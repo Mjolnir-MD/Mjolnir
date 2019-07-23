@@ -21,6 +21,7 @@ struct dummy_potential
 {
     using real_type      = T;
     using parameter_type = std::pair<std::size_t, std::size_t>;
+    using pair_parameter_type = parameter_type;
 
     using topology_type        = mjolnir::Topology;
     using molecule_id_type     = typename topology_type::molecule_id_type;
@@ -33,7 +34,7 @@ struct dummy_potential
 
     real_type max_cutoff_length() const noexcept {return this->cutoff_;}
 
-    parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
+    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
         return parameter_type{i, j};
     }
