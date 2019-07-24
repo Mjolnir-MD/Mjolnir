@@ -16,6 +16,8 @@ set(TEST_NAMES
     test_flp_dihedral_potential
     test_clementi_dihedral_potential
     test_go_contact_potential
+    test_3spn2_base_stacking_potential
+    test_3spn2_base_base_interaction_potential
     test_lennard_jones_potential
     test_uniform_lennard_jones_potential
     test_excluded_volume_potential
