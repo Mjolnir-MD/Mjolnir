@@ -30,7 +30,8 @@ template<typename realT>
 class ThreeSPN2BaseBaseInteractionPotential
 {
   public:
-    using real_type = realT;
+    using real_type        = realT;
+    using self_type        = ThreeSPN2BaseBaseInteractionPotential<real_type>;
     using base_kind        = parameter_3SPN2::base_kind;
     using base_pair_kind   = parameter_3SPN2::base_pair_kind;
     using cross_stack_kind = parameter_3SPN2::cross_stack_kind;
@@ -43,9 +44,13 @@ class ThreeSPN2BaseBaseInteractionPotential
     };
     struct pair_parameter_type
     {
-        base_pair_kind bp_kind;
         std::size_t    Si;
         std::size_t    Sj;
+        std::size_t    Bi_next;
+        std::size_t    Bj_next;
+        cross_stack_kind cs_i_kind; // i and adjacent of j
+        cross_stack_kind cs_j_kind; // j and adjacent of i
+        base_pair_kind   bp_kind;
     };
     using container_type = std::vector<parameter_type>;
 
@@ -128,8 +133,43 @@ class ThreeSPN2BaseBaseInteractionPotential
     {
         const auto& para_i = this->parameters_[i];
         const auto& para_j = this->parameters_[j];
+
+        // generate cross-stacking parameters
+        //
+        //       Si   Bi   Bj   Sj
+        //  5'    o -- o===o -- o     3'
+        //  ^    /      \ /      \    |
+        //  | P o        x        o P |
+        //  |    \      / \      /    v
+        //  3'    o -- o===o -- o     5'
+        //       Bj_next   Bj_next
+
+        const bool i_is_sense_strand = (para_i.strand_index < para_j.strand_index);
+        const auto Bi_next = i_is_sense_strand ? para_i.B3_idx : para_i.B5_idx;
+        const auto Bj_next = i_is_sense_strand ? para_j.B5_idx : para_j.B3_idx;
+
+        cross_stack_kind cs_i_kind = cross_stack_kind::INVALID;
+        cross_stack_kind cs_j_kind = cross_stack_kind::INVALID;
+        if(Bj_next != self_type::invalid())
+        {
+            const auto& Bj_next_para = this->parameters_[Bj_next];
+            // contact between i and the adjacent of j
+            cs_i_kind = i_is_sense_strand ?
+                this->cs5_kind(para_i.base, Bj_next_para.base) :
+                this->cs3_kind(para_i.base, Bj_next_para.base) ;
+        }
+        if(Bi_next != self_type::invalid())
+        {
+            const auto& Bi_next_para = this->parameters_[Bi_next];
+            // contact between i and the adjacent of j
+            cs_j_kind = i_is_sense_strand ?
+                this->cs3_kind(para_j.base, Bi_next_para.base) :
+                this->cs5_kind(para_j.base, Bi_next_para.base) ;
+        }
+
         return pair_parameter_type{
-            this->bp_kind(para_i.base, para_j.base), para_i.S_idx, para_j.S_idx
+            para_i.S_idx, para_j.S_idx, Bi_next, Bj_next,
+            cs_i_kind, cs_j_kind, this->bp_kind(para_i.base, para_j.base)
         };
     }
 
@@ -246,6 +286,51 @@ class ThreeSPN2BaseBaseInteractionPotential
                  const real_type theta, const real_type theta0) const noexcept
     {
         return this->df_impl(K_CS_, pi_over_K_CS_, theta, theta0);
+    }
+
+    real_type U_rep(const base_pair_kind bp, const real_type r) const noexcept
+    {
+        return this->U_rep_impl(this->epsilon(bp), this->alpha(bp), r, this->r0(bp));
+    }
+    real_type U_rep(const cross_stack_kind cs, const real_type r) const noexcept
+    {
+        return this->U_rep_impl(this->epsilon(cs), this->alpha(cs), r, this->r0(cs));
+    }
+    real_type dU_rep(const base_pair_kind bp, const real_type r) const noexcept
+    {
+        return this->dU_rep_impl(this->epsilon(bp), this->alpha(bp), r, this->r0(bp));
+    }
+    real_type dU_rep(const cross_stack_kind cs, const real_type r) const noexcept
+    {
+        return this->dU_rep_impl(this->epsilon(cs), this->alpha(cs), r, this->r0(cs));
+    }
+
+    real_type U_attr(const base_pair_kind bp, const real_type r) const noexcept
+    {
+        return this->U_attr_impl(this->epsilon(bp), this->alpha(bp), r, this->r0(bp));
+    }
+    real_type U_attr(const cross_stack_kind cs, const real_type r) const noexcept
+    {
+        return this->U_attr_impl(this->epsilon(cs), this->alpha(cs), r, this->r0(cs));
+    }
+    real_type dU_attr(const base_pair_kind bp, const real_type r) const noexcept
+    {
+        return this->dU_attr_impl(this->epsilon(bp), this->alpha(bp), r, this->r0(bp));
+    }
+    real_type dU_attr(const cross_stack_kind cs, const real_type r) const noexcept
+    {
+        return this->dU_attr_impl(this->epsilon(cs), this->alpha(cs), r, this->r0(cs));
+    }
+
+    std::pair<real_type, real_type>
+    U_dU_attr(const base_pair_kind bp, const real_type r) const noexcept
+    {
+        return this->U_and_dU_attr_impl(this->epsilon(bp), this->alpha(bp), r, this->r0(bp));
+    }
+    std::pair<real_type, real_type>
+    U_dU_attr(const cross_stack_kind cs, const real_type r) const noexcept
+    {
+        return this->U_and_dU_attr_impl(this->epsilon(cs), this->alpha(cs), r, this->r0(cs));
     }
 
     real_type cutoff_sq() const noexcept {return this->cutoff_sq_;}
@@ -406,6 +491,68 @@ class ThreeSPN2BaseBaseInteractionPotential
             return 0.0;
         }
     }
+
+    real_type U_attr_impl(const real_type epsilon, const real_type alpha,
+                          const real_type r,       const real_type r0) const noexcept
+    {
+        // --------------------------------------------------------
+        // U_m^attr =
+        //   -e                             ... (dBij <= dBij0)
+        //   -e + e * (1 - exp(-a(r-r0)))^2 ... (otherwise)
+        //
+        real_type U_attr = -epsilon;
+        if(r0 < r)
+        {
+            const auto term = real_type(1) - std::exp(-alpha * (r - r0));
+            U_attr += epsilon * term * term;
+        }
+        return U_attr;
+    }
+    real_type dU_attr_impl(const real_type epsilon, const real_type alpha,
+                           const real_type r,       const real_type r0) const noexcept
+    {
+        // --------------------------------------------------------
+        // dU_m^attr / dr =
+        //   0                                 ... (dBij <= dBij0)
+        //   2ae(1-exp(-a(r-r0)))exp(-a(r-r0)) ... (otherwise)
+        //
+        if(r <= r0) {return real_type(0);}
+        const auto term = std::exp(-alpha * (r - r0));
+        return 2 * alpha * epsilon * term * (real_type(1) - term);
+    }
+
+    std::pair<real_type, real_type> U_and_dU_attr_impl(
+            const real_type epsilon, const real_type alpha,
+            const real_type r,       const real_type r0) const noexcept
+    {
+        real_type  U_attr = -epsilon;
+        real_type dU_attr = 0.0;
+        if(r0 < r)
+        {
+            const auto term = std::exp(-alpha * (r - r0));
+            U_attr  += epsilon * (real_type(1) - term) * (real_type(1) - term);
+            dU_attr  = 2 * alpha * epsilon * term * (real_type(1) - term);
+        }
+        return std::make_pair(U_attr, dU_attr);
+    }
+
+    real_type U_rep_impl(const real_type epsilon, const real_type alpha,
+                         const real_type r,       const real_type r0) const noexcept
+    {
+        if(r0 < r) {return real_type(0);}
+        const auto term = real_type(1) - std::exp(-alpha * (r - r0));
+        return epsilon * term * term;
+    }
+    real_type dU_rep_impl(const real_type epsilon, const real_type alpha,
+                          const real_type r,       const real_type r0) const noexcept
+    {
+        if(r0 < r) {return real_type(0);}
+        const auto term = std::exp(-alpha * (r - r0));
+        return 2 * alpha * epsilon * term * (real_type(1) - term);
+    }
+
+
+
 
   private:
 
