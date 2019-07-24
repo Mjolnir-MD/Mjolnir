@@ -500,13 +500,15 @@ class ThreeSPN2BaseBaseInteractionPotential
         //   -e                             ... (dBij <= dBij0)
         //   -e + e * (1 - exp(-a(r-r0)))^2 ... (otherwise)
         //
-        real_type U_attr = -epsilon;
-        if(r0 < r)
+        if(r <= r0)
+        {
+            return -epsilon;
+        }
+        else
         {
             const auto term = real_type(1) - std::exp(-alpha * (r - r0));
-            U_attr += epsilon * term * term;
+            return epsilon * (term * term - real_type(1));
         }
-        return U_attr;
     }
     real_type dU_attr_impl(const real_type epsilon, const real_type alpha,
                            const real_type r,       const real_type r0) const noexcept
@@ -550,9 +552,6 @@ class ThreeSPN2BaseBaseInteractionPotential
         const auto term = std::exp(-alpha * (r - r0));
         return 2 * alpha * epsilon * term * (real_type(1) - term);
     }
-
-
-
 
   private:
 
