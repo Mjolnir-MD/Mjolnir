@@ -32,19 +32,27 @@ template<>
 struct tolerance_aux<double>
 {
     using real_type = double;
-    static constexpr real_type value() noexcept {return 1e-8;}
+    static constexpr real_type abs_value() noexcept {return 1e-8;}
+    static constexpr real_type rel_value() noexcept {return 1e-8;}
 };
 template<>
 struct tolerance_aux<float>
 {
     using real_type = float;
-    static constexpr real_type value() noexcept {return 1e-4;}
+    static constexpr real_type abs_value() noexcept {return 1e-8;}
+    static constexpr real_type rel_value() noexcept {return 1e-4;}
 };
 
 template<typename realT>
-constexpr realT tolerance() noexcept
+constexpr realT abs_tolerance() noexcept
 {
-    return tolerance_aux<realT>::value();
+    return tolerance_aux<realT>::abs_value();
+}
+
+template<typename realT>
+constexpr realT rel_tolerance() noexcept
+{
+    return tolerance_aux<realT>::rel_value();
 }
 
 } // math

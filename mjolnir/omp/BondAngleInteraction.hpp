@@ -71,8 +71,8 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
             const real_type coef  = -(idxp.second.derivative(theta));
 
             const real_type sin_theta    = std::sin(theta);
-            const real_type coef_inv_sin = (sin_theta > math::tolerance<real_type>()) ?
-                                 coef / sin_theta : coef / math::tolerance<real_type>();
+            const real_type coef_inv_sin = (sin_theta > math::abs_tolerance<real_type>()) ?
+                                 coef / sin_theta : coef / math::abs_tolerance<real_type>();
 
             const coordinate_type Fi =
                 (coef_inv_sin * inv_len_r_ij) * (cos_theta * r_ij_reg - r_kj_reg);
