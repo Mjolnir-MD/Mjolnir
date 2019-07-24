@@ -105,7 +105,7 @@ template<typename traitsT>
 void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
         system_type& sys) const noexcept
 {
-    constexpr auto tolerance = math::tolerance<real_type>();
+    constexpr auto tolerance = math::abs_tolerance<real_type>();
     for(const auto& idxp : this->parameters_)
     {
         // ====================================================================

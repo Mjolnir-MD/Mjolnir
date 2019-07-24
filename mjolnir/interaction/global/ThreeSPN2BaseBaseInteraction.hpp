@@ -88,7 +88,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
 
     constexpr auto pi        = math::constants<real_type>::pi;
     constexpr auto two_pi    = math::constants<real_type>::two_pi;
-    constexpr auto tolerance = math::tolerance<real_type>();
+    constexpr auto tolerance = math::abs_tolerance<real_type>();
 
     for(const auto Bi : this->potential_.participants())
     {
