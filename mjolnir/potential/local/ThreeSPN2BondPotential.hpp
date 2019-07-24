@@ -24,7 +24,7 @@ class ThreeSPN2BondPotential
     {
         const real_type dv  = v - v0_;
         const real_type dv2 = dv * dv;
-        return this->k_ * (dv2 + 100 * dv2 * dv2);
+        return this->k_ * (dv2 + real_type(100) * dv2 * dv2);
     }
 
     // 2k * (v - v0) + 400k * (v - v0)^3
