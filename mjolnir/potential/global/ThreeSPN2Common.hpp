@@ -41,7 +41,8 @@ enum class cross_stack_kind: std::uint8_t
     AA3 = 16, AT3 = 17, AG3 = 18, AC3 = 19,
     TA3 = 20, TT3 = 21, TG3 = 22, TC3 = 23,
     GA3 = 24, GT3 = 25, GG3 = 26, GC3 = 27,
-    CA3 = 28, CT3 = 29, CG3 = 30, CC3 = 31
+    CA3 = 28, CT3 = 29, CG3 = 30, CC3 = 31,
+    INVALID = 255
 };
 
 template<typename charT, typename traitsT>
