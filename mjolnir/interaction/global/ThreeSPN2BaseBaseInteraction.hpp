@@ -83,9 +83,6 @@ template<typename traitsT, typename partitionT>
 void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
         system_type& sys) const noexcept
 {
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-
     constexpr auto pi        = math::constants<real_type>::pi;
     constexpr auto two_pi    = math::constants<real_type>::two_pi;
     constexpr auto tolerance = math::abs_tolerance<real_type>();
@@ -99,8 +96,6 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             const auto& para = ptnr.parameter();
             const auto& rBj  = sys.position(Bj);
             const auto  bp_kind = para.bp_kind;
-
-            MJOLNIR_LOG_INFO("base ", Bi, " and ", Bj, ", bp = ", bp_kind);
 
             const auto Bij = sys.adjust_direction(rBj - rBi); // Bi -> Bj
             const auto lBij_sq = math::length_sq(Bij);
@@ -121,9 +116,6 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             const auto rlBij = math::rsqrt(lBij_sq); // 1 / |Bij|
             const auto lBij  = lBij_sq * rlBij;      // |Bij|
 
-            MJOLNIR_LOG_INFO("enough close to form a contact (r = ", lBij,
-                             " > rc = ", potential_.cutoff(), ")");
-
             const auto Bij_reg =  rlBij * Bij;
             const auto Bji_reg = -rlBij * Bij;
 
@@ -140,8 +132,6 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     // remember that F = -dU. Here `coef` = -dU.
                     sys.force(Bi) -= dU_rep * Bji_reg;
                     sys.force(Bj) -= dU_rep * Bij_reg;
-
-                    MJOLNIR_LOG_INFO("feels repulsive force, ", -dU_rep, ".");
                 }
             }
 
@@ -343,6 +333,8 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             const auto theta3     = std::acos(math::clamp<real_type>(cos_theta3, -1, 1));
             const auto theta3_0   = potential_.theta3_0(bp_kind);
             const auto f3         = potential_.f(bp_kind, theta3, theta3_0);
+
+
             if(f3 == real_type(0))
             {
                 // f(theta) == 0 means df(theta) is also zero.
@@ -354,7 +346,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             // ----------------------------------------------------------------
             // force directions for dtheta3/dr
 
-            const auto sin_theta3  = std::sin(cos_theta3);
+            const auto sin_theta3  = std::sin(theta3);
             const auto rsin_theta3 = (sin_theta3 > tolerance) ?
                     (real_type(1) / sin_theta3) : (real_type(1) / tolerance);
 
