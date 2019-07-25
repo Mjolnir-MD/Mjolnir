@@ -129,7 +129,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 const auto dU_rep = potential_.dU_rep(bp_kind, lBij);
                 if(dU_rep != real_type(0))
                 {
-                    // remember that F = -dU. Here `coef` = -dU.
+                    // remember that F = -dU.
                     sys.force(Bi) -= dU_rep * Bji_reg;
                     sys.force(Bj) -= dU_rep * Bij_reg;
                 }
@@ -193,8 +193,8 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                 const auto R = -SBi + (-dot_SBiBj * rlBij_sq) * Bij;
                 const auto S = -SBj + ( dot_SBjBi * rlBij_sq) * Bij;
 
-                const auto dot_phi = math::dot_product(R, S) * math::rsqrt(
-                                         math::length_sq(R) * math::length_sq(S));
+                const auto dot_phi = math::dot_product(R, S) *
+                        math::rsqrt(math::length_sq(R) * math::length_sq(S));
                 const auto cos_phi = math::clamp<real_type>(dot_phi, -1, 1);
 
                 const auto m = math::cross_product(-SBi, Bij);
@@ -344,11 +344,14 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             // ----------------------------------------------------------------
             // force directions for dtheta3/dr
 
+            // here, theta3 is a return value of acos, so it is in [0, pi].
+            // and inside it, sin(theta3) should be larger than 0.
             const auto sin_theta3  = std::sin(theta3);
-            const auto rsin_theta3 = real_type(1) / std::max(sin_theta3, tolerance);
+            const auto rsin_theta3 = sin_theta3 > tolerance ?
+                real_type(1) / sin_theta3 : real_type(1) / tolerance;
 
-            const auto fBi_theta3 = rsin_theta3 * rlSBi * (cos_theta3 * BSi_reg - BSj_reg);
-            const auto fBj_theta3 = rsin_theta3 * rlSBj * (cos_theta3 * BSj_reg - BSi_reg);
+            const auto fBi_theta3 = rsin_theta3 * rlSBi * (BSj_reg - cos_theta3 * BSi_reg);
+            const auto fBj_theta3 = rsin_theta3 * rlSBj * (BSi_reg - cos_theta3 * BSj_reg);
             const auto fSi_theta3 = real_type(-1) * fBi_theta3;
             const auto fSj_theta3 = real_type(-1) * fBj_theta3;
 
@@ -390,6 +393,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
 
                     const auto lBj5i = lBj5i_sq * rlBj5i;
                     const auto U_dU_attr = potential_.U_dU_attr(cs_kind, lBj5i);
+                    const auto Bj5i_reg  = rlBj5i * Bj5i;
 
                     // --------------------------------------------------------
                     // df/dtheta3 f(theta_CS)  U_attr(eps, alp, rij) dtheta_3 /dr
@@ -409,10 +413,9 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                         const auto sin_theta_CS = std::sin(theta_CS);
                         const auto coef_rsin    = (sin_theta_CS > tolerance) ?
                                    (coef / sin_theta_CS) : (coef / tolerance);
-                        const auto Bj5i_reg     = rlBj5i * Bj5i;
 
-                        const auto fSi  =  coef_rsin * rlSBi  * (cos_theta_CS * BSi_reg + Bj5i_reg);
-                        const auto fBj5 = -coef_rsin * rlBj5i * (cos_theta_CS * Bj5i_reg + BSi_reg);
+                        const auto fSi  = -coef_rsin * rlSBi  * (cos_theta_CS * BSi_reg + Bj5i_reg);
+                        const auto fBj5 =  coef_rsin * rlBj5i * (cos_theta_CS * Bj5i_reg + BSi_reg);
 
                         sys.force(Si)      += fSi;
                         sys.force(Bi)      -= (fSi + fBj5);
@@ -420,9 +423,9 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     }
                     // --------------------------------------------------------
                     // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
-                    const auto coef = -f3 * fCS * U_dU_attr.second * rlBj5i;
-                    sys.force(Bi)      += coef * Bj5i;
-                    sys.force(Bj_next) -= coef * Bj5i;
+                    const auto coef = -f3 * fCS * U_dU_attr.second;
+                    sys.force(Bi)      += coef * Bj5i_reg;
+                    sys.force(Bj_next) -= coef * Bj5i_reg;
                 }
             }
             if(Bi_next_exists)
@@ -461,6 +464,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     const auto dfCS  = potential_.df(cs_kind, theta_CS, theta_CS_0);
                     const auto lBi3j = lBi3j_sq * rlBi3j;
                     const auto U_dU_attr = potential_.U_dU_attr(cs_kind, lBi3j);
+                    const auto Bi3j_reg  = rlBi3j * Bi3j;
 
                     // --------------------------------------------------------
                     // df/dtheta3 f(theta_CS)  U_attr(eps, alp, rij) dtheta_3 /dr
@@ -480,19 +484,18 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                         const auto sin_theta_CS = std::sin(theta_CS);
                         const auto coef_rsin    = (sin_theta_CS > tolerance) ?
                                    (coef / sin_theta_CS) : (coef / tolerance);
-                        const auto Bi3j_reg     = rlBi3j * Bi3j;
 
-                        const auto fSj  =  coef_rsin * rlSBj  * (cos_theta_CS * BSj_reg + Bi3j_reg);
-                        const auto fBi3 = -coef_rsin * rlBi3j * (cos_theta_CS * Bi3j_reg + BSj_reg);
+                        const auto fSj  = -coef_rsin * rlSBj  * (cos_theta_CS * BSj_reg + Bi3j_reg);
+                        const auto fBi3 =  coef_rsin * rlBi3j * (cos_theta_CS * Bi3j_reg + BSj_reg);
                         sys.force(Sj)      += fSj;
                         sys.force(Bj)      -= (fSj + fBi3);
                         sys.force(Bi_next) += fBi3;
                     }
                     // --------------------------------------------------------
                     // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
-                    const auto coef = -f3 * fCS * U_dU_attr.second * rlBi3j;
-                    sys.force(Bj)      += coef * Bi3j;
-                    sys.force(Bi_next) -= coef * Bi3j;
+                    const auto coef = -f3 * fCS * U_dU_attr.second;
+                    sys.force(Bj)      += coef * Bi3j_reg;
+                    sys.force(Bi_next) -= coef * Bi3j_reg;
                 }
             }
         }
