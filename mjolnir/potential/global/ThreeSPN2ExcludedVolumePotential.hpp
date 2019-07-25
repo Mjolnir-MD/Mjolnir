@@ -51,7 +51,7 @@ class ThreeSPN2ExcludedVolumePotential
     ThreeSPN2ExcludedVolumePotential(
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         ignore_group_type ignore_grp)
-        : exclusion_list_({{"next_nucl",   1}, {"3SPN2_bond",     1},
+        : exclusion_list_({{"next_nucl",   1}, {"bond",           1},
                            {"3SPN2_angle", 1}, {"3SPN2_dihedral", 1}},
                           ignore_molecule_type("Nothing"), std::move(ignore_grp))
     {
