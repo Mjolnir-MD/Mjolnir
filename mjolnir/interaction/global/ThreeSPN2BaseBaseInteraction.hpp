@@ -305,7 +305,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             //       Si   Bi   Bj   Sj
             //  5'    o -- o===o -- o     3'
             //  ^    /      \ /      \    |
-            //  | P o        x        o P |
+            //  | P o        X        o P |
             //  |    \      / \      /    v
             //  3'    o -- o===o -- o     5'
             //       Bj_next   Bj_next
@@ -315,6 +315,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             //  + f(theta_3) df/dtheta_CS U_attr(eps, alp, rij) dtheta_CS /dr
             //  + f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
             //
+
             const auto Bi_next        = para.Bi_next;
             const auto Bj_next        = para.Bj_next;
             const bool Bi_next_exists = (Bi_next != potential_type::invalid());
@@ -328,13 +329,10 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             // ----------------------------------------------------------------
             // calc common part, theta3 and dtheta3/dr.
 
-            const auto dot_SBiSBj = math::dot_product(SBi, SBj);
-            const auto cos_theta3 = dot_SBiSBj * rlSBi * rlSBj;
+            const auto cos_theta3 = math::dot_product(BSi_reg, BSj_reg);
             const auto theta3     = std::acos(math::clamp<real_type>(cos_theta3, -1, 1));
             const auto theta3_0   = potential_.theta3_0(bp_kind);
             const auto f3         = potential_.f(bp_kind, theta3, theta3_0);
-
-
             if(f3 == real_type(0))
             {
                 // f(theta) == 0 means df(theta) is also zero.
@@ -347,13 +345,12 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
             // force directions for dtheta3/dr
 
             const auto sin_theta3  = std::sin(theta3);
-            const auto rsin_theta3 = (sin_theta3 > tolerance) ?
-                    (real_type(1) / sin_theta3) : (real_type(1) / tolerance);
+            const auto rsin_theta3 = real_type(1) / std::max(sin_theta3, tolerance);
 
-            const auto fSi_theta3 = rsin_theta3 * rlSBi * (cos_theta3 * BSi_reg - BSj_reg);
-            const auto fSj_theta3 = rsin_theta3 * rlSBj * (cos_theta3 * BSj_reg - BSi_reg);
-            const auto fBi_theta3 = real_type(-1) * fSi_theta3;
-            const auto fBj_theta3 = real_type(-1) * fSj_theta3;
+            const auto fBi_theta3 = rsin_theta3 * rlSBi * (cos_theta3 * BSi_reg - BSj_reg);
+            const auto fBj_theta3 = rsin_theta3 * rlSBj * (cos_theta3 * BSj_reg - BSi_reg);
+            const auto fSi_theta3 = real_type(-1) * fBi_theta3;
+            const auto fSj_theta3 = real_type(-1) * fBj_theta3;
 
             // adjacent of Base j exists. its not the edge of the strand.
             if(Bj_next_exists)
@@ -414,8 +411,8 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                                    (coef / sin_theta_CS) : (coef / tolerance);
                         const auto Bj5i_reg     = rlBj5i * Bj5i;
 
-                        const auto fSi  = coef_rsin * rlSBi  * (-cos_theta_CS * BSi_reg - Bj5i_reg);
-                        const auto fBj5 = coef_rsin * rlBj5i * ( cos_theta_CS * Bj5i_reg + BSi_reg);
+                        const auto fSi  =  coef_rsin * rlSBi  * (cos_theta_CS * BSi_reg + Bj5i_reg);
+                        const auto fBj5 = -coef_rsin * rlBj5i * (cos_theta_CS * Bj5i_reg + BSi_reg);
 
                         sys.force(Si)      += fSi;
                         sys.force(Bi)      -= (fSi + fBj5);
@@ -424,8 +421,8 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     // --------------------------------------------------------
                     // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
                     const auto coef = -f3 * fCS * U_dU_attr.second * rlBj5i;
-                    sys.force(Bi)      -= coef * Bj5i;
-                    sys.force(Bj_next) += coef * Bj5i;
+                    sys.force(Bi)      += coef * Bj5i;
+                    sys.force(Bj_next) -= coef * Bj5i;
                 }
             }
             if(Bi_next_exists)
@@ -485,10 +482,8 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                                    (coef / sin_theta_CS) : (coef / tolerance);
                         const auto Bi3j_reg     = rlBi3j * Bi3j;
 
-                        const auto fSj  = coef_rsin * rlSBj  *
-                                          (-cos_theta_CS * BSj_reg - Bi3j_reg);
-                        const auto fBi3 = coef_rsin * rlBi3j *
-                                          ( cos_theta_CS * Bi3j_reg + BSj_reg);
+                        const auto fSj  =  coef_rsin * rlSBj  * (cos_theta_CS * BSj_reg + Bi3j_reg);
+                        const auto fBi3 = -coef_rsin * rlBi3j * (cos_theta_CS * Bi3j_reg + BSj_reg);
                         sys.force(Sj)      += fSj;
                         sys.force(Bj)      -= (fSj + fBi3);
                         sys.force(Bi_next) += fBi3;
@@ -496,8 +491,8 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     // --------------------------------------------------------
                     // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
                     const auto coef = -f3 * fCS * U_dU_attr.second * rlBi3j;
-                    sys.force(Bj)      -= coef * Bi3j;
-                    sys.force(Bi_next) += coef * Bi3j;
+                    sys.force(Bj)      += coef * Bi3j;
+                    sys.force(Bi_next) -= coef * Bi3j;
                 }
             }
         }
