@@ -527,15 +527,15 @@ class ThreeSPN2BaseBaseInteractionPotential
             const real_type epsilon, const real_type alpha,
             const real_type r,       const real_type r0) const noexcept
     {
-        real_type  U_attr = -epsilon;
-        real_type dU_attr = 0.0;
-        if(r0 < r)
+        if(r <= r0)
         {
-            const auto term = std::exp(-alpha * (r - r0));
-            U_attr  += epsilon * (real_type(1) - term) * (real_type(1) - term);
-            dU_attr  = 2 * alpha * epsilon * term * (real_type(1) - term);
+            return std::make_pair(-epsilon, 0.0);
         }
-        return std::make_pair(U_attr, dU_attr);
+
+        const auto term1 = std::exp(-alpha * (r - r0));
+        const auto term2 = real_type(1) - term1;
+        return std::make_pair(epsilon * (term2 * term2 - real_type(1)),
+                              2 * alpha * epsilon * term1 * term2);
     }
 
     real_type U_rep_impl(const real_type epsilon, const real_type alpha,
