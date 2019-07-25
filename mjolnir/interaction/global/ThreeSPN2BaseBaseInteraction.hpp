@@ -414,8 +414,8 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                         const auto coef_rsin    = (sin_theta_CS > tolerance) ?
                                    (coef / sin_theta_CS) : (coef / tolerance);
 
-                        const auto fSi  = -coef_rsin * rlSBi  * (cos_theta_CS * BSi_reg + Bj5i_reg);
-                        const auto fBj5 =  coef_rsin * rlBj5i * (cos_theta_CS * Bj5i_reg + BSi_reg);
+                        const auto fSi  =  coef_rsin * rlSBi  * (cos_theta_CS * BSi_reg + Bj5i_reg);
+                        const auto fBj5 = -coef_rsin * rlBj5i * (cos_theta_CS * Bj5i_reg + BSi_reg);
 
                         sys.force(Si)      += fSi;
                         sys.force(Bi)      -= (fSi + fBj5);
@@ -485,8 +485,8 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                         const auto coef_rsin    = (sin_theta_CS > tolerance) ?
                                    (coef / sin_theta_CS) : (coef / tolerance);
 
-                        const auto fSj  = -coef_rsin * rlSBj  * (cos_theta_CS * BSj_reg + Bi3j_reg);
-                        const auto fBi3 =  coef_rsin * rlBi3j * (cos_theta_CS * Bi3j_reg + BSj_reg);
+                        const auto fSj  =  coef_rsin * rlSBj  * (cos_theta_CS * BSj_reg + Bi3j_reg);
+                        const auto fBi3 = -coef_rsin * rlBi3j * (cos_theta_CS * Bi3j_reg + BSj_reg);
                         sys.force(Sj)      += fSj;
                         sys.force(Bj)      -= (fSj + fBi3);
                         sys.force(Bi_next) += fBi3;
