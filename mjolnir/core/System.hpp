@@ -39,6 +39,10 @@ class System
           forces_   (num_particles)
     {}
     ~System() = default;
+    System(const System&) = default;
+    System(System&&)      = default;
+    System& operator=(const System&) = default;
+    System& operator=(System&&)      = default;
 
     coordinate_type adjust_direction(coordinate_type dr) const noexcept
     {return boundary_.adjust_direction(dr);}
