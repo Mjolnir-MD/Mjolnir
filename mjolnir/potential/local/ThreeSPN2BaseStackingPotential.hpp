@@ -183,6 +183,81 @@ class ThreeSPN2BaseStackingPotential
         }
     }
 
+    real_type U_rep(const base_stack_kind bs, const real_type r) const noexcept
+    {
+        // --------------------------------------------------------------------
+        // U_rep = e_ij (1 - exp(-a_ij (r - r0)))^2 ... r < r0
+        //       = 0                                ... r0 <= r
+
+        const auto r0  = this->r0(bs);
+        if(r0 <= r) {return 0.0;}
+
+        const auto eps  = this->epsilon(bs);
+        const auto alp  = this->alpha  (bs);
+        const auto term = real_type(1.0) - std::exp(-alp * (r - r0));
+        return eps * term * term;
+    }
+    real_type dU_rep(const base_stack_kind bs, const real_type r) const noexcept
+    {
+        // --------------------------------------------------------------------
+        // dU_rep = 2 a e exp(-a(r-r0)) (1-exp(-a(r-r0))) ... r  <  r0
+        //        = 0                                     ... r0 <= r
+
+        const auto r0 = this->r0(bs);
+        if(r0 <= r) {return 0.0;}
+
+        const auto eps  = this->epsilon(bs);
+        const auto alp  = this->alpha  (bs);
+        const auto term = std::exp(-alp * (r - r0));
+
+        return 2 * alp * eps * term * (real_type(1) - term);
+    }
+
+    real_type U_attr(const base_stack_kind bs, const real_type r) const noexcept
+    {
+        // --------------------------------------------------------------------
+        // U_attr = -e                             ... (r <= r0)
+        //          -e + e * (1 - exp(-a(r-r0)))^2 ... (otherwise)
+        //
+        const auto r0  = this->r0(bs);
+        const auto eps = this->epsilon(bs);
+        if(r <= r0) {return -eps;}
+
+        const auto alp  = this->alpha(bs);
+        const auto term = std::exp(-alp * (r - r0));
+        return eps * (term * term - 2 * term);
+    }
+    real_type dU_attr(const base_stack_kind bs, const real_type r) const noexcept
+    {
+        // --------------------------------------------------------------------
+        // dU_attr =  0                                 ... (r <= r0)
+        //            2ae(1-exp(-a(r-r0)))exp(-a(r-r0)) ... (otherwise)
+
+        const auto r0 = this->r0(bs);
+        if(r <= r0) {return 0.0;}
+
+        const auto eps  = this->epsilon(bs);
+        const auto alp  = this->alpha  (bs);
+        const auto term = std::exp(-alp * (r - r0));
+
+        return 2 * alp * eps * term * (real_type(1) - term);
+    }
+    std::pair<real_type, real_type>
+    U_dU_attr(const base_stack_kind bs, const real_type r) const noexcept
+    {
+        const auto r0 = this->r0(bs);
+        const auto eps  = this->epsilon(bs);
+        if(r <= r0)
+        {
+            return std::make_pair(-eps, 0.0);
+        }
+        const auto alp  = this->alpha(bs);
+        const auto term = std::exp(-alp * (r - r0));
+
+        return std::make_pair(eps * (term * term - 2 * term),
+                              2 * alp * eps * term * (real_type(1) - term));
+    }
+
   private:
 
     bool unit_converted_    = false;

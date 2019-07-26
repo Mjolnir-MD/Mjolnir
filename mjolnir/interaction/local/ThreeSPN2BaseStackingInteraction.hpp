@@ -144,16 +144,11 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
         //
         // dU_rep = 2 a e exp(-a(r-r0)) (1-exp(-a(r-r0))) ... r  <  r0
         //        = 0                                     ... r0 <= r
-        const auto r0  = potential_.r0(bs_kind);
-        const auto eps = potential_.epsilon(bs_kind);
-        const auto alp = potential_.alpha(bs_kind);
-        if(lBji < r0)
+        const auto dU_rep = potential_.dU_rep(bs_kind, lBji);
+        if(dU_rep != real_type(0.0))
         {
-            const auto term = std::exp(-alp * (lBji - r0));
-            const auto coef = 2 * alp * eps * term * (real_type(1) - term);
-
-            sys.force(Bi) -= coef * Bji_reg;
-            sys.force(Bj) += coef * Bji_reg;
+            sys.force(Bi) -= dU_rep * Bji_reg;
+            sys.force(Bj) += dU_rep * Bji_reg;
         }
 
         // --------------------------------------------------------------------
@@ -186,27 +181,8 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
             // purely repulsive.
             continue;
         }
-        const auto df_theta = potential_.df(theta, theta_0);
-
-        // --------------------------------------------------------
-        // U_m^attr =
-        //   -e                             ... (dBij <= dBij0)
-        //   -e + e * (1 - exp(-a(r-r0)))^2 ... (otherwise)
-        //
-        // dU_m^attr / dr =
-        //   0                                 ... (dBij <= dBij0)
-        //   2ae(1-exp(-a(r-r0)))exp(-a(r-r0)) ... (otherwise)
-
-        real_type U_attr_  = -eps;
-        real_type dU_attr_ = 0.0;
-        if(r0 < lBji)
-        {
-            const auto term = std::exp(-alp * (lBji - r0));
-            U_attr_ += eps * (real_type(1) - term) * (real_type(1) - term);
-            dU_attr_ = 2 * alp * eps * (real_type(1) - term) * term;
-        }
-        const auto U_attr  = U_attr_;  // mark it const
-        const auto dU_attr = dU_attr_; // mark it const
+        const auto df_theta  = potential_.df(theta, theta_0);
+        const auto U_dU_attr = potential_.U_dU_attr(bs_kind, lBji);
 
         // --------------------------------------------------------------------
         // calc the first term in the attractive part
@@ -214,7 +190,7 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
         //
         if(df_theta != real_type(0.0))
         {
-            const auto coef = -df_theta * U_attr;
+            const auto coef = -df_theta * U_dU_attr.first;
 
             const auto sin_theta = std::sin(theta);
             const auto coef_rsin = (sin_theta > tolerance) ?
@@ -232,7 +208,7 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
         // calc the second term in the attractive part
         // = f(theta) dU_attr(rij) drij/dr
 
-        const auto coef = f_theta * dU_attr;
+        const auto coef = f_theta * U_dU_attr.second;
         sys.force(Bi) -= coef * Bji_reg;
         sys.force(Bj) += coef * Bji_reg;
     }
@@ -277,17 +253,8 @@ ThreeSPN2BaseStackingInteraction<traitsT>::calc_energy(
 
         // ====================================================================
         // calc repulsive part, which does not depend on angle term.
-        //
-        // U_rep = e_ij (1 - exp(-a_ij (rij - r0_ij)))^2 ... rij < r0_ij
-        //       = 0                                     ... r0_ij <= rij
-        const auto r0  = potential_.r0(bs_kind);
-        const auto eps = potential_.epsilon(bs_kind);
-        const auto alp = potential_.alpha(bs_kind);
-        if(lBji < r0)
-        {
-            const auto term = real_type(1.0) - std::exp(-alp * (lBji - r0));
-            E += eps * term * term;
-        }
+
+        E += potential_.U_rep(bs_kind, lBji);
 
         // --------------------------------------------------------------------
         // calc theta
@@ -309,18 +276,7 @@ ThreeSPN2BaseStackingInteraction<traitsT>::calc_energy(
         {
             continue; // purely repulsive.
         }
-
-        // --------------------------------------------------------
-        // U_m^attr =
-        //   -e                             ... (dBij <= dBij0)
-        //   -e + e * (1 - exp(-a(r-r0)))^2 ... (otherwise)
-        //
-        real_type U_attr = -eps;
-        if(r0 < lBji)
-        {
-            const auto term = real_type(1.0) - std::exp(-alp * (lBji - r0));
-            U_attr += eps * term * term;
-        }
+        const auto U_attr = potential_.U_attr(bs_kind, lBji);
         E += U_attr * f_theta;
     }
     return E;
