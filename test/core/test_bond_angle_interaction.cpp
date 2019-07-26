@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_numerical_diff)
 
         const auto init = sys;
 
-        constexpr real_type tol = 1e-5;
+        constexpr real_type tol = 1e-4;
         constexpr real_type dr  = 1e-5;
         for(std::size_t idx=0; idx<3; ++idx)
         {
