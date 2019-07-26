@@ -98,6 +98,10 @@ class ThreeSPN2BaseBaseInteractionPotential
         }
     }
     ~ThreeSPN2BaseBaseInteractionPotential() = default;
+    ThreeSPN2BaseBaseInteractionPotential(const ThreeSPN2BaseBaseInteractionPotential&) = default;
+    ThreeSPN2BaseBaseInteractionPotential(ThreeSPN2BaseBaseInteractionPotential&&) = default;
+    ThreeSPN2BaseBaseInteractionPotential& operator=(const ThreeSPN2BaseBaseInteractionPotential&) = default;
+    ThreeSPN2BaseBaseInteractionPotential& operator=(ThreeSPN2BaseBaseInteractionPotential&&) = default;
 
     base_pair_kind bp_kind(const base_kind lhs, const base_kind rhs) const noexcept
     {
