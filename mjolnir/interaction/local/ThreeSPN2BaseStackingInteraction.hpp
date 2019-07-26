@@ -141,9 +141,7 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
 
         // ====================================================================
         // calc repulsive part, which does not depend on angle term.
-        //
-        // dU_rep = 2 a e exp(-a(r-r0)) (1-exp(-a(r-r0))) ... r  <  r0
-        //        = 0                                     ... r0 <= r
+
         const auto dU_rep = potential_.dU_rep(bs_kind, lBji);
         if(dU_rep != real_type(0.0))
         {
@@ -208,9 +206,12 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
         // calc the second term in the attractive part
         // = f(theta) dU_attr(rij) drij/dr
 
-        const auto coef = f_theta * U_dU_attr.second;
-        sys.force(Bi) -= coef * Bji_reg;
-        sys.force(Bj) += coef * Bji_reg;
+        if(U_dU_attr.second != real_type(0.0))
+        {
+            const auto coef = f_theta * U_dU_attr.second;
+            sys.force(Bi) -= coef * Bji_reg;
+            sys.force(Bj) += coef * Bji_reg;
+        }
     }
     return ;
 }

@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_INTERACTION_GLOBAL_3SPN_BASE_BASE_INTERACTION_HPP
 #define MJOLNIR_INTERACTION_GLOBAL_3SPN_BASE_BASE_INTERACTION_HPP
 #include <mjolnir/potential/global/ThreeSPN2BaseBaseInteractionPotential.hpp>
+#include <mjolnir/core/GlobalInteractionBase.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/math/math.hpp>
 #include <memory>
@@ -423,9 +424,12 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     }
                     // --------------------------------------------------------
                     // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
-                    const auto coef = -f3 * fCS * U_dU_attr.second;
-                    sys.force(Bi)      += coef * Bj5i_reg;
-                    sys.force(Bj_next) -= coef * Bj5i_reg;
+                    if(U_dU_attr.second != real_type(0.0))
+                    {
+                        const auto coef = -f3 * fCS * U_dU_attr.second;
+                        sys.force(Bi)      += coef * Bj5i_reg;
+                        sys.force(Bj_next) -= coef * Bj5i_reg;
+                    }
                 }
             }
             if(Bi_next_exists)
@@ -493,9 +497,12 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
                     }
                     // --------------------------------------------------------
                     // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
-                    const auto coef = -f3 * fCS * U_dU_attr.second;
-                    sys.force(Bj)      += coef * Bi3j_reg;
-                    sys.force(Bi_next) -= coef * Bi3j_reg;
+                    if(U_dU_attr.second != real_type(0.0))
+                    {
+                        const auto coef = -f3 * fCS * U_dU_attr.second;
+                        sys.force(Bj)      += coef * Bi3j_reg;
+                        sys.force(Bi_next) -= coef * Bi3j_reg;
+                    }
                 }
             }
         }
