@@ -159,51 +159,51 @@ BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_numerical_diff)
     const real_type k3(1e0);
     const real_type native(mjolnir::math::constants<real_type>::pi / 2.0);
 
-    potential_type potential{k1, k3, native};
-    dihedral_angle_type interaction("none", {{ {{0,1,2,3}}, potential}});
-
-    system_type sys(4, boundary_type{});
-
-    sys.at(0).mass = 1.0;
-    sys.at(1).mass = 1.0;
-    sys.at(2).mass = 1.0;
-    sys.at(3).mass = 1.0;
-    sys.at(0).rmass = 1.0;
-    sys.at(1).rmass = 1.0;
-    sys.at(2).rmass = 1.0;
-    sys.at(3).rmass = 1.0;
-
-    sys.at(0).position = coord_type(2.0, 0.0,  1.0);
-    sys.at(1).position = coord_type(1.0, 1.0,  0.0);
-    sys.at(2).position = coord_type(0.0, 0.0,  0.0);
-    sys.at(3).position = coord_type(1.0, 1.0, -1.0);
-    sys.at(0).velocity = coord_type(0.0, 0.0,  0.0);
-    sys.at(1).velocity = coord_type(0.0, 0.0,  0.0);
-    sys.at(2).velocity = coord_type(0.0, 0.0,  0.0);
-    sys.at(3).velocity = coord_type(0.0, 0.0,  0.0);
-    sys.at(0).force    = coord_type(0.0, 0.0,  0.0);
-    sys.at(1).force    = coord_type(0.0, 0.0,  0.0);
-    sys.at(2).force    = coord_type(0.0, 0.0,  0.0);
-    sys.at(3).force    = coord_type(0.0, 0.0,  0.0);
-
-    const auto init = sys;
-
-    sys.at(0).name  = "X";
-    sys.at(1).name  = "X";
-    sys.at(2).name  = "X";
-    sys.at(3).name  = "X";
-    sys.at(0).group = "NONE";
-    sys.at(1).group = "NONE";
-    sys.at(2).group = "NONE";
-    sys.at(3).group = "NONE";
-
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
 
-    constexpr real_type tol = 1e-5;
-    constexpr real_type dr  = 1e-5;
-    for(int i = 0; i < 1000; ++i)
+    potential_type potential{k1, k3, native};
+    dihedral_angle_type interaction("none", {{ {{0,1,2,3}}, potential}});
+
+    for(std::size_t i=0; i<100; ++i)
     {
+        system_type sys(4, boundary_type{});
+
+        sys.mass (0) = 1.0;
+        sys.mass (1) = 1.0;
+        sys.mass (2) = 1.0;
+        sys.mass (3) = 1.0;
+        sys.rmass(0) = 1.0;
+        sys.rmass(1) = 1.0;
+        sys.rmass(2) = 1.0;
+        sys.rmass(3) = 1.0;
+
+        sys.position(0) = coord_type(2.0 + 1e-2 * uni(mt), 0.0 + 1e-2 * uni(mt),  1.0 + 1e-2 * uni(mt));
+        sys.position(1) = coord_type(1.0 + 1e-2 * uni(mt), 1.0 + 1e-2 * uni(mt),  0.0 + 1e-2 * uni(mt));
+        sys.position(2) = coord_type(0.0 + 1e-2 * uni(mt), 0.0 + 1e-2 * uni(mt),  0.0 + 1e-2 * uni(mt));
+        sys.position(3) = coord_type(1.0 + 1e-2 * uni(mt), 1.0 + 1e-2 * uni(mt), -1.0 + 1e-2 * uni(mt));
+        sys.velocity(0) = coord_type(0.0, 0.0,  0.0);
+        sys.velocity(1) = coord_type(0.0, 0.0,  0.0);
+        sys.velocity(2) = coord_type(0.0, 0.0,  0.0);
+        sys.velocity(3) = coord_type(0.0, 0.0,  0.0);
+        sys.force   (0) = coord_type(0.0, 0.0,  0.0);
+        sys.force   (1) = coord_type(0.0, 0.0,  0.0);
+        sys.force   (2) = coord_type(0.0, 0.0,  0.0);
+        sys.force   (3) = coord_type(0.0, 0.0,  0.0);
+
+        const auto init = sys;
+
+        sys.at(0).name  = "X";
+        sys.at(1).name  = "X";
+        sys.at(2).name  = "X";
+        sys.at(3).name  = "X";
+        sys.at(0).group = "NONE";
+        sys.at(1).group = "NONE";
+        sys.at(2).group = "NONE";
+        sys.at(3).group = "NONE";
+
+        constexpr real_type tol = 1e-4;
+        constexpr real_type dr  = 1e-4;
         for(std::size_t idx=0; idx<4; ++idx)
         {
             {
@@ -214,14 +214,12 @@ BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_numerical_diff)
                 // calc U(x-dx)
                 const auto E0 = interaction.calc_energy(sys);
 
-                const auto dx = uni(mt) * dr;
-
-                mjolnir::math::X(sys.position(0)) += dx;
+                mjolnir::math::X(sys.position(idx)) += dr;
 
                 // calc F(x)
                 interaction.calc_force(sys);
 
-                mjolnir::math::X(sys.position(0)) += dx;
+                mjolnir::math::X(sys.position(idx)) += dr;
 
                 // calc U(x+dx)
                 const auto E1 = interaction.calc_energy(sys);
@@ -229,7 +227,7 @@ BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_numerical_diff)
                 // central difference
                 const auto dE = (E1 - E0) * 0.5;
 
-                BOOST_TEST(-dE == dx * mjolnir::math::X(sys.force(0)),
+                BOOST_TEST(-dE == dr * mjolnir::math::X(sys.force(idx)),
                            boost::test_tools::tolerance(tol));
             }
             {
@@ -240,14 +238,12 @@ BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_numerical_diff)
                 // calc U(x-dx)
                 const auto E0 = interaction.calc_energy(sys);
 
-                const auto dy = uni(mt) * dr;
-
-                mjolnir::math::Y(sys.position(0)) += dy;
+                mjolnir::math::Y(sys.position(idx)) += dr;
 
                 // calc F(x)
                 interaction.calc_force(sys);
 
-                mjolnir::math::Y(sys.position(0)) += dy;
+                mjolnir::math::Y(sys.position(idx)) += dr;
 
                 // calc U(x+dx)
                 const auto E1 = interaction.calc_energy(sys);
@@ -255,7 +251,7 @@ BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_numerical_diff)
                 // central difference
                 const auto dE = (E1 - E0) * 0.5;
 
-                BOOST_TEST(-dE == dy * mjolnir::math::Y(sys.force(0)),
+                BOOST_TEST(-dE == dr * mjolnir::math::Y(sys.force(idx)),
                            boost::test_tools::tolerance(tol));
             }
             {
@@ -266,14 +262,12 @@ BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_numerical_diff)
                 // calc U(x-dx)
                 const auto E0 = interaction.calc_energy(sys);
 
-                const auto dz = uni(mt) * dr;
-
-                mjolnir::math::Z(sys.position(0)) += dz;
+                mjolnir::math::Z(sys.position(idx)) += dr;
 
                 // calc F(x)
                 interaction.calc_force(sys);
 
-                mjolnir::math::Z(sys.position(0)) += dz;
+                mjolnir::math::Z(sys.position(idx)) += dr;
 
                 // calc U(x+dx)
                 const auto E1 = interaction.calc_energy(sys);
@@ -281,7 +275,7 @@ BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_numerical_diff)
                 // central difference
                 const auto dE = (E1 - E0) * 0.5;
 
-                BOOST_TEST(-dE == dz * mjolnir::math::Z(sys.force(0)),
+                BOOST_TEST(-dE == dr * mjolnir::math::Z(sys.force(idx)),
                            boost::test_tools::tolerance(tol));
             }
         }
