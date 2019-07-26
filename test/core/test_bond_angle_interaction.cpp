@@ -166,44 +166,44 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_numerical_diff)
     const real_type k(10.0);
     const real_type native(mjolnir::math::constants<real_type>::pi / 3.0);
 
-    harmonic_type potential{k, native};
-    bond_angle_type interaction("none", {{ {{0,1,2}}, potential}});
-
-    system_type sys(3, boundary_type{});
-
-    sys.at(0).mass = 1.0;
-    sys.at(1).mass = 1.0;
-    sys.at(2).mass = 1.0;
-    sys.at(0).rmass = 1.0;
-    sys.at(1).rmass = 1.0;
-    sys.at(2).rmass = 1.0;
-
-    sys.at(0).position = coord_type(1.0, 0.0, 0.0);
-    sys.at(1).position = coord_type(0.0, 0.0, 1.0);
-    sys.at(2).position = coord_type(1.0, 1.0, 1.0);
-    sys.at(0).velocity = coord_type(0.0, 0.0, 0.0);
-    sys.at(1).velocity = coord_type(0.0, 0.0, 0.0);
-    sys.at(2).velocity = coord_type(0.0, 0.0, 0.0);
-    sys.at(0).force    = coord_type(0.0, 0.0, 0.0);
-    sys.at(1).force    = coord_type(0.0, 0.0, 0.0);
-    sys.at(2).force    = coord_type(0.0, 0.0, 0.0);
-
-    sys.at(0).name  = "X";
-    sys.at(1).name  = "X";
-    sys.at(2).name  = "X";
-    sys.at(0).group = "NONE";
-    sys.at(1).group = "NONE";
-    sys.at(2).group = "NONE";
-
-    const auto init = sys;
-
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
 
-    constexpr real_type tol = 1e-5;
-    constexpr real_type dr  = 1e-5;
+    harmonic_type potential{k, native};
+    bond_angle_type interaction("none", {{ {{0,1,2}}, potential}});
+
     for(int i = 0; i < 1000; ++i)
     {
+        system_type sys(3, boundary_type{});
+
+        sys.mass (0)= 1.0;
+        sys.mass (1)= 1.0;
+        sys.mass (2)= 1.0;
+        sys.rmass(0) = 1.0;
+        sys.rmass(1) = 1.0;
+        sys.rmass(2) = 1.0;
+
+        sys.position(0) = coord_type(1.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
+        sys.position(1) = coord_type(0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
+        sys.position(2) = coord_type(1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
+        sys.velocity(0) = coord_type(0.0, 0.0, 0.0);
+        sys.velocity(1) = coord_type(0.0, 0.0, 0.0);
+        sys.velocity(2) = coord_type(0.0, 0.0, 0.0);
+        sys.force   (0) = coord_type(0.0, 0.0, 0.0);
+        sys.force   (1) = coord_type(0.0, 0.0, 0.0);
+        sys.force   (2) = coord_type(0.0, 0.0, 0.0);
+
+        sys.name (0) = "X";
+        sys.name (1) = "X";
+        sys.name (2) = "X";
+        sys.group(0) = "NONE";
+        sys.group(1) = "NONE";
+        sys.group(2) = "NONE";
+
+        const auto init = sys;
+
+        constexpr real_type tol = 1e-4;
+        constexpr real_type dr  = 1e-5;
         for(std::size_t idx=0; idx<3; ++idx)
         {
             {
@@ -214,14 +214,12 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_numerical_diff)
                 // calc U(x-dx)
                 const auto E0 = interaction.calc_energy(sys);
 
-                const auto dx = uni(mt) * dr;
-
-                mjolnir::math::X(sys.position(idx)) += dx;
+                mjolnir::math::X(sys.position(idx)) += dr;
 
                 // calc F(x)
                 interaction.calc_force(sys);
 
-                mjolnir::math::X(sys.position(idx)) += dx;
+                mjolnir::math::X(sys.position(idx)) += dr;
 
                 // calc U(x+dx)
                 const auto E1 = interaction.calc_energy(sys);
@@ -229,7 +227,7 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_numerical_diff)
                 // central difference
                 const auto dE = (E1 - E0) * 0.5;
 
-                BOOST_TEST(-dE == dx * mjolnir::math::X(sys.force(idx)),
+                BOOST_TEST(-dE == dr * mjolnir::math::X(sys.force(idx)),
                            boost::test_tools::tolerance(tol));
             }
             {
@@ -240,14 +238,12 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_numerical_diff)
                 // calc U(x-dx)
                 const auto E0 = interaction.calc_energy(sys);
 
-                const auto dy = uni(mt) * dr;
-
-                mjolnir::math::Y(sys.position(idx)) += dy;
+                mjolnir::math::Y(sys.position(idx)) += dr;
 
                 // calc F(x)
                 interaction.calc_force(sys);
 
-                mjolnir::math::Y(sys.position(idx)) += dy;
+                mjolnir::math::Y(sys.position(idx)) += dr;
 
                 // calc U(x+dx)
                 const auto E1 = interaction.calc_energy(sys);
@@ -255,7 +251,7 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_numerical_diff)
                 // central difference
                 const auto dE = (E1 - E0) * 0.5;
 
-                BOOST_TEST(-dE == dy * mjolnir::math::Y(sys.force(idx)),
+                BOOST_TEST(-dE == dr * mjolnir::math::Y(sys.force(idx)),
                            boost::test_tools::tolerance(tol));
             }
             {
@@ -266,14 +262,12 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_numerical_diff)
                 // calc U(x-dx)
                 const auto E0 = interaction.calc_energy(sys);
 
-                const auto dz = uni(mt) * dr;
-
-                mjolnir::math::Z(sys.position(idx)) += dz;
+                mjolnir::math::Z(sys.position(idx)) += dr;
 
                 // calc F(x)
                 interaction.calc_force(sys);
 
-                mjolnir::math::Z(sys.position(idx)) += dz;
+                mjolnir::math::Z(sys.position(idx)) += dr;
 
                 // calc U(x+dx)
                 const auto E1 = interaction.calc_energy(sys);
@@ -281,7 +275,7 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_numerical_diff)
                 // central difference
                 const auto dE = (E1 - E0) * 0.5;
 
-                BOOST_TEST(-dE == dz * mjolnir::math::Z(sys.force(idx)),
+                BOOST_TEST(-dE == dr * mjolnir::math::Z(sys.force(idx)),
                            boost::test_tools::tolerance(tol));
             }
         }
