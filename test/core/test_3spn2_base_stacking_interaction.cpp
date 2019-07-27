@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BaseStackingInteraction_numerical_diff)
             BOOST_TEST(mjolnir::math::Z(init.force(2)) == 0.0);
 
             constexpr real_type tol = 1e-4;
-            constexpr real_type dr  = 1e-4;
+            constexpr real_type dr  = 1e-5;
             for(std::size_t idx=0; idx<3; ++idx)
             {
                 {
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BaseStackingInteraction_numerical_diff)
                     // central difference
                     const auto dE = (E1 - E0) * 0.5;
 
-                    BOOST_TEST(-dE == dr * mjolnir::math::X(sys.force(idx)),
+                    BOOST_TEST(-dE / dr ==  mjolnir::math::X(sys.force(idx)),
                                boost::test_tools::tolerance(tol));
                 }
                 {
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BaseStackingInteraction_numerical_diff)
                     // central difference
                     const auto dE = (E1 - E0) * 0.5;
 
-                    BOOST_TEST(-dE == dr * mjolnir::math::Y(sys.force(idx)),
+                    BOOST_TEST(-dE / dr == mjolnir::math::Y(sys.force(idx)),
                                boost::test_tools::tolerance(tol));
                 }
                 {
@@ -298,7 +298,7 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BaseStackingInteraction_numerical_diff)
                     // central difference
                     const auto dE = (E1 - E0) * 0.5;
 
-                    BOOST_TEST(-dE == dr * mjolnir::math::Z(sys.force(idx)),
+                    BOOST_TEST(-dE / dr == mjolnir::math::Z(sys.force(idx)),
                                boost::test_tools::tolerance(tol));
                 }
             }
