@@ -11,7 +11,7 @@
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/VerletList.hpp>
-#include <mjolnir/interaction/global/ThreeSPN2BaseBaseInteraction.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseBaseInteraction.hpp>
 #include <mjolnir/input/read_units.hpp>
 #include <random>
 

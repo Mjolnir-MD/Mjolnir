@@ -10,7 +10,7 @@
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/interaction/local/ThreeSPN2BaseStackingInteraction.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingInteraction.hpp>
 #include <mjolnir/input/read_units.hpp>
 
 #include <random>

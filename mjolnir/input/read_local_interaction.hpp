@@ -7,8 +7,8 @@
 #include <mjolnir/interaction/local/DihedralAngleInteraction.hpp>
 #include <mjolnir/interaction/local/DummyInteraction.hpp>
 
-#include <mjolnir/potential/local/ThreeSPN2BaseStackingPotential.hpp>
-#include <mjolnir/interaction/local/ThreeSPN2BaseStackingInteraction.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingPotential.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingInteraction.hpp>
 
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>

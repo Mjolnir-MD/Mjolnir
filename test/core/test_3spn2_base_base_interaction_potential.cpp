@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/global/ThreeSPN2BaseBaseInteractionPotential.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseBaseInteractionPotential.hpp>
 
 BOOST_AUTO_TEST_CASE(f_3SPN2_BaseBaseInteraction_double)
 {

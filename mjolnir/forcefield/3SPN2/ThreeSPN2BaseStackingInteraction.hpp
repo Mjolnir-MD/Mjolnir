@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_INTEARACTION_LOCAL_3SPN2_BASE_STACKING_INTEARACTION_HPP
 #define MJOLNIR_INTEARACTION_LOCAL_3SPN2_BASE_STACKING_INTEARACTION_HPP
 #include <mjolnir/core/LocalInteractionBase.hpp>
-#include <mjolnir/potential/local/ThreeSPN2BaseStackingPotential.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingPotential.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/util/string.hpp>

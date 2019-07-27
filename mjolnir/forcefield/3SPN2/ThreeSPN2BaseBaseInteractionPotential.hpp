@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_3SPN2_BASE_BASE_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_3SPN2_BASE_BASE_POTENTIAL_HPP
-#include <mjolnir/potential/global/ThreeSPN2Common.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2Common.hpp>
 #include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/Unit.hpp>

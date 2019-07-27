@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/local/ThreeSPN2BaseStackingPotential.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingPotential.hpp>
 
 BOOST_AUTO_TEST_CASE(f_3SPN2_BaseStacking_double)
 {

@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_POTENTIAL_LOCAL_3SPN2_BASE_STACKING_INTEARACTION_HPP
 #define MJOLNIR_POTENTIAL_LOCAL_3SPN2_BASE_STACKING_INTEARACTION_HPP
-#include <mjolnir/potential/global/ThreeSPN2Common.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2Common.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/Unit.hpp>

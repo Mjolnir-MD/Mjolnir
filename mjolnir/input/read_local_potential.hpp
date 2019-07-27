@@ -12,7 +12,7 @@
 #include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
 #include <mjolnir/potential/local/CosinePotential.hpp>
 #include <mjolnir/potential/local/SumLocalPotential.hpp>
-#include <mjolnir/potential/local/ThreeSPN2BondPotential.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BondPotential.hpp>
 
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/string.hpp>

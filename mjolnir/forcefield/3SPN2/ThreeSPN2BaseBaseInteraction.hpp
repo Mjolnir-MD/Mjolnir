@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_INTERACTION_GLOBAL_3SPN_BASE_BASE_INTERACTION_HPP
 #define MJOLNIR_INTERACTION_GLOBAL_3SPN_BASE_BASE_INTERACTION_HPP
-#include <mjolnir/potential/global/ThreeSPN2BaseBaseInteractionPotential.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseBaseInteractionPotential.hpp>
 #include <mjolnir/core/GlobalInteractionBase.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/math/math.hpp>

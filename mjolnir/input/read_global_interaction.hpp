@@ -5,7 +5,7 @@
 #include <mjolnir/interaction/global/GlobalPairLennardJonesInteraction.hpp>
 #include <mjolnir/interaction/global/GlobalPairUniformLennardJonesInteraction.hpp>
 #include <mjolnir/interaction/global/GlobalPairExcludedVolumeInteraction.hpp>
-#include <mjolnir/interaction/global/ThreeSPN2BaseBaseInteraction.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseBaseInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>

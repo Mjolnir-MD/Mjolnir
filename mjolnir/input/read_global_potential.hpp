@@ -6,7 +6,7 @@
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
 #include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
-#include <mjolnir/potential/global/ThreeSPN2ExcludedVolumePotential.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2ExcludedVolumePotential.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/make_unique.hpp>
