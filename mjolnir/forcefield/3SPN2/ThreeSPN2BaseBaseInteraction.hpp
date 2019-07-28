@@ -74,6 +74,9 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
 
     std::string name() const override {return "3SPN2BaseBaseInteraction";}
 
+    potential_type const& potential() const noexcept {return potential_;}
+    potential_type&       potential()       noexcept {return potential_;}
+
   private:
 
     potential_type potential_;
