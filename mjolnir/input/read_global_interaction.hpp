@@ -165,8 +165,13 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
         params.emplace_back(B, p);
     }
 
-    const auto& ignore = toml::find<toml::value>(global, "ignore");
-    potential_type potential(std::move(params), read_ignored_group(ignore));
+    IgnoreGroup<typename Topology::group_id_type> ignore_grp({});
+    if(global.as_table().count("ignore") == 1)
+    {
+        const auto& ignore = toml::find<toml::value>(global, "ignore");
+        ignore_grp = read_ignored_group(ignore);
+    }
+    potential_type potential(std::move(params), ignore_grp);
 
     // -----------------------------------------------------------------------
     // read spatial partition

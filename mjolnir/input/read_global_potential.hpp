@@ -307,8 +307,6 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
         typename ThreeSPN2ExcludedVolumePotential<realT>::parameter_type;
     using bead_kind = parameter_3SPN2::bead_kind;
 
-    const auto& ignore = toml::find(global, "ignore");
-
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
 
@@ -344,7 +342,14 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
         params.emplace_back(idx, bead);
         MJOLNIR_LOG_INFO("idx = ", idx, ", kind = ", bead);
     }
-    return ThreeSPN2ExcludedVolumePotential<realT>(params, read_ignored_group(ignore));
+
+    IgnoreGroup<typename Topology::group_id_type> ignore_grp({});
+    if(global.as_table().count("ignore") == 1)
+    {
+        const auto& ignore = toml::find<toml::value>(global, "ignore");
+        ignore_grp = read_ignored_group(ignore);
+    }
+    return ThreeSPN2ExcludedVolumePotential<realT>(params, ignore_grp);
 }
 
 
