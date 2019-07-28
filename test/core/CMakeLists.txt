@@ -53,7 +53,9 @@ set(TEST_NAMES
     test_read_flexible_local_angle_potential
     test_read_flexible_local_dihedral_potential
     test_read_cosine_potential
+    test_read_3spn2_bond_potential
     test_read_excluded_volume_potential
+    test_read_3spn2_excluded_volume_potential
     test_read_debye_huckel_potential
     test_read_lennard_jones_potential
     test_read_uniform_lennard_jones_potential
@@ -68,6 +70,8 @@ set(TEST_NAMES
     test_read_bond_angle_interaction
     test_read_dihedral_angle_interaction
     test_read_dummy_interaction
+    test_read_3spn2_base_stacking_interaction
+    test_read_3spn2_base_base_interaction
     test_read_global_pair_interaction
     test_read_position_restraint_interaction
 
