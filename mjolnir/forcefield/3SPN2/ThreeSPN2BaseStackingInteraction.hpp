@@ -94,6 +94,14 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
         return;
     }
 
+    connection_kind_type const& connection_kind() const noexcept {return kind_;}
+
+    container_type const& parameters() const noexcept {return parameters_;}
+    container_type&       parameters()       noexcept {return parameters_;}
+
+    potential_type const& potential() const noexcept {return potential_;}
+    potential_type&       potential()       noexcept {return potential_;}
+
   private:
 
     connection_kind_type kind_;
