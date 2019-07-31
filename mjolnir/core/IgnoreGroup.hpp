@@ -22,8 +22,8 @@ class IgnoreGroup
 
     using group_id_type = GroupID;
 
-    IgnoreGroup(std::map<GroupID, std::vector<GroupID>> ignore)
-        : ignores_(std::move(ignore))
+    explicit IgnoreGroup(const std::map<GroupID, std::vector<GroupID>>& ignore)
+        : ignores_(ignore)
     {
         // to make it bidirectional
         for(const auto& kv : this->ignores_)
