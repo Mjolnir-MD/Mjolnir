@@ -165,20 +165,20 @@ namespace mjolnir
 // ============================================================================
 // exv
 // CellList
-extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>, UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        typename ExcludedVolumePotential<double>::parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float> , UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        typename ExcludedVolumePotential<float>::parameter_type> >;
-extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>, PeriodicGridCellList <SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<double>::parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float> , PeriodicGridCellList <SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<float>::parameter_type> >;
+extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>, UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        typename ExcludedVolumePotential<double>::pair_parameter_type>>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float> , UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        typename ExcludedVolumePotential<float>::pair_parameter_type> >;
+extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>, PeriodicGridCellList <SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<double>::pair_parameter_type>>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float> , PeriodicGridCellList <SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<float>::pair_parameter_type> >;
 // VerletList
-extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>, VerletList<SimulatorTraits<double, UnlimitedBoundary>,        typename ExcludedVolumePotential<double>::parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float> , VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        typename ExcludedVolumePotential<float>::parameter_type> >;
-extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>, VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<double>::parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float> , VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<float>::parameter_type> >;
+extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>, VerletList<SimulatorTraits<double, UnlimitedBoundary>,        typename ExcludedVolumePotential<double>::pair_parameter_type>>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float> , VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        typename ExcludedVolumePotential<float>::pair_parameter_type> >;
+extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>, VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<double>::pair_parameter_type>>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float> , VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<float>::pair_parameter_type> >;
 // Naive
-extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>, NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>,        typename ExcludedVolumePotential<double>::parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float> , NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>,        typename ExcludedVolumePotential<float>::parameter_type> >;
-extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>, NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<double>::parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float> , NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<float>::parameter_type> >;
+extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>, NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>,        typename ExcludedVolumePotential<double>::pair_parameter_type>>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float> , NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>,        typename ExcludedVolumePotential<float>::pair_parameter_type> >;
+extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>, NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<double>::pair_parameter_type>>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float> , NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<float>::pair_parameter_type> >;
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
 
