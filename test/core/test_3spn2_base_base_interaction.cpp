@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BasePairIntearction_numerical_diff)
         phys_type::set_L_to_volume(1e-3 * std::pow(unit_type::m_to_angstrom, 3));
         phys_type::set_volume_to_L(1e+3 * std::pow(unit_type::angstrom_to_m, 3));
 
-        phys_type::set_length_unit("angstrom");
+        phys_type::set_length_unit(length);
     }
 
     // Here, this test case checks base pairing interaction only.
