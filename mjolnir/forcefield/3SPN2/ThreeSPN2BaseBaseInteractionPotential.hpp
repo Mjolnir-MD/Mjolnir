@@ -44,17 +44,9 @@ class ThreeSPN2BaseBaseInteractionPotential
     };
     struct pair_parameter_type
     {
-        // XXX cppcheck is not for headers, so it cannot check across files.
-        // But it is still useful in many cases, so it is enabled on Codacy.
-        // To avoid misdetecting "bad" codes, some checks are disabled manually.
-
-        // cppcheck-suppress unusedStructMember
         std::size_t    Si;
-        // cppcheck-suppress unusedStructMember
         std::size_t    Sj;
-        // cppcheck-suppress unusedStructMember
         std::size_t    Bi_next;
-        // cppcheck-suppress unusedStructMember
         std::size_t    Bj_next;
         cross_stack_kind cs_i_kind; // i and adjacent of j
         cross_stack_kind cs_j_kind; // j and adjacent of i
