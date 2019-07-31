@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_OMP_3SPN2_BASE_STACKING_INTEARACTION_HPP
-#define MJOLNIR_OMP_3SPN2_BASE_STACKING_INTEARACTION_HPP
+#ifndef MJOLNIR_OMP_3SPN2_BASE_STACKING_INTERACTION_HPP
+#define MJOLNIR_OMP_3SPN2_BASE_STACKING_INTERACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingInteraction.hpp>
@@ -289,4 +289,24 @@ class ThreeSPN2BaseStackingInteraction<
 };
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize major use case to speedup compilation
+#include <mjolnir/core/BoundaryCondition.hpp>
+
+namespace mjolnir
+{
+
+// EXV, L-J and UL-J have its own specialization, so DO NOT specialize here.
+
+// ============================================================================
+// D-H
+extern template class ThreeSPN2BaseStackingInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ThreeSPN2BaseStackingInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ThreeSPN2BaseStackingInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ThreeSPN2BaseStackingInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif // MJOLNIR_INTEARACTION_GLOBAL_3SPN_BASE_STACKING_INTEARACTION_HPP

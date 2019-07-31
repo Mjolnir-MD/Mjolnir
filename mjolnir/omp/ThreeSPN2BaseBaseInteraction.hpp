@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_OMP_3SPN_BASE_BASE_INTERACTION_HPP
-#define MJOLNIR_OMP_3SPN_BASE_BASE_INTERACTION_HPP
+#ifndef MJOLNIR_OMP_3SPN2_BASE_BASE_INTERACTION_HPP
+#define MJOLNIR_OMP_3SPN2_BASE_BASE_INTERACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
 #include <mjolnir/omp/UnlimitedGridCellList.hpp>
@@ -766,4 +766,36 @@ class ThreeSPN2BaseBaseInteraction<
 };
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize BondAngleInteraction with LocalPotentials
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/NaivePairCalculation.hpp>
+#include <mjolnir/core/VerletList.hpp>
+#include <mjolnir/core/UnlimitedGridCellList.hpp>
+#include <mjolnir/core/PeriodicGridCellList.hpp>
+
+namespace mjolnir
+{
+
+// ============================================================================
+// CellList
+extern template class ThreeSPN2BaseBaseInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
+extern template class ThreeSPN2BaseBaseInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
+extern template class ThreeSPN2BaseBaseInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, PeriodicGridCellList <OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
+extern template class ThreeSPN2BaseBaseInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, PeriodicGridCellList <OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
+// VerletList
+extern template class ThreeSPN2BaseBaseInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        VerletList<OpenMPSimulatorTraits<double, UnlimitedBoundary>,                   typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
+extern template class ThreeSPN2BaseBaseInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        VerletList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,                   typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
+extern template class ThreeSPN2BaseBaseInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, VerletList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>,            typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
+extern template class ThreeSPN2BaseBaseInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, VerletList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>,            typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
+// Naive
+extern template class ThreeSPN2BaseBaseInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        NaivePairCalculation<OpenMPSimulatorTraits<double, UnlimitedBoundary>,         typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
+extern template class ThreeSPN2BaseBaseInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        NaivePairCalculation<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,         typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
+extern template class ThreeSPN2BaseBaseInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, NaivePairCalculation<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>,  typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
+extern template class ThreeSPN2BaseBaseInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, NaivePairCalculation<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>,  typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif // MJOLNIR_INTERACTION_GLOBAL_3SPN_BASE_PAIRING_INTERACTION_HPP
