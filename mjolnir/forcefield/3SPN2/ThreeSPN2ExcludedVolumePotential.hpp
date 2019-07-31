@@ -51,8 +51,8 @@ class ThreeSPN2ExcludedVolumePotential
     ThreeSPN2ExcludedVolumePotential(
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         ignore_group_type ignore_grp)
-        : exclusion_list_({{"next_nucl",   1}, {"bond",           1},
-                           {"3SPN2_angle", 1}, {"3SPN2_dihedral", 1}},
+        : exclusion_list_({{"next_nucleotide", 1}, {"bond",           1},
+                           {"3SPN2_angle", 1},     {"3SPN2_dihedral", 1}},
                           ignore_molecule_type("Nothing"), std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
@@ -197,7 +197,7 @@ class ThreeSPN2ExcludedVolumePotential
                 this->within_3_nucl_ranges_.emplace_back(first, first);
                 continue;
             }
-            auto within3 = topol.list_adjacent_within(i, 3, "next_nucl");
+            auto within3 = topol.list_adjacent_within(i, 3, "next_nucleotide");
 
             // remove non-base stuff
             within3.erase(std::remove_if(within3.begin(), within3.end(), is_base),

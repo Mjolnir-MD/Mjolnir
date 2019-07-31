@@ -81,7 +81,7 @@ class ThreeSPN2BaseBaseInteractionPotential
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         ignore_group_type ignore_grp)
         : cutoff_(18.0), cutoff_sq_(18.0*18.0),
-          exclusion_list_({{"next_nucl", 3}}, ignore_molecule_type("Nothing"),
+          exclusion_list_({{"next_nucleotide", 3}}, ignore_molecule_type("Nothing"),
                           std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
