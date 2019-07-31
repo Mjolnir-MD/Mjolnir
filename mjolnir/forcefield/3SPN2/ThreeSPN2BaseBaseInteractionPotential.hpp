@@ -50,8 +50,11 @@ class ThreeSPN2BaseBaseInteractionPotential
 
         // cppcheck-suppress unusedStructMember
         std::size_t    Si;
+        // cppcheck-suppress unusedStructMember
         std::size_t    Sj;
+        // cppcheck-suppress unusedStructMember
         std::size_t    Bi_next;
+        // cppcheck-suppress unusedStructMember
         std::size_t    Bj_next;
         cross_stack_kind cs_i_kind; // i and adjacent of j
         cross_stack_kind cs_j_kind; // j and adjacent of i
