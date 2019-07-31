@@ -6,6 +6,10 @@
 #include <mjolnir/interaction/local/BondAngleInteraction.hpp>
 #include <mjolnir/interaction/local/DihedralAngleInteraction.hpp>
 #include <mjolnir/interaction/local/DummyInteraction.hpp>
+
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingPotential.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingInteraction.hpp>
+
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -53,6 +57,14 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
                 kind, read_local_potential<2, potentialT>(local));
     }
+    else if(potential == "3SPN2Bond")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is 3SPN2Bond.");
+        using potentialT = ThreeSPN2BondPotential<real_type>;
+
+        return make_unique<BondLengthInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<2, potentialT>(local));
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -62,6 +74,7 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
             "- \"Harmonic\" : well-known harmonic potential",
             "- \"GoContact\": r^12 - r^10 type native contact potential",
             "- \"Gaussian\" : well-known gaussian potential"
+            "- \"3SPN2Bond\": bond length potential for 3SPN2"
             }));
     }
 }
@@ -306,6 +319,89 @@ read_dummy_interaction(const std::string& kind, const toml::value& local)
     return make_unique<DummyInteraction<traitsT>>(kind, std::move(indices_list));
 }
 
+template<typename traitsT>
+std::unique_ptr<LocalInteractionBase<traitsT>>
+read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value& local)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type      = typename traitsT::real_type;
+    using potential_type = ThreeSPN2BaseStackingPotential<real_type>;
+    using base_kind      = parameter_3SPN2::base_kind;
+
+    // [[forcefields.local]]
+    // interaction = "3SPN2BaseStacking"
+    // topology    = "none"
+    // parameters = [
+    //     {S_idx = 0, B3_idx = 1, B5_idx = 4, Base3 = "A", Base5 = "T"},
+    //     # ...
+    // ]
+
+    using indices_type   = std::array<std::size_t, 3>; // {S, B3, B5}
+    using parameter_type = typename potential_type::parameter_type;
+
+    potential_type potential;
+
+    const auto& params = toml::find<toml::array>(local, "parameters");
+    MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
+
+    const auto& env = local.as_table().count("env") == 1 ?
+                      local.as_table().at("env") : toml::value{};
+
+    std::vector<std::pair<indices_type, parameter_type>> parameters;
+    parameters.reserve(params.size());
+    for(const auto& item : params)
+    {
+        const auto S_idx  = find_parameter<std::size_t>(item, env, "S_idx");
+        const auto B5_idx = find_parameter<std::size_t>(item, env, "B5_idx");
+        const auto B3_idx = find_parameter<std::size_t>(item, env, "B3_idx");
+
+        const indices_type idxs{{S_idx, B5_idx, B3_idx}};
+
+        const auto B5 = find_parameter<std::string>(item, env, "Base5");
+        const auto B3 = find_parameter<std::string>(item, env, "Base3");
+        if(B5 != "A" && B5 != "T" && B5 != "G" && B5 != "C")
+        {
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "mjolnir::read_3spn2_base_stacking_potential: none of A,T,C,G",
+                find_parameter<toml::value>(item, env, "Base5"), "here"));
+        }
+        if(B3 != "A" && B3 != "T" && B3 != "G" && B3 != "C")
+        {
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "mjolnir::read_3spn2_base_stacking_potential: none of A,T,C,G",
+                find_parameter<toml::value>(item, env, "Base3"), "here"));
+        }
+        base_kind B3_kind = base_kind::X;
+        base_kind B5_kind = base_kind::X;
+        switch(B5.front())
+        {
+            case 'A': {B5_kind = base_kind::A; break;}
+            case 'T': {B5_kind = base_kind::T; break;}
+            case 'G': {B5_kind = base_kind::G; break;}
+            case 'C': {B5_kind = base_kind::C; break;}
+        }
+        switch(B3.front())
+        {
+            case 'A': {B3_kind = base_kind::A; break;}
+            case 'T': {B3_kind = base_kind::T; break;}
+            case 'G': {B3_kind = base_kind::G; break;}
+            case 'C': {B3_kind = base_kind::C; break;}
+        }
+        assert(B3_kind != base_kind::X);
+        assert(B5_kind != base_kind::X);
+
+        const auto bs_kind = potential.bs_kind(B5_kind, B3_kind);
+
+        MJOLNIR_LOG_INFO("ThreeSPN2BaseStackingPotential = {S = ", S_idx,
+            ", B5 = ", B5_idx, ", B3 = ", B3_idx, ", bases = ", bs_kind, '}');
+
+        parameters.emplace_back(idxs, bs_kind);
+    }
+    return make_unique<ThreeSPN2BaseStackingInteraction<traitsT>>(
+            kind, std::move(parameters), std::move(potential));
+}
+
 // ----------------------------------------------------------------------------
 // general read_local_interaction function
 // ----------------------------------------------------------------------------
@@ -345,6 +441,11 @@ read_local_interaction(const toml::value& local)
     {
         MJOLNIR_LOG_NOTICE("Dummy interaction found.");
         return read_dummy_interaction<traitsT>(kind, local);
+    }
+    else if(interaction == "3SPN2BaseStacking")
+    {
+        MJOLNIR_LOG_NOTICE("3SPN2BaseStacking interaction found.");
+        return read_3spn2_base_stacking_interaction<traitsT>(kind, local);
     }
     else
     {

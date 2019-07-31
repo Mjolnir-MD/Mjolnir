@@ -6,6 +6,7 @@
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
 #include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2ExcludedVolumePotential.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/make_unique.hpp>
@@ -295,6 +296,62 @@ read_debye_huckel_potential(const toml::value& global)
         std::move(params), ignore_particle_within,
         read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
+
+template<typename realT>
+ThreeSPN2ExcludedVolumePotential<realT>
+read_3spn2_excluded_volume_potential(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using parameter_type =
+        typename ThreeSPN2ExcludedVolumePotential<realT>::parameter_type;
+    using bead_kind = parameter_3SPN2::bead_kind;
+
+    const auto& env = global.as_table().count("env") == 1 ?
+                      global.as_table().at("env") : toml::value{};
+
+    const auto& ps = toml::find<toml::array>(global, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        const auto idx  = find_parameter<std::size_t>(param, env, "index");
+        const auto kind = find_parameter<std::string>(param, env, "kind");
+
+        if(kind != "S" && kind != "P" &&
+           kind != "A" && kind != "T" && kind != "G" && kind != "C")
+        {
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "mjolnir::read_3spn2_excluded_volume_potential: unknown bead "
+                "kind", find_parameter<toml::value>(param, env, "kind"),
+                "expected S, P, A, T, G, C."));
+        }
+        bead_kind bead;
+        switch(kind.front())
+        {
+            case 'P': {bead = bead_kind::Phosphate; break;}
+            case 'S': {bead = bead_kind::Sugar;     break;}
+            case 'A': {bead = bead_kind::BaseA;     break;}
+            case 'T': {bead = bead_kind::BaseT;     break;}
+            case 'G': {bead = bead_kind::BaseG;     break;}
+            case 'C': {bead = bead_kind::BaseC;     break;}
+            default:  {assert(false);}
+        }
+        params.emplace_back(idx, bead);
+        MJOLNIR_LOG_INFO("idx = ", idx, ", kind = ", bead);
+    }
+
+    IgnoreGroup<typename Topology::group_id_type> ignore_grp({});
+    if(global.as_table().count("ignore") == 1)
+    {
+        const auto& ignore = toml::find<toml::value>(global, "ignore");
+        ignore_grp = read_ignored_group(ignore);
+    }
+    return ThreeSPN2ExcludedVolumePotential<realT>(params, ignore_grp);
+}
+
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template ExcludedVolumePotential<double> read_excluded_volume_potential(const toml::value& global);

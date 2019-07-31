@@ -67,6 +67,9 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
     std::string name() const override
     {return "Pair:"_s + potential_type::name();}
 
+    potential_type const& potential() const noexcept {return potential_;}
+    potential_type &      potential()       noexcept {return potential_;}
+
   private:
 
     potential_type potential_;
