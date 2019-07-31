@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_POTENTIAL_LOCAL_3SPN2_BOND_POTENTIAL_HPP
-#define MJOLNIR_POTENTIAL_LOCAL_3SPN2_BOND_POTENTIAL_HPP
+#ifndef MJOLNIR_FORCEFIELD_3SPN2_BOND_POTENTIAL_HPP
+#define MJOLNIR_FORCEFIELD_3SPN2_BOND_POTENTIAL_HPP
 #include <limits>
 
 namespace mjolnir
@@ -50,6 +50,11 @@ class ThreeSPN2BondPotential
     real_type k_;
     real_type v0_;
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ThreeSPN2BondPotential<double>;
+extern template class ThreeSPN2BondPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
 
 } // mjolnir
 #endif /* MJOLNIR_HARMONIC_POTENTIAL */

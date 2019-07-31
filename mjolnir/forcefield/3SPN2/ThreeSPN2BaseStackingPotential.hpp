@@ -1,10 +1,11 @@
-#ifndef MJOLNIR_POTENTIAL_LOCAL_3SPN2_BASE_STACKING_INTEARACTION_HPP
-#define MJOLNIR_POTENTIAL_LOCAL_3SPN2_BASE_STACKING_INTEARACTION_HPP
+#ifndef MJOLNIR_FORCEFIELD_3SPN2_BASE_STACKING_POTENTIAL_HPP
+#define MJOLNIR_FORCEFIELD_3SPN2_BASE_STACKING_POTENTIAL_HPP
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2Common.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/math/math.hpp>
+#include <cassert>
 
 namespace mjolnir
 {
@@ -284,6 +285,11 @@ class ThreeSPN2BaseStackingPotential
         /* CA */ 106.49, /* CT */ 93.31, /* CG */ 109.54, /* CC */ 95.46
     }};
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ThreeSPN2BaseStackingPotential<double>;
+extern template class ThreeSPN2BaseStackingPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
 
 } // mjolnir
 #endif // MJOLNIR_POTENTIAL_LOCAL_3SPN2_BASE_STACKING_INTEARACTION_HPP

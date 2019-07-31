@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_POTENTIAL_GLOBAL_3SPN2_BASE_BASE_POTENTIAL_HPP
-#define MJOLNIR_POTENTIAL_GLOBAL_3SPN2_BASE_BASE_POTENTIAL_HPP
+#ifndef MJOLNIR_FORCEFIELD_3SPN2_BASE_BASE_POTENTIAL_HPP
+#define MJOLNIR_FORCEFIELD_3SPN2_BASE_BASE_POTENTIAL_HPP
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2Common.hpp>
 #include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
@@ -640,6 +640,11 @@ class ThreeSPN2BaseBaseInteractionPotential
 
     exclusion_list_type exclusion_list_;
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ThreeSPN2BaseBaseInteractionPotential<double>;
+extern template class ThreeSPN2BaseBaseInteractionPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
 
 } // mjolnir
 #endif // MJOLNIR_POTENTIAL_GLOBAL_3SPN2_BASE_BASE_POTENTIAL_HPP

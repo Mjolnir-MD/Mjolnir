@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_INTERACTION_GLOBAL_3SPN_BASE_BASE_INTERACTION_HPP
-#define MJOLNIR_INTERACTION_GLOBAL_3SPN_BASE_BASE_INTERACTION_HPP
+#ifndef MJOLNIR_FORCEFIELD_3SPN2_BASE_BASE_INTERACTION_HPP
+#define MJOLNIR_FORCEFIELD_3SPN2_BASE_BASE_INTERACTION_HPP
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseBaseInteractionPotential.hpp>
 #include <mjolnir/core/GlobalInteractionBase.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
@@ -764,6 +764,36 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
     }
     return E;
 }
+} // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize major use-cases
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/NaivePairCalculation.hpp>
+#include <mjolnir/core/VerletList.hpp>
+#include <mjolnir/core/UnlimitedGridCellList.hpp>
+#include <mjolnir/core/PeriodicGridCellList.hpp>
+
+namespace mjolnir
+{
+
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, UnlimitedBoundary>,        UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, PeriodicGridCellList <SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, PeriodicGridCellList <SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
+
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, UnlimitedBoundary>,        VerletList<SimulatorTraits<double, UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
+
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, UnlimitedBoundary>,        NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
 
 } // mjolnir
-#endif // MJOLNIR_INTERACTION_GLOBAL_3SPN_BASE_PAIRING_INTERACTION_HPP
+#endif // MJOLNIR_SEPARATE_BUILD
+
+#endif // MJOLNIR_FORCEFIELD_3SPN_BASE_PAIRING_INTERACTION_HPP

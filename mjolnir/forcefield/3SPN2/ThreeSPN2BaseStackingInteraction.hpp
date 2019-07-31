@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_INTEARACTION_LOCAL_3SPN2_BASE_STACKING_INTEARACTION_HPP
-#define MJOLNIR_INTEARACTION_LOCAL_3SPN2_BASE_STACKING_INTEARACTION_HPP
+#ifndef MJOLNIR_FORCEFIELD_3SPN2_BASE_STACKING_INTEARACTION_HPP
+#define MJOLNIR_FORCEFIELD_3SPN2_BASE_STACKING_INTEARACTION_HPP
 #include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingPotential.hpp>
 #include <mjolnir/math/math.hpp>
@@ -291,6 +291,21 @@ ThreeSPN2BaseStackingInteraction<traitsT>::calc_energy(
     return E;
 }
 
+} // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize major use-cases
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+
+namespace mjolnir
+{
+
+extern template class ThreeSPN2BaseStackingInteraction<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ThreeSPN2BaseStackingInteraction<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ThreeSPN2BaseStackingInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ThreeSPN2BaseStackingInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 
 } // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
 #endif // MJOLNIR_INTEARACTION_GLOBAL_3SPN_BASE_STACKING_INTEARACTION_HPP

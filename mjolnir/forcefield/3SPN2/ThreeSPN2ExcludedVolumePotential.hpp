@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_POTENTIAL_GLOBAL_3SPN2_EXV_POTENTIAL_HPP
-#define MJOLNIR_POTENTIAL_GLOBAL_3SPN2_EXV_POTENTIAL_HPP
+#ifndef MJOLNIR_FORCEFIELD_3SPN2_EXV_POTENTIAL_HPP
+#define MJOLNIR_FORCEFIELD_3SPN2_EXV_POTENTIAL_HPP
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2Common.hpp>
 #include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
@@ -323,6 +323,11 @@ class ThreeSPN2ExcludedVolumePotential
     std::vector<std::size_t> within_3_nucl_;
     std::vector<std::pair<std::ptrdiff_t, std::ptrdiff_t>> within_3_nucl_ranges_;
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ThreeSPN2ExcludedVolumePotential<double>;
+extern template class ThreeSPN2ExcludedVolumePotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
 
 } // mjolnir
 #endif // MJOLNIR_POTENTIAL_GLOBAL_3SPN2_EXV_POTENTIAL_HPP
