@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.4.0
+
+### Added
+
+- add 3SPN2 forcefield support
+- enable to disable inter- and intra-group interactinos
+- enalbe to compile files separately to reduce compilation time
+
+### Misc
+
+- refactoring
+
 ## 1.3.2
 
 ### Fixed
