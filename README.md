@@ -38,8 +38,8 @@ $ make test # optional
 After this, you will find executable binary in `bin` directory.
 
 The codes are tested with the following compilers on [Travis CI](https://travis-ci.org/ToruNiina/Mjolnir).
-- `g++-7`, `g++-6`, `g++-5` on `Linux`
-- `clang++-7`, `clang++-6`, `clang++-5` on `Linux`
+- `g++-9`, `g++-8`, `g++-7` on `Linux`
+- `clang++-8`, `clang++-7` on `Linux`
 - `clang++` on `OS X`
 
 ## Dependency
