@@ -1,0 +1,22 @@
+set(mjolnir_omp_cpp_files
+    "${CMAKE_CURRENT_SOURCE_DIR}/System.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ForceField.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/RandomNumberGenerator.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/BAOABLangevinIntegrator.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/UnderdampedLangevinIntegrator.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/BondLengthInteraction.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ContactInteraction.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/BondAngleInteraction.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/DihedralAngleInteraction.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/GlobalPairExcludedVolumeInteraction.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/GlobalPairInteraction.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/GlobalPairLennardJonesInteraction.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/GlobalPairUniformLennardJonesInteraction.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ThreeSPN2BaseBaseInteraction.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ThreeSPN2BaseStackingInteraction.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/UnlimitedGridCellList.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/PeriodicGridCellList.cpp"
+    )
+set(mjolnir_cpp_files
+    ${mjolnir_cpp_files}
+    ${mjolnir_omp_cpp_files} PARENT_SCOPE)

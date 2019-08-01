@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_POTENTIAL_LOCAL_FLEXIBLE_LOCAL_ANGLE_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_LOCAL_FLEXIBLE_LOCAL_ANGLE_POTENTIAL_HPP
+#include <mjolnir/util/throw_exception.hpp>
 #include <array>
 #include <algorithm>
 #include <limits>
@@ -12,8 +13,7 @@ namespace mjolnir
 template<typename T> class System;
 
 // Flexible Local Angle potential (T. Terakawa and S. Takada Biophys J 2011)
-// NOTE: It assumes that each theta value in histogram is same as the default.
-//     : It requires the unit to be [kcal/mol] & [angstrom]!
+// NOTE:  It requires the unit to be [kcal/mol] & [angstrom]!
 //
 // Here, the implementation is derived from the original implementation in
 // the CGMD package, Cafemol (Kenzaki et al., JCTC 2011).
@@ -26,50 +26,32 @@ class FlexibleLocalAnglePotential
   public:
     using real_type = realT;
     // TODO: support unit systems
-    static constexpr real_type max_force  =  30.0;
+    static constexpr real_type max_force  =  30.0; // [kcal/mol / angstrom]
     static constexpr real_type min_force  = -30.0;
-
-    static constexpr std::array<real_type, 10> thetas = {
-        {1.30900, 1.48353, 1.65806, 1.83260, 2.00713,
-         2.18166, 2.35619, 2.53073, 2.70526, 2.87979}
-    };
-    static constexpr real_type dtheta  = (2.87979 - 1.30900) / 9.0;
-    static constexpr real_type rdtheta = 1.0 / dtheta;
 
   public:
 
     FlexibleLocalAnglePotential(const real_type k,
+                                const std::array<real_type, 10>& xs,
                                 const std::array<real_type, 10>& ys,
                                 const std::array<real_type, 10>& d2ys)
-        : min_theta(thetas.front()), max_theta(thetas.back()),
-          k_(k), ys_(ys), d2ys_(d2ys)
+        : min_theta(xs.front()), max_theta(xs.back()), k_(k),
+          dtheta((max_theta - min_theta) / 9.0), rdtheta(1.0 / dtheta),
+          thetas(xs), ys_(ys), d2ys_(d2ys)
     {
-        // set the range and the parameters from table
-        // from cafemol3/mloop_flexible_local.F90
-        real_type th = thetas[0];
-        const real_type center_th = (max_theta + min_theta) * 0.5;
-        this->min_theta_ene = spline_interpolate(min_theta);
-        this->max_theta_ene = spline_interpolate(max_theta - 1e-4);
-
-        this->min_energy = min_theta_ene;
-        while(th < max_theta)
-        {
-            const real_type energy = this->spline_interpolate(th);
-            const real_type force  = this->spline_derivative(th);
-            this->min_energy = std::min(min_energy, energy);
-
-            if(force < min_force)
-            {
-                this->min_theta     = th;
-                this->min_theta_ene = energy;
-            }
-            if(max_force < force && center_th < th && max_theta == thetas.back())
-            {
-                this->max_theta     = th;
-                this->max_theta_ene = energy;
-            }
-            th += 1e-4;
-        }
+        this->reset_energy_parameters();
+    }
+    FlexibleLocalAnglePotential(const real_type k,
+                                const std::array<real_type, 10>& ys,
+                                const std::array<real_type, 10>& d2ys)
+        : min_theta(1.30900), max_theta(2.87979), k_(k),
+          dtheta((2.87979 - 1.30900) / 9.0), rdtheta(1.0 / dtheta),
+          thetas{
+              {1.30900, 1.48353, 1.65806, 1.83260, 2.00713,
+               2.18166, 2.35619, 2.53073, 2.70526, 2.87979}
+          }, ys_(ys), d2ys_(d2ys)
+    {
+        this->reset_energy_parameters();
     }
     ~FlexibleLocalAnglePotential() = default;
 
@@ -111,6 +93,51 @@ class FlexibleLocalAnglePotential
     {return std::numeric_limits<real_type>::infinity();}
 
   private:
+
+    void reset_energy_parameters()
+    {
+        // check the data points are evenly distributed.
+        for(std::size_t i=1; i < thetas.size(); ++i)
+        {
+            const auto x_prev = this->thetas[i-1];
+            const auto x_curr = this->thetas[i];
+            const auto dx_tmp = x_curr - x_prev;
+            if(std::abs(dx_tmp / this->dtheta - 1.0) > 1e-3)
+            {
+                throw_exception<std::runtime_error>("FlexibleLocalAnglePotential:"
+                    " data points are not evenly distributed");
+            }
+        }
+
+        // set the range and the parameters from table
+        // from cafemol3/mloop_flexible_local.F90
+        const real_type center_th = (max_theta + min_theta) * 0.5;
+        this->min_theta_ene = spline_interpolate(min_theta);
+        this->max_theta_ene = spline_interpolate(max_theta - 1e-4);
+
+        this->min_energy = min_theta_ene;
+        real_type th = this->thetas[0];
+        while(th < max_theta)
+        {
+            const real_type energy = this->spline_interpolate(th);
+            const real_type force  = this->spline_derivative(th);
+            this->min_energy = std::min(min_energy, energy);
+
+            if(force < min_force)
+            {
+                this->min_theta     = th;
+                this->min_theta_ene = energy;
+            }
+            if(max_force < force && center_th < th && max_theta == thetas.back())
+            {
+                this->max_theta     = th;
+                this->max_theta_ene = energy;
+            }
+            th += 1e-4;
+        }
+        return ;
+    }
+
 
     real_type spline_interpolate(const real_type th) const noexcept
     {
@@ -163,20 +190,25 @@ class FlexibleLocalAnglePotential
     real_type min_theta_ene;
     real_type max_theta_ene;
 
-    real_type k_;
+    real_type k_, dtheta, rdtheta;
+    std::array<real_type, 10> thetas;
     std::array<real_type, 10> ys_;
     std::array<real_type, 10> d2ys_;
+    // These values enlarges the size of this object and in most case those
+    // parameter values are the same as the default (it depends on the type of
+    // the residue, but there are only 20 parameter sets). By making these
+    // values static, the cache hit ratio might become better and the
+    // simulation can be accelerated.
 };
 template<typename realT>
 constexpr realT FlexibleLocalAnglePotential<realT>::max_force;
 template<typename realT>
 constexpr realT FlexibleLocalAnglePotential<realT>::min_force;
-template<typename realT>
-constexpr realT FlexibleLocalAnglePotential<realT>::dtheta;
-template<typename realT>
-constexpr realT FlexibleLocalAnglePotential<realT>::rdtheta;
-template<typename realT>
-constexpr std::array<realT, 10> FlexibleLocalAnglePotential<realT>::thetas;
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class FlexibleLocalAnglePotential<double>;
+extern template class FlexibleLocalAnglePotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
 
 } // mjolnir
 #endif // MJOLNIR_FLEXIBLE_LOCAL_ANGLE_POTENTIAL

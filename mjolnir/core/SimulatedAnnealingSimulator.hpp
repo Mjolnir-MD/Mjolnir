@@ -165,4 +165,23 @@ SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::finalize()
 }
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+#include <mjolnir/core/BAOABLangevinIntegrator.hpp>
+#include <mjolnir/core/UnderdampedLangevinIntegrator.hpp>
+namespace mjolnir
+{
+// BAOAB
+extern template class SimulatedAnnealingSimulator<SimulatorTraits<double, UnlimitedBoundary>       , BAOABLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>       >, LinearScheduler>;
+extern template class SimulatedAnnealingSimulator<SimulatorTraits<float,  UnlimitedBoundary>       , BAOABLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       >, LinearScheduler>;
+extern template class SimulatedAnnealingSimulator<SimulatorTraits<double, CuboidalPeriodicBoundary>, BAOABLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>, LinearScheduler>;
+extern template class SimulatedAnnealingSimulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>, BAOABLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>, LinearScheduler>;
+// Langevin
+extern template class SimulatedAnnealingSimulator<SimulatorTraits<double, UnlimitedBoundary>       , UnderdampedLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>       >, LinearScheduler>;
+extern template class SimulatedAnnealingSimulator<SimulatorTraits<float,  UnlimitedBoundary>       , UnderdampedLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       >, LinearScheduler>;
+extern template class SimulatedAnnealingSimulator<SimulatorTraits<double, CuboidalPeriodicBoundary>, UnderdampedLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>, LinearScheduler>;
+extern template class SimulatedAnnealingSimulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UnderdampedLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>, LinearScheduler>;
+}
+#endif // SEPARATE_BUILD
+
 #endif // MJOLNIR_SIMULATED_ANNEALING_SIMULATOR_HPP

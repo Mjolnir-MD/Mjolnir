@@ -11,7 +11,7 @@ namespace mjolnir
 
 template<typename traitsT>
 GlobalForceField<traitsT>
-read_global_forcefield(toml::array interactions, const std::string& input_path)
+read_global_forcefield(const toml::array& interactions, const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -60,6 +60,12 @@ read_global_forcefield(toml::array interactions, const std::string& input_path)
     return gff;
 }
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template GlobalForceField<SimulatorTraits<double, UnlimitedBoundary>       > read_global_forcefield(const toml::array& interactions, const std::string& input_path);
+extern template GlobalForceField<SimulatorTraits<float,  UnlimitedBoundary>       > read_global_forcefield(const toml::array& interactions, const std::string& input_path);
+extern template GlobalForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_global_forcefield(const toml::array& interactions, const std::string& input_path);
+extern template GlobalForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_global_forcefield(const toml::array& interactions, const std::string& input_path);
+#endif
 
 } // mjolnir
 #endif// MJOLNIR_READ_GLOBAL_FORCEFIELD_HPP

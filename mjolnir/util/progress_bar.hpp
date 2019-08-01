@@ -1,8 +1,9 @@
 #ifndef MJOLNIR_UTIL_PROGRESS_BAR_HPP
 #define MJOLNIR_UTIL_PROGRESS_BAR_HPP
+#include <array>
 #include <cstring>
 #include <cmath>
-#include <array>
+#include <cassert>
 
 namespace mjolnir
 {
@@ -10,27 +11,21 @@ namespace mjolnir
 template<std::size_t Width>
 class progress_bar
 {
-    //XXX: requires UTF-8. TODO: consider setting locale
-    static constexpr auto full  = u8"█"; // U+2588 Full block
-    static constexpr auto l7    = u8"▉"; // U+2589 Left seven eighths block
-    static constexpr auto l6    = u8"▊"; // U+258A Left three quarters block
-    static constexpr auto l5    = u8"▋"; // U+258B Left five eighths block
-    static constexpr auto l4    = u8"▌"; // U+258C Left half block
-    static constexpr auto l3    = u8"▍"; // U+258D Left three eighths block
-    static constexpr auto l2    = u8"▎"; // U+258E Left one quarter block
-    static constexpr auto l1    = u8"▏"; // U+258F Left one eighth block
-
-    // \r100.0%| ... W*3 ... |\0
-    static constexpr std::size_t buffer_size = 10 + Width * 3;
+    //  .---8--.             .--------21---------.
+    //  12345678             123456789012345678901
+    // \r100.0%| ... W*3 ... |XX.X sec remaining \0
+    using buffer_type = std::array<char, 30 + Width * 3>;
 
   public:
 
-    progress_bar(): total_(1), r_total_(1.0)
+    progress_bar() noexcept
+        : total_(1), r_total_(1.0)
     {
         buffer_.fill('\0');
         buffer_.front() = '\r';
     }
-    explicit progress_bar(std::size_t tot) : total_(tot), r_total_(1.0 / tot)
+    explicit progress_bar(std::size_t tot) noexcept
+        : total_(tot), r_total_(1.0 / tot)
     {
         buffer_.fill('\0');
         buffer_.front() = '\r';
@@ -50,12 +45,22 @@ class progress_bar
 
     const char* format(std::size_t count)
     {
+        //XXX: requires UTF-8. TODO: consider setting locale
+        constexpr auto full  = u8"█"; // U+2588 Full block
+        constexpr auto l7    = u8"▉"; // U+2589 Left seven eighths block
+        constexpr auto l6    = u8"▊"; // U+258A Left three quarters block
+        constexpr auto l5    = u8"▋"; // U+258B Left five eighths block
+        constexpr auto l4    = u8"▌"; // U+258C Left half block
+        constexpr auto l3    = u8"▍"; // U+258D Left three eighths block
+        constexpr auto l2    = u8"▎"; // U+258E Left one quarter block
+        constexpr auto l1    = u8"▏"; // U+258F Left one eighth block
+
         const double ratio = (count == total_) ? 1.0 : count * this->r_total_;
         assert(ratio <= 1.0);
 
         char* iter = buffer_.data();
         iter++; // the first character is always \r
-        iter += std::sprintf(iter, "%5.1f", ratio * 100.0);
+        iter += std::snprintf(iter, 6, "%5.1f", ratio * 100.0);
         *iter++ = '%';
         *iter++ = '|';
 
@@ -79,13 +84,14 @@ class progress_bar
                 case 6:{*iter++ = l6[0]; *iter++ = l6[1]; *iter++ = l6[2]; break;}
                 case 7:{*iter++ = l7[0]; *iter++ = l7[1]; *iter++ = l7[2]; break;}
             }
-            for(std::size_t i=0; i<Width - filled - 1; ++i)
+            for(std::size_t i=1; i<Width - filled; ++i)
             {
                 *iter++ = ' ';
             }
         }
         *iter++ = '|';
         *iter++ = '\0';
+        assert(iter <= buffer_.end());
         return buffer_.data();
     }
 
@@ -95,9 +101,8 @@ class progress_bar
 
     std::size_t total_;
     double      r_total_;
-    std::array<char, buffer_size> buffer_;
+    buffer_type buffer_;
 };
-
 
 } // mjolnir
 #endif// MJOLNIR_PROGRESS_BAR_HPP

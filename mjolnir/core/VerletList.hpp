@@ -2,7 +2,7 @@
 #define MJOLNIR_CORE_VERLET_LIST_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
-#include <mjolnir/core/ExclusionList.hpp>
+#include <mjolnir/util/empty.hpp>
 #include <algorithm>
 #include <limits>
 
@@ -18,7 +18,6 @@ class VerletList
     using boundary_type       = typename traits_type::boundary_type;
     using real_type           = typename traits_type::real_type;
     using coordinate_type     = typename traits_type::coordinate_type;
-    using exclusion_list_type = ExclusionList;
 
     using parameter_type      = parameterT;
     using neighbor_list_type  = NeighborList<parameter_type>;
@@ -44,7 +43,6 @@ class VerletList
     void initialize(const system_type& sys, const PotentialT& pot)
     {
         this->set_cutoff(pot.max_cutoff_length());
-        this->exclusion_.make(sys, pot);
         this->make(sys, pot);
         return;
     }
@@ -71,7 +69,6 @@ class VerletList
     real_type      margin_;
     real_type      current_margin_;
 
-    exclusion_list_type exclusion_;
     neighbor_list_type  neighbors_;
 };
 
@@ -93,7 +90,7 @@ template<typename potentialT>
 void VerletList<traitsT, parameterT>::make(
         const system_type& sys, const potentialT& pot)
 {
-    static_assert(std::is_same<typename potentialT::parameter_type,
+    static_assert(std::is_same<typename potentialT::pair_parameter_type,
         parameter_type>::value, "VerletList: invalid template argumnet: "
         "potentialT::parameter_type should be equal to verletlist::parameterT");
 
@@ -116,11 +113,10 @@ void VerletList<traitsT, parameterT>::make(
         for(std::size_t jdx=idx+1; jdx<participants.size(); ++jdx)
         {
             const auto j = participants[jdx];
-            if(this->exclusion_.is_excluded(i, j))
+            if(!pot.has_interaction(i, j))
             {
                 continue;
             }
-
             const auto& rj = sys.position(j);
             if(math::length_sq(sys.adjust_direction(rj - ri)) < rc2)
             {
@@ -133,6 +129,24 @@ void VerletList<traitsT, parameterT>::make(
     this->current_margin_ = cutoff_ * margin_;
     return ;
 }
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>, empty_t>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>, double>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>, float >;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+#endif
+
 
 } // mjolnir
 #endif/* MJOLNIR_CORE_VERLET_LIST */

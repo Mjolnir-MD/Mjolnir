@@ -12,6 +12,8 @@
 #include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
 #include <mjolnir/potential/local/CosinePotential.hpp>
 #include <mjolnir/potential/local/SumLocalPotential.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BondPotential.hpp>
+
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/make_unique.hpp>
@@ -90,9 +92,30 @@ read_flexible_local_angle_potential(const toml::value& param, const toml::value&
     const auto term1 = find_parameter<std::array<real_type, 10>>(param, env, "y");
     const auto term2 = find_parameter<std::array<real_type, 10>>(param, env, "d2y");
 
-    MJOLNIR_LOG_INFO("FlexibleLocalAngle = {k = ", k,
-                     ", y = ", term1, ", d2y = ", term2, '}');
-    return FlexibleLocalAnglePotential<realT>(k, term1, term2);
+    if(param.as_table().count("x") == 1)
+    {
+        const auto xs =
+            find_parameter<std::array<real_type, 10>>(param, env, "x");
+        MJOLNIR_LOG_INFO("FlexibleLocalAngle = {k = ", k, ", x = ", xs,
+                         ", y = ", term1, ", d2y = ", term2, '}');
+        try
+        {
+            return FlexibleLocalAnglePotential<realT>(k, xs, term1, term2);
+        }
+        catch (const std::runtime_error&)
+        {
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "mjolnir::read_flexible_local_angle_potential: data points "
+                "are not evenly distributed", find_parameter<toml::value>(
+                param, env, "x"), "here"));
+        }
+    }
+    else
+    {
+        MJOLNIR_LOG_INFO("FlexibleLocalAngle = {k = ", k,
+                         ", y = ", term1, ", d2y = ", term2, '}');
+        return FlexibleLocalAnglePotential<realT>(k, term1, term2);
+    }
 }
 
 template<typename realT>
@@ -135,6 +158,19 @@ read_cosine_potential(const toml::value& param, const toml::value& env)
 
     MJOLNIR_LOG_INFO("CosinePotential = {k = ", k, ", n = ", n, ", v0 = ", v0, '}');
     return CosinePotential<realT>(k, n, v0);
+}
+
+template<typename realT>
+ThreeSPN2BondPotential<realT>
+read_3spn2_bond_potential(const toml::value& param, const toml::value& env)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    using real_type = realT;
+    auto k  = find_parameter<real_type>(param, env, "k");
+    auto v0 = find_parameter<real_type>(param, env, "v0");
+
+    MJOLNIR_LOG_INFO("ThreeSPN2BondPotential = {k = ", k, ", v0 = ", v0, '}');
+    return ThreeSPN2BondPotential<realT>(k, v0);
 }
 
 // ----------------------------------------------------------------------------
@@ -222,6 +258,15 @@ struct read_local_potential_impl<CosinePotential<realT>>
         return read_cosine_potential<realT>(param, env);
     }
 };
+template<typename realT>
+struct read_local_potential_impl<ThreeSPN2BondPotential<realT>>
+{
+    static ThreeSPN2BondPotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
+    {
+        return read_3spn2_bond_potential<realT>(param, env);
+    }
+};
 } // namespace detail
 
 // this function reads particle indices on which the potential will be applied
@@ -299,6 +344,33 @@ read_local_potentials(const toml::value& local)
     }
     return retval;
 }
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template std::vector<std::pair<std::array<std::size_t, 2>, HarmonicPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 2>, HarmonicPotential<float >>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 3>, HarmonicPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 3>, HarmonicPotential<float >>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, HarmonicPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, HarmonicPotential<float >>> read_local_potential(const toml::value& local);
+
+extern template std::vector<std::pair<std::array<std::size_t, 4>, ClementiDihedralPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, ClementiDihedralPotential<float >>> read_local_potential(const toml::value& local);
+
+extern template std::vector<std::pair<std::array<std::size_t, 2>, GaussianPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 2>, GaussianPotential<float >>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 3>, GaussianPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 3>, GaussianPotential<float >>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, PeriodicGaussianPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, PeriodicGaussianPotential<float >>> read_local_potential(const toml::value& local);
+
+extern template std::vector<std::pair<std::array<std::size_t, 3>, FlexibleLocalAnglePotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 3>, FlexibleLocalAnglePotential<float >>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, FlexibleLocalDihedralPotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, FlexibleLocalDihedralPotential<float >>> read_local_potential(const toml::value& local);
+
+extern template std::vector<std::pair<std::array<std::size_t, 4>, CosinePotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 4>, CosinePotential<float >>> read_local_potential(const toml::value& local);
+#endif
 
 } // mjolnir
 #endif // MJOLNIR_READ_LOCAL_POTENTIAL_HPP

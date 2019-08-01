@@ -32,6 +32,13 @@ class ObserverBase
     virtual std::string const& prefix() const noexcept = 0;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ObserverBase<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ObserverBase<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ObserverBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ObserverBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 namespace detail
 {
 // it is a helper function to write value as an array of bytes

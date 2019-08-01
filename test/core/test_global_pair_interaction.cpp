@@ -10,7 +10,6 @@
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/NaivePairCalculation.hpp>
 #include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
-#include <mjolnir/potential/global/IgnoreMolecule.hpp>
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <random>
@@ -35,7 +34,9 @@ BOOST_AUTO_TEST_CASE(GlobalPairInteraction_double)
     potential_type   potential(std::vector<std::pair<std::size_t, parameter_type>>{
             {0, {/* sigma = */ 1.0, /* epsilon = */1.2}},
             {1, {/* sigma = */ 1.0, /* epsilon = */1.2}}
-        }, {}, typename potential_type::ignore_molecule_type("Nothing"));
+        }, {}, typename potential_type::ignore_molecule_type("Nothing"),
+               typename potential_type::ignore_group_type   ({})
+        );
 
     interaction_type interaction(potential_type{potential}, partition_type{});
 
@@ -56,12 +57,13 @@ BOOST_AUTO_TEST_CASE(GlobalPairInteraction_double)
     sys.force(1)    = coordinate_type(0.0, 0.0, 0.0);
 
     sys.topology().construct_molecules();
-    interaction.initialize(sys);
 
     sys.name(0)  = "X";
     sys.name(1)  = "X";
     sys.group(0) = "NONE";
     sys.group(1) = "NONE";
+
+    interaction.initialize(sys);
 
     std::mt19937 rng(123456789);
     std::normal_distribution<real_type> gauss(0.0, 1.0);

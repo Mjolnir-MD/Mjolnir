@@ -2,7 +2,7 @@
 #define MJOLNIR_CORE_NAIVE_PAIR_CALCULATION_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
-#include <mjolnir/core/ExclusionList.hpp>
+#include <mjolnir/util/empty.hpp>
 
 namespace mjolnir
 {
@@ -16,7 +16,6 @@ class NaivePairCalculation
     using boundary_type       = typename traits_type::boundary_type;
     using real_type           = typename traits_type::real_type;
     using coordinate_type     = typename traits_type::coordinate_type;
-    using exclusion_list_type = ExclusionList;
     using parameter_type      = parameterT;
     using neighbor_list_type  = NeighborList<parameter_type>;
     using neighbor_type       = typename neighbor_list_type::neighbor_type;
@@ -47,7 +46,6 @@ class NaivePairCalculation
 
   private:
 
-    exclusion_list_type exclusion_;
     neighbor_list_type  neighbors_;
 };
 
@@ -56,7 +54,6 @@ template<typename PotentialT>
 void NaivePairCalculation<traitsT, parameterT>::initialize(
         const system_type& sys, const PotentialT& pot)
 {
-    this->exclusion_.make(sys, pot);
     this->make(sys, pot);
     return;
 }
@@ -78,16 +75,32 @@ void NaivePairCalculation<traitsT, parameterT>::make(
         for(std::size_t jdx=idx+1; jdx<participants.size(); ++jdx)
         {
             const auto j = participants[jdx];
-            if(this->exclusion_.is_excluded(i, j))
+            if(pot.has_interaction(i, j)) // likely
             {
-                continue;
+                partners.emplace_back(j, pot.prepare_params(i, j));
             }
-            partners.emplace_back(j, pot.prepare_params(i, j));
         }
         this->neighbors_.add_list_for(i, partners.begin(), partners.end());
     }
     return;
 }
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>, empty_t>;
+extern template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
+extern template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
+extern template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+
+extern template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>, double>;
+extern template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>, float >;
+extern template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
+extern template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+
+extern template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
+extern template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
+extern template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
+extern template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+#endif
 
 } // mjolnir
 #endif /*MJOLNIR_CORE_NAIVE_PAIR_CALCULATION*/

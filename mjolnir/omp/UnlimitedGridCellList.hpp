@@ -15,14 +15,13 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
     using system_type         = System<traits_type>;
     using real_type           = typename traits_type::real_type;
     using coordinate_type     = typename traits_type::coordinate_type;
-    using exclusion_list_type = ExclusionList;
     using parameter_type      = parameterT;
     using neighbor_list_type  = NeighborList<parameter_type>;
     using neighbor_type       = typename neighbor_list_type::neighbor_type;
     using range_type          = typename neighbor_list_type::range_type;
 
     constexpr static std::size_t  dim_size  = 8;
-    constexpr static std::int64_t dim       = 8;
+    constexpr static std::int64_t dim       = static_cast<std::int64_t>(dim_size);
     constexpr static std::size_t total_size = dim_size * dim_size * dim_size;
     constexpr static real_type mesh_epsilon = 1e-6;
 
@@ -64,7 +63,6 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
         MJOLNIR_LOG_INFO(pot.name(), " cutoff = ", pot.max_cutoff_length());
         MJOLNIR_LOG_INFO("dimension = ", dim, 'x', dim, 'x', dim);
         this->set_cutoff(pot.max_cutoff_length());
-        this->exclusion_.make(sys, pot);
 
         // initialize cell list
 #pragma omp parallel for
@@ -200,7 +198,7 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
                 {
                     const auto j = pici.first;
                     MJOLNIR_LOG_DEBUG("looking particle ", j);
-                    if(j <= i || this->exclusion_.is_excluded(i, j))
+                    if(j <= i || !pot.has_interaction(i, j))
                     {
                         continue;
                     }
@@ -281,7 +279,6 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
     real_type current_margin_;
     real_type r_cell_size_;
 
-    exclusion_list_type       exclusion_;
     neighbor_list_type        neighbors_;
     cell_list_type            cell_list_;
     cell_index_container_type index_by_cell_;
@@ -306,6 +303,23 @@ template<typename realT, template<typename, typename> class boundaryT, typename 
 constexpr typename UnlimitedGridCellList<
     OpenMPSimulatorTraits<realT, boundaryT>, parameterT>::real_type
     UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>::mesh_epsilon;
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, empty_t>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, double>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, float >;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+#endif
 
 } // mjolnir
 #endif/* MJOLNIR_UNLIMITED_GRID_CELL_LIST */

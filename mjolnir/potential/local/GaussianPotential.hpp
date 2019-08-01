@@ -21,7 +21,7 @@ class GaussianPotential
                       const real_type v0) noexcept
         : k_(k), sigma_(sigma), inv_sigma2_(-1./(2*sigma*sigma)), v0_(v0),
           cutoff_(v0_ + sigma_ *
-                  std::sqrt(2 * std::log(k_ / math::tolerance<real_type>())))
+                  std::sqrt(2 * std::log(k_ / math::abs_tolerance<real_type>())))
     {}
     ~GaussianPotential() = default;
 
@@ -55,6 +55,11 @@ class GaussianPotential
     real_type v0_;
     real_type cutoff_;
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class GaussianPotential<double>;
+extern template class GaussianPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
 
 } // mjolnir
 #endif /* MJOLNIR_GAUSSIAN_POTENTIAL */

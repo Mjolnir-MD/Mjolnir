@@ -34,6 +34,9 @@ std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
         // eps0 [F/m] == [C^2/J/m] -> [C^2/(kcal/mol)/m]
         phys_type::set_eps0(phys_type::eps0() * (1000.0 / unit_type::J_to_cal) /
                             unit_type::avogadro_constant);
+
+        // set name of energy unit
+        phys_type::set_energy_unit(energy);
     }
     else if(energy == "kJ/mol")
     {
@@ -42,6 +45,9 @@ std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
         // eps0 [F/m] == [C^2/J/m] -> [C^2/kJ/mol/m]
         phys_type::set_eps0(phys_type::eps0() * 1e+3 /
                             unit_type::avogadro_constant);
+
+        // set name of energy unit
+        phys_type::set_energy_unit(energy);
     }
     else
     {
@@ -76,6 +82,9 @@ std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
 
         MJOLNIR_LOG_INFO("1 [L] = ", phys_type::L_to_volume(), " [", length, "^3]");
         MJOLNIR_LOG_INFO("1 [", length, "^3] = ", phys_type::volume_to_L(), " [L]");
+
+        // set name of length unit
+        phys_type::set_length_unit("angstrom");
     }
     else if(length == "nm")
     {
@@ -95,6 +104,9 @@ std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
 
         MJOLNIR_LOG_INFO("1 [L] = ", phys_type::L_to_volume(), " [", length, "^3]");
         MJOLNIR_LOG_INFO("1 [", length, "^3] = ", phys_type::volume_to_L(), " [L]");
+
+        // set name of length unit
+        phys_type::set_length_unit("nm");
     }
     else
     {
@@ -114,6 +126,13 @@ std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
 
     return read_simulator<traitsT>(data);
 }
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<double, UnlimitedBoundary>>(const toml::table& data);
+extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<float,  UnlimitedBoundary>>(const toml::table& data);
+extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::table& data);
+extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::table& data);
+#endif
 
 } // mjolnir
 #endif// MJOLNIR_READ_UNIT_SYSTEM_HPP

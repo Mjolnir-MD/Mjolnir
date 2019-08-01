@@ -196,4 +196,30 @@ void ContactInteraction<traitsT, potentialT>::write_topology(
 }
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize ContactInteraction with LocalPotentials
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/potential/local/GoContactPotential.hpp>
+#include <mjolnir/potential/local/GaussianPotential.hpp>
+
+namespace mjolnir
+{
+
+// go-contact
+extern template class ContactInteraction<SimulatorTraits<double, UnlimitedBoundary>, GoContactPotential<double>>;
+extern template class ContactInteraction<SimulatorTraits<float,  UnlimitedBoundary>, GoContactPotential<float> >;
+extern template class ContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GoContactPotential<double>>;
+extern template class ContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GoContactPotential<float> >;
+
+// gaussian
+extern template class ContactInteraction<SimulatorTraits<double, UnlimitedBoundary>, GaussianPotential<double>>;
+extern template class ContactInteraction<SimulatorTraits<float,  UnlimitedBoundary>, GaussianPotential<float> >;
+extern template class ContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>>;
+extern template class ContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> >;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif /* MJOLNIR_BOND_LENGTH_INTERACTION */

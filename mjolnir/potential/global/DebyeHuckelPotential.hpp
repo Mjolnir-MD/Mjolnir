@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_DEBYE_HUCKEL_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_DEBYE_HUCKEL_POTENTIAL_HPP
-#include <mjolnir/potential/global/IgnoreMolecule.hpp>
 #include <mjolnir/core/Unit.hpp>
+#include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -28,11 +28,21 @@ class DebyeHuckelPotential
     using parameter_type       = real_type;
     using container_type       = std::vector<parameter_type>;
 
+    // `pair_parameter_type` is a parameter for a interacting pair.
+    // Although it is the same type as `parameter_type` in this potential,
+    // it can be different from normal parameter for each particle.
+    // This enables NeighborList to cache a value to calculate forces between
+    // the particles, e.g. by having qi * qj for pair of particles i and j.
+    using pair_parameter_type  = parameter_type;
+
     // topology stuff
     using topology_type        = Topology;
     using molecule_id_type     = typename topology_type::molecule_id_type;
+    using group_id_type        = typename topology_type::group_id_type;
     using connection_kind_type = typename topology_type::connection_kind_type;
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type    = IgnoreGroup   <group_id_type>;
+    using exclusion_list_type  = ExclusionList;
 
     // r_cutoff = cutoff_ratio * debye_length
     static constexpr real_type cutoff_ratio = 5.5;
@@ -47,10 +57,9 @@ class DebyeHuckelPotential
     DebyeHuckelPotential(
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>& exclusions,
-        ignore_molecule_type ignore_mol)
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
         : temperature_(300.0), ion_conc_(0.1),
-          ignore_molecule_(std::move(ignore_mol)),
-          ignore_within_  (exclusions.begin(), exclusions.end())
+          exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
@@ -70,7 +79,7 @@ class DebyeHuckelPotential
     }
     ~DebyeHuckelPotential() = default;
 
-    parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
+    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
         return this->inv_4_pi_eps0_epsk_ * this->parameters_[i] * this->parameters_[j];
     }
@@ -86,12 +95,12 @@ class DebyeHuckelPotential
         return this->derivative(r, this->prepare_params(i, j));
     }
 
-    real_type potential(const real_type r, const parameter_type& p) const noexcept
+    real_type potential(const real_type r, const pair_parameter_type& p) const noexcept
     {
         if(this->max_cutoff_length() <= r) {return 0.0;}
         return p * std::exp(-r * this->inv_debye_length_) / r;
     }
-    real_type derivative(const real_type r, const parameter_type& p) const noexcept
+    real_type derivative(const real_type r, const pair_parameter_type& p) const noexcept
     {
         if(this->max_cutoff_length() <= r) {return 0.0;}
         return -p * (debye_length_ + r) * this->inv_debye_length_ / (r * r) *
@@ -117,9 +126,7 @@ class DebyeHuckelPotential
         {
             MJOLNIR_LOG_ERROR("DebyeHuckel requires `ionic_strength` attribute");
         }
-        this->temperature_ = sys.attribute("temperature");
-        this->ion_conc_    = sys.attribute("ionic_strength");
-        this->calc_parameters();
+        this->update(sys); // calc parameters
         return;
     }
 
@@ -127,34 +134,50 @@ class DebyeHuckelPotential
     template<typename traitsT>
     void update(const System<traitsT>& sys) noexcept
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
         assert(sys.has_attribute("temperature"));
         assert(sys.has_attribute("ionic_strength"));
 
         this->temperature_ = sys.attribute("temperature");
         this->ion_conc_    = sys.attribute("ionic_strength");
+
+        MJOLNIR_LOG_INFO("temperature    = ", this->temperature_);
+        MJOLNIR_LOG_INFO("ionic strength = ", this->ion_conc_);
+
         this->calc_parameters();
+
+        // update exclusion list based on sys.topology()
+        exclusion_list_.make(sys);
         return;
     }
 
-    // e.g. {"bond", 3} means ignore particles connected within 3 "bond"s
-    std::vector<std::pair<connection_kind_type, std::size_t>>
-    ignore_within() const {return ignore_within_;}
-
-    bool is_ignored_molecule(
-            const molecule_id_type& i, const molecule_id_type& j) const noexcept
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
-        return ignore_molecule_.is_ignored(i, j);
+        // if not excluded, the pair has interaction.
+        return !exclusion_list_.is_excluded(i, j);
     }
 
+    // for testing
+    exclusion_list_type const& exclusion_list() const noexcept
+    {
+        return exclusion_list_;
+    }
+
+    // ------------------------------------------------------------------------
+    // used by Observer.
     static const char* name() noexcept {return "DebyeHuckel";}
 
-    // access to the parameters
+    // ------------------------------------------------------------------------
+    // the following accessers would be used in tests.
+
+    // access to the parameters.
     std::vector<real_type>&       charges()       noexcept {return parameters_;}
     std::vector<real_type> const& charges() const noexcept {return parameters_;}
 
     std::vector<std::size_t> const& participants() const noexcept {return participants_;}
 
-    //XXX this one is calculated parameter, shouldn't be changed!
     real_type debye_length() const noexcept {return this->debye_length_;}
 
   private:
@@ -214,13 +237,17 @@ class DebyeHuckelPotential
     container_type parameters_;
     std::vector<std::size_t> participants_;
 
-    ignore_molecule_type ignore_molecule_;
-    std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
+    exclusion_list_type  exclusion_list_;
 };
 
 template<typename realT>
 constexpr typename DebyeHuckelPotential<realT>::real_type
 DebyeHuckelPotential<realT>::cutoff_ratio;
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class DebyeHuckelPotential<double>;
+extern template class DebyeHuckelPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
 
 } // mjolnir
 #endif /* MJOLNIR_DEBYE_HUCKEL_POTENTIAL */

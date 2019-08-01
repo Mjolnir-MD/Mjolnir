@@ -2,7 +2,6 @@
 #define MJOLNIR_CORE_UNLIMITED_GRID_CELL_LIST_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
-#include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/util/range.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <functional>
@@ -22,13 +21,12 @@ class UnlimitedGridCellList
     using system_type         = System<traits_type>;
     using real_type           = typename traits_type::real_type;
     using coordinate_type     = typename traits_type::coordinate_type;
-    using exclusion_list_type = ExclusionList;
     using parameter_type      = parameterT;
     using neighbor_list_type  = NeighborList<parameter_type>;
     using neighbor_type       = typename neighbor_list_type::neighbor_type;
     using range_type          = typename neighbor_list_type::range_type;
 
-    constexpr static std::size_t  dim_size  = 8;
+    constexpr static std::size_t  dim_size  = 8u;
     constexpr static std::int64_t dim       = 8;
     constexpr static std::size_t total_size = dim_size * dim_size * dim_size;
     constexpr static real_type mesh_epsilon = 1e-6;
@@ -112,7 +110,6 @@ class UnlimitedGridCellList
     real_type current_margin_;
     real_type r_cell_size_;
 
-    exclusion_list_type       exclusion_;
     neighbor_list_type        neighbors_;
     cell_list_type            cell_list_;
     cell_index_container_type index_by_cell_;
@@ -214,7 +211,7 @@ void UnlimitedGridCellList<traitsT, parameterT>::make(
             {
                 const auto j = pici.first;
                 MJOLNIR_LOG_DEBUG("looking particle ", j);
-                if(j <= i || this->exclusion_.is_excluded(i, j))
+                if(j <= i || !pot.has_interaction(i, j))
                 {
                     continue;
                 }
@@ -249,7 +246,6 @@ void UnlimitedGridCellList<traitsT, parameterT>::initialize(
     MJOLNIR_LOG_INFO(pot.name(), " cutoff = ", pot.max_cutoff_length());
     MJOLNIR_LOG_INFO("dimension(independent from system size) = ", dim, 'x', dim, 'x', dim);
     this->set_cutoff(pot.max_cutoff_length());
-    this->exclusion_.make(sys, pot);
 
     // initialize cell list
     for(int x = 0; x < dim; ++x)
@@ -299,6 +295,21 @@ void UnlimitedGridCellList<traitsT, parameterT>::initialize(
     this->make(sys, pot);
     return;
 }
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, empty_t>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
 
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, double>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, float >;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+#endif
 } // mjolnir
 #endif/* MJOLNIR_UNLIMITED_GRID_CELL_LIST */

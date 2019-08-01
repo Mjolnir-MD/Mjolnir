@@ -73,6 +73,7 @@ class DihedralAngleInteraction final : public LocalInteractionBase<traitsT>
     void write_topology(topology_type&) const override;
 
    private:
+
     connection_kind_type kind_;
     container_type potentials;
 };
@@ -185,11 +186,54 @@ void DihedralAngleInteraction<traitsT, potentialT>::write_topology(
         const auto k = idxp.first[2];
         const auto l = idxp.first[3];
         topol.add_connection(i, j, this->kind_);
+        topol.add_connection(i, k, this->kind_);
+        topol.add_connection(i, l, this->kind_);
         topol.add_connection(j, k, this->kind_);
+        topol.add_connection(j, l, this->kind_);
         topol.add_connection(k, l, this->kind_);
     }
     return;
 }
 
 }// mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize BondLengthInteraction with LocalPotentials
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
+#include <mjolnir/potential/local/PeriodicGaussianPotential.hpp>
+#include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
+#include <mjolnir/potential/local/CosinePotential.hpp>
+
+namespace mjolnir
+{
+
+// ClementiDihedral
+extern template class DihedralAngleInteraction<SimulatorTraits<double, UnlimitedBoundary>, ClementiDihedralPotential<double>>;
+extern template class DihedralAngleInteraction<SimulatorTraits<float,  UnlimitedBoundary>, ClementiDihedralPotential<float> >;
+extern template class DihedralAngleInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, ClementiDihedralPotential<double>>;
+extern template class DihedralAngleInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ClementiDihedralPotential<float> >;
+
+// gaussian
+extern template class DihedralAngleInteraction<SimulatorTraits<double, UnlimitedBoundary>, PeriodicGaussianPotential<double>>;
+extern template class DihedralAngleInteraction<SimulatorTraits<float,  UnlimitedBoundary>, PeriodicGaussianPotential<float> >;
+extern template class DihedralAngleInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, PeriodicGaussianPotential<double>>;
+extern template class DihedralAngleInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, PeriodicGaussianPotential<float> >;
+
+// FLP dihedral
+extern template class DihedralAngleInteraction<SimulatorTraits<double, UnlimitedBoundary>, FlexibleLocalDihedralPotential<double>>;
+extern template class DihedralAngleInteraction<SimulatorTraits<float,  UnlimitedBoundary>, FlexibleLocalDihedralPotential<float> >;
+extern template class DihedralAngleInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, FlexibleLocalDihedralPotential<double>>;
+extern template class DihedralAngleInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, FlexibleLocalDihedralPotential<float> >;
+
+// cosine
+extern template class DihedralAngleInteraction<SimulatorTraits<double, UnlimitedBoundary>, CosinePotential<double>>;
+extern template class DihedralAngleInteraction<SimulatorTraits<float,  UnlimitedBoundary>, CosinePotential<float> >;
+extern template class DihedralAngleInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, CosinePotential<double>>;
+extern template class DihedralAngleInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, CosinePotential<float> >;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif /* MJOLNIR_DIHEDRAL_ANGLE_INTERACTION */

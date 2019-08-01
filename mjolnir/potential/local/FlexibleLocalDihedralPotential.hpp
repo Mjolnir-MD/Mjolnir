@@ -90,6 +90,10 @@ class FlexibleLocalDihedralPotential
     std::array<real_type, 7> term_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class FlexibleLocalDihedralPotential<double>;
+extern template class FlexibleLocalDihedralPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
 
 } // mjolnir
 #endif // MJOLNIR_FLEXIBLE_LOCAL_DIHEDRAL_POTENTIAL

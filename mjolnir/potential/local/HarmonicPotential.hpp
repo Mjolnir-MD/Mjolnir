@@ -48,5 +48,10 @@ class HarmonicPotential
     real_type v0_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class HarmonicPotential<double>;
+extern template class HarmonicPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 }
 #endif /* MJOLNIR_HARMONIC_POTENTIAL */

@@ -77,5 +77,10 @@ template<typename realT>
 constexpr typename GoContactPotential<realT>::real_type
 GoContactPotential<realT>::rcutoff_ratio;
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class GoContactPotential<double>;
+extern template class GoContactPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 } // mjolnir
 #endif /* MJOLNIR_GO_10_12_CONTACT_POTENTIAL */

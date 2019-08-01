@@ -1,5 +1,7 @@
 #ifndef MJOLNIR_CORE_RANDOM_NUMBER_GENERATOR_HPP
 #define MJOLNIR_CORE_RANDOM_NUMBER_GENERATOR_HPP
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
 #include <random>
 #include <cstdint>
 
@@ -41,6 +43,13 @@ class RandomNumberGenerator
     std::mt19937        rng_;
     std::normal_distribution<real_type> nrm_;
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class RandomNumberGenerator<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class RandomNumberGenerator<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class RandomNumberGenerator<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class RandomNumberGenerator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
 
 } // mjolnir
 #endif /*MJOLNIR_CORE_RANDOM_NUMBER_GENERATOR*/

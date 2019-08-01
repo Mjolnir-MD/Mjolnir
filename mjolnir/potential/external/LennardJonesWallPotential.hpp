@@ -103,5 +103,10 @@ template<typename realT>
 constexpr typename LennardJonesWallPotential<realT>::real_type
 LennardJonesWallPotential<realT>::coef_at_cutoff;
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class LennardJonesWallPotential<double>;
+extern template class LennardJonesWallPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 } // mjolnir
 #endif // MJOLNIR_EXTERNAL_LENNARD_JONES_WALL_POTENTIAL

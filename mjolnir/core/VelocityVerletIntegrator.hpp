@@ -87,5 +87,12 @@ VelocityVerletIntegrator<traitsT>::step(
     return time + dt_;
 }
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class VelocityVerletIntegrator<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class VelocityVerletIntegrator<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class VelocityVerletIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class VelocityVerletIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 } // mjolnir
 #endif // MJOLNIR_NVE_VELOCITY_VERLET_INTEGRATOR_HPP

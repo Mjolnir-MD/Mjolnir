@@ -150,5 +150,13 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     std::vector<coordinate_type> acceleration_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class BAOABLangevinIntegrator<OpenMPSimulatorTraits<double, UnlimitedBoundary>>;
+extern template class BAOABLangevinIntegrator<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class BAOABLangevinIntegrator<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class BAOABLangevinIntegrator<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
+
 } // mjolnir
 #endif /* MJOLNIR_BAOAB_LANGEVIN_INTEGRATOR */

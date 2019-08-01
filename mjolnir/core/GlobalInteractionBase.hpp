@@ -29,5 +29,12 @@ class GlobalInteractionBase
     virtual std::string name() const = 0;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 } // mjolnir
 #endif/* MJOLNIR_GLOBAL_INTEARACTION_BASE */

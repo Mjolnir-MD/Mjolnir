@@ -157,5 +157,12 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     std::vector<coordinate_type> acceleration_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<double, UnlimitedBoundary>>;
+extern template class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 } // mjolnir
 #endif /* MJOLNIR_UNDERDAMPED_LANGEVIN_INTEGRATOR */

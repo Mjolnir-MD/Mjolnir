@@ -16,6 +16,9 @@ set(TEST_NAMES
     test_flp_dihedral_potential
     test_clementi_dihedral_potential
     test_go_contact_potential
+    test_3spn2_bond_potential
+    test_3spn2_base_stacking_potential
+    test_3spn2_base_base_interaction_potential
     test_lennard_jones_potential
     test_uniform_lennard_jones_potential
     test_excluded_volume_potential
@@ -31,6 +34,8 @@ set(TEST_NAMES
     test_dihedral_angle_interaction
     test_dihedral_angle_utility_function
     test_contact_interaction
+    test_3spn2_base_stacking_interaction
+    test_3spn2_base_base_interaction
     test_global_pair_interaction
     test_position_restraint_interaction
 
@@ -48,7 +53,9 @@ set(TEST_NAMES
     test_read_flexible_local_angle_potential
     test_read_flexible_local_dihedral_potential
     test_read_cosine_potential
+    test_read_3spn2_bond_potential
     test_read_excluded_volume_potential
+    test_read_3spn2_excluded_volume_potential
     test_read_debye_huckel_potential
     test_read_lennard_jones_potential
     test_read_uniform_lennard_jones_potential
@@ -56,10 +63,15 @@ set(TEST_NAMES
     test_read_lennard_jones_wall_potential
     test_read_implicit_membrane_potential
 
+    test_read_ignore_molecule
+    test_read_ignore_group
+
     test_read_bond_length_interaction
     test_read_bond_angle_interaction
     test_read_dihedral_angle_interaction
     test_read_dummy_interaction
+    test_read_3spn2_base_stacking_interaction
+    test_read_3spn2_base_base_interaction
     test_read_global_pair_interaction
     test_read_position_restraint_interaction
 
@@ -87,8 +99,13 @@ endif()
 
 foreach(TEST_NAME ${TEST_NAMES})
     add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+
+    if(SEPARATE_BUILD)
+        target_link_libraries(${TEST_NAME} mjolnir_core)
+    endif()
     if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
         target_link_libraries(${TEST_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-    endif (Boost_UNIT_TEST_FRAMEWORK_FOUND)
+    endif()
+
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 endforeach(TEST_NAME)

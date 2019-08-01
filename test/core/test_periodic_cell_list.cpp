@@ -7,6 +7,7 @@
 #endif
 
 #include <mjolnir/util/empty.hpp>
+#include <mjolnir/util/logger.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/PeriodicGridCellList.hpp>
@@ -37,6 +38,8 @@ struct dummy_potential
     }
 
     bool is_ignored_molecule(std::size_t, std::size_t) const {return false;}
+    bool is_ignored_group   (std::string, std::string) const {return false;}
+    bool has_interaction    (std::size_t, std::size_t) const {return true;}
 
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within() const
     {

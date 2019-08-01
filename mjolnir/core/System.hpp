@@ -2,6 +2,8 @@
 #define MJOLNIR_CORE_SYSTEM_HPP
 #include <mjolnir/core/Particle.hpp>
 #include <mjolnir/core/Topology.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
 #include <vector>
 #include <map>
 
@@ -13,6 +15,7 @@ class System
 {
   public:
     using traits_type     = traitsT;
+    using string_type     = std::string;
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
     using boundary_type   = typename traits_type::boundary_type;
@@ -20,13 +23,11 @@ class System
     using attribute_type  = std::map<std::string, real_type>;
 
     using particle_type            = Particle<real_type, coordinate_type>;
-    using static_string_type       = typename particle_type::static_string_type;
     using particle_view_type       = ParticleView<real_type, coordinate_type>;
     using particle_const_view_type = ParticleConstView<real_type, coordinate_type>;
 
     using real_container_type          = std::vector<real_type>;
     using coordinate_container_type    = std::vector<coordinate_type>;
-    using static_string_container_type = std::vector<static_string_type>;
 
   public:
 
@@ -35,10 +36,13 @@ class System
           attributes_(), num_particles_(num_particles),
           masses_   (num_particles), rmasses_   (num_particles),
           positions_(num_particles), velocities_(num_particles),
-          forces_   (num_particles), names_     (num_particles),
-          groups_   (num_particles)
+          forces_   (num_particles)
     {}
     ~System() = default;
+    System(const System&) = default;
+    System(System&&)      = default;
+    System& operator=(const System&) = default;
+    System& operator=(System&&)      = default;
 
     coordinate_type adjust_direction(coordinate_type dr) const noexcept
     {return boundary_.adjust_direction(dr);}
@@ -52,7 +56,8 @@ class System
         return particle_view_type{
             masses_[i],    rmasses_[i],
             positions_[i], velocities_[i], forces_[i],
-            names_[i],     groups_[i]
+            this->topology_.name_of (i, std::nothrow),
+            this->topology_.group_of(i, std::nothrow)
         };
     }
     particle_const_view_type operator[](std::size_t i) const noexcept
@@ -60,7 +65,8 @@ class System
         return particle_const_view_type{
             masses_[i],    rmasses_[i],
             positions_[i], velocities_[i], forces_[i],
-            names_[i],     groups_[i]
+            this->topology_.name_of (i, std::nothrow),
+            this->topology_.group_of(i, std::nothrow)
         };
     }
     particle_view_type at(std::size_t i)
@@ -68,7 +74,7 @@ class System
         return particle_view_type{
             masses_.at(i),    rmasses_.at(i),
             positions_.at(i), velocities_.at(i), forces_.at(i),
-            names_.at(i),     groups_.at(i)
+            topology_.name_of(i), topology_.group_of(i)
         };
     }
     particle_const_view_type at(std::size_t i) const
@@ -76,7 +82,7 @@ class System
         return particle_const_view_type{
             masses_.at(i),    rmasses_.at(i),
             positions_.at(i), velocities_.at(i), forces_.at(i),
-            names_.at(i),     groups_.at(i)
+            topology_.name_of(i), topology_.group_of(i)
         };
     }
 
@@ -92,10 +98,10 @@ class System
     coordinate_type const& force   (std::size_t i) const noexcept {return forces_[i];}
     coordinate_type&       force   (std::size_t i)       noexcept {return forces_[i];}
 
-    static_string_type const& name(std::size_t i) const noexcept {return names_[i];}
-    static_string_type&       name(std::size_t i)       noexcept {return names_[i];}
-    static_string_type const& group(std::size_t i) const noexcept {return groups_[i];}
-    static_string_type&       group(std::size_t i)       noexcept {return groups_[i];}
+    string_type const& name (std::size_t i) const noexcept {return topology_.name_of(i, std::nothrow);}
+    string_type&       name (std::size_t i)       noexcept {return topology_.name_of(i, std::nothrow);}
+    string_type const& group(std::size_t i) const noexcept {return topology_.group_of(i, std::nothrow);}
+    string_type&       group(std::size_t i)       noexcept {return topology_.group_of(i, std::nothrow);}
 
     boundary_type&       boundary()       noexcept {return boundary_;}
     boundary_type const& boundary() const noexcept {return boundary_;}
@@ -120,9 +126,15 @@ class System
     coordinate_container_type    positions_;
     coordinate_container_type    velocities_;
     coordinate_container_type    forces_;
-    static_string_container_type names_;
-    static_string_container_type groups_;
+    // names and groups are in Topology class
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class System<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class System<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class System<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class System<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
 
 } // mjolnir
 #endif// MJOLNIR_SYSTEM_HPP

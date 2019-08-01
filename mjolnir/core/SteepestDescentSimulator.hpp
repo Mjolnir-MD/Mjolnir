@@ -123,5 +123,13 @@ inline void SteepestDescentSimulator<traitsT>::finalize()
     return;
 }
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+// BAOAB
+extern template class SteepestDescentSimulator<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class SteepestDescentSimulator<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class SteepestDescentSimulator<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class SteepestDescentSimulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif // SEPARATE_BUILD
+
 } // mjolnir
 #endif /* MJOLNIR_STEEPEST_DESCENT_SIMULATOR */

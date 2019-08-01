@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_CORE_UNIT_HPP
 #define MJOLNIR_CORE_UNIT_HPP
+#include <string>
 
 namespace mjolnir
 {
@@ -39,7 +40,7 @@ struct constants
     static constexpr real_type m_to_nm        = 1e+9;  // 1 m  = 10^+9 nm
     static constexpr real_type nm_to_m        = 1e-9;  // 1 nm = 1e^-9 m
 
-    static constexpr real_type cal_to_J       = 4.1868; // the IT calorie
+    static constexpr real_type cal_to_J       = 4.184;
     static constexpr real_type J_to_cal       = 1.0 / cal_to_J;
 };
 
@@ -98,6 +99,23 @@ struct constants
     static void set_L_to_volume(const real_type v) noexcept {L_to_volume_ = v;}
     static void set_volume_to_L(const real_type v) noexcept {volume_to_L_ = v;}
 
+    static void set_energy_unit(const std::string& name)
+    {
+        energy_unit_ = name;
+    }
+    static void set_length_unit(const std::string& name)
+    {
+        length_unit_ = name;
+    }
+    static std::string const& energy_unit() noexcept
+    {
+        return energy_unit_;
+    }
+    static std::string const& length_unit() noexcept
+    {
+        return length_unit_;
+    }
+
     // forget all the units and put the default value. mainly for test codes
     static void reset() noexcept
     {
@@ -106,6 +124,9 @@ struct constants
         eps0_ = unit_type::vacuum_permittivity /
                 unit_type::elementary_charge   /
                 unit_type::elementary_charge;
+
+        length_unit_ = "m";
+        energy_unit_ = "J";
 
         m_to_length_ = 1.0;
         length_to_m_ = 1.0;
@@ -127,6 +148,9 @@ struct constants
 
     static real_type L_to_volume_;
     static real_type volume_to_L_;
+
+    static std::string energy_unit_;
+    static std::string length_unit_;
 };
 
 // convert them in read_units() function defined in mjolnir/input/read_units.hpp
@@ -155,9 +179,10 @@ template<typename realT> realT constants<realT>::m_to_length_ = 1.0;
 template<typename realT> realT constants<realT>::length_to_m_ = 1.0;
 template<typename realT> realT constants<realT>::L_to_volume_ = 1e-3;
 template<typename realT> realT constants<realT>::volume_to_L_ = 1e+3;
+template<typename realT> std::string constants<realT>::length_unit_ = "J";
+template<typename realT> std::string constants<realT>::energy_unit_ = "m";
 
 } // physics
-
 
 } // mjolnir
 #endif// MJOLNIR_CORE_UNIT_HPP

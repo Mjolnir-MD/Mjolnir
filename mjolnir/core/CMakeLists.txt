@@ -1,0 +1,32 @@
+set(mjolnir_core_cpp_files
+    "${CMAKE_CURRENT_SOURCE_DIR}/System.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/RandomNumberGenerator.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/BAOABLangevinIntegrator.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/UnderdampedLangevinIntegrator.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/VelocityVerletIntegrator.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/MolecularDynamicsSimulator.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/SimulatedAnnealingSimulator.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/SteepestDescentSimulator.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/UnlimitedGridCellList.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/PeriodicGridCellList.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/VerletList.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/NaivePairCalculation.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/IgnoreMolecule.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/IgnoreGroup.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ObserverBase.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/EnergyObserver.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/XYZObserver.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/DCDObserver.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/TRRObserver.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ObserverContainer.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ForceField.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/LocalForceField.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/GlobalForceField.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ExternalForceField.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/LocalInteractionBase.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/GlobalInteractionBase.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ExternalForceInteractionBase.cpp"
+    )
+set(mjolnir_cpp_files
+    ${mjolnir_cpp_files}
+    ${mjolnir_core_cpp_files} PARENT_SCOPE)

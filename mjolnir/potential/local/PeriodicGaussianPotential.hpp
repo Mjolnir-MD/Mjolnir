@@ -62,5 +62,10 @@ class PeriodicGaussianPotential
     real_type v0_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class PeriodicGaussianPotential<double>;
+extern template class PeriodicGaussianPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 } // mjolnir
 #endif /* MJOLNIR_GAUSSIAN_POTENTIAL */

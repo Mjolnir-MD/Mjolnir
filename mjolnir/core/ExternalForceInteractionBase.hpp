@@ -29,5 +29,13 @@ class ExternalForceInteractionBase
     virtual std::string name() const = 0;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ExternalForceInteractionBase<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class ExternalForceInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class ExternalForceInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ExternalForceInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
+
 } // mjolnir
 #endif/* MJOLNIR_EXTERNAL_FORCE_INTEARACTION_BASE */

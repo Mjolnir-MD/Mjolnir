@@ -1,15 +1,15 @@
 # Introduction
 
-Mjolnir is a general-purpose molecular dynamics simulator designed for
-flexibility, transparency, and efficiency.
+This is a document for Mjolnir.
 
 ## [Installation](Installation.md)
 
-This page introduces how to build Mjolnir and the prerequisites.
+It explains how to build Mjolnir.
 
 ## [Reference](Reference.md)
 
-**Under construction**
+It explains what components are in input files and what does the parameters mean.
 
-This page introduces what variables would be specified in an input file and
-how it behaves.
+## [Developer's Guide](DevelopersGuide.md)
+
+It explains information for Developer.

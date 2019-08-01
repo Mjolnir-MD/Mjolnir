@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_CORE_ENERGY_OBSERVER_HPP
 #define MJOLNIR_CORE_ENERGY_OBSERVER_HPP
 #include <mjolnir/core/ObserverBase.hpp>
+#include <mjolnir/core/Unit.hpp>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -32,7 +33,10 @@ class EnergyObserver final : public ObserverBase<traitsT>
     void initialize(const std::size_t, const real_type,
                     const system_type&, const forcefield_type& ff) override
     {
+        using phys_constants = physics::constants<real_type>;
         std::ofstream ofs(this->file_name_, std::ios::app);
+        ofs << "# unit of length : " << phys_constants::length_unit()
+            << ", unit of energy : " << phys_constants::energy_unit() << '\n';
         ofs << "# timestep  " << ff.list_energy_name() << " kinetic_energy\n";
         return;
     }
@@ -84,6 +88,13 @@ class EnergyObserver final : public ObserverBase<traitsT>
     std::string prefix_;
     std::string file_name_;
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class EnergyObserver<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class EnergyObserver<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class EnergyObserver<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class EnergyObserver<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
 
 
 } // mjolnir

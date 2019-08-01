@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_LENNARD_JONES_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_LENNARD_JONES_POTENTIAL_HPP
-#include <mjolnir/potential/global/IgnoreMolecule.hpp>
+#include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>
 #include <vector>
@@ -18,15 +18,25 @@ template<typename realT>
 class LennardJonesPotential
 {
   public:
-    using real_type = realT;
-    using parameter_type = std::pair<real_type, real_type>; // {sigma, epsilon}
-    using container_type = std::vector<parameter_type>;
+    using real_type            = realT;
+    using parameter_type       = std::pair<real_type, real_type>; // {sigma, epsilon}
+    using container_type       = std::vector<parameter_type>;
+
+    // `pair_parameter_type` is a parameter for a interacting pair.
+    // Although it is the same type as `parameter_type` in this potential,
+    // it can be different from normal parameter for each particle.
+    // This enables NeighborList to cache a value to calculate forces between
+    // the particles, e.g. by having (sigma_i + sigma_j)/2 for a pair of {i, j}.
+    using pair_parameter_type  = parameter_type;
 
     // topology stuff
     using topology_type        = Topology;
     using molecule_id_type     = typename topology_type::molecule_id_type;
+    using group_id_type        = typename topology_type::group_id_type;
     using connection_kind_type = typename topology_type::connection_kind_type;
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type    = IgnoreGroup   <group_id_type>;
+    using exclusion_list_type  = ExclusionList;
 
     // rc = 2.5 * sigma
     constexpr static real_type cutoff_ratio = 2.5;
@@ -45,9 +55,8 @@ class LennardJonesPotential
     LennardJonesPotential(
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
-        ignore_molecule_type ignore_molecule)
-        : ignore_molecule_(std::move(ignore_molecule)),
-          ignore_within_  (exclusions.begin(), exclusions.end())
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+        : exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
@@ -64,7 +73,7 @@ class LennardJonesPotential
     }
     ~LennardJonesPotential() = default;
 
-    parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
+    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
         const auto sgm1 = parameters_[i].first;
         const auto eps1 = parameters_[i].second;
@@ -87,7 +96,7 @@ class LennardJonesPotential
         return this->derivative(r, this->prepare_params(i, j));
     }
 
-    real_type potential(const real_type r, const parameter_type& p) const noexcept
+    real_type potential(const real_type r, const pair_parameter_type& p) const noexcept
     {
         const real_type sigma = p.first;
         if(sigma * cutoff_ratio < r){return 0;}
@@ -100,7 +109,7 @@ class LennardJonesPotential
         const real_type r12s12 = r6s6 * r6s6;
         return 4 * epsilon * (r12s12 - r6s6 - coef_at_cutoff);
     }
-    real_type derivative(const real_type r, const parameter_type& p) const noexcept
+    real_type derivative(const real_type r, const pair_parameter_type& p) const noexcept
     {
         const real_type sigma = p.first;
         if(sigma * cutoff_ratio < r){return 0;}
@@ -126,23 +135,42 @@ class LennardJonesPotential
     }
 
     template<typename traitsT>
-    void initialize(const System<traitsT>&) noexcept {return;}
-
-    // nothing to do when system parameters change.
-    template<typename traitsT>
-    void update(const System<traitsT>&) const noexcept {return;}
-
-    // e.g. `{"bond", 3}` means ignore particles connected within 3 "bond"s
-    std::vector<std::pair<connection_kind_type, std::size_t>>
-    ignore_within() const {return ignore_within_;}
-
-    bool is_ignored_molecule(
-            const molecule_id_type& i, const molecule_id_type& j) const noexcept
+    void initialize(const System<traitsT>& sys) noexcept
     {
-        return ignore_molecule_.is_ignored(i, j);
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        this->update(sys);
+        return;
     }
 
+    template<typename traitsT>
+    void update(const System<traitsT>& sys) noexcept
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        // update exclusion list based on sys.topology()
+        exclusion_list_.make(sys);
+        return;
+    }
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
+    {
+        // if not excluded, the pair has interaction.
+        return !exclusion_list_.is_excluded(i, j);
+    }
+    // for testing
+    exclusion_list_type const& exclusion_list() const noexcept
+    {
+        return exclusion_list_;
+    }
+
+    // ------------------------------------------------------------------------
+    // used by Observer.
     static const char* name() noexcept {return "LennardJones";}
+
+    // ------------------------------------------------------------------------
+    // the following accessers would be used in tests.
 
     // access to the parameters...
     std::vector<parameter_type>&       parameters()       noexcept {return parameters_;}
@@ -155,12 +183,16 @@ class LennardJonesPotential
     container_type parameters_;
     std::vector<std::size_t> participants_;
 
-    ignore_molecule_type ignore_molecule_;
-    std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
+    exclusion_list_type  exclusion_list_;
 };
 template<typename realT>
 constexpr typename LennardJonesPotential<realT>::real_type
 LennardJonesPotential<realT>::cutoff_ratio;
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class LennardJonesPotential<double>;
+extern template class LennardJonesPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
 
 } // mjolnir
 #endif /* MJOLNIR_LENNARD_JONES_POTENTIAL */

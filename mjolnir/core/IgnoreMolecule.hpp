@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_IGNORE_MOLECULE_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_IGNORE_MOLECULE_HPP
 #include <mjolnir/util/throw_exception.hpp>
+#include <mjolnir/core/Topology.hpp>
 #include <string>
 #include <memory>
 
@@ -19,8 +20,9 @@ namespace mjolnir
 {
 
 template<typename MoleculeID>
-struct IgnoreMoleculeBase
+class IgnoreMoleculeBase
 {
+  public:
     IgnoreMoleculeBase()          = default;
     virtual ~IgnoreMoleculeBase() = default;
 
@@ -29,8 +31,9 @@ struct IgnoreMoleculeBase
 };
 
 template<typename MoleculeID>
-struct IgnoreNothing: public IgnoreMoleculeBase<MoleculeID>
+class IgnoreNothing: public IgnoreMoleculeBase<MoleculeID>
 {
+  public:
     IgnoreNothing()           = default;
     ~IgnoreNothing() override = default;
 
@@ -42,8 +45,9 @@ struct IgnoreNothing: public IgnoreMoleculeBase<MoleculeID>
 };
 
 template<typename MoleculeID>
-struct IgnoreSelf: public IgnoreMoleculeBase<MoleculeID>
+class IgnoreSelf: public IgnoreMoleculeBase<MoleculeID>
 {
+  public:
     IgnoreSelf()           = default;
     ~IgnoreSelf() override = default;
 
@@ -55,8 +59,9 @@ struct IgnoreSelf: public IgnoreMoleculeBase<MoleculeID>
 };
 
 template<typename MoleculeID>
-struct IgnoreOthers: public IgnoreMoleculeBase<MoleculeID>
+class IgnoreOthers: public IgnoreMoleculeBase<MoleculeID>
 {
+  public:
     IgnoreOthers()           = default;
     ~IgnoreOthers() override = default;
 
@@ -68,8 +73,9 @@ struct IgnoreOthers: public IgnoreMoleculeBase<MoleculeID>
 };
 
 template<typename MoleculeID>
-struct IgnoreMolecule
+class IgnoreMolecule
 {
+  public:
     explicit IgnoreMolecule(const std::string& name): ignore_mol_(nullptr)
     {
         this->reset(name);
@@ -98,11 +104,11 @@ struct IgnoreMolecule
         {
             ignore_mol_.reset(new IgnoreNothing<MoleculeID>);
         }
-        else if(name == "Self")
+        else if(name == "Self" || name == "Intra")
         {
             ignore_mol_.reset(new IgnoreSelf<MoleculeID>);
         }
-        else if(name == "Others")
+        else if(name == "Others" || name == "Inter")
         {
             ignore_mol_.reset(new IgnoreOthers<MoleculeID>);
         }
@@ -118,6 +124,14 @@ struct IgnoreMolecule
 
     std::unique_ptr<IgnoreMoleculeBase<MoleculeID>> ignore_mol_;
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class IgnoreMoleculeBase<Topology::molecule_id_type>;
+extern template class IgnoreNothing     <Topology::molecule_id_type>;
+extern template class IgnoreSelf        <Topology::molecule_id_type>;
+extern template class IgnoreOthers      <Topology::molecule_id_type>;
+extern template class IgnoreMolecule    <Topology::molecule_id_type>;
+#endif// MJOLNIR_SEPARATE_BUILD
 
 } // mjolnir
 #endif// MJOLNIR_IGNORE_MOLECULE_HPP

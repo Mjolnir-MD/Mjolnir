@@ -52,7 +52,7 @@ calc_bond_angle_force(const System<traitsT>& sys,
 
     const auto theta = std::acos(cos_theta);
 
-    constexpr auto tol   = math::tolerance<real_type>();
+    constexpr auto tol   = math::abs_tolerance<real_type>();
     const auto sin_theta = std::sin(theta);
     const auto inv_sin   = (sin_theta > tol) ? real_type(1.0) / sin_theta :
                                                real_type(1.0) / tol;

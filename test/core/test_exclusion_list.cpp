@@ -11,80 +11,11 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/potential/global/IgnoreMolecule.hpp>
 #include <limits>
 
 #include <mjolnir/core/ExclusionList.hpp>
 #include <random>
 #include <cmath>
-
-struct dummy_potential
-{
-  public:
-    using real_type = double;
-    using parameter_type = mjolnir::empty_t;
-
-    using topology_type        = mjolnir::Topology;
-    using molecule_id_type     = typename topology_type::molecule_id_type;
-    using connection_kind_type = typename topology_type::connection_kind_type;
-    using ignore_molecule_type = mjolnir::IgnoreMolecule<molecule_id_type>;
-
-  public:
-
-    dummy_potential(const std::map<connection_kind_type, std::size_t>& exclusions,
-                    ignore_molecule_type ignore_mol)
-        : ignore_molecule_(std::move(ignore_mol)),
-          ignore_within_  (exclusions.begin(), exclusions.end())
-    {}
-
-    parameter_type prepare_params(std::size_t, std::size_t) const noexcept {return {};}
-
-    // forwarding functions for clarity...
-    real_type potential(const std::size_t, const std::size_t, const real_type) const noexcept
-    {
-        return 0.0;
-    }
-    real_type derivative(const std::size_t, const std::size_t, const real_type) const noexcept
-    {
-        return 0.0;
-    }
-
-    real_type potential(const real_type, const parameter_type&) const noexcept
-    {
-        return 0.0;
-    }
-    real_type derivative(const real_type, const parameter_type&) const noexcept
-    {
-        return 0.0;
-    }
-
-    template<typename traitsT>
-    void initialize(const mjolnir::System<traitsT>&) noexcept {return;}
-
-    // nothing to be done if system parameter (e.g. temperature) changes
-    template<typename traitsT>
-    void update(const mjolnir::System<traitsT>&) const noexcept {return;}
-
-    real_type max_cutoff_length() const
-    {
-        return std::numeric_limits<real_type>::max();
-    }
-
-    std::vector<std::pair<connection_kind_type, std::size_t>>
-    ignore_within() const {return ignore_within_;}
-
-    bool is_ignored_molecule(
-            const molecule_id_type& i, const molecule_id_type& j) const noexcept
-    {
-        return ignore_molecule_.is_ignored(i, j);
-    }
-
-    const char* name() const noexcept {return "dummy";}
-
-  private:
-    ignore_molecule_type ignore_molecule_;
-    std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
-};
 
 BOOST_AUTO_TEST_CASE(ExclusionList_noignore)
 {
@@ -93,9 +24,10 @@ BOOST_AUTO_TEST_CASE(ExclusionList_noignore)
     using boundary_type        = traits_type::boundary_type;
     using topology_type        = mjolnir::Topology;
     using molecule_id_type     = topology_type::molecule_id_type;
+    using group_id_type        = topology_type::group_id_type;
     using ignore_molecule_type = mjolnir::IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type    = mjolnir::IgnoreGroup   <group_id_type>;
 
-    const dummy_potential pot({}, ignore_molecule_type("Nothing"));
     constexpr std::size_t N = 10;
 
     // no topology
@@ -108,8 +40,9 @@ BOOST_AUTO_TEST_CASE(ExclusionList_noignore)
         }
         sys.topology().construct_molecules();
 
-        mjolnir::ExclusionList exl;
-        exl.make(sys, pot);
+        mjolnir::ExclusionList exl({},
+                ignore_molecule_type("Nothing"), ignore_group_type({}));
+        exl.make(sys);
 
         for(std::size_t i=0; i<10; ++i)
         {
@@ -145,8 +78,9 @@ BOOST_AUTO_TEST_CASE(ExclusionList_noignore)
 
         sys.topology().construct_molecules();
 
-        mjolnir::ExclusionList exl;
-        exl.make(sys, pot);
+        mjolnir::ExclusionList exl({},
+                ignore_molecule_type("Nothing"), ignore_group_type({}));
+        exl.make(sys);
 
         for(std::size_t i=0; i<10; ++i)
         {
@@ -172,10 +106,9 @@ BOOST_AUTO_TEST_CASE(ExclusionList_topology_dependent)
     using boundary_type        = traits_type::boundary_type;
     using topology_type        = mjolnir::Topology;
     using molecule_id_type     = topology_type::molecule_id_type;
+    using group_id_type        = topology_type::group_id_type;
     using ignore_molecule_type = mjolnir::IgnoreMolecule<molecule_id_type>;
-
-    const dummy_potential pot({{"bond", 3}, {"contact", 1}},
-            ignore_molecule_type("Nothing"));
+    using ignore_group_type    = mjolnir::IgnoreGroup   <group_id_type>;
 
     // no topology
     {
@@ -187,8 +120,10 @@ BOOST_AUTO_TEST_CASE(ExclusionList_topology_dependent)
         }
         sys.topology().construct_molecules();
 
-        mjolnir::ExclusionList exl;
-        exl.make(sys, pot);
+        mjolnir::ExclusionList exl({{"bond", 3}, {"contact", 1}},
+                                   ignore_molecule_type("Nothing"),
+                                   ignore_group_type({}));
+        exl.make(sys);
 
         for(std::size_t i=0; i<10; ++i)
         {
@@ -223,8 +158,10 @@ BOOST_AUTO_TEST_CASE(ExclusionList_topology_dependent)
 
         sys.topology().construct_molecules();
 
-        mjolnir::ExclusionList exl;
-        exl.make(sys, pot);
+        mjolnir::ExclusionList exl({{"bond", 3}, {"contact", 1}},
+                                   ignore_molecule_type("Nothing"),
+                                   ignore_group_type({}));
+        exl.make(sys);
 
         for(std::int32_t i=0; i<10; ++i)
         {
@@ -276,8 +213,10 @@ BOOST_AUTO_TEST_CASE(ExclusionList_topology_dependent)
 
         sys.topology().construct_molecules();
 
-        mjolnir::ExclusionList exl;
-        exl.make(sys, pot);
+        mjolnir::ExclusionList exl({{"bond", 3}, {"contact", 1}},
+                                   ignore_molecule_type("Nothing"),
+                                   ignore_group_type({}));
+        exl.make(sys);
 
         BOOST_TEST( exl.is_excluded(0, 0));
         BOOST_TEST( exl.is_excluded(0, 1));
@@ -408,13 +347,12 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
     using boundary_type        = traits_type::boundary_type;
     using topology_type        = mjolnir::Topology;
     using molecule_id_type     = topology_type::molecule_id_type;
+    using group_id_type        = topology_type::group_id_type;
     using ignore_molecule_type = mjolnir::IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type    = mjolnir::IgnoreGroup   <group_id_type>;
 
     {
         // there are no interaction between particles in the same molecules
-        const dummy_potential pot({{"bond", 1}},
-                ignore_molecule_type("Self"));
-
         {
             mjolnir::System<traits_type> sys(10, boundary_type{});
             for(std::size_t i=0; i<10; ++i)
@@ -429,8 +367,10 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
             }
             sys.topology().construct_molecules();
 
-            mjolnir::ExclusionList exl;
-            exl.make(sys, pot);
+            mjolnir::ExclusionList exl({{"bond", 1}},
+                ignore_molecule_type("Self"),
+                ignore_group_type({}));
+            exl.make(sys);
 
             for(std::int32_t i=0; i<10; ++i)
             {
@@ -456,8 +396,10 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
 
             sys.topology().construct_molecules();
 
-            mjolnir::ExclusionList exl;
-            exl.make(sys, pot);
+            mjolnir::ExclusionList exl({{"bond", 1}},
+                ignore_molecule_type("Self"),
+                ignore_group_type({}));
+            exl.make(sys);
 
             for(std::int32_t i=0; i<10; ++i)
             {
@@ -478,9 +420,6 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
 
     {
         // there are no interaction between particles in different molecules
-        const dummy_potential pot({{"bond", 1}},
-                ignore_molecule_type("Others"));
-
         {
             mjolnir::System<traits_type> sys(10, boundary_type{});
             for(std::size_t i=0; i<10; ++i)
@@ -495,8 +434,10 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
             }
             sys.topology().construct_molecules();
 
-            mjolnir::ExclusionList exl;
-            exl.make(sys, pot);
+            mjolnir::ExclusionList exl({{"bond", 1}},
+                ignore_molecule_type("Others"),
+                ignore_group_type({}));
+            exl.make(sys);
 
             for(std::int32_t i=0; i<10; ++i)
             {
@@ -531,8 +472,10 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
 
             BOOST_TEST(sys.topology().number_of_molecules() == 2u);
 
-            mjolnir::ExclusionList exl;
-            exl.make(sys, pot);
+            mjolnir::ExclusionList exl({{"bond", 1}},
+                ignore_molecule_type("Others"),
+                ignore_group_type({}));
+            exl.make(sys);
 
             for(std::int32_t i=0; i<10; ++i)
             {
@@ -553,6 +496,159 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
                             BOOST_TEST(!exl.is_excluded(i, j));
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(ExclusionList_gruop_dependent)
+{
+    mjolnir::LoggerManager::set_default_logger("test_ExclusionList");
+    using traits_type          = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using boundary_type        = traits_type::boundary_type;
+    using topology_type        = mjolnir::Topology;
+    using molecule_id_type     = topology_type::molecule_id_type;
+    using group_id_type        = topology_type::group_id_type;
+    using ignore_molecule_type = mjolnir::IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type    = mjolnir::IgnoreGroup   <group_id_type>;
+
+    {
+        {
+            mjolnir::System<traits_type> sys(10, boundary_type{});
+            for(std::size_t i=0; i<5; ++i)
+            {
+                sys.name(i)  = "X";
+                sys.group(i) = "protein1";
+            }
+            for(std::size_t i=5; i<10; ++i)
+            {
+                sys.name(i)  = "X";
+                sys.group(i) = "protein2";
+            }
+
+            for(std::size_t i=1; i<10; ++i)
+            {
+                sys.topology().add_connection(i-1, i, "bond");
+            }
+            sys.topology().erase_connection(4, 5, "bond");
+            sys.topology().construct_molecules();
+
+            mjolnir::ExclusionList exl({{"bond", 1}},
+                ignore_molecule_type("Nothing"),
+                ignore_group_type({
+                    // interact only if groups are different (intra-groups are ignored)
+                    {"protein1", {"protein1"}},
+                    {"protein2", {"protein2"}}
+                }));
+            exl.make(sys);
+
+            for(std::int32_t i=0; i<10; ++i)
+            {
+                for(std::int32_t j=0; j<10; ++j)
+                {
+                    if(sys.group(i) != sys.group(j))
+                    {
+                        BOOST_TEST(!exl.is_excluded(i, j));
+                    }
+                    else
+                    {
+                        BOOST_TEST(exl.is_excluded(i, j));
+                    }
+                }
+            }
+        }
+    }
+
+    {
+        {
+            mjolnir::System<traits_type> sys(10, boundary_type{});
+            for(std::size_t i=0; i<5; ++i)
+            {
+                sys.name(i)  = "X";
+                sys.group(i) = "protein1";
+            }
+            for(std::size_t i=5; i<10; ++i)
+            {
+                sys.name(i)  = "X";
+                sys.group(i) = "protein2";
+            }
+
+            for(std::size_t i=1; i<10; ++i)
+            {
+                sys.topology().add_connection(i-1, i, "bond");
+            }
+            sys.topology().erase_connection(4, 5, "bond");
+            sys.topology().construct_molecules();
+
+            mjolnir::ExclusionList exl({{"bond", 1}},
+                ignore_molecule_type("Nothing"),
+                ignore_group_type({
+                    // interact only if groups are different (inter-groups are ignored)
+                    {"protein1", {"protein2"}},
+                    {"protein2", {"protein1"}}
+                }));
+            exl.make(sys);
+
+            for(std::int32_t i=0; i<10; ++i)
+            {
+                for(std::int32_t j=0; j<10; ++j)
+                {
+                    if(sys.group(i) != sys.group(j))
+                    {
+                        BOOST_TEST(exl.is_excluded(i, j));
+                    }
+                    else // the same group
+                    {
+                        if(sys.topology().has_connection(i, j, "bond"))
+                        {
+                            BOOST_TEST(exl.is_excluded(i, j));
+                        }
+                        else
+                        {
+                            BOOST_TEST(!exl.is_excluded(i, j));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    {
+        {
+            mjolnir::System<traits_type> sys(10, boundary_type{});
+            for(std::size_t i=0; i<5; ++i)
+            {
+                sys.name(i)  = "X";
+                sys.group(i) = "protein1";
+            }
+            for(std::size_t i=5; i<10; ++i)
+            {
+                sys.name(i)  = "X";
+                sys.group(i) = "protein2";
+            }
+
+            for(std::size_t i=1; i<10; ++i)
+            {
+                sys.topology().add_connection(i-1, i, "bond");
+            }
+            sys.topology().erase_connection(4, 5, "bond");
+            sys.topology().construct_molecules();
+
+            mjolnir::ExclusionList exl({{"bond", 1}},
+                ignore_molecule_type("Nothing"),
+                ignore_group_type({
+                    // everything will be ignored
+                    {"protein1", {"protein1", "protein2"}},
+                    {"protein2", {"protein1", "protein2"}}
+                }));
+            exl.make(sys);
+
+            for(std::int32_t i=0; i<10; ++i)
+            {
+                for(std::int32_t j=0; j<10; ++j)
+                {
+                    BOOST_TEST(exl.is_excluded(i, j));
                 }
             }
         }

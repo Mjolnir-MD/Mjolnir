@@ -207,5 +207,13 @@ inline void TRRObserver<traitsT>::output(
     return ;
 }
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class TRRObserver<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class TRRObserver<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class TRRObserver<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class TRRObserver<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
+
 } // mjolnir
 #endif // MJOLNIR_CORE_TRR_OBSERVER_HPP

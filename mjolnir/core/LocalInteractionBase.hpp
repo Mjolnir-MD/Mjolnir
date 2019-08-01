@@ -34,5 +34,12 @@ class LocalInteractionBase
     virtual void write_topology(topology_type&) const = 0;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class LocalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class LocalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class LocalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class LocalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 } // mjolnir
 #endif/* MJOLNIR_GLOBAL_INTEARACTION_BASE */

@@ -29,6 +29,10 @@ endif()
 foreach(TEST_NAME ${TEST_NAMES})
     add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
 
+    if(SEPARATE_BUILD)
+        target_link_libraries(${TEST_NAME} mjolnir_core)
+    endif()
+
     target_link_libraries(${TEST_NAME} ${OpenMP_CXX_LIBRARIES})
 
     if (Boost_UNIT_TEST_FRAMEWORK_FOUND)

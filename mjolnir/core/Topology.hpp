@@ -19,22 +19,26 @@ namespace mjolnir
 //       it detemines "molecule"s.
 //
 // Most of the time, "molecule" defined by this class is equivalent to "chain".
-// the reason why it calls "chain" as molecule is that small molecules and
-// circular molecules are allowed.
-// considering lipids, "molecule" looks better than "chain" because they
-// are too small and in the most of the cases, there are many of them.
+// But calling "molecule" as "chain" is misreading because there can be a
+// circular molecule or tiny molecule that only has a few number of beads.
+// For example, lipid membrane is composed of a large number of lipid molecules
+// and people useally does not call each lipid as "chain".
 //
 // Generally, traversing graph takes time rather than finding value from
 // contiguous container. So there are ExclusionList class that stores the
-// connection information for NeighborLists (usually, nonlocal potentials are
-// ignored if the two particles are connected by covarent bond).
+// information for NeighborLists (usually, nonlocal potentials are ignored if
+// the two particles are connected by covarent bond). While the simulation,
+// ExclusionLists would be called many time, but Topology would only be called
+// to construct ExclusionList at the beginning ofjthe simulation.
+//
 // Since the members of this class are rarely called, in most cases, the speed
-// of these methods does not affect to the overall efficiency.
+// of these methods does not affect to the overall efficiency.class Topology
 class Topology
 {
   public:
 
     using molecule_id_type     = std::size_t;
+    using group_id_type        = std::string;
     using connection_kind_type = std::string;
     using edge_type = std::pair<std::size_t, connection_kind_type>;
 
@@ -45,8 +49,9 @@ class Topology
 
     struct node
     {
-        std::size_t molecule_id;
-        std::string identifier;
+        std::size_t   molecule_id;
+        std::string   name;
+        group_id_type group;
         std::vector<edge_type> adjacents;
     };
 
@@ -60,22 +65,42 @@ class Topology
     Topology& operator=(Topology&&)      = default;
 
     explicit Topology(const std::size_t N)
-        : num_molecules_(1), nodes_(N, {uninitialized(), "uninitialized", {}})
+        : num_molecules_(1), nodes_(N, node{
+                uninitialized(), "uninitialized", "uninitialized", {}})
     {}
 
     void        clear()                {return nodes_.clear();}
     bool        empty() const noexcept {return nodes_.empty();}
     std::size_t size()  const noexcept {return nodes_.size();}
 
-    std::string&       identifier_of(const std::size_t i)
-    {return this->nodes_.at(i).identifier;}
-    std::string const& identifier_of(const std::size_t i) const
-    {return this->nodes_.at(i).identifier;}
+    std::string&       name_of(const std::size_t i)
+    {return this->nodes_.at(i).name;}
+    std::string const& name_of(const std::size_t i) const
+    {return this->nodes_.at(i).name;}
+    std::string&       name_of(const std::size_t i, const std::nothrow_t&) noexcept
+    {return this->nodes_[i].name;}
+    std::string const& name_of(const std::size_t i, const std::nothrow_t&) const noexcept
+    {return this->nodes_[i].name;}
 
-    molecule_id_type  molecule_of(const std::size_t idx) const
-    {return nodes_.at(idx).molecule_id;}
-    molecule_id_type& molecule_of(const std::size_t idx)
-    {return nodes_.at(idx).molecule_id;}
+    molecule_id_type  molecule_of(const std::size_t i) const
+    {return nodes_.at(i).molecule_id;}
+    molecule_id_type& molecule_of(const std::size_t i)
+    {return nodes_.at(i).molecule_id;}
+
+    molecule_id_type  molecule_of(const std::size_t i, const std::nothrow_t&) const
+    {return nodes_[i].molecule_id;}
+    molecule_id_type& molecule_of(const std::size_t i, const std::nothrow_t&)
+    {return nodes_[i].molecule_id;}
+
+    std::string&       group_of(const std::size_t i)
+    {return this->nodes_.at(i).group;}
+    std::string const& group_of(const std::size_t i) const
+    {return this->nodes_.at(i).group;}
+
+    std::string&       group_of(const std::size_t i, const std::nothrow_t&) noexcept
+    {return this->nodes_[i].group;}
+    std::string const& group_of(const std::size_t i, const std::nothrow_t&) const noexcept
+    {return this->nodes_[i].group;}
 
     void add_connection  (const std::size_t i, const std::size_t j,
                           const connection_kind_type& kind);
@@ -107,17 +132,13 @@ class Topology
     {
         if(dist == 0)
         {
-            if(std::find(out.cbegin(), out.cend(), node_idx) != out.cend())
-            {
-                out.push_back(node_idx);
-            }
+            out.push_back(node_idx);
             return;
         }
 
         for(auto edge : this->nodes_.at(node_idx).adjacents)
         {
-            if(edge.second != kind ||
-               std::find(out.cbegin(), out.cend(), edge.first) != out.cend())
+            if(edge.second != kind)
             {
                 continue;
             }
@@ -225,8 +246,7 @@ Topology::list_adjacent_within(
 
     for(auto edge : this->nodes_.at(node_idx).adjacents)
     {
-        if(edge.second != kind || std::find(
-           retval.cbegin(), retval.cend(), edge.first) != retval.cend())
+        if(edge.second != kind)
         {
             continue;
         }

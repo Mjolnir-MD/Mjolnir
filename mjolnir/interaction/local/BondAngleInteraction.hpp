@@ -107,8 +107,8 @@ BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const no
         const real_type coef  = -(idxp.second.derivative(theta));
 
         const real_type sin_theta    = std::sin(theta);
-        const real_type coef_inv_sin = (sin_theta > math::tolerance<real_type>()) ?
-                             coef / sin_theta : coef / math::tolerance<real_type>();
+        const real_type coef_inv_sin = (sin_theta > math::abs_tolerance<real_type>()) ?
+                             coef / sin_theta : coef / math::abs_tolerance<real_type>();
 
         const coordinate_type Fi =
             (coef_inv_sin * inv_len_r_ij) * (cos_theta * r_ij_reg - r_kj_reg);
@@ -165,10 +165,44 @@ void BondAngleInteraction<traitsT, potentialT>::write_topology(
         const auto j = idxp.first[1];
         const auto k = idxp.first[2];
         topol.add_connection(i, j, this->kind_);
+        topol.add_connection(i, k, this->kind_);
         topol.add_connection(j, k, this->kind_);
     }
     return;
 }
 
 }// mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize BondAngleInteraction with LocalPotentials
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/potential/local/HarmonicPotential.hpp>
+#include <mjolnir/potential/local/GaussianPotential.hpp>
+#include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
+
+namespace mjolnir
+{
+
+// harmonic
+extern template class BondAngleInteraction<SimulatorTraits<double, UnlimitedBoundary>, HarmonicPotential<double>>;
+extern template class BondAngleInteraction<SimulatorTraits<float,  UnlimitedBoundary>, HarmonicPotential<float> >;
+extern template class BondAngleInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, HarmonicPotential<double>>;
+extern template class BondAngleInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, HarmonicPotential<float> >;
+
+// gaussian
+extern template class BondAngleInteraction<SimulatorTraits<double, UnlimitedBoundary>, GaussianPotential<double>>;
+extern template class BondAngleInteraction<SimulatorTraits<float,  UnlimitedBoundary>, GaussianPotential<float> >;
+extern template class BondAngleInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>>;
+extern template class BondAngleInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> >;
+
+// FLP angle
+extern template class BondAngleInteraction<SimulatorTraits<double, UnlimitedBoundary>, FlexibleLocalAnglePotential<double>>;
+extern template class BondAngleInteraction<SimulatorTraits<float,  UnlimitedBoundary>, FlexibleLocalAnglePotential<float> >;
+extern template class BondAngleInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, FlexibleLocalAnglePotential<double>>;
+extern template class BondAngleInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, FlexibleLocalAnglePotential<float> >;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif /* MJOLNIR_BOND_ANGL_INTERACTION */

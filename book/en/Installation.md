@@ -1,11 +1,8 @@
 # Installation
 
-This page introduces what variables would be specified in an input file and
-how it behaves.
+This page describes how to build Mjolnir.
 
 ## Prerequisities
-
-Mjolnir requires the following stuff to build.
 
 - linux or Unix (e.g. OS X)
 - C++11 compatible compiler
@@ -16,41 +13,38 @@ Mjolnir requires the following stuff to build.
 
 ### Operating System
 
-Mjolnir does not use OS-specific behaviors except file paths, but it is tested
-only on linux and OS X. Thus, basically, it is not guaranteed to run on any
-other OS, such as Windows.
+It assumes that the file pathes conform to the posix standard.
+
+Also, automatic tests only run on Linux and OS X. Thus it is not guaranteed
+to work on Windows properly.
 
 ### C++ compiler
 
-Mjolnir requires C++11 compatible compiler. Today, most of the environment
-provides sufficiently new compiler by default.
+It requires C++11 compatible compiler. Since now it is 2019, default compilers
+in most of the systems are compatible to C++11.
 
-If possible, it is recommended to use the latest compiler. Generally, a newer
-version of compiler is smarter than the previous ones and generate the more
-efficient executable binary.
+But I recommend to use the later versions of compilers. Compilers are also
+in development, so the later versions generally have less bugs and generate
+faster executables.
 
 ### Git
 
-Mjolnir depends on an third-party library "toml11", which is managed as a git
-submodule. To download it, Git is required.
+Mjolnir contains `toml11` library as a `git-submodule`.
+ Git is required to download it.
 
 ### CMake
 
-Mjolnir uses CMake to generate a build script.
+Mjolnir uses CMake as a build system.
 
-Some of the CMake modules are updated frequently. Mjolnir intends to support
-newer versions of CMake rather than the older ones. So it is recommended to
-update CMake to the latest version.
+The `CMakeLists.txt`s expects relatively later versions of CMake.
+So it is recommended to use the later versions of CMake.
 
 ### Boost
 
-Test codes of Mjolnir are written using Boost.Test library.
+Test codes of Mjolnir depends on the Boost library.
 
-Mjolnir automatically downloads Boost library if it is not installed.
-But pre-installed Boost library makes the building process faster.
-
-Also, to download Boost, `wget`, `tar` and `shasum` are required. Most of the
-environments have it by default.
+Although `CMakeLists.txt` automatically downloads Boost, it makes build process
+faster to use a library that is already built.
 
 ## Building
 
@@ -61,19 +55,27 @@ $ git clone https://github.com/Mjolnir-MD/Mjolnir.git
 $ cd Mjolnir
 $ mkdir build
 $ cd build
-$ cmake .. # options are explained later.
+$ cmake .. # commonly-used options are listed below.
 $ make
 $ make test
 ```
 
 ### Options for CMake
 
-Useful options are listed here.
-
-- `-DFIND_BOOST=[ON/OFF]`
-  - It tries to find boost library. If it would not be found, it fails to build.
+- `-DUSE_OPENMP=(ON|OFF)`
+  - `ON` by default.
+  - If `ON`, compile with OpenMP (if it is available).
+    Then you can parallelize your simulation with OpenMP.
+- `-DFIND_BOOST=(ON|OFF)`
+  - `OFF` by default.
+  - If `ON`, CMake looks boost library that is already installed.
+    If it does not exist, the build fails.
 - `-DBOOST_ROOT=/path/to/boost`
-  - It is an option for CMake FindBoost module. You can pass the directory where
-    boost library is installed.
+  - It is an option for `FindBoost` package in CMake.
+    You can specify the path to boost you want to use.
 - `-DCMAKE_CXX_COMPILER=/path/to/compiler`
-  - It is an option for CMake. You can set which compiler to use.
+  - It is an option for CMake. You can choose what compiler would be used.
+- `-DSEPARATE_BUILD=(ON|OFF)`
+  - `OFF` by default.
+  - If `ON`, compile codes separately and link them after compilation.
+    This feature is for developers who compiles it a lot of times.

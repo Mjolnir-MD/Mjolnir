@@ -60,5 +60,10 @@ class ClementiDihedralPotential
     real_type v0_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ClementiDihedralPotential<double>;
+extern template class ClementiDihedralPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 } // mjolnir
 #endif /* MJOLNIR_CLEMENTI_DIHEDRAL_POTENTIAL */

@@ -100,6 +100,10 @@ class LocalForceField
         std::string retval;
         for(const auto& i : interactions_)
         {
+            if(i->name().size() > 5 && i->name().substr(0, 5) == "Dummy")
+            {
+                continue;
+            }
             retval += ' ';
             retval += i->name();
         }
@@ -111,6 +115,10 @@ class LocalForceField
         std::ostringstream oss;
         for(const auto& i : interactions_)
         {
+            if(i->name().size() > 5 && i->name().substr(0, 5) == "Dummy")
+            {
+                continue;
+            }
             oss << ' ' << std::setw(i->name().size()) << std::fixed
                 << std::right << i->calc_energy(sys);
         }
@@ -130,6 +138,13 @@ class LocalForceField
 
     container_type interactions_;
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class LocalForceField<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class LocalForceField<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class LocalForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class LocalForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
 
 } // mjolnir
 #endif /* MJOLNIR_LOCAL_FORCE_FIELD */

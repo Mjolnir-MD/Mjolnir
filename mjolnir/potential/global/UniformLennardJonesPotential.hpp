@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_UNIFORM_LENNARD_JONES_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_UNIFORM_LENNARD_JONES_POTENTIAL_HPP
-#include <mjolnir/potential/global/IgnoreMolecule.hpp>
+#include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/empty.hpp>
@@ -20,15 +20,19 @@ template<typename realT>
 class UniformLennardJonesPotential
 {
   public:
-    using real_type = realT;
-    using parameter_type = empty_t;
-    using container_type = empty_t;
+    using real_type           = realT;
+    using parameter_type      = empty_t; // no particle-specific parameter
+    using container_type      = empty_t; // no parameter, so no container there.
+    using pair_parameter_type = empty_t; // no particle-pair-specific parameter
 
     // topology stuff
     using topology_type        = Topology;
     using molecule_id_type     = typename topology_type::molecule_id_type;
+    using group_id_type        = typename topology_type::group_id_type;
     using connection_kind_type = typename topology_type::connection_kind_type;
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type    = IgnoreGroup   <group_id_type>;
+    using exclusion_list_type  = ExclusionList;
 
     // rc = 2.5 * sigma
     constexpr static real_type cutoff_ratio = 2.5;
@@ -47,10 +51,9 @@ class UniformLennardJonesPotential
     UniformLennardJonesPotential(const real_type sgm, const real_type eps,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
-        ignore_molecule_type ignore_molecule)
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
         : sigma_(sgm), epsilon_(eps), r_cut_(sgm * cutoff_ratio),
-          ignore_molecule_(std::move(ignore_molecule)),
-          ignore_within_(exclusions.begin(), exclusions.end())
+          exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         this->participants_.reserve(parameters.size());
         for(const auto& idxp : parameters)
@@ -60,9 +63,9 @@ class UniformLennardJonesPotential
     }
     ~UniformLennardJonesPotential() = default;
 
-    parameter_type prepare_params(std::size_t, std::size_t) const noexcept
+    pair_parameter_type prepare_params(std::size_t, std::size_t) const noexcept
     {
-        return parameter_type{}; // no pre-calculated parameter
+        return pair_parameter_type{}; // no pre-calculated parameter
     }
 
     // forwarding functions for clarity...
@@ -78,7 +81,7 @@ class UniformLennardJonesPotential
     }
 
     real_type
-    potential(const real_type r, const parameter_type&) const noexcept
+    potential(const real_type r, const pair_parameter_type&) const noexcept
     {
         if(r_cut_ < r){return 0;}
 
@@ -90,7 +93,7 @@ class UniformLennardJonesPotential
     }
 
     real_type
-    derivative(const real_type r, const parameter_type&) const noexcept
+    derivative(const real_type r, const pair_parameter_type&) const noexcept
     {
         if(r_cut_ < r){return 0;}
 
@@ -124,24 +127,39 @@ class UniformLennardJonesPotential
             this->participants_.resize(sys.size());
             std::iota(this->participants_.begin(), this->participants_.end(), 0u);
         }
+
+        this->update(sys);
         return;
     }
 
-    // nothing to do when system parameters change.
     template<typename traitsT>
-    void update(const System<traitsT>&) const noexcept {return;}
-
-    // e.g. `3` means ignore particles connected within 3 "bond"s
-    std::vector<std::pair<connection_kind_type, std::size_t>>
-    ignore_within() const {return ignore_within_;}
-
-    bool is_ignored_molecule(
-            const molecule_id_type& i, const molecule_id_type& j) const noexcept
+    void update(const System<traitsT>& sys) noexcept
     {
-        return ignore_molecule_.is_ignored(i, j);
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        // update exclusion list based on sys.topology()
+        exclusion_list_.make(sys);
+        return;
+    }
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
+    {
+        // if not excluded, the pair has interaction.
+        return !exclusion_list_.is_excluded(i, j);
+    }
+    exclusion_list_type const& exclusion_list() const noexcept
+    {
+        return exclusion_list_;
     }
 
+
+
+    // ------------------------------------------------------------------------
+    // used by Observer.
     static const char* name() noexcept {return "LennardJones";}
+
+    // ------------------------------------------------------------------------
+    // the following accessers would be used in tests.
 
     // access to the parameters...
     real_type& sigma()         noexcept {return sigma_;}
@@ -156,13 +174,17 @@ class UniformLennardJonesPotential
     real_type sigma_, epsilon_, r_cut_;
     std::vector<std::size_t> participants_;
 
-    ignore_molecule_type ignore_molecule_;
-    std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within_;
+    exclusion_list_type  exclusion_list_;
 };
 
 template<typename traitsT>
 constexpr typename UniformLennardJonesPotential<traitsT>::real_type
 UniformLennardJonesPotential<traitsT>::cutoff_ratio;
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class UniformLennardJonesPotential<double>;
+extern template class UniformLennardJonesPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
 
 } // mjolnir
 #endif /* MJOLNIR_LENNARD_JONES_POTENTIAL */

@@ -11,7 +11,7 @@ namespace mjolnir
 
 template<typename traitsT>
 ExternalForceField<traitsT>
-read_external_forcefield(toml::array interactions, const std::string& input_path)
+read_external_forcefield(const toml::array& interactions, const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -59,6 +59,13 @@ read_external_forcefield(toml::array interactions, const std::string& input_path
     }
     return eff;
 }
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template ExternalForceField<SimulatorTraits<double, UnlimitedBoundary>       > read_external_forcefield(const toml::array& interactions, const std::string& input_path);
+extern template ExternalForceField<SimulatorTraits<float,  UnlimitedBoundary>       > read_external_forcefield(const toml::array& interactions, const std::string& input_path);
+extern template ExternalForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_external_forcefield(const toml::array& interactions, const std::string& input_path);
+extern template ExternalForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_external_forcefield(const toml::array& interactions, const std::string& input_path);
+#endif
 
 } // mjolnir
 #endif// MJOLNIR_READ_EXTERNAL_FORCEFIELD_HPP
