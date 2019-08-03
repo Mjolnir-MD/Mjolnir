@@ -33,42 +33,52 @@ read_global_pair_interaction(const toml::value& global)
     if(potential == "ExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Excluded Volume.");
-        using potential_t = ExcludedVolumePotential<real_type>;
+        using potential_t   = ExcludedVolumePotential<real_type>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
-        return read_spatial_partition<traitsT, potential_t>(
-            global, read_excluded_volume_potential<real_type>(global));
+        return make_unique<interaction_t>(
+            read_excluded_volume_potential<real_type>(global),
+            read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "DebyeHuckel")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Debye-Huckel.");
-        using potential_t = DebyeHuckelPotential<real_type>;
+        using potential_t   = DebyeHuckelPotential<real_type>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
-        return read_spatial_partition<traitsT, potential_t>(
-            global, read_debye_huckel_potential<real_type>(global));
+        return make_unique<interaction_t>(
+            read_debye_huckel_potential<real_type>(global),
+            read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "LennardJones")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Lennard-Jones.");
-        using potential_t = LennardJonesPotential<real_type>;
+        using potential_t   = LennardJonesPotential<real_type>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
-        return read_spatial_partition<traitsT, potential_t>(
-            global, read_lennard_jones_potential<real_type>(global));
+        return make_unique<interaction_t>(
+            read_lennard_jones_potential<real_type>(global),
+            read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "UniformLennardJones")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Uniform Lennard-Jones.");
-        using potential_t = UniformLennardJonesPotential<real_type>;
+        using potential_t   = UniformLennardJonesPotential<real_type>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
-        return read_spatial_partition<traitsT, potential_t>(
-            global, read_uniform_lennard_jones_potential<real_type>(global));
+        return make_unique<interaction_t>(
+            read_uniform_lennard_jones_potential<real_type>(global),
+            read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "3SPN2ExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is 3SPN2ExcludedVolume.");
-        using potential_t = ThreeSPN2ExcludedVolumePotential<real_type>;
+        using potential_t   = ThreeSPN2ExcludedVolumePotential<real_type>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
-        return read_spatial_partition<traitsT, potential_t>(
-            global, read_3spn2_excluded_volume_potential<real_type>(global));
+        return make_unique<interaction_t>(
+            read_3spn2_excluded_volume_potential<real_type>(global),
+            read_spatial_partition<traitsT, potential_t>(global));
     }
     else
     {
@@ -98,7 +108,6 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
     using base_kind           = parameter_3SPN2::base_kind;
     using potential_type      = ThreeSPN2BaseBaseInteractionPotential<real_type>;
     using parameter_type      = typename potential_type::parameter_type;
-    using pair_parameter_type = typename potential_type::pair_parameter_type;
 
     // [[forcefields.global]]
     // interaction = "3SPNBaseBase"
@@ -173,51 +182,8 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
     }
     potential_type potential(std::move(params), ignore_grp);
 
-    // -----------------------------------------------------------------------
-    // read spatial partition
-
-    const auto& sp   = toml::find(global, "spatial_partition");
-    const auto  type = toml::find<std::string>(sp, "type");
-    if(type == "CellList")
-    {
-        using boundary_type = typename traitsT::boundary_type;
-        using dispatcher    = celllist_dispatcher<boundary_type, traitsT,
-                                                  pair_parameter_type>;
-        using celllist_type = typename dispatcher::type;
-
-        const auto margin = toml::find<real_type>(sp, "margin");
-        MJOLNIR_LOG_NOTICE("-- Spatial Partition is CellList "
-                           "with relative margin = ", margin);
-        return make_unique<
-            ThreeSPN2BaseBaseInteraction<traitsT, celllist_type>
-            >(std::move(potential), dispatcher::invoke(margin));
-    }
-    else if(type == "VerletList")
-    {
-        using verlet_list_type = VerletList<traitsT, pair_parameter_type>;
-
-        const auto margin = toml::find<real_type>(sp, "margin");
-        MJOLNIR_LOG_NOTICE("-- Spatial Partition is VerletList "
-                           "with relative margin = ", margin);
-        return make_unique<
-            ThreeSPN2BaseBaseInteraction<traitsT, verlet_list_type>
-            >(std::move(potential), verlet_list_type(margin));
-    }
-    else if(type == "Naive" || type == "Nothing")
-    {
-        MJOLNIR_LOG_NOTICE("-- No Spatial Partition. Calculate all the possible pairs.");
-        using naive_pair_type = NaivePairCalculation<traitsT, pair_parameter_type>;
-
-        return make_unique<
-            ThreeSPN2BaseBaseInteraction<traitsT, naive_pair_type>
-            >(std::move(potential), naive_pair_type());
-    }
-    else
-    {
-        throw std::runtime_error(toml::format_error("[error] "
-            "mjolnir::read_global_3spn2_base_base_interaction: unknown option",
-            toml::find(sp, "type"), "expected \"CellList\" or \"VerletList\""));
-    }
+    return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(std::move(potential),
+            read_spatial_partition<traitsT, potential_type>(global));
 }
 
 // ----------------------------------------------------------------------------
