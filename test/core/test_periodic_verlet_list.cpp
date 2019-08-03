@@ -66,6 +66,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary)
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using potential_type  = dummy_potential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -86,7 +87,6 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary)
     std::iota(participants.begin(), participants.end(), 0);
 
     dummy_potential<real_type> pot(cutoff, participants);
-    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
 
     mjolnir::System<traits_type> sys(N, boundary_type(coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
 
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
+    mjolnir::VerletList<traits_type, potential_type> vlist(margin);
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 
@@ -151,6 +151,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary_partial)
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using potential_type  = dummy_potential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -172,7 +173,6 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary_partial)
     std::iota(participants.begin(), participants.end(), 200u);
 
     dummy_potential<real_type> pot(cutoff, participants);
-    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
 
     mjolnir::System<traits_type> sys(N, boundary_type(coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
 
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary_partial)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
+    mjolnir::VerletList<traits_type, potential_type> vlist(margin);
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 
@@ -248,6 +248,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary_partial_2)
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using potential_type  = dummy_potential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -271,7 +272,6 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary_partial_2)
     }
 
     dummy_potential<real_type> pot(cutoff, participants);
-    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
 
     mjolnir::System<traits_type> sys(N, boundary_type(coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
 
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary_partial_2)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
+    mjolnir::VerletList<traits_type, potential_type> vlist(margin);
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 

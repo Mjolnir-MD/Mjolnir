@@ -20,6 +20,7 @@ struct dummy_potential
 {
     using real_type      = T;
     using parameter_type = mjolnir::empty_t;
+    using pair_parameter_type = parameter_type;
 
     using topology_type        = mjolnir::Topology;
     using molecule_id_type     = typename topology_type::molecule_id_type;
@@ -64,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_PeriodicBoundary)
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
-    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
+    using potential_type  = dummy_potential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -97,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_PeriodicBoundary)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::PeriodicGridCellList<traits_type, parameter_type> vlist(margin);
+    mjolnir::PeriodicGridCellList<traits_type, potential_type> vlist(margin);
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 
     BOOST_TEST(!vlist.valid());
@@ -138,6 +139,7 @@ BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_partial)
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using potential_type  = dummy_potential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -159,7 +161,6 @@ BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_partial)
     std::iota(participants.begin(), participants.end(), 200u);
 
     dummy_potential<real_type> pot(cutoff, participants);
-    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
 
     mjolnir::System<traits_type> sys(N, boundary_type(coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
 
@@ -171,7 +172,7 @@ BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_partial)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::PeriodicGridCellList<traits_type, parameter_type> vlist(margin);
+    mjolnir::PeriodicGridCellList<traits_type, potential_type> vlist(margin);
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 
@@ -235,6 +236,7 @@ BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_partial_2)
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using potential_type  = dummy_potential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -258,7 +260,6 @@ BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_partial_2)
     }
 
     dummy_potential<real_type> pot(cutoff, participants);
-    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
 
     mjolnir::System<traits_type> sys(N, boundary_type(coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
 
@@ -270,7 +271,7 @@ BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_partial_2)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::PeriodicGridCellList<traits_type, parameter_type> vlist(margin);
+    mjolnir::PeriodicGridCellList<traits_type, potential_type> vlist(margin);
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 

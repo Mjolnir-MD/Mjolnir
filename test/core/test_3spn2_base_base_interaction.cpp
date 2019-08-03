@@ -29,10 +29,9 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BasePairIntearction_numerical_diff)
     using potential_type      = mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>;
     using base_kind           = typename potential_type::base_kind;
     using parameter_type      = typename potential_type::parameter_type;
-    using pair_parameter_type = typename potential_type::pair_parameter_type;
-    using partition_type      = mjolnir::VerletList<traits_type, pair_parameter_type>;
+    using partition_type      = mjolnir::VerletList<traits_type, potential_type>;
 
-    using interaction_type  = mjolnir::ThreeSPN2BaseBaseInteraction<traits_type, partition_type>;
+    using interaction_type  = mjolnir::ThreeSPN2BaseBaseInteraction<traits_type>;
     using ignore_group_type = typename potential_type::ignore_group_type;
 
     constexpr real_type pi = mjolnir::math::constants<real_type>::pi;
@@ -109,8 +108,8 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BasePairIntearction_numerical_diff)
             }, std::move(grp)
         );
 
-        interaction_type interaction(
-                potential_type(potential), partition_type{});
+        interaction_type interaction(potential_type(potential),
+                mjolnir::make_unique<partition_type>());
 
         system_type sys(4, boundary_type{});
 
@@ -319,10 +318,9 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2CrossStackingIntearction_numerical_diff)
     using potential_type    = mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>;
     using base_kind         = typename potential_type::base_kind;
     using parameter_type    = typename potential_type::parameter_type;
-    using pair_parameter_type = typename potential_type::pair_parameter_type;
-    using partition_type      = mjolnir::VerletList<traits_type, pair_parameter_type>;
+    using partition_type      = mjolnir::VerletList<traits_type, potential_type>;
 
-    using interaction_type  = mjolnir::ThreeSPN2BaseBaseInteraction<traits_type, partition_type>;
+    using interaction_type  = mjolnir::ThreeSPN2BaseBaseInteraction<traits_type>;
     using ignore_group_type = typename potential_type::ignore_group_type;
 
     constexpr real_type pi = mjolnir::math::constants<real_type>::pi;
@@ -420,8 +418,8 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2CrossStackingIntearction_numerical_diff)
             }, ignore_group_type({})
         );
 
-        interaction_type interaction(
-                potential_type(potential), partition_type{});
+        interaction_type interaction(potential_type(potential),
+                mjolnir::make_unique<partition_type>());
 
         system_type sys(10, boundary_type{});
 

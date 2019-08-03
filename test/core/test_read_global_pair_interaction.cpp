@@ -32,10 +32,9 @@ BOOST_AUTO_TEST_CASE(read_global_pair_exv)
         const auto base = mjolnir::read_global_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
-        const auto derv = dynamic_cast<mjolnir::GlobalPairInteraction<
-            traits_type, potential_type,
-            mjolnir::NaivePairCalculation<traits_type, parameter_type>
-            >*>(base.get()); // check the expected type is contained
+        const auto derv = dynamic_cast<
+            mjolnir::GlobalPairInteraction<traits_type, potential_type>*
+            >(base.get());
         BOOST_TEST(static_cast<bool>(derv));
     }
 }
@@ -66,10 +65,8 @@ BOOST_AUTO_TEST_CASE(read_global_pair_dh)
         const auto base = mjolnir::read_global_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
-        const auto derv = dynamic_cast<mjolnir::GlobalPairInteraction<
-            traits_type, potential_type,
-            mjolnir::NaivePairCalculation<traits_type, parameter_type>
-            >*
+        const auto derv = dynamic_cast<
+            mjolnir::GlobalPairInteraction<traits_type, potential_type>*
             >(base.get()); // check the expected type is contained
         BOOST_TEST(static_cast<bool>(derv));
     }
@@ -104,10 +101,9 @@ BOOST_AUTO_TEST_CASE(read_global_pair_lj)
         const auto base = mjolnir::read_global_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
-        const auto derv = dynamic_cast<mjolnir::GlobalPairInteraction<
-            traits_type, potential_type,
-            mjolnir::NaivePairCalculation<traits_type, parameter_type>
-            >*>(base.get()); // check the expected type is contained
+        const auto derv = dynamic_cast<
+            mjolnir::GlobalPairInteraction<traits_type, potential_type>*
+            >(base.get()); // check the expected type is contained
         BOOST_TEST(static_cast<bool>(derv));
     }
 }
@@ -137,10 +133,9 @@ BOOST_AUTO_TEST_CASE(read_global_pair_uni_lj)
         const auto base = mjolnir::read_global_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
-        const auto derv = dynamic_cast<mjolnir::GlobalPairInteraction<
-            traits_type, potential_type,
-            mjolnir::NaivePairCalculation<traits_type, parameter_type>
-            >*>(base.get()); // check the expected type is contained
+        const auto derv = dynamic_cast<
+            mjolnir::GlobalPairInteraction<traits_type, potential_type>*
+            >(base.get()); // check the expected type is contained
         BOOST_TEST(static_cast<bool>(derv));
     }
 }

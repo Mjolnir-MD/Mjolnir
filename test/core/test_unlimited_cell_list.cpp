@@ -21,6 +21,7 @@ struct dummy_potential
 {
     using real_type      = T;
     using parameter_type = mjolnir::empty_t;
+    using pair_parameter_type = parameter_type;
 
     using topology_type        = mjolnir::Topology;
     using molecule_id_type     = typename topology_type::molecule_id_type;
@@ -65,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary)
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
-    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
+    using potential_type  = dummy_potential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -97,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::UnlimitedGridCellList<traits_type, parameter_type> vlist(margin);
+    mjolnir::UnlimitedGridCellList<traits_type, potential_type> vlist(margin);
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 
@@ -140,7 +141,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial)
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
-    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
+    using potential_type  = dummy_potential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -173,7 +174,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::UnlimitedGridCellList<traits_type, parameter_type> vlist(margin);
+    mjolnir::UnlimitedGridCellList<traits_type, potential_type> vlist(margin);
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 
@@ -238,7 +239,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial_2)
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
-    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
+    using potential_type  = dummy_potential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -273,7 +274,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial_2)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::UnlimitedGridCellList<traits_type, parameter_type> vlist(margin);
+    mjolnir::UnlimitedGridCellList<traits_type, potential_type> vlist(margin);
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 
