@@ -33,34 +33,30 @@ class NaivePairCalculation final : public SpatialPartitionBase<traitsT, Potentia
 
     bool valid() const noexcept override {return true;}
 
-    void initialize (const system_type& sys, const potential_type& pot) override
+    void initialize(neighbor_list_type& neighbor,
+            const system_type& sys, const potential_type& pot) override
     {
-        this->make(sys, pot);
+        this->make(neighbor, sys, pot);
         return;
     }
 
-    void make  (const system_type& sys, const potential_type& pot) override;
-    void update(const real_type, const system_type&,
-                const potential_type&) override
+    void make  (neighbor_list_type& neighbor,
+                const system_type& sys, const potential_type& pot) override;
+    void update(neighbor_list_type&, const real_type,
+                const system_type&, const potential_type&) override
     {
         return;
     }
 
     real_type cutoff() const noexcept override {return std::numeric_limits<real_type>::infinity();}
     real_type margin() const noexcept override {return std::numeric_limits<real_type>::infinity();}
-
-    range_type partners(std::size_t i) const noexcept override {return neighbors_[i];}
-
-  private:
-
-    neighbor_list_type  neighbors_;
 };
 
 template<typename traitsT, typename potentialT>
-void NaivePairCalculation<traitsT, potentialT>::make(
+void NaivePairCalculation<traitsT, potentialT>::make(neighbor_list_type& neighbors,
         const system_type&, const potential_type& pot)
 {
-    this->neighbors_.clear();
+    neighbors.clear();
 
     const auto& participants = pot.participants();
 
@@ -77,7 +73,7 @@ void NaivePairCalculation<traitsT, potentialT>::make(
                 partners.emplace_back(j, pot.prepare_params(i, j));
             }
         }
-        this->neighbors_.add_list_for(i, partners.begin(), partners.end());
+        neighbors.add_list_for(i, partners.begin(), partners.end());
     }
     return;
 }

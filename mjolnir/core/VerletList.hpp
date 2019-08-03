@@ -40,30 +40,30 @@ class VerletList final : public SpatialPartitionBase<traitsT, PotentialT>
         return current_margin_ >= 0.0;
     }
 
-    void initialize(const system_type& sys, const potential_type& pot) override
+    void initialize(neighbor_list_type& neighbors,
+            const system_type& sys, const potential_type& pot) override
     {
         this->set_cutoff(pot.max_cutoff_length());
-        this->make(sys, pot);
+        this->make(neighbors, sys, pot);
         return;
     }
 
-    void make  (const system_type& sys, const potential_type& pot) override;
+    void make  (neighbor_list_type& neighbors,
+                const system_type& sys, const potential_type& pot) override;
 
-    void update(const real_type dmargin, const system_type& sys,
-                const potential_type& pot) override
+    void update(neighbor_list_type& neighbors, const real_type dmargin,
+                const system_type& sys, const potential_type& pot) override
     {
         this->current_margin_ -= dmargin;
         if(this->current_margin_ < 0)
         {
-            this->make(sys, pot);
+            this->make(neighbors, sys, pot);
         }
         return ;
     }
 
     real_type cutoff() const noexcept override {return this->cutoff_;}
     real_type margin() const noexcept override {return this->margin_;}
-
-    range_type partners(std::size_t i) const noexcept override {return neighbors_[i];}
 
   private:
 
@@ -75,15 +75,13 @@ class VerletList final : public SpatialPartitionBase<traitsT, PotentialT>
     real_type      cutoff_;
     real_type      margin_;
     real_type      current_margin_;
-
-    neighbor_list_type  neighbors_;
 };
 
 template<typename traitsT, typename potentialT>
-void VerletList<traitsT, potentialT>::make(
+void VerletList<traitsT, potentialT>::make(neighbor_list_type& neighbors,
         const system_type& sys, const potential_type& pot)
 {
-    this->neighbors_.clear();
+    neighbors.clear();
 
     // `participants` is a list that contains indices of particles that are
     // related to the potential.
@@ -113,7 +111,7 @@ void VerletList<traitsT, potentialT>::make(
             }
         }
         // because j is searched sequencially, sorting is not needed.
-        this->neighbors_.add_list_for(i, partner.begin(), partner.end());
+        neighbors.add_list_for(i, partner.begin(), partner.end());
     }
     this->current_margin_ = cutoff_ * margin_;
     return ;

@@ -61,23 +61,23 @@ class UnlimitedGridCellList final : public SpatialPartitionBase<traitsT, Potenti
         return current_margin_ >= 0.;
     }
 
-    void initialize(const system_type& sys, const potential_type& pot) override;
-    void make  (const system_type& sys, const potential_type& pot) override;
-    void update(const real_type dmargin, const system_type& sys,
-                const potential_type& pot) override
+    void initialize(neighbor_list_type& neighbors,
+                    const system_type& sys, const potential_type& pot) override;
+    void make  (neighbor_list_type& neighbors,
+                const system_type& sys, const potential_type& pot) override;
+    void update(neighbor_list_type& neighbors, const real_type dmargin,
+                const system_type& sys, const potential_type& pot) override
     {
         this->current_margin_ -= dmargin;
         if(this->current_margin_ < 0.)
         {
-            this->make(sys, pot);
+            this->make(neighbors, sys, pot);
         }
         return ;
     }
 
     real_type cutoff() const noexcept override {return this->cutoff_;}
     real_type margin() const noexcept override {return this->margin_;}
-
-    range_type partners(std::size_t i) const noexcept override {return neighbors_[i];}
 
   private:
 
@@ -116,7 +116,6 @@ class UnlimitedGridCellList final : public SpatialPartitionBase<traitsT, Potenti
     real_type current_margin_;
     real_type r_cell_size_;
 
-    neighbor_list_type        neighbors_;
     cell_list_type            cell_list_;
     cell_index_container_type index_by_cell_;
     // index_by_cell_ has {particle idx, cell idx} and sorted by cell idx
@@ -124,7 +123,7 @@ class UnlimitedGridCellList final : public SpatialPartitionBase<traitsT, Potenti
 };
 
 template<typename traitsT, typename potentialT>
-void UnlimitedGridCellList<traitsT, potentialT>::make(
+void UnlimitedGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbors,
         const system_type& sys, const potential_type& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
@@ -134,7 +133,7 @@ void UnlimitedGridCellList<traitsT, potentialT>::make(
     // related to the potential.
     const auto& participants = pot.participants();
 
-    neighbors_.clear();
+    neighbors.clear();
     index_by_cell_.resize(participants.size());
 
     for(std::size_t i=0; i<participants.size(); ++i)
@@ -211,7 +210,7 @@ void UnlimitedGridCellList<traitsT, potentialT>::make(
         }
         // make the result consistent with NaivePairCalculation...
         std::sort(partner.begin(), partner.end());
-        this->neighbors_.add_list_for(i, partner.begin(), partner.end());
+        neighbors.add_list_for(i, partner.begin(), partner.end());
     }
     this->current_margin_ = cutoff_ * margin_;
     return ;
@@ -219,6 +218,7 @@ void UnlimitedGridCellList<traitsT, potentialT>::make(
 
 template<typename traitsT, typename potentialT>
 void UnlimitedGridCellList<traitsT, potentialT>::initialize(
+        neighbor_list_type& neighbors,
         const system_type& sys, const potential_type& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -275,7 +275,7 @@ void UnlimitedGridCellList<traitsT, potentialT>::initialize(
         cell.second[26] = calc_index(x_next, y_next, z_next);
     }
 
-    this->make(sys, pot);
+    this->make(neighbors, sys, pot);
     return;
 }
 } // mjolnir

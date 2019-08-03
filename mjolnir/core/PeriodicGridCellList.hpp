@@ -61,14 +61,15 @@ class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, Potentia
         return current_margin_ >= 0.0;
     }
 
-    void initialize(const system_type& sys, const potential_type& pot) override;
-    void make  (const system_type& sys, const potential_type& pot) override;
-    void update(const real_type, const system_type&, const potential_type&) override;
+    void initialize(neighbor_list_type& neighbors,
+                    const system_type& sys, const potential_type& pot) override;
+    void make  (neighbor_list_type& neighbors,
+                const system_type& sys, const potential_type& pot) override;
+    void update(neighbor_list_type& neighbors, const real_type,
+                const system_type&, const potential_type&) override;
 
     real_type cutoff() const noexcept override {return this->cutoff_;}
     real_type margin() const noexcept override {return this->margin_;}
-
-    range_type partners(std::size_t i) const noexcept override {return neighbors_[i];}
 
   private:
 
@@ -118,7 +119,6 @@ class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, Potentia
     std::size_t dim_z_;
 
     coordinate_type     lower_bound_;
-    neighbor_list_type  neighbors_;
     cell_list_type      cell_list_;
     cell_index_container_type index_by_cell_;
     // index_by_cell_ has {particle idx, cell idx} and sorted by cell idx
@@ -126,19 +126,19 @@ class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, Potentia
 };
 
 template<typename traitsT, typename potentialT>
-void PeriodicGridCellList<traitsT, potentialT>::update(
+void PeriodicGridCellList<traitsT, potentialT>::update(neighbor_list_type& neighbors,
         const real_type dmargin, const system_type& sys, const potential_type& pot)
 {
     this->current_margin_ -= dmargin;
     if(this->current_margin_ < 0.)
     {
-        this->make(sys, pot);
+        this->make(neighbors, sys, pot);
     }
     return ;
 }
 
 template<typename traitsT, typename potentialT>
-void PeriodicGridCellList<traitsT, potentialT>::make(
+void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbors,
         const system_type& sys, const potential_type& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
@@ -148,7 +148,7 @@ void PeriodicGridCellList<traitsT, potentialT>::make(
     // related to the potential.
     const auto& participants = pot.participants();
 
-    neighbors_.clear();
+    neighbors.clear();
     index_by_cell_.resize(sys.size());
 
     for(std::size_t i=0; i<participants.size(); ++i)
@@ -224,7 +224,7 @@ void PeriodicGridCellList<traitsT, potentialT>::make(
         }
         // make the result consistent with NaivePairCalculation...
         std::sort(partner.begin(), partner.end());
-        this->neighbors_.add_list_for(i, partner.begin(), partner.end());
+        neighbors.add_list_for(i, partner.begin(), partner.end());
     }
 
     this->current_margin_ = cutoff_ * margin_;
@@ -233,6 +233,7 @@ void PeriodicGridCellList<traitsT, potentialT>::make(
 
 template<typename traitsT, typename potentialT>
 void PeriodicGridCellList<traitsT, potentialT>::initialize(
+        neighbor_list_type& neighbors,
         const system_type& sys, const potential_type& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -329,7 +330,7 @@ void PeriodicGridCellList<traitsT, potentialT>::initialize(
     }
     }
     }
-    this->make(sys, pot);
+    this->make(neighbors, sys, pot);
     return;
 }
 
