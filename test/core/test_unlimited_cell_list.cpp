@@ -98,7 +98,9 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::UnlimitedGridCellList<traits_type, potential_type> vlist(margin);
+
+    mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
+        mjolnir::UnlimitedGridCellList<traits_type, potential_type>>(margin));
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 
@@ -174,7 +176,8 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::UnlimitedGridCellList<traits_type, potential_type> vlist(margin);
+    mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
+        mjolnir::UnlimitedGridCellList<traits_type, potential_type>>(margin));
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 
@@ -274,7 +277,8 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial_2)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::UnlimitedGridCellList<traits_type, potential_type> vlist(margin);
+    mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
+        mjolnir::UnlimitedGridCellList<traits_type, potential_type>>(margin));
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 

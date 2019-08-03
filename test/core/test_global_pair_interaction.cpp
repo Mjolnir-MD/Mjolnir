@@ -39,7 +39,8 @@ BOOST_AUTO_TEST_CASE(GlobalPairInteraction_double)
         );
 
     interaction_type interaction(potential_type{potential},
-            mjolnir::make_unique<partition_type>());
+        mjolnir::SpatialPartition<traits, potential_type>(
+            mjolnir::make_unique<partition_type>()));
 
     const real_type eq_dist = 1.0 * std::pow(2.0, 1.0 / 6.0);
 

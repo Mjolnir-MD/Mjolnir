@@ -109,7 +109,8 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BasePairIntearction_numerical_diff)
         );
 
         interaction_type interaction(potential_type(potential),
-                mjolnir::make_unique<partition_type>());
+            mjolnir::SpatialPartition<traits_type, potential_type>(
+                mjolnir::make_unique<partition_type>()));
 
         system_type sys(4, boundary_type{});
 
@@ -419,7 +420,8 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2CrossStackingIntearction_numerical_diff)
         );
 
         interaction_type interaction(potential_type(potential),
-                mjolnir::make_unique<partition_type>());
+            mjolnir::SpatialPartition<traits_type, potential_type>(
+                mjolnir::make_unique<partition_type>()));
 
         system_type sys(10, boundary_type{});
 

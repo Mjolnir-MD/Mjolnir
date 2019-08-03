@@ -98,7 +98,8 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::VerletList<traits_type, potential_type> vlist(margin);
+    mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
+        mjolnir::VerletList<traits_type, potential_type>>(margin));
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 
@@ -184,7 +185,8 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary_partial)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::VerletList<traits_type, potential_type> vlist(margin);
+    mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
+        mjolnir::VerletList<traits_type, potential_type>>(margin));
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 
@@ -283,7 +285,8 @@ BOOST_AUTO_TEST_CASE(test_VerletList_PeriodicBoundary_partial_2)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::VerletList<traits_type, potential_type> vlist(margin);
+    mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
+        mjolnir::VerletList<traits_type, potential_type>>(margin));
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 
