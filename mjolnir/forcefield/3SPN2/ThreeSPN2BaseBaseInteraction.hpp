@@ -87,8 +87,8 @@ template<typename traitsT, typename partitionT>
 void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
         system_type& sys) const noexcept
 {
-    constexpr auto pi        = math::constants<real_type>::pi;
-    constexpr auto two_pi    = math::constants<real_type>::two_pi;
+    constexpr auto pi        = math::constants<real_type>::pi();
+    constexpr auto two_pi    = math::constants<real_type>::two_pi();
     constexpr auto tolerance = math::abs_tolerance<real_type>();
 
     for(const auto Bi : this->potential_.participants())
@@ -518,8 +518,8 @@ typename ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::real_type
 ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
         const system_type& sys) const noexcept
 {
-    constexpr auto pi        = math::constants<real_type>::pi;
-    constexpr auto two_pi    = math::constants<real_type>::two_pi;
+    constexpr auto pi        = math::constants<real_type>::pi();
+    constexpr auto two_pi    = math::constants<real_type>::two_pi();
 
     real_type E = 0.0;
     for(const auto Bi : this->potential_.participants())

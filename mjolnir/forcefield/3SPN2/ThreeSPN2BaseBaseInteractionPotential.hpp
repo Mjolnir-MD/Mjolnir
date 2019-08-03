@@ -402,7 +402,7 @@ class ThreeSPN2BaseBaseInteractionPotential
             MJOLNIR_LOG_INFO("angle parameters are convered into rad.");
             for(auto& theta_CS_0 : this->theta_CS_0_)
             {
-                theta_CS_0 *= (math::constants<real_type>::pi / 180.0);
+                theta_CS_0 *= (math::constants<real_type>::pi() / 180.0);
             }
             unit_converted = true;
         }
@@ -571,8 +571,8 @@ class ThreeSPN2BaseBaseInteractionPotential
 
     real_type K_BP_         = 12.0;
     real_type K_CS_         =  8.0;
-    real_type pi_over_K_BP_ = math::constants<real_type>::pi / 12.0;
-    real_type pi_over_K_CS_ = math::constants<real_type>::pi /  8.0;
+    real_type pi_over_K_BP_ = math::constants<real_type>::pi() / 12.0;
+    real_type pi_over_K_CS_ = math::constants<real_type>::pi() /  8.0;
 
     real_type epsilon_AT_   = 16.73; // [kJ/mol]
     real_type epsilon_GC_   = 21.18; // [kJ/mol]
@@ -580,25 +580,25 @@ class ThreeSPN2BaseBaseInteractionPotential
     real_type r0_AT_        = 5.941; // [angstrom]
     real_type r0_GC_        = 5.530; // [angstrom]
 
-    real_type theta1_0_AT_  = 156.54 / 180.0 * math::constants<real_type>::pi;
-    real_type theta1_0_TA_  = 135.78 / 180.0 * math::constants<real_type>::pi;
-    real_type theta1_0_GC_  = 159.81 / 180.0 * math::constants<real_type>::pi;
-    real_type theta1_0_CG_  = 141.16 / 180.0 * math::constants<real_type>::pi;
+    real_type theta1_0_AT_  = 156.54 / 180.0 * math::constants<real_type>::pi();
+    real_type theta1_0_TA_  = 135.78 / 180.0 * math::constants<real_type>::pi();
+    real_type theta1_0_GC_  = 159.81 / 180.0 * math::constants<real_type>::pi();
+    real_type theta1_0_CG_  = 141.16 / 180.0 * math::constants<real_type>::pi();
 
-    real_type theta2_0_AT_  = 135.78 / 180.0 * math::constants<real_type>::pi;
-    real_type theta2_0_TA_  = 156.54 / 180.0 * math::constants<real_type>::pi;
-    real_type theta2_0_GC_  = 141.16 / 180.0 * math::constants<real_type>::pi;
-    real_type theta2_0_CG_  = 159.81 / 180.0 * math::constants<real_type>::pi;
+    real_type theta2_0_AT_  = 135.78 / 180.0 * math::constants<real_type>::pi();
+    real_type theta2_0_TA_  = 156.54 / 180.0 * math::constants<real_type>::pi();
+    real_type theta2_0_GC_  = 141.16 / 180.0 * math::constants<real_type>::pi();
+    real_type theta2_0_CG_  = 159.81 / 180.0 * math::constants<real_type>::pi();
 
-    real_type theta3_0_AT_  = 116.09 / 180.0 * math::constants<real_type>::pi;
-    real_type theta3_0_TA_  = 116.09 / 180.0 * math::constants<real_type>::pi;
-    real_type theta3_0_GC_  = 124.94 / 180.0 * math::constants<real_type>::pi;
-    real_type theta3_0_CG_  = 124.94 / 180.0 * math::constants<real_type>::pi;
+    real_type theta3_0_AT_  = 116.09 / 180.0 * math::constants<real_type>::pi();
+    real_type theta3_0_TA_  = 116.09 / 180.0 * math::constants<real_type>::pi();
+    real_type theta3_0_GC_  = 124.94 / 180.0 * math::constants<real_type>::pi();
+    real_type theta3_0_CG_  = 124.94 / 180.0 * math::constants<real_type>::pi();
 
-    real_type phi_0_AT_     = -38.35 / 180.0 * math::constants<real_type>::pi;
-    real_type phi_0_TA_     = -38.35 / 180.0 * math::constants<real_type>::pi;
-    real_type phi_0_GC_     = -42.98 / 180.0 * math::constants<real_type>::pi;
-    real_type phi_0_CG_     = -42.98 / 180.0 * math::constants<real_type>::pi;
+    real_type phi_0_AT_     = -38.35 / 180.0 * math::constants<real_type>::pi();
+    real_type phi_0_TA_     = -38.35 / 180.0 * math::constants<real_type>::pi();
+    real_type phi_0_GC_     = -42.98 / 180.0 * math::constants<real_type>::pi();
+    real_type phi_0_CG_     = -42.98 / 180.0 * math::constants<real_type>::pi();
 
     std::array<real_type, 32> epsilon_CS_ = {{ // [kJ/mol]
         /* AA5 */ 2.186, /* AT5 */ 2.774, /* AG5 */ 2.833, /* AC5 */ 1.951,

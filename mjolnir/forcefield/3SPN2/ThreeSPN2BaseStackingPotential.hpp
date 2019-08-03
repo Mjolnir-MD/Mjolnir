@@ -103,7 +103,7 @@ class ThreeSPN2BaseStackingPotential
             {
                 const auto bs = static_cast<base_stack_kind>(idx);
                 MJOLNIR_LOG_INFO_NO_LF("theta0:", bs, " = ", theta0_BS, " [deg] -> ");
-                theta0_BS *= (math::constants<real_type>::pi / 180.0);
+                theta0_BS *= (math::constants<real_type>::pi() / 180.0);
                 MJOLNIR_LOG_INFO(theta0_BS, "[rad]");
                 ++idx;
             }
@@ -263,7 +263,7 @@ class ThreeSPN2BaseStackingPotential
 
     bool unit_converted_    = false;
     real_type K_BS_         = 6.0;
-    real_type pi_over_K_BS_ = math::constants<real_type>::pi / 6.0;
+    real_type pi_over_K_BS_ = math::constants<real_type>::pi() / 6.0;
     real_type alpha_BS_     = 3.0;
 
     std::array<real_type, 16> epsilon_BS_ = {{ // [kJ/mol]

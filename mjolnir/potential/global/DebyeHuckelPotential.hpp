@@ -190,7 +190,7 @@ class DebyeHuckelPotential
         using math_const =    math::constants<real_type>;
         using phys_const = physics::constants<real_type>;
 
-        constexpr real_type pi   = math_const::pi;
+        constexpr real_type pi   = math_const::pi();
         const     real_type kB   = phys_const::kB();
         const     real_type NA   = phys_const::NA();
         const     real_type eps0 = phys_const::eps0();
