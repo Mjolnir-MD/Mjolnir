@@ -1,10 +1,8 @@
 #ifndef MJOLNIR_CORE_PERIODIC_GRID_CELL_LIST_HPP
 #define MJOLNIR_CORE_PERIODIC_GRID_CELL_LIST_HPP
-#include <mjolnir/core/System.hpp>
-#include <mjolnir/core/NeighborList.hpp>
+#include <mjolnir/core/SpatialPartitionBase.hpp>
 #include <mjolnir/util/range.hpp>
 #include <mjolnir/util/logger.hpp>
-#include <mjolnir/util/empty.hpp>
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -16,20 +14,23 @@ namespace mjolnir
 // XXX: almost same as UnlimitedGridCellList.
 // the difference between UnlimitedGridCellList is only the number of cells.
 // PeriodicGridCellList can optimize the number of cells using boundary size.
-template<typename traitsT, typename parameterT>
-class PeriodicGridCellList
+template<typename traitsT, typename PotentialT>
+class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, PotentialT>
 {
   public:
-    using traits_type         = traitsT;
-    using system_type         = System<traits_type>;
-    using real_type           = typename traits_type::real_type;
-    using coordinate_type     = typename traits_type::coordinate_type;
-    using parameter_type      = parameterT;
-    using neighbor_list_type  = NeighborList<parameter_type>;
-    using neighbor_type       = typename neighbor_list_type::neighbor_type;
-    using range_type          = typename neighbor_list_type::range_type;
+    using traits_type        = traitsT;
+    using potential_type     = PotentialT;
+    using base_type          = SpatialPartitionBase<traits_type, potential_type>;
 
-    constexpr static real_type mesh_epsilon = 1e-6;
+    using system_type        = typename base_type::system_type;
+    using boundary_type      = typename base_type::boundary_type;
+    using real_type          = typename base_type::real_type;
+    using coordinate_type    = typename base_type::coordinate_type;
+    using neighbor_list_type = typename base_type::neighbor_list_type;
+    using neighbor_type      = typename base_type::neighbor_type;
+    using range_type         = typename base_type::range_type;
+
+    constexpr static real_type mesh_epsilon() {return 1e-6;}
 
     using particle_cell_idx_pair    = std::pair<std::size_t, std::size_t>;
     using cell_index_container_type = std::vector<particle_cell_idx_pair>;
@@ -44,7 +45,7 @@ class PeriodicGridCellList
         : cutoff_(0), margin_(1), current_margin_(-1),
           r_x_(-1), r_y_(-1), r_z_(-1), dim_x_(0), dim_y_(0), dim_z_(0)
     {}
-    ~PeriodicGridCellList() = default;
+    ~PeriodicGridCellList() override = default;
     PeriodicGridCellList(PeriodicGridCellList const&) = default;
     PeriodicGridCellList(PeriodicGridCellList &&)     = default;
     PeriodicGridCellList& operator=(PeriodicGridCellList const&) = default;
@@ -55,24 +56,19 @@ class PeriodicGridCellList
           r_x_(-1), r_y_(-1), r_z_(-1), dim_x_(0), dim_y_(0), dim_z_(0)
     {}
 
-    bool valid() const noexcept
+    bool valid() const noexcept override
     {
         return current_margin_ >= 0.0;
     }
 
-    template<typename PotentialT>
-    void initialize(const system_type& sys, const PotentialT& pot);
+    void initialize(const system_type& sys, const potential_type& pot) override;
+    void make  (const system_type& sys, const potential_type& pot) override;
+    void update(const real_type, const system_type&, const potential_type&) override;
 
-    template<typename PotentialT>
-    void make  (const system_type& sys, const PotentialT& pot);
+    real_type cutoff() const noexcept override {return this->cutoff_;}
+    real_type margin() const noexcept override {return this->margin_;}
 
-    template<typename PotentialT>
-    void update(const real_type, const system_type&, const PotentialT&);
-
-    real_type cutoff() const {return this->cutoff_;}
-    real_type margin() const {return this->margin_;}
-
-    range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
+    range_type partners(std::size_t i) const noexcept override {return neighbors_[i];}
 
   private:
 
@@ -92,18 +88,20 @@ class PeriodicGridCellList
 
     void set_cutoff(const real_type c) noexcept
     {
+        constexpr real_type me = mesh_epsilon();
         this->cutoff_ = c;
-        this->r_x_ = 1 / (this->cutoff_ * (1 + this->margin_) + mesh_epsilon);
-        this->r_y_ = 1 / (this->cutoff_ * (1 + this->margin_) + mesh_epsilon);
-        this->r_z_ = 1 / (this->cutoff_ * (1 + this->margin_) + mesh_epsilon);
+        this->r_x_ = 1 / (this->cutoff_ * (1 + this->margin_) + me);
+        this->r_y_ = 1 / (this->cutoff_ * (1 + this->margin_) + me);
+        this->r_z_ = 1 / (this->cutoff_ * (1 + this->margin_) + me);
         return;
     }
     void set_margin(const real_type m) noexcept
     {
+        constexpr real_type me = mesh_epsilon();
         this->margin_ = m;
-        this->r_x_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + mesh_epsilon);
-        this->r_y_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + mesh_epsilon);
-        this->r_z_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + mesh_epsilon);
+        this->r_x_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + me);
+        this->r_y_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + me);
+        this->r_z_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + me);
         return;
     }
 
@@ -127,10 +125,9 @@ class PeriodicGridCellList
     // first term of cell list contains first and last idx of index_by_cell
 };
 
-template<typename traitsT, typename parameterT>
-template<typename PotentialT>
-void PeriodicGridCellList<traitsT, parameterT>::update(
-        const real_type dmargin, const system_type& sys, const PotentialT& pot)
+template<typename traitsT, typename potentialT>
+void PeriodicGridCellList<traitsT, potentialT>::update(
+        const real_type dmargin, const system_type& sys, const potential_type& pot)
 {
     this->current_margin_ -= dmargin;
     if(this->current_margin_ < 0.)
@@ -140,10 +137,9 @@ void PeriodicGridCellList<traitsT, parameterT>::update(
     return ;
 }
 
-template<typename traitsT, typename parameterT>
-template<typename PotentialT>
-void PeriodicGridCellList<traitsT, parameterT>::make(
-        const system_type& sys, const PotentialT& pot)
+template<typename traitsT, typename potentialT>
+void PeriodicGridCellList<traitsT, potentialT>::make(
+        const system_type& sys, const potential_type& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
@@ -235,10 +231,9 @@ void PeriodicGridCellList<traitsT, parameterT>::make(
     return ;
 }
 
-template<typename traitsT, typename parameterT>
-template<typename PotentialT>
-void PeriodicGridCellList<traitsT, parameterT>::initialize(
-        const system_type& sys, const PotentialT& pot)
+template<typename traitsT, typename potentialT>
+void PeriodicGridCellList<traitsT, potentialT>::initialize(
+        const system_type& sys, const potential_type& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -338,22 +333,28 @@ void PeriodicGridCellList<traitsT, parameterT>::initialize(
     return;
 }
 
-#ifdef MJOLNIR_SEPARATE_BUILD
-extern template class PeriodicGridCellList<SimulatorTraits<double, UnlimitedBoundary>, empty_t>;
-extern template class PeriodicGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
-extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
-extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
-
-extern template class PeriodicGridCellList<SimulatorTraits<double, UnlimitedBoundary>, double>;
-extern template class PeriodicGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, float >;
-extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
-extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
-
-extern template class PeriodicGridCellList<SimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
-extern template class PeriodicGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
-extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
-extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
-#endif
-
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+#include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
+#include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
+#include <mjolnir/potential/global/LennardJonesPotential.hpp>
+#include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
+
+namespace mjolnir
+{
+extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>;
+extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float >>;
+
+extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;
+extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float >>;
+
+extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<double>>;
+extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<float >>;
+
+extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
+extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float >>;
+}
+#endif // SEPARATE_BUILD
+
 #endif /* MJOLNIR_PERIODIC_GRID_CELL_LIST */

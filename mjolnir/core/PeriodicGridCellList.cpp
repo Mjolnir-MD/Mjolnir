@@ -6,18 +6,15 @@
 
 namespace mjolnir
 {
-template class PeriodicGridCellList<SimulatorTraits<double, UnlimitedBoundary>, empty_t>;
-template class PeriodicGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
-template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
-template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>;
+template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float >>;
 
-template class PeriodicGridCellList<SimulatorTraits<double, UnlimitedBoundary>, double>;
-template class PeriodicGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, float >;
-template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
-template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;
+template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float >>;
 
-template class PeriodicGridCellList<SimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
-template class PeriodicGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
-template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
-template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<double>>;
+template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<float >>;
+
+template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
+template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float >>;
 } // mjolnir

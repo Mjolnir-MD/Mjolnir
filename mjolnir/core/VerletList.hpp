@@ -1,62 +1,69 @@
 #ifndef MJOLNIR_CORE_VERLET_LIST_HPP
 #define MJOLNIR_CORE_VERLET_LIST_HPP
-#include <mjolnir/core/System.hpp>
-#include <mjolnir/core/NeighborList.hpp>
-#include <mjolnir/util/empty.hpp>
+#include <mjolnir/core/SpatialPartitionBase.hpp>
 #include <algorithm>
 #include <limits>
 
 namespace mjolnir
 {
 
-template<typename traitsT, typename parameterT>
-class VerletList
+template<typename traitsT, typename PotentialT>
+class VerletList final : public SpatialPartitionBase<traitsT, PotentialT>
 {
   public:
-    using traits_type         = traitsT;
-    using system_type         = System<traits_type>;
-    using boundary_type       = typename traits_type::boundary_type;
-    using real_type           = typename traits_type::real_type;
-    using coordinate_type     = typename traits_type::coordinate_type;
 
-    using parameter_type      = parameterT;
-    using neighbor_list_type  = NeighborList<parameter_type>;
-    using neighbor_type       = typename neighbor_list_type::neighbor_type;
-    using range_type          = typename neighbor_list_type::range_type;
+    using traits_type        = traitsT;
+    using potential_type     = PotentialT;
+    using base_type          = SpatialPartitionBase<traits_type, potential_type>;
+
+    using system_type        = typename base_type::system_type;
+    using boundary_type      = typename base_type::boundary_type;
+    using real_type          = typename base_type::real_type;
+    using coordinate_type    = typename base_type::coordinate_type;
+    using neighbor_list_type = typename base_type::neighbor_list_type;
+    using neighbor_type      = typename base_type::neighbor_type;
+    using range_type         = typename base_type::range_type;
 
   public:
+
     VerletList() : margin_(0.5), current_margin_(-1.0){}
     explicit VerletList(const real_type mgn): margin_(mgn), current_margin_(-1.0){}
 
-    ~VerletList() = default;
+    ~VerletList() override = default;
     VerletList(VerletList const&) = default;
     VerletList(VerletList &&)     = default;
     VerletList& operator=(VerletList const&) = default;
     VerletList& operator=(VerletList &&)     = default;
 
-    bool valid() const noexcept
+    bool valid() const noexcept override
     {
         return current_margin_ >= 0.0;
     }
 
-    template<typename PotentialT>
-    void initialize(const system_type& sys, const PotentialT& pot)
+    void initialize(const system_type& sys, const potential_type& pot) override
     {
         this->set_cutoff(pot.max_cutoff_length());
         this->make(sys, pot);
         return;
     }
 
-    template<typename PotentialT>
-    void make  (const system_type& sys, const PotentialT& pot);
+    void make  (const system_type& sys, const potential_type& pot) override;
 
-    template<typename PotentialT>
-    void update(const real_type, const system_type&, const PotentialT&);
+    void update(const real_type dmargin, const system_type& sys,
+                const potential_type& pot) override
+    {
+        this->current_margin_ -= dmargin;
+        if(this->current_margin_ < 0)
+        {
+            this->make(sys, pot);
+        }
+        return ;
+    }
 
-    real_type cutoff() const noexcept {return this->cutoff_;}
-    real_type margin() const noexcept {return this->margin_;}
+    real_type cutoff() const noexcept override {return this->cutoff_;}
+    real_type margin() const noexcept override {return this->margin_;}
 
-    range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
+    range_type partners(std::size_t i) const noexcept override {return neighbors_[i];}
 
   private:
 
@@ -72,28 +79,10 @@ class VerletList
     neighbor_list_type  neighbors_;
 };
 
-template<typename traitsT, typename parameterT>
-template<typename potentialT>
-void VerletList<traitsT, parameterT>::update(
-        const real_type dmargin, const system_type& sys, const potentialT& pot)
+template<typename traitsT, typename potentialT>
+void VerletList<traitsT, potentialT>::make(
+        const system_type& sys, const potential_type& pot)
 {
-    this->current_margin_ -= dmargin;
-    if(this->current_margin_ < 0)
-    {
-        this->make(sys, pot);
-    }
-    return ;
-}
-
-template<typename traitsT, typename parameterT>
-template<typename potentialT>
-void VerletList<traitsT, parameterT>::make(
-        const system_type& sys, const potentialT& pot)
-{
-    static_assert(std::is_same<typename potentialT::pair_parameter_type,
-        parameter_type>::value, "VerletList: invalid template argumnet: "
-        "potentialT::parameter_type should be equal to verletlist::parameterT");
-
     this->neighbors_.clear();
 
     // `participants` is a list that contains indices of particles that are
@@ -129,24 +118,37 @@ void VerletList<traitsT, parameterT>::make(
     this->current_margin_ = cutoff_ * margin_;
     return ;
 }
+} // mjolnir
+
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>, empty_t>;
-extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
-extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
-extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+#include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
+#include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
+#include <mjolnir/potential/global/LennardJonesPotential.hpp>
+#include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
 
-extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>, double>;
-extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>, float >;
-extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
-extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+namespace mjolnir
+{
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float >>;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float >>;
 
-extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
-extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
-extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
-extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
-#endif
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float >>;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float >>;
 
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        LennardJonesPotential<double>>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        LennardJonesPotential<float >>;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<double>>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<float >>;
 
-} // mjolnir
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float >>;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float >>;
+}
+#endif // SEPARATE_BUILD
+
 #endif/* MJOLNIR_CORE_VERLET_LIST */

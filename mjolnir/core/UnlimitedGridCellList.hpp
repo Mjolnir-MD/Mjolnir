@@ -1,8 +1,6 @@
 #ifndef MJOLNIR_CORE_UNLIMITED_GRID_CELL_LIST_HPP
 #define MJOLNIR_CORE_UNLIMITED_GRID_CELL_LIST_HPP
-#include <mjolnir/core/System.hpp>
-#include <mjolnir/core/NeighborList.hpp>
-#include <mjolnir/util/range.hpp>
+#include <mjolnir/core/SpatialPartitionBase.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <functional>
 #include <algorithm>
@@ -13,30 +11,34 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename parameterT>
-class UnlimitedGridCellList
+template<typename traitsT, typename PotentialT>
+class UnlimitedGridCellList final : public SpatialPartitionBase<traitsT, PotentialT>
 {
   public:
-    using traits_type         = traitsT;
-    using system_type         = System<traits_type>;
-    using real_type           = typename traits_type::real_type;
-    using coordinate_type     = typename traits_type::coordinate_type;
-    using parameter_type      = parameterT;
-    using neighbor_list_type  = NeighborList<parameter_type>;
-    using neighbor_type       = typename neighbor_list_type::neighbor_type;
-    using range_type          = typename neighbor_list_type::range_type;
 
-    constexpr static std::size_t  dim_size  = 8u;
-    constexpr static std::int64_t dim       = 8;
-    constexpr static std::size_t total_size = dim_size * dim_size * dim_size;
-    constexpr static real_type mesh_epsilon = 1e-6;
+    using traits_type        = traitsT;
+    using potential_type     = PotentialT;
+    using base_type          = SpatialPartitionBase<traits_type, potential_type>;
+
+    using system_type        = typename base_type::system_type;
+    using boundary_type      = typename base_type::boundary_type;
+    using real_type          = typename base_type::real_type;
+    using coordinate_type    = typename base_type::coordinate_type;
+    using neighbor_list_type = typename base_type::neighbor_list_type;
+    using neighbor_type      = typename base_type::neighbor_type;
+    using range_type         = typename base_type::range_type;
+
+    static constexpr std::size_t  dim_size()     {return 8u;}
+    static constexpr std::int64_t dim()          {return 8; }
+    static constexpr std::size_t  total_size()   {return 512u;}
+    static constexpr real_type    mesh_epsilon() {return 1e-6;}
 
     using particle_cell_idx_pair    = std::pair<std::size_t, std::size_t>;
     using cell_index_container_type = std::vector<particle_cell_idx_pair>;
     using cell_index_const_iterator = typename cell_index_container_type::const_iterator;
     using adjacent_cell_idx         = std::array<std::size_t, 27>;
     using cell_type                 = std::pair<range<cell_index_const_iterator>, adjacent_cell_idx>;
-    using cell_list_type            = std::array<cell_type, total_size>;
+    using cell_list_type            = std::array<cell_type, dim() * dim() * dim()>;
 
   public:
 
@@ -44,7 +46,7 @@ class UnlimitedGridCellList
         : margin_(0.5), current_margin_(-1.0), r_cell_size_(-1.0)
     {}
 
-    ~UnlimitedGridCellList() = default;
+    ~UnlimitedGridCellList() override = default;
     UnlimitedGridCellList(UnlimitedGridCellList const&) = default;
     UnlimitedGridCellList(UnlimitedGridCellList &&)     = default;
     UnlimitedGridCellList& operator=(UnlimitedGridCellList const&) = default;
@@ -54,53 +56,57 @@ class UnlimitedGridCellList
         : margin_(margin), current_margin_(-1.0), r_cell_size_(-1.0)
     {}
 
-    bool valid() const noexcept
+    bool valid() const noexcept override
     {
         return current_margin_ >= 0.;
     }
 
-    template<typename PotentialT>
-    void initialize(const system_type& sys, const PotentialT& pot);
+    void initialize(const system_type& sys, const potential_type& pot) override;
+    void make  (const system_type& sys, const potential_type& pot) override;
+    void update(const real_type dmargin, const system_type& sys,
+                const potential_type& pot) override
+    {
+        this->current_margin_ -= dmargin;
+        if(this->current_margin_ < 0.)
+        {
+            this->make(sys, pot);
+        }
+        return ;
+    }
 
-    template<typename PotentialT>
-    void make  (const system_type& sys, const PotentialT& pot);
+    real_type cutoff() const noexcept override {return this->cutoff_;}
+    real_type margin() const noexcept override {return this->margin_;}
 
-    template<typename PotentialT>
-    void update(const real_type, const system_type&, const PotentialT&);
-
-    real_type cutoff() const noexcept {return this->cutoff_;}
-    real_type margin() const noexcept {return this->margin_;}
-
-    range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
+    range_type partners(std::size_t i) const noexcept override {return neighbors_[i];}
 
   private:
 
     // calc cell index of the position
     std::size_t calc_index(const coordinate_type& pos) const noexcept
     {
-        const auto x = static_cast<std::int64_t>(std::floor(math::X(pos) * r_cell_size_)) % dim;
-        const auto y = static_cast<std::int64_t>(std::floor(math::Y(pos) * r_cell_size_)) % dim;
-        const auto z = static_cast<std::int64_t>(std::floor(math::Z(pos) * r_cell_size_)) % dim;
-
-        return this->calc_index(
-                (x<0) ? x+dim : x, (y<0) ? y+dim : y, (z<0) ? z+dim : z);
+        constexpr std::int64_t d = dim();
+        const auto x = std::int64_t(std::floor(math::X(pos) * r_cell_size_)) % d;
+        const auto y = std::int64_t(std::floor(math::Y(pos) * r_cell_size_)) % d;
+        const auto z = std::int64_t(std::floor(math::Z(pos) * r_cell_size_)) % d;
+        return this->calc_index((x<0) ? x+d : x, (y<0) ? y+d : y, (z<0) ? z+d : z);
     }
 
     std::size_t calc_index(const std::size_t x, const std::size_t y,
                            const std::size_t z) const noexcept
     {
-        return x + dim_size * y + dim_size * dim_size * z;
+        constexpr std::size_t ds = dim_size();
+        return x + ds * y + ds * ds * z;
     }
 
     void set_cutoff(const real_type c) noexcept
     {
         this->cutoff_ = c;
-        this->r_cell_size_ = 1 / (cutoff_ * (1 + margin_) * (1+mesh_epsilon));
+        this->r_cell_size_ = 1 / (cutoff_ * (1 + margin_) * (1+mesh_epsilon()));
     }
     void set_margin(const real_type m) noexcept
     {
         this->margin_ = m;
-        this->r_cell_size_ = 1 / (cutoff_ * (1 + margin_) * (1+mesh_epsilon));
+        this->r_cell_size_ = 1 / (cutoff_ * (1 + margin_) * (1+mesh_epsilon()));
     }
 
   private:
@@ -117,33 +123,9 @@ class UnlimitedGridCellList
     // first term of cell list contains first and last idx of index_by_cell
 };
 
-template<typename traitsT, typename parameterT>
-constexpr std::size_t  UnlimitedGridCellList<traitsT, parameterT>::dim_size;
-template<typename traitsT, typename parameterT>
-constexpr std::int64_t UnlimitedGridCellList<traitsT, parameterT>::dim;
-template<typename traitsT, typename parameterT>
-constexpr std::size_t  UnlimitedGridCellList<traitsT, parameterT>::total_size;
-template<typename traitsT, typename parameterT>
-constexpr typename UnlimitedGridCellList<traitsT, parameterT>::real_type
-UnlimitedGridCellList<traitsT, parameterT>::mesh_epsilon;
-
-template<typename traitsT, typename parameterT>
-template<typename PotentialT>
-void UnlimitedGridCellList<traitsT, parameterT>::update(
-        const real_type dmargin, const system_type& sys, const PotentialT& pot)
-{
-    this->current_margin_ -= dmargin;
-    if(this->current_margin_ < 0.)
-    {
-        this->make(sys, pot);
-    }
-    return ;
-}
-
-template<typename traitsT, typename parameterT>
-template<typename PotentialT>
-void UnlimitedGridCellList<traitsT, parameterT>::make(
-        const system_type& sys, const PotentialT& pot)
+template<typename traitsT, typename potentialT>
+void UnlimitedGridCellList<traitsT, potentialT>::make(
+        const system_type& sys, const potential_type& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
@@ -235,31 +217,32 @@ void UnlimitedGridCellList<traitsT, parameterT>::make(
     return ;
 }
 
-template<typename traitsT, typename parameterT>
-template<typename PotentialT>
-void UnlimitedGridCellList<traitsT, parameterT>::initialize(
-        const system_type& sys, const PotentialT& pot)
+template<typename traitsT, typename potentialT>
+void UnlimitedGridCellList<traitsT, potentialT>::initialize(
+        const system_type& sys, const potential_type& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
+    constexpr std::int64_t d = dim();
+
     MJOLNIR_LOG_INFO(pot.name(), " cutoff = ", pot.max_cutoff_length());
-    MJOLNIR_LOG_INFO("dimension(independent from system size) = ", dim, 'x', dim, 'x', dim);
+    MJOLNIR_LOG_INFO("dimension(independent from system size) = ", d, 'x', d, 'x', d);
     this->set_cutoff(pot.max_cutoff_length());
 
     // initialize cell list
-    for(int x = 0; x < dim; ++x)
-    for(int y = 0; y < dim; ++y)
-    for(int z = 0; z < dim; ++z)
+    for(int x = 0; x < d; ++x)
+    for(int y = 0; y < d; ++y)
+    for(int z = 0; z < d; ++z)
     {
         auto& cell = this->cell_list_[calc_index(x, y, z)];
 
-        const std::size_t x_prev = (x ==     0) ? dim-1 : x-1;
-        const std::size_t x_next = (x == dim-1) ?     0 : x+1;
-        const std::size_t y_prev = (y ==     0) ? dim-1 : y-1;
-        const std::size_t y_next = (y == dim-1) ?     0 : y+1;
-        const std::size_t z_prev = (z ==     0) ? dim-1 : z-1;
-        const std::size_t z_next = (z == dim-1) ?     0 : z+1;
+        const std::size_t x_prev = (x ==   0) ? d-1 : x-1;
+        const std::size_t x_next = (x == d-1) ?   0 : x+1;
+        const std::size_t y_prev = (y ==   0) ? d-1 : y-1;
+        const std::size_t y_next = (y == d-1) ?   0 : y+1;
+        const std::size_t z_prev = (z ==   0) ? d-1 : z-1;
+        const std::size_t z_next = (z == d-1) ?   0 : z+1;
 
         cell.second[ 0] = calc_index(x_prev, y_prev, z_prev);
         cell.second[ 1] = calc_index(x,      y_prev, z_prev);
@@ -295,21 +278,28 @@ void UnlimitedGridCellList<traitsT, parameterT>::initialize(
     this->make(sys, pot);
     return;
 }
-#ifdef MJOLNIR_SEPARATE_BUILD
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, empty_t>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
-extern template class UnlimitedGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
-
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, double>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, float >;
-extern template class UnlimitedGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
-
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
-extern template class UnlimitedGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
-#endif
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+#include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
+#include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
+#include <mjolnir/potential/global/LennardJonesPotential.hpp>
+#include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
+
+namespace mjolnir
+{
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float >>;
+
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float >>;
+
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        LennardJonesPotential<double>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        LennardJonesPotential<float >>;
+
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float >>;
+}
+#endif // SEPARATE_BUILD
+
 #endif/* MJOLNIR_UNLIMITED_GRID_CELL_LIST */
