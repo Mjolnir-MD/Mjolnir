@@ -16,12 +16,12 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
   public:
     using traits_type     = traitsT;
     using potential_type  = potentialT;
-    using partition_type  = std::unique_ptr<SpatialPartitionBase<traits_type, potentialT>>;
     using base_type       = GlobalInteractionBase<traitsT>;
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
+    using partition_type  = SpatialPartition<traits_type, potential_type>;
 
   public:
     GlobalPairInteraction()  = default;
@@ -39,7 +39,7 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->potential_.initialize(sys);
-        this->partition_->initialize(sys, this->potential_);
+        this->partition_.initialize(sys, this->potential_);
     }
 
     /*! @brief update parameters (e.g. temperature, ionic strength, ...)  *
@@ -53,12 +53,12 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->potential_.update(sys);
         // potential update may change the cutoff length!
-        this->partition_->initialize(sys, this->potential_);
+        this->partition_.initialize(sys, this->potential_);
     }
 
     void update_margin(const real_type dmargin, const system_type& sys) override
     {
-        this->partition_->update(dmargin, sys, this->potential_);
+        this->partition_.update(dmargin, sys, this->potential_);
         return;
     }
 
@@ -83,7 +83,7 @@ void GlobalPairInteraction<traitsT, potT>::calc_force(
 {
     for(const auto i : this->potential_.participants())
     {
-        for(const auto& ptnr : this->partition_->partners(i))
+        for(const auto& ptnr : this->partition_.partners(i))
         {
             const auto  j     = ptnr.index;
             const auto& param = ptnr.parameter();
@@ -114,7 +114,7 @@ GlobalPairInteraction<traitsT, potT>::calc_energy(
     real_type e = 0.0;
     for(const auto i : this->potential_.participants())
     {
-        for(const auto& ptnr : this->partition_->partners(i))
+        for(const auto& ptnr : this->partition_.partners(i))
         {
             const auto  j     = ptnr.index;
             const auto& param = ptnr.parameter();

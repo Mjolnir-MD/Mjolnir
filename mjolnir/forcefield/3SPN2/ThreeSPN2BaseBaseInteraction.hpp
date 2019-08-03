@@ -34,7 +34,7 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
     using potential_type  = ThreeSPN2BaseBaseInteractionPotential<real_type>;
-    using partition_type  = std::unique_ptr<SpatialPartitionBase<traitsT, potential_type>>;
+    using partition_type  = SpatialPartition<traitsT, potential_type>;
 
     using base_kind        = parameter_3SPN2::bead_kind;
     using base_pair_kind   = parameter_3SPN2::base_pair_kind;
@@ -52,7 +52,7 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->potential_.initialize(sys);
-        this->partition_->initialize(sys, this->potential_);
+        this->partition_.initialize(sys, this->potential_);
     }
 
     void update(const system_type& sys) override
@@ -61,12 +61,12 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->potential_.update(sys);
-        this->partition_->initialize(sys, this->potential_);
+        this->partition_.initialize(sys, this->potential_);
     }
 
     void update_margin(const real_type dmargin, const system_type& sys) override
     {
-        this->partition_->update(dmargin, sys, this->potential_);
+        this->partition_.update(dmargin, sys, this->potential_);
         return;
     }
 
@@ -95,7 +95,7 @@ void ThreeSPN2BaseBaseInteraction<traitsT>::calc_force(
     for(const auto Bi : this->potential_.participants())
     {
         const auto& rBi = sys.position(Bi);
-        for(const auto& ptnr : this->partition_->partners(Bi))
+        for(const auto& ptnr : this->partition_.partners(Bi))
         {
             const auto  Bj   = ptnr.index;
             const auto& para = ptnr.parameter();
@@ -527,7 +527,7 @@ ThreeSPN2BaseBaseInteraction<traitsT>::calc_energy(
     {
         const auto& rBi = sys.position(Bi);
 
-        for(const auto& ptnr : this->partition_->partners(Bi))
+        for(const auto& ptnr : this->partition_.partners(Bi))
         {
             const auto  Bj   = ptnr.index;
             const auto& para = ptnr.parameter();

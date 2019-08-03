@@ -24,7 +24,7 @@ class GlobalPairInteraction<
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
     using potential_type  = ExcludedVolumePotential<real_type>;
-    using partition_type  = std::unique_ptr<SpatialPartitionBase<traits_type, potential_type>>;
+    using partition_type  = SpatialPartition<traits_type, potential_type>;
 
   public:
     GlobalPairInteraction()  = default;
@@ -42,7 +42,7 @@ class GlobalPairInteraction<
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->potential_.initialize(sys);
-        this->partition_->initialize(sys, this->potential_);
+        this->partition_.initialize(sys, this->potential_);
     }
 
     /*! @brief update parameters (e.g. temperature, ionic strength, ...)  *
@@ -56,12 +56,12 @@ class GlobalPairInteraction<
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->potential_.update(sys);
         // potential update may change the cutoff length!
-        this->partition_->initialize(sys, this->potential_);
+        this->partition_.initialize(sys, this->potential_);
     }
 
     void update_margin(const real_type dmargin, const system_type& sys) override
     {
-        this->partition_->update(dmargin, sys, this->potential_);
+        this->partition_.update(dmargin, sys, this->potential_);
         return;
     }
 
@@ -75,7 +75,7 @@ class GlobalPairInteraction<
         const     auto  epsilon12       = 12 * potential_.epsilon();
         for(const auto i : this->potential_.participants())
         {
-            for(const auto& ptnr : this->partition_->partners(i))
+            for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto  j     = ptnr.index;
                 const auto& param = ptnr.parameter(); // sum of radius
@@ -116,7 +116,7 @@ class GlobalPairInteraction<
         const     auto  epsilon         = potential_.epsilon();
         for(const auto i : this->potential_.participants())
         {
-            for(const auto& ptnr : this->partition_->partners(i))
+            for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto  j     = ptnr.index;
                 const auto& param = ptnr.parameter();
