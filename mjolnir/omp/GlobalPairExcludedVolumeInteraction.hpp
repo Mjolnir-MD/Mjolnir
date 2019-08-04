@@ -10,12 +10,10 @@ namespace mjolnir
 {
 
 // specialization for Pair<ExcludedVolume>
-template<typename realT, template<typename, typename> class boundaryT,
-         typename partitionT>
+template<typename realT, template<typename, typename> class boundaryT>
 class GlobalPairInteraction<
     OpenMPSimulatorTraits<realT, boundaryT>,
-    ExcludedVolumePotential<realT>,
-    partitionT
+    ExcludedVolumePotential<realT>
     > final : public GlobalInteractionBase<OpenMPSimulatorTraits<realT, boundaryT>>
 {
   public:
@@ -25,8 +23,8 @@ class GlobalPairInteraction<
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
-    using partition_type  = partitionT;
     using potential_type  = ExcludedVolumePotential<real_type>;
+    using partition_type  = SpatialPartition<traits_type, potential_type>;
 
   public:
     GlobalPairInteraction()  = default;
@@ -161,30 +159,16 @@ class GlobalPairInteraction<
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 #include <mjolnir/core/BoundaryCondition.hpp>
-#include <mjolnir/core/NaivePairCalculation.hpp>
-#include <mjolnir/core/VerletList.hpp>
-#include <mjolnir/core/UnlimitedGridCellList.hpp>
-#include <mjolnir/core/PeriodicGridCellList.hpp>
 
 namespace mjolnir
 {
 // ============================================================================
 // exv
 // CellList
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>, UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        typename ExcludedVolumePotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float> , UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        typename ExcludedVolumePotential<float>::pair_parameter_type> >;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>, PeriodicGridCellList <OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float> , PeriodicGridCellList <OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<float>::pair_parameter_type> >;
-// VerletList
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>, VerletList<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        typename ExcludedVolumePotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float> , VerletList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        typename ExcludedVolumePotential<float>::pair_parameter_type> >;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>, VerletList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float> , VerletList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<float>::pair_parameter_type> >;
-// Naive
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>, NaivePairCalculation<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        typename ExcludedVolumePotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float> , NaivePairCalculation<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        typename ExcludedVolumePotential<float>::pair_parameter_type> >;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>, NaivePairCalculation<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float> , NaivePairCalculation<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ExcludedVolumePotential<float>::pair_parameter_type> >;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float> >;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float> >;
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
 

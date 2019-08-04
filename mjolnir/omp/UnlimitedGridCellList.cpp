@@ -6,18 +6,15 @@
 
 namespace mjolnir
 {
-template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, empty_t>;
-template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
-template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
-template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, DebyeHuckelPotential<double>>;
+template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, DebyeHuckelPotential<float >>;
 
-template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, double>;
-template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, float >;
-template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
-template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, ExcludedVolumePotential<double>>;
+template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, ExcludedVolumePotential<float >>;
 
-template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
-template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
-template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
-template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<double>>;
+template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<float >>;
+
+template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<double>>;
+template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<float >>;
 } // mjolnir
