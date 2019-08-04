@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
 
     const real_type k1(1e0);
     const real_type k3(1e0);
-    const real_type native(mjolnir::math::constants<real_type>::pi * 2.0 / 3.0);
+    const real_type native(mjolnir::math::constants<real_type>::pi() * 2.0 / 3.0);
 
     potential_type potential{k1, k3, native};
     dihedral_angle_type interaction("none", {{ {{0,1,2,3}}, potential}});
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
     sys.at(2).group = "NONE";
     sys.at(3).group = "NONE";
 
-    const real_type dtheta = mjolnir::math::constants<real_type>::pi / 1800.0;
+    const real_type dtheta = mjolnir::math::constants<real_type>::pi() / 1800.0;
     for(int i = -1800; i < 1800; ++i)
     {
         BOOST_TEST(mjolnir::math::length(sys[0].position - pos1) == 0.0, boost::test_tools::tolerance(tol));
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_numerical_diff)
 
     const real_type k1(1e0);
     const real_type k3(1e0);
-    const real_type native(mjolnir::math::constants<real_type>::pi / 2.0);
+    const real_type native(mjolnir::math::constants<real_type>::pi() / 2.0);
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<real_type> uni(-1.0, 1.0);

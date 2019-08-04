@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BasePairIntearction_numerical_diff)
     using interaction_type  = mjolnir::ThreeSPN2BaseBaseInteraction<traits_type>;
     using ignore_group_type = typename potential_type::ignore_group_type;
 
-    constexpr real_type pi = mjolnir::math::constants<real_type>::pi;
+    constexpr real_type pi = mjolnir::math::constants<real_type>::pi();
 
     {
         using unit_type = mjolnir::unit::constants<real_type>;
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2CrossStackingIntearction_numerical_diff)
     using interaction_type  = mjolnir::ThreeSPN2BaseBaseInteraction<traits_type>;
     using ignore_group_type = typename potential_type::ignore_group_type;
 
-    constexpr real_type pi = mjolnir::math::constants<real_type>::pi;
+    constexpr real_type pi = mjolnir::math::constants<real_type>::pi();
 
     {
         using unit_type = mjolnir::unit::constants<real_type>;

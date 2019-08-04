@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE(FlexibleLocalDihedral_double)
     using real_type = double;
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
-    constexpr real_type   pi = mjolnir::math::constants<real_type>::pi;
+    constexpr real_type   pi = mjolnir::math::constants<real_type>::pi();
 
     const real_type k  = 1.0;
     const std::array<real_type, 7> term{{
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(FlexibleLocalDihedral_float)
     constexpr std::size_t N   = 100;
     constexpr real_type   h   = 1e-3;
     constexpr real_type   tol = 5e-2;
-    constexpr real_type   pi = mjolnir::math::constants<real_type>::pi;
+    constexpr real_type   pi = mjolnir::math::constants<real_type>::pi();
 
     const real_type k  = 1.0;
     const std::array<real_type, 7> term{{

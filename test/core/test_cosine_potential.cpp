@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE(CosinePotential_double)
     using real_type = double;
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
-    constexpr real_type   pi = mjolnir::math::constants<real_type>::pi;
+    constexpr real_type   pi = mjolnir::math::constants<real_type>::pi();
     const real_type    k = 2.0;
     const std::int32_t n = 2;
     const real_type   v0 = 3.0;
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(CosinePotential_float)
     using real_type = float;
     constexpr std::size_t N = 100;
     constexpr real_type   h = 1e-3;
-    constexpr real_type   pi = mjolnir::math::constants<real_type>::pi;
+    constexpr real_type   pi = mjolnir::math::constants<real_type>::pi();
     const real_type    k = 2.0;
     const std::int32_t n = 2;
     const real_type   v0 = 3.0;

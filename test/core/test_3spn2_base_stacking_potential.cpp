@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(f_3SPN2_BaseStacking_double)
 
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
-    constexpr real_type  pi = mjolnir::math::constants<real_type>::pi;
+    constexpr real_type  pi = mjolnir::math::constants<real_type>::pi();
 
     mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential;
 
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(f_3SPN2_BaseStacking_float)
 
     constexpr std::size_t N = 100;
     constexpr real_type   h = 1e-3f;
-    constexpr real_type  pi = mjolnir::math::constants<real_type>::pi;
+    constexpr real_type  pi = mjolnir::math::constants<real_type>::pi();
 
     mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential;
 

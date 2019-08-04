@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_and_calc_dihedral_angle_force)
     // check calc_angle calculate the correct angle
 
     const int N = 1800;
-    const real_type dtheta = mjolnir::math::constants<real_type>::pi / N;
+    const real_type dtheta = mjolnir::math::constants<real_type>::pi() / N;
     for(int i = -1800; i < 1800; ++i)
     {
         const auto theta = i * dtheta;

@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_and_calc_bond_angle_force)
     // check calc_angle calculate the correct angle
 
     const int N = 1800;
-    const real_type dtheta = mjolnir::math::constants<real_type>::pi / N;
+    const real_type dtheta = mjolnir::math::constants<real_type>::pi() / N;
     for(int i = 1; i < N; ++i)
     {
         const auto theta = i * dtheta;

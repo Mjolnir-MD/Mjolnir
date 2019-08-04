@@ -74,8 +74,8 @@ class ThreeSPN2BaseBaseInteraction<
 
     void      calc_force (system_type& sys)       const noexcept override
     {
-        constexpr auto pi        = math::constants<real_type>::pi;
-        constexpr auto two_pi    = math::constants<real_type>::two_pi;
+        constexpr auto pi        = math::constants<real_type>::pi();
+        constexpr auto two_pi    = math::constants<real_type>::two_pi();
         constexpr auto tolerance = math::abs_tolerance<real_type>();
 
 #pragma omp for nowait
@@ -504,8 +504,8 @@ class ThreeSPN2BaseBaseInteraction<
 
     real_type calc_energy(const system_type& sys) const noexcept override
     {
-        constexpr auto pi        = math::constants<real_type>::pi;
-        constexpr auto two_pi    = math::constants<real_type>::two_pi;
+        constexpr auto pi        = math::constants<real_type>::pi();
+        constexpr auto two_pi    = math::constants<real_type>::two_pi();
 
         real_type E = 0.0;
 #pragma omp parallel for reduction(+:E)

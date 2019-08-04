@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BaseStackingInteraction_numerical_diff)
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
-    constexpr real_type pi = mjolnir::math::constants<real_type>::pi;
+    constexpr real_type pi = mjolnir::math::constants<real_type>::pi();
 
     for(const auto bs_kind : {base_stack_kind::AA, base_stack_kind::AT,
                               base_stack_kind::AG, base_stack_kind::AC,

@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
     auto normalize = [](const coord_type& v){return v / mjolnir::math::length(v);};
 
     const real_type k(1e0);
-    const real_type native(mjolnir::math::constants<real_type>::pi * 2.0 / 3.0); // 120 degree
+    const real_type native(mjolnir::math::constants<real_type>::pi() * 2.0 / 3.0); // 120 degree
 
     harmonic_type potential{k, native};
     bond_angle_type interaction("none", {{ {{0,1,2}}, potential}});
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
     sys.at(2).group = "NONE";
 
     const int N = 1800;
-    const real_type dtheta = mjolnir::math::constants<real_type>::pi  / N;
+    const real_type dtheta = mjolnir::math::constants<real_type>::pi()  / N;
     for(int i = 1; i < N; ++i)
     {
         BOOST_TEST(mjolnir::math::length(sys[0].position - pos1) == 0.0, boost::test_tools::tolerance(tol));
@@ -124,8 +124,8 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
             BOOST_TEST(mjolnir::math::length(normalize(sys[0].force) - f1) == 0.0, boost::test_tools::tolerance(tol));
 
             const coord_type f3(
-                    cos(theta + mjolnir::math::constants<real_type>::pi / 2.),
-                    sin(theta + mjolnir::math::constants<real_type>::pi / 2.),
+                    cos(theta + mjolnir::math::constants<real_type>::pi() / 2.),
+                    sin(theta + mjolnir::math::constants<real_type>::pi() / 2.),
                     0.);
             BOOST_TEST(mjolnir::math::length(normalize(sys[2].force) - f3) == 0.0, boost::test_tools::tolerance(tol));
         }
@@ -140,8 +140,8 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_force)
             BOOST_TEST(mjolnir::math::length(normalize(sys[0].force) - f1) == 0.0, boost::test_tools::tolerance(tol));
 
             const coord_type f3(
-                    cos(theta - mjolnir::math::constants<real_type>::pi / 2.),
-                    sin(theta - mjolnir::math::constants<real_type>::pi / 2.),
+                    cos(theta - mjolnir::math::constants<real_type>::pi() / 2.),
+                    sin(theta - mjolnir::math::constants<real_type>::pi() / 2.),
                     0.);
             BOOST_TEST(mjolnir::math::length(normalize(sys[2].force) - f3) == 0.0, boost::test_tools::tolerance(tol));
         }
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_numerical_diff)
     using bond_angle_type = mjolnir::BondAngleInteraction<traits_type, harmonic_type>;
 
     const real_type k(10.0);
-    const real_type native(mjolnir::math::constants<real_type>::pi / 3.0);
+    const real_type native(mjolnir::math::constants<real_type>::pi() / 3.0);
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
