@@ -19,7 +19,6 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_base_interaction)
     using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type   = typename traits_type::real_type;
     using potential_type      = mjolnir::ThreeSPN2ExcludedVolumePotential<real_type>;
-    using pair_parameter_type = typename potential_type::pair_parameter_type;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -40,8 +39,7 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_base_interaction)
         BOOST_TEST(static_cast<bool>(base));
 
         const auto derv = dynamic_cast<
-            mjolnir::GlobalPairInteraction<traits_type, potential_type,
-                mjolnir::VerletList<traits_type, pair_parameter_type>>*
+            mjolnir::GlobalPairInteraction<traits_type, potential_type>*
             >(base.get()); // check the expected type is contained
         BOOST_TEST(static_cast<bool>(derv));
 

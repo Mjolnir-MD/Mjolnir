@@ -20,10 +20,10 @@ struct constants
     using real_type = realT;
 
     // NIST CODATA in the SI unit
-    static constexpr real_type boltzmann_constant  = 1.38064852e-23;   // [J/K]
-    static constexpr real_type avogadro_constant   = 6.022140857e23;   // [/mol]
-    static constexpr real_type elementary_charge   = 1.6021766208e-19; // [C]
-    static constexpr real_type vacuum_permittivity = 8.854187817e-12;  // [F/m]
+    static constexpr real_type boltzmann_constant()  {return 1.38064852e-23;  } // [J/K]
+    static constexpr real_type avogadro_constant()   {return 6.022140857e23;  } // [/mol]
+    static constexpr real_type elementary_charge()   {return 1.6021766208e-19;} // [C]
+    static constexpr real_type vacuum_permittivity() {return 8.854187817e-12; } // [F/m]
     // [V] = [J/C]; [F/m] = [C/V.m] = [C^2/J.m]
 
     // ------------------------------------------------------------------------
@@ -31,38 +31,19 @@ struct constants
     // ------------------------------------------------------------------------
 
     // 1.0 [nm] * nm_to_angstrom = 10.0 [A]
-    static constexpr real_type nm_to_angstrom = 1e+1;  // 1 nm = 10 A
-    static constexpr real_type angstrom_to_nm = 1e-1;  // 1 A  = 0.1 nm
+    static constexpr real_type nm_to_angstrom() {return 1e+1;}  // 1 nm = 10 A
+    static constexpr real_type angstrom_to_nm() {return 1e-1;}  // 1 A  = 0.1 nm
 
-    static constexpr real_type m_to_angstrom  = 1e+10; // 1 m  = 10^+10 a
-    static constexpr real_type angstrom_to_m  = 1e-10; // 1 A  = 10^-10 A
+    static constexpr real_type m_to_angstrom() {return 1e+10;} // 1 m  = 10^+10 a
+    static constexpr real_type angstrom_to_m() {return 1e-10;} // 1 A  = 10^-10 A
 
-    static constexpr real_type m_to_nm        = 1e+9;  // 1 m  = 10^+9 nm
-    static constexpr real_type nm_to_m        = 1e-9;  // 1 nm = 1e^-9 m
+    static constexpr real_type m_to_nm() {return 1e+9;}  // 1 m  = 10^+9 nm
+    static constexpr real_type nm_to_m() {return 1e-9;}  // 1 nm = 1e^-9 m
 
-    static constexpr real_type cal_to_J       = 4.184;
-    static constexpr real_type J_to_cal       = 1.0 / cal_to_J;
+    static constexpr real_type cal_to_J() {return 4.184;}
+    static constexpr real_type J_to_cal() {return 1.0 / cal_to_J();}
 };
-
-template<typename realT> constexpr realT constants<realT>::m_to_nm;
-template<typename realT> constexpr realT constants<realT>::nm_to_m;
-
-template<typename realT> constexpr realT constants<realT>::m_to_angstrom;
-template<typename realT> constexpr realT constants<realT>::angstrom_to_m;
-
-template<typename realT> constexpr realT constants<realT>::nm_to_angstrom;
-template<typename realT> constexpr realT constants<realT>::angstrom_to_nm;
-
-template<typename realT> constexpr realT constants<realT>::cal_to_J;
-template<typename realT> constexpr realT constants<realT>::J_to_cal;
-
-template<typename realT> constexpr realT constants<realT>::boltzmann_constant;
-template<typename realT> constexpr realT constants<realT>::avogadro_constant;
-template<typename realT> constexpr realT constants<realT>::elementary_charge;
-template<typename realT> constexpr realT constants<realT>::vacuum_permittivity;
-
 } // unit
-
 
 // -----------------------------------------------------------------------------
 // List of physical constants. The values may be modified after reading the
@@ -119,11 +100,11 @@ struct constants
     // forget all the units and put the default value. mainly for test codes
     static void reset() noexcept
     {
-        kB_   = unit_type::boltzmann_constant;
-        NA_   = unit_type::avogadro_constant;
-        eps0_ = unit_type::vacuum_permittivity /
-                unit_type::elementary_charge   /
-                unit_type::elementary_charge;
+        kB_   = unit_type::boltzmann_constant();
+        NA_   = unit_type::avogadro_constant();
+        eps0_ = unit_type::vacuum_permittivity() /
+                unit_type::elementary_charge()   /
+                unit_type::elementary_charge();
 
         length_unit_ = "m";
         energy_unit_ = "J";
@@ -167,13 +148,13 @@ struct constants
 //      the range.
 
 template<typename realT>
-realT constants<realT>::kB_ = unit::constants<realT>::boltzmann_constant;
+realT constants<realT>::kB_ = unit::constants<realT>::boltzmann_constant();
 template<typename realT>
-realT constants<realT>::NA_ = unit::constants<realT>::avogadro_constant;
+realT constants<realT>::NA_ = unit::constants<realT>::avogadro_constant();
 template<typename realT>
-realT constants<realT>::eps0_ = (unit::constants<realT>::vacuum_permittivity /
-                                 unit::constants<realT>::elementary_charge)  /
-                                 unit::constants<realT>::elementary_charge;
+realT constants<realT>::eps0_ = (unit::constants<realT>::vacuum_permittivity() /
+                                 unit::constants<realT>::elementary_charge())  /
+                                 unit::constants<realT>::elementary_charge();
 
 template<typename realT> realT constants<realT>::m_to_length_ = 1.0;
 template<typename realT> realT constants<realT>::length_to_m_ = 1.0;

@@ -9,12 +9,10 @@ namespace mjolnir
 {
 
 // specialization for GlobalPair<LennardJones>
-template<typename realT, template<typename, typename> class boundaryT,
-         typename partitionT>
+template<typename realT, template<typename, typename> class boundaryT>
 class GlobalPairInteraction<
     SimulatorTraits<realT, boundaryT>,
-    UniformLennardJonesPotential<realT>,
-    partitionT
+    UniformLennardJonesPotential<realT>
     > final : public GlobalInteractionBase<SimulatorTraits<realT, boundaryT>>
 {
   public:
@@ -26,7 +24,7 @@ class GlobalPairInteraction<
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
     using potential_type  = UniformLennardJonesPotential<real_type>;
-    using partition_type  = partitionT;
+    using partition_type  = SpatialPartition<traits_type, potential_type>;
 
   public:
     GlobalPairInteraction()  = default;
@@ -150,30 +148,15 @@ class GlobalPairInteraction<
 // explicitly specialize BondAngleInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/core/NaivePairCalculation.hpp>
-#include <mjolnir/core/VerletList.hpp>
-#include <mjolnir/core/UnlimitedGridCellList.hpp>
-#include <mjolnir/core/PeriodicGridCellList.hpp>
 
 namespace mjolnir
 {
 
-// ============================================================================
 // Uniform L-J
-extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>, UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        typename UniformLennardJonesPotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float> , UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        typename UniformLennardJonesPotential<float>::pair_parameter_type> >;
-extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>, PeriodicGridCellList <SimulatorTraits<double, CuboidalPeriodicBoundary>, typename UniformLennardJonesPotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float> , PeriodicGridCellList <SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename UniformLennardJonesPotential<float>::pair_parameter_type> >;
-// VerletList
-extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>, VerletList<SimulatorTraits<double, UnlimitedBoundary>,                   typename UniformLennardJonesPotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float> , VerletList<SimulatorTraits<float,  UnlimitedBoundary>,                   typename UniformLennardJonesPotential<float>::pair_parameter_type> >;
-extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>, VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>,            typename UniformLennardJonesPotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float> , VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>,            typename UniformLennardJonesPotential<float>::pair_parameter_type> >;
-// Naive
-extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>, NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>,         typename UniformLennardJonesPotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float> , NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>,         typename UniformLennardJonesPotential<float>::pair_parameter_type> >;
-extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>, NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>,  typename UniformLennardJonesPotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float> , NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>,  typename UniformLennardJonesPotential<float>::pair_parameter_type> >;
+extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float> >;
+extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float> >;
 
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD

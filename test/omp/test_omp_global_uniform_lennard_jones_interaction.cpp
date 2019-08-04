@@ -26,18 +26,16 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_UniformLennardJones_calc_force)
     using boundary_type    = typename traits_type::boundary_type;
     using system_type      = mjolnir::System<traits_type>;
     using potential_type   = mjolnir::UniformLennardJonesPotential<real_type>;
-    using parameter_type   = typename potential_type::parameter_type;
-    using partition_type   = mjolnir::UnlimitedGridCellList<traits_type, parameter_type>;
-    using interaction_type = mjolnir::GlobalPairInteraction<traits_type, potential_type, partition_type>;
+    using partition_type   = mjolnir::UnlimitedGridCellList<traits_type, potential_type>;
+    using interaction_type = mjolnir::GlobalPairInteraction<traits_type, potential_type>;
     using rng_type         = mjolnir::RandomNumberGenerator<traits_type>;
 
     using sequencial_system_type      = mjolnir::System<
         mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>>;
     using sequencial_partition_type   = mjolnir::UnlimitedGridCellList<
-        mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>, parameter_type>;
+        mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>, potential_type>;
     using sequencial_interaction_type = mjolnir::GlobalPairInteraction<
-        mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>,
-        potential_type, sequencial_partition_type>;
+        mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>, potential_type>;
 
     const int max_number_of_threads = omp_get_max_threads();
     BOOST_TEST_WARN(max_number_of_threads > 2);
@@ -96,10 +94,12 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_UniformLennardJones_calc_force)
         sys    .topology().construct_molecules();
         seq_sys.topology().construct_molecules();
 
-        interaction_type interaction(
-                potential_type(potential), std::move(celllist));
-        sequencial_interaction_type seq_interaction(
-                potential_type(potential), std::move(seq_celllist));
+        interaction_type interaction(potential_type(potential),
+            mjolnir::SpatialPartition<traits_type, potential_type>(
+                mjolnir::make_unique<partition_type>()));
+        sequencial_interaction_type seq_interaction(potential_type(potential),
+            mjolnir::SpatialPartition<mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>, potential_type>(
+                mjolnir::make_unique<sequencial_partition_type>()));
 
         interaction    .initialize(sys);
         seq_interaction.initialize(seq_sys);

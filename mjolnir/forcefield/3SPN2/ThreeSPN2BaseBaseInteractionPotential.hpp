@@ -364,15 +364,15 @@ class ThreeSPN2BaseBaseInteractionPotential
             {
                 MJOLNIR_LOG_INFO("energy unit ([kcal/mol]) differs from the "
                                  "default, [kJ/mol]. converting by multiplying ",
-                                 unit::constants<real_type>::J_to_cal);
+                                 unit::constants<real_type>::J_to_cal());
 
                 // convert from kJ/mol to kcal/mol (/= 4.18)
-                this->epsilon_AT_ *= unit::constants<real_type>::J_to_cal;
-                this->epsilon_GC_ *= unit::constants<real_type>::J_to_cal;
+                this->epsilon_AT_ *= unit::constants<real_type>::J_to_cal();
+                this->epsilon_GC_ *= unit::constants<real_type>::J_to_cal();
 
                 for(auto& epsilon_CS : this->epsilon_CS_)
                 {
-                    epsilon_CS *= unit::constants<real_type>::J_to_cal;
+                    epsilon_CS *= unit::constants<real_type>::J_to_cal();
                 }
             }
 
@@ -384,18 +384,18 @@ class ThreeSPN2BaseBaseInteractionPotential
             {
                 MJOLNIR_LOG_INFO("length unit (nm) differs from the default, "
                                  "[angstrom]. converting by multiplying ",
-                                 unit::constants<real_type>::angstrom_to_nm);
+                                 unit::constants<real_type>::angstrom_to_nm());
 
                 // convert angstrom -> nm (* 0.1)
-                this->cutoff_   *= unit::constants<real_type>::angstrom_to_nm;
+                this->cutoff_   *= unit::constants<real_type>::angstrom_to_nm();
                 this->cutoff_sq_ = this->cutoff_ * this->cutoff_;
 
-                this->r0_AT_ *= unit::constants<real_type>::angstrom_to_nm;
-                this->r0_GC_ *= unit::constants<real_type>::angstrom_to_nm;
+                this->r0_AT_ *= unit::constants<real_type>::angstrom_to_nm();
+                this->r0_GC_ *= unit::constants<real_type>::angstrom_to_nm();
 
                 for(auto& r0_CS : this->r0_CS_)
                 {
-                    r0_CS *= unit::constants<real_type>::angstrom_to_nm;
+                    r0_CS *= unit::constants<real_type>::angstrom_to_nm();
                 }
             }
 

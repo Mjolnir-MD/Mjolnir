@@ -66,6 +66,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_all)
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using potential_type  = dummy_potential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -86,7 +87,6 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_all)
     std::iota(participants.begin(), participants.end(), 0);
 
     dummy_potential<real_type> pot(cutoff, participants);
-    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
 
     mjolnir::System<traits_type> sys(N, boundary_type{});
 
@@ -98,7 +98,8 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_all)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
+    mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
+            mjolnir::VerletList<traits_type, potential_type>>(margin));
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 
@@ -152,7 +153,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_partial)
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
-    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
+    using potential_type  = dummy_potential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -185,7 +186,8 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_partial)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
+    mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
+            mjolnir::VerletList<traits_type, potential_type>>(margin));
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 
@@ -250,7 +252,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_partial_2)
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
-    using parameter_type  = typename dummy_potential<real_type>::parameter_type;
+    using potential_type  = dummy_potential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -285,7 +287,8 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_partial_2)
     }
     sys.topology().construct_molecules();
 
-    mjolnir::VerletList<traits_type, parameter_type> vlist(margin);
+    mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
+            mjolnir::VerletList<traits_type, potential_type>>(margin));
 
     using neighbor_type = typename decltype(vlist)::neighbor_type;
 

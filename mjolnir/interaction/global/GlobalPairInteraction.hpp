@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_INTEARACTION_GLOBAL_PAIR_INTEARACTION_HPP
 #define MJOLNIR_INTEARACTION_GLOBAL_PAIR_INTEARACTION_HPP
 #include <mjolnir/core/GlobalInteractionBase.hpp>
+#include <mjolnir/core/SpatialPartitionBase.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/util/string.hpp>
@@ -9,18 +10,18 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename potentialT, typename partitionT>
+template<typename traitsT, typename potentialT>
 class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
 {
   public:
     using traits_type     = traitsT;
     using potential_type  = potentialT;
-    using partition_type  = partitionT;
     using base_type       = GlobalInteractionBase<traitsT>;
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
+    using partition_type  = SpatialPartition<traits_type, potential_type>;
 
   public:
     GlobalPairInteraction()  = default;
@@ -76,8 +77,8 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
     partition_type partition_;
 };
 
-template<typename traitsT, typename potT, typename spaceT>
-void GlobalPairInteraction<traitsT, potT, spaceT>::calc_force(
+template<typename traitsT, typename potT>
+void GlobalPairInteraction<traitsT, potT>::calc_force(
         system_type& sys) const noexcept
 {
     for(const auto i : this->potential_.participants())
@@ -105,9 +106,9 @@ void GlobalPairInteraction<traitsT, potT, spaceT>::calc_force(
     return ;
 }
 
-template<typename traitsT, typename potT, typename spaceT>
-typename GlobalPairInteraction<traitsT, potT, spaceT>::real_type
-GlobalPairInteraction<traitsT, potT, spaceT>::calc_energy(
+template<typename traitsT, typename potT>
+typename GlobalPairInteraction<traitsT, potT>::real_type
+GlobalPairInteraction<traitsT, potT>::calc_energy(
         const system_type& sys) const noexcept
 {
     real_type e = 0.0;
@@ -136,10 +137,6 @@ GlobalPairInteraction<traitsT, potT, spaceT>::calc_energy(
 // explicitly specialize BondAngleInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/core/NaivePairCalculation.hpp>
-#include <mjolnir/core/VerletList.hpp>
-#include <mjolnir/core/UnlimitedGridCellList.hpp>
-#include <mjolnir/core/PeriodicGridCellList.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
 
 namespace mjolnir
@@ -147,23 +144,11 @@ namespace mjolnir
 
 // EXV, L-J and UL-J have its own specialization, so DO NOT specialize here.
 
-// ============================================================================
 // D-H
-extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>, UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        typename DebyeHuckelPotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float> , UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        typename DebyeHuckelPotential<float>::pair_parameter_type> >;
-extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>, PeriodicGridCellList <SimulatorTraits<double, CuboidalPeriodicBoundary>, typename DebyeHuckelPotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float> , PeriodicGridCellList <SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename DebyeHuckelPotential<float>::pair_parameter_type> >;
-// VerletList
-extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>, VerletList<SimulatorTraits<double, UnlimitedBoundary>,                   typename DebyeHuckelPotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float> , VerletList<SimulatorTraits<float,  UnlimitedBoundary>,                   typename DebyeHuckelPotential<float>::pair_parameter_type> >;
-extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>, VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>,            typename DebyeHuckelPotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float> , VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>,            typename DebyeHuckelPotential<float>::pair_parameter_type> >;
-// Naive
-extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>, NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>,         typename DebyeHuckelPotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float> , NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>,         typename DebyeHuckelPotential<float>::pair_parameter_type> >;
-extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>, NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>,  typename DebyeHuckelPotential<double>::pair_parameter_type>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float> , NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>,  typename DebyeHuckelPotential<float>::pair_parameter_type> >;
-
+extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float> >;
+extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float> >;
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
 

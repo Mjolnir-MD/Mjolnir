@@ -34,19 +34,19 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BaseStackingInteraction_numerical_diff)
         using phys_type = mjolnir::physics::constants<real_type>;
         const std::string energy = "kcal/mol";
         const std::string length = "angstrom";
-        phys_type::set_kB(phys_type::kB() * (unit_type::J_to_cal / 1000.0) *
-                          unit_type::avogadro_constant);
-        phys_type::set_eps0(phys_type::eps0() * (1000.0 / unit_type::J_to_cal) /
-                            unit_type::avogadro_constant);
+        phys_type::set_kB(phys_type::kB() * (unit_type::J_to_cal() / 1000.0) *
+                          unit_type::avogadro_constant());
+        phys_type::set_eps0(phys_type::eps0() * (1000.0 / unit_type::J_to_cal()) /
+                            unit_type::avogadro_constant());
         phys_type::set_energy_unit(energy);
 
-        phys_type::set_eps0(phys_type::eps0() / unit_type::m_to_angstrom);
+        phys_type::set_eps0(phys_type::eps0() / unit_type::m_to_angstrom());
 
-        phys_type::set_m_to_length(unit_type::m_to_angstrom);
-        phys_type::set_length_to_m(unit_type::angstrom_to_m);
+        phys_type::set_m_to_length(unit_type::m_to_angstrom());
+        phys_type::set_length_to_m(unit_type::angstrom_to_m());
 
-        phys_type::set_L_to_volume(1e-3 * std::pow(unit_type::m_to_angstrom, 3));
-        phys_type::set_volume_to_L(1e+3 * std::pow(unit_type::angstrom_to_m, 3));
+        phys_type::set_L_to_volume(1e-3 * std::pow(unit_type::m_to_angstrom(), 3));
+        phys_type::set_volume_to_L(1e+3 * std::pow(unit_type::angstrom_to_m(), 3));
 
         phys_type::set_length_unit(length);
     }

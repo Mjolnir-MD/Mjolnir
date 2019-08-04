@@ -134,10 +134,10 @@ class ThreeSPN2ExcludedVolumePotential
             {
                 MJOLNIR_LOG_INFO("energy unit ([kcal/mol]) differs from the "
                                  "default, [kJ/mol]. converting by multiplying ",
-                                 unit::constants<real_type>::J_to_cal);
+                                 unit::constants<real_type>::J_to_cal());
 
                 // convert from kJ/mol to kcal/mol (/= 4.18)
-                this->epsilon_ *= unit::constants<real_type>::J_to_cal;
+                this->epsilon_ *= unit::constants<real_type>::J_to_cal();
             }
 
             const auto& length_unit = physics::constants<real_type>::length_unit();
@@ -148,17 +148,17 @@ class ThreeSPN2ExcludedVolumePotential
             {
                 MJOLNIR_LOG_INFO("length unit (nm) differs from the default, "
                                  "[angstrom]. converting by multiplying ",
-                                 unit::constants<real_type>::angstrom_to_nm);
+                                 unit::constants<real_type>::angstrom_to_nm());
 
                 // convert angstrom -> nm (* 0.1)
-                this->cutoff_   *= unit::constants<real_type>::angstrom_to_nm;
+                this->cutoff_   *= unit::constants<real_type>::angstrom_to_nm();
 
-                this->sigma_P_  *= unit::constants<real_type>::angstrom_to_nm;
-                this->sigma_S_  *= unit::constants<real_type>::angstrom_to_nm;
-                this->sigma_A_  *= unit::constants<real_type>::angstrom_to_nm;
-                this->sigma_T_  *= unit::constants<real_type>::angstrom_to_nm;
-                this->sigma_G_  *= unit::constants<real_type>::angstrom_to_nm;
-                this->sigma_C_  *= unit::constants<real_type>::angstrom_to_nm;
+                this->sigma_P_  *= unit::constants<real_type>::angstrom_to_nm();
+                this->sigma_S_  *= unit::constants<real_type>::angstrom_to_nm();
+                this->sigma_A_  *= unit::constants<real_type>::angstrom_to_nm();
+                this->sigma_T_  *= unit::constants<real_type>::angstrom_to_nm();
+                this->sigma_G_  *= unit::constants<real_type>::angstrom_to_nm();
+                this->sigma_C_  *= unit::constants<real_type>::angstrom_to_nm();
             }
             unit_converted_ = true;
         }

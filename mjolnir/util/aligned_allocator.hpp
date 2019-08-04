@@ -88,7 +88,7 @@ inline void* aligned_alloc(std::size_t alignment, std::size_t size)
         // prepare space to write the original ptr.
         void* aligned_ptr =
             reinterpret_cast<void*>(reinterpret_cast<void**>(ptr) + 1);
-                
+
         // search aligned region ...
         std::size_t space = size + offset;
         void* tmp = std::align(alignment, size, aligned_ptr, space);

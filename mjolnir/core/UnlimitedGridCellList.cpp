@@ -6,18 +6,15 @@
 
 namespace mjolnir
 {
-template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, empty_t>;
-template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
-template class UnlimitedGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
-template class UnlimitedGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
+template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float >>;
 
-template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, double>;
-template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, float >;
-template class UnlimitedGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
-template class UnlimitedGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
+template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float >>;
 
-template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
-template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
-template class UnlimitedGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
-template class UnlimitedGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        LennardJonesPotential<double>>;
+template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        LennardJonesPotential<float >>;
+
+template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
+template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float >>;
 } // mjolnir
