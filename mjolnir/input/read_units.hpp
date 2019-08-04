@@ -28,12 +28,12 @@ std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
     if(energy == "kcal/mol")
     {
         // kB [J/K] -> [kcal/mol/K] by * (J to cal) * 1e-3 * (/mol)
-        phys_type::set_kB(phys_type::kB() * (unit_type::J_to_cal / 1000.0) *
-                          unit_type::avogadro_constant);
+        phys_type::set_kB(phys_type::kB() * (unit_type::J_to_cal() / 1000.0) *
+                          unit_type::avogadro_constant());
 
         // eps0 [F/m] == [C^2/J/m] -> [C^2/(kcal/mol)/m]
-        phys_type::set_eps0(phys_type::eps0() * (1000.0 / unit_type::J_to_cal) /
-                            unit_type::avogadro_constant);
+        phys_type::set_eps0(phys_type::eps0() * (1000.0 / unit_type::J_to_cal()) /
+                            unit_type::avogadro_constant());
 
         // set name of energy unit
         phys_type::set_energy_unit(energy);
@@ -41,10 +41,10 @@ std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
     else if(energy == "kJ/mol")
     {
         // kB [J/K] -> [kJ/mol/K]
-        phys_type::set_kB(phys_type::kB() * 1e-3 * unit_type::avogadro_constant);
+        phys_type::set_kB(phys_type::kB() * 1e-3 * unit_type::avogadro_constant());
         // eps0 [F/m] == [C^2/J/m] -> [C^2/kJ/mol/m]
         phys_type::set_eps0(phys_type::eps0() * 1e+3 /
-                            unit_type::avogadro_constant);
+                            unit_type::avogadro_constant());
 
         // set name of energy unit
         phys_type::set_energy_unit(energy);
@@ -67,15 +67,15 @@ std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
     if(length == "angstrom" || length == u8"Å")
     {
         // eps0 [C^2/Energy/m] -> [C^2/Energy/Angstrom]
-        phys_type::set_eps0(phys_type::eps0() / unit_type::m_to_angstrom);
+        phys_type::set_eps0(phys_type::eps0() / unit_type::m_to_angstrom());
 
         // 1 m = 10^9 nm, 1 nm = 10^-9 m
-        phys_type::set_m_to_length(unit_type::m_to_angstrom);
-        phys_type::set_length_to_m(unit_type::angstrom_to_m);
+        phys_type::set_m_to_length(unit_type::m_to_angstrom());
+        phys_type::set_length_to_m(unit_type::angstrom_to_m());
 
         // 1 [L] = 1e-3 [m^3] = 1e+24 [nm^3]; 1 [m^3] = 1e27 [nm^3]
-        phys_type::set_L_to_volume(1e-3 * std::pow(unit_type::m_to_angstrom, 3));
-        phys_type::set_volume_to_L(1e+3 * std::pow(unit_type::angstrom_to_m, 3));
+        phys_type::set_L_to_volume(1e-3 * std::pow(unit_type::m_to_angstrom(), 3));
+        phys_type::set_volume_to_L(1e+3 * std::pow(unit_type::angstrom_to_m(), 3));
 
         MJOLNIR_LOG_INFO("1 [m] = ", phys_type::m_to_length(), " [", length, "]");
         MJOLNIR_LOG_INFO("1 [", length, "] = ", phys_type::length_to_m(), " [m]");
@@ -89,15 +89,15 @@ std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
     else if(length == "nm")
     {
         // eps0 [C^2/Energy/m] -> [C^2/Energy/nm]
-        phys_type::set_eps0(phys_type::eps0() / unit_type::m_to_nm);
+        phys_type::set_eps0(phys_type::eps0() / unit_type::m_to_nm());
 
         // 1 m = 10^9 nm, 1 nm = 10^-9 m
-        phys_type::set_m_to_length(unit_type::m_to_nm);
-        phys_type::set_length_to_m(unit_type::nm_to_m);
+        phys_type::set_m_to_length(unit_type::m_to_nm());
+        phys_type::set_length_to_m(unit_type::nm_to_m());
 
         // 1 [L] = 1e-3 [m^3] = 1e+24 [nm^3]; 1 [m^3] = 1e27 [nm^3]
-        phys_type::set_L_to_volume(1e-3 * std::pow(unit_type::m_to_nm, 3));
-        phys_type::set_volume_to_L(1e+3 * std::pow(unit_type::nm_to_m, 3));
+        phys_type::set_L_to_volume(1e-3 * std::pow(unit_type::m_to_nm(), 3));
+        phys_type::set_volume_to_L(1e+3 * std::pow(unit_type::nm_to_m(), 3));
 
         MJOLNIR_LOG_INFO("1 [m] = ", phys_type::m_to_length(), " [", length, "]");
         MJOLNIR_LOG_INFO("1 [", length, "] = ", phys_type::length_to_m(), " [m]");
