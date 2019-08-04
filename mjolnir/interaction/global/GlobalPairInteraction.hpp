@@ -137,10 +137,6 @@ GlobalPairInteraction<traitsT, potT>::calc_energy(
 // explicitly specialize BondAngleInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/core/NaivePairCalculation.hpp>
-#include <mjolnir/core/VerletList.hpp>
-#include <mjolnir/core/UnlimitedGridCellList.hpp>
-#include <mjolnir/core/PeriodicGridCellList.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
 
 namespace mjolnir
