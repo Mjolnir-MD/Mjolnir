@@ -7,6 +7,7 @@ set(mjolnir_core_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/MolecularDynamicsSimulator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/SimulatedAnnealingSimulator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/SteepestDescentSimulator.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/NeighborList.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/UnlimitedGridCellList.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/PeriodicGridCellList.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/VerletList.cpp"
