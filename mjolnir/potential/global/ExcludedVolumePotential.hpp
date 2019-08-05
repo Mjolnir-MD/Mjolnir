@@ -43,10 +43,10 @@ class ExcludedVolumePotential
     using exclusion_list_type  = ExclusionList;
 
     // rc = 2.0 * sigma
-    constexpr static real_type cutoff_ratio = 2.0;
+    static constexpr real_type cutoff_ratio = 2.0;
 
     // to make the potential curve continuous at the cutoff point
-    constexpr static real_type coef_at_cutoff =
+    static constexpr real_type coef_at_cutoff =
         compiletime::pow(1.0 / cutoff_ratio, 12);
 
     static constexpr parameter_type default_parameter() noexcept

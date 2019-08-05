@@ -17,9 +17,9 @@ class LennardJonesWallPotential
     using parameter_type = std::pair<real_type, real_type>;
 
     // rc = 2.5 * sigma
-    constexpr static real_type cutoff_ratio = 2.5;
+    static constexpr real_type cutoff_ratio = 2.5;
     // to make the potential curve continuous at the cutoff point
-    constexpr static real_type coef_at_cutoff =
+    static constexpr real_type coef_at_cutoff =
         compiletime::pow(1.0 / cutoff_ratio, 12u) -
         compiletime::pow(1.0 / cutoff_ratio,  6u);
 

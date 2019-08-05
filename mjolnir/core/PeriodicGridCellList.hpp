@@ -30,7 +30,7 @@ class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, Potentia
     using neighbor_type      = typename base_type::neighbor_type;
     using range_type         = typename base_type::range_type;
 
-    constexpr static real_type mesh_epsilon() {return 1e-6;}
+    static constexpr real_type mesh_epsilon() {return 1e-6;}
 
     using particle_cell_idx_pair    = std::pair<std::size_t, std::size_t>;
     using cell_index_container_type = std::vector<particle_cell_idx_pair>;
