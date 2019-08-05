@@ -25,8 +25,7 @@ BOOST_AUTO_TEST_CASE(EXV_double)
     };
 
     const real_type x_min = 0.8 * sigma;
-    const real_type x_max =
-        mjolnir::ExcludedVolumePotential<real_type>::cutoff_ratio * sigma;
+    const real_type x_max = exv.cutoff_ratio() * sigma;
     const real_type dx = (x_max - x_min) / N;
 
     for(std::size_t i=0; i<N; ++i)
@@ -58,8 +57,7 @@ BOOST_AUTO_TEST_CASE(EXV_float)
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
     };
-    constexpr real_type cutoff =
-        mjolnir::ExcludedVolumePotential<real_type>::cutoff_ratio;
+    const real_type cutoff = exv.cutoff_ratio();
 
     const real_type x_min = 0.8f   * sigma;
     const real_type x_max = cutoff * sigma;
