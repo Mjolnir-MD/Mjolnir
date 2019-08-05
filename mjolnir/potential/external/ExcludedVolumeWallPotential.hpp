@@ -15,36 +15,36 @@ class ExcludedVolumeWallPotential
   public:
     using real_type = realT;
 
-    // rc = 2.0 * sigma
-    static constexpr real_type cutoff_ratio = 2.0;
-    // to make the potential curve continuous at the cutoff point
-    static constexpr real_type coef_at_cutoff =
-        compiletime::pow(1.0 / cutoff_ratio, 12);
-
   public:
 
+    ExcludedVolumeWallPotential(const real_type epsilon,
+        const real_type cutoff_ratio, std::vector<real_type> params)
+        : epsilon_(epsilon), cutoff_ratio_(cutoff_ratio),
+          coef_at_cutoff_(std::pow(1 / cutoff_ratio, 12)),
+          radii_(std::move(params))
+    {}
     ExcludedVolumeWallPotential(
         const real_type epsilon, std::vector<real_type> params)
-        : epsilon_(epsilon), radii_(std::move(params))
+        : ExcludedVolumeWallPotential(epsilon, 2.0, std::move(params))
     {}
     ~ExcludedVolumeWallPotential(){}
 
     real_type potential(const std::size_t i, const real_type r) const noexcept
     {
         const real_type d = this->radii_[i];
-        if(d * cutoff_ratio < r){return real_type(0.0);}
+        if(d * this->cutoff_ratio_ < r){return real_type(0.0);}
 
         const real_type d_r  = d / r;
         const real_type dr3  = d_r * d_r * d_r;
         const real_type dr6  = dr3 * dr3;
         const real_type dr12 = dr6 * dr6;
-        return this->epsilon_ * (dr12 - coef_at_cutoff);
+        return this->epsilon_ * (dr12 - this->coef_at_cutoff_);
     }
 
     real_type derivative(const std::size_t i, const real_type r) const noexcept
     {
         const real_type d = this->radii_[i];
-        if(d * cutoff_ratio < r){return real_type(0.0);}
+        if(d * this->cutoff_ratio_ < r){return real_type(0.0);}
 
         const real_type rinv = real_type(1.0) / r;
         const real_type d_r  = d * rinv;
@@ -58,7 +58,7 @@ class ExcludedVolumeWallPotential
     {
         const real_type max_sigma =
             *(std::max_element(radii_.cbegin(), radii_.cend()));
-        return max_sigma * cutoff_ratio;
+        return max_sigma * this->cutoff_ratio_;
     }
 
     // TODO more sophisticated way to treat this
@@ -91,15 +91,9 @@ class ExcludedVolumeWallPotential
   private:
 
     real_type epsilon_;
+    real_type cutoff_ratio_, coef_at_cutoff_;
     std::vector<real_type> radii_;
 };
-
-template<typename realT>
-constexpr typename ExcludedVolumeWallPotential<realT>::real_type
-ExcludedVolumeWallPotential<realT>::cutoff_ratio;
-template<typename realT>
-constexpr typename ExcludedVolumeWallPotential<realT>::real_type
-ExcludedVolumeWallPotential<realT>::coef_at_cutoff;
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template class ExcludedVolumeWallPotential<double>;

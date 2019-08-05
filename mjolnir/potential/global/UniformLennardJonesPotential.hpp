@@ -34,13 +34,6 @@ class UniformLennardJonesPotential
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
     using exclusion_list_type  = ExclusionList;
 
-    // rc = 2.5 * sigma
-    static constexpr real_type cutoff_ratio = 2.5;
-    // to make the potential curve continuous at the cutoff point
-    static constexpr real_type coef_at_cutoff =
-        compiletime::pow<real_type>(1 / cutoff_ratio, 12u) -
-        compiletime::pow<real_type>(1 / cutoff_ratio,  6u);
-
     static constexpr parameter_type default_parameter() noexcept
     {
         return parameter_type{};
@@ -48,12 +41,15 @@ class UniformLennardJonesPotential
 
   public:
 
-    UniformLennardJonesPotential(const real_type sgm, const real_type eps,
+    UniformLennardJonesPotential(
+        const real_type sgm, const real_type eps, const real_type cutoff_ratio,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-        : sigma_(sgm), epsilon_(eps), r_cut_(sgm * cutoff_ratio),
-          exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
+    : cutoff_ratio_(cutoff_ratio),
+      coef_at_cutoff_(std::pow(1/cutoff_ratio, 12) - std::pow(1/cutoff_ratio, 6)),
+      sigma_(sgm), epsilon_(eps), r_cut_(sgm * cutoff_ratio),
+      exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         this->participants_.reserve(parameters.size());
         for(const auto& idxp : parameters)
@@ -61,6 +57,14 @@ class UniformLennardJonesPotential
             this->participants_.push_back(idxp.first);
         }
     }
+    UniformLennardJonesPotential(
+        const real_type sgm, const real_type eps,
+        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
+        const std::map<connection_kind_type, std::size_t>&         exclusions,
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+    : UniformLennardJonesPotential(sgm, eps, 2.5, parameters, exclusions,
+                                   std::move(ignore_mol), std::move(ignore_grp))
+    {}
     ~UniformLennardJonesPotential() = default;
 
     pair_parameter_type prepare_params(std::size_t, std::size_t) const noexcept
@@ -89,7 +93,7 @@ class UniformLennardJonesPotential
         const real_type r3s3   = r1s1 * r1s1 * r1s1;
         const real_type r6s6   = r3s3 * r3s3;
         const real_type r12s12 = r6s6 * r6s6;
-        return 4 * epsilon_ * (r12s12 - r6s6 - coef_at_cutoff);
+        return 4 * epsilon_ * (r12s12 - r6s6 - this->coef_at_cutoff_);
     }
 
     real_type
@@ -105,9 +109,12 @@ class UniformLennardJonesPotential
         return 24 * epsilon_ * (r6s6 - 2 * r12s12) * rinv;
     }
 
+    real_type cutoff_ratio()   const noexcept {return this->cutoff_ratio_;}
+    real_type coef_at_cutoff() const noexcept {return this->coef_at_cutoff_;}
+
     real_type max_cutoff_length() const noexcept
     {
-        return sigma_ * cutoff_ratio;
+        return sigma_ * cutoff_ratio_;
     }
 
     template<typename traitsT>
@@ -152,8 +159,6 @@ class UniformLennardJonesPotential
         return exclusion_list_;
     }
 
-
-
     // ------------------------------------------------------------------------
     // used by Observer.
     static const char* name() noexcept {return "LennardJones";}
@@ -171,15 +176,12 @@ class UniformLennardJonesPotential
 
   private:
 
+    real_type cutoff_ratio_, coef_at_cutoff_;
     real_type sigma_, epsilon_, r_cut_;
     std::vector<std::size_t> participants_;
 
     exclusion_list_type  exclusion_list_;
 };
-
-template<typename traitsT>
-constexpr typename UniformLennardJonesPotential<traitsT>::real_type
-UniformLennardJonesPotential<traitsT>::cutoff_ratio;
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template class UniformLennardJonesPotential<double>;
