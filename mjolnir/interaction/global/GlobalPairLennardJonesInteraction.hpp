@@ -67,8 +67,8 @@ class GlobalPairInteraction<
 
     void calc_force(system_type& sys) const noexcept override
     {
-        constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
-        constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
+        const auto  cutoff_ratio    = potential_.cutoff_ratio();
+        const auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
         for(const auto i : this->potential_.participants())
         {
             for(const auto& ptnr : this->partition_.partners(i))
@@ -103,9 +103,9 @@ class GlobalPairInteraction<
     {
         real_type E(0);
 
-        constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
-        constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-        constexpr auto  coef_at_cutoff  = potential_type::coef_at_cutoff;
+        const auto cutoff_ratio    = potential_.cutoff_ratio();
+        const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
+        const auto coef_at_cutoff  = potential_.coef_at_cutoff();
         for(const auto i : this->potential_.participants())
         {
             for(const auto& ptnr : this->partition_.partners(i))

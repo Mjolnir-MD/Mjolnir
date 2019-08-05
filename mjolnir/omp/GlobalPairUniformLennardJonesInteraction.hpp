@@ -68,12 +68,12 @@ class GlobalPairInteraction<
 
     void calc_force(system_type& sys) const noexcept override
     {
-        constexpr auto cutoff_ratio    = potential_type::cutoff_ratio;
-        constexpr auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-        const     auto sigma           = this->potential_.sigma();
-        const     auto sigma_sq        = sigma * sigma;
-        const     auto r_cutoff_sq     = cutoff_ratio_sq * sigma_sq;
-        const     auto epsilon         = this->potential_.epsilon();
+        const auto cutoff_ratio    = potential_.cutoff_ratio();
+        const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
+        const auto sigma           = this->potential_.sigma();
+        const auto sigma_sq        = sigma * sigma;
+        const auto r_cutoff_sq     = cutoff_ratio_sq * sigma_sq;
+        const auto epsilon         = this->potential_.epsilon();
 
 #pragma omp for nowait
         for(std::size_t idx=0; idx < this->potential_.participants().size(); ++idx)
@@ -108,13 +108,13 @@ class GlobalPairInteraction<
     {
         real_type E(0);
 
-        constexpr auto cutoff_ratio    = potential_type::cutoff_ratio;
-        constexpr auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-        constexpr auto coef_at_cutoff  = potential_type::coef_at_cutoff;
-        const     auto sigma           = this->potential_.sigma();
-        const     auto sigma_sq        = sigma * sigma;
-        const     auto r_cutoff_sq     = cutoff_ratio_sq * sigma_sq;
-        const     auto epsilon         = this->potential_.epsilon();
+        const auto cutoff_ratio    = potential_.cutoff_ratio();
+        const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
+        const auto coef_at_cutoff  = potential_.coef_at_cutoff();
+        const auto sigma           = this->potential_.sigma();
+        const auto sigma_sq        = sigma * sigma;
+        const auto r_cutoff_sq     = cutoff_ratio_sq * sigma_sq;
+        const auto epsilon         = this->potential_.epsilon();
 
 #pragma omp parallel for reduction(+:E)
         for(std::size_t idx=0; idx < this->potential_.participants().size(); ++idx)

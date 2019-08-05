@@ -70,9 +70,9 @@ class GlobalPairInteraction<
         MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
         MJOLNIR_LOG_FUNCTION_DEBUG();
 
-        constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
-        constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-        const     auto  epsilon12       = 12 * potential_.epsilon();
+        const auto cutoff_ratio    = potential_.cutoff_ratio();
+        const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
+        const auto epsilon12       = 12 * potential_.epsilon();
 
 #pragma omp for nowait
         for(std::size_t idx=0; idx < this->potential_.participants().size(); ++idx)
@@ -114,10 +114,10 @@ class GlobalPairInteraction<
 
         real_type E(0);
 
-        constexpr auto  cutoff_ratio    = potential_type::cutoff_ratio;
-        constexpr auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-        constexpr auto  coef_at_cutoff  = potential_type::coef_at_cutoff;
-        const     auto  epsilon         = potential_.epsilon();
+        const auto cutoff_ratio    = potential_.cutoff_ratio();
+        const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
+        const auto coef_at_cutoff  = potential_.coef_at_cutoff();
+        const auto epsilon         = potential_.epsilon();
 
 #pragma omp parallel for reduction(+:E)
         for(std::size_t idx=0; idx < this->potential_.participants().size(); ++idx)
