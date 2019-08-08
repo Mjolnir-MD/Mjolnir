@@ -41,12 +41,12 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
     ContactInteraction(const connection_kind_type kind,
                        const container_type&      pot,
                        const real_type            margin = 0.5)
-        : kind_(kind), potentials(pot), margin_(margin)
+        : kind_(kind), potentials_(pot), margin_(margin)
     {}
     ContactInteraction(const connection_kind_type kind,
                        container_type&&           pot,
                        const real_type            margin = 0.5)
-        : kind_(kind), potentials(std::move(pot)), margin_(margin)
+        : kind_(kind), potentials_(std::move(pot)), margin_(margin)
     {}
     ~ContactInteraction() override = default;
 
@@ -58,9 +58,9 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential = ", potential_type::name(),
-                         ", number of bonds = ", potentials.size());
+                         ", number of bonds = ", potentials_.size());
 
-        this->cutoff_ = std::max_element(potentials.begin(), potentials.end(),
+        this->cutoff_ = std::max_element(potentials_.begin(), potentials_.end(),
             [](const potential_index_pair& lhs, const potential_index_pair& rhs)
             {
                 return lhs.second.cutoff() < rhs.second.cutoff();
@@ -71,12 +71,12 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
 
     void update(const system_type& sys) override
     {
-        for(auto& item : potentials)
+        for(auto& item : potentials_)
         {
             item.second.update(sys);
         }
 
-        this->cutoff_ = std::max_element(potentials.begin(), potentials.end(),
+        this->cutoff_ = std::max_element(potentials_.begin(), potentials_.end(),
             [](const potential_index_pair& lhs, const potential_index_pair& rhs)
             {
                 return lhs.second.cutoff() < rhs.second.cutoff();
@@ -100,19 +100,22 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
 
     void write_topology(topology_type&) const override;
 
+    container_type const& potentials() const noexcept {return potentials_;}
+    container_type&       potentials()       noexcept {return potentials_;}
+
   private:
 
     void make_list(const system_type& sys)
     {
         this->active_contacts_.clear();
-        this->active_contacts_.reserve(potentials.size());
+        this->active_contacts_.reserve(potentials_.size());
 
         // absolute length of margin (this->margin_ is a relative length).
         const real_type abs_margin = this->cutoff_ * this->margin_;
 
-        for(std::size_t i=0; i < this->potentials.size(); ++i)
+        for(std::size_t i=0; i < this->potentials_.size(); ++i)
         {
-            const auto& pot = this->potentials[i];
+            const auto& pot = this->potentials_[i];
             const auto pos0 = sys.position(pot.first[0]);
             const auto pos1 = sys.position(pot.first[1]);
             const auto dpos = sys.adjust_direction(pos1 - pos0);
@@ -130,7 +133,7 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
 
   private:
     connection_kind_type kind_;
-    container_type potentials;
+    container_type potentials_;
 
     // neighbor list stuff
     real_type cutoff_;
@@ -145,7 +148,7 @@ void ContactInteraction<traitsT, potentialT>::calc_force(
 {
     for(const std::size_t active_contact : active_contacts_)
     {
-        const auto& idxp = this->potentials[active_contact];
+        const auto& idxp = this->potentials_[active_contact];
 
         const std::size_t idx0 = idxp.first[0];
         const std::size_t idx1 = idxp.first[1];
@@ -173,7 +176,7 @@ ContactInteraction<traitsT, potentialT>::calc_energy(
     real_type E = 0.0;
     for(const std::size_t active_contact : active_contacts_)
     {
-        const auto& idxp = this->potentials[active_contact];
+        const auto& idxp = this->potentials_[active_contact];
         E += idxp.second.potential(math::length(sys.adjust_direction(
                 sys.position(idxp.first[1]) - sys.position(idxp.first[0]))));
     }
@@ -186,7 +189,7 @@ void ContactInteraction<traitsT, potentialT>::write_topology(
 {
     if(this->kind_.empty() || this->kind_ == "none") {return;}
 
-    for(const auto& idxp : this->potentials)
+    for(const auto& idxp : this->potentials_)
     {
         const auto i = idxp.first[0];
         const auto j = idxp.first[1];
@@ -198,7 +201,6 @@ void ContactInteraction<traitsT, potentialT>::write_topology(
 } // mjolnir
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-// explicitly specialize ContactInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/potential/local/GoContactPotential.hpp>

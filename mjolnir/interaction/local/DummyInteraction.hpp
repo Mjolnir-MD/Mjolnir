@@ -34,7 +34,7 @@ class DummyInteraction final : public LocalInteractionBase<traitsT>
   public:
 
     DummyInteraction(const connection_kind_type& kind, const container_type& cont)
-        : kind_(kind), connections_(cont)
+        : kind_(kind), potentials_(cont)
     {}
     ~DummyInteraction() override = default;
 
@@ -46,7 +46,7 @@ class DummyInteraction final : public LocalInteractionBase<traitsT>
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("connection kind = ", this->kind_,
-                         ", number of bonds = ", connections_.size());
+                         ", number of bonds = ", potentials_.size());
         return;
     }
 
@@ -67,7 +67,7 @@ class DummyInteraction final : public LocalInteractionBase<traitsT>
             return;
         }
 
-        for(const auto& idxs : this->connections_)
+        for(const auto& idxs : this->potentials_)
         {
             const auto i = idxs[0];
             const auto j = idxs[1];
@@ -76,15 +76,17 @@ class DummyInteraction final : public LocalInteractionBase<traitsT>
         return;
     }
 
+    container_type const& potentials() const noexcept {return potentials_;}
+    container_type&       potentials()       noexcept {return potentials_;}
+
   private:
     connection_kind_type kind_;
-    container_type       connections_;
+    container_type       potentials_;
 };
 
 } // mjolnir
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-// explicitly specialize BondAngleInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 
