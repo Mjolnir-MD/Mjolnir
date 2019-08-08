@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.4.1
+
+### Changed
+
+- consider energy at cutoff in DebyeHuckel
+- add SpatialPartitionBase to reduce compilation time
+- replace constant values by constexpr functions
+
 ## 1.4.0
 
 ### Added
