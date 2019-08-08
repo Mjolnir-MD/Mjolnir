@@ -77,7 +77,9 @@ class SpatialPartition
 
   public:
 
-    SpatialPartition(partition_type&& part): partition_(std::move(part)){}
+    explicit SpatialPartition(partition_type&& part)
+        : partition_(std::move(part))
+    {}
 
     ~SpatialPartition() = default;
     SpatialPartition(SpatialPartition const&) = default;
