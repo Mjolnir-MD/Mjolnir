@@ -42,13 +42,6 @@ class ExcludedVolumePotential
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
     using exclusion_list_type  = ExclusionList;
 
-    // rc = 2.0 * sigma
-    constexpr static real_type cutoff_ratio = 2.0;
-
-    // to make the potential curve continuous at the cutoff point
-    constexpr static real_type coef_at_cutoff =
-        compiletime::pow(1.0 / cutoff_ratio, 12);
-
     static constexpr parameter_type default_parameter() noexcept
     {
         return parameter_type{0.0};
@@ -60,7 +53,15 @@ class ExcludedVolumePotential
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-        : epsilon_(eps),
+        : ExcludedVolumePotential(eps, /* defualt cutoff ratio = */ 2.0,
+            parameters, exclusions, std::move(ignore_mol), std::move(ignore_grp))
+    {}
+    ExcludedVolumePotential(const real_type eps, const real_type cutoff_ratio,
+        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
+        const std::map<connection_kind_type, std::size_t>&         exclusions,
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+        : epsilon_(eps), cutoff_ratio_(cutoff_ratio),
+          coef_at_cutoff_(std::pow(1.0 / cutoff_ratio, 12)),
           exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
@@ -101,17 +102,17 @@ class ExcludedVolumePotential
 
     real_type potential(const real_type r, const pair_parameter_type& d) const noexcept
     {
-        if(d * cutoff_ratio < r){return 0.0;}
+        if(d * this->cutoff_ratio_ < r){return 0.0;}
 
         const real_type d_r  = d / r;
         const real_type dr3  = d_r * d_r * d_r;
         const real_type dr6  = dr3 * dr3;
         const real_type dr12 = dr6 * dr6;
-        return this->epsilon_ * (dr12 - coef_at_cutoff);
+        return this->epsilon_ * (dr12 - this->coef_at_cutoff_);
     }
     real_type derivative(const real_type r, const pair_parameter_type& d) const noexcept
     {
-        if(d * cutoff_ratio < r){return 0.0;}
+        if(d * this->cutoff_ratio_ < r){return 0.0;}
 
         const real_type rinv = 1.0 / r;
         const real_type d_r  = d * rinv;
@@ -143,11 +144,14 @@ class ExcludedVolumePotential
         return;
     }
 
+    real_type cutoff_ratio()   const noexcept {return this->cutoff_ratio_;}
+    real_type coef_at_cutoff() const noexcept {return this->coef_at_cutoff_;}
+
     real_type max_cutoff_length() const
     {
         const real_type max_sigma =
             *(std::max_element(parameters_.cbegin(), parameters_.cend()));
-        return 2 * max_sigma * cutoff_ratio;
+        return 2 * max_sigma * this->cutoff_ratio_;
     }
 
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
@@ -179,15 +183,13 @@ class ExcludedVolumePotential
   private:
 
     real_type epsilon_;
+    real_type cutoff_ratio_;
+    real_type coef_at_cutoff_;
     std::vector<parameter_type> parameters_;
     std::vector<std::size_t> participants_;
 
     exclusion_list_type  exclusion_list_;
 };
-
-template<typename realT>
-constexpr typename ExcludedVolumePotential<realT>::real_type
-ExcludedVolumePotential<realT>::cutoff_ratio;
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template class ExcludedVolumePotential<double>;

@@ -47,7 +47,7 @@ class TRRObserver final : public ObserverBase<traitsT>
         MJOLNIR_LOG_FUNCTION();
 
         if(physics::constants<real_type>::m_to_length() !=
-              unit::constants<real_type>::m_to_nm)
+              unit::constants<real_type>::m_to_nm())
         {
             MJOLNIR_LOG_NOTICE("length unit seems to be different from [nm]."    );
             MJOLNIR_LOG_NOTICE("The resulting .trr file might look weird because");

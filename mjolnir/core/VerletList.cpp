@@ -6,18 +6,23 @@
 
 namespace mjolnir
 {
-template class VerletList<SimulatorTraits<double, UnlimitedBoundary>, empty_t>;
-template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
-template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
-template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
+template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float >>;
+template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>;
+template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float >>;
 
-template class VerletList<SimulatorTraits<double, UnlimitedBoundary>, double>;
-template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>, float >;
-template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
-template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
+template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float >>;
+template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;
+template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float >>;
 
-template class VerletList<SimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
-template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
-template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
-template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        LennardJonesPotential<double>>;
+template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        LennardJonesPotential<float >>;
+template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<double>>;
+template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<float >>;
+
+template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
+template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float >>;
+template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
+template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float >>;
 } // mjolnir

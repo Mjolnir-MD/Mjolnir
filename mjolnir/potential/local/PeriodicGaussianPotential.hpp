@@ -25,8 +25,8 @@ class PeriodicGaussianPotential
 
     real_type potential(const real_type val) const noexcept
     {
-        constexpr real_type pi     = math::constants<real_type>::pi;
-        constexpr real_type two_pi = math::constants<real_type>::two_pi;
+        constexpr real_type pi     = math::constants<real_type>::pi();
+        constexpr real_type two_pi = math::constants<real_type>::two_pi();
 
         real_type dval = val - this->v0_;
         if(dval < -pi) {dval += two_pi;} else if(pi < dval){dval -= two_pi;}
@@ -35,8 +35,8 @@ class PeriodicGaussianPotential
 
     real_type derivative(const real_type val) const noexcept
     {
-        constexpr real_type pi     = math::constants<real_type>::pi;
-        constexpr real_type two_pi = math::constants<real_type>::two_pi;
+        constexpr real_type pi     = math::constants<real_type>::pi();
+        constexpr real_type two_pi = math::constants<real_type>::two_pi();
 
         real_type dval = val - this->v0_;
         if(dval < -pi) {dval += two_pi;} else if(pi < dval){dval -= two_pi;}

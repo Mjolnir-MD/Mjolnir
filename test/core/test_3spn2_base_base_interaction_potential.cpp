@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE(f_3SPN2_BaseBaseInteraction_double)
 
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
-    constexpr real_type  pi = mjolnir::math::constants<real_type>::pi;
+    constexpr real_type  pi = mjolnir::math::constants<real_type>::pi();
 
     mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential({},
         typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_group_type({})
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(f_3SPN2_BaseBaseInteraction_float)
 
     constexpr std::size_t N = 100;
     constexpr real_type   h = 1e-3f;
-    constexpr real_type  pi = mjolnir::math::constants<real_type>::pi;
+    constexpr real_type  pi = mjolnir::math::constants<real_type>::pi();
 
     mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential({},
         typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_group_type({})

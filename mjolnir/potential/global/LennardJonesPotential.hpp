@@ -38,13 +38,6 @@ class LennardJonesPotential
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
     using exclusion_list_type  = ExclusionList;
 
-    // rc = 2.5 * sigma
-    constexpr static real_type cutoff_ratio = 2.5;
-    // to make the potential curve continuous at the cutoff point
-    constexpr static real_type coef_at_cutoff =
-        compiletime::pow<real_type>(1 / cutoff_ratio, 12u) -
-        compiletime::pow<real_type>(1 / cutoff_ratio,  6u);
-
     static constexpr parameter_type default_parameter() noexcept
     {
         return parameter_type{real_type(0), real_type(0)};
@@ -52,11 +45,13 @@ class LennardJonesPotential
 
   public:
 
-    LennardJonesPotential(
+    LennardJonesPotential(const real_type cutoff_ratio,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-        : exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
+    : cutoff_ratio_(cutoff_ratio),
+      coef_at_cutoff_(std::pow(1 / cutoff_ratio, 12) - std::pow(1 / cutoff_ratio, 6)),
+      exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
@@ -71,6 +66,13 @@ class LennardJonesPotential
             this->parameters_.at(idx) = idxp.second;
         }
     }
+    LennardJonesPotential(
+        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
+        const std::map<connection_kind_type, std::size_t>&         exclusions,
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+    : LennardJonesPotential(/*default cutoff = */2.5, parameters, exclusions,
+                            std::move(ignore_mol), std::move(ignore_grp))
+    {}
     ~LennardJonesPotential() = default;
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
@@ -99,7 +101,7 @@ class LennardJonesPotential
     real_type potential(const real_type r, const pair_parameter_type& p) const noexcept
     {
         const real_type sigma = p.first;
-        if(sigma * cutoff_ratio < r){return 0;}
+        if(sigma * this->cutoff_ratio_ < r){return 0;}
 
         const real_type epsilon = p.second;
 
@@ -107,12 +109,12 @@ class LennardJonesPotential
         const real_type r3s3   = r1s1 * r1s1 * r1s1;
         const real_type r6s6   = r3s3 * r3s3;
         const real_type r12s12 = r6s6 * r6s6;
-        return 4 * epsilon * (r12s12 - r6s6 - coef_at_cutoff);
+        return 4 * epsilon * (r12s12 - r6s6 - coef_at_cutoff_);
     }
     real_type derivative(const real_type r, const pair_parameter_type& p) const noexcept
     {
         const real_type sigma = p.first;
-        if(sigma * cutoff_ratio < r){return 0;}
+        if(sigma * this->cutoff_ratio_ < r){return 0;}
 
         const real_type epsilon = p.second;
 
@@ -124,6 +126,9 @@ class LennardJonesPotential
         return 24 * epsilon * (r6s6 - 2 * r12s12) * rinv;
     }
 
+    real_type cutoff_ratio()   const noexcept {return this->cutoff_ratio_;}
+    real_type coef_at_cutoff() const noexcept {return this->coef_at_cutoff_;}
+
     real_type max_cutoff_length() const noexcept
     {
         const real_type max_sigma = std::max_element(
@@ -131,7 +136,7 @@ class LennardJonesPotential
             [](const parameter_type& lhs, const parameter_type& rhs) noexcept {
                 return lhs.first < rhs.first;
             })->first;
-        return max_sigma * cutoff_ratio;
+        return max_sigma * this->cutoff_ratio_;
     }
 
     template<typename traitsT>
@@ -180,14 +185,13 @@ class LennardJonesPotential
 
   private:
 
+    real_type cutoff_ratio_;
+    real_type coef_at_cutoff_;
     container_type parameters_;
     std::vector<std::size_t> participants_;
 
     exclusion_list_type  exclusion_list_;
 };
-template<typename realT>
-constexpr typename LennardJonesPotential<realT>::real_type
-LennardJonesPotential<realT>::cutoff_ratio;
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template class LennardJonesPotential<double>;

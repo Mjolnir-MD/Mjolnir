@@ -16,37 +16,37 @@ class LennardJonesWallPotential
     using real_type      = realT;
     using parameter_type = std::pair<real_type, real_type>;
 
-    // rc = 2.5 * sigma
-    constexpr static real_type cutoff_ratio = 2.5;
-    // to make the potential curve continuous at the cutoff point
-    constexpr static real_type coef_at_cutoff =
-        compiletime::pow(1.0 / cutoff_ratio, 12u) -
-        compiletime::pow(1.0 / cutoff_ratio,  6u);
-
   public:
 
+    LennardJonesWallPotential(
+        const real_type cutoff_ratio, std::vector<parameter_type> params)
+        : cutoff_ratio_(cutoff_ratio),
+          coef_at_cutoff_(std::pow(1 / cutoff_ratio, 12) -
+                          std::pow(1 / cutoff_ratio, 6)),
+          params_(std::move(params))
+    {}
     LennardJonesWallPotential(std::vector<parameter_type> params)
-        : params_(std::move(params))
+        : LennardJonesWallPotential(2.5, std::move(params))
     {}
     ~LennardJonesWallPotential(){}
 
     real_type potential(const std::size_t i, const real_type r) const noexcept
     {
         const real_type sigma = params_[i].first;
-        if(sigma * cutoff_ratio < r){return real_type(0.0);}
+        if(sigma * this->cutoff_ratio_ < r){return real_type(0.0);}
         const real_type epsilon = params_[i].second;
 
         const real_type r1s1   = sigma / r;
         const real_type r3s3   = r1s1 * r1s1 * r1s1;
         const real_type r6s6   = r3s3 * r3s3;
         const real_type r12s12 = r6s6 * r6s6;
-        return real_type(4.0) * epsilon * (r12s12 - r6s6 - coef_at_cutoff);
+        return real_type(4.0) * epsilon * (r12s12 - r6s6 - this->coef_at_cutoff_);
     }
 
     real_type derivative(const std::size_t i, const real_type r) const noexcept
     {
         const real_type sigma = params_[i].first;
-        if(sigma * cutoff_ratio < r){return real_type(0.0);}
+        if(sigma * this->cutoff_ratio_ < r){return real_type(0.0);}
         const real_type epsilon = params_[i].second;
 
         const real_type r1s1   = sigma / r;
@@ -63,10 +63,9 @@ class LennardJonesWallPotential
             [](const parameter_type& lhs, const parameter_type& rhs) noexcept {
                 return lhs.first < rhs.first;
             })->first;
-        return max_sigma * cutoff_ratio;
+        return max_sigma * this->cutoff_ratio_;
     }
 
-    // TODO
     std::vector<std::size_t> participants() const
     {
         std::vector<std::size_t> retval;
@@ -93,15 +92,9 @@ class LennardJonesWallPotential
 
   private:
 
+    real_type cutoff_ratio_, coef_at_cutoff_;
     std::vector<parameter_type> params_;
 };
-
-template<typename realT>
-constexpr typename LennardJonesWallPotential<realT>::real_type
-LennardJonesWallPotential<realT>::cutoff_ratio;
-template<typename realT>
-constexpr typename LennardJonesWallPotential<realT>::real_type
-LennardJonesWallPotential<realT>::coef_at_cutoff;
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template class LennardJonesWallPotential<double>;

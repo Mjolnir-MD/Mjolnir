@@ -8,20 +8,25 @@ namespace mjolnir
 {
 
 template<typename realT, template<typename, typename> class boundaryT,
-         typename parameterT>
-class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
+         typename potentialT>
+class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
+    final : public SpatialPartitionBase<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 {
   public:
-    using traits_type         = OpenMPSimulatorTraits<realT, boundaryT>;
-    using system_type         = System<traits_type>;
-    using real_type           = typename traits_type::real_type;
-    using coordinate_type     = typename traits_type::coordinate_type;
-    using parameter_type      = parameterT;
-    using neighbor_list_type  = NeighborList<parameter_type>;
-    using neighbor_type       = typename neighbor_list_type::neighbor_type;
-    using range_type          = typename neighbor_list_type::range_type;
 
-    constexpr static real_type mesh_epsilon = 1e-6;
+    using traits_type        = OpenMPSimulatorTraits<realT, boundaryT>;
+    using potential_type     = potentialT;
+    using base_type          = SpatialPartitionBase<traits_type, potential_type>;
+
+    using system_type        = typename base_type::system_type;
+    using boundary_type      = typename base_type::boundary_type;
+    using real_type          = typename base_type::real_type;
+    using coordinate_type    = typename base_type::coordinate_type;
+    using neighbor_list_type = typename base_type::neighbor_list_type;
+    using neighbor_type      = typename base_type::neighbor_type;
+    using range_type         = typename base_type::range_type;
+
+    static constexpr real_type mesh_epsilon() {return 1e-6;}
 
     using particle_cell_idx_pair    = std::pair<std::size_t, std::size_t>;
     using cell_index_container_type = std::vector<particle_cell_idx_pair>;
@@ -36,7 +41,7 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
         : cutoff_(0), margin_(1), current_margin_(-1),
           r_x_(-1), r_y_(-1), r_z_(-1), dim_x_(0), dim_y_(0), dim_z_(0)
     {}
-    ~PeriodicGridCellList() = default;
+    ~PeriodicGridCellList() override = default;
     PeriodicGridCellList(PeriodicGridCellList const&) = default;
     PeriodicGridCellList(PeriodicGridCellList &&)     = default;
     PeriodicGridCellList& operator=(PeriodicGridCellList const&) = default;
@@ -47,13 +52,13 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
           r_x_(-1), r_y_(-1), r_z_(-1), dim_x_(0), dim_y_(0), dim_z_(0)
     {}
 
-    bool valid() const noexcept
+    bool valid() const noexcept override
     {
         return current_margin_ >= 0.0;
     }
 
-    template<typename PotentialT>
-    void initialize(const system_type& sys, const PotentialT& pot)
+    void initialize(neighbor_list_type& neighbors,
+                    const system_type& sys, const potential_type& pot) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -150,18 +155,18 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
             }
             }
         }
-        this->make(sys, pot);
+        this->make(neighbors, sys, pot);
         return;
     }
 
-    template<typename PotentialT>
-    void make  (const system_type& sys, const PotentialT& pot)
+    void make(neighbor_list_type& neighbors,
+              const system_type& sys, const potential_type& pot) override
     {
         // `participants` is a list that contains indices of particles that are
         // related to the potential.
         const auto& participants = pot.participants();
 
-        neighbors_.clear();
+        neighbors.clear();
         if(index_by_cell_    .size() != sys.size() ||
            index_by_cell_buf_.size() != sys.size())
         {
@@ -245,7 +250,7 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
             }
             // make the result consistent with NaivePairCalculation...
             std::sort(partner.begin(), partner.end());
-            this->neighbors_.add_list_for(i, partner.begin(), partner.end());
+            neighbors.add_list_for(i, partner.begin(), partner.end());
         }
 
         this->current_margin_ = cutoff_ * margin_;
@@ -253,22 +258,19 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
     }
 
 
-    template<typename PotentialT>
-    void update(const real_type dmargin, const system_type& sys,
-                const PotentialT& pot)
+    void update(neighbor_list_type& neighbors, const real_type dmargin,
+                const system_type& sys, const potential_type& pot) override
     {
         this->current_margin_ -= dmargin;
         if(this->current_margin_ < 0)
         {
-            this->make(sys, pot);
+            this->make(neighbors, sys, pot);
         }
         return ;
     }
 
-    real_type cutoff() const {return this->cutoff_;}
-    real_type margin() const {return this->margin_;}
-
-    range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
+    real_type cutoff() const noexcept override {return this->cutoff_;}
+    real_type margin() const noexcept override {return this->margin_;}
 
   private:
 
@@ -289,17 +291,17 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
     void set_cutoff(const real_type c) noexcept
     {
         this->cutoff_ = c;
-        this->r_x_ = 1 / (this->cutoff_ * (1 + this->margin_) + mesh_epsilon);
-        this->r_y_ = 1 / (this->cutoff_ * (1 + this->margin_) + mesh_epsilon);
-        this->r_z_ = 1 / (this->cutoff_ * (1 + this->margin_) + mesh_epsilon);
+        this->r_x_ = 1 / (this->cutoff_ * (1 + this->margin_) + mesh_epsilon());
+        this->r_y_ = 1 / (this->cutoff_ * (1 + this->margin_) + mesh_epsilon());
+        this->r_z_ = 1 / (this->cutoff_ * (1 + this->margin_) + mesh_epsilon());
         return;
     }
     void set_margin(const real_type m) noexcept
     {
         this->margin_ = m;
-        this->r_x_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + mesh_epsilon);
-        this->r_y_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + mesh_epsilon);
-        this->r_z_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + mesh_epsilon);
+        this->r_x_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + mesh_epsilon());
+        this->r_y_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + mesh_epsilon());
+        this->r_z_ = 1.0 / (this->cutoff_ * (1.0 + this->margin_) + mesh_epsilon());
         return;
     }
 
@@ -315,38 +317,35 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, parameterT>
     std::size_t dim_y_;
     std::size_t dim_z_;
 
-    coordinate_type     lower_bound_;
-    neighbor_list_type  neighbors_;
-    cell_list_type      cell_list_;
+    coordinate_type           lower_bound_;
+    cell_list_type            cell_list_;
     cell_index_container_type index_by_cell_;
     cell_index_container_type index_by_cell_buf_;
     // index_by_cell_ has {particle idx, cell idx} and sorted by cell idx
     // first term of cell list contains first and last idx of index_by_cell
 };
-
-template<typename realT, template<typename, typename> class boundaryT,
-         typename parameterT>
-constexpr typename PeriodicGridCellList<
-    OpenMPSimulatorTraits<realT, boundaryT>, parameterT>::real_type
-    PeriodicGridCellList<
-        OpenMPSimulatorTraits<realT, boundaryT>, parameterT>::mesh_epsilon;
+} // mjolnir
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, empty_t>;
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+#include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
+#include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
+#include <mjolnir/potential/global/LennardJonesPotential.hpp>
+#include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
 
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, double>;
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, float >;
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+namespace mjolnir
+{
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float >>;
 
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
-#endif
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float >>;
 
-} // mjolnir
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<double>>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<float >>;
+
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float >>;
+}
+#endif // SEPARATE_BUILD
+
 #endif /* MJOLNIR_PERIODIC_GRID_CELL_LIST */

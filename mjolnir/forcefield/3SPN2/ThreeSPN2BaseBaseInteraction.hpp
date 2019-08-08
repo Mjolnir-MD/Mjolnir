@@ -2,6 +2,7 @@
 #define MJOLNIR_FORCEFIELD_3SPN2_BASE_BASE_INTERACTION_HPP
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseBaseInteractionPotential.hpp>
 #include <mjolnir/core/GlobalInteractionBase.hpp>
+#include <mjolnir/core/SpatialPartitionBase.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/math/math.hpp>
 #include <memory>
@@ -21,7 +22,7 @@ namespace mjolnir
 // It shares CellList between BasePairing and CrossStacking.
 // It constructs CellList for BasePairing and re-use the pairs for CrossStacking.
 //
-template<typename traitsT, typename partitionT>
+template<typename traitsT>
 class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
 {
   public:
@@ -32,12 +33,12 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
-    using partition_type  = partitionT;
+    using potential_type  = ThreeSPN2BaseBaseInteractionPotential<real_type>;
+    using partition_type  = SpatialPartition<traitsT, potential_type>;
 
     using base_kind        = parameter_3SPN2::bead_kind;
     using base_pair_kind   = parameter_3SPN2::base_pair_kind;
     using cross_stack_kind = parameter_3SPN2::cross_stack_kind;
-    using potential_type   = ThreeSPN2BaseBaseInteractionPotential<real_type>;
 
   public:
     ThreeSPN2BaseBaseInteraction(potential_type&& pot, partition_type&& part)
@@ -83,12 +84,12 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
     partition_type partition_;
 };
 
-template<typename traitsT, typename partitionT>
-void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
+template<typename traitsT>
+void ThreeSPN2BaseBaseInteraction<traitsT>::calc_force(
         system_type& sys) const noexcept
 {
-    constexpr auto pi        = math::constants<real_type>::pi;
-    constexpr auto two_pi    = math::constants<real_type>::two_pi;
+    constexpr auto pi        = math::constants<real_type>::pi();
+    constexpr auto two_pi    = math::constants<real_type>::two_pi();
     constexpr auto tolerance = math::abs_tolerance<real_type>();
 
     for(const auto Bi : this->potential_.participants())
@@ -513,13 +514,13 @@ void ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_force(
     return;
 }
 
-template<typename traitsT, typename partitionT>
-typename ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::real_type
-ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
+template<typename traitsT>
+typename ThreeSPN2BaseBaseInteraction<traitsT>::real_type
+ThreeSPN2BaseBaseInteraction<traitsT>::calc_energy(
         const system_type& sys) const noexcept
 {
-    constexpr auto pi        = math::constants<real_type>::pi;
-    constexpr auto two_pi    = math::constants<real_type>::two_pi;
+    constexpr auto pi        = math::constants<real_type>::pi();
+    constexpr auto two_pi    = math::constants<real_type>::two_pi();
 
     real_type E = 0.0;
     for(const auto Bi : this->potential_.participants())
@@ -770,28 +771,14 @@ ThreeSPN2BaseBaseInteraction<traitsT, partitionT>::calc_energy(
 // explicitly specialize major use-cases
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/core/NaivePairCalculation.hpp>
-#include <mjolnir/core/VerletList.hpp>
-#include <mjolnir/core/UnlimitedGridCellList.hpp>
-#include <mjolnir/core/PeriodicGridCellList.hpp>
 
 namespace mjolnir
 {
 
-extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, UnlimitedBoundary>,        UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
-extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
-extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, PeriodicGridCellList <SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
-extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, PeriodicGridCellList <SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
-
-extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, UnlimitedBoundary>,        VerletList<SimulatorTraits<double, UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
-extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
-extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
-extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
-
-extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, UnlimitedBoundary>,        NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
-extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
-extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
-extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD

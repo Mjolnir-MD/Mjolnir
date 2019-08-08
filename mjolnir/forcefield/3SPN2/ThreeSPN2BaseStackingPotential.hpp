@@ -59,7 +59,7 @@ class ThreeSPN2BaseStackingPotential
             {
                 MJOLNIR_LOG_INFO("energy unit ([kcal/mol]) differs from the "
                                  "default, [kJ/mol]. converting by multiplying ",
-                                 unit::constants<real_type>::J_to_cal);
+                                 unit::constants<real_type>::J_to_cal());
 
                 // convert from kJ/mol to kcal/mol (/= 4.18)
                 std::uint8_t idx = 0;
@@ -68,7 +68,7 @@ class ThreeSPN2BaseStackingPotential
                     const auto bs = static_cast<base_stack_kind>(idx);
                     MJOLNIR_LOG_INFO_NO_LF("epsilon:", bs, " = ", epsilon,
                                            " [kJ/mol] -> ");
-                    epsilon *= unit::constants<real_type>::J_to_cal;
+                    epsilon *= unit::constants<real_type>::J_to_cal();
                     MJOLNIR_LOG_INFO(epsilon, "[kcal/mol]");
                     ++idx;
                 }
@@ -82,7 +82,7 @@ class ThreeSPN2BaseStackingPotential
             {
                 MJOLNIR_LOG_INFO("length unit (nm) differs from the default, "
                                  "[angstrom]. converting by multiplying ",
-                                 unit::constants<real_type>::angstrom_to_nm);
+                                 unit::constants<real_type>::angstrom_to_nm());
 
                 // convert angstrom -> nm (* 0.1)
                 std::uint8_t idx = 0;
@@ -91,7 +91,7 @@ class ThreeSPN2BaseStackingPotential
                     const auto bs = static_cast<base_stack_kind>(idx);
                     MJOLNIR_LOG_INFO_NO_LF("r0:", bs, " = ", r0_BS,
                                            " [angstrom] -> ");
-                    r0_BS *= unit::constants<real_type>::angstrom_to_nm;
+                    r0_BS *= unit::constants<real_type>::angstrom_to_nm();
                     MJOLNIR_LOG_INFO(r0_BS, "[nm]");
                     ++idx;
                 }
@@ -103,7 +103,7 @@ class ThreeSPN2BaseStackingPotential
             {
                 const auto bs = static_cast<base_stack_kind>(idx);
                 MJOLNIR_LOG_INFO_NO_LF("theta0:", bs, " = ", theta0_BS, " [deg] -> ");
-                theta0_BS *= (math::constants<real_type>::pi / 180.0);
+                theta0_BS *= (math::constants<real_type>::pi() / 180.0);
                 MJOLNIR_LOG_INFO(theta0_BS, "[rad]");
                 ++idx;
             }
@@ -263,7 +263,7 @@ class ThreeSPN2BaseStackingPotential
 
     bool unit_converted_    = false;
     real_type K_BS_         = 6.0;
-    real_type pi_over_K_BS_ = math::constants<real_type>::pi / 6.0;
+    real_type pi_over_K_BS_ = math::constants<real_type>::pi() / 6.0;
     real_type alpha_BS_     = 3.0;
 
     std::array<real_type, 16> epsilon_BS_ = {{ // [kJ/mol]

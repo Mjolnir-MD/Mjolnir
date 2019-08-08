@@ -23,8 +23,7 @@ BOOST_AUTO_TEST_CASE(UniformLennardJones_double)
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
     };
-    constexpr real_type cutoff =
-        mjolnir::UniformLennardJonesPotential<real_type>::cutoff_ratio;
+    const real_type cutoff = lj.cutoff_ratio();
 
     const real_type x_min = 0.8 * sigma;
     const real_type x_max = cutoff * sigma;
@@ -58,8 +57,7 @@ BOOST_AUTO_TEST_CASE(UniformLennardJones_float)
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
     };
-    constexpr real_type cutoff =
-        mjolnir::UniformLennardJonesPotential<real_type>::cutoff_ratio;
+    const real_type cutoff = lj.cutoff_ratio();
 
     const real_type x_min = 0.8 * sigma;
     const real_type x_max = cutoff * sigma;

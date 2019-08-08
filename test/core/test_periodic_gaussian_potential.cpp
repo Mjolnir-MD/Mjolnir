@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE(PeriodicGaussian_double)
     using real_type = double;
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
-    constexpr real_type   pi = mjolnir::math::constants<real_type>::pi;
+    constexpr real_type   pi = mjolnir::math::constants<real_type>::pi();
     const real_type e  = 2.0;
     const real_type w  = 1.0;
     const real_type r0 = 3.0;
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(PeriodicGaussian_float)
     using real_type = float;
     constexpr std::size_t N = 100;
     constexpr real_type   h = 1e-3;
-    constexpr real_type   pi = mjolnir::math::constants<real_type>::pi;
+    constexpr real_type   pi = mjolnir::math::constants<real_type>::pi();
     const real_type e  = 2.0;
     const real_type w  = 1.0;
     const real_type r0 = 3.0;

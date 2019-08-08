@@ -6,18 +6,23 @@
 
 namespace mjolnir
 {
-template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>, empty_t>;
-template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>, empty_t>;
-template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, empty_t>;
-template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, empty_t>;
+template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
+template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float >>;
+template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>;
+template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float >>;
 
-template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>, double>;
-template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>, float >;
-template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, double>;
-template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, float >;
+template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
+template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float >>;
+template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;
+template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float >>;
 
-template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>, std::pair<double, double>>;
-template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>, std::pair<float , float >>;
-template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, std::pair<double, double>>;
-template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, std::pair<float , float >>;
+template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>,        LennardJonesPotential<double>>;
+template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>,        LennardJonesPotential<float >>;
+template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<double>>;
+template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<float >>;
+
+template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
+template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float >>;
+template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
+template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float >>;
 } // mjolnir

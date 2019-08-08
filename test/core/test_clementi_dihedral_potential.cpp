@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE(ClementiDihedral_double)
     using real_type = double;
     constexpr std::size_t N  = 1000;
     constexpr real_type   h  = 1e-6;
-    constexpr real_type   pi = mjolnir::math::constants<real_type>::pi;
+    constexpr real_type   pi = mjolnir::math::constants<real_type>::pi();
 
     const real_type k1 = 1.0;
     const real_type k3 = 2.0;
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(ClementiDihedral_float)
     using real_type = float;
     constexpr static std::size_t N  = 100;
     constexpr static real_type   h  = 1e-2f;
-    constexpr static real_type   pi = mjolnir::math::constants<real_type>::pi;
+    constexpr static real_type   pi = mjolnir::math::constants<real_type>::pi();
 
     const real_type k1 = 1.0f;
     const real_type k3 = 2.0f;

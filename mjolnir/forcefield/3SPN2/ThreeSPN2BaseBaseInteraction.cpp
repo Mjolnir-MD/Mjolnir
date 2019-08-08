@@ -7,19 +7,9 @@
 namespace mjolnir
 {
 
-template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, UnlimitedBoundary>,        UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
-template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
-template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, PeriodicGridCellList <SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
-template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, PeriodicGridCellList <SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
-
-template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, UnlimitedBoundary>,        VerletList<SimulatorTraits<double, UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
-template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
-template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
-template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
-
-template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, UnlimitedBoundary>,        NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
-template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>,        typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
-template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<double>::pair_parameter_type>>;
-template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, typename ThreeSPN2BaseBaseInteractionPotential<float>::pair_parameter_type> >;
+template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, UnlimitedBoundary>       >;
+template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  UnlimitedBoundary>       >;
+template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+template class ThreeSPN2BaseBaseInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 
 } // mjolnir

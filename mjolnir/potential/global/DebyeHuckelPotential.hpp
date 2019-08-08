@@ -44,9 +44,6 @@ class DebyeHuckelPotential
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
     using exclusion_list_type  = ExclusionList;
 
-    // r_cutoff = cutoff_ratio * debye_length
-    static constexpr real_type cutoff_ratio = 5.5;
-
     static constexpr parameter_type default_parameter() noexcept
     {
         return real_type(0);
@@ -54,12 +51,12 @@ class DebyeHuckelPotential
 
   public:
 
-    DebyeHuckelPotential(
+    DebyeHuckelPotential(const real_type cutoff_ratio,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-        : temperature_(300.0), ion_conc_(0.1),
-          exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
+    : cutoff_ratio_(cutoff_ratio), temperature_(300.0), ion_conc_(0.1),
+      exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
@@ -77,6 +74,12 @@ class DebyeHuckelPotential
         // XXX should be updated before use because T and ion conc are default!
         this->calc_parameters();
     }
+    DebyeHuckelPotential(
+        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
+        const std::map<connection_kind_type, std::size_t>& exclusions,
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+    : DebyeHuckelPotential(5.5, parameters, exclusions, ignore_mol, ignore_grp)
+    {}
     ~DebyeHuckelPotential() = default;
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
@@ -98,7 +101,7 @@ class DebyeHuckelPotential
     real_type potential(const real_type r, const pair_parameter_type& p) const noexcept
     {
         if(this->max_cutoff_length() <= r) {return 0.0;}
-        return p * std::exp(-r * this->inv_debye_length_) / r;
+        return p * (std::exp(-r * this->inv_debye_length_) / r - coef_at_cutoff_);
     }
     real_type derivative(const real_type r, const pair_parameter_type& p) const noexcept
     {
@@ -107,9 +110,12 @@ class DebyeHuckelPotential
                std::exp(-r * this->inv_debye_length_);
     }
 
+    real_type cutoff_ratio()   const noexcept {return this->cutoff_ratio_;}
+    real_type coef_at_cutoff() const noexcept {return this->coef_at_cutoff_;}
+
     real_type max_cutoff_length() const noexcept
     {
-        return debye_length_ * cutoff_ratio;
+        return this->debye_length_ * this->cutoff_ratio_;
     }
 
     template<typename traitsT>
@@ -190,7 +196,7 @@ class DebyeHuckelPotential
         using math_const =    math::constants<real_type>;
         using phys_const = physics::constants<real_type>;
 
-        constexpr real_type pi   = math_const::pi;
+        constexpr real_type pi   = math_const::pi();
         const     real_type kB   = phys_const::kB();
         const     real_type NA   = phys_const::NA();
         const     real_type eps0 = phys_const::eps0();
@@ -216,6 +222,8 @@ class DebyeHuckelPotential
         MJOLNIR_LOG_INFO("1 / debye length  = ", inv_debye_length_);
         MJOLNIR_LOG_INFO("1 / 4pi eps0 epsk = ", inv_4_pi_eps0_epsk_);
 
+        this->coef_at_cutoff_ = std::exp(-cutoff_ratio_) /
+                                (debye_length_ * cutoff_ratio_);
         return;
     }
 
@@ -228,8 +236,10 @@ class DebyeHuckelPotential
 
   private:
 
+    real_type cutoff_ratio_; // relative to the debye length
+    real_type coef_at_cutoff_;
     real_type temperature_;  // [K]
-    real_type ion_conc_; // [M]
+    real_type ion_conc_;     // [M]
     real_type inv_4_pi_eps0_epsk_;
     real_type debye_length_;
     real_type inv_debye_length_;
@@ -239,10 +249,6 @@ class DebyeHuckelPotential
 
     exclusion_list_type  exclusion_list_;
 };
-
-template<typename realT>
-constexpr typename DebyeHuckelPotential<realT>::real_type
-DebyeHuckelPotential<realT>::cutoff_ratio;
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template class DebyeHuckelPotential<double>;
