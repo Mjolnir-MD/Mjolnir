@@ -11,5 +11,7 @@ integrator.type = "VelocityVerlet"
 
 ## 入力
 
+`delta_t`などの他のパラメータは[Simulator](Simulator.md)で設定します。
+
 - `type`: 文字列型
   - [Integrator](Integrator.md)の種類を指定します。`"VelocityVerlet"`です。
