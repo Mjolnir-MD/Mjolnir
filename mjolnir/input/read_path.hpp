@@ -7,7 +7,8 @@ namespace mjolnir
 {
 
 // this function may be callen from other read_* functions.
-inline std::string read_input_path(const toml::value& root)
+template<typename C, template<typename...> class T, template<typename...> class A>
+std::string read_input_path(const toml::basic_value<C, T, A>& root)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -27,7 +28,8 @@ inline std::string read_input_path(const toml::value& root)
     return input_path;
 }
 
-inline std::string read_output_path(const toml::value& root)
+template<typename C, template<typename...> class T, template<typename...> class A>
+std::string read_output_path(const toml::basic_value<C, T, A>& root)
 {
     // This function does not output log because it might be called when
     // the logger has not been initialized yet.
@@ -47,6 +49,11 @@ inline std::string read_output_path(const toml::value& root)
     }
     return output_path;
 }
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template std::string read_input_path <toml::discard_comments, std::unordered_map, std::vector>(const toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>&);
+extern template std::string read_output_path<toml::discard_comments, std::unordered_map, std::vector>(const toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>&);
+#endif
 
 } // mjolnir
 #endif// MJOLNIR_READ_PATH_HPP
