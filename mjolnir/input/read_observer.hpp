@@ -23,23 +23,23 @@ void add_observer(ObserverContainer<traitsT>& observers,
     // To show the informative error message, here it uses toml::value that
     // contains file location. But this function assumes that the `format`
     // contains `toml::string`.
-    assert(format.is(toml::value_t::String));
+    assert(format.is_string());
 
-    if(format == "xyz")
+    if(format.as_string() == "xyz")
     {
         using observer_type = XYZObserver<traitsT>;
         MJOLNIR_LOG_NOTICE("output xyz format.");
         observers.push_back(make_unique<observer_type>(file_prefix));
         return;
     }
-    else if(format == "dcd")
+    else if(format.as_string() == "dcd")
     {
         using observer_type = DCDObserver<traitsT>;
         MJOLNIR_LOG_NOTICE("output dcd format.");
         observers.push_back(make_unique<observer_type>(file_prefix));
         return;
     }
-    else if(format == "trr")
+    else if(format.as_string() == "trr")
     {
         using observer_type = TRRObserver<traitsT>;
         MJOLNIR_LOG_NOTICE("output trr format.");
@@ -63,13 +63,12 @@ void add_observer(ObserverContainer<traitsT>& observers,
 
 template<typename traitsT>
 ObserverContainer<traitsT>
-read_observer(const toml::table& root)
+read_observer(const toml::value& root)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
-    const auto& files  = toml::find<toml::value>(root, "files");
-    const auto& output = toml::find<toml::value>(files, "output");
+    const auto& output = toml::find(root, "files", "output");
 
     const auto progress_bar_enabled = toml::expect<bool>(output, "progress_bar")
                                                         .unwrap_or(true);
@@ -89,11 +88,11 @@ read_observer(const toml::table& root)
 
     const auto& format = toml::find(output, "format");
 
-    if(format.is(toml::value_t::String))
+    if(format.is_string())
     {
         add_observer(observers, format, file_prefix);
     }
-    else if(format.is(toml::value_t::Array))
+    else if(format.is_array())
     {
         const auto fmts = toml::get<toml::array>(format);
         for(const auto& fmt : fmts)
@@ -117,10 +116,10 @@ extern template void add_observer<SimulatorTraits<float,  UnlimitedBoundary>    
 extern template void add_observer<SimulatorTraits<double, CuboidalPeriodicBoundary>>(ObserverContainer<SimulatorTraits<double, CuboidalPeriodicBoundary>>& observers, const toml::value& format, const std::string& file_prefix);
 extern template void add_observer<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(ObserverContainer<SimulatorTraits<float,  CuboidalPeriodicBoundary>>& observers, const toml::value& format, const std::string& file_prefix);
 
-extern template ObserverContainer<SimulatorTraits<double, UnlimitedBoundary>       > read_observer<SimulatorTraits<double, UnlimitedBoundary>>(const toml::table& data);
-extern template ObserverContainer<SimulatorTraits<float,  UnlimitedBoundary>       > read_observer<SimulatorTraits<float,  UnlimitedBoundary>>(const toml::table& data);
-extern template ObserverContainer<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_observer<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::table& data);
-extern template ObserverContainer<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_observer<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::table& data);
+extern template ObserverContainer<SimulatorTraits<double, UnlimitedBoundary>       > read_observer<SimulatorTraits<double, UnlimitedBoundary       >>(const toml::value& data);
+extern template ObserverContainer<SimulatorTraits<float,  UnlimitedBoundary>       > read_observer<SimulatorTraits<float,  UnlimitedBoundary       >>(const toml::value& data);
+extern template ObserverContainer<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_observer<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value& data);
+extern template ObserverContainer<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_observer<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value& data);
 } // mjolnir
 #endif
 

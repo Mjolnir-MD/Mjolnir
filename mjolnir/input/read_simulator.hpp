@@ -19,15 +19,15 @@ namespace mjolnir
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_molecular_dynamics_simulator(
-        const toml::table& root, const toml::value& simulator)
+        const toml::value& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
     const auto& integrator     = toml::find(simulator, "integrator");
     const auto integrator_type = toml::find<std::string>(integrator, "type");
-    const auto tstep      = toml::find<std::size_t>(simulator, "total_step");
-    const auto sstep      = toml::find<std::size_t>(simulator, "save_step");
+    const auto tstep = toml::find<std::size_t>(simulator, "total_step");
+    const auto sstep = toml::find<std::size_t>(simulator, "save_step");
     MJOLNIR_LOG_NOTICE("total step is ", tstep);
     MJOLNIR_LOG_NOTICE("save  step is ", sstep);
 
@@ -86,7 +86,7 @@ read_molecular_dynamics_simulator(
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_steepest_descent_simulator(
-        const toml::table& root, const toml::value& simulator)
+        const toml::value& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -113,7 +113,7 @@ read_steepest_descent_simulator(
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_simulated_annealing_simulator(
-        const toml::table& root, const toml::value& simulator)
+        const toml::value& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -121,17 +121,17 @@ read_simulated_annealing_simulator(
 
     const auto& integrator     = toml::find(simulator, "integrator");
     const auto integrator_type = toml::find<std::string>(integrator, "type");
-    const auto tstep      = toml::find<std::size_t>(simulator, "total_step");
-    const auto sstep      = toml::find<std::size_t>(simulator, "save_step");
+    const auto tstep = toml::find<std::size_t>(simulator, "total_step");
+    const auto sstep = toml::find<std::size_t>(simulator, "save_step");
 
     MJOLNIR_LOG_NOTICE("total step is ", tstep);
     MJOLNIR_LOG_NOTICE("save  step is ", sstep);
 
-    const auto schedule  = toml::find(simulator, "schedule");
+    const auto schedule       = toml::find(simulator, "schedule");
     const auto schedule_type  = toml::find<std::string>(schedule, "type");
     const auto schedule_begin = toml::find<real_type>  (schedule, "begin");
     const auto schedule_end   = toml::find<real_type>  (schedule, "end");
-    const auto each_step = toml::find<std::size_t>(simulator, "each_step");
+    const auto each_step      = toml::find<std::size_t>(simulator, "each_step");
 
     MJOLNIR_LOG_NOTICE("temperature from ", schedule_begin);
     MJOLNIR_LOG_NOTICE("temperature to   ", schedule_end);
@@ -196,7 +196,7 @@ read_simulated_annealing_simulator(
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
             "mjolnir::read_simulated_annealing_simulator: invalid schedule.type",
-            toml::find<toml::value>(schedule, "type"), "here", {
+            toml::find(schedule, "type"), "here", {
             "expected value is one of the following.",
             "- \"linear\"     : simple linear temperature scheduling",
             }));
@@ -205,7 +205,7 @@ read_simulated_annealing_simulator(
 
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
-read_simulator_from_table(const toml::table& root, const toml::value& simulator)
+read_simulator_from_table(const toml::value& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -230,7 +230,7 @@ read_simulator_from_table(const toml::table& root, const toml::value& simulator)
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
             "mjolnir::read_simulator: invalid type",
-            toml::find<toml::value>(simulator, "type"), "here", {
+            toml::find(simulator, "type"), "here", {
             "expected value is one of the following.",
             "- \"MolecularDynamcis\" : standard MD simulation",
             "- \"SteepestDescent\"   : energy minimization by gradient method",
@@ -241,7 +241,7 @@ read_simulator_from_table(const toml::table& root, const toml::value& simulator)
 
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
-read_simulator(const toml::table& root)
+read_simulator(const toml::value& root)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -268,14 +268,14 @@ read_simulator(const toml::table& root)
         const auto simfile = toml::parse(input_path + file_name);
         MJOLNIR_LOG_NOTICE(" done.");
 
-        if(simfile.count("simulator") != 1)
+        if(simfile.as_table().count("simulator") != 1)
         {
             throw_exception<std::out_of_range>("[error] mjolnir::read_simulator: "
                 "table [simulator] not found in the toml file\n --> ",
                 input_path, file_name, "\n | the file should define [simulator] "
                 "table and define values in it.");
         }
-        return read_simulator_from_table<traitsT>(root, simfile.at("simulator"));
+        return read_simulator_from_table<traitsT>(root, simfile.as_table().at("simulator"));
     }
     else
     {
@@ -292,30 +292,30 @@ read_simulator(const toml::table& root)
 
 namespace mjolnir
 {
-extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::table& data);
-extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::table& data);
-extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::table& data);
-extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::table& data);
+extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::value& data);
+extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::value& data);
+extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value& data);
+extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value& data);
 
-extern template std::unique_ptr<SimulatorBase> read_simulator_from_table<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::table&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_simulator_from_table<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::table&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_simulator_from_table<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::table&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_simulator_from_table<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::table&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulator_from_table<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulator_from_table<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulator_from_table<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulator_from_table<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
 
-extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::table&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::table&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::table&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::table&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
 
-extern template std::unique_ptr<SimulatorBase> read_steepest_descent_simulator<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::table&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_steepest_descent_simulator<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::table&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_steepest_descent_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::table&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_steepest_descent_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::table&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_steepest_descent_simulator<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_steepest_descent_simulator<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_steepest_descent_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_steepest_descent_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
 
-extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::table&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::table&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::table&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::table&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
 } // mjolnir
 #endif
 
