@@ -10,7 +10,7 @@
 
 BOOST_AUTO_TEST_CASE(read_simulated_annealing_simulator)
 {
-    mjolnir::LoggerManager::set_default_logger("test_read_simulator.log");
+    mjolnir::LoggerManager::set_default_logger("test_read_simulated_annealing_simulator.log");
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(read_simulated_annealing_simulator)
 
         )"_toml;
 
-        root["simulator"] = v;
+        root.as_table()["simulator"] = v;
         const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
 
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(read_simulated_annealing_simulator)
 
 BOOST_AUTO_TEST_CASE(read_BAOAB_Langevin_simulated_annealing_simulator)
 {
-    mjolnir::LoggerManager::set_default_logger("test_read_simulator.log");
+    mjolnir::LoggerManager::set_default_logger("test_read_simulated_annealing_simulator.log");
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(read_BAOAB_Langevin_simulated_annealing_simulator)
 
         )"_toml;
 
-        root["simulator"] = v;
+        root.as_table()["simulator"] = v;
         const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
 
