@@ -18,6 +18,12 @@ read_forcefield_from_table(const toml::value& ff, const std::string& input_path)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
+    if(ff.as_table().count("name") == 1)
+    {
+        MJOLNIR_LOG_NOTICE("forcefield \"", toml::find<std::string>(ff, "name"),
+                           "\" found");
+    }
+
     toml::array fflocal, ffglobal, ffexternal;
     if(ff.as_table().count("local") == 1)
     {
@@ -37,7 +43,8 @@ read_forcefield_from_table(const toml::value& ff, const std::string& input_path)
 
     for(const auto kv: ff.as_table())
     {
-        if(kv.first != "local" && kv.first != "global" && kv.first != "external")
+        const auto& key = kv.first;
+        if(key != "local" && key != "global" && key != "external" && key != "name")
         {
             MJOLNIR_LOG_WARN("unknown key `", kv.first, "` appeared in "
                              "[[forcefields]] table. It will be ignored.");
