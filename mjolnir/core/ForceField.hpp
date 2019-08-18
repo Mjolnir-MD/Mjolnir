@@ -21,10 +21,6 @@ class ForceField
 
   public:
 
-    ForceField(local_forcefield_type&& local, global_forcefield_type&& global)
-        : local_(std::move(local)), global_(std::move(global))
-    {}
-
     ForceField(local_forcefield_type&&    local,
                global_forcefield_type&&   global,
                external_forcefield_type&& external)
