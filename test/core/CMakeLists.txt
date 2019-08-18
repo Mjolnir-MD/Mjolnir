@@ -83,6 +83,7 @@ set(TEST_NAMES
     test_read_molecular_dynamics_simulator
     test_read_simulated_annealing_simulator
     test_read_steepest_descent_simulator
+    test_read_switching_forcefield_simulator
 
     test_read_observer
     test_read_integrator
