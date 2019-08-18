@@ -4,6 +4,7 @@
 #include <mjolnir/core/MolecularDynamicsSimulator.hpp>
 #include <mjolnir/core/SteepestDescentSimulator.hpp>
 #include <mjolnir/core/SimulatedAnnealingSimulator.hpp>
+#include <mjolnir/core/SwitchingForceFieldSimulator.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -211,6 +212,107 @@ read_simulated_annealing_simulator(
 
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
+read_switching_forcefield_simulator(
+        const toml::value& root, const toml::value& simulator)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+
+    const auto tstep = toml::find<std::size_t>(simulator, "total_step");
+    const auto sstep = toml::find<std::size_t>(simulator, "save_step");
+    MJOLNIR_LOG_NOTICE("total step is ", tstep);
+    MJOLNIR_LOG_NOTICE("save  step is ", sstep);
+
+    // later move them, so non-const
+    auto sys = read_system    <traitsT>(root, 0);
+    auto obs = read_observer  <traitsT>(root);
+
+    // ------------------------------------------------------------------------
+    // read schedule
+    const auto& schedule = toml::find(simulator, "schedule").as_array();
+    std::vector<std::pair<std::size_t, std::string>> sch(schedule.size());
+    std::transform(schedule.begin(), schedule.end(), sch.begin(),
+            [](const toml::value& v){
+                return std::make_pair(toml::find<std::size_t>(v, "until"),
+                                      toml::find<std::string>(v, "forcefield"));
+            });
+
+    // ------------------------------------------------------------------------
+    // read all forcefields and its names
+    using forcefield_type = ForceField<traitsT>;
+
+    const auto forcefields = toml::find<toml::array>(root, "forcefields");
+    std::vector<forcefield_type> ffs; ffs.reserve(forcefields.size());
+    std::map<std::string, std::size_t> ffidx;
+
+    for(std::size_t i=0; i<forcefields.size(); ++i)
+    {
+        const auto name = toml::find<std::string>(forcefields.at(i), "name");
+        ffidx[name] = i;
+        ffs.push_back(read_forcefield<traitsT>(root, i));
+
+        MJOLNIR_LOG_NOTICE(i, "-th forcefield \"", name, "\" found.");
+    }
+    MJOLNIR_LOG_NOTICE("forcefields = ", ffidx);
+
+    // ------------------------------------------------------------------------
+    // read integrator and then return simulator
+
+    const auto& integrator     = toml::find(simulator, "integrator");
+    const auto integrator_type = toml::find<std::string>(integrator, "type");
+
+    if(integrator_type == "VelocityVerlet")
+    {
+        MJOLNIR_LOG_NOTICE("Integrator is VelocityVerlet.");
+        using integrator_t = VelocityVerletIntegrator<traitsT>;
+        using simulator_t  = SwitchingForceFieldSimulator<traitsT, integrator_t>;
+
+        auto intg = read_velocity_verlet_integrator<traitsT>(simulator);
+
+        return make_unique<simulator_t>(tstep, sstep, std::move(sys),
+                std::move(ffs), std::move(intg), std::move(obs),
+                std::move(ffidx), std::move(sch));
+    }
+    else if(integrator_type == "UnderdampedLangevin")
+    {
+        MJOLNIR_LOG_NOTICE("Integrator is Underdamped Langevin.");
+        using integrator_t = UnderdampedLangevinIntegrator<traitsT>;
+        using simulator_t  = SwitchingForceFieldSimulator<traitsT, integrator_t>;
+
+        auto intg = read_underdamped_langevin_integrator<traitsT>(simulator);
+
+        return make_unique<simulator_t>(tstep, sstep, std::move(sys),
+                std::move(ffs), std::move(intg), std::move(obs),
+                std::move(ffidx), std::move(sch));
+    }
+    else if(integrator_type == "BAOABLangevin")
+    {
+        MJOLNIR_LOG_NOTICE("Integrator is BAOAB Langevin.");
+        using integrator_t = BAOABLangevinIntegrator<traitsT>;
+        using simulator_t  = SwitchingForceFieldSimulator<traitsT, integrator_t>;
+
+        auto intg = read_BAOAB_langevin_integrator<traitsT>(simulator);
+
+        return make_unique<simulator_t>(tstep, sstep, std::move(sys),
+                std::move(ffs), std::move(intg), std::move(obs),
+                std::move(ffidx), std::move(sch));
+    }
+    else
+    {
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_switching_forcefield_simulator: invalid integrator: ",
+            toml::find(integrator, "type"), "here", {
+            "expected value is one of the following.",
+            "- \"VelocityVerlet\"     : simple and standard Velocity Verlet integrator.",
+            "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
+                                      " based on the Velocity Verlet",
+            "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator"
+            }));
+    }
+}
+
+template<typename traitsT>
+std::unique_ptr<SimulatorBase>
 read_simulator_from_table(const toml::value& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -232,6 +334,11 @@ read_simulator_from_table(const toml::value& root, const toml::value& simulator)
         MJOLNIR_LOG_NOTICE("Simulator type is SimulatedAnnealing.");
         return read_simulated_annealing_simulator<traitsT>(root, simulator);
     }
+    else if(type == "SwitchingForceField")
+    {
+        MJOLNIR_LOG_NOTICE("Simulator type is SwitchingForceField.");
+        return read_switching_forcefield_simulator<traitsT>(root, simulator);
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -240,7 +347,8 @@ read_simulator_from_table(const toml::value& root, const toml::value& simulator)
             "expected value is one of the following.",
             "- \"MolecularDynamcis\"  : standard MD simulation",
             "- \"SteepestDescent\"    : energy minimization by gradient method",
-            "- \"SimulatedAnnealing\" : energy minimization by Annealing"
+            "- \"SimulatedAnnealing\" : energy minimization by Annealing",
+            "- \"SwitchingForceField\": switch forcefield while running simulation"
             }));
     }
 }
