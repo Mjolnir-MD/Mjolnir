@@ -11,7 +11,7 @@ namespace mjolnir
 {
 
 template<typename traitsT>
-std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
+std::unique_ptr<SimulatorBase> read_units(const toml::value& root)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -19,7 +19,7 @@ std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
     using phys_type = physics::constants<real_type>;
     using unit_type = unit::constants<real_type>;
 
-    const auto& units  = toml::find<toml::value>(data,  "units");
+    const auto& units  = toml::find<toml::value>(root,  "units");
     const auto& energy = toml::find<std::string>(units, "energy");
     const auto& length = toml::find<std::string>(units, "length");
     MJOLNIR_LOG_NOTICE("energy unit is [", energy, ']');
@@ -124,14 +124,14 @@ std::unique_ptr<SimulatorBase> read_units(const toml::table& data)
     MJOLNIR_LOG_INFO(u8"phys::ε0 = ", phys_type::eps0(),
                      " [e^2 / (", energy, '*', length, ")]");
 
-    return read_simulator<traitsT>(data);
+    return read_simulator<traitsT>(root);
 }
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<double, UnlimitedBoundary>>(const toml::table& data);
-extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<float,  UnlimitedBoundary>>(const toml::table& data);
-extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::table& data);
-extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::table& data);
+extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<double, UnlimitedBoundary       >>(const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<float,  UnlimitedBoundary       >>(const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value&);
 #endif
 
 } // mjolnir

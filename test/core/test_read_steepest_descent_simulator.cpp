@@ -10,7 +10,7 @@
 
 BOOST_AUTO_TEST_CASE(read_steepest_descent_simulator)
 {
-    mjolnir::LoggerManager::set_default_logger("test_read_simulator.log");
+    mjolnir::LoggerManager::set_default_logger("test_read_steepest_descent_simulator.log");
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(read_steepest_descent_simulator)
             threshold       = 0.0
         )"_toml;
 
-        root["simulator"] = v;
+        root.as_table()["simulator"] = v;
         const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
 

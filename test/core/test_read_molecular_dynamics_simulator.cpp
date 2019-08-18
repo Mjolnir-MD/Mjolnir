@@ -10,7 +10,7 @@
 
 BOOST_AUTO_TEST_CASE(read_newtonian_molecular_dynamics_simulator)
 {
-    mjolnir::LoggerManager::set_default_logger("test_read_simulator.log");
+    mjolnir::LoggerManager::set_default_logger("test_read_molecular_dynamics_simulator.log");
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(read_newtonian_molecular_dynamics_simulator)
             save_step       = 10
         )"_toml;
 
-        root["simulator"] = v;
+        root.as_table()["simulator"] = v;
         const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
 
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(read_newtonian_molecular_dynamics_simulator)
 
 BOOST_AUTO_TEST_CASE(read_langevin_molecular_dynamics_simulator)
 {
-    mjolnir::LoggerManager::set_default_logger("test_read_simulator.log");
+    mjolnir::LoggerManager::set_default_logger("test_read_molecular_dynamics_simulator.log");
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(read_langevin_molecular_dynamics_simulator)
             save_step       = 10
         )"_toml;
 
-        root["simulator"] = v;
+        root.as_table()["simulator"] = v;
         const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
 
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(read_BAOAB_langevin_molecular_dynamics_simulator)
             save_step       = 10
         )"_toml;
 
-        root["simulator"] = v;
+        root.as_table()["simulator"] = v;
         const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
 

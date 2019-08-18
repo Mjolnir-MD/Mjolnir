@@ -52,14 +52,14 @@ read_forcefield_from_table(const toml::value& ff, const std::string& input_path)
 
 template<typename traitsT>
 ForceField<traitsT>
-read_forcefield(const toml::table& root, std::size_t N)
+read_forcefield(const toml::value& root, std::size_t N)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
     if(N != 0) {MJOLNIR_LOG_NOTICE("reading ", N, "-th [[forcefield]].");}
     else       {MJOLNIR_LOG_NOTICE("reading [[forcefield]].");}
 
-    const auto& ffs = toml::find<toml::array>(root, "forcefields", "<root>");
+    const auto& ffs = toml::find<toml::array>(root, "forcefields");
     if(ffs.size() <= N)
     {
         throw_exception<std::out_of_range>("[error] mjolnir::read_forcefield: "
@@ -70,14 +70,14 @@ read_forcefield(const toml::table& root, std::size_t N)
     MJOLNIR_LOG_INFO("using ", N, "-th forcefield");
 
     const auto input_path = read_input_path(root);
-    const auto& ff = toml::get<toml::table>(ffs.at(N));
-    if(ff.count("file_name") == 1)
+    const auto& ff = ffs.at(N);
+    if(ff.as_table().count("file_name") == 1)
     {
-        MJOLNIR_LOG_SCOPE(if(ff.count("file_name") == 1));
+        MJOLNIR_LOG_SCOPE(if(ff.as_table().count("file_name") == 1));
 
         const auto file_name = toml::find<std::string>(ff, "file_name");
         MJOLNIR_LOG_NOTICE("forcefield is defined in ", input_path, file_name);
-        if(ff.size() != 1)
+        if(ff.as_table().size() != 1)
         {
             MJOLNIR_LOG_WARN("[[forcefields]] has \"file_name\" and other keys.");
             MJOLNIR_LOG_WARN("When \"file_name\" is provided, other values are "
@@ -89,14 +89,14 @@ read_forcefield(const toml::table& root, std::size_t N)
         const auto ff_file = toml::parse(input_path + file_name);
         MJOLNIR_LOG_NOTICE(" done.");
 
-        if(ff_file.count("forcefields") != 1)
+        if(ff_file.as_table().count("forcefields") != 1)
         {
             throw_exception<std::out_of_range>("[error] mjolnir::read_forcefields: "
                 "table [forcefields] not found in the toml file\n --> ",
                 input_path, file_name, "\n | the file should define [forcefield] "
                 "table and define values in it.");
         }
-        if(ff_file.at("forcefields").is(toml::value_t::Array))
+        if(ff_file.as_table().at("forcefields").is_array())
         {
             return read_forcefield_from_table<traitsT>(
                 toml::find<toml::array>(ff_file, "forcefields").front(),
@@ -115,10 +115,10 @@ extern template ForceField<SimulatorTraits<float,  UnlimitedBoundary>       > re
 extern template ForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_forcefield_from_table(const toml::value& ff, const std::string& input_path);
 extern template ForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_forcefield_from_table(const toml::value& ff, const std::string& input_path);
 
-extern template ForceField<SimulatorTraits<double, UnlimitedBoundary>       > read_forcefield(const toml::table& root, std::size_t N);
-extern template ForceField<SimulatorTraits<float,  UnlimitedBoundary>       > read_forcefield(const toml::table& root, std::size_t N);
-extern template ForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_forcefield(const toml::table& root, std::size_t N);
-extern template ForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_forcefield(const toml::table& root, std::size_t N);
+extern template ForceField<SimulatorTraits<double, UnlimitedBoundary>       > read_forcefield(const toml::value& root, std::size_t N);
+extern template ForceField<SimulatorTraits<float,  UnlimitedBoundary>       > read_forcefield(const toml::value& root, std::size_t N);
+extern template ForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_forcefield(const toml::value& root, std::size_t N);
+extern template ForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_forcefield(const toml::value& root, std::size_t N);
 #endif
 
 } // mjolnir

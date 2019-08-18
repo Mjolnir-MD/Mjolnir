@@ -59,7 +59,7 @@ read_external_distance_interaction(const toml::value& external, shapeT&& shape)
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
             "mjolnir::read_external_distance_interaction: invalid potential",
-            toml::find<toml::value>(external, "potential"), "here", {
+            toml::find(external, "potential"), "here", {
             "expected value is one of the following.",
             "- \"ExcludedVolumeWall\": repulsive r^12 potential",
             "- \"LennardJonesWall\"  : famous r^12 - r^6 potential",
@@ -135,7 +135,7 @@ read_external_distance_interaction_shape(const toml::value& external)
         {
             throw_exception<std::runtime_error>(toml::format_error("[error] "
                 "mjolnir::read_external_distance_interaction_shape: invalid shape",
-                toml::find<toml::value>(external, "shape"), "expected [+-]?[XYZ]"));
+                toml::find(external, "shape"), "expected [+-]?[XYZ]"));
         }
     }
     else
@@ -189,7 +189,7 @@ read_external_position_restraint_interaction(const toml::value& external)
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
             "mjolnir::read_external_position_restraint_interaction: invalid potential",
-            toml::find<toml::value>(external, "potential"), "here", {
+            toml::find(external, "potential"), "here", {
             "expected value is one of the following.",
             "- \"Harmonic\": very famous `k(x-x0)^2` potential",
             }));
@@ -222,7 +222,7 @@ read_external_interaction(const toml::value& external)
     {
         throw std::runtime_error(toml::format_error("[error] "
             "mjolnir::read_external_interaction: invalid interaction",
-            toml::find<toml::value>(external, "interaction"), "here", {
+            toml::find(external, "interaction"), "here", {
             "expected value is one of the following.",
             "- \"Distance\":          interaction depending on the distance between a particle and a structure",
             "- \"PositionRestraint\": interaction depending on the distance between a particle and a fixed point"
