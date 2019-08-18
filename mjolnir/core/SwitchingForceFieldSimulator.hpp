@@ -48,7 +48,7 @@ class SwitchingForceFieldSimulator final : public SimulatorBase
         std::vector<forcefield_type>&&                     ff,
         integrator_type&&                                  integr,
         observer_type&&                                    obs,
-        std::map<std::string, std::size_t>&&               forcefield_names,
+        std::map<std::string, std::size_t>&&               forcefield_index,
         std::vector<std::pair<std::size_t, std::string>>&& schedule)
         : current_forcefield_(0),
           current_schedule_(0),
@@ -61,7 +61,7 @@ class SwitchingForceFieldSimulator final : public SimulatorBase
           integrator_(std::move(integr)),
           observers_(std::move(obs)),
           forcefields_(std::move(ff)),
-          forcefield_names_(std::move(forcefield_names)),
+          forcefield_index_(std::move(forcefield_index)),
           schedule_(std::move(schedule))
     {}
     ~SwitchingForceFieldSimulator() override = default;
@@ -80,6 +80,16 @@ class SwitchingForceFieldSimulator final : public SimulatorBase
     real_type& time()       noexcept {return time_;}
     real_type  time() const noexcept {return time_;}
 
+    // ------------------------------------------------------------------------
+    // for testing
+
+    std::map<std::string, std::size_t> const&
+    forcefield_index() const noexcept {return forcefield_index_;}
+
+    std::vector<std::pair<std::size_t, std::string>> const&
+    schedule() const noexcept {return schedule_;}
+
+
   private:
 
     std::size_t     current_forcefield_; // index of current ff in forcefields_
@@ -93,7 +103,7 @@ class SwitchingForceFieldSimulator final : public SimulatorBase
     integrator_type integrator_;
     observer_type   observers_;
     std::vector<forcefield_type>                  forcefields_;
-    std::map<std::string, std::size_t>       forcefield_names_;
+    std::map<std::string, std::size_t>       forcefield_index_;
     std::vector<std::pair<std::size_t, std::string>> schedule_;
 };
 
@@ -105,7 +115,7 @@ inline void SwitchingForceFieldSimulator<traitsT, integratorT>::initialize()
     const auto& sch = schedule_.at(current_schedule_);
 
     this->next_switch_step_   = sch.first;
-    this->current_forcefield_ = this->forcefield_names_.at(sch.second);
+    this->current_forcefield_ = this->forcefield_index_.at(sch.second);
 
     auto& ff = this->forcefields_[this->current_forcefield_];
 
@@ -139,7 +149,7 @@ inline bool SwitchingForceFieldSimulator<traitsT, integratorT>::step()
         const auto& sch = schedule_.at(current_schedule_);
 
         this->next_switch_step_   = sch.first;
-        this->current_forcefield_ = forcefield_names_.at(sch.second);
+        this->current_forcefield_ = forcefield_index_.at(sch.second);
 
         // initialize spatial partition (e.g. cell lists) and system.topology
         forcefields_[current_forcefield_].initialize(this->system_);
