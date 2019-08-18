@@ -89,7 +89,6 @@ class SwitchingForceFieldSimulator final : public SimulatorBase
     std::vector<std::pair<std::size_t, std::string>> const&
     schedule() const noexcept {return schedule_;}
 
-
   private:
 
     std::size_t     current_forcefield_; // index of current ff in forcefields_
@@ -142,7 +141,9 @@ inline bool SwitchingForceFieldSimulator<traitsT, integratorT>::step()
     this->time_ = this->step_count_ * integrator_.delta_t();
 
     // the step reaches to the `until`. change forcefield.
-    if(step_count_ == next_switch_step_)
+    // if until == total_step, the next schedule does not exists.
+    // so first check the simulation continues.
+    if(step_count_ < total_step_ && step_count_ == next_switch_step_)
     {
         this->current_schedule_  += 1;
 
