@@ -24,12 +24,18 @@ read_molecular_dynamics_simulator(
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
-    const auto& integrator     = toml::find(simulator, "integrator");
-    const auto integrator_type = toml::find<std::string>(integrator, "type");
     const auto tstep      = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep      = toml::find<std::size_t>(simulator, "save_step");
     MJOLNIR_LOG_NOTICE("total step is ", tstep);
     MJOLNIR_LOG_NOTICE("save  step is ", sstep);
+
+    // later move them, so non-const
+    auto sys = read_system    <traitsT>(root, 0);
+    auto obs = read_observer  <traitsT>(root);
+    auto ff  = read_forcefield<traitsT>(root, 0);
+
+    const auto& integrator     = toml::find(simulator, "integrator");
+    const auto integrator_type = toml::find<std::string>(integrator, "type");
 
     if(integrator_type == "VelocityVerlet")
     {
@@ -37,12 +43,10 @@ read_molecular_dynamics_simulator(
         using integrator_t = VelocityVerletIntegrator<traitsT>;
         using simulator_t  = MolecularDynamicsSimulator<traitsT, integrator_t>;
 
-        return make_unique<simulator_t>(
-                tstep, sstep,
-                read_system<traitsT>(root, 0),
-                read_forcefield<traitsT>(root, 0),
-                read_velocity_verlet_integrator<traitsT>(simulator),
-                read_observer<traitsT>(root));
+        auto intg = read_velocity_verlet_integrator<traitsT>(simulator);
+
+        return make_unique<simulator_t>(tstep, sstep, std::move(sys),
+                std::move(ff), std::move(intg), std::move(obs));
     }
     else if(integrator_type == "UnderdampedLangevin")
     {
@@ -50,12 +54,10 @@ read_molecular_dynamics_simulator(
         using integrator_t = UnderdampedLangevinIntegrator<traitsT>;
         using simulator_t  = MolecularDynamicsSimulator<traitsT, integrator_t>;
 
-        return make_unique<simulator_t>(
-                tstep, sstep,
-                read_system<traitsT>(root, 0),
-                read_forcefield<traitsT>(root, 0),
-                read_underdamped_langevin_integrator<traitsT>(simulator),
-                read_observer<traitsT>(root));
+        auto intg = read_underdamped_langevin_integrator<traitsT>(simulator);
+
+        return make_unique<simulator_t>(tstep, sstep, std::move(sys),
+                std::move(ff), std::move(intg), std::move(obs));
     }
     else if(integrator_type == "BAOABLangevin")
     {
@@ -63,12 +65,10 @@ read_molecular_dynamics_simulator(
         using integrator_t = BAOABLangevinIntegrator<traitsT>;
         using simulator_t  = MolecularDynamicsSimulator<traitsT, integrator_t>;
 
-        return make_unique<simulator_t>(
-                tstep, sstep,
-                read_system<traitsT>(root, 0),
-                read_forcefield<traitsT>(root, 0),
-                read_BAOAB_langevin_integrator<traitsT>(simulator),
-                read_observer<traitsT>(root));
+        auto intg = read_BAOAB_langevin_integrator<traitsT>(simulator);
+
+        return make_unique<simulator_t>(tstep, sstep, std::move(sys),
+                std::move(ff), std::move(intg), std::move(obs));
     }
     else
     {
@@ -78,7 +78,8 @@ read_molecular_dynamics_simulator(
             "expected value is one of the following.",
             "- \"VelocityVerlet\"     : simple and standard Velocity Verlet integrator.",
             "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
-                                      " based on the Velocity Verlet"
+                                      " based on the Velocity Verlet",
+            "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator"
             }));
     }
 }
@@ -103,10 +104,8 @@ read_steepest_descent_simulator(
     MJOLNIR_LOG_NOTICE("delta      is ", delta);
     MJOLNIR_LOG_NOTICE("threshold  is ", threshold);
 
-    return make_unique<simulator_type>(
-            delta, threshold, step_lim, save_step,
-            read_system<traitsT>(root, 0),
-            read_forcefield<traitsT>(root, 0),
+    return make_unique<simulator_type>(delta, threshold, step_lim, save_step,
+            read_system<traitsT>(root, 0), read_forcefield<traitsT>(root, 0),
             read_observer<traitsT>(root));
 }
 
@@ -119,8 +118,6 @@ read_simulated_annealing_simulator(
     MJOLNIR_LOG_FUNCTION();
     using real_type   = typename traitsT::real_type;
 
-    const auto& integrator     = toml::find(simulator, "integrator");
-    const auto integrator_type = toml::find<std::string>(integrator, "type");
     const auto tstep      = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep      = toml::find<std::size_t>(simulator, "save_step");
 
@@ -137,49 +134,58 @@ read_simulated_annealing_simulator(
     MJOLNIR_LOG_NOTICE("temperature to   ", schedule_end);
     MJOLNIR_LOG_INFO("update temperature for each ", each_step, " steps");
 
+    const auto& integrator     = toml::find(simulator, "integrator");
+    const auto integrator_type = toml::find<std::string>(integrator, "type");
+
+    auto sys = read_system    <traitsT>(root, 0);
+    auto ff  = read_forcefield<traitsT>(root, 0);
+    auto obs = read_observer  <traitsT>(root);
+
     if(schedule_type == "linear")
     {
         MJOLNIR_LOG_NOTICE("temparing schedule is linear.");
+        auto sch = LinearScheduler<real_type>(schedule_begin, schedule_end);
+
         if(integrator_type == "VelocityVerlet")
         {
             MJOLNIR_LOG_ERROR("Simulated Annealing + NVE Newtonian");
             MJOLNIR_LOG_ERROR("NVE Newtonian doesn't have temperature control.");
+
             throw_exception<std::runtime_error>(toml::format_error("[error] "
                 "mjolnir::read_simulated_annealing_simulator: invalid integrator: ",
                 toml::find(integrator, "type"), "here", {
                 "Newtonian Integrator does not controls temperature."
                 "expected value is one of the following.",
                 "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
-                                          " based on the Velocity Verlet"
+                                          " based on the Velocity Verlet",
+                "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator"
                 }));
         }
         else if(integrator_type == "UnderdampedLangevin")
         {
+            MJOLNIR_LOG_NOTICE("Integrator is Underdamped Langevin.");
             using integrator_t = UnderdampedLangevinIntegrator<traitsT>;
             using simulator_t  = SimulatedAnnealingSimulator<
                 traitsT, integrator_t, LinearScheduler>;
 
-            MJOLNIR_LOG_NOTICE("Integrator is Underdamped Langevin.");
+            auto intg = read_underdamped_langevin_integrator<traitsT>(simulator);
+
             return make_unique<simulator_t>(tstep, sstep, each_step,
-                    LinearScheduler<real_type>(schedule_begin, schedule_end),
-                    read_system<traitsT>(root, 0),
-                    read_forcefield<traitsT>(root, 0),
-                    read_underdamped_langevin_integrator<traitsT>(simulator),
-                    read_observer<traitsT>(root));
+                    std::move(sch),  std::move(sys), std::move(ff),
+                    std::move(intg), std::move(obs));
         }
         else if(integrator_type == "BAOABLangevin")
         {
+            MJOLNIR_LOG_NOTICE("Integrator is BAOAB Langevin.");
             using integrator_t = BAOABLangevinIntegrator<traitsT>;
             using simulator_t  = SimulatedAnnealingSimulator<
                 traitsT, integrator_t, LinearScheduler>;
 
-            MJOLNIR_LOG_NOTICE("Integrator is BAOAB Langevin.");
+            auto intg = read_BAOAB_langevin_integrator<traitsT>(simulator);
+
             return make_unique<simulator_t>(tstep, sstep, each_step,
-                    LinearScheduler<real_type>(schedule_begin, schedule_end),
-                    read_system<traitsT>(root, 0),
-                    read_forcefield<traitsT>(root, 0),
-                    read_BAOAB_langevin_integrator<traitsT>(simulator),
-                    read_observer<traitsT>(root));
+                    std::move(sch),  std::move(sys), std::move(ff),
+                    std::move(intg), std::move(obs));
         }
         else
         {
@@ -198,7 +204,7 @@ read_simulated_annealing_simulator(
             "mjolnir::read_simulated_annealing_simulator: invalid schedule.type",
             toml::find<toml::value>(schedule, "type"), "here", {
             "expected value is one of the following.",
-            "- \"linear\"     : simple linear temperature scheduling",
+            "- \"linear\"     : simple linear temperature scheduling"
             }));
     }
 }
@@ -213,17 +219,17 @@ read_simulator_from_table(const toml::table& root, const toml::value& simulator)
     const auto type = toml::find<std::string>(simulator, "type");
     if(type == "MolecularDynamics")
     {
-        MJOLNIR_LOG_NOTICE("Simulator type is Molecular Dynamics.");
+        MJOLNIR_LOG_NOTICE("Simulator type is MolecularDynamics.");
         return read_molecular_dynamics_simulator<traitsT>(root, simulator);
     }
     else if(type == "SteepestDescent")
     {
-        MJOLNIR_LOG_NOTICE("Simulator type is Steepest Descent.");
+        MJOLNIR_LOG_NOTICE("Simulator type is SteepestDescent.");
         return read_steepest_descent_simulator<traitsT>(root, simulator);
     }
     else if(type == "SimulatedAnnealing")
     {
-        MJOLNIR_LOG_NOTICE("Simulator type is Simulated Annealing.");
+        MJOLNIR_LOG_NOTICE("Simulator type is SimulatedAnnealing.");
         return read_simulated_annealing_simulator<traitsT>(root, simulator);
     }
     else
@@ -232,9 +238,9 @@ read_simulator_from_table(const toml::table& root, const toml::value& simulator)
             "mjolnir::read_simulator: invalid type",
             toml::find<toml::value>(simulator, "type"), "here", {
             "expected value is one of the following.",
-            "- \"MolecularDynamcis\" : standard MD simulation",
-            "- \"SteepestDescent\"   : energy minimization by gradient method",
-            "- \"SimulatedAnnealing\": energy minimization by Annealing",
+            "- \"MolecularDynamcis\"  : standard MD simulation",
+            "- \"SteepestDescent\"    : energy minimization by gradient method",
+            "- \"SimulatedAnnealing\" : energy minimization by Annealing"
             }));
     }
 }
