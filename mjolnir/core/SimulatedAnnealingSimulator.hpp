@@ -71,8 +71,8 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
     system_type&       system()       noexcept {return system_;}
     system_type const& system() const noexcept {return system_;}
 
-    ForceField<traitsT>&       forcefields()       noexcept {return ff_;}
-    ForceField<traitsT> const& forcefields() const noexcept {return ff_;}
+    forcefield_type&       forcefields()       noexcept {return ff_;}
+    forcefield_type const& forcefields() const noexcept {return ff_;}
 
     real_type& time()       noexcept {return time_;}
     real_type  time() const noexcept {return time_;}

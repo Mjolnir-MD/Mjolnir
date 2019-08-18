@@ -40,8 +40,8 @@ class SteepestDescentSimulator final : public SimulatorBase
     system_type&       system()       noexcept {return system_;}
     system_type const& system() const noexcept {return system_;}
 
-    ForceField<traitsT>&       forcefields()       noexcept {return ff_;}
-    ForceField<traitsT> const& forcefields() const noexcept {return ff_;}
+    forcefield_type&       forcefields()       noexcept {return ff_;}
+    forcefield_type const& forcefields() const noexcept {return ff_;}
 
   protected:
     real_type       h_;
