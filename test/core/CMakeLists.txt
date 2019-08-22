@@ -29,6 +29,7 @@ set(TEST_NAMES
     test_axis_aligned_plane_shape
 
     test_bond_length_interaction
+    test_bond_length_gocontact_interaction
     test_bond_angle_interaction
     test_bond_angle_utility_function
     test_dihedral_angle_interaction
