@@ -30,9 +30,7 @@ set(TEST_NAMES
 
     test_bond_length_interaction
     test_bond_angle_interaction
-    test_bond_angle_utility_function
     test_dihedral_angle_interaction
-    test_dihedral_angle_utility_function
     test_contact_interaction
     test_3spn2_base_stacking_interaction
     test_3spn2_base_base_interaction
