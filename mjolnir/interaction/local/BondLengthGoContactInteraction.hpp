@@ -52,7 +52,7 @@ class BondLengthInteraction<
                 sys.adjust_direction(sys.position(idx1) - sys.position(idx0));
 
             const real_type len2  = math::length_sq(dpos);
-            if(pot.cutoff() * pot.cutoff() < len2)
+            if(pot.cutoff() * pot.cutoff() <= len2)
             {
                 continue;
             }
