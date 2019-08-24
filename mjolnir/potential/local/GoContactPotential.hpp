@@ -15,9 +15,7 @@ class GoContactPotential
 {
   public:
     using real_type = realT;
-
-    static constexpr real_type cutoff_ratio  = 2.5;
-    static constexpr real_type rcutoff_ratio = 1. / cutoff_ratio;
+    static constexpr real_type cutoff_ratio() {return 2.5;}
 
   public:
     GoContactPotential(const real_type e, const real_type v0) noexcept
@@ -27,30 +25,25 @@ class GoContactPotential
 
     real_type potential(const real_type v) const noexcept
     {
+        if(this->cutoff() <= v) {return real_type(0.0);}
+
         const real_type rd   = this->v0_ / v;
-        if(rd < rcutoff_ratio){return real_type(0.0);}
+        const real_type rd3  = rd  * rd  * rd;
+        const real_type rd9  = rd3 * rd3 * rd3;
 
-        const real_type rd2  = rd  * rd;
-        const real_type rd4  = rd2 * rd2;
-        const real_type rd8  = rd4 * rd4;
-        const real_type rd10 = rd8 * rd2;
-        const real_type rd12 = rd8 * rd4;
-
-        return this->epsilon_ * (5 * rd12 - 6 * rd10);
+        return this->epsilon_ * (5 * rd9 * rd3 - 6 * rd9 * rd);
     }
 
     real_type derivative(const real_type v) const noexcept
     {
+        if(this->cutoff() <= v) {return real_type(0.0);}
+
         const real_type invr = real_type(1.0) / v;
         const real_type rd   = this->v0_ * invr;
-        if(rd < rcutoff_ratio){return real_type(0.0);}
+        const real_type rd3  = rd  * rd  * rd;
+        const real_type rd9  = rd3 * rd3 * rd3;
 
-        const real_type rd2  = rd  * rd;
-        const real_type rd4  = rd2 * rd2;
-        const real_type rd8  = rd4 * rd4;
-        const real_type rd10 = rd8 * rd2;
-        const real_type rd12 = rd8 * rd4;
-        return this->epsilon_ * 60 * (rd10 - rd12) * invr;
+        return this->epsilon_ * 60 * (rd9 * rd - rd9 * rd3) * invr;
     }
 
     template<typename T>
@@ -61,21 +54,13 @@ class GoContactPotential
     real_type k()      const noexcept {return epsilon_;}
     real_type v0()     const noexcept {return v0_;}
 
-    real_type cutoff() const noexcept {return this->v0_ * cutoff_ratio;}
+    real_type cutoff() const noexcept {return this->v0_ * cutoff_ratio();}
 
   private:
 
     real_type epsilon_;
     real_type v0_;
 };
-
-template<typename realT>
-constexpr typename GoContactPotential<realT>::real_type
-GoContactPotential<realT>::cutoff_ratio;
-
-template<typename realT>
-constexpr typename GoContactPotential<realT>::real_type
-GoContactPotential<realT>::rcutoff_ratio;
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template class GoContactPotential<double>;
