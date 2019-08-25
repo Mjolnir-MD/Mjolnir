@@ -1,28 +1,23 @@
-#ifndef MJOLNIR_INTERACTION_CONTACT_INTERACTION_HPP
-#define MJOLNIR_INTERACTION_CONTACT_INTERACTION_HPP
-#include <mjolnir/core/LocalInteractionBase.hpp>
-#include <mjolnir/math/math.hpp>
-#include <mjolnir/util/string.hpp>
-#include <mjolnir/util/logger.hpp>
-#include <cmath>
-#include <iostream>
+#ifndef MJOLNIR_INTERACTION_GO_CONTACT_INTERACTION_HPP
+#define MJOLNIR_INTERACTION_GO_CONTACT_INTERACTION_HPP
+#include <mjolnir/interaction/local/ContactInteraction.hpp>
+#include <mjolnir/potential/local/GoContactPotential.hpp>
 
 namespace mjolnir
 {
 
-// ContactInteraction is basically the same as BondLengthInteraction. The only
-// difference is that it has a kind of "Neighbor List" to skip broken contacts.
-// BondLengthInteraction considers that all the interactions are kept within
-// the cutoff range (if a potential has a cutoff). Contrary, ContactInteraction
-// considers any of the interactions occasionally become distant than the cutoff
-// range. It becomes faster when a number of the contacts are not formed
-// throughout the simulation time.
-template<typename traitsT, typename potentialT>
-class ContactInteraction final : public LocalInteractionBase<traitsT>
+// A specialization of ContactInteraction for GoContact.
+//
+// Force calculation of GoContact can be optimized when explicitly specialized.
+template<typename realT, template<typename, typename> class boundaryT>
+class ContactInteraction<
+    SimulatorTraits<realT, boundaryT>,
+    GoContactPotential<realT>
+    > final : public LocalInteractionBase<SimulatorTraits<realT, boundaryT>>
 {
   public:
-    using traits_type          = traitsT;
-    using potential_type       = potentialT;
+    using traits_type          = SimulatorTraits<realT, boundaryT>;
+    using potential_type       = GoContactPotential<realT>;
     using base_type            = LocalInteractionBase<traits_type>;
     using real_type            = typename base_type::real_type;
     using coordinate_type      = typename base_type::coordinate_type;
@@ -31,7 +26,7 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
     using connection_kind_type = typename base_type::connection_kind_type;
 
     using indices_type         = std::array<std::size_t, 2>;
-    using potential_index_pair = std::pair<indices_type, potentialT>;
+    using potential_index_pair = std::pair<indices_type, potential_type>;
     using container_type       = std::vector<potential_index_pair>;
     using iterator             = typename container_type::iterator;
     using const_iterator       = typename container_type::const_iterator;
@@ -50,8 +45,58 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
     {}
     ~ContactInteraction() override = default;
 
-    void      calc_force (system_type&)       const noexcept override;
-    real_type calc_energy(const system_type&) const noexcept override;
+    void calc_force(system_type& sys) const noexcept override
+    {
+        for(const std::size_t active_contact : active_contacts_)
+        {
+            const auto& idxp = this->potentials_[active_contact];
+
+            const std::size_t idx0 = idxp.first[0];
+            const std::size_t idx1 = idxp.first[1];
+            const auto&       pot  = idxp.second;
+
+            const auto dpos =
+                sys.adjust_direction(sys.position(idx1) - sys.position(idx0));
+
+            const real_type len2  = math::length_sq(dpos);
+            if(pot.cutoff() * pot.cutoff() <= len2)
+            {
+                continue;
+            }
+
+            const real_type rd2   = real_type(1) / len2;
+            const real_type rd6   = rd2 * rd2 * rd2;
+            const real_type rd12  = rd6 * rd6;
+            const real_type rd14  = rd12 * rd2;
+
+            const real_type v0    = pot.v0();
+            const real_type v0_3  = v0   * v0   * v0;
+            const real_type v0_9  = v0_3 * v0_3 * v0_3;
+            const real_type v0_10 = v0_9 * v0;
+            const real_type v0_12 = v0_9 * v0_3;
+
+            //   60k * [(r0/r)^10  - (r0/r)^12] / r * (dr / r)
+            // = 60k * [r0^10/r^12 - r0^12/r^14]    *  dr
+
+            const auto coef = -60 * pot.k() * (v0_10 * rd12 - v0_12 * rd14);
+            const auto f    = coef * dpos;
+            sys.force(idx0) -= f;
+            sys.force(idx1) += f;
+        }
+        return;
+    }
+
+    real_type calc_energy(const system_type& sys) const noexcept override
+    {
+        real_type E = 0.0;
+        for(const std::size_t active_contact : active_contacts_)
+        {
+            const auto& idxp = this->potentials_[active_contact];
+            E += idxp.second.potential(math::length(sys.adjust_direction(
+                    sys.position(idxp.first[1]) - sys.position(idxp.first[0]))));
+        }
+        return E;
+    }
 
     void initialize(const system_type& sys) override
     {
@@ -98,7 +143,18 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
     std::string name() const override
     {return "Contact:"_s + potential_type::name();}
 
-    void write_topology(topology_type&) const override;
+    void write_topology(topology_type& topol) const override
+    {
+        if(this->kind_.empty() || this->kind_ == "none") {return;}
+
+        for(const auto& idxp : this->potentials_)
+        {
+            const auto i = idxp.first[0];
+            const auto j = idxp.first[1];
+            topol.add_connection(i, j, this->kind_);
+        }
+        return;
+    }
 
     container_type const& potentials() const noexcept {return potentials_;}
     container_type&       potentials()       noexcept {return potentials_;}
@@ -142,80 +198,20 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
     std::vector<std::size_t> active_contacts_;
 };
 
-template<typename traitsT, typename potentialT>
-void ContactInteraction<traitsT, potentialT>::calc_force(
-        system_type& sys) const noexcept
-{
-    for(const std::size_t active_contact : active_contacts_)
-    {
-        const auto& idxp = this->potentials_[active_contact];
-
-        const std::size_t idx0 = idxp.first[0];
-        const std::size_t idx1 = idxp.first[1];
-
-        const auto dpos =
-            sys.adjust_direction(sys.position(idx1) - sys.position(idx0));
-
-        const real_type len2 = math::length_sq(dpos); // l^2
-        const real_type rlen = math::rsqrt(len2);     // 1/l
-        const real_type force = -1 * idxp.second.derivative(len2 * rlen);
-        // here, L^2 * (1 / L) = L.
-
-        const coordinate_type f = dpos * (force * rlen);
-        sys.force(idx0) -= f;
-        sys.force(idx1) += f;
-    }
-    return;
-}
-
-template<typename traitsT, typename potentialT>
-typename ContactInteraction<traitsT, potentialT>::real_type
-ContactInteraction<traitsT, potentialT>::calc_energy(
-        const system_type& sys) const noexcept
-{
-    real_type E = 0.0;
-    for(const std::size_t active_contact : active_contacts_)
-    {
-        const auto& idxp = this->potentials_[active_contact];
-        E += idxp.second.potential(math::length(sys.adjust_direction(
-                sys.position(idxp.first[1]) - sys.position(idxp.first[0]))));
-    }
-    return E;
-}
-
-template<typename traitsT, typename potentialT>
-void ContactInteraction<traitsT, potentialT>::write_topology(
-        topology_type& topol) const
-{
-    if(this->kind_.empty() || this->kind_ == "none") {return;}
-
-    for(const auto& idxp : this->potentials_)
-    {
-        const auto i = idxp.first[0];
-        const auto j = idxp.first[1];
-        topol.add_connection(i, j, this->kind_);
-    }
-    return;
-}
-
 } // mjolnir
-
-#include <mjolnir/interaction/local/GoContactInteraction.hpp>
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/potential/local/GoContactPotential.hpp>
-#include <mjolnir/potential/local/GaussianPotential.hpp>
 
 namespace mjolnir
 {
 
-// gaussian
-extern template class ContactInteraction<SimulatorTraits<double, UnlimitedBoundary>, GaussianPotential<double>>;
-extern template class ContactInteraction<SimulatorTraits<float,  UnlimitedBoundary>, GaussianPotential<float> >;
-extern template class ContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>>;
-extern template class ContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> >;
+// go-contact
+extern template class ContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, GoContactPotential<double>>;
+extern template class ContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, GoContactPotential<float> >;
+extern template class ContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GoContactPotential<double>>;
+extern template class ContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GoContactPotential<float> >;
 
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD

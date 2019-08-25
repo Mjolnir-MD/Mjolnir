@@ -37,7 +37,16 @@ class EnergyObserver final : public ObserverBase<traitsT>
         std::ofstream ofs(this->file_name_, std::ios::app);
         ofs << "# unit of length : " << phys_constants::length_unit()
             << ", unit of energy : " << phys_constants::energy_unit() << '\n';
-        ofs << "# timestep  " << ff.list_energy_name() << " kinetic_energy\n";
+        ofs << "# timestep  ";
+
+        const auto names = ff.list_energy_name();
+        this->widths_.reserve(names.size());
+        for(std::size_t i=0; i<names.size(); ++i)
+        {
+            ofs << names.at(i) << ' ';
+            this->widths_.push_back(names.at(i).size());
+        }
+        ofs << " kinetic_energy\n";
         return;
     }
 
@@ -49,8 +58,16 @@ class EnergyObserver final : public ObserverBase<traitsT>
         // if the width exceeds, operator<<(std::ostream, std::string) ignores
         // ostream::width and outputs whole string.
         ofs << std::setw(11) << std::left << std::to_string(step) << ' ';
-        ofs << ff.dump_energy(sys) << ' ';
-        ofs << std::setw(14) << std::right << this->calc_kinetic_energy(sys) << '\n';
+
+        const auto energies = ff.dump_energy(sys);
+        for(std::size_t i=0; i<energies.size(); ++i)
+        {
+            ofs << std::setw(this->widths_.at(i)) << std::fixed
+                << std::right << energies.at(i) << ' ';
+        }
+        ofs << std::setw(14) << std::right << this->calc_kinetic_energy(sys)
+            << '\n';
+
         return;
     }
 
@@ -87,6 +104,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
 
     std::string prefix_;
     std::string file_name_;
+    std::vector<std::size_t> widths_; // column width to format energy values
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD
