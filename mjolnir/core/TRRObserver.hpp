@@ -53,6 +53,12 @@ class TRRObserver final : public ObserverBase<traitsT>
             MJOLNIR_LOG_NOTICE("The resulting .trr file might look weird because");
             MJOLNIR_LOG_NOTICE("of the unit conversion (normally [nm] is used)"  );
         }
+        return;
+    }
+
+    void update(const std::size_t,  const real_type,
+                const system_type&, const forcefield_type&) override
+    {
         return; // do nothing.
     }
 

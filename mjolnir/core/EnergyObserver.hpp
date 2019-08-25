@@ -50,6 +50,23 @@ class EnergyObserver final : public ObserverBase<traitsT>
         return;
     }
 
+    // update column names and widths if forcefield changed.
+    void update(const std::size_t,  const real_type,
+                const system_type&, const forcefield_type& ff) override
+    {
+        std::ofstream ofs(this->file_name_, std::ios::app);
+        ofs << "# timestep  ";
+        const auto names = ff.list_energy_name();
+        this->widths_.reserve(names.size());
+        for(std::size_t i=0; i<names.size(); ++i)
+        {
+            ofs << names.at(i) << ' ';
+            this->widths_.push_back(names.at(i).size());
+        }
+        ofs << " kinetic_energy\n";
+        return;
+    }
+
     void output(const std::size_t step, const real_type,
                 const system_type& sys, const forcefield_type& ff) override
     {
