@@ -134,6 +134,8 @@ void BondLengthInteraction<traitsT, potentialT>::write_topology(
 
 } // mjolnir
 
+#include <mjolnir/interaction/local/BondLengthGoContactInteraction.hpp>
+
 #ifdef MJOLNIR_SEPARATE_BUILD
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
@@ -145,20 +147,17 @@ namespace mjolnir
 {
 
 // harmonic
-extern template class BondLengthInteraction<SimulatorTraits<double, UnlimitedBoundary>, HarmonicPotential<double>>;
-extern template class BondLengthInteraction<SimulatorTraits<float,  UnlimitedBoundary>, HarmonicPotential<float> >;
+extern template class BondLengthInteraction<SimulatorTraits<double, UnlimitedBoundary       >, HarmonicPotential<double>>;
+extern template class BondLengthInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, HarmonicPotential<float> >;
 extern template class BondLengthInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, HarmonicPotential<double>>;
 extern template class BondLengthInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, HarmonicPotential<float> >;
 
-// go-contact
-extern template class BondLengthInteraction<SimulatorTraits<double, UnlimitedBoundary>, GoContactPotential<double>>;
-extern template class BondLengthInteraction<SimulatorTraits<float,  UnlimitedBoundary>, GoContactPotential<float> >;
-extern template class BondLengthInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GoContactPotential<double>>;
-extern template class BondLengthInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GoContactPotential<float> >;
+// The case of GoContactPotential is manually specialized in BondLengthGoContactInteraction.hpp.
+// DO NOT specialize it here.
 
 // gaussian
-extern template class BondLengthInteraction<SimulatorTraits<double, UnlimitedBoundary>, GaussianPotential<double>>;
-extern template class BondLengthInteraction<SimulatorTraits<float,  UnlimitedBoundary>, GaussianPotential<float> >;
+extern template class BondLengthInteraction<SimulatorTraits<double, UnlimitedBoundary       >, GaussianPotential<double>>;
+extern template class BondLengthInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, GaussianPotential<float> >;
 extern template class BondLengthInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>>;
 extern template class BondLengthInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> >;
 
