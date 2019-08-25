@@ -94,35 +94,35 @@ class LocalForceField
         return energy;
     }
 
-    // TODO simplify
-    std::string list_energy() const
+    // basically, it is called only once at the begenning of a simulation.
+    // this function do a lot of stuff, such as memory allocation, but it does
+    // not affect runtime efficiency so much.
+    std::vector<std::string> list_energy() const
     {
-        std::string retval;
+        std::vector<std::string> retval;
         for(const auto& i : interactions_)
         {
             if(i->name().size() > 5 && i->name().substr(0, 5) == "Dummy")
             {
                 continue;
             }
-            retval += ' ';
-            retval += i->name();
+            retval.push_back(i->name());
         }
         return retval;
     }
 
-    std::string dump_energy(const system_type& sys) const
+    std::vector<real_type> dump_energy(const system_type& sys) const
     {
-        std::ostringstream oss;
+        std::vector<real_type> retval;
         for(const auto& i : interactions_)
         {
             if(i->name().size() > 5 && i->name().substr(0, 5) == "Dummy")
             {
                 continue;
             }
-            oss << ' ' << std::setw(i->name().size()) << std::fixed
-                << std::right << i->calc_energy(sys);
+            retval.push_back(i->calc_energy(sys));
         }
-        return oss.str();
+        return retval;
     }
 
     bool           empty()  const noexcept {return interactions_.empty();}
