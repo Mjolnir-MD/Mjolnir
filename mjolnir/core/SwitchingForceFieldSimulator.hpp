@@ -137,6 +137,7 @@ inline bool SwitchingForceFieldSimulator<traitsT, integratorT>::step()
     }
 
     integrator_.step(this->time_, system_, forcefields_[current_forcefield_]);
+
     ++step_count_;
     this->time_ = this->step_count_ * integrator_.delta_t();
 
@@ -146,7 +147,6 @@ inline bool SwitchingForceFieldSimulator<traitsT, integratorT>::step()
     if(step_count_ < total_step_ && step_count_ == next_switch_step_)
     {
         this->current_schedule_  += 1;
-
         const auto& sch = schedule_.at(current_schedule_);
 
         this->next_switch_step_   = sch.first;
@@ -157,8 +157,10 @@ inline bool SwitchingForceFieldSimulator<traitsT, integratorT>::step()
         // initialize forces with the current forcefield. the previous forces
         // will be zero-cleared. but velocities are kept.
         integrator_.initialize(this->system_, forcefields_[current_forcefield_]);
-        // Observers does not need to be initialized because observer::init()
-        // initializes the file, such as header information.
+        // Observers need to be updated because forcefield changed.
+        // especially, EnergyObserver needed to be updated.
+        observers_.update(this->step_count_, this->integrator_.delta_t(),
+                          this->system_, forcefields_[current_forcefield_]);
     }
     return step_count_ < total_step_;
 }
