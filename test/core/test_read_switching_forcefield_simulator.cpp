@@ -66,6 +66,8 @@ BOOST_AUTO_TEST_CASE(read_newtonian_switching_forcefield_simulator)
         traits_type, mjolnir::VelocityVerletIntegrator<traits_type>>*>(sim.get());
     BOOST_TEST(static_cast<bool>(mdsim));
 
+    BOOST_TEST(mdsim->forcefields().size() == 2u);
+
     BOOST_TEST(mdsim->forcefield_index().at("open" ) == 0u);
     BOOST_TEST(mdsim->forcefield_index().at("close") == 1u);
 
@@ -163,6 +165,8 @@ BOOST_AUTO_TEST_CASE(read_underdamped_langevin_switching_forcefield_simulator)
     const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
         traits_type, mjolnir::UnderdampedLangevinIntegrator<traits_type>>*>(sim.get());
     BOOST_TEST(static_cast<bool>(mdsim));
+
+    BOOST_TEST(mdsim->forcefields().size() == 2u);
 
     BOOST_TEST(mdsim->forcefield_index().at("open" ) == 0u);
     BOOST_TEST(mdsim->forcefield_index().at("close") == 1u);
@@ -264,6 +268,8 @@ BOOST_AUTO_TEST_CASE(read_BAOAB_langevin_switching_forcefield_simulator)
     const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
         traits_type, mjolnir::BAOABLangevinIntegrator<traits_type>>*>(sim.get());
     BOOST_TEST(static_cast<bool>(mdsim));
+
+    BOOST_TEST(mdsim->forcefields().size() == 2u);
 
     BOOST_TEST(mdsim->forcefield_index().at("open" ) == 0u);
     BOOST_TEST(mdsim->forcefield_index().at("close") == 1u);
