@@ -224,8 +224,8 @@ read_switching_forcefield_simulator(
     MJOLNIR_LOG_NOTICE("save  step is ", sstep);
 
     // later move them, so non-const
-    auto sys = read_system    <traitsT>(root, 0);
-    auto obs = read_observer  <traitsT>(root);
+    auto sys = read_system  <traitsT>(root, 0);
+    auto obs = read_observer<traitsT>(root);
 
     // ------------------------------------------------------------------------
     // read schedule
@@ -254,6 +254,20 @@ read_switching_forcefield_simulator(
         MJOLNIR_LOG_NOTICE(i, "-th forcefield \"", name, "\" found.");
     }
     MJOLNIR_LOG_NOTICE("forcefields = ", ffidx);
+
+    // ------------------------------------------------------------------------
+    // check consistency
+    for(const auto& v : schedule)
+    {
+        const auto& ff_name = toml::find<std::string>(v, "forcefield");
+        if(ffidx.count(ff_name) == 0)
+        {
+            MJOLNIR_LOG_ERROR("forcefield \"", ff_name, "\" does not exist.");
+            throw std::runtime_error(toml::format_error("[error] "
+                    "forcefield is not defined.", toml::find(v, "forcefield"),
+                    "this is not defined in [[forcefields]]"));
+        }
+    }
 
     // ------------------------------------------------------------------------
     // read integrator and then return simulator
