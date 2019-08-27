@@ -127,6 +127,9 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
     void make(neighbor_list_type& neighbors,
               const system_type& sys, const potential_type& pot) override
     {
+	MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+	MJOLNIR_LOG_FUNCTION_DEBUG();
+
         // `participants` is a list that contains indices of particles that are
         // related to the potential.
         const auto& participants = pot.participants();
