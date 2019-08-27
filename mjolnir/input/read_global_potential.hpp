@@ -124,6 +124,51 @@ read_ignored_group(const toml::value& ignore)
     return IgnoreGroup<group_id_type>(ignores);
 }
 
+template<typename parameterT>
+void check_parameter_overlap(const toml::value& env, const toml::array& setting,
+        std::vector<std::pair<std::size_t, parameterT>>& parameters)
+{
+    if(parameters.empty()) {return ;}
+
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using value_type = std::pair<std::size_t, parameterT>;
+    std::sort(parameters.begin(), parameters.end(),
+            [](const value_type& lhs, const value_type& rhs) noexcept -> bool {
+                return lhs.first < rhs.first;
+            });
+    const auto overlap = std::adjacent_find(parameters.begin(), parameters.end(),
+            [](const value_type& lhs, const value_type& rhs) noexcept -> bool {
+                return lhs.first == rhs.first;
+            });
+
+    if(overlap != parameters.end())
+    {
+        const std::size_t overlapped_idx = overlap->first;
+        MJOLNIR_LOG_ERROR("parameter for ", overlapped_idx, " defined twice");
+
+        // find overlapped one
+        const auto overlapped1 = std::find_if(setting.begin(), setting.end(),
+            [overlapped_idx, &env](const toml::value& v) -> bool {
+                return find_parameter<std::size_t>(v, env, "index") == overlapped_idx;
+            });
+
+        assert(overlapped1 != setting.end());
+
+        const auto overlapped2 = std::find_if(std::next(overlapped1), setting.end(),
+            [overlapped_idx, &env](const toml::value& v) -> bool {
+                return find_parameter<std::size_t>(v, env, "index") == overlapped_idx;
+            });
+
+        assert(overlapped2 != setting.end());
+
+        throw_exception<std::runtime_error>(toml::format_error(
+            "[error] parameter index is not unique",
+            *overlapped1, "this defined twice", *overlapped2, "here"));
+    }
+    return ;
+}
+
 template<typename realT>
 ExcludedVolumePotential<realT>
 read_excluded_volume_potential(const toml::value& global)
@@ -163,6 +208,7 @@ read_excluded_volume_potential(const toml::value& global)
         params.emplace_back(idx, radius);
         MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
     }
+    check_parameter_overlap(env, ps, params);
 
     return ExcludedVolumePotential<realT>(
         eps, params, ignore_particle_within,
@@ -207,6 +253,8 @@ read_lennard_jones_potential(const toml::value& global)
         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma, ", epsilon = ", epsilon);
     }
 
+    check_parameter_overlap(env, ps, params);
+
     return LennardJonesPotential<realT>(
         std::move(params), ignore_particle_within,
         read_ignored_molecule(ignore), read_ignored_group(ignore));
@@ -245,12 +293,15 @@ read_uniform_lennard_jones_potential(const toml::value& global)
     std::vector<std::pair<std::size_t, parameter_type>> params;
     if(global.as_table().count("parameters") == 1)
     {
-        for(const auto& param : toml::find<toml::array>(global, "parameters"))
+        const auto& parameters = toml::find<toml::array>(global, "parameters");
+        for(const auto& param : parameters)
         {
             const auto idx = find_parameter<std::size_t>(param, env, "index");
             params.emplace_back(idx, parameter_type{});
         }
+        check_parameter_overlap(env, parameters, params);
     }
+
     return UniformLennardJonesPotential<realT>(
         sigma, epsilon, params, ignore_particle_within,
         read_ignored_molecule(ignore), read_ignored_group(ignore));
@@ -292,6 +343,9 @@ read_debye_huckel_potential(const toml::value& global)
         params.emplace_back(idx, parameter_type{charge});
         MJOLNIR_LOG_INFO("idx = ", idx, ", charge = ", charge);
     }
+
+    check_parameter_overlap(env, ps, params);
+
     return DebyeHuckelPotential<realT>(
         std::move(params), ignore_particle_within,
         read_ignored_molecule(ignore), read_ignored_group(ignore));
@@ -342,6 +396,8 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
         params.emplace_back(idx, bead);
         MJOLNIR_LOG_INFO("idx = ", idx, ", kind = ", bead);
     }
+
+    check_parameter_overlap(env, ps, params);
 
     IgnoreGroup<typename Topology::group_id_type> ignore_grp({});
     if(global.as_table().count("ignore") == 1)
