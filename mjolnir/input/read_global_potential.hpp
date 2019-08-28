@@ -163,7 +163,7 @@ void check_parameter_overlap(const toml::value& env, const toml::array& setting,
         assert(overlapped2 != setting.end());
 
         throw_exception<std::runtime_error>(toml::format_error(
-            "[error] parameter index is not unique",
+            "[error] duplicate parameter definitions",
             *overlapped1, "this defined twice", *overlapped2, "here"));
     }
     return ;
@@ -181,10 +181,11 @@ read_excluded_volume_potential(const toml::value& global)
 
     const auto ignore_particle_within = toml::find<
         std::map<std::string, std::size_t>>(ignore, "particles_within");
+
     for(const auto& connection : ignore_particle_within)
     {
         MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
-            " within ", connection.second, " will be ignored");
+                         " within ", connection.second, " will be ignored");
     }
 
     const auto& env = global.as_table().count("env") == 1 ?
