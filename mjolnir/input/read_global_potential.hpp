@@ -133,6 +133,7 @@ void check_parameter_overlap(const toml::value& env, const toml::array& setting,
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
     using value_type = std::pair<std::size_t, parameterT>;
+
     std::sort(parameters.begin(), parameters.end(),
             [](const value_type& lhs, const value_type& rhs) noexcept -> bool {
                 return lhs.first < rhs.first;
@@ -175,7 +176,9 @@ read_excluded_volume_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type = realT;
+    using potential_type = ExcludedVolumePotential<realT>;
+    using real_type      = typename potential_type::real_type;
+    using parameter_type = typename potential_type::parameter_type;
 
     const auto& ignore = toml::find<toml::value>(global, "ignore");
 
@@ -197,8 +200,6 @@ read_excluded_volume_potential(const toml::value& global)
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
-    using parameter_type = typename ExcludedVolumePotential<realT>::parameter_type;
-
     std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(ps.size());
     for(const auto& param : ps)
@@ -211,8 +212,7 @@ read_excluded_volume_potential(const toml::value& global)
     }
     check_parameter_overlap(env, ps, params);
 
-    return ExcludedVolumePotential<realT>(
-        eps, params, ignore_particle_within,
+    return potential_type(eps, params, ignore_particle_within,
         read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
 
@@ -222,7 +222,9 @@ read_lennard_jones_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type = realT;
+    using potential_type = LennardJonesPotential<realT>;
+    using real_type      = typename potential_type::real_type;
+    using parameter_type = typename potential_type::parameter_type;
 
     const auto& ignore = toml::find<toml::value>(global, "ignore");
 
@@ -240,8 +242,6 @@ read_lennard_jones_potential(const toml::value& global)
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
-    using parameter_type = typename LennardJonesPotential<realT>::parameter_type;
-
     std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(ps.size());
     for(const auto& param : ps)
@@ -256,8 +256,7 @@ read_lennard_jones_potential(const toml::value& global)
 
     check_parameter_overlap(env, ps, params);
 
-    return LennardJonesPotential<realT>(
-        std::move(params), ignore_particle_within,
+    return potential_type(std::move(params), ignore_particle_within,
         read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
 
@@ -267,7 +266,9 @@ read_uniform_lennard_jones_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type = realT;
+    using potential_type = UniformLennardJonesPotential<realT>;
+    using real_type      = typename potential_type::real_type;
+    using parameter_type = typename potential_type::parameter_type;
 
     const auto& ignore = toml::find<toml::value>(global, "ignore");
 
@@ -290,7 +291,6 @@ read_uniform_lennard_jones_potential(const toml::value& global)
     MJOLNIR_LOG_INFO("sigma   = ", sigma);
     MJOLNIR_LOG_INFO("epsilon = ", epsilon);
 
-    using parameter_type = typename UniformLennardJonesPotential<realT>::parameter_type;
     std::vector<std::pair<std::size_t, parameter_type>> params;
     if(global.as_table().count("parameters") == 1)
     {
@@ -303,7 +303,7 @@ read_uniform_lennard_jones_potential(const toml::value& global)
         check_parameter_overlap(env, parameters, params);
     }
 
-    return UniformLennardJonesPotential<realT>(
+    return potential_type(
         sigma, epsilon, params, ignore_particle_within,
         read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
@@ -314,7 +314,9 @@ read_debye_huckel_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type = realT;
+    using potential_type = DebyeHuckelPotential<realT>;
+    using real_type      = typename potential_type::real_type;
+    using parameter_type = typename potential_type::parameter_type;
 
     const auto& ignore = toml::find<toml::value>(global, "ignore");
 
@@ -332,8 +334,6 @@ read_debye_huckel_potential(const toml::value& global)
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
-    using parameter_type = typename DebyeHuckelPotential<realT>::parameter_type;
-
     std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(ps.size());
     for(const auto& param : ps)
@@ -347,7 +347,7 @@ read_debye_huckel_potential(const toml::value& global)
 
     check_parameter_overlap(env, ps, params);
 
-    return DebyeHuckelPotential<realT>(
+    return potential_type(
         std::move(params), ignore_particle_within,
         read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
@@ -358,9 +358,9 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using parameter_type =
-        typename ThreeSPN2ExcludedVolumePotential<realT>::parameter_type;
-    using bead_kind = parameter_3SPN2::bead_kind;
+    using potential_type = ThreeSPN2ExcludedVolumePotential<realT>;
+    using parameter_type = typename potential_type::parameter_type;
+    using bead_kind      = parameter_3SPN2::bead_kind;
 
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
@@ -406,7 +406,7 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
         const auto& ignore = toml::find<toml::value>(global, "ignore");
         ignore_grp = read_ignored_group(ignore);
     }
-    return ThreeSPN2ExcludedVolumePotential<realT>(params, ignore_grp);
+    return potential_type(params, ignore_grp);
 }
 
 
