@@ -196,19 +196,13 @@ class ContactInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 
 namespace mjolnir
 {
-
-// go-contact
-extern template class ContactInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>, GoContactPotential<double>>;
-extern template class ContactInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, GoContactPotential<float> >;
-extern template class ContactInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, GoContactPotential<double>>;
-extern template class ContactInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, GoContactPotential<float> >;
+// Specialization for go-contact is defined in GoContactInteraction.hpp.
 
 // gaussian
 extern template class ContactInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>, GaussianPotential<double>>;
 extern template class ContactInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, GaussianPotential<float> >;
 extern template class ContactInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>>;
 extern template class ContactInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> >;
-
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
 
