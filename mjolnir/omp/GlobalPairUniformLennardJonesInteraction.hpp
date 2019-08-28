@@ -2,8 +2,6 @@
 #define MJOLNIR_OMP_GLOBAL_PAIR_UNIFORM_LENNARD_JONES_INTEARACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/omp/UnlimitedGridCellList.hpp>
-#include <mjolnir/omp/PeriodicGridCellList.hpp>
 #include <mjolnir/interaction/global/GlobalPairUniformLennardJonesInteraction.hpp>
 
 namespace mjolnir
@@ -151,19 +149,14 @@ class GlobalPairInteraction<
 } // mjolnir
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-// explicitly specialize BondAngleInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
 
 namespace mjolnir
 {
-
-// ============================================================================
-// Uniform L-J
 extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
 extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float> >;
 extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
 extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float> >;
-
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
 
