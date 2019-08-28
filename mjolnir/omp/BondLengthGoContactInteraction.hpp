@@ -2,8 +2,7 @@
 #define MJOLNIR_OMP_BOND_LENGTH_GO_CONTACT_INTERACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/interaction/local/BondLengthInteraction.hpp>
-#include <mjolnir/potential/local/GoContactPotential.hpp>
+#include <mjolnir/interaction/local/BondLengthGoContactInteraction.hpp>
 
 namespace mjolnir
 {
