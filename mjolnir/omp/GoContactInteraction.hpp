@@ -85,8 +85,9 @@ class ContactInteraction<
 
             const auto coef = -60 * pot.k() * (v0_10 * rd12 - v0_12 * rd14);
             const auto f    = coef * dpos;
-            sys.force(idx0) -= f;
-            sys.force(idx1) += f;
+            const std::size_t thread_id = omp_get_thread_num();
+            sys.force_thread(thread_id, idx0) -= f;
+            sys.force_thread(thread_id, idx1) += f;
         }
         return;
     }
