@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(read_ignored_group_intra)
 
     using namespace toml::literals;
     const toml::value v = u8R"(
-        group.intra = ["protein"]
+        ignore.group.intra = ["protein"]
     )"_toml;
 
     const auto mol = mjolnir::read_ignored_group(v);
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(read_ignored_group_inter)
 
     using namespace toml::literals;
     const toml::value v = u8R"(
-        group.inter = [
+        ignore.group.inter = [
             ["protein1", "protein2"]
         ]
     )"_toml;
@@ -69,8 +69,8 @@ BOOST_AUTO_TEST_CASE(read_ignored_group_intra_inter)
 
     using namespace toml::literals;
     const toml::value v = u8R"(
-        group.intra = ["protein"]
-        group.inter = [
+        ignore.group.intra = ["protein"]
+        ignore.group.inter = [
             ["protein", "protein1"]
         ]
     )"_toml;
