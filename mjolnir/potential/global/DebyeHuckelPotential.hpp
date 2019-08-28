@@ -44,6 +44,10 @@ class DebyeHuckelPotential
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
     using exclusion_list_type  = ExclusionList;
 
+    static constexpr real_type default_cutoff() noexcept
+    {
+        return real_type(5.5);
+    }
     static constexpr parameter_type default_parameter() noexcept
     {
         return real_type(0);
@@ -78,7 +82,8 @@ class DebyeHuckelPotential
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-    : DebyeHuckelPotential(5.5, parameters, exclusions, ignore_mol, ignore_grp)
+    : DebyeHuckelPotential(default_cutoff(), parameters,
+                           exclusions, ignore_mol, ignore_grp)
     {}
     ~DebyeHuckelPotential() = default;
 
