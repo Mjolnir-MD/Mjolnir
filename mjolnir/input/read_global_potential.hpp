@@ -197,6 +197,10 @@ read_excluded_volume_potential(const toml::value& global)
     const real_type eps = toml::find<real_type>(global, "epsilon");
     MJOLNIR_LOG_INFO("epsilon = ", eps);
 
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff());
+    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
@@ -212,7 +216,7 @@ read_excluded_volume_potential(const toml::value& global)
     }
     check_parameter_overlap(env, ps, params);
 
-    return potential_type(eps, params, ignore_particle_within,
+    return potential_type(eps, cutoff, params, ignore_particle_within,
         read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
 
@@ -239,6 +243,10 @@ read_lennard_jones_potential(const toml::value& global)
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
 
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff());
+    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
@@ -256,7 +264,7 @@ read_lennard_jones_potential(const toml::value& global)
 
     check_parameter_overlap(env, ps, params);
 
-    return potential_type(std::move(params), ignore_particle_within,
+    return potential_type(cutoff, std::move(params), ignore_particle_within,
         read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
 
@@ -291,6 +299,10 @@ read_uniform_lennard_jones_potential(const toml::value& global)
     MJOLNIR_LOG_INFO("sigma   = ", sigma);
     MJOLNIR_LOG_INFO("epsilon = ", epsilon);
 
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff());
+    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+
     std::vector<std::pair<std::size_t, parameter_type>> params;
     if(global.as_table().count("parameters") == 1)
     {
@@ -303,8 +315,7 @@ read_uniform_lennard_jones_potential(const toml::value& global)
         check_parameter_overlap(env, parameters, params);
     }
 
-    return potential_type(
-        sigma, epsilon, params, ignore_particle_within,
+    return potential_type(sigma, epsilon, cutoff, params, ignore_particle_within,
         read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
 
@@ -331,6 +342,10 @@ read_debye_huckel_potential(const toml::value& global)
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
 
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff());
+    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
@@ -347,8 +362,7 @@ read_debye_huckel_potential(const toml::value& global)
 
     check_parameter_overlap(env, ps, params);
 
-    return potential_type(
-        std::move(params), ignore_particle_within,
+    return potential_type(cutoff, std::move(params), ignore_particle_within,
         read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
 
