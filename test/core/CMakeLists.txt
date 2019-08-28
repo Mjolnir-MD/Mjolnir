@@ -4,7 +4,6 @@ set(TEST_NAMES
     test_math
     test_range
     test_throw_exception
-    test_static_string
     test_topology
     test_exclusion_list
 
