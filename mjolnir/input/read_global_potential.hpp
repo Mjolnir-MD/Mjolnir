@@ -124,6 +124,23 @@ read_ignored_group(const toml::value& ignore)
     return IgnoreGroup<group_id_type>(ignores);
 }
 
+inline std::map<std::string, std::size_t>
+read_ignore_particles_within(const toml::value& ignore)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+
+    using map_type = std::map<std::string, std::size_t>;
+
+    const auto ignore_particle_within = toml::find_or<map_type>(
+            ignore, "particles_within", map_type{});
+    for(const auto& connection : ignore_particle_within)
+    {
+        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
+                         " within ", connection.second, " will be ignored");
+    }
+    return ignore_particle_within;
+}
+
 template<typename parameterT>
 void check_parameter_overlap(const toml::value& env, const toml::array& setting,
         std::vector<std::pair<std::size_t, parameterT>>& parameters)
@@ -181,15 +198,7 @@ read_excluded_volume_potential(const toml::value& global)
     using parameter_type = typename potential_type::parameter_type;
 
     const auto& ignore = toml::find<toml::value>(global, "ignore");
-
-    const auto ignore_particle_within = toml::find<
-        std::map<std::string, std::size_t>>(ignore, "particles_within");
-
-    for(const auto& connection : ignore_particle_within)
-    {
-        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
-                         " within ", connection.second, " will be ignored");
-    }
+    const auto ignore_particle_within = read_ignore_particles_within(ignore);
 
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
@@ -231,14 +240,7 @@ read_lennard_jones_potential(const toml::value& global)
     using parameter_type = typename potential_type::parameter_type;
 
     const auto& ignore = toml::find<toml::value>(global, "ignore");
-
-    const auto ignore_particle_within = toml::find<
-        std::map<std::string, std::size_t>>(ignore, "particles_within");
-    for(const auto& connection : ignore_particle_within)
-    {
-        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
-            " within ", connection.second, " will be ignored");
-    }
+    const auto ignore_particle_within = read_ignore_particles_within(ignore);
 
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
@@ -279,14 +281,7 @@ read_uniform_lennard_jones_potential(const toml::value& global)
     using parameter_type = typename potential_type::parameter_type;
 
     const auto& ignore = toml::find<toml::value>(global, "ignore");
-
-    const auto ignore_particle_within = toml::find<
-        std::map<std::string, std::size_t>>(ignore, "particles_within");
-    for(const auto& connection : ignore_particle_within)
-    {
-        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
-            " within ", connection.second, " will be ignored");
-    }
+    const auto ignore_particle_within = read_ignore_particles_within(ignore);
 
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
@@ -330,14 +325,7 @@ read_debye_huckel_potential(const toml::value& global)
     using parameter_type = typename potential_type::parameter_type;
 
     const auto& ignore = toml::find<toml::value>(global, "ignore");
-
-    const auto ignore_particle_within = toml::find<
-        std::map<std::string, std::size_t>>(ignore, "particles_within");
-    for(const auto& connection : ignore_particle_within)
-    {
-        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
-            " within ", connection.second, " will be ignored");
-    }
+    const auto ignore_particle_within = read_ignore_particles_within(ignore);
 
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
