@@ -28,7 +28,7 @@ read_ignored_molecule(const toml::value& global)
     if(global.as_table().count("ignore") == 0)
     {
         MJOLNIR_LOG_NOTICE("No `ignore.molecule` is provided. "
-                           "All the groups are taken into account.");
+                           "All the molecules are taken into account.");
 
         return IgnoreMolecule<typename Topology::molecule_id_type>{
             make_unique<IgnoreNothing<typename Topology::molecule_id_type>>()
