@@ -104,10 +104,8 @@ endif()
 
 # -----------------------------------------------------------------------------
 
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/toml/toml.hpp")
-    execute_process(COMMAND git submodule update --init --recursive
-                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-endif()
+execute_process(COMMAND git submodule update --init --recursive
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 option(FIND_BOOST "find boost library" OFF)
 if(BOOST_ROOT OR FIND_BOOST)
