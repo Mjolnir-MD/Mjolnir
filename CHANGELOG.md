@@ -1,5 +1,22 @@
 # Change Log
 
+## 1.5.0
+
+### Added
+
+- support SwitchingForceFieldSimulator
+- enable to change cut off ratio of global potentials
+
+### Changed
+
+- optimize efficiency of BondLength<GoContact> and Contact<GoContact>
+- add warning messages while reading input file
+- upgrade toml11 to v3.0.1
+
+### Misc
+
+- refactoring
+
 ## 1.4.1
 
 ### Changed
