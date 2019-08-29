@@ -3,6 +3,7 @@
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/input/utility.hpp>
 #include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
+#include <mjolnir/potential/global/HardCoreExcludedVolumePotential.hpp>
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
 #include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
@@ -256,6 +257,51 @@ read_excluded_volume_potential(const toml::value& global)
 }
 
 template<typename realT>
+HardCoreExcludedVolumePotential<realT>
+read_hard_core_excluded_volume_potential(const toml::value& global)
+{
+  MJOLNIR_GET_DEFAULT_LOGGER();
+  MJOLNIR_LOG_FUNCTION();
+  using real_type = realT;
+
+  const auto ignore = toml::find<toml::value>(global, "ignore");
+
+  const auto ignore_particle_within = toml::find<
+    std::map<std::string, std::size_t>>(ignore, "particles_within");
+  for(const auto& connection : ignore_particle_within)
+  {
+    MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
+        "within", connection.second, " will be ignored");
+  }
+
+    const auto& env = global.as_table().count("env") == 1 ?
+                      global.as_table().at("env") : toml::value{};
+
+    const real_type eps = toml::find<real_type>(global, "epsilon");
+    const auto& ps = toml::find<toml::array>(global, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    using parameter_type = typename HardCoreExcludedVolumePotential<real_type>::parameter_type;
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+      const auto idx = find_parameter<std::size_t>(param, env, "index");
+      const auto core_radius = find_parameter<real_type>(param, env, "core_radius");
+      const auto soft_shell_thickness = find_parameter<real_type>(param, env, "soft_shell_thickness");
+
+      params.emplace_back(idx, parameter_type{core_radius, soft_shell_thickness});
+      MJOLNIR_LOG_INFO("idx = ", idx, ", core_radius = ", core_radius,
+                       ", soft_shell_thickness = ", soft_shell_thickness);
+    }
+
+    return HardCoreExcludedVolumePotential<realT>(
+        eps, std::move(params), ignore_particle_within,
+        read_ignored_molecule(ignore), read_ignored_group(ignore));
+}
+
+template<typename realT>
 LennardJonesPotential<realT>
 read_lennard_jones_potential(const toml::value& global)
 {
@@ -428,6 +474,9 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template ExcludedVolumePotential<double> read_excluded_volume_potential(const toml::value& global);
 extern template ExcludedVolumePotential<float > read_excluded_volume_potential(const toml::value& global);
+
+extern template HardCoreExcludedVolumePotential<double> read_hard_core_excluded_volume_potential(const toml::value& global);
+extern template HardCoreExcludedVolumePotential<float > read_hard_core_excluded_volume_potential(const toml::value& global);
 
 extern template LennardJonesPotential<double> read_lennard_jones_potential(const toml::value& global);
 extern template LennardJonesPotential<float > read_lennard_jones_potential(const toml::value& global);
