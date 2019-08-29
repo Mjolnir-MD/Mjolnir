@@ -437,6 +437,9 @@ extern template UniformLennardJonesPotential<float > read_uniform_lennard_jones_
 
 extern template DebyeHuckelPotential<double> read_debye_huckel_potential(const toml::value& global);
 extern template DebyeHuckelPotential<float > read_debye_huckel_potential(const toml::value& global);
+
+extern template ThreeSPN2ExcludedVolumePotential<double> read_3spn2_excluded_volume_potential(const toml::value& global);
+extern template ThreeSPN2ExcludedVolumePotential<float > read_3spn2_excluded_volume_potential(const toml::value& global);
 #endif
 
 } // mjolnir

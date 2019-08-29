@@ -14,6 +14,9 @@ template std::vector<std::pair<std::array<std::size_t, 3>, HarmonicPotential<flo
 template std::vector<std::pair<std::array<std::size_t, 4>, HarmonicPotential<double>>> read_local_potential(const toml::value& local);
 template std::vector<std::pair<std::array<std::size_t, 4>, HarmonicPotential<float >>> read_local_potential(const toml::value& local);
 
+template std::vector<std::pair<std::array<std::size_t, 2>, GoContactPotential<double>>> read_local_potential(const toml::value& local);
+template std::vector<std::pair<std::array<std::size_t, 2>, GoContactPotential<float >>> read_local_potential(const toml::value& local);
+
 template std::vector<std::pair<std::array<std::size_t, 4>, ClementiDihedralPotential<double>>> read_local_potential(const toml::value& local);
 template std::vector<std::pair<std::array<std::size_t, 4>, ClementiDihedralPotential<float >>> read_local_potential(const toml::value& local);
 
@@ -28,6 +31,9 @@ template std::vector<std::pair<std::array<std::size_t, 3>, FlexibleLocalAnglePot
 template std::vector<std::pair<std::array<std::size_t, 3>, FlexibleLocalAnglePotential<float >>> read_local_potential(const toml::value& local);
 template std::vector<std::pair<std::array<std::size_t, 4>, FlexibleLocalDihedralPotential<double>>> read_local_potential(const toml::value& local);
 template std::vector<std::pair<std::array<std::size_t, 4>, FlexibleLocalDihedralPotential<float >>> read_local_potential(const toml::value& local);
+
+template std::vector<std::pair<std::array<std::size_t, 2>, ThreeSPN2BondPotential<double>>> read_local_potential(const toml::value& local);
+template std::vector<std::pair<std::array<std::size_t, 2>, ThreeSPN2BondPotential<float >>> read_local_potential(const toml::value& local);
 
 template std::vector<std::pair<std::array<std::size_t, 4>, CosinePotential<double>>> read_local_potential(const toml::value& local);
 template std::vector<std::pair<std::array<std::size_t, 4>, CosinePotential<float >>> read_local_potential(const toml::value& local);
