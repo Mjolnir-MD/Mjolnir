@@ -112,6 +112,8 @@ class ExcludedVolumePotential
         const real_type dr3  = d_r * d_r * d_r;
         const real_type dr6  = dr3 * dr3;
         const real_type dr12 = dr6 * dr6;
+        // correction by coef_at_cuttoff make energy 0 about the particle pair
+        // who's distance is over the cutoff range.
         return this->epsilon_ * (dr12 - this->coef_at_cutoff_);
     }
     real_type derivative(const real_type r, const pair_parameter_type& d) const noexcept
