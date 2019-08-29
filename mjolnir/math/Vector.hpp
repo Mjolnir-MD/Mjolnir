@@ -1,7 +1,6 @@
 #ifndef MJOLNIR_MATH_VECTOR_HPP
 #define MJOLNIR_MATH_VECTOR_HPP
 #include <mjolnir/math/Matrix.hpp>
-#include <mjolnir/math/quaternion.hpp>
 #include <mjolnir/math/functions.hpp>
 #include <mjolnir/math/vector_util.hpp>
 #include <cmath>
