@@ -1,10 +1,12 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_HARD_CORE_EXCLUDED_VOLUME_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_HARD_CORE_EXCLUDED_VOLUME_POTENTIAL_HPP
+#include <mjolnir/core/ExclusionList.hpp>
+#include <mjolnir/core/System.hpp>
 #include <vector>
 #include <algorithm>
 #include <numeric>
 #include <cmath>
-#include <limit>
+#include <limits>
 
 namespace mjolnir
 {
@@ -42,14 +44,14 @@ class HardCoreExcludedVolumePotential
 
     static constexpr parameter_type default_parameter() noexcept
     {
-        return parameter_type{0.0, 0.0}
+        return parameter_type{0.0, 0.0};
     }
 
   public:
 
     HardCoreExcludedVolumePotential(const real_type eps,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-        const std::map<connection_kind_type, std::size_t>& excludsions,
+        const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
         : HardCoreExcludedVolumePotential(eps, default_cutoff(),
             parameters, exclusions, std::move(ignore_mol), std::move(ignore_grp))
@@ -81,7 +83,7 @@ class HardCoreExcludedVolumePotential
     HardCoreExcludedVolumePotential& operator=(const HardCoreExcludedVolumePotential&) = default;
     HardCoreExcludedVolumePotential& operator=(HardCoreExcludedVolumePotential&&) = default;
 
-    pair_parameter_type prepare_params(std::size_t i, std::size_t j) cosnst noexcept
+    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
         const auto sigma1           = this->parameters_[i].first;
         const auto hardcore_radius1 = this->parameters_[i].second;
@@ -108,8 +110,8 @@ class HardCoreExcludedVolumePotential
     {
         const real_type sigma_sum = pram.first;
         const real_type hradi_sum = pram.second;
-        if(sigma_sum * this->cutoff_ratio_ + hradi_sum < r){return 0}
-        else if(r < hradi_sum){return std::numeric_limits<real_type>::infinity()};
+        if(sigma_sum * this->cutoff_ratio_ + hradi_sum < r){return 0;}
+        else if(r < hradi_sum){return std::numeric_limits<real_type>::infinity();}
 
         const real_type gap = r - hradi_sum;
         const real_type sigma1gap1 = sigma_sum / gap;
@@ -124,7 +126,7 @@ class HardCoreExcludedVolumePotential
         const real_type sigma_sum = pram.first;
         const real_type hradi_sum = pram.second;
         if(sigma_sum * this->cutoff_ratio_ + hradi_sum < r){return 0.0;}
-        else if(r < hradi_sum){return std::numeric_limits<real_type>::infinity()};
+        else if(r < hradi_sum){return std::numeric_limits<real_type>::infinity();}
         const real_type gapinv = 1 / (r - hradi_sum);
         const real_type sigma1gap1 = sigma_sum * gapinv;
         const real_type sigma3gap3 = sigma1gap1 * sigma1gap1 * sigma1gap1;
@@ -133,7 +135,7 @@ class HardCoreExcludedVolumePotential
         return -12.0 * this->epsilon_ * sigma12gap12 * gapinv;
     }
 
-    template<typename traitT>
+    template<typename traitsT>
     void initialize(const System<traitsT>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
@@ -144,7 +146,7 @@ class HardCoreExcludedVolumePotential
     }
 
     template<typename traitsT>
-    void update(const System<traitT>& sys) noexcept
+    void update(const System<traitsT>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
