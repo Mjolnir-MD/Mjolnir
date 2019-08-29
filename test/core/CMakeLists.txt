@@ -21,6 +21,7 @@ set(TEST_NAMES
     test_lennard_jones_potential
     test_uniform_lennard_jones_potential
     test_excluded_volume_potential
+    test_hard_core_excluded_volume_potential
     test_debye_huckel_potential
     test_implicit_membrane_potential
     test_excluded_volume_wall_potential
