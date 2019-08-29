@@ -21,10 +21,6 @@ class ForceField
 
   public:
 
-    ForceField(local_forcefield_type&& local, global_forcefield_type&& global)
-        : local_(std::move(local)), global_(std::move(global))
-    {}
-
     ForceField(local_forcefield_type&&    local,
                global_forcefield_type&&   global,
                external_forcefield_type&& external)
@@ -91,15 +87,35 @@ class ForceField
             external_.calc_energy(sys);
     }
 
-    std::string list_energy_name() const
+    std::vector<std::string> list_energy_name() const
     {
-        return local_.list_energy() + global_.list_energy() +
-            external_.list_energy();
+        auto retval = local_.list_energy();
+        auto glo    = global_.list_energy();
+        auto ext    = external_.list_energy();
+
+        retval.reserve(retval.size() + glo.size() + ext.size());
+
+        std::copy(std::make_move_iterator(glo.begin()),
+                  std::make_move_iterator(glo.end()),
+                  std::back_inserter(retval));
+
+        std::copy(std::make_move_iterator(ext.begin()),
+                  std::make_move_iterator(ext.end()),
+                  std::back_inserter(retval));
+
+        return retval;
     }
-    std::string dump_energy(const system_type& sys) const
+    std::vector<real_type> dump_energy(const system_type& sys) const
     {
-        return local_.dump_energy(sys) + global_.dump_energy(sys) +
-            external_.dump_energy(sys);
+        auto retval = local_.dump_energy(sys);
+        auto glo    = global_.dump_energy(sys);
+        auto ext    = external_.dump_energy(sys);
+
+        retval.reserve(retval.size() + glo.size() + ext.size());
+
+        std::copy(glo.begin(), glo.end(), std::back_inserter(retval));
+        std::copy(ext.begin(), ext.end(), std::back_inserter(retval));
+        return retval;
     }
 
     local_forcefield_type    const& local()    const noexcept {return local_;}

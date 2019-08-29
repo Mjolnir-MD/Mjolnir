@@ -2,8 +2,6 @@
 #define MJOLNIR_OMP_GLOBAL_PAIR_EXCLUDED_VOLUME_INTEARACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/omp/UnlimitedGridCellList.hpp>
-#include <mjolnir/omp/PeriodicGridCellList.hpp>
 #include <mjolnir/interaction/global/GlobalPairExcludedVolumeInteraction.hpp>
 
 namespace mjolnir
@@ -162,9 +160,6 @@ class GlobalPairInteraction<
 
 namespace mjolnir
 {
-// ============================================================================
-// exv
-// CellList
 extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
 extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float> >;
 extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;

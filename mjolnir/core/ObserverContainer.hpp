@@ -37,6 +37,7 @@ class ObserverContainer
     ObserverContainer& operator=(const ObserverContainer&) = default;
     ObserverContainer& operator=(ObserverContainer&&)      = default;
 
+    // open files, write header and so on.
     void initialize(const std::size_t total_step, const real_type dt,
                     const system_type& sys, const forcefield_type& ff)
     {
@@ -47,6 +48,16 @@ class ObserverContainer
 
         this->progress_bar_.reset(total_step); // set total_step as 100%.
     }
+    // call if system or forcefield is changed.
+    void update(const std::size_t step, const real_type dt,
+                const system_type& sys, const forcefield_type& ff)
+    {
+        for(const auto& obs : this->observers_)
+        {
+            obs->update(step, dt, sys, ff);
+        }
+    }
+    // output the current state.
     void output(const std::size_t step, const real_type dt,
                 const system_type& sys, const forcefield_type& ff)
     {
@@ -63,6 +74,7 @@ class ObserverContainer
             std::cerr << this->progress_bar_.format(step);
         }
     }
+    // update header, or something that required to be finalized
     void finalize(const std::size_t total_step, const real_type dt,
                   const system_type& sys, const forcefield_type& ff)
     {

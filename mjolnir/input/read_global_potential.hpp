@@ -20,10 +20,22 @@ namespace mjolnir
 // ============================================================================
 
 inline IgnoreMolecule<typename Topology::molecule_id_type>
-read_ignored_molecule(const toml::value& ignore)
+read_ignored_molecule(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
+
+    if(global.as_table().count("ignore") == 0)
+    {
+        MJOLNIR_LOG_NOTICE("No `ignore.molecule` is provided. "
+                           "All the molecules are taken into account.");
+
+        return IgnoreMolecule<typename Topology::molecule_id_type>{
+            make_unique<IgnoreNothing<typename Topology::molecule_id_type>>()
+        };
+    }
+
+    const auto& ignore = toml::find(global, "ignore");
 
     if(ignore.as_table().count("molecule") == 0)
     {
@@ -68,7 +80,7 @@ read_ignored_molecule(const toml::value& ignore)
 }
 
 inline IgnoreGroup<typename Topology::group_id_type>
-read_ignored_group(const toml::value& ignore)
+read_ignored_group(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -85,6 +97,16 @@ read_ignored_group(const toml::value& ignore)
     // ```
 
     std::map<group_id_type, std::vector<group_id_type>> ignores;
+
+    if(global.as_table().count("ignore") == 0)
+    {
+        MJOLNIR_LOG_NOTICE("No `ignore.group` is provided. "
+                           "All the groups are taken into account.");
+        assert(ignores.empty());
+        return IgnoreGroup<group_id_type>(ignores);
+    }
+
+    const auto& ignore = toml::find(global, "ignore");
 
     if(ignore.as_table().count("group") == 0)
     {
@@ -124,23 +146,84 @@ read_ignored_group(const toml::value& ignore)
     return IgnoreGroup<group_id_type>(ignores);
 }
 
+inline std::map<std::string, std::size_t>
+read_ignore_particles_within(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+
+    using map_type = std::map<std::string, std::size_t>;
+
+    if(global.as_table().count("ignore") == 0)
+    {
+        return map_type{};
+    }
+    const auto& ignore = toml::find(global, "ignore");
+
+    const auto ignore_particle_within = toml::find_or<map_type>(
+            ignore, "particles_within", map_type{});
+    for(const auto& connection : ignore_particle_within)
+    {
+        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
+                         " within ", connection.second, " will be ignored");
+    }
+    return ignore_particle_within;
+}
+
+template<typename parameterT>
+void check_parameter_overlap(const toml::value& env, const toml::array& setting,
+        std::vector<std::pair<std::size_t, parameterT>>& parameters)
+{
+    if(parameters.empty()) {return ;}
+
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using value_type = std::pair<std::size_t, parameterT>;
+
+    std::sort(parameters.begin(), parameters.end(),
+            [](const value_type& lhs, const value_type& rhs) noexcept -> bool {
+                return lhs.first < rhs.first;
+            });
+    const auto overlap = std::adjacent_find(parameters.begin(), parameters.end(),
+            [](const value_type& lhs, const value_type& rhs) noexcept -> bool {
+                return lhs.first == rhs.first;
+            });
+
+    if(overlap != parameters.end())
+    {
+        const std::size_t overlapped_idx = overlap->first;
+        MJOLNIR_LOG_ERROR("parameter for ", overlapped_idx, " defined twice");
+
+        // find overlapped one
+        const auto overlapped1 = std::find_if(setting.begin(), setting.end(),
+            [overlapped_idx, &env](const toml::value& v) -> bool {
+                return find_parameter<std::size_t>(v, env, "index") == overlapped_idx;
+            });
+
+        assert(overlapped1 != setting.end());
+
+        const auto overlapped2 = std::find_if(std::next(overlapped1), setting.end(),
+            [overlapped_idx, &env](const toml::value& v) -> bool {
+                return find_parameter<std::size_t>(v, env, "index") == overlapped_idx;
+            });
+
+        assert(overlapped2 != setting.end());
+
+        throw_exception<std::runtime_error>(toml::format_error(
+            "[error] duplicate parameter definitions",
+            *overlapped1, "this defined twice", *overlapped2, "here"));
+    }
+    return ;
+}
+
 template<typename realT>
 ExcludedVolumePotential<realT>
 read_excluded_volume_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type = realT;
-
-    const auto& ignore = toml::find<toml::value>(global, "ignore");
-
-    const auto ignore_particle_within = toml::find<
-        std::map<std::string, std::size_t>>(ignore, "particles_within");
-    for(const auto& connection : ignore_particle_within)
-    {
-        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
-            " within ", connection.second, " will be ignored");
-    }
+    using potential_type = ExcludedVolumePotential<realT>;
+    using real_type      = typename potential_type::real_type;
+    using parameter_type = typename potential_type::parameter_type;
 
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
@@ -148,10 +231,12 @@ read_excluded_volume_potential(const toml::value& global)
     const real_type eps = toml::find<real_type>(global, "epsilon");
     MJOLNIR_LOG_INFO("epsilon = ", eps);
 
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff());
+    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-    using parameter_type = typename ExcludedVolumePotential<realT>::parameter_type;
 
     std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(ps.size());
@@ -163,10 +248,11 @@ read_excluded_volume_potential(const toml::value& global)
         params.emplace_back(idx, radius);
         MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
     }
+    check_parameter_overlap(env, ps, params);
 
-    return ExcludedVolumePotential<realT>(
-        eps, params, ignore_particle_within,
-        read_ignored_molecule(ignore), read_ignored_group(ignore));
+    return potential_type(eps, cutoff, params,
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
 }
 
 template<typename realT>
@@ -175,25 +261,19 @@ read_lennard_jones_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type = realT;
-
-    const auto& ignore = toml::find<toml::value>(global, "ignore");
-
-    const auto ignore_particle_within = toml::find<
-        std::map<std::string, std::size_t>>(ignore, "particles_within");
-    for(const auto& connection : ignore_particle_within)
-    {
-        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
-            " within ", connection.second, " will be ignored");
-    }
+    using potential_type = LennardJonesPotential<realT>;
+    using real_type      = typename potential_type::real_type;
+    using parameter_type = typename potential_type::parameter_type;
 
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
 
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff());
+    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-    using parameter_type = typename LennardJonesPotential<realT>::parameter_type;
 
     std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(ps.size());
@@ -207,9 +287,11 @@ read_lennard_jones_potential(const toml::value& global)
         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma, ", epsilon = ", epsilon);
     }
 
-    return LennardJonesPotential<realT>(
-        std::move(params), ignore_particle_within,
-        read_ignored_molecule(ignore), read_ignored_group(ignore));
+    check_parameter_overlap(env, ps, params);
+
+    return potential_type(cutoff, std::move(params),
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
 }
 
 template<typename realT>
@@ -218,17 +300,9 @@ read_uniform_lennard_jones_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type = realT;
-
-    const auto& ignore = toml::find<toml::value>(global, "ignore");
-
-    const auto ignore_particle_within = toml::find<
-        std::map<std::string, std::size_t>>(ignore, "particles_within");
-    for(const auto& connection : ignore_particle_within)
-    {
-        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
-            " within ", connection.second, " will be ignored");
-    }
+    using potential_type = UniformLennardJonesPotential<realT>;
+    using real_type      = typename potential_type::real_type;
+    using parameter_type = typename potential_type::parameter_type;
 
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
@@ -241,19 +315,25 @@ read_uniform_lennard_jones_potential(const toml::value& global)
     MJOLNIR_LOG_INFO("sigma   = ", sigma);
     MJOLNIR_LOG_INFO("epsilon = ", epsilon);
 
-    using parameter_type = typename UniformLennardJonesPotential<realT>::parameter_type;
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff());
+    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+
     std::vector<std::pair<std::size_t, parameter_type>> params;
     if(global.as_table().count("parameters") == 1)
     {
-        for(const auto& param : toml::find<toml::array>(global, "parameters"))
+        const auto& parameters = toml::find<toml::array>(global, "parameters");
+        for(const auto& param : parameters)
         {
             const auto idx = find_parameter<std::size_t>(param, env, "index");
             params.emplace_back(idx, parameter_type{});
         }
+        check_parameter_overlap(env, parameters, params);
     }
-    return UniformLennardJonesPotential<realT>(
-        sigma, epsilon, params, ignore_particle_within,
-        read_ignored_molecule(ignore), read_ignored_group(ignore));
+
+    return potential_type(sigma, epsilon, cutoff, params,
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
 }
 
 template<typename realT>
@@ -262,25 +342,19 @@ read_debye_huckel_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type = realT;
-
-    const auto& ignore = toml::find<toml::value>(global, "ignore");
-
-    const auto ignore_particle_within = toml::find<
-        std::map<std::string, std::size_t>>(ignore, "particles_within");
-    for(const auto& connection : ignore_particle_within)
-    {
-        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
-            " within ", connection.second, " will be ignored");
-    }
+    using potential_type = DebyeHuckelPotential<realT>;
+    using real_type      = typename potential_type::real_type;
+    using parameter_type = typename potential_type::parameter_type;
 
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
 
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff());
+    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-    using parameter_type = typename DebyeHuckelPotential<realT>::parameter_type;
 
     std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(ps.size());
@@ -292,9 +366,12 @@ read_debye_huckel_potential(const toml::value& global)
         params.emplace_back(idx, parameter_type{charge});
         MJOLNIR_LOG_INFO("idx = ", idx, ", charge = ", charge);
     }
-    return DebyeHuckelPotential<realT>(
-        std::move(params), ignore_particle_within,
-        read_ignored_molecule(ignore), read_ignored_group(ignore));
+
+    check_parameter_overlap(env, ps, params);
+
+    return potential_type(cutoff, std::move(params),
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
 }
 
 template<typename realT>
@@ -303,9 +380,9 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using parameter_type =
-        typename ThreeSPN2ExcludedVolumePotential<realT>::parameter_type;
-    using bead_kind = parameter_3SPN2::bead_kind;
+    using potential_type = ThreeSPN2ExcludedVolumePotential<realT>;
+    using parameter_type = typename potential_type::parameter_type;
+    using bead_kind      = parameter_3SPN2::bead_kind;
 
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
@@ -343,13 +420,8 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
         MJOLNIR_LOG_INFO("idx = ", idx, ", kind = ", bead);
     }
 
-    IgnoreGroup<typename Topology::group_id_type> ignore_grp({});
-    if(global.as_table().count("ignore") == 1)
-    {
-        const auto& ignore = toml::find<toml::value>(global, "ignore");
-        ignore_grp = read_ignored_group(ignore);
-    }
-    return ThreeSPN2ExcludedVolumePotential<realT>(params, ignore_grp);
+    check_parameter_overlap(env, ps, params);
+    return potential_type(params, read_ignored_group(global));
 }
 
 
@@ -365,6 +437,9 @@ extern template UniformLennardJonesPotential<float > read_uniform_lennard_jones_
 
 extern template DebyeHuckelPotential<double> read_debye_huckel_potential(const toml::value& global);
 extern template DebyeHuckelPotential<float > read_debye_huckel_potential(const toml::value& global);
+
+extern template ThreeSPN2ExcludedVolumePotential<double> read_3spn2_excluded_volume_potential(const toml::value& global);
+extern template ThreeSPN2ExcludedVolumePotential<float > read_3spn2_excluded_volume_potential(const toml::value& global);
 #endif
 
 } // mjolnir

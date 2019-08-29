@@ -123,6 +123,8 @@ class BondLengthInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 
 } // mjolnir
 
+#include <mjolnir/omp/BondLengthGoContactInteraction.hpp>
+
 #ifdef MJOLNIR_SEPARATE_BUILD
 // explicitly specialize BondLengthInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
@@ -139,11 +141,7 @@ extern template class BondLengthInteraction<OpenMPSimulatorTraits<float,  Unlimi
 extern template class BondLengthInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, HarmonicPotential<double>>;
 extern template class BondLengthInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, HarmonicPotential<float> >;
 
-// go-contact
-extern template class BondLengthInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>, GoContactPotential<double>>;
-extern template class BondLengthInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, GoContactPotential<float> >;
-extern template class BondLengthInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, GoContactPotential<double>>;
-extern template class BondLengthInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, GoContactPotential<float> >;
+// Specialization for go-contact is defined in BondLengthGoContactInteraction.hpp.
 
 // gaussian
 extern template class BondLengthInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>, GaussianPotential<double>>;

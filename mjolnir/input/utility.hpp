@@ -74,9 +74,6 @@ typename std::enable_if<negation<std::is_same<T, std::string>>::value, T>::type
 find_parameter(const toml::value& params, const toml::value& env,
                const std::string& name1,  const std::string& name2)
 {
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-
     if(!params.is_table() || (params.as_table().count(name1) == 0 &&
                               params.as_table().count(name2) == 0))
     {
@@ -87,12 +84,6 @@ find_parameter(const toml::value& params, const toml::value& env,
     const toml::value& p = (params.as_table().count(name1) == 1) ?
                             params.as_table().at(name1)          :
                             params.as_table().at(name2)          ;
-
-//     if(params.as_table().count(name2) == 1)
-//     {
-//         MJOLNIR_LOG_WARN("deprecated name \"", name2, "\" is used. Use \"",
-//                          name1, "\" instead.");
-//     }
     if(p.is_string())
     {
         // search inside of `env`

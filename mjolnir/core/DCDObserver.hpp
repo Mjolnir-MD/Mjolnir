@@ -48,6 +48,24 @@ class DCDObserver final : public ObserverBase<traitsT>
         return;
     }
 
+    void update(const std::size_t,      const real_type,
+                const system_type& sys, const forcefield_type&) override
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+        if(sys.size() != this->buffer_x_.size())
+        {
+            MJOLNIR_LOG_NOTICE("the number of particles changed.");
+            MJOLNIR_LOG_NOTICE("Most of dcd file readers assumes it is a constant.");
+            MJOLNIR_LOG_NOTICE("It may cause some problems.");
+
+            this->buffer_x_.resize(sys.size());
+            this->buffer_y_.resize(sys.size());
+            this->buffer_z_.resize(sys.size());
+        }
+        return;
+    }
+
     void output(const std::size_t step, const real_type dt,
                 const system_type& sys, const forcefield_type& ff) override;
 

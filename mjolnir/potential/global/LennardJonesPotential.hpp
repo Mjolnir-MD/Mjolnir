@@ -38,6 +38,10 @@ class LennardJonesPotential
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
     using exclusion_list_type  = ExclusionList;
 
+    static constexpr real_type default_cutoff() noexcept
+    {
+        return real_type(2.5);
+    }
     static constexpr parameter_type default_parameter() noexcept
     {
         return parameter_type{real_type(0), real_type(0)};
@@ -70,7 +74,7 @@ class LennardJonesPotential
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-    : LennardJonesPotential(/*default cutoff = */2.5, parameters, exclusions,
+    : LennardJonesPotential(default_cutoff(), parameters, exclusions,
                             std::move(ignore_mol), std::move(ignore_grp))
     {}
     ~LennardJonesPotential() = default;

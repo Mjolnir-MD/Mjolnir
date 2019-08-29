@@ -39,7 +39,7 @@ read_local_forcefield(
                                input_path, file_name, "`.");
 
             const auto ff_file = toml::parse(input_path + file_name);
-            if(ff_file.count("forcefield") == 1)
+            if(ff_file.as_table().count("forcefield") == 1)
             {
                 const auto& ff_tab = toml::find(ff_file, "forcefield");
                 if(ff_tab.as_table().count("local") == 1)

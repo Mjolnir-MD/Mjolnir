@@ -21,10 +21,16 @@ class ObserverBase
     ObserverBase() = default;
     virtual ~ObserverBase() = default;
 
+    // open files, write header and so on.
     virtual void initialize(const std::size_t total_step, const real_type dt,
                             const system_type&, const forcefield_type&) = 0;
+    // call if system or forcefield is changed.
+    virtual void update    (const std::size_t step,       const real_type dt,
+                            const system_type&, const forcefield_type&) = 0;
+    // output the current state.
     virtual void output    (const std::size_t step,       const real_type dt,
                             const system_type&, const forcefield_type&) = 0;
+    // update header, or something that required to be finalized
     virtual void finalize  (const std::size_t total_step, const real_type dt,
                             const system_type&, const forcefield_type&) = 0;
 

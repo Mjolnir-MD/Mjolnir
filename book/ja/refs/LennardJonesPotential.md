@@ -19,6 +19,7 @@ U(r) = 4\epsilon \left[\left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{
 [[forcefields.global]]
 # ここにはPairInteractionなどによって要求されるパラメータが入ります。
 # ...
+cutoff = 2.5
 parameters = [
     {index = 0, sigma = 2.0, epsilon = 10.0},
     # 必要に応じて続きます...
@@ -26,7 +27,9 @@ parameters = [
 ```
 
 ## 入力
-
+- `cutoff`: 浮動小数点数型
+  - カットオフ距離を決めます。
+  - 相互作用している粒子ペアの半径の$$\sigma_{ij}$$に対しての相対値です。書かなければ、デフォルトの値になります。
 - `index`: 整数型
   - パラメータが何番目の粒子のものかを指定します。番号は0から始まります。
 - `sigma`: 浮動小数点数型

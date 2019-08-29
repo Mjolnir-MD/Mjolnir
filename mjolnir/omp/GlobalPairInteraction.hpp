@@ -2,8 +2,6 @@
 #define MJOLNIR_OMP_GLOBAL_PAIR_INTEARACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/omp/UnlimitedGridCellList.hpp>
-#include <mjolnir/omp/PeriodicGridCellList.hpp>
 #include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
 
 namespace mjolnir

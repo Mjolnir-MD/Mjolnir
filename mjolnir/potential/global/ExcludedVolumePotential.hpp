@@ -42,6 +42,10 @@ class ExcludedVolumePotential
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
     using exclusion_list_type  = ExclusionList;
 
+    static constexpr real_type default_cutoff() noexcept
+    {
+        return real_type(2.0);
+    }
     static constexpr parameter_type default_parameter() noexcept
     {
         return parameter_type{0.0};
@@ -53,7 +57,7 @@ class ExcludedVolumePotential
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-        : ExcludedVolumePotential(eps, /* defualt cutoff ratio = */ 2.0,
+        : ExcludedVolumePotential(eps, default_cutoff(),
             parameters, exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {}
     ExcludedVolumePotential(const real_type eps, const real_type cutoff_ratio,

@@ -13,6 +13,7 @@
 [[forcefields.global]]
 # ここにはPairInteractionなどによって要求されるパラメータが入ります。
 # ...
+cutoff     = 5.5
 parameters = [
     {index = 0, charge = 1.0},
     # 必要に応じて続きます...
@@ -23,6 +24,9 @@ parameters = [
 
 ここでの設定の他に、[`System`](System.md)の`attribute`として`temperature`と`ionic_strength`を指定する必要があります。
 
+- `cutoff`: 浮動小数点数型
+  - カットオフ距離を決めます。
+  - デバイ長に対しての相対値です。書かなければ、デフォルトの値になります。
 - `index`: 整数型
   - パラメータが何番目の粒子のものかを指定します。番号は0から始まります。
 - `charge`: 浮動小数点数型

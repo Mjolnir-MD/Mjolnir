@@ -35,11 +35,11 @@ class DihedralAngleInteraction final : public LocalInteractionBase<traitsT>
 
     DihedralAngleInteraction(const connection_kind_type kind,
                              const container_type& pot)
-        : kind_(kind), potentials(pot)
+        : kind_(kind), potentials_(pot)
     {}
     DihedralAngleInteraction(const connection_kind_type kind,
                              container_type&& pot)
-        : kind_(kind), potentials(std::move(pot))
+        : kind_(kind), potentials_(std::move(pot))
     {}
     ~DihedralAngleInteraction() = default;
 
@@ -51,13 +51,13 @@ class DihedralAngleInteraction final : public LocalInteractionBase<traitsT>
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential = ", potential_type::name(),
-                         ", number of dihedrals = ", potentials.size());
+                         ", number of dihedrals = ", potentials_.size());
         return;
     }
 
     void update(const system_type& sys) override
     {
-        for(auto& item : potentials)
+        for(auto& item : potentials_)
         {
             item.second.update(sys);
         }
@@ -72,10 +72,13 @@ class DihedralAngleInteraction final : public LocalInteractionBase<traitsT>
 
     void write_topology(topology_type&) const override;
 
+    container_type const& potentials() const noexcept {return potentials_;}
+    container_type&       potentials()       noexcept {return potentials_;}
+
    private:
 
     connection_kind_type kind_;
-    container_type potentials;
+    container_type potentials_;
 };
 
 
@@ -83,7 +86,7 @@ template<typename traitsT, typename pT>
 void
 DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const noexcept
 {
-    for(const auto& idxp : this->potentials)
+    for(const auto& idxp : this->potentials_)
     {
         const std::size_t idx0 = idxp.first[0];
         const std::size_t idx1 = idxp.first[1];
@@ -144,7 +147,7 @@ DihedralAngleInteraction<traitsT, potentialT>::calc_energy(
         const system_type& sys) const noexcept
 {
     real_type E = 0.0;
-    for(const auto& idxp : this->potentials)
+    for(const auto& idxp : this->potentials_)
     {
         const coordinate_type r_ij = sys.adjust_direction(
                 sys.position(idxp.first[0]) - sys.position(idxp.first[1]));
@@ -179,7 +182,7 @@ void DihedralAngleInteraction<traitsT, potentialT>::write_topology(
 {
     if(this->kind_.empty() || this->kind_ == "none") {return;}
 
-    for(const auto& idxp : this->potentials)
+    for(const auto& idxp : this->potentials_)
     {
         const auto i = idxp.first[0];
         const auto j = idxp.first[1];
@@ -198,7 +201,6 @@ void DihedralAngleInteraction<traitsT, potentialT>::write_topology(
 }// mjolnir
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-// explicitly specialize BondLengthInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/potential/local/ClementiDihedralPotential.hpp>

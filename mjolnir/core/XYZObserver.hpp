@@ -37,6 +37,11 @@ class XYZObserver final : public ObserverBase<traitsT>
     {
         // do nothing.
     }
+    void update(const std::size_t,  const real_type,
+                const system_type&, const forcefield_type&) override
+    {
+        // do nothing.
+    }
 
     void output(const std::size_t step, const real_type,
                 const system_type& sys, const forcefield_type&) override

@@ -82,25 +82,25 @@ class ExternalForceField
         return energy;
     }
 
-    // TODO simplify
-    std::string list_energy() const
+    // basically, it is called only once at the begenning of a simulation.
+    // this function do a lot of stuff, such as memory allocation, but it does
+    // not affect runtime efficiency so much.
+    std::vector<std::string> list_energy() const
     {
-        std::string retval;
+        std::vector<std::string> retval;
         for(const auto& i : interactions_)
         {
-            retval += i->name();
-            retval += ' ';
+            retval.push_back(i->name());
         }
         return retval;
     }
 
-    std::string dump_energy(const system_type& sys) const
+    std::vector<real_type> dump_energy(const system_type& sys) const
     {
-        std::string retval;
+        std::vector<real_type> retval;
         for(const auto& i : interactions_)
         {
-            retval += std::to_string(i->calc_energy(sys));
-            retval += ' ';
+            retval.push_back(i->calc_energy(sys));
         }
         return retval;
     }

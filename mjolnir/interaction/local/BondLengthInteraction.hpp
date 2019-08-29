@@ -34,11 +34,11 @@ class BondLengthInteraction final : public LocalInteractionBase<traitsT>
 
     BondLengthInteraction(const connection_kind_type kind,
                           const container_type& pot)
-        : kind_(kind), potentials(pot)
+        : kind_(kind), potentials_(pot)
     {}
     BondLengthInteraction(const connection_kind_type kind,
                           container_type&& pot)
-        : kind_(kind), potentials(std::move(pot))
+        : kind_(kind), potentials_(std::move(pot))
     {}
     ~BondLengthInteraction() override = default;
 
@@ -50,13 +50,13 @@ class BondLengthInteraction final : public LocalInteractionBase<traitsT>
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential = ", potential_type::name(),
-                         ", number of bonds = ", potentials.size());
+                         ", number of bonds = ", potentials_.size());
         return;
     }
 
     void update(const system_type& sys) override
     {
-        for(auto& item : potentials)
+        for(auto& item : potentials_)
         {
             item.second.update(sys);
         }
@@ -71,16 +71,19 @@ class BondLengthInteraction final : public LocalInteractionBase<traitsT>
 
     void write_topology(topology_type&) const override;
 
+    container_type const& potentials() const noexcept {return potentials_;}
+    container_type&       potentials()       noexcept {return potentials_;}
+
   private:
     connection_kind_type kind_;
-    container_type potentials;
+    container_type potentials_;
 };
 
 template<typename traitsT, typename potentialT>
 void BondLengthInteraction<traitsT, potentialT>::calc_force(
         system_type& sys) const noexcept
 {
-    for(const auto& idxp : this->potentials)
+    for(const auto& idxp : this->potentials_)
     {
         const std::size_t idx0 = idxp.first[0];
         const std::size_t idx1 = idxp.first[1];
@@ -106,7 +109,7 @@ BondLengthInteraction<traitsT, potentialT>::calc_energy(
         const system_type& sys) const noexcept
 {
     real_type E = 0.;
-    for(const auto& idxp : this->potentials)
+    for(const auto& idxp : this->potentials_)
     {
         E += idxp.second.potential(math::length(sys.adjust_direction(
                 sys.position(idxp.first[1]) - sys.position(idxp.first[0]))));
@@ -120,7 +123,7 @@ void BondLengthInteraction<traitsT, potentialT>::write_topology(
 {
     if(this->kind_.empty() || this->kind_ == "none") {return;}
 
-    for(const auto& idxp : this->potentials)
+    for(const auto& idxp : this->potentials_)
     {
         const auto i = idxp.first[0];
         const auto j = idxp.first[1];
@@ -131,8 +134,9 @@ void BondLengthInteraction<traitsT, potentialT>::write_topology(
 
 } // mjolnir
 
+#include <mjolnir/interaction/local/BondLengthGoContactInteraction.hpp>
+
 #ifdef MJOLNIR_SEPARATE_BUILD
-// explicitly specialize BondLengthInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
@@ -143,20 +147,17 @@ namespace mjolnir
 {
 
 // harmonic
-extern template class BondLengthInteraction<SimulatorTraits<double, UnlimitedBoundary>, HarmonicPotential<double>>;
-extern template class BondLengthInteraction<SimulatorTraits<float,  UnlimitedBoundary>, HarmonicPotential<float> >;
+extern template class BondLengthInteraction<SimulatorTraits<double, UnlimitedBoundary       >, HarmonicPotential<double>>;
+extern template class BondLengthInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, HarmonicPotential<float> >;
 extern template class BondLengthInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, HarmonicPotential<double>>;
 extern template class BondLengthInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, HarmonicPotential<float> >;
 
-// go-contact
-extern template class BondLengthInteraction<SimulatorTraits<double, UnlimitedBoundary>, GoContactPotential<double>>;
-extern template class BondLengthInteraction<SimulatorTraits<float,  UnlimitedBoundary>, GoContactPotential<float> >;
-extern template class BondLengthInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GoContactPotential<double>>;
-extern template class BondLengthInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GoContactPotential<float> >;
+// The case of GoContactPotential is manually specialized in BondLengthGoContactInteraction.hpp.
+// DO NOT specialize it here.
 
 // gaussian
-extern template class BondLengthInteraction<SimulatorTraits<double, UnlimitedBoundary>, GaussianPotential<double>>;
-extern template class BondLengthInteraction<SimulatorTraits<float,  UnlimitedBoundary>, GaussianPotential<float> >;
+extern template class BondLengthInteraction<SimulatorTraits<double, UnlimitedBoundary       >, GaussianPotential<double>>;
+extern template class BondLengthInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, GaussianPotential<float> >;
 extern template class BondLengthInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>>;
 extern template class BondLengthInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> >;
 
