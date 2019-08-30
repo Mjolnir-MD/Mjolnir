@@ -73,7 +73,7 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
             "expected value is one of the following.",
             "- \"Harmonic\" : well-known harmonic potential",
             "- \"GoContact\": r^12 - r^10 type native contact potential",
-            "- \"Gaussian\" : well-known gaussian potential"
+            "- \"Gaussian\" : well-known gaussian potential",
             "- \"3SPN2Bond\": bond length potential for 3SPN2"
             }));
     }
