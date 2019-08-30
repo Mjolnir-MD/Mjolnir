@@ -26,9 +26,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_noenv, T, test_types)
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
-            interaction             = "Pair"
-            potential               = "ExcludedVolume"
-            spatial_partition.type  = "Nothing"
             epsilon                 = 3.14
             ignore.molecule         = "Nothing"
             ignore.particles_within.bond    = 3
