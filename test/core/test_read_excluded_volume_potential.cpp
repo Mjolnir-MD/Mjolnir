@@ -77,9 +77,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_env, T, test_types)
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
-            interaction             = "Pair"
-            potential               = "ExcludedVolume"
-            spatial_partition.type  = "Nothing"
             epsilon                 = 3.14
             ignore.molecule         = "Nothing"
             ignore.particles_within.bond    = 3
@@ -134,9 +131,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_ignore_self, T, test_types)
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
-            interaction             = "Pair"
-            potential               = "ExcludedVolume"
-            spatial_partition.type  = "Nothing"
             epsilon                 = 3.14
             ignore.molecule         = "Self"
             ignore.particles_within.bond    = 3
@@ -175,9 +169,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_ignore_others, T, test_types)
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
-            interaction             = "Pair"
-            potential               = "ExcludedVolume"
-            spatial_partition.type  = "Nothing"
             epsilon                 = 3.14
             ignore.molecule         = "Others"
             ignore.particles_within.bond    = 3
@@ -216,9 +207,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_ignore_group, T, test_types)
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
-            interaction             = "Pair"
-            potential               = "ExcludedVolume"
-            spatial_partition.type  = "Nothing"
             epsilon                 = 3.14
             ignore.molecule         = "Nothing"
             ignore.particles_within.bond    = 3
