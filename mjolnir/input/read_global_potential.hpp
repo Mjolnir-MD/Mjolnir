@@ -262,7 +262,9 @@ read_hard_core_excluded_volume_potential(const toml::value& global)
 {
   MJOLNIR_GET_DEFAULT_LOGGER();
   MJOLNIR_LOG_FUNCTION();
-  using real_type = realT;
+  using potential_type = HardCoreExcludedVolumePotential<realT>;
+  using real_type      = typename potential_type::real_type;
+  using parameter_type = typename potential_type::parameter_type;
 
   const auto ignore = toml::find<toml::value>(global, "ignore");
 
@@ -278,10 +280,14 @@ read_hard_core_excluded_volume_potential(const toml::value& global)
                       global.as_table().at("env") : toml::value{};
 
     const real_type eps = toml::find<real_type>(global, "epsilon");
+    MJOLNIR_LOG_INFO("epsilon = ", eps);
+
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff());
+    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-    using parameter_type = typename HardCoreExcludedVolumePotential<real_type>::parameter_type;
 
     std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(ps.size());
@@ -291,7 +297,7 @@ read_hard_core_excluded_volume_potential(const toml::value& global)
       const auto core_radius = find_parameter<real_type>(param, env, "core_radius");
       const auto soft_shell_thickness = find_parameter<real_type>(param, env, "soft_shell_thickness");
 
-      params.emplace_back(idx, parameter_type{core_radius, soft_shell_thickness});
+      params.emplace_back(idx, parameter_type{soft_shell_thickness, core_radius});
       MJOLNIR_LOG_INFO("idx = ", idx, ", core_radius = ", core_radius,
                        ", soft_shell_thickness = ", soft_shell_thickness);
     }
