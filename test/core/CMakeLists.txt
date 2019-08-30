@@ -55,6 +55,7 @@ set(TEST_NAMES
     test_read_cosine_potential
     test_read_3spn2_bond_potential
     test_read_excluded_volume_potential
+    test_read_hard_core_excluded_volume_potential
     test_read_3spn2_excluded_volume_potential
     test_read_debye_huckel_potential
     test_read_lennard_jones_potential
