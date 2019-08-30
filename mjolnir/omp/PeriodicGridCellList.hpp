@@ -150,7 +150,7 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
                 assert(uniq == cell.second.end());
                 for(auto i : cell.second)
                 {
-                    assert(0 <= i && i <= cell_list_.size());
+                    assert(i <= cell_list_.size());
                 }
             }
             }
