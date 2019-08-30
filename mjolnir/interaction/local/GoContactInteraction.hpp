@@ -6,9 +6,9 @@
 namespace mjolnir
 {
 
-// A specialization of ContactInteraction for GoContact.
-//
-// Force calculation of GoContact can be optimized when explicitly specialized.
+// It is a specialization of ContactInteraction for GoContactPotential.
+// In the case of GoContactPotential, we can omit `sqrt` call that is
+// normally used to calculate distance because we only needs the squared distance.
 template<typename realT, template<typename, typename> class boundaryT>
 class ContactInteraction<
     SimulatorTraits<realT, boundaryT>,

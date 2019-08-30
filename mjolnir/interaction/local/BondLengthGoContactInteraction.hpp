@@ -6,6 +6,9 @@
 namespace mjolnir
 {
 
+// It is a specialization of BondLengthInteraction for GoContactPotential.
+// In the case of GoContactPotential, we can omit `sqrt` call that is
+// normally used to calculate distance because we only needs the squared distance.
 template<typename realT, template<typename, typename> class boundaryT>
 class BondLengthInteraction<
     SimulatorTraits<realT, boundaryT>,

@@ -10,6 +10,19 @@
 namespace mjolnir
 {
 
+// Normal pair interaction.
+//
+// For the following potentials, there are specialized definitions to speedup
+// calculation.
+// - ExcludedVolume
+//   - GlobalPairExcludedVolumeInteraction.hpp
+// - LennardJones
+//   - GlobalPairLennardJonesInteraction.hpp
+// - UniformLennardJones
+//   - GlobalPairUniformLennardJonesInteraction.hpp
+// By combining potential calculations, we can omit `sqrt()` that is usually
+// used to calculate the distance between particles.
+//
 template<typename traitsT, typename potentialT>
 class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
 {

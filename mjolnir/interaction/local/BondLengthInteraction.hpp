@@ -10,7 +10,15 @@
 namespace mjolnir
 {
 
-/*! @brief calculate energy and force of Bond length type local interaction */
+// Bond Length dependent interaction.
+//
+// For the following potentials, there are specialized definitions to speedup
+// calculation.
+// - GoContactPotential
+//   - BondLengthGoContactInteraction.hpp
+// By combining potential calculations, we can omit `sqrt()` that is usually
+// used to calculate the distance between particles.
+//
 template<typename traitsT, typename potentialT>
 class BondLengthInteraction final : public LocalInteractionBase<traitsT>
 {

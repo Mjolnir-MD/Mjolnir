@@ -8,7 +8,9 @@
 namespace mjolnir
 {
 
-// specialization for GlobalPair<LennardJones>
+// It is a specialization of GlobalPairInteraction for UniformLennardJones.
+// In the case of UniformLennardJones, we can omit `sqrt` call that is
+// normally used to calculate distance because we only needs the squared distance.
 template<typename realT, template<typename, typename> class boundaryT>
 class GlobalPairInteraction<
     SimulatorTraits<realT, boundaryT>,

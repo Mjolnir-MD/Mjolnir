@@ -17,6 +17,14 @@ namespace mjolnir
 // considers any of the interactions occasionally become distant than the cutoff
 // range. It becomes faster when a number of the contacts are not formed
 // throughout the simulation time.
+//
+// For the following potentials, there are specialized definitions to speedup
+// calculation.
+// - GoContactPotential
+//   - GoContactInteraction.hpp
+// By combining potential calculations, we can omit `sqrt()` that is usually
+// used to calculate the distance between particles.
+//
 template<typename traitsT, typename potentialT>
 class ContactInteraction final : public LocalInteractionBase<traitsT>
 {
