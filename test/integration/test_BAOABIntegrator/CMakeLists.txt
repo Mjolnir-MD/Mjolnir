@@ -13,4 +13,8 @@ endif()
 if(OpenMP_FOUND AND USE_OPENMP)
     message(STATUS "adding OpenMP flags ${OpenMP_CXX_FLAGS} to test_BAOABIntegrator ...")
     target_link_libraries(test_BAOABIntegrator ${OpenMP_CXX_LIBRARIES})
+
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
+        target_link_libraries(${TEST_NAME} PUBLIC -parallel)
+    endif()
 endif()
