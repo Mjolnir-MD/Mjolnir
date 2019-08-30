@@ -17,6 +17,11 @@ namespace mjolnir
 // This class is an implementation of the excluded volume term used in
 // Clementi's off-lattice Go-like model (Clement et al., 2000) and AICG2+ model
 // (Li et al., 2014)
+
+// Note: When you use ExcludedVolume with GlobalPairInteraction, the simulator
+// doesn't uses this class, because it uses the potential and derivative
+// calculation method in GlobalPairInteraction class specializing for excluded
+// volume potential.
 template<typename realT>
 class ExcludedVolumePotential
 {
@@ -106,6 +111,9 @@ class ExcludedVolumePotential
 
     real_type potential(const real_type r, const pair_parameter_type& d) const noexcept
     {
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+        MJOLNIR_LOG_FUNCTION_DEBUG();
+
         if(d * this->cutoff_ratio_ < r){return 0.0;}
 
         const real_type d_r  = d / r;
