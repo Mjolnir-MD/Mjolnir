@@ -41,7 +41,7 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         : cutoff_(0), margin_(1), current_margin_(-1),
           r_x_(-1), r_y_(-1), r_z_(-1), dim_x_(0), dim_y_(0), dim_z_(0)
     {}
-    ~PeriodicGridCellList() override = default;
+    ~PeriodicGridCellList() override {}
     PeriodicGridCellList(PeriodicGridCellList const&) = default;
     PeriodicGridCellList(PeriodicGridCellList &&)     = default;
     PeriodicGridCellList& operator=(PeriodicGridCellList const&) = default;

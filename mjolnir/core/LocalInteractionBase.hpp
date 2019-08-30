@@ -21,7 +21,7 @@ class LocalInteractionBase
 
   public:
 
-    virtual ~LocalInteractionBase() = default;
+    virtual ~LocalInteractionBase() {}
 
     virtual void initialize(const system_type&) = 0;
     virtual void update    (const system_type&) = 0;

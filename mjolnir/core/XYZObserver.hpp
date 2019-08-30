@@ -30,7 +30,7 @@ class XYZObserver final : public ObserverBase<traitsT>
         this->clear_file(this->xyz_name_);
         this->clear_file(this->vel_name_);
     }
-    ~XYZObserver() override = default;
+    ~XYZObserver() override {}
 
     void initialize(const std::size_t,  const real_type,
                     const system_type&, const forcefield_type&) override

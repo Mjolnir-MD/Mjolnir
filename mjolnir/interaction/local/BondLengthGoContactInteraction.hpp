@@ -38,7 +38,7 @@ class BondLengthInteraction<
                           container_type&& pot)
         : kind_(kind), potentials_(std::move(pot))
     {}
-    ~BondLengthInteraction() override = default;
+    ~BondLengthInteraction() override {}
 
     void calc_force(system_type& sys) const noexcept override
     {

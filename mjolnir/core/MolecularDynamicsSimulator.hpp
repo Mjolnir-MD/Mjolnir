@@ -28,7 +28,7 @@ class MolecularDynamicsSimulator final : public SimulatorBase
       system_(std::move(sys)), ff_(std::move(ff)),
       integrator_(std::move(integr)), observers_(std::move(obs))
     {}
-    ~MolecularDynamicsSimulator() override = default;
+    ~MolecularDynamicsSimulator() override {}
 
     void initialize() override;
     bool step()       override;

@@ -31,7 +31,7 @@ class ExternalDistanceInteraction<
     ExternalDistanceInteraction(shape_type&& shape, potential_type&& pot)
         : shape_(std::move(shape)), potential_(std::move(pot))
     {}
-    ~ExternalDistanceInteraction() override = default;
+    ~ExternalDistanceInteraction() override {}
 
     // calculate force, update spatial partition (reduce margin) inside.
     void calc_force (system_type& sys) const noexcept override

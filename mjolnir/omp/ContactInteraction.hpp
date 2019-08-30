@@ -47,7 +47,7 @@ class ContactInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
                        const real_type            margin = 0.5)
         : kind_(kind), potentials(std::move(pot)), margin_(margin)
     {}
-    ~ContactInteraction() override = default;
+    ~ContactInteraction() override {}
 
     void      calc_force (system_type& sys)       const noexcept override
     {
