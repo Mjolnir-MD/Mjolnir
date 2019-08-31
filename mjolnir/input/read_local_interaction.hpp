@@ -340,7 +340,30 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
     using indices_type   = std::array<std::size_t, 3>; // {S, B3, B5}
     using parameter_type = typename potential_type::parameter_type;
 
-    potential_type potential;
+    potential_type potential = [](const toml::value& pot_) -> potential_type
+    {
+        const auto& pot = toml::get<std::string>(pot_);
+        if(pot == "3SPN2")
+        {
+            ThreeSPN2BaseStackingPotentialParameter<real_type> para_3SPN2;
+            return potential_type(para_3SPN2);
+        }
+        else if(pot == "3SPN2C" || pot == "3SPN2.C")
+        {
+            ThreeSPN2CBaseStackingPotentialParameter<real_type> para_3SPN2C;
+            return potential_type(para_3SPN2C);
+        }
+        else
+        {
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "mjolnir::read_local_3spn2_base_stacking_interaction: "
+                "invalid potential", pot_, "here", {
+                "expected value is one of the following.",
+                "- \"3SPN2\"  : The general 3SPN2 parameter set.",
+                "- \"3SPN2.C\": The parameter set optimized to reproduce curveture of dsDNA."
+                }));
+        }
+    }(toml::find_or(local, "potential", toml::value(std::string("3SPN2"))));
 
     const auto& params = toml::find<toml::array>(local, "parameters");
     MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");

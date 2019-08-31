@@ -110,7 +110,8 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
     using parameter_type      = typename potential_type::parameter_type;
 
     // [[forcefields.global]]
-    // interaction = "3SPNBaseBase"
+    // interaction = "3SPN2BaseBase"
+    // potential   = "3SPN2"
     // spatial_partition = {type = "CellList", margin = 1.0}
     // parameters = [
     // {nucleotide_index = 0, S = 0, B = 1, base = "A", B5 = "none", B3 = 4},
@@ -180,10 +181,37 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
         const auto& ignore = toml::find<toml::value>(global, "ignore");
         ignore_grp = read_ignored_group(ignore);
     }
-    potential_type potential(std::move(params), ignore_grp);
 
-    return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(std::move(potential),
-            read_spatial_partition<traitsT, potential_type>(global));
+    const auto pot = toml::find<std::string>(global, "potential", "3SPN2");
+
+    if(pot == "3SPN2")
+    {
+        ThreeSPN2BaseBaseGlobalPotentialParameter<real_type> para_3SPN2;
+        potential_type potential(para_3SPN2, std::move(params), ignore_grp);
+
+        return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(
+                std::move(potential),
+                read_spatial_partition<traitsT, potential_type>(global));
+    }
+    else if(pot == "3SPN2C" || pot == "3SPN2.C")
+    {
+        ThreeSPN2CBaseBaseGlobalPotentialParameter<real_type> para_3SPN2C;
+        potential_type potential(para_3SPN2C, std::move(params), ignore_grp);
+
+        return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(
+                std::move(potential),
+                read_spatial_partition<traitsT, potential_type>(global));
+    }
+    else
+    {
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_local_3spn2_base_stacking_interaction: "
+            "invalid potential", toml::find(global, "potential"), "here", {
+            "expected value is one of the following.",
+            "- \"3SPN2\"  : The general 3SPN2 parameter set.",
+            "- \"3SPN2.C\": The parameter set optimized to reproduce curveture of dsDNA."
+            }));
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -215,7 +243,7 @@ read_global_interaction(const toml::value& global)
             toml::find<toml::value>(global, "interaction"), "here", {
             "expected value is one of the following.",
             "- \"Pair\": well-known pair interaction depends only on the distance",
-            "- \"3SPN2BaseBase\": Base-Base interaction for 3SPN2 DNA model"
+            "- \"3SPN2BaseBase\": Base pair and cross stacking interaction for 3SPN2 DNA model"
             }));
     }
 }
