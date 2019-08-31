@@ -14,6 +14,10 @@ namespace mjolnir
 // - D. M. Hinckley, G. S. Freeman, J. K. Whitmer, and J. J. de Pablo
 //   J. Chem. Phys. (2013)
 //
+// And also 3SPN2.C model.
+// - G. S. Freeman, D. M. Hinckley, J. P. Lequieu, J. K. Whitmer, and J. J. de Pablo
+//   J. Chem. Phys. (2014)
+//
 // The potential function closely tied to the interaction, so this interaction
 // class is implemented with its own, uninterchangeable potential class.
 // It does not take any potential class as a template parameter because
