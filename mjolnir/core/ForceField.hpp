@@ -38,11 +38,14 @@ class ForceField
     // this modify system::topology by using local interaction info.
     void initialize(system_type& sys)
     {
-        // first, fetch current topology
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        MJOLNIR_LOG_INFO("writing current topology");
         local_.write_topology(sys.topology());
         sys.topology().construct_molecules();
 
-        // based on the topology, make exclusion list
+        MJOLNIR_LOG_INFO("initializing forcefields");
         local_   .initialize(sys);
         global_  .initialize(sys);
         external_.initialize(sys);
