@@ -36,6 +36,7 @@ class ExternalForceField
     void emplace(interaction_ptr&& interaction)
     {
         interactions_.push_back(std::move(interaction));
+        return;
     }
 
     void initialize(const system_type& sys)
@@ -47,6 +48,7 @@ class ExternalForceField
             MJOLNIR_LOG_INFO("initializing ", item->name());
             item->initialize(sys);
         }
+        return;
     }
 
     // to re-calculate parameters like temperature, ionic concentration, etc...
@@ -56,6 +58,7 @@ class ExternalForceField
         {
             item->update(sys);
         }
+        return;
     }
 
     // to reduce margin of neighbor list, and re-construct the list if needed
@@ -65,6 +68,7 @@ class ExternalForceField
         {
             item->update_margin(dmargin, sys);
         }
+        return;
     }
 
     void calc_force(system_type& sys) const noexcept

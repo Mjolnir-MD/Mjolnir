@@ -47,6 +47,7 @@ class LocalForceField
             MJOLNIR_LOG_INFO("initializing ", item->name());
             item->initialize(sys);
         }
+        return;
     }
 
     // to re-calculate parameters like temperature, ionic concentration, etc...
