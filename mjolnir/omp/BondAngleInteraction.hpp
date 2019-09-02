@@ -40,7 +40,7 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
                          container_type&& pot)
         : kind_(kind), potentials(std::move(pot))
     {}
-    ~BondAngleInteraction() override = default;
+    ~BondAngleInteraction() override {}
 
     void      calc_force (system_type& sys)        const noexcept override
     {

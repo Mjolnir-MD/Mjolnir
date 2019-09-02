@@ -19,7 +19,7 @@ class ObserverBase
 
   public:
     ObserverBase() = default;
-    virtual ~ObserverBase() = default;
+    virtual ~ObserverBase() {}
 
     // open files, write header and so on.
     virtual void initialize(const std::size_t total_step, const real_type dt,

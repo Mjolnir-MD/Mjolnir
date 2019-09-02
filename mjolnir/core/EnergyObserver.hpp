@@ -28,7 +28,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
         // clear files and throw an error if the files cannot be opened.
         this->clear_file(this->file_name_);
     }
-    ~EnergyObserver() override = default;
+    ~EnergyObserver() override {}
 
     void initialize(const std::size_t, const real_type,
                     const system_type&, const forcefield_type& ff) override

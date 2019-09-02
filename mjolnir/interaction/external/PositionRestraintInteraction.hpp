@@ -37,7 +37,7 @@ class PositionRestraintInteraction final
     explicit PositionRestraintInteraction(potential_container_type&& pots)
         : potentials_(std::move(pots))
     {}
-    ~PositionRestraintInteraction() override = default;
+    ~PositionRestraintInteraction() override {}
 
     void      calc_force (system_type&)       const noexcept override;
     real_type calc_energy(system_type const&) const noexcept override;

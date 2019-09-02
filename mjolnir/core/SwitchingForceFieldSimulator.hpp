@@ -64,7 +64,7 @@ class SwitchingForceFieldSimulator final : public SimulatorBase
           forcefield_index_(std::move(forcefield_index)),
           schedule_(std::move(schedule))
     {}
-    ~SwitchingForceFieldSimulator() override = default;
+    ~SwitchingForceFieldSimulator() override {}
 
     void initialize() override;
     bool step()       override;

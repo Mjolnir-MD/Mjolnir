@@ -41,5 +41,11 @@ foreach(TEST_NAME ${TEST_NAMES})
         target_link_libraries(${TEST_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
     endif (Boost_UNIT_TEST_FRAMEWORK_FOUND)
 
+    if(OpenMP_FOUND AND USE_OPENMP)
+        if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
+            target_link_libraries(${TEST_NAME} PUBLIC -parallel)
+        endif()
+    endif()
+
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} --log_level=warning WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 endforeach(TEST_NAME)

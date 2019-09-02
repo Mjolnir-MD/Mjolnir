@@ -56,7 +56,7 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
                        const real_type            margin = 0.5)
         : kind_(kind), potentials_(std::move(pot)), margin_(margin)
     {}
-    ~ContactInteraction() override = default;
+    ~ContactInteraction() override {}
 
     void      calc_force (system_type&)       const noexcept override;
     real_type calc_energy(const system_type&) const noexcept override;
