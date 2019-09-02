@@ -113,9 +113,6 @@ class ExcludedVolumePotential
 
     real_type potential(const real_type r, const pair_parameter_type& d) const noexcept
     {
-        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
-        MJOLNIR_LOG_FUNCTION_DEBUG();
-
         if(d * this->cutoff_ratio_ < r){return 0.0;}
 
         const real_type d_r  = d / r;
