@@ -34,8 +34,8 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
   public:
 
     System(const std::size_t num_particles, const boundary_type& bound)
-        : boundary_(bound), topology_(num_particles),
-          attributes_(), num_particles_(num_particles),
+        : velocity_initialized_(false), boundary_(bound),
+          topology_(num_particles), attributes_(), num_particles_(num_particles),
           masses_   (num_particles), rmasses_   (num_particles),
           positions_(num_particles), velocities_(num_particles),
           forces_master_(num_particles),
@@ -146,8 +146,12 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     real_type& attribute(const std::string& key)       {return attributes_[key];}
     bool   has_attribute(const std::string& key) const {return attributes_.count(key) == 1;}
 
+    bool  velocity_initialized() const noexcept {return velocity_initialized_;}
+    bool& velocity_initialized()       noexcept {return velocity_initialized_;}
+
   private:
 
+    bool           velocity_initialized_;
     boundary_type  boundary_;
     topology_type  topology_;
     attribute_type attributes_;
