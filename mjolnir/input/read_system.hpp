@@ -81,22 +81,69 @@ System<traitsT> read_system_from_table(const toml::value& system)
 
     System<traitsT> sys(particles.size(), read_boundary<traitsT>(boundary));
 
+    if(not particles.empty())
+    {
+        const auto& p = particles.front().as_table();
+        // if the first particle has velocity, mjolnir assumes that velocity is
+        // already initialized (velocity generation not required).
+        sys.velocity_initialized() = (p.count("vel")      != 0) ||
+                                     (p.count("velocity") != 0);
+    }
+
+    const auto find_either = [](const toml::value& v,
+        const std::string& key1, const std::string& key2) -> const toml::value&
+    {
+        const auto& table = v.as_table();
+        if(table.count(key1) != 0 && table.count(key2) != 0)
+        {
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "key duplicates.", table.at(key1), "here", table.at(key2),
+                "this conflicts the above value definition"));
+        }
+        if(table.count(key1)) {return table.at(key1);}
+        if(table.count(key2)) {return table.at(key2);}
+
+        std::ostringstream oss;
+        oss << "[error] both keys \"" << key1 << "\" and \"" << key2
+            << "\" not found.";
+        throw_exception<std::out_of_range>(
+                toml::format_error(oss.str(), v, "in this table"));
+    };
+
     MJOLNIR_LOG_NOTICE(particles.size(), " particles are found.");
     for(std::size_t i=0; i<particles.size(); ++i)
     {
         using vec_type = std::array<real_type, 3>;
         const auto& p = particles.at(i);
 
-        sys.mass(i)     = toml::expect<real_type>(p, "m").or_other(
-                          toml::expect<real_type>(p, "mass")).unwrap();
-        sys.rmass(i)    = 1.0 / sys.mass(i);
-        sys.position(i) = toml::expect<vec_type>(p, "pos").or_other(
-                          toml::expect<vec_type>(p, "position")).unwrap();
-        sys.velocity(i) = toml::expect<vec_type>(p, "vel").or_other(
-                          toml::expect<vec_type>(p, "velocity")).unwrap();
-        sys.force(i)    = math::make_coordinate<coordinate_type>(0, 0, 0);
-        sys.name(i)     = toml::expect<std::string>(p, "name").unwrap_or("X");
-        sys.group(i)    = toml::expect<std::string>(p, "group").unwrap_or("NONE");
+        sys.mass(i)     = toml::get<real_type>(find_either(p, "m",   "mass"));
+        sys.position(i) = toml::get< vec_type>(find_either(p, "pos", "position"));
+        sys.velocity(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
+
+        if(sys.velocity_initialized()) // it requires `velocity`.
+        {
+            sys.velocity(i) = toml::get<vec_type>(find_either(p, "vel", "velocity"));
+        }
+        else // velocity should not be there. check it.
+        {
+            if(p.as_table().count("vel") != 0 || p.as_table().count("velocity") != 0)
+            {
+                throw_exception<std::runtime_error>(toml::format_error("[error]"
+                    "read_system(): missing (or extraneous) velocity input",
+                    particles.front(), "this does not have `velocity` field",
+                    p, "but this has `velocity` field", {
+                    "To specify the initial velocity, it is necessary to give "
+                    "the value at all particles.",
+                    "To generate the initial velocity with a random number, "
+                    "all the `velocity` fields must be empty."
+                    }));
+            }
+        }
+
+        sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
+        sys.name(i)  = toml::find_or<std::string>(p, "name",  "X"   );
+        sys.group(i) = toml::find_or<std::string>(p, "group", "NONE");
+        sys.rmass(i) = 1.0 / sys.mass(i);
 
         MJOLNIR_LOG_INFO("mass = ",        sys.mass(i),
                           ", position = ", sys.position(i),
@@ -105,8 +152,6 @@ System<traitsT> read_system_from_table(const toml::value& system)
                           ", name = ",     sys.name(i),
                           ", group = ",    sys.group(i));
     }
-    MJOLNIR_LOG_NOTICE("done.");
-
     for(const auto& attr : toml::find<toml::table>(system, "attributes"))
     {
         const real_type attribute = toml::get<real_type>(attr.second);
