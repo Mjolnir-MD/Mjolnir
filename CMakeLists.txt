@@ -98,6 +98,12 @@ if(APPLE)
 endif()
 
 if(SEPARATE_BUILD)
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
+        message(WARNING
+            "-DSEPARATE_BUILD=ON option may slow down the runtime efficiency.\n"
+            "This flag is for developers. If you don't recompile many times, "
+            "remove the flag, delete the CMakeCache.txt and run cmake again.")
+    endif()
     add_definitions(-DMJOLNIR_SEPARATE_BUILD)
 #     add_definitions(-flto)
 endif()
