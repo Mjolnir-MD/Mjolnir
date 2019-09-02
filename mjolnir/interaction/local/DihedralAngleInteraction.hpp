@@ -41,7 +41,7 @@ class DihedralAngleInteraction final : public LocalInteractionBase<traitsT>
                              container_type&& pot)
         : kind_(kind), potentials_(std::move(pot))
     {}
-    ~DihedralAngleInteraction() = default;
+    ~DihedralAngleInteraction() {}
 
     void      calc_force (system_type&)       const noexcept override;
     real_type calc_energy(const system_type&) const noexcept override;

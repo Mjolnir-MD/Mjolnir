@@ -33,7 +33,7 @@ class DCDObserver final : public ObserverBase<traitsT>
         this->clear_file(this->pos_name_);
         this->clear_file(this->vel_name_);
     }
-    ~DCDObserver() override = default;
+    ~DCDObserver() override {}
 
     void initialize(const std::size_t total_step, const real_type dt,
                     const system_type& sys, const forcefield_type& ff) override

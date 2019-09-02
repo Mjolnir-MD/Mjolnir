@@ -17,7 +17,7 @@ class GlobalInteractionBase
     using boundary_type   = typename traits_type::boundary_type;
 
   public:
-    virtual ~GlobalInteractionBase() = default;
+    virtual ~GlobalInteractionBase() {}
 
     virtual void initialize(const system_type&) = 0;
     virtual void update    (const system_type&) = 0;

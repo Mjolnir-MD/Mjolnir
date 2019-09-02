@@ -32,7 +32,7 @@ class BondLengthInteraction<
   public:
 
     BondLengthInteraction() = default;
-    ~BondLengthInteraction() override = default;
+    ~BondLengthInteraction() override {}
 
     BondLengthInteraction(const connection_kind_type kind,
                           const container_type& pot)

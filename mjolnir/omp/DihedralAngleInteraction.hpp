@@ -41,7 +41,7 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
                              container_type&& pot)
         : kind_(kind), potentials(std::move(pot))
     {}
-    ~DihedralAngleInteraction() = default;
+    ~DihedralAngleInteraction() override {}
 
     void      calc_force (system_type& sys)       const noexcept override
     {

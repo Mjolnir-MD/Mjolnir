@@ -44,7 +44,7 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
     ThreeSPN2BaseBaseInteraction(potential_type&& pot, partition_type&& part)
         : potential_(std::move(pot)), partition_(std::move(part))
     {}
-    ~ThreeSPN2BaseBaseInteraction() = default;
+    ~ThreeSPN2BaseBaseInteraction() {}
 
     void initialize(const system_type& sys) override
     {

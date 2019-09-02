@@ -36,7 +36,7 @@ class DummyInteraction final : public LocalInteractionBase<traitsT>
     DummyInteraction(const connection_kind_type& kind, const container_type& cont)
         : kind_(kind), potentials_(cont)
     {}
-    ~DummyInteraction() override = default;
+    ~DummyInteraction() override {}
 
     void      calc_force (system_type&)       const noexcept override {return;}
     real_type calc_energy(const system_type&) const noexcept override {return 0;}
