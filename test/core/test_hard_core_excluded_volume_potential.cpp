@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "test_excluded_volume_potential"
+#define BOOST_TEST_MODULE "test_hard_core_excluded_volume_potential"
 
 #ifdef BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
