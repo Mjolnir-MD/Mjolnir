@@ -7,6 +7,7 @@
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/math/vector_util.hpp>
 #include <mjolnir/input/read_path.hpp>
+#include <mjolnir/input/utility.hpp>
 
 namespace mjolnir
 {
@@ -21,11 +22,12 @@ template<typename realT, typename coordT>
 struct read_boundary_impl<UnlimitedBoundary<realT, coordT>>
 {
     static UnlimitedBoundary<realT, coordT>
-    invoke(const toml::value&)
+    invoke(const toml::value& v)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("no boundary is set. unlimited");
+        check_keys_available(v, {}); // no available keys
         return UnlimitedBoundary<realT, coordT>{};
     }
 };
@@ -39,6 +41,7 @@ struct read_boundary_impl<CuboidalPeriodicBoundary<realT, coordT>>
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("shape of periodic boundary is cuboid");
+        check_keys_available(boundary, {"upper"_s, "lower"_s});
 
         const auto upper = toml::find<std::array<realT, 3>>(boundary, "upper");
         const auto lower = toml::find<std::array<realT, 3>>(boundary, "lower");
@@ -76,6 +79,8 @@ System<traitsT> read_system_from_table(const toml::value& system)
 
     MJOLNIR_LOG_NOTICE("reading system ...");
 
+    check_keys_available(system, {"boundary_shape"_s, "attributes"_s, "particles"_s});
+
     const auto& boundary  = toml::find<toml::value>(system, "boundary_shape");
     const auto& particles = toml::find<toml::array>(system, "particles");
 
@@ -86,6 +91,9 @@ System<traitsT> read_system_from_table(const toml::value& system)
     {
         using vec_type = std::array<real_type, 3>;
         const auto& p = particles.at(i);
+
+        check_keys_available(p, {"mass"_s, "m"_s, "position"_s, "pos"_s,
+                "velocity"_s, "vel"_s, "name"_s, "group"_s});
 
         sys.mass(i)     = toml::expect<real_type>(p, "m").or_other(
                           toml::expect<real_type>(p, "mass")).unwrap();
