@@ -31,7 +31,7 @@ inline bool check_keys_available(const toml::value& table,
         {
             std::ostringstream oss;
             oss << "unknown value \"" << kv.first << "\" found. this "
-                << kv.second.type() << " will never used.";
+                << kv.second.type() << " will never be used.";
             MJOLNIR_LOG_WARN(toml::format_error(oss.str(),
                         kv.second, "this will be ignored"));
             all_available = false;
