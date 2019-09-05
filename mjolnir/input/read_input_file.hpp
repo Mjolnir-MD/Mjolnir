@@ -6,6 +6,7 @@
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <mjolnir/input/utility.hpp>
 #include <mjolnir/input/read_units.hpp>
 #include <mjolnir/input/read_path.hpp>
 
@@ -142,23 +143,10 @@ read_input_file(const std::string& filename)
     MJOLNIR_LOG_FUNCTION();
     MJOLNIR_LOG_NOTICE("the log file is `", logger_name, '`');
 
-    // Check top-level toml-values. Since it uses logger, we need to do here.
-    const auto top_level_keys = {
-        "files"_s, "units"_s, "simulator"_s, "systems"_s, "forcefields"_s
-    };
-    for(const auto& kv : root.as_table())
-    {
-        const auto found = std::find(
-                top_level_keys.begin(), top_level_keys.end(), kv.first);
-        if(found == top_level_keys.end())
-        {
-            std::ostringstream oss;
-            oss << "unknown value \"" << kv.first << "\" found. this "
-                << kv.second.type() << " will never used.";
-            MJOLNIR_LOG_WARN(toml::format_error(
-                    oss.str(), kv.second, "this will be ignored"));
-        }
-    }
+    // Check top-level toml-values. Since it uses logger to warn,
+    // we need to call it after `MJOLNIR_SET_DEFAULT_LOGGER(logger_name)`.
+    check_keys_available(root, {"files"_s, "units"_s, "simulator"_s,
+                                "systems"_s, "forcefields"_s});
 
     // the most of important flags are defined in [simulator], like
     // `precision = "float"`, `boundary_type = "Unlimited"`.
