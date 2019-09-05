@@ -15,6 +15,7 @@ if(OpenMP_FOUND AND USE_OPENMP)
     target_link_libraries(test_BAOABIntegrator ${OpenMP_CXX_LIBRARIES})
 
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
-        target_link_libraries(${TEST_NAME} PUBLIC -parallel)
+        # After CMake 3.13, we can use target_link_options
+        set_target_properties(test_BAOABIntegrator PROPERTIES LINK_FLAGS "-parallel")
     endif()
 endif()

@@ -17,7 +17,8 @@ if(OpenMP_FOUND AND USE_OPENMP)
     target_link_libraries(mjolnir ${OpenMP_CXX_LIBRARIES})
 
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
-        target_link_libraries(${TEST_NAME} PUBLIC -parallel)
+        # After CMake 3.13, we can use target_link_options
+        set_target_properties(mjolnir PROPERTIES LINK_FLAGS "-parallel")
     endif()
 else()
     message(STATUS "Ignoring OpenMP ...")
