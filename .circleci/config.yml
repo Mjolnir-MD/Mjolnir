@@ -25,7 +25,7 @@ jobs:
               rm -rf mathjax/
               git clone git@github.com:mathjax/MathJax.git ./mathjax
               cd mathjax/
-              git checkuout refs/tags/2.7.6
+              git checkout refs/tags/2.7.6
               cd ../../
               cd node_modules/mathjax-node/lib
               sed -i -e 's/processExpression/toSpeech/g' mj-single.js
