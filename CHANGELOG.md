@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.5.1
+
+### Fixed
+
+- add a workaround for intel compiler linker errors
+- add a missing newline in an error message
+
+### Added
+
+- warn if unknown keys appear in a toml file
+
 ## 1.5.0
 
 ### Added
