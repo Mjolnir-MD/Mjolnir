@@ -10,6 +10,8 @@
 
 BOOST_AUTO_TEST_CASE(EXV_double)
 {
+    mjolnir::LoggerManager::set_default_logger("test_excluded_volume_potential.log");
+
     using real_type = double;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
     using group_id_type    = mjolnir::Topology::group_id_type;
