@@ -17,7 +17,7 @@ U(r) = 4\epsilon \left[\left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{
 cutoff     = 2.5
 sigma      = 2.0
 epsilon    = 1.0
-parameters = [ # 省略可能です。省略すると、全ての粒子に適用されます。
+parameters = [
     {index = 0},
     {index = 1},
     # 必要に応じて続きます...
@@ -34,4 +34,4 @@ parameters = [ # 省略可能です。省略すると、全ての粒子に適用
 - `epsilon`: 浮動小数点数型
   - エネルギーに対応するパラメータです。
 - `parameters.index`: 整数型
-  - パラメータが何番目の粒子のものかを指定します。番号は0から始まります。
+  - 何番目にこの力場を作用させるか指定します。番号は0から始まります。
