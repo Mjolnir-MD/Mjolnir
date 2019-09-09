@@ -14,6 +14,10 @@ if(OpenMP_FOUND AND USE_OPENMP)
     message(STATUS "adding OpenMP flags ${OpenMP_CXX_FLAGS} to test_BAOABIntegrator ...")
     target_link_libraries(test_BAOABIntegrator ${OpenMP_CXX_LIBRARIES})
 
+    # here use the same options as src/mjolnir because it is an integration test.
+    set_target_properties(test_BAOABIntegrator PROPERTIES
+        COMPILE_FLAGS "${MJOLNIR_OPTIMIZATON_FLAGS}")
+
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
         # After CMake 3.13, we can use target_link_options
         set_target_properties(test_BAOABIntegrator PROPERTIES LINK_FLAGS "-parallel")
