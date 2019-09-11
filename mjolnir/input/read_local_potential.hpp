@@ -32,6 +32,8 @@ read_harmonic_potential(const toml::value& param, const toml::value& env)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
+    check_keys_available(param, {"indices", "k", "v0"});
+
     const auto k  = find_parameter<real_type>(param, env, "k" );
     const auto v0 = find_parameter<real_type>(param, env, "v0");
 
@@ -45,6 +47,8 @@ read_go_contact_potential(const toml::value& param, const toml::value& env)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
+    check_keys_available(param, {"indices", "k", "v0"});
+
     const auto k  = find_parameter<real_type>(param, env, "k");
     const auto v0 = find_parameter<real_type>(param, env, "v0");
 
@@ -58,6 +62,8 @@ read_gaussian_potential(const toml::value& param, const toml::value& env)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
+    check_keys_available(param, {"indices", "k", "v0", "sigma", u8"σ"});
+
     const auto v0    = find_parameter<real_type>(param, env, "v0");
     const auto k     = find_parameter<real_type>(param, env, "k");
     const auto sigma = find_parameter<real_type>(param, env, "sigma", u8"σ");
@@ -73,6 +79,8 @@ read_periodic_gaussian_potential(const toml::value& param, const toml::value& en
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
+    check_keys_available(param, {"indices", "k", "v0", "sigma", u8"σ"});
+
     const auto v0    = find_parameter<real_type>(param, env, "v0");
     const auto k     = find_parameter<real_type>(param, env, "k");
     const auto sigma = find_parameter<real_type>(param, env, "sigma", u8"σ");
@@ -88,6 +96,7 @@ read_flexible_local_angle_potential(const toml::value& param, const toml::value&
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
+    check_keys_available(param, {"indices", "k", "y", "d2y", "x"});
     const auto k     = find_parameter<real_type                >(param, env, "k");
     const auto term1 = find_parameter<std::array<real_type, 10>>(param, env, "y");
     const auto term2 = find_parameter<std::array<real_type, 10>>(param, env, "d2y");
@@ -124,6 +133,8 @@ read_clementi_dihedral_potential(const toml::value& param, const toml::value& en
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
+    check_keys_available(param, {"indices", "k1", "k3", "v0"});
+
     const auto v0 = find_parameter<real_type>(param, env, "v0");
     const auto k1 = find_parameter<real_type>(param, env, "k1");
     const auto k3 = find_parameter<real_type>(param, env, "k3");
@@ -139,6 +150,8 @@ read_flexible_local_dihedral_potential(const toml::value& param, const toml::val
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
+    check_keys_available(param, {"indices", "k", "coef"});
+
     auto k    = find_parameter<real_type               >(param, env, "k");
     auto term = find_parameter<std::array<real_type, 7>>(param, env, "coef");
 
@@ -152,6 +165,8 @@ read_cosine_potential(const toml::value& param, const toml::value& env)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
+    check_keys_available(param, {"indices", "k", "n", "v0"});
+
     auto k  = find_parameter<real_type   >(param, env, "k");
     auto n  = find_parameter<std::int32_t>(param, env, "n");
     auto v0 = find_parameter<real_type   >(param, env, "v0");
@@ -166,6 +181,8 @@ read_3spn2_bond_potential(const toml::value& param, const toml::value& env)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
+    check_keys_available(param, {"indices", "k", "v0"});
+
     auto k  = find_parameter<real_type>(param, env, "k");
     auto v0 = find_parameter<real_type>(param, env, "v0");
 
