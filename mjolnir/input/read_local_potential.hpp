@@ -153,10 +153,10 @@ read_flexible_local_dihedral_potential(const toml::value& param, const toml::val
     check_keys_available(param, {"indices", "k", "coef"});
 
     auto k    = find_parameter<real_type               >(param, env, "k");
-    auto term = find_parameter<std::array<real_type, 7>>(param, env, "coef");
+    auto coef = find_parameter<std::array<real_type, 7>>(param, env, "coef");
 
-    MJOLNIR_LOG_INFO("FlexibleLocalDihedral = {k = ", k, ", coef = ", term, '}');
-    return FlexibleLocalDihedralPotential<realT>(k, term);
+    MJOLNIR_LOG_INFO("FlexibleLocalDihedral = {k = ", k, ", coef = ", coef, '}');
+    return FlexibleLocalDihedralPotential<realT>(k, coef);
 }
 
 template<typename realT>
