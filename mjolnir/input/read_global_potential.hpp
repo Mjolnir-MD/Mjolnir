@@ -432,7 +432,8 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using potential_type = ThreeSPN2ExcludedVolumePotential<realT>;
+    using real_type      = realT;
+    using potential_type = ThreeSPN2ExcludedVolumePotential<real_type>;
     using parameter_type = typename potential_type::parameter_type;
     using bead_kind      = parameter_3SPN2::bead_kind;
 
@@ -472,8 +473,12 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
         MJOLNIR_LOG_INFO("idx = ", idx, ", kind = ", bead);
     }
 
+    ThreeSPN2ExcludedVolumePotentialParameter<real_type> default_parameters;
+
     check_parameter_overlap(env, ps, params);
-    return potential_type(params, read_ignored_group(global));
+    return potential_type(std::move(default_parameters), params,
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
 }
 
 
