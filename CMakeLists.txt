@@ -29,32 +29,36 @@ endif()
 # ----------------------------------------------------------------------------
 # add optimization flags
 
+set(MJOLNIR_OPTIMIZATON_FLAGS "")
+
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
     check_cxx_compiler_flag("-fast" MJOLNIR_COMPILER_HAS_FAST)
     if(MJOLNIR_COMPILER_HAS_FAST)
-        add_definitions(-fast)
+        set(MJOLNIR_OPTIMIZATON_FLAGS "${MJOLNIR_OPTIMIZATON_FLAGS} -fast")
     endif()
     check_cxx_compiler_flag("-xHost" MJOLNIR_COMPILER_HAS_XHOST)
     if(MJOLNIR_COMPILER_HAS_XHOST)
-        add_definitions(-xHost)
+        set(MJOLNIR_OPTIMIZATON_FLAGS "${MJOLNIR_OPTIMIZATON_FLAGS} -xHost")
     endif()
 else()
     check_cxx_compiler_flag("-march=native" MJOLNIR_COMPILER_HAS_MARCH_NATIVE)
     if(MJOLNIR_COMPILER_HAS_MARCH_NATIVE)
-        add_definitions(-march=native)
+        set(MJOLNIR_OPTIMIZATON_FLAGS "${MJOLNIR_OPTIMIZATON_FLAGS} -march=native")
     endif()
     check_cxx_compiler_flag("-mtune=native" MJOLNIR_COMPILER_HAS_MTUNE_NATIVE)
     if(MJOLNIR_COMPILER_HAS_MTUNE_NATIVE)
-        add_definitions(-mtune=native)
+        set(MJOLNIR_OPTIMIZATON_FLAGS "${MJOLNIR_OPTIMIZATON_FLAGS} -mtune=native")
     endif()
     check_cxx_compiler_flag("-Ofast" MJOLNIR_COMPILER_HAS_OFAST)
     check_cxx_compiler_flag("-O3"    MJOLNIR_COMPILER_HAS_O3)
     if(MJOLNIR_COMPILER_HAS_OFAST)
-        add_definitions(-Ofast)
+        set(MJOLNIR_OPTIMIZATON_FLAGS "${MJOLNIR_OPTIMIZATON_FLAGS} -Ofast")
     elseif(MJOLNIR_COMPILER_HAS_O3)
-        add_definitions(-O3)
+        set(MJOLNIR_OPTIMIZATON_FLAGS "${MJOLNIR_OPTIMIZATON_FLAGS} -O3")
     endif()
 endif()
+
+message(STATUS "optimization flags are ${MJOLNIR_OPTIMIZATON_FLAGS}")
 
 # -----------------------------------------------------------------------------
 # check input flags
