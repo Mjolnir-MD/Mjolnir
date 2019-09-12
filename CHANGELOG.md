@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.5.2
+
+### Fixed
+
+- cutoff length of gaussian contact
+  - Do not use `Contact` interaction with `Gaussian` potential in the earlier releases
+- fix some typographical errors in the documentation
+
+### Changed
+
+- change compile flags for test codes
+
 ## 1.5.1
 
 ### Fixed
