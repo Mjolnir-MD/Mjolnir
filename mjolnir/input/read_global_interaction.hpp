@@ -192,7 +192,7 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
         ignore_grp = read_ignored_group(ignore);
     }
 
-    const auto pot = toml::find<std::string>(global, "potential", "3SPN2");
+    const auto pot = toml::find_or<std::string>(global, "potential", std::string("3SPN2"));
 
     if(pot == "3SPN2")
     {
