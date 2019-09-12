@@ -8,7 +8,17 @@
 
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingPotential.hpp>
 
-BOOST_AUTO_TEST_CASE(f_3SPN2_BaseStacking_double)
+using parameter_set_to_test_d = std::tuple<
+    mjolnir::ThreeSPN2BaseStackingPotentialParameter<double>,
+    mjolnir::ThreeSPN2CBaseStackingPotentialParameter<double>
+>;
+using parameter_set_to_test_f = std::tuple<
+    mjolnir::ThreeSPN2BaseStackingPotentialParameter<float>,
+    mjolnir::ThreeSPN2CBaseStackingPotentialParameter<float>
+>;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(f_3SPN2_BaseStacking_double,
+        ParameterSet, parameter_set_to_test_d)
 {
     mjolnir::LoggerManager::set_default_logger("test_3spn2_base_stacking_potential.log");
     using real_type = double;
@@ -17,7 +27,7 @@ BOOST_AUTO_TEST_CASE(f_3SPN2_BaseStacking_double)
     constexpr real_type   h = 1e-6;
     constexpr real_type  pi = mjolnir::math::constants<real_type>::pi();
 
-    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential;
+    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential(ParameterSet{});
 
     const real_type theta_0   = 0.5  * pi;
     const real_type theta_min = 0.01 * pi;
@@ -43,7 +53,8 @@ BOOST_AUTO_TEST_CASE(f_3SPN2_BaseStacking_double)
     }
 }
 
-BOOST_AUTO_TEST_CASE(f_3SPN2_BaseStacking_float)
+BOOST_AUTO_TEST_CASE_TEMPLATE(f_3SPN2_BaseStacking_float,
+        ParameterSet, parameter_set_to_test_f)
 {
     mjolnir::LoggerManager::set_default_logger("test_3spn2_base_stacking_potential.log");
     using real_type = float;
@@ -52,7 +63,7 @@ BOOST_AUTO_TEST_CASE(f_3SPN2_BaseStacking_float)
     constexpr real_type   h = 1e-3f;
     constexpr real_type  pi = mjolnir::math::constants<real_type>::pi();
 
-    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential;
+    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential(ParameterSet{});
 
     const real_type theta_0  = 0.5  * pi;
     const real_type theta_min = 0.01 * pi;
@@ -78,7 +89,8 @@ BOOST_AUTO_TEST_CASE(f_3SPN2_BaseStacking_float)
     }
 }
 
-BOOST_AUTO_TEST_CASE(U_rep_3SPN2_BaseStacking_double)
+BOOST_AUTO_TEST_CASE_TEMPLATE(U_rep_3SPN2_BaseStacking_double,
+        ParameterSet, parameter_set_to_test_d)
 {
     mjolnir::LoggerManager::set_default_logger("test_3spn2_base_stacking_potential.log");
     using real_type = double;
@@ -87,7 +99,7 @@ BOOST_AUTO_TEST_CASE(U_rep_3SPN2_BaseStacking_double)
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
 
-    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential;
+    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential(ParameterSet{});
 
     const real_type x_min = 2.0;
     const real_type x_max = 6.0; // outside of cutoff
@@ -110,7 +122,8 @@ BOOST_AUTO_TEST_CASE(U_rep_3SPN2_BaseStacking_double)
     }
 }
 
-BOOST_AUTO_TEST_CASE(U_rep_3SPN2_BaseStacking_float)
+BOOST_AUTO_TEST_CASE_TEMPLATE(U_rep_3SPN2_BaseStacking_float,
+        ParameterSet, parameter_set_to_test_f)
 {
     mjolnir::LoggerManager::set_default_logger("test_3spn2_base_stacking_potential.log");
     using real_type = float;
@@ -119,7 +132,7 @@ BOOST_AUTO_TEST_CASE(U_rep_3SPN2_BaseStacking_float)
     constexpr std::size_t N = 100;
     constexpr real_type   h = 1e-3f;
 
-    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential;
+    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential(ParameterSet{});
 
     const real_type x_min = 2.0;
     const real_type x_max = 6.0; // outside of cutoff
@@ -142,7 +155,8 @@ BOOST_AUTO_TEST_CASE(U_rep_3SPN2_BaseStacking_float)
     }
 }
 
-BOOST_AUTO_TEST_CASE(U_attr_3SPN2_BaseStacking_double)
+BOOST_AUTO_TEST_CASE_TEMPLATE(U_attr_3SPN2_BaseStacking_double,
+        ParameterSet, parameter_set_to_test_d)
 {
     mjolnir::LoggerManager::set_default_logger("test_3spn2_base_stacking_potential.log");
     using real_type = double;
@@ -151,7 +165,7 @@ BOOST_AUTO_TEST_CASE(U_attr_3SPN2_BaseStacking_double)
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
 
-    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential;
+    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential(ParameterSet{});
 
     const real_type x_min =  3.0; // inside of flat region
     const real_type x_max = 12.0;
@@ -175,7 +189,8 @@ BOOST_AUTO_TEST_CASE(U_attr_3SPN2_BaseStacking_double)
     }
 }
 
-BOOST_AUTO_TEST_CASE(U_attr_3SPN2_BaseStacking_float)
+BOOST_AUTO_TEST_CASE_TEMPLATE(U_attr_3SPN2_BaseStacking_float,
+        ParameterSet, parameter_set_to_test_f)
 {
     mjolnir::LoggerManager::set_default_logger("test_3spn2_base_stacking_potential.log");
     using real_type = float;
@@ -184,7 +199,7 @@ BOOST_AUTO_TEST_CASE(U_attr_3SPN2_BaseStacking_float)
     constexpr std::size_t N = 100;
     constexpr real_type   h = 1e-3f;
 
-    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential;
+    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential(ParameterSet{});
 
     const real_type x_min =  3.0f;
     const real_type x_max = 12.0f;
@@ -209,7 +224,8 @@ BOOST_AUTO_TEST_CASE(U_attr_3SPN2_BaseStacking_float)
     }
 }
 
-BOOST_AUTO_TEST_CASE(U_dU_attr_3SPN2_BaseStacking_double)
+BOOST_AUTO_TEST_CASE_TEMPLATE(U_dU_attr_3SPN2_BaseStacking_double,
+        ParameterSet, parameter_set_to_test_d)
 {
     mjolnir::LoggerManager::set_default_logger("test_3spn2_base_stacking_potential.log");
     using real_type = double;
@@ -220,7 +236,7 @@ BOOST_AUTO_TEST_CASE(U_dU_attr_3SPN2_BaseStacking_double)
     constexpr real_type x_min =  3.0;
     constexpr real_type x_max = 12.0;
     constexpr real_type dx    = (x_max - x_min) / N;
-    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential;
+    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential(ParameterSet{});
 
     for(std::size_t i=0; i<N; ++i)
     {
@@ -234,7 +250,8 @@ BOOST_AUTO_TEST_CASE(U_dU_attr_3SPN2_BaseStacking_double)
     }
 }
 
-BOOST_AUTO_TEST_CASE(U_dU_attr_3SPN2_BaseStacking_float)
+BOOST_AUTO_TEST_CASE_TEMPLATE(U_dU_attr_3SPN2_BaseStacking_float,
+        ParameterSet, parameter_set_to_test_f)
 {
     mjolnir::LoggerManager::set_default_logger("test_3spn2_base_stacking_potential.log");
     using real_type = float;
@@ -245,7 +262,7 @@ BOOST_AUTO_TEST_CASE(U_dU_attr_3SPN2_BaseStacking_float)
     constexpr real_type x_min =  3.0f;
     constexpr real_type x_max = 12.0f;
     constexpr real_type dx    = (x_max - x_min) / N;
-    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential;
+    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential(ParameterSet{});
 
     for(std::size_t i=0; i<N; ++i)
     {
@@ -259,14 +276,15 @@ BOOST_AUTO_TEST_CASE(U_dU_attr_3SPN2_BaseStacking_float)
     }
 }
 
-BOOST_AUTO_TEST_CASE(bs_kind_3SPN2_BaseStacking)
+BOOST_AUTO_TEST_CASE_TEMPLATE(bs_kind_3SPN2_BaseStacking,
+        ParameterSet, parameter_set_to_test_d)
 {
     mjolnir::LoggerManager::set_default_logger("test_3spn2_base_stacking_potential.log");
     using real_type = double;
     using base_kind = mjolnir::parameter_3SPN2::base_kind;
     using base_stack_kind = mjolnir::parameter_3SPN2::base_stack_kind;
 
-    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential;
+    mjolnir::ThreeSPN2BaseStackingPotential<real_type> potential(ParameterSet{});
 
     BOOST_TEST(base_stack_kind::AA == potential.bs_kind(base_kind::A, base_kind::A));
     BOOST_TEST(base_stack_kind::AT == potential.bs_kind(base_kind::A, base_kind::T));

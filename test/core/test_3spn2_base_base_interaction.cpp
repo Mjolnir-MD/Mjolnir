@@ -15,7 +15,13 @@
 #include <mjolnir/input/read_units.hpp>
 #include <random>
 
-BOOST_AUTO_TEST_CASE(ThreeSPN2BasePairIntearction_numerical_diff)
+using parameters_to_test = std::tuple<
+    mjolnir::ThreeSPN2BaseBaseGlobalPotentialParameter<double>,
+    mjolnir::ThreeSPN2CBaseBaseGlobalPotentialParameter<double>
+>;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_numerical_diff,
+        ParameterSet, parameters_to_test)
 {
     mjolnir::LoggerManager::set_default_logger(
             "test_3spn2_base_base_interaction.log");
@@ -102,7 +108,7 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BasePairIntearction_numerical_diff)
         constexpr auto invalid = potential_type::invalid();
 
         ignore_group_type grp({});
-        potential_type potential({
+        potential_type potential(ParameterSet{}, {
                 {1, parameter_type{bases.at(0), 0, 0, invalid, invalid}},
                 {3, parameter_type{bases.at(1), 1, 2, invalid, invalid}}
             }, std::move(grp)
@@ -305,7 +311,8 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BasePairIntearction_numerical_diff)
 
 }
 
-BOOST_AUTO_TEST_CASE(ThreeSPN2CrossStackingIntearction_numerical_diff)
+BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
+        ParameterSet, parameters_to_test)
 {
     mjolnir::LoggerManager::set_default_logger(
             "test_3spn2_base_base_interaction.log");
@@ -411,7 +418,7 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2CrossStackingIntearction_numerical_diff)
 
         constexpr auto invalid = potential_type::invalid();
 
-        potential_type potential({
+        potential_type potential(ParameterSet{}, {
                 {1, parameter_type{bases.at(0), 0, 0, 4, invalid}},
                 {9, parameter_type{bases.at(1), 3, 8, invalid, 6}},
                 {4, parameter_type{bases.at(2), 1, 3, invalid, 1}},
@@ -535,6 +542,8 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2CrossStackingIntearction_numerical_diff)
                         (mjolnir::math::length(v01) * mjolnir::math::length(v89)),
                         -1.0, 1.0));
 
+                    BOOST_TEST_MESSAGE("dtheta = " << dtheta << ", current configuration = " << std::abs(theta_0189 - theta3));
+
                     if(std::abs(theta_0189 - theta3) < dtheta)
                     {
                         dtheta   = std::abs(theta_0189 - theta3);
@@ -542,6 +551,8 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2CrossStackingIntearction_numerical_diff)
                     }
                     sys = bck;
                 }
+
+                BOOST_TEST_MESSAGE("best_phi = " << best_phi << ", dtheta = " << dtheta);
 
                 {
                     const matrix33_type rot(
