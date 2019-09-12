@@ -59,13 +59,6 @@ class ExcludedVolumePotential
 
   public:
 
-    ExcludedVolumePotential(const real_type eps,
-        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-        const std::map<connection_kind_type, std::size_t>&         exclusions,
-        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-        : ExcludedVolumePotential(eps, default_cutoff(),
-            parameters, exclusions, std::move(ignore_mol), std::move(ignore_grp))
-    {}
     ExcludedVolumePotential(const real_type eps, const real_type cutoff_ratio,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,

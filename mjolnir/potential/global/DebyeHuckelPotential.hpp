@@ -78,13 +78,6 @@ class DebyeHuckelPotential
         // XXX should be updated before use because T and ion conc are default!
         this->calc_parameters();
     }
-    DebyeHuckelPotential(
-        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-        const std::map<connection_kind_type, std::size_t>& exclusions,
-        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-    : DebyeHuckelPotential(default_cutoff(), parameters,
-                           exclusions, ignore_mol, ignore_grp)
-    {}
     ~DebyeHuckelPotential() = default;
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
