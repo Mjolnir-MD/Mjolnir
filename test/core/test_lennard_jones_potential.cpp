@@ -23,6 +23,7 @@ BOOST_AUTO_TEST_CASE(LennardJones_double)
     const real_type epsilon = 1.0;
     const parameter_type param{sigma, epsilon};
     mjolnir::LennardJonesPotential<real_type> lj{
+        mjolnir::LennardJonesPotential<real_type>::default_cutoff(),
         {{0, param}, {1, param}}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
@@ -59,6 +60,7 @@ BOOST_AUTO_TEST_CASE(LennardJones_float)
     const real_type epsilon = 1.0f;
     const parameter_type param{sigma, epsilon};
     mjolnir::LennardJonesPotential<real_type> lj{
+        mjolnir::LennardJonesPotential<real_type>::default_cutoff(),
         {{0, param}, {1, param}}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
