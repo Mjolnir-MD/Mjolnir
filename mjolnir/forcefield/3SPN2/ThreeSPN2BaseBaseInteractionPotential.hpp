@@ -764,7 +764,7 @@ struct ThreeSPN2CBaseBaseGlobalPotentialParameter
     real_type theta1_0_GC  = 159.50 / 180.0 * math::constants<real_type>::pi();
     real_type theta1_0_CG  = 138.08 / 180.0 * math::constants<real_type>::pi();
 
-    real_type theta2_0_AT  = 159.50 / 180.0 * math::constants<real_type>::pi();
+    real_type theta2_0_AT  = 133.51 / 180.0 * math::constants<real_type>::pi();
     real_type theta2_0_TA  = 153.17 / 180.0 * math::constants<real_type>::pi();
     real_type theta2_0_GC  = 138.08 / 180.0 * math::constants<real_type>::pi();
     real_type theta2_0_CG  = 159.50 / 180.0 * math::constants<real_type>::pi();
