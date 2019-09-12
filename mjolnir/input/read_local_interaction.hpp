@@ -3,6 +3,7 @@
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/interaction/local/BondLengthInteraction.hpp>
 #include <mjolnir/interaction/local/ContactInteraction.hpp>
+#include <mjolnir/interaction/local/DirectionalContactInteraction.hpp>
 #include <mjolnir/interaction/local/BondAngleInteraction.hpp>
 #include <mjolnir/interaction/local/DihedralAngleInteraction.hpp>
 #include <mjolnir/interaction/local/DummyInteraction.hpp>
@@ -136,7 +137,7 @@ read_contact_in_directional_contact_interaction(const std::string& kind, const t
     margin = toml::find<real_type>(local, "margin");
   }
 
-  const auto contact_potential = toml::find<std::string>(local, "contact_potential");
+  const auto contact_potential = toml::find<std::string>(local, "potentials", "contact");
   if(contact_potential == "GoContact")
   {
     MJOLNIR_LOG_NOTICE("-- contact potential function is 10-12 Go contact.");
@@ -144,8 +145,9 @@ read_contact_in_directional_contact_interaction(const std::string& kind, const t
 
     return make_unique<DirectionalContactInteraction<traitsT, angle1_potentialT,
                angle2_potentialT, contact_potentialT>>(
-                   kind, read_directional_contact_potentials<4, angle1_potentialT,
-                   angle2_potentialT, contact_potentialT>,  margin);
+                   kind, read_directional_contact_potentials<
+                   4, real_type, angle1_potentialT,
+                   angle2_potentialT, contact_potentialT>(local));
   }
   else if(contact_potential == "Gaussian")
   {
@@ -154,14 +156,15 @@ read_contact_in_directional_contact_interaction(const std::string& kind, const t
 
     return make_unique<DirectionalContactInteraction<traitsT, angle1_potentialT,
                angle2_potentialT, contact_potentialT>>(
-                   kind, read_directional_contact_potentials<4, angle1_potentialT,
-                   angle2_potentialT, contact_potentialT>, margin);
+                   kind, read_directional_contact_potentials<
+                   4, real_type, angle1_potentialT,
+                   angle2_potentialT, contact_potentialT>(local));
   }
   else
   {
     throw_exception<std::runtime_error>(toml::format_error("[error] "
         "mjolnir::read_directional_contact_interaction: invalid contact potential",
-        toml::find<toml::value>(local, "potential"), "here", {
+	toml::find<toml::value>(local, "potentials", "contact"), "here", {
         "expected value is one of the following.",
         "- \"GoContact\": r^12 - r^10 type native contact potential",
         "- \"Gaussian\" : well-known gaussian potential"
@@ -174,7 +177,7 @@ template<typename traitsT, typename ... PotentialTs>
 typename std::enable_if<sizeof...(PotentialTs) == 2,
                         std::unique_ptr<LocalInteractionBase<traitsT>>>::type
 read_angle_in_directional_contact_interaction(
-    const std::string& kind, const toml::value& local, std::vector<std::string>& angle_potential_keys)
+    const std::string& kind, const toml::value& local, std::vector<std::string>&)
 {
   return read_contact_in_directional_contact_interaction<traitsT, PotentialTs...>(kind, local);
 }
@@ -190,7 +193,7 @@ read_angle_in_directional_contact_interaction(
   using real_type = typename traitsT::real_type;
 
   std::string angle_potential_key = angle_potential_keys.back();
-  std::string angle_potential = toml::find<std::string>(local, angle_potential_key);
+  std::string angle_potential = toml::find<std::string>(local, "potentials", angle_potential_key);
   angle_potential_keys.pop_back();
   if(angle_potential == "Cosine")
   {
@@ -204,7 +207,7 @@ read_angle_in_directional_contact_interaction(
   {
     throw_exception<std::runtime_error>(toml::format_error("[error] "
         "mjolnir::read_bond_length_interaction: invalid angle potential",
-        toml::find<toml::value>(local, angle_potential_key), "here", {
+	toml::find<toml::value>(local, "potentials", angle_potential_key), "here", {
         "expected value is one of the following.",
         "- \"Cosine\" : 1 + Cosine(x) potential"
         }));
@@ -217,7 +220,7 @@ read_directional_contact_interaction(const std::string& kind, const toml::value&
 {
   MJOLNIR_GET_DEFAULT_LOGGER();
   MJOLNIR_LOG_FUNCTION();
-  std::vector<std::string> angle_potential_keys = {"angle1_potential", "angle2_potential"};
+  std::vector<std::string> angle_potential_keys = {"angle1", "angle2"};
 
   return read_angle_in_directional_contact_interaction<traitsT>(kind, local, angle_potential_keys);
 }
@@ -527,6 +530,11 @@ read_local_interaction(const toml::value& local)
         MJOLNIR_LOG_NOTICE("Contact interaction found.");
         return read_contact_interaction<traitsT>(kind, local);
     }
+    else if(interaction == "DirectionalContact")
+    {
+        MJOLNIR_LOG_NOTICE("Directional Contact interaction found.");
+        return read_directional_contact_interaction<traitsT>(kind, local);
+    }
     else if(interaction == "BondAngle")
     {
         MJOLNIR_LOG_NOTICE("Bond Angle interaction found.");
@@ -553,10 +561,11 @@ read_local_interaction(const toml::value& local)
             "mjolnir::read_local_interaction: invalid interaction",
             toml::find<toml::value>(local, "interaction"), "here", {
             "expected value is one of the following.",
-            "- \"BondLength\"    : 2-body well-known chemical bond interaction",
-            "- \"BondAngle\"     : 3-body well-known bond angle interaction",
-            "- \"DihedralAngle\" : 4-body well-known dihedral angle interaction",
-            "- \"Dummy\"         : To represent a strange topology. It does nothing",
+            "- \"BondLength\"         : 2-body well-known chemical bond interaction",
+            "- \"DirectionalContact\" : 4-body contact interaction depends on the contact angle",
+            "- \"BondAngle\"          : 3-body well-known bond angle interaction",
+            "- \"DihedralAngle\"      : 4-body well-known dihedral angle interaction",
+            "- \"Dummy\"              : To represent a strange topology. It does nothing",
             }));
     }
 }
