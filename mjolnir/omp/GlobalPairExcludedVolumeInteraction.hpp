@@ -26,7 +26,7 @@ class GlobalPairInteraction<
 
   public:
     GlobalPairInteraction()  = default;
-    ~GlobalPairInteraction() = default;
+    ~GlobalPairInteraction() override {}
 
     GlobalPairInteraction(potential_type&& pot, partition_type&& part)
         : potential_(std::move(pot)), partition_(std::move(part))

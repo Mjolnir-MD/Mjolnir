@@ -46,7 +46,7 @@ class UnlimitedGridCellList final : public SpatialPartitionBase<traitsT, Potenti
         : margin_(0.5), current_margin_(-1.0), r_cell_size_(-1.0)
     {}
 
-    ~UnlimitedGridCellList() override = default;
+    ~UnlimitedGridCellList() override {}
     UnlimitedGridCellList(UnlimitedGridCellList const&) = default;
     UnlimitedGridCellList(UnlimitedGridCellList &&)     = default;
     UnlimitedGridCellList& operator=(UnlimitedGridCellList const&) = default;

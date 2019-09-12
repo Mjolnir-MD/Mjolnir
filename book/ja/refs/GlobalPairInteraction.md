@@ -31,6 +31,7 @@ parameters = [
 - `potential`: 文字列型
   - ポテンシャルの種類を設定します。
   - [`"ExcludedVolume"`](ExcludedVolumePotential.md): 排除体積ポテンシャルを用います。
+  - [`"HardCoreExcludedVolume"`](HardCoreExcludedVolumePotential.md): 硬い核と、排除体積ポテンシャルに相当する殻を持ったポテンシャルを用います。
   - [`"LennardJones"`](LennardJonesPotential.md): レナード・ジョーンズポテンシャルを用います。
   - [`"UniformLennardJones"`](UniformLennardJonesPotential.md): パラメータが粒子によらず一定なレナード・ジョーンズポテンシャルを用います。
   - [`"DebyeHuckel"`](DebyeHuckelPotential.md): 溶媒による遮蔽効果を考慮した静電相互作用を用います。

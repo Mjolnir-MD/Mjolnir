@@ -6,6 +6,7 @@
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <mjolnir/input/utility.hpp>
 #include <mjolnir/input/read_units.hpp>
 #include <mjolnir/input/read_path.hpp>
 
@@ -141,6 +142,11 @@ read_input_file(const std::string& filename)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
     MJOLNIR_LOG_NOTICE("the log file is `", logger_name, '`');
+
+    // Check top-level toml-values. Since it uses logger to warn,
+    // we need to call it after `MJOLNIR_SET_DEFAULT_LOGGER(logger_name)`.
+    check_keys_available(root, {"files"_s, "units"_s, "simulator"_s,
+                                "systems"_s, "forcefields"_s});
 
     // the most of important flags are defined in [simulator], like
     // `precision = "float"`, `boundary_type = "Unlimited"`.

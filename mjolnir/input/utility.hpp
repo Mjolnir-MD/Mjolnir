@@ -8,6 +8,38 @@
 namespace mjolnir
 {
 
+// This check all the keys in a table are found in a list.
+//     If there is a key that is not found in the range, it warns about the
+// corresponding value will be ignored.
+//     In order to allow optional keys, it only checks all the keys are found
+// in the specified container.
+//
+// Use it as the following.
+// ```cpp
+// check_keys_available(table, {"foo"_s, "bar"_s, "baz"_s});
+// ```
+inline bool check_keys_available(const toml::value& table,
+                                 std::initializer_list<std::string> list)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    // no logger scope here. use the parent scope.
+
+    bool all_available = true;
+    for(const auto& kv : table.as_table())
+    {
+        if(list.end() == std::find(list.begin(), list.end(), kv.first))
+        {
+            std::ostringstream oss;
+            oss << "unknown value \"" << kv.first << "\" found. this "
+                << kv.second.type() << " will never be used.";
+            MJOLNIR_LOG_WARN(toml::format_error(oss.str(),
+                        kv.second, "this will be ignored"));
+            all_available = false;
+        }
+    }
+    return all_available;
+}
+
 template<typename T>
 typename std::enable_if<negation<std::is_same<T, std::string>>::value, T>::type
 find_parameter(const toml::value& params, const toml::value& env,

@@ -14,7 +14,7 @@
 
 ```toml
 [[forcefields.local]]
-interaction = "BondLength"
+interaction = "Contact"
 potential   = "GoContact"
 topology    = "bond"
 margin      = 0.5 # relative length to longest cutoff

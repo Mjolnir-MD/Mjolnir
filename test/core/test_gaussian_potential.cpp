@@ -67,3 +67,73 @@ BOOST_AUTO_TEST_CASE(Gaussian_float)
         }
     }
 }
+
+BOOST_AUTO_TEST_CASE(Gaussian_cutoff_double)
+{
+    using real_type = double;
+    constexpr real_type   h = 1e-6;
+
+    {
+        const real_type e  = 2.0;
+        const real_type w  = 0.15;
+        const real_type r0 = 7.0;
+
+        mjolnir::GaussianPotential<real_type> gaussian(e, w, r0);
+
+        const auto rc = gaussian.cutoff();
+
+        BOOST_TEST(std::isfinite(rc));
+        BOOST_TEST(std::abs(gaussian.potential(rc)) ==
+                   mjolnir::math::abs_tolerance<real_type>(),
+                   boost::test_tools::tolerance(h));
+    }
+    {
+        const real_type e  = -2.0;
+        const real_type w  = 0.15;
+        const real_type r0 = 7.0;
+
+        mjolnir::GaussianPotential<real_type> gaussian(e, w, r0);
+
+        const auto rc = gaussian.cutoff();
+
+        BOOST_TEST(std::isfinite(rc));
+        BOOST_TEST(std::abs(gaussian.potential(rc)) ==
+                   mjolnir::math::abs_tolerance<real_type>(),
+                   boost::test_tools::tolerance(h));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(Gaussian_cutoff_float)
+{
+    using real_type = float;
+    constexpr real_type   h = 1e-3;
+
+    {
+        const real_type e  = 2.0;
+        const real_type w  = 0.15;
+        const real_type r0 = 7.0;
+
+        mjolnir::GaussianPotential<real_type> gaussian(e, w, r0);
+
+        const auto rc = gaussian.cutoff();
+
+        BOOST_TEST(std::isfinite(rc));
+        BOOST_TEST(gaussian.potential(rc) ==
+                   mjolnir::math::abs_tolerance<real_type>(),
+                   boost::test_tools::tolerance(h));
+    }
+    {
+        const real_type e  = -2.0;
+        const real_type w  = 0.15;
+        const real_type r0 = 7.0;
+
+        mjolnir::GaussianPotential<real_type> gaussian(e, w, r0);
+
+        const auto rc = gaussian.cutoff();
+
+        BOOST_TEST(std::isfinite(rc));
+        BOOST_TEST(std::abs(gaussian.potential(rc)) ==
+                   mjolnir::math::abs_tolerance<real_type>(),
+                   boost::test_tools::tolerance(h));
+    }
+}

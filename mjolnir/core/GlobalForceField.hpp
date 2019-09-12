@@ -35,14 +35,19 @@ class GlobalForceField
     void emplace(interaction_ptr&& inter)
     {
         interactions_.emplace_back(std::move(inter));
+        return;
     }
 
     void initialize(const system_type& sys)
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
         for(auto& item : this->interactions_)
         {
+            MJOLNIR_LOG_INFO("initializing ", item->name());
             item->initialize(sys);
         }
+        return;
     }
 
     // to re-calculate parameters like temperature, ionic concentration, etc...
@@ -52,6 +57,7 @@ class GlobalForceField
         {
             item->update(sys);
         }
+        return;
     }
 
     // to reduce margin of neighbor list, and re-construct the list if needed
@@ -61,12 +67,17 @@ class GlobalForceField
         {
             item->update_margin(dmargin, sys);
         }
+        return;
     }
 
     void calc_force(system_type& sys) const noexcept
     {
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+        MJOLNIR_LOG_FUNCTION_DEBUG();
+
         for(const auto& item : this->interactions_)
         {
+            MJOLNIR_LOG_DEBUG("interaction name is ", item->name());
             item->calc_force(sys);
         }
         return;

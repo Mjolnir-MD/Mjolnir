@@ -40,10 +40,14 @@ class LocalForceField
 
     void initialize(const system_type& sys)
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
         for(auto& item : this->interactions_)
         {
+            MJOLNIR_LOG_INFO("initializing ", item->name());
             item->initialize(sys);
         }
+        return;
     }
 
     // to re-calculate parameters like temperature, ionic concentration, etc...

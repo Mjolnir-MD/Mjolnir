@@ -38,7 +38,7 @@ class TRRObserver final : public ObserverBase<traitsT>
         // clear files and throw an error if the files cannot be opened.
         this->clear_file(this->trr_name_);
     }
-    ~TRRObserver() override = default;
+    ~TRRObserver() override {}
 
     void initialize(const std::size_t,  const real_type,
                     const system_type&, const forcefield_type&) override

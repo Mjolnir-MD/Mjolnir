@@ -118,5 +118,5 @@ script:
 - mkdir build
 - cd build
 - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON -DUSE_OPENMP=OFF -DBUILD_INTEGRATION_TEST=OFF -DSEPARATE_BUILD="${SEPARATE}" ..
-- make
+- make VERBOSE=1
 - ctest --output-on-failure

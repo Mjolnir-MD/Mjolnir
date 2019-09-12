@@ -22,6 +22,9 @@ std::unique_ptr<SimulatorBase> read_units(const toml::value& root)
     const auto& units  = toml::find<toml::value>(root,  "units");
     const auto& energy = toml::find<std::string>(units, "energy");
     const auto& length = toml::find<std::string>(units, "length");
+
+    check_keys_available(units, {"energy"_s, "length"_s});
+
     MJOLNIR_LOG_NOTICE("energy unit is [", energy, ']');
     MJOLNIR_LOG_NOTICE("length unit is [", length, ']');
 

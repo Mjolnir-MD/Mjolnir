@@ -25,7 +25,7 @@ class NaivePairCalculation final : public SpatialPartitionBase<traitsT, Potentia
   public:
 
     NaivePairCalculation() = default;
-    ~NaivePairCalculation() override = default;
+    ~NaivePairCalculation() override {}
     NaivePairCalculation(NaivePairCalculation const&)            = default;
     NaivePairCalculation& operator=(NaivePairCalculation const&) = default;
     NaivePairCalculation(NaivePairCalculation&&)                 = default;

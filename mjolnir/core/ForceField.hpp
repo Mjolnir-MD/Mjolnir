@@ -38,14 +38,19 @@ class ForceField
     // this modify system::topology by using local interaction info.
     void initialize(system_type& sys)
     {
-        // first, fetch current topology
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        MJOLNIR_LOG_INFO("writing current topology");
         local_.write_topology(sys.topology());
         sys.topology().construct_molecules();
 
-        // based on the topology, make exclusion list
+        MJOLNIR_LOG_INFO("initializing forcefields");
         local_   .initialize(sys);
         global_  .initialize(sys);
         external_.initialize(sys);
+
+        return;
     }
 
     // update parameters like temperature, ionic concentration, etc...
@@ -54,6 +59,7 @@ class ForceField
         local_   .update(sys);
         global_  .update(sys);
         external_.update(sys);
+        return;
     }
 
     // update margin of neighbor list
@@ -73,6 +79,7 @@ class ForceField
         local_   .update_margin(dmargin, sys);
         global_  .update_margin(dmargin, sys);
         external_.update_margin(dmargin, sys);
+        return;
     }
 
     void calc_force(system_type& sys) const noexcept
@@ -80,6 +87,7 @@ class ForceField
         local_   .calc_force(sys);
         global_  .calc_force(sys);
         external_.calc_force(sys);
+        return;
     }
     real_type calc_energy(const system_type& sys) const noexcept
     {

@@ -51,7 +51,7 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
             container_type&& para, potential_type&& pot)
         : kind_(kind), parameters_(std::move(para)), potential_(std::move(pot))
     {}
-    ~ThreeSPN2BaseStackingInteraction() = default;
+    ~ThreeSPN2BaseStackingInteraction() {}
     ThreeSPN2BaseStackingInteraction(const ThreeSPN2BaseStackingInteraction&) = default;
     ThreeSPN2BaseStackingInteraction(ThreeSPN2BaseStackingInteraction&&)      = default;
     ThreeSPN2BaseStackingInteraction& operator=(const ThreeSPN2BaseStackingInteraction&) = default;

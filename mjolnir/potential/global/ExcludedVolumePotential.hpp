@@ -17,6 +17,11 @@ namespace mjolnir
 // This class is an implementation of the excluded volume term used in
 // Clementi's off-lattice Go-like model (Clement et al., 2000) and AICG2+ model
 // (Li et al., 2014)
+//
+// Note: When ExcludedVolume is used with GlobalPairInteraction, `calc_force`
+//       and `calc_energy` implemented here will not be used because we can
+//       optimize the runtime efficiency by specializing GlobalPairInteraction.
+//       See mjolnir/interaction/GlobalExcludedVolumeInteraction.hpp for detail.
 template<typename realT>
 class ExcludedVolumePotential
 {
@@ -33,6 +38,7 @@ class ExcludedVolumePotential
     // the particles, e.g. by having (radius_i + radius_)/2 for a pair of {i, j}.
     using pair_parameter_type  = parameter_type;
 
+    // ------------------------------------------------------------------------
     // topology stuff
     using topology_type        = Topology;
     using molecule_id_type     = typename topology_type::molecule_id_type;
@@ -87,6 +93,7 @@ class ExcludedVolumePotential
     ExcludedVolumePotential& operator=(const ExcludedVolumePotential&) = default;
     ExcludedVolumePotential& operator=(ExcludedVolumePotential&&)      = default;
 
+    // this value will be stored in NeighborList.
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
         return this->parameters_[i] + this->parameters_[j];
@@ -106,12 +113,17 @@ class ExcludedVolumePotential
 
     real_type potential(const real_type r, const pair_parameter_type& d) const noexcept
     {
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+        MJOLNIR_LOG_FUNCTION_DEBUG();
+
         if(d * this->cutoff_ratio_ < r){return 0.0;}
 
         const real_type d_r  = d / r;
         const real_type dr3  = d_r * d_r * d_r;
         const real_type dr6  = dr3 * dr3;
         const real_type dr12 = dr6 * dr6;
+        // correction by coef_at_cuttoff make energy 0 about the particle pair
+        // who's distance is over the cutoff range.
         return this->epsilon_ * (dr12 - this->coef_at_cutoff_);
     }
     real_type derivative(const real_type r, const pair_parameter_type& d) const noexcept
@@ -188,7 +200,7 @@ class ExcludedVolumePotential
 
     real_type epsilon_;
     real_type cutoff_ratio_;
-    real_type coef_at_cutoff_;
+    real_type coef_at_cutoff_; // correction of energy value at cutoff length
     std::vector<parameter_type> parameters_;
     std::vector<std::size_t> participants_;
 
