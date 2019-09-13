@@ -140,26 +140,26 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
 
 template<typename traitsT, typename angle1_potentialT,
          typename angle2_potentialT, typename contact_potentialT>
-void DirectionalContactInteraction<traitsT, angle1_potentialT,
-                                   angle2_potentialT, contact_potentialT>
-::calc_force(system_type& sys) const noexcept
+void DirectionalContactInteraction<
+  traitsT, angle1_potentialT, angle2_potentialT, contact_potentialT
+  >::calc_force(system_type& sys) const noexcept
 {
   for(const std::size_t active_contact : this -> active_contacts_)
   {
     const auto& idxp = this->potentials_[active_contact];
 
-    const auto angle1_pot = std::get<angle1_pot_type>(idxp);
-    const auto angle2_pot = std::get<angle2_pot_type>(idxp);
+    const auto angle1_pot  = std::get<angle1_pot_type>(idxp);
+    const auto angle2_pot  = std::get<angle2_pot_type>(idxp);
     const auto contact_pot = std::get<contact_pot_type>(idxp);
 
-    const std::size_t Ci  = std::get<indices_type>(idxp)[0];
+    const std::size_t      Ci  = std::get<indices_type>(idxp)[0];
+    const std::size_t      Pi  = std::get<indices_type>(idxp)[1];
+    const std::size_t      Pj  = std::get<indices_type>(idxp)[2];
+    const std::size_t      Cj  = std::get<indices_type>(idxp)[3];
     const coordinate_type& rCi = sys.position(Ci);
-    const std::size_t Pi = std::get<indices_type>(idxp)[1];
     const coordinate_type& rPi = sys.position(Pi);
-    const std::size_t Cj  = std::get<indices_type>(idxp)[2];
-    const coordinate_type& rCj = sys.position(Cj);
-    const std::size_t Pj = std::get<indices_type>(idxp)[3];
     const coordinate_type& rPj = sys.position(Pj);
+    const coordinate_type& rCj = sys.position(Cj);
 
     // =========================================================
     // contact schema
@@ -261,7 +261,56 @@ typename DirectionalContactInteraction<traitsT, angle1_potentialT,
 DirectionalContactInteraction<traitsT, angle1_potentialT, angle2_potentialT,
     contact_potentialT>::calc_energy(const system_type& sys) const noexcept
 {
-  real_type E = 0.0;
+  for(const std::size_t active_contact : active_contacts_)
+  {
+    const auto& idxp = this->potentials_[active_contact];
+
+    const auto angle1_pot = std::get<angle1_pot_type>(idxp);
+    const auto angle2_pot = std::get<angle2_pot_type>(idxp);
+    const auto contact_pot = std::get<contact_pot_type>(idxp);
+
+    const std::size_t Ci  = std::get<indices_type>(idxp)[0];
+    const coordinate_type& rCi = sys.position(Ci);
+    const std::size_t Pi = std::get<indices_type>(idxp)[1];
+    const coordinate_type& rPi = sys.position(Pi);
+    const std::size_t Cj  = std::get<indices_type>(idxp)[2];
+    const coordinate_type& rCj = sys.position(Cj);
+    const std::size_t Pj = std::get<indices_type>(idxp)[3];
+    const coordinate_type& rPj = sys.position(Pj);
+
+    const coordinate_type Pij = sys.adjust_direction(rPi - rPj); // Pi -> Pj
+    const real_type lPij = math::length(Pij);
+    if(lPij > contact_pot.cutoff_())
+    {
+      continue;
+    }
+
+    // calculate theta1
+    const coordinate_type PiCi = sys.adjust_direction(rCi - rPi);
+    const real_type inv_len_PiCi = math::rlength(PiCi);
+    const coordinate_type PiCi_reg = PiCi * inv_len_PiCi;
+
+    const real_type inv_len_Pij = real_type(1.0) / lPij;
+    const coordinate_type Pij_reg = Pij * inv_len_Pij;
+
+    const real_type PiCi_dot_Pij = math::dot_product(PiCi_reg, Pij_reg);
+    const real_type cos_theta1 = math::clamp(PiCi_dot_Pij,  real_type(-1.0), real_type(1.0));
+    const real_type theta1 = std::acos(cos_theta1);
+
+    // calculate theta2
+    const coordinate_type PjCj = sys.adjust_direction(rPj - rCj);
+    const real_type inv_len_PjCj = math::rlength(PjCj);
+    const coordinate_type PjCj_reg = PjCj * inv_len_PiCi;
+
+    const Pji_reg = - Pij_reg;
+    const real_type PjCj_dot_Pji = math::dot_product(PjCj_reg, Pji_reg);
+    const real_type cos_theta2 = math::clamp(PjCj_dot_Pji, real_type(-1.0), real_type(1.0));
+    const real_type theta2 = std::acos(cos_theta2);
+
+    E += std::get<angle1_pot_type>(idxp).potential(theta1)
+        + std::get<angle2_pot_type>(idxp).potential(theta2)
+        + std::get<contact_pot_type>(idxp).potential(lPij);
+  }
   return E;
 }
 
