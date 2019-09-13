@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BaseStackingInteraction_numerical_diff,
         interaction_type interaction("none",
                 std::vector<std::pair<std::array<std::size_t, 3>, base_stack_kind>>{
                     { {{0, 1, 2}}, bs_kind }
-                }, potential_type(potential));
+                }, potential_type(potential), {});
 
         system_type sys(3, boundary_type{});
 
