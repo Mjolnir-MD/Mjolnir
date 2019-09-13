@@ -5,6 +5,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/math/math.hpp>
+#include <mjolnir/util/string.hpp>
 #include <vector>
 #include <algorithm>
 #include <numeric>
@@ -85,7 +86,8 @@ class ThreeSPN2BaseBaseInteractionPotential
     template<typename ParameterSet>
     ThreeSPN2BaseBaseInteractionPotential(ParameterSet para_set,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-        ignore_group_type ignore_grp)
+        const std::map<connection_kind_type, std::size_t>&         exclusions,
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
         : cutoff_      (para_set.cutoff),
           cutoff_sq_   (para_set.cutoff_sq),
           alpha_BP_    (para_set.alpha_BP),
@@ -122,9 +124,22 @@ class ThreeSPN2BaseBaseInteractionPotential
           epsilon_CS_(para_set.epsilon_CS),
           r0_CS_     (para_set.r0_CS),
           theta_CS_0_(para_set.theta_CS_0),
-          exclusion_list_({{"next_nucleotide", 3}}, ignore_molecule_type("Nothing"),
-                          std::move(ignore_grp))
+          exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        // Normally, DNA has two chains and this potential should be applied to
+        // both inter-strand and intra-strand particle pairs. So the parameter
+        // should be `ignore.molecule = "Nothing"`.
+        if(this->exclusion_list_.ignored_molecule_type() != "Nothing"_s)
+        {
+            MJOLNIR_LOG_WARN("3SPN2 potential requires ignore.molecule = "
+                             "\"Nothing\" but you manually set \"",
+                             this->exclusion_list_.ignored_molecule_type(),
+                             "\". I trust that you know what you are doing.");
+        }
+
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
         for(const auto& idxp : parameters)
