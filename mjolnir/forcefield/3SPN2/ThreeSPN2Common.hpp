@@ -49,12 +49,13 @@ enum class cross_stack_kind: std::uint8_t
 
 struct NucleotideIndex
 {
+    static constexpr std::size_t nil() noexcept
+    {
+        return std::numeric_limits<std::size_t>::max();
+    }
+
     NucleotideIndex() noexcept
-        : strand    (std::numeric_limits<std::size_t>::max()),
-          nucleotide(std::numeric_limits<std::size_t>::max()),
-          P(std::numeric_limits<std::size_t>::max()),
-          S(std::numeric_limits<std::size_t>::max()),
-          B(std::numeric_limits<std::size_t>::max()),
+        : strand(nil()), nucleotide(nil()), P(nil()), S(nil()), B(nil()),
           base(base_kind::X)
     {}
     ~NucleotideIndex() noexcept = default;
