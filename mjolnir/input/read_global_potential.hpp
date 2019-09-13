@@ -382,6 +382,12 @@ read_uniform_lennard_jones_potential(const toml::value& global)
         }
         check_parameter_overlap(env, parameters, params);
     }
+    else
+    {
+        MJOLNIR_LOG_WARN("deprecated: `parameters` field in UniformLennardJones"
+                         "potential will be required in the future release.");
+        MJOLNIR_LOG_WARN("deprecated: write participants explicitly.");
+    }
 
     return potential_type(sigma, epsilon, cutoff, params,
             read_ignore_particles_within(global),
