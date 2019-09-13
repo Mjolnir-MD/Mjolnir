@@ -38,6 +38,7 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
     using connection_kind_type = typename base_type::connection_kind_type;
 
     using potential_type       = ThreeSPN2BaseStackingPotential<real_type>;
+    using base_kind            = parameter_3SPN2::base_kind;
     using base_stack_kind      = parameter_3SPN2::base_stack_kind;
 
     using indices_type         = std::array<std::size_t, 3>;
@@ -45,11 +46,16 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
     using parameter_index_pair = std::pair<indices_type, parameter_type>;
     using container_type       = std::vector<parameter_index_pair>;
 
+    // to register adjacent nucleotides to Topology...
+    using nucleotide_index_type = parameter_3SPN2::NucleotideIndex;
+
   public:
 
     ThreeSPN2BaseStackingInteraction(const connection_kind_type kind,
-            container_type&& para, potential_type&& pot)
-        : kind_(kind), parameters_(std::move(para)), potential_(std::move(pot))
+            container_type&& para, potential_type&& pot,
+            std::vector<nucleotide_index_type>&& nuc_idx)
+        : kind_(kind), parameters_(std::move(para)), potential_(std::move(pot)),
+          nucleotide_index_(std::move(nuc_idx))
     {}
     ~ThreeSPN2BaseStackingInteraction() {}
     ThreeSPN2BaseStackingInteraction(const ThreeSPN2BaseStackingInteraction&) = default;
@@ -82,18 +88,48 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
 
     std::string name() const override {return "3SPN2BaseStacking"_s;}
 
+    // Unlike other interactions, it registers edges between adjacent nucleotides.
+    // Because Base-Base interaction counts number of nucleotides that separates
+    // particles.
     void write_topology(topology_type& topol) const override
     {
-        if(this->kind_.empty() || this->kind_ == "none") {return;}
-
-        for(const auto& idxp : this->parameters_)
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        if(this->kind_.empty() || this->kind_ == "none")
         {
-            const auto i = idxp.first[0];
-            const auto j = idxp.first[1];
-            const auto k = idxp.first[2];
-            topol.add_connection(i, j, this->kind_);
-            topol.add_connection(i, k, this->kind_);
-            topol.add_connection(j, k, this->kind_);
+            MJOLNIR_LOG_WARN("3SPN2 Base-Base Interaction (base pairing + "
+                             "cross stacking) requires the number of nucleotides"
+                             " that separates bases but topology is not set.");
+            MJOLNIR_LOG_WARN("I trust that you know what you are doing.");
+            return;
+        }
+
+        for(std::size_t i=1; i<nucleotide_index_.size(); ++i)
+        {
+            const auto none = std::numeric_limits<std::size_t>::max();
+            const auto& Base5 = nucleotide_index_.at(i-1);
+            const auto& Base3 = nucleotide_index_.at(i);
+
+            if(Base5.strand != Base3.strand) {continue;}
+
+            topol.add_connection(Base5.S, Base3.S, this->kind_);
+            topol.add_connection(Base5.S, Base3.B, this->kind_);
+            topol.add_connection(Base5.B, Base3.S, this->kind_);
+            topol.add_connection(Base5.B, Base3.B, this->kind_);
+
+            if(Base5.P != none)
+            {
+                topol.add_connection(Base5.P, Base3.S, this->kind_);
+                topol.add_connection(Base5.P, Base3.B, this->kind_);
+            }
+            if(Base3.P != none)
+            {
+                topol.add_connection(Base5.S, Base3.P, this->kind_);
+                topol.add_connection(Base5.B, Base3.P, this->kind_);
+            }
+            if(Base5.P != none && Base3.P != none)
+            {
+                topol.add_connection(Base3.P, Base5.P, this->kind_);
+            }
         }
         return;
     }
@@ -111,6 +147,7 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
     connection_kind_type kind_;
     container_type parameters_;
     potential_type potential_;
+    std::vector<nucleotide_index_type> nucleotide_index_;
 };
 
 template<typename traitsT>
