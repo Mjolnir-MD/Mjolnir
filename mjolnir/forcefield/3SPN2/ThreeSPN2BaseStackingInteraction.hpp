@@ -105,7 +105,7 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
 
         for(std::size_t i=1; i<nucleotide_index_.size(); ++i)
         {
-            const auto none = std::numeric_limits<std::size_t>::max();
+            constexpr auto nil = nucleotide_index_type::nil();
             const auto& Base5 = nucleotide_index_.at(i-1);
             const auto& Base3 = nucleotide_index_.at(i);
 
@@ -116,19 +116,19 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
             topol.add_connection(Base5.B, Base3.S, this->kind_);
             topol.add_connection(Base5.B, Base3.B, this->kind_);
 
-            if(Base5.P != none)
+            if(Base5.P != nil)
             {
                 topol.add_connection(Base5.P, Base3.S, this->kind_);
                 topol.add_connection(Base5.P, Base3.B, this->kind_);
             }
-            if(Base3.P != none)
+            if(Base3.P != nil)
             {
                 topol.add_connection(Base5.S, Base3.P, this->kind_);
                 topol.add_connection(Base5.B, Base3.P, this->kind_);
             }
-            if(Base5.P != none && Base3.P != none)
+            if(Base5.P != nil && Base3.P != nil)
             {
-                topol.add_connection(Base3.P, Base5.P, this->kind_);
+                topol.add_connection(Base5.P, Base3.P, this->kind_);
             }
         }
         return;
