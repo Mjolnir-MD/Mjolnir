@@ -185,19 +185,14 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
         params.emplace_back(B, p);
     }
 
-    IgnoreGroup<typename Topology::group_id_type> ignore_grp({});
-    if(global.as_table().count("ignore") == 1)
-    {
-        const auto& ignore = toml::find<toml::value>(global, "ignore");
-        ignore_grp = read_ignored_group(ignore);
-    }
-
     const auto pot = toml::find_or<std::string>(global, "potential", std::string("3SPN2"));
 
     if(pot == "3SPN2")
     {
         ThreeSPN2BaseBaseGlobalPotentialParameter<real_type> para_3SPN2;
-        potential_type potential(para_3SPN2, std::move(params), ignore_grp);
+        potential_type potential(para_3SPN2, std::move(params),
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
 
         return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(
                 std::move(potential),
@@ -206,7 +201,9 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
     else if(pot == "3SPN2C" || pot == "3SPN2.C")
     {
         ThreeSPN2CBaseBaseGlobalPotentialParameter<real_type> para_3SPN2C;
-        potential_type potential(para_3SPN2C, std::move(params), ignore_grp);
+        potential_type potential(para_3SPN2C, std::move(params),
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
 
         return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(
                 std::move(potential),
