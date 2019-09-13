@@ -33,7 +33,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(f_3SPN2_BaseBaseInteraction_double,
     constexpr real_type  pi = mjolnir::math::constants<real_type>::pi();
 
     mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential(
-        ParameterSet{}, {},
+        ParameterSet{}, {}, {},
+        typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_molecule_type("Nothing"),
         typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_group_type({})
         );
 
@@ -74,7 +75,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(f_3SPN2_BaseBaseInteraction_float,
     constexpr real_type  pi = mjolnir::math::constants<real_type>::pi();
 
     mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential(
-        ParameterSet{}, {},
+        ParameterSet{}, {}, {},
+        typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_molecule_type("Nothing"),
         typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_group_type({})
         );
 
@@ -114,7 +116,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(U_rep_3SPN2_BaseBaseInteraction_double,
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
 
-    mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential(ParameterSet{}, {},
+    mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential(ParameterSet{}, {}, {},
+        typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_molecule_type("Nothing"),
         typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_group_type({})
         );
 
@@ -157,7 +160,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(U_attr_3SPN2_BaseBaseInteraction_double,
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
 
-    mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential(ParameterSet{}, {},
+    mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential(ParameterSet{}, {}, {},
+        typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_molecule_type("Nothing"),
         typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_group_type({})
         );
 
@@ -203,7 +207,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(U_dU_attr_3SPN2_BaseBaseInteraction_double,
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-8;
 
-    mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential(ParameterSet{}, {},
+    mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential(ParameterSet{}, {}, {},
+        typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_molecule_type("Nothing"),
         typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_group_type({})
         );
     for(const auto bp : {base_pair_kind::AT, base_pair_kind::TA,
@@ -269,7 +274,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(U_dU_attr_3SPN2_BaseBaseInteraction_float,
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-4;
 
-    mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential(ParameterSet{}, {},
+    mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential(ParameterSet{}, {}, {},
+        typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_molecule_type("Nothing"),
         typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_group_type({})
         );
 
@@ -335,7 +341,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(bp_kind_3SPN2_BaseBaseInteraction,
     using base_kind = mjolnir::parameter_3SPN2::base_kind;
     using base_pair_kind = mjolnir::parameter_3SPN2::base_pair_kind;
 
-    mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential(ParameterSet{}, {},
+    mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential(ParameterSet{}, {}, {},
+        typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_molecule_type("Nothing"),
         typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_group_type({})
         );
 
@@ -353,7 +360,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(cs_kind_3SPN2_BaseBaseInteraction,
     using base_kind = mjolnir::parameter_3SPN2::base_kind;
     using cross_stack_kind = mjolnir::parameter_3SPN2::cross_stack_kind;
 
-    mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential(ParameterSet{}, {},
+    mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type> potential(ParameterSet{}, {}, {},
+        typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_molecule_type("Nothing"),
         typename mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>::ignore_group_type({})
         );
 

@@ -37,8 +37,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_numerical_diff,
     using parameter_type      = typename potential_type::parameter_type;
     using partition_type      = mjolnir::VerletList<traits_type, potential_type>;
 
-    using interaction_type  = mjolnir::ThreeSPN2BaseBaseInteraction<traits_type>;
-    using ignore_group_type = typename potential_type::ignore_group_type;
+    using interaction_type     = mjolnir::ThreeSPN2BaseBaseInteraction<traits_type>;
+    using ignore_group_type    = typename potential_type::ignore_group_type;
+    using ignore_molecule_type = typename potential_type::ignore_molecule_type;
 
     constexpr real_type pi = mjolnir::math::constants<real_type>::pi();
 
@@ -107,11 +108,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_numerical_diff,
         //
         constexpr auto invalid = potential_type::invalid();
 
-        ignore_group_type grp({});
         potential_type potential(ParameterSet{}, {
                 {1, parameter_type{bases.at(0), 0, 0, invalid, invalid}},
                 {3, parameter_type{bases.at(1), 1, 2, invalid, invalid}}
-            }, std::move(grp)
+            }, {}, ignore_molecule_type("Nothing"), ignore_group_type({})
         );
 
         interaction_type interaction(potential_type(potential),
@@ -328,8 +328,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
     using parameter_type    = typename potential_type::parameter_type;
     using partition_type      = mjolnir::VerletList<traits_type, potential_type>;
 
-    using interaction_type  = mjolnir::ThreeSPN2BaseBaseInteraction<traits_type>;
-    using ignore_group_type = typename potential_type::ignore_group_type;
+    using interaction_type     = mjolnir::ThreeSPN2BaseBaseInteraction<traits_type>;
+    using ignore_group_type    = typename potential_type::ignore_group_type;
+    using ignore_molecule_type = typename potential_type::ignore_molecule_type;
 
     constexpr real_type pi = mjolnir::math::constants<real_type>::pi();
 
@@ -423,7 +424,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
                 {9, parameter_type{bases.at(1), 3, 8, invalid, 6}},
                 {4, parameter_type{bases.at(2), 1, 3, invalid, 1}},
                 {6, parameter_type{bases.at(3), 2, 5, 9, invalid}},
-            }, ignore_group_type({})
+            }, {}, ignore_molecule_type("Nothing"), ignore_group_type({})
         );
 
         interaction_type interaction(potential_type(potential),
