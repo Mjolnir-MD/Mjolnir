@@ -10,6 +10,11 @@
 namespace mjolnir
 {
 
+template<typename realT>
+struct ThreeSPN2BaseStackingPotentialParameter;
+template<typename realT>
+struct ThreeSPN2CBaseStackingPotentialParameter;
+
 // It calculates a stacking energy/force that is a part of 3SPN2 DNA model.
 // - D. M. Hinckley, G. S. Freeman, J. K. Whitmer, and J. J. de Pablo
 //   J. Chem. Phys. (2013)
@@ -35,6 +40,11 @@ class ThreeSPN2BaseStackingPotential
     using parameter_type  = base_stack_kind;
 
   public:
+
+    ThreeSPN2BaseStackingPotential()
+        : ThreeSPN2BaseStackingPotential(
+            ThreeSPN2BaseStackingPotentialParameter<real_type>{})
+    {}
 
     template<typename ParameterSet>
     ThreeSPN2BaseStackingPotential(ParameterSet paraset)
