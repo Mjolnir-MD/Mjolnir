@@ -376,8 +376,7 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
     //     {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
     //     # ...
     // ]
-    using nucleotide_index_type =
-        typename ThreeSPN2BaseStackingInteraction<traitsT>::nucleotide_index_type;
+    using nucleotide_index_type = parameter_3SPN2::NucleotideIndex;
     std::vector<nucleotide_index_type> nuc_idxs;
     nuc_idxs.reserve(params.size());
     for(const auto& item : params)
