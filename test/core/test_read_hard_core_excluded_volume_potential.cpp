@@ -27,13 +27,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_hard_core_excluded_volume_noenv, T, test_type
         using namespace toml::literals;
         const toml::value v = u8R"(
             epsilon                 = 3.14
+            cutoff                  = 2.71
             ignore.molecule         = "Nothing"
             ignore.particles_within.bond    = 3
             ignore.particles_within.contact = 1
             parameters  = [
-                {index =   0, core_radius =   2.0, soft_shell_thickness = 3.0},
-                {index =   1, core_radius =   2.0, soft_shell_thickness = 2.0},
-                {index =   3, core_radius =   3.0, soft_shell_thickness = 100.0},
+                {index = 0, core_radius = 2.0, soft_shell_thickness = 3.0},
+                {index = 1, core_radius = 2.0, soft_shell_thickness = 2.0},
+                {index = 3, core_radius = 3.0, soft_shell_thickness = 100.0},
             ]
         )"_toml;
 
@@ -47,20 +48,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_hard_core_excluded_volume_noenv, T, test_type
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST(pot.participants().size() ==   3u);
-        BOOST_TEST(pot.participants().at(0)  ==   0u);
-        BOOST_TEST(pot.participants().at(1)  ==   1u);
-        BOOST_TEST(pot.participants().at(2)  ==   3u);
+        BOOST_TEST(pot.participants().size() == 3u);
+        BOOST_TEST(pot.participants().at(0)  == 0u);
+        BOOST_TEST(pot.participants().at(1)  == 1u);
+        BOOST_TEST(pot.participants().at(2)  == 3u);
 
-        BOOST_TEST(pot.parameters().at(  0).first  == real_type(  3.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  1).first  == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  3).first  == real_type(100.0), tolerance<real_type>());
+        BOOST_TEST(pot.parameters().at(0).first == real_type(  3.0), tolerance<real_type>());
+        BOOST_TEST(pot.parameters().at(1).first == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(pot.parameters().at(3).first == real_type(100.0), tolerance<real_type>());
 
-        BOOST_TEST(pot.parameters().at(  0).second  == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  1).second  == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  3).second  == real_type(  3.0), tolerance<real_type>());
+        BOOST_TEST(pot.parameters().at(0).second == real_type(2.0), tolerance<real_type>());
+        BOOST_TEST(pot.parameters().at(1).second == real_type(2.0), tolerance<real_type>());
+        BOOST_TEST(pot.parameters().at(3).second == real_type(3.0), tolerance<real_type>());
 
-        BOOST_TEST(pot.epsilon() == real_type(3.14), tolerance<real_type>());
+        BOOST_TEST(pot.epsilon()      == real_type(3.14), tolerance<real_type>());
+        BOOST_TEST(pot.cutoff_ratio() == real_type(2.71), tolerance<real_type>());
     }
 }
 
@@ -96,19 +98,20 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_hard_core_excluded_volume_env, T, test_types)
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST(pot.participants().size() ==   3u);
-        BOOST_TEST(pot.participants().at(0)  ==   0u);
-        BOOST_TEST(pot.participants().at(1)  ==   1u);
-        BOOST_TEST(pot.participants().at(2)  ==   3u);
+        BOOST_TEST(pot.participants().size() == 3u);
+        BOOST_TEST(pot.participants().at(0)  == 0u);
+        BOOST_TEST(pot.participants().at(1)  == 1u);
+        BOOST_TEST(pot.participants().at(2)  == 3u);
 
-        BOOST_TEST(pot.parameters().at(  0).first  == real_type(  3.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  1).first  == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  3).first  == real_type(100.0), tolerance<real_type>());
+        BOOST_TEST(pot.parameters().at(0).first == real_type(  3.0), tolerance<real_type>());
+        BOOST_TEST(pot.parameters().at(1).first == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(pot.parameters().at(3).first == real_type(100.0), tolerance<real_type>());
 
-        BOOST_TEST(pot.parameters().at(  0).second  == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  1).second  == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  3).second  == real_type(  3.0), tolerance<real_type>());
+        BOOST_TEST(pot.parameters().at(0).second == real_type(2.0), tolerance<real_type>());
+        BOOST_TEST(pot.parameters().at(1).second == real_type(2.0), tolerance<real_type>());
+        BOOST_TEST(pot.parameters().at(3).second == real_type(3.0), tolerance<real_type>());
 
-        BOOST_TEST(pot.epsilon() == real_type(3.14), tolerance<real_type>());
+        BOOST_TEST(pot.epsilon()      == real_type(3.14), tolerance<real_type>());
+        BOOST_TEST(pot.cutoff_ratio() == decltype(pot)::default_cutoff(), tolerance<real_type>());
     }
 }
