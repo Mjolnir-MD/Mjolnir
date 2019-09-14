@@ -303,7 +303,7 @@ read_hard_core_excluded_volume_potential(const toml::value& global)
     }
 
     return HardCoreExcludedVolumePotential<realT>(
-        eps, std::move(params), ignore_particle_within,
+        eps, cutoff, std::move(params), ignore_particle_within,
         read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
 
