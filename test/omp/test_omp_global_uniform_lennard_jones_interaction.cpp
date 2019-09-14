@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_UniformLennardJones_calc_force)
         omp_set_num_threads(num_thread);
         BOOST_TEST_MESSAGE("maximum number of threads = " << omp_get_max_threads());
 
-        potential_type potential(1.0, 1.0, {}, {},
+        potential_type potential(1.0, 1.0, potential_type::default_cutoff(), {}, {},
             typename potential_type::ignore_molecule_type("Nothing"),
             typename potential_type::ignore_group_type({}));
 

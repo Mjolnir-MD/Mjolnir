@@ -21,7 +21,8 @@ BOOST_AUTO_TEST_CASE(EXV_double)
     const real_type sigma   = 3.0;
     const real_type epsilon = 1.0;
     mjolnir::ExcludedVolumePotential<real_type> exv{
-        epsilon, {{0, sigma}, {1, sigma}}, {},
+        epsilon, mjolnir::ExcludedVolumePotential<real_type>::default_cutoff(),
+        {{0, sigma}, {1, sigma}}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
     };
@@ -55,7 +56,8 @@ BOOST_AUTO_TEST_CASE(EXV_float)
     const real_type epsilon = 1.0;
 
     mjolnir::ExcludedVolumePotential<real_type> exv{
-        epsilon, {{0, sigma}, {1, sigma}}, {},
+        epsilon, mjolnir::ExcludedVolumePotential<real_type>::default_cutoff(),
+        {{0, sigma}, {1, sigma}}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
     };
