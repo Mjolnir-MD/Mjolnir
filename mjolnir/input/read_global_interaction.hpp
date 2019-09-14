@@ -220,7 +220,7 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
                 std::move(potential),
                 read_spatial_partition<traitsT, potential_type>(global));
     }
-    else if(pot == "3SPN2C" || pot == "3SPN2.C")
+    else if(pot == "3SPN2C")
     {
         ThreeSPN2CBaseBaseGlobalPotentialParameter<real_type> para_3SPN2C;
         potential_type potential(para_3SPN2C, std::move(params),
@@ -237,8 +237,8 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
             "mjolnir::read_local_3spn2_base_stacking_interaction: "
             "invalid potential", toml::find(global, "potential"), "here", {
             "expected value is one of the following.",
-            "- \"3SPN2\"  : The general 3SPN2 parameter set.",
-            "- \"3SPN2.C\": The parameter set optimized to reproduce curveture of dsDNA."
+            "- \"3SPN2\" : The general 3SPN2 parameter set.",
+            "- \"3SPN2C\": The parameter set optimized to reproduce curveture of dsDNA."
             }));
     }
 }

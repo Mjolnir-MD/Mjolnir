@@ -349,9 +349,9 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
         ThreeSPN2BaseStackingPotentialParameter<real_type> para_3SPN2;
         potential = potential_type(para_3SPN2);
     }
-    else if (pot == "3SPN2.C" || pot == "3SPN2C")
+    else if (pot == "3SPN2C")
     {
-        MJOLNIR_LOG_NOTICE("potential is 3SPN2.C");
+        MJOLNIR_LOG_NOTICE("potential is 3SPN2C");
         ThreeSPN2CBaseStackingPotentialParameter<real_type> para_3SPN2C;
         potential = potential_type(para_3SPN2C);
     }
@@ -361,8 +361,8 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
             "mjolnir::read_local_3spn2_base_stacking_interaction: "
             "invalid potential", toml::find(local, "potential"), "here", {
             "expected value is one of the following.",
-            "- \"3SPN2\"  : The general 3SPN2 parameter set.",
-            "- \"3SPN2.C\": The parameter set optimized to reproduce curveture of dsDNA."
+            "- \"3SPN2\" : The general 3SPN2 parameter set.",
+            "- \"3SPN2C\": The parameter set optimized to reproduce curveture of dsDNA."
             }));
     }
 
