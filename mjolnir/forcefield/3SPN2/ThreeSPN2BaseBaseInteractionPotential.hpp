@@ -45,7 +45,7 @@ class ThreeSPN2BaseBaseInteractionPotential
     struct parameter_type
     {
         base_kind   base;
-        std::size_t strand_index; // index in a strand.
+        std::size_t nucleotide_index; // index in a strand.
         std::size_t S_idx, B3_idx, B5_idx;
     };
     struct pair_parameter_type
@@ -204,7 +204,7 @@ class ThreeSPN2BaseBaseInteractionPotential
         //  3'    o -- o===o -- o     5'
         //       Bj_next   Bj_next
 
-        const bool i_is_sense_strand = (para_i.strand_index < para_j.strand_index);
+        const bool i_is_sense_strand = (para_i.nucleotide_index < para_j.nucleotide_index);
         const auto Bi_next = i_is_sense_strand ? para_i.B3_idx : para_i.B5_idx;
         const auto Bj_next = i_is_sense_strand ? para_j.B5_idx : para_j.B3_idx;
 

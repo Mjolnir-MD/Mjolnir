@@ -188,9 +188,9 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
         const auto  B = base.B;
 
         parameter_type p;
-        p.base         = base.base;
-        p.strand_index = base.nucleotide;
-        p.S_idx        = base.S;
+        p.nucleotide_index = base.nucleotide;
+        p.base   = base.base;
+        p.S_idx  = base.S;
         p.B5_idx = potential_type::invalid();
         p.B3_idx = potential_type::invalid();
 
