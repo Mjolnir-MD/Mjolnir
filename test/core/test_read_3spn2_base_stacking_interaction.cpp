@@ -39,8 +39,24 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_stacking_interaction)
                 {strand = 0, nucleotide = 12, P = 35, S = 36, B = 37, Base = "C"}, # CA
                 {strand = 0, nucleotide = 13, P = 38, S = 39, B = 40, Base = "A"}, # AT
                 {strand = 0, nucleotide = 14, P = 41, S = 42, B = 43, Base = "T"}, # TG
-                {strand = 0, nucleotide = 15, P = 44, S = 45, B = 46, Base = "G"}, # GC
-                {strand = 0, nucleotide = 16, P = 47, S = 48, B = 49, Base = "C"}, # x
+                {strand = 0, nucleotide = 15, P = 44, S = 45, B = 46, Base = "G"}, # X
+
+                {strand = 1, nucleotide = 16,         S = 47, B = 48, Base = "A"}, # AA
+                {strand = 1, nucleotide = 17, P = 49, S = 50, B = 51, Base = "A"}, # AT
+                {strand = 1, nucleotide = 18, P = 52, S = 53, B = 54, Base = "T"}, # TG
+                {strand = 1, nucleotide = 19, P = 55, S = 56, B = 57, Base = "G"}, # GC
+                {strand = 1, nucleotide = 20, P = 58, S = 59, B = 60, Base = "C"}, # CA
+                {strand = 1, nucleotide = 21, P = 61, S = 62, B = 63, Base = "A"}, # AT
+                {strand = 1, nucleotide = 22, P = 64, S = 65, B = 66, Base = "T"}, # TG
+                {strand = 1, nucleotide = 23, P = 67, S = 68, B = 69, Base = "G"}, # GC
+                {strand = 1, nucleotide = 24, P = 70, S = 71, B = 72, Base = "C"}, # CA
+                {strand = 1, nucleotide = 25, P = 73, S = 74, B = 75, Base = "A"}, # AT
+                {strand = 1, nucleotide = 26, P = 76, S = 77, B = 78, Base = "T"}, # TG
+                {strand = 1, nucleotide = 27, P = 79, S = 80, B = 81, Base = "G"}, # GC
+                {strand = 1, nucleotide = 28, P = 82, S = 83, B = 84, Base = "C"}, # CA
+                {strand = 1, nucleotide = 29, P = 85, S = 86, B = 87, Base = "A"}, # AT
+                {strand = 1, nucleotide = 30, P = 88, S = 89, B = 90, Base = "T"}, # TG
+                {strand = 1, nucleotide = 31, P = 91, S = 92, B = 93, Base = "G"}, # X
             ]
         )"_toml;
 
@@ -53,12 +69,18 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_stacking_interaction)
         BOOST_TEST(static_cast<bool>(derv));
 
         BOOST_TEST(derv->connection_kind() == "nucleotide");
-        BOOST_TEST_REQUIRE(derv->parameters().size() == 16u);
-        for(std::size_t i=0; i<16; ++i)
+        BOOST_TEST_REQUIRE(derv->parameters().size() == 30u);
+        for(std::size_t i=0; i<15; ++i)
         {
             BOOST_TEST(derv->parameters().at(i).first.at(0) == 0 + i*3);
             BOOST_TEST(derv->parameters().at(i).first.at(1) == 1 + i*3);
             BOOST_TEST(derv->parameters().at(i).first.at(2) == 4 + i*3);
+        }
+        for(std::size_t i=15; i<30; ++i)
+        {
+            BOOST_TEST(derv->parameters().at(i).first.at(0) == 47 + (i-15)*3);
+            BOOST_TEST(derv->parameters().at(i).first.at(1) == 48 + (i-15)*3);
+            BOOST_TEST(derv->parameters().at(i).first.at(2) == 51 + (i-15)*3);
         }
         BOOST_TEST(derv->parameters().at( 0).second == base_stack_kind::AA);
         BOOST_TEST(derv->parameters().at( 1).second == base_stack_kind::AT);
@@ -75,6 +97,21 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_stacking_interaction)
         BOOST_TEST(derv->parameters().at(12).second == base_stack_kind::CA);
         BOOST_TEST(derv->parameters().at(13).second == base_stack_kind::AT);
         BOOST_TEST(derv->parameters().at(14).second == base_stack_kind::TG);
-        BOOST_TEST(derv->parameters().at(15).second == base_stack_kind::GC);
+
+        BOOST_TEST(derv->parameters().at(15).second == base_stack_kind::AA);
+        BOOST_TEST(derv->parameters().at(16).second == base_stack_kind::AT);
+        BOOST_TEST(derv->parameters().at(17).second == base_stack_kind::TG);
+        BOOST_TEST(derv->parameters().at(18).second == base_stack_kind::GC);
+        BOOST_TEST(derv->parameters().at(19).second == base_stack_kind::CA);
+        BOOST_TEST(derv->parameters().at(20).second == base_stack_kind::AT);
+        BOOST_TEST(derv->parameters().at(21).second == base_stack_kind::TG);
+        BOOST_TEST(derv->parameters().at(22).second == base_stack_kind::GC);
+        BOOST_TEST(derv->parameters().at(23).second == base_stack_kind::CA);
+        BOOST_TEST(derv->parameters().at(24).second == base_stack_kind::AT);
+        BOOST_TEST(derv->parameters().at(25).second == base_stack_kind::TG);
+        BOOST_TEST(derv->parameters().at(26).second == base_stack_kind::GC);
+        BOOST_TEST(derv->parameters().at(27).second == base_stack_kind::CA);
+        BOOST_TEST(derv->parameters().at(28).second == base_stack_kind::AT);
+        BOOST_TEST(derv->parameters().at(29).second == base_stack_kind::TG);
     }
 }
