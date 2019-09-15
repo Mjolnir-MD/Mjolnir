@@ -164,13 +164,13 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
         else
         {
             throw_exception<std::runtime_error>(toml::format_error("[error] "
-                "mjolnir::read_local_3spn2_base_stacking_interaction: "
+                "mjolnir::read_local_3spn2_base_base_interaction: "
                 "invalid Base", item, "here", {
                 "expected value is one of the \"A\", \"T\", \"C\", \"G\"."
                 }));
         }
 
-        MJOLNIR_LOG_INFO("ThreeSPN2BaseStackingPotential: nucleotide = ", nuc_idx);
+        MJOLNIR_LOG_INFO("ThreeSPN2BaseBaseInteraction: nucleotide = ", nuc_idx);
         nuc_idxs.push_back(nuc_idx);
     }
 
