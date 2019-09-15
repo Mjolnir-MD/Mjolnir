@@ -23,12 +23,13 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_base_interaction)
         using namespace toml::literals;
         const toml::value v = u8R"(
             interaction = "3SPN2BaseBase"
+            potential   = "3SPN2"
             spatial_partition = {type = "VerletList", margin = 1.0}
             parameters = [
-            {nucleotide_index = 0, S = 0, B =  1, base = "A", B5 = "none", B3 =      4},
-            {nucleotide_index = 1, S = 3, B =  4, base = "T", B5 =      1, B3 =      7},
-            {nucleotide_index = 2, S = 6, B =  7, base = "G", B5 =      4, B3 =     10},
-            {nucleotide_index = 3, S = 9, B = 10, base = "C", B5 =      7, B3 = "none"},
+            {strand = 0, nucleotide =  0,          S =   0, B =   1, Base = "A"},
+            {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
+            {strand = 0, nucleotide =  2, P =   5, S =   6, B =   7, Base = "G"},
+            {strand = 0, nucleotide =  3, P =   8, S =   9, B =  10, Base = "C"},
             ]
         )"_toml;
 
@@ -42,10 +43,15 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_base_interaction)
 
         BOOST_TEST_REQUIRE(derv->potential().participants().size() == 4u);
 
-        BOOST_TEST(derv->potential().parameters().at( 1).strand_index == 0u);
-        BOOST_TEST(derv->potential().parameters().at( 4).strand_index == 1u);
-        BOOST_TEST(derv->potential().parameters().at( 7).strand_index == 2u);
-        BOOST_TEST(derv->potential().parameters().at(10).strand_index == 3u);
+        BOOST_TEST_REQUIRE(derv->potential().participants().at(0) ==  1u);
+        BOOST_TEST_REQUIRE(derv->potential().participants().at(1) ==  4u);
+        BOOST_TEST_REQUIRE(derv->potential().participants().at(2) ==  7u);
+        BOOST_TEST_REQUIRE(derv->potential().participants().at(3) == 10u);
+
+        BOOST_TEST(derv->potential().parameters().at( 1).nucleotide_index == 0u);
+        BOOST_TEST(derv->potential().parameters().at( 4).nucleotide_index == 1u);
+        BOOST_TEST(derv->potential().parameters().at( 7).nucleotide_index == 2u);
+        BOOST_TEST(derv->potential().parameters().at(10).nucleotide_index == 3u);
 
         BOOST_TEST(derv->potential().parameters().at( 1).S_idx == 0u);
         BOOST_TEST(derv->potential().parameters().at( 4).S_idx == 3u);
