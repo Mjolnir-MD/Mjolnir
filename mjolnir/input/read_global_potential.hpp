@@ -303,7 +303,7 @@ read_hard_core_excluded_volume_potential(const toml::value& global)
     }
 
     return HardCoreExcludedVolumePotential<realT>(
-        eps, std::move(params), ignore_particle_within,
+        eps, cutoff, std::move(params), ignore_particle_within,
         read_ignored_molecule(ignore), read_ignored_group(ignore));
 }
 
@@ -381,6 +381,12 @@ read_uniform_lennard_jones_potential(const toml::value& global)
             params.emplace_back(idx, parameter_type{});
         }
         check_parameter_overlap(env, parameters, params);
+    }
+    else
+    {
+        MJOLNIR_LOG_WARN("deprecated: `parameters` field in UniformLennardJones"
+                         "potential will be required in the future release.");
+        MJOLNIR_LOG_WARN("deprecated: write participants explicitly.");
     }
 
     return potential_type(sigma, epsilon, cutoff, params,

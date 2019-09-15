@@ -132,9 +132,9 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
     coordinate_type gen_R() noexcept
     {
-        const auto x = this->rng_.gaussian(0, 1);
-        const auto y = this->rng_.gaussian(0, 1);
-        const auto z = this->rng_.gaussian(0, 1);
+        const auto x = this->rng_.gaussian();
+        const auto y = this->rng_.gaussian();
+        const auto z = this->rng_.gaussian();
         return math::make_coordinate<coordinate_type>(x, y, z);
     }
 

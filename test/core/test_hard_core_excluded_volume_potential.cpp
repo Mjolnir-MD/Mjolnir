@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(HCEXV_double)
     const real_type soft_shell_thickness = 3.0;
     const parameter_type param{hard_core_radius, soft_shell_thickness};
     mjolnir::HardCoreExcludedVolumePotential<real_type> hdexv{
-      epsilon, {{0, param}, {1, param}}, {},
+      epsilon, potential_type::default_cutoff(), {{0, param}, {1, param}}, {},
       mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
       mjolnir::IgnoreGroup<group_id_type>({})
     };
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(HCEXV_float)
     const real_type soft_shell_thickness = 3.0;
     const parameter_type param{hard_core_radius, soft_shell_thickness};
     mjolnir::HardCoreExcludedVolumePotential<real_type> hdexv{
-      epsilon, {{0, param}, {1, param}}, {},
+      epsilon, potential_type::default_cutoff(), {{0, param}, {1, param}}, {},
       mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
       mjolnir::IgnoreGroup<group_id_type>({})
     };
