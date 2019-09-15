@@ -26,7 +26,7 @@ read_molecular_dynamics_simulator(
     MJOLNIR_LOG_FUNCTION();
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
-            "total_step"_s, "save_step"_s, "delta_t"_s, "integrator"_s});
+        "parallelism"_s, "total_step"_s, "save_step"_s, "delta_t"_s, "integrator"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
@@ -99,7 +99,7 @@ read_steepest_descent_simulator(
     using simulator_type = SteepestDescentSimulator<traitsT>;
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
-            "step_limit"_s, "save_step"_s, "delta"_s, "threshold"_s});
+        "parallelism"_s, "step_limit"_s, "save_step"_s, "delta"_s, "threshold"_s});
 
     const auto step_lim  = toml::find<std::size_t>(simulator, "step_limit");
     const auto save_step = toml::find<std::size_t>(simulator, "save_step");
@@ -126,8 +126,8 @@ read_simulated_annealing_simulator(
     using real_type   = typename traitsT::real_type;
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
-            "total_step"_s, "save_step"_s, "delta_t"_s, "integrator"_s,
-            "schedule"_s, "each_step"_s});
+            "parallelism"_s, "total_step"_s, "save_step"_s, "delta_t"_s,
+            "integrator"_s, "schedule"_s, "each_step"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
@@ -231,8 +231,8 @@ read_switching_forcefield_simulator(
     MJOLNIR_LOG_FUNCTION();
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
-            "total_step"_s, "save_step"_s, "delta_t"_s, "integrator"_s,
-            "schedule"_s});
+            "parallelism"_s, "total_step"_s, "save_step"_s, "delta_t"_s,
+            "integrator"_s, "schedule"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
