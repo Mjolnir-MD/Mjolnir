@@ -53,12 +53,19 @@ class RandomNumberGenerator<OpenMPSimulatorTraits<realT, boundaryT>>
     {
         return this->uniform_real01() * (max - min) + min;
     }
+
+    real_type gaussian()
+    {
+        const std::size_t thread_id = omp_get_thread_num();
+        auto& rng = this->rngs_.at(thread_id).value;
+        auto& nrm = this->nrms_.at(thread_id).value;
+        return nrm(rng);
+    }
     real_type gaussian(const real_type mean, const real_type stddev)
     {
         const std::size_t thread_id = omp_get_thread_num();
         auto& rng = this->rngs_.at(thread_id).value;
         auto& nrm = this->nrms_.at(thread_id).value;
-
         return nrm(rng) * stddev + mean;
     }
 
