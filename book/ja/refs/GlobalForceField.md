@@ -5,3 +5,7 @@ GlobalForceFieldでは、パラメータを指定した粒子間の全てのペ�
 ## [GlobalPair](GlobalPairInteraction.md)
 
 二体間の距離に作用する相互作用を設定します。分子間力や、静電相互作用などが対応します。
+
+## [3SPN2BaseBase](3SPN2BaseBaseInteraction.md)
+
+3SPN2系統の力場で使用される、塩基間の相互作用（base pairing + cross stacking）を設定します。
