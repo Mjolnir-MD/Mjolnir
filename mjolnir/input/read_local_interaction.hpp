@@ -164,7 +164,7 @@ read_contact_in_directional_contact_interaction(const std::string& kind, const t
   {
     throw_exception<std::runtime_error>(toml::format_error("[error] "
         "mjolnir::read_directional_contact_interaction: invalid contact potential",
-	toml::find<toml::value>(local, "potentials", "contact"), "here", {
+        toml::find<toml::value>(local, "potentials", "contact"), "here", {
         "expected value is one of the following.",
         "- \"GoContact\": r^12 - r^10 type native contact potential",
         "- \"Gaussian\" : well-known gaussian potential"
@@ -203,13 +203,22 @@ read_angle_in_directional_contact_interaction(
     return read_angle_in_directional_contact_interaction<
       traitsT, PotentialTs..., angle_potential_T>(kind, local, angle_potential_keys);
   }
+  else if(angle_potential == "Gaussian")
+  {
+    MJOLNIR_LOG_NOTICE("-- angle potential function is Gaussian");
+    using angle_potential_T = GaussianPotential<real_type>;
+
+    return read_angle_in_directional_contact_interaction<
+      traitsT, PotentialTs..., angle_potential_T>(kind, local, angle_potential_keys);
+  }
   else
   {
     throw_exception<std::runtime_error>(toml::format_error("[error] "
         "mjolnir::read_bond_length_interaction: invalid angle potential",
-	toml::find<toml::value>(local, "potentials", angle_potential_key), "here", {
+        toml::find<toml::value>(local, "potentials", angle_potential_key), "here", {
         "expected value is one of the following.",
-        "- \"Cosine\" : 1 + Cosine(x) potential"
+        "- \"Cosine\"   : 1 + Cosine(x) potential",
+        "- \"Gaussian\" : well-known gaussian potential"
         }));
   }
 }
