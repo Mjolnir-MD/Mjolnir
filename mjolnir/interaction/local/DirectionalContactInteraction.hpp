@@ -228,7 +228,7 @@ void DirectionalContactInteraction<
     // dU_angle2(theta2) / dr
     const coordinate_type PjCj          = sys.adjust_direction(rCj - rPj);
     const real_type inv_len_PjCj        = math::rlength(PjCj);
-    const coordinate_type PjCj_reg      = PjCj * inv_len_PiCi;
+    const coordinate_type PjCj_reg      = PjCj * inv_len_PjCj;
 
     const coordinate_type Pji_reg       = - Pij_reg;
     const real_type PjCj_dot_Pji        = math::dot_product(PjCj_reg, Pji_reg);
