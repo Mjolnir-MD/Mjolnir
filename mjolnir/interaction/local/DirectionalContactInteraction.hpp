@@ -87,9 +87,8 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
 
   std::string name() const override
   {
-    return "DirectionalContact: {angle1 potentail: "_s + angle1_pot_type::name()
-        + ", angle2 potential: "_s + angle2_pot_type::name()
-        + ", contact potential: "_s + contact_pot_type::name() + "}"_s;
+    return "DirectionalContact:"_s + angle1_pot_type::name()
+        + ","_s + angle2_pot_type::name() + ","_s + contact_pot_type::name();
   }
 
   void write_topology(topology_type&) const override;
