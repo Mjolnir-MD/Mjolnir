@@ -205,16 +205,6 @@ read_dihedral_angle_interaction(const std::string& kind, const toml::value& loca
         return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
             kind, read_local_potential<4, potentialT>(local));
     }
-    else if(potential == "PeriodicGaussian")
-    {
-        // XXX remove this after v1.4.0
-        MJOLNIR_LOG_NOTICE("-- potential function is PeriodicGaussian.");
-        MJOLNIR_LOG_WARN  ("[deprecated] \"Periodic\" is no longer needed.");
-        using potentialT = PeriodicGaussianPotential<real_type>;
-
-        return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
-            kind, read_local_potential<4, potentialT>(local));
-    }
     else if(potential == "FlexibleLocalDihedral")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Flexible Local Dihedral.");
@@ -235,19 +225,6 @@ read_dihedral_angle_interaction(const std::string& kind, const toml::value& loca
     {
         MJOLNIR_LOG_NOTICE("-- potential function is "
                            "Gaussian + FlexibleLocalDihedral.");
-        using potentialT = SumLocalPotential<real_type,
-              PeriodicGaussianPotential, FlexibleLocalDihedralPotential>;
-
-        return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(kind,
-            read_local_potentials<4, real_type,
-                PeriodicGaussianPotential, FlexibleLocalDihedralPotential>(local));
-    }
-    else if(potential == "PeriodicGaussian+FlexibleLocalDihedral")
-    {
-        // XXX remove this after v1.4.0
-        MJOLNIR_LOG_NOTICE("-- potential function is "
-                           "PeriodicGaussian + FlexibleLocalDihedral.");
-        MJOLNIR_LOG_WARN  ("[deprecated] \"Periodic\" is no longer needed.");
         using potentialT = SumLocalPotential<real_type,
               PeriodicGaussianPotential, FlexibleLocalDihedralPotential>;
 
