@@ -324,7 +324,8 @@ template<std::size_t N, typename realT,
          >
 std::vector<std::pair<std::array<std::size_t, N>,
                       SumLocalPotential<realT, potential1T, potential2T>>>
-read_local_potentials(const toml::value& local)
+read_local_potentials(const toml::value& local,
+        const std::string& pot1_name, const std::string& pot2_name)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -351,8 +352,8 @@ read_local_potentials(const toml::value& local)
         const auto indices = find_parameter<indices_type>(item, env, "indices");
         MJOLNIR_LOG_INFO("idxs = ", indices);
 
-        const auto& pot1 = find_parameter<toml::value>(item, env, potential_1_type::name());
-        const auto& pot2 = find_parameter<toml::value>(item, env, potential_2_type::name());
+        const auto& pot1 = find_parameter<toml::value>(item, env, pot1_name);
+        const auto& pot2 = find_parameter<toml::value>(item, env, pot2_name);
 
         retval.emplace_back(indices, potential_type(
             detail::read_local_potential_impl<potential_1_type>::invoke(pot1, env),
