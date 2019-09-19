@@ -12,6 +12,7 @@
 #include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
 #include <mjolnir/potential/local/CosinePotential.hpp>
 #include <mjolnir/potential/local/SumLocalPotential.hpp>
+#include <mjolnir/potential/local/UniformPotential.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BondPotential.hpp>
 
 #include <mjolnir/core/Topology.hpp>
@@ -176,6 +177,19 @@ read_cosine_potential(const toml::value& param, const toml::value& env)
 }
 
 template<typename realT>
+UniformPotential<realT>
+read_uniform_potential(const toml::value& param, const toml::value& env)
+{
+  MJOLNIR_GET_DEFAULT_LOGGER();
+  using real_type = realT;
+
+  auto k = find_parameter<real_type>(param, env, "k");
+
+  MJOLNIR_LOG_INFO("UniformPotential");
+  return UniformPotential<realT>(k);
+}
+
+template<typename realT>
 ThreeSPN2BondPotential<realT>
 read_3spn2_bond_potential(const toml::value& param, const toml::value& env)
 {
@@ -274,6 +288,15 @@ struct read_local_potential_impl<CosinePotential<realT>>
     {
         return read_cosine_potential<realT>(param, env);
     }
+};
+template<typename realT>
+struct read_local_potential_impl<UniformPotential<realT>>
+{
+  static UniformPotential<realT>
+  invoke(const toml::value& param, const toml::value& env)
+  {
+    return read_uniform_potential<realT>(param, env);
+  }
 };
 template<typename realT>
 struct read_local_potential_impl<ThreeSPN2BondPotential<realT>>
