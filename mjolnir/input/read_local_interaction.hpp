@@ -209,11 +209,11 @@ read_directional_contact_interaction(const std::string& kind,
 
       return make_unique<
           DirectionalContactInteraction<
-              traitsT, angle1_potentialT,angle2_potentialT, contact_potentialT
+              traitsT, PotentialTs..., contact_potentialT
               >
           >(kind,
             read_directional_contact_potentials<
-                4, real_type, angle1_potentialT, angle2_potentialT, contact_potentialT
+                4, real_type, PotentialTs..., contact_potentialT
             >(local));
     }
     else
@@ -266,9 +266,9 @@ read_directional_contact_interaction(const std::string& kind,
         MJOLNIR_LOG_NOTICE("-- angle potential function is Uniform potential");
         using angle_potential_T = UniformPotential<real_type>;
 
-        return read_angle_in_directional_contact_interaction<
+        return read_directional_contact_interaction<
             traitsT, PotentialTs..., angle_potential_T
-            >(kind, local, angle_potential_keys);
+            >(kind, local, std::move(angle_potential_keys));
     }
     else
     {
