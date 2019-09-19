@@ -229,7 +229,7 @@ read_directional_contact_interaction(const std::string& kind, const toml::value&
 {
   MJOLNIR_GET_DEFAULT_LOGGER();
   MJOLNIR_LOG_FUNCTION();
-  std::vector<std::string> angle_potential_keys = {"angle1", "angle2"};
+  std::vector<std::string> angle_potential_keys = {"angle2", "angle1"};
 
   return read_angle_in_directional_contact_interaction<traitsT>(kind, local, angle_potential_keys);
 }
