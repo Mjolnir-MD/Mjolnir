@@ -119,8 +119,8 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
         this->active_contacts_.push_back(i);
       }
       this->current_margin_ = this->cutoff_ * this->margin_;
-      return;
     }
+    return;
   }
 
   const real_type max_cutoff_length() const noexcept
