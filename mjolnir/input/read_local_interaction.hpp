@@ -234,6 +234,17 @@ read_dihedral_angle_interaction(const std::string& kind, const toml::value& loca
                 PeriodicGaussianPotential, FlexibleLocalDihedralPotential
                 >(local, "Gaussian", "FlexibleLocalDihedral"));
     }
+    else if(potential == "Gaussian+Cosine" || potential == "Cosine+Gaussian")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is PeriodicGaussian + Cosine.");
+        using potentialT = SumLocalPotential<real_type,
+              PeriodicGaussianPotential, CosinePotential>;
+
+        return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(kind,
+            read_local_potentials<
+                4, real_type, PeriodicGaussianPotential, CosinePotential
+                >(local, "Gaussian", "Cosine"));
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
