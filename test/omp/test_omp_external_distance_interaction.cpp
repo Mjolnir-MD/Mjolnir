@@ -46,14 +46,20 @@ BOOST_AUTO_TEST_CASE(omp_ExternalDistacne_calc_force)
     BOOST_TEST_WARN(max_number_of_threads > 2);
     BOOST_TEST_MESSAGE("maximum number of threads = " << max_number_of_threads);
 
+
     const std::size_t N_particle = 64;
+    std::vector<std::pair<std::size_t, parameter_type>> parameters(N_particle);
+    for(std::size_t i=0; i<N_particle; ++i)
+    {
+        parameters.emplace_back(i, parameter_type(1.0, 1.0));
+    }
+    const potential_type potential(2.5, parameters);
+
     for(int num_thread=1; num_thread<=max_number_of_threads; ++num_thread)
     {
         omp_set_num_threads(num_thread);
         BOOST_TEST_MESSAGE("maximum number of threads = " << omp_get_max_threads());
 
-        potential_type potential(
-            std::vector<parameter_type>(N_particle, parameter_type(1.0, 1.0)));
 
         rng_type    rng(123456789);
         system_type sys(N_particle, boundary_type{});
