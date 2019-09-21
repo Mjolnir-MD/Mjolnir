@@ -82,46 +82,47 @@ class BondAngleInteraction final : public LocalInteractionBase<traitsT>
 };
 
 template<typename traitsT, typename potentialT>
-void
-BondAngleInteraction<traitsT, potentialT>::calc_force(system_type& sys) const noexcept
+void BondAngleInteraction<traitsT, potentialT>::calc_force(
+        system_type& sys) const noexcept
 {
+    constexpr auto abs_tol = math::abs_tolerance<real_type>();
+
     for(const auto& idxp : this->potentials_)
     {
-        const std::size_t idx0 = idxp.first[0];
-        const std::size_t idx1 = idxp.first[1];
-        const std::size_t idx2 = idxp.first[2];
+        const auto& idxs = idxp.first;
+        const auto& pot  = idxp.second;
 
-        const coordinate_type r_ij =
-            sys.adjust_direction(sys.position(idx0) - sys.position(idx1));
+        const auto& p0 = sys.position(idxp.first[0]);
+        const auto& p1 = sys.position(idxp.first[1]);
+        const auto& p2 = sys.position(idxp.first[2]);
 
-        const real_type       inv_len_r_ij = math::rlength(r_ij);
-        const coordinate_type r_ij_reg     = r_ij * inv_len_r_ij;
+        const auto r_ij         = sys.adjust_direction(p0 - p1);
+        const auto inv_len_r_ij = math::rlength(r_ij);
+        const auto r_ij_reg     = r_ij * inv_len_r_ij;
 
-        const coordinate_type r_kj =
-            sys.adjust_direction(sys.position(idx2) - sys.position(idx1));
+        const auto r_kj         = sys.adjust_direction(p2 - p1);
+        const auto inv_len_r_kj = math::rlength(r_kj);
+        const auto r_kj_reg     = r_kj * inv_len_r_kj;
 
-        const real_type       inv_len_r_kj = math::rlength(r_kj);
-        const coordinate_type r_kj_reg     = r_kj * inv_len_r_kj;
+        const auto dot_ijk   = math::dot_product(r_ij_reg, r_kj_reg);
+        const auto cos_theta = math::clamp<real_type>(dot_ijk, -1, 1);
 
-        const real_type dot_ijk   = math::dot_product(r_ij_reg, r_kj_reg);
-        const real_type cos_theta = math::clamp(dot_ijk, real_type(-1.0), real_type(1.0));
+        // acos returns a value in [0, pi]
+        const auto theta = std::acos(cos_theta);
+        const auto coef  = -pot.derivative(theta);
 
-        const real_type theta = std::acos(cos_theta);
-        const real_type coef  = -(idxp.second.derivative(theta));
+        // sin(x) >= 0 if x is in [0, pi].
+        const auto sin_theta    = std::sin(theta);
+        const auto coef_inv_sin = coef / std::max(sin_theta, abs_tol);
 
-        const real_type sin_theta    = std::sin(theta);
-        const real_type coef_inv_sin = (sin_theta > math::abs_tolerance<real_type>()) ?
-                             coef / sin_theta : coef / math::abs_tolerance<real_type>();
+        const auto Fi = (coef_inv_sin * inv_len_r_ij) *
+                        (cos_theta * r_ij_reg - r_kj_reg);
+        const auto Fk = (coef_inv_sin * inv_len_r_kj) *
+                        (cos_theta * r_kj_reg - r_ij_reg);
 
-        const coordinate_type Fi =
-            (coef_inv_sin * inv_len_r_ij) * (cos_theta * r_ij_reg - r_kj_reg);
-
-        const coordinate_type Fk =
-            (coef_inv_sin * inv_len_r_kj) * (cos_theta * r_kj_reg - r_ij_reg);
-
-        sys.force(idx0) += Fi;
-        sys.force(idx1) -= (Fi + Fk);
-        sys.force(idx2) += Fk;
+        sys.force(idxs[0]) += Fi;
+        sys.force(idxs[1]) -= (Fi + Fk);
+        sys.force(idxs[2]) += Fk;
     }
     return;
 }
@@ -134,22 +135,20 @@ BondAngleInteraction<traitsT, potentialT>::calc_energy(
     real_type E = 0.0;
     for(const auto& idxp : this->potentials_)
     {
-        const std::size_t idx0 = idxp.first[0];
-        const std::size_t idx1 = idxp.first[1];
-        const std::size_t idx2 = idxp.first[2];
+        const auto& p0 = sys.position(idxp.first[0]);
+        const auto& p1 = sys.position(idxp.first[1]);
+        const auto& p2 = sys.position(idxp.first[2]);
 
-        const coordinate_type v_2to1 =
-            sys.adjust_direction(sys.position(idx0) - sys.position(idx1));
-        const coordinate_type v_2to3 =
-            sys.adjust_direction(sys.position(idx2) - sys.position(idx1));
+        const auto rji = sys.adjust_direction(p0 - p1); // pj -> pi
+        const auto rjk = sys.adjust_direction(p2 - p1); // pj -> pi
 
-        const real_type lensq_v21   = math::length_sq(v_2to1);
-        const real_type lensq_v23   = math::length_sq(v_2to3);
-        const real_type dot_v21_v23 = math::dot_product(v_2to1, v_2to3);
+        const auto lsq_rji = math::length_sq(rji);
+        const auto lsq_rjk = math::length_sq(rjk);
+        const auto dot_ijk = math::dot_product(rji, rjk);
 
-        const real_type dot_ijk   = dot_v21_v23 * math::rsqrt(lensq_v21 * lensq_v23);
-        const real_type cos_theta = math::clamp(dot_ijk, real_type(-1.0), real_type(1.0));
-        const real_type theta     = std::acos(cos_theta);
+        const auto dot_ijk_reg = dot_ijk * math::rsqrt(lsq_rji * lsq_rjk);
+        const auto cos_theta   = math::clamp<real_type>(dot_ijk_reg, -1, 1);
+        const auto theta       = std::acos(cos_theta);
 
         E += idxp.second.potential(theta);
     }
