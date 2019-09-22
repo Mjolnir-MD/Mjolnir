@@ -4,6 +4,7 @@
 #include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/RandomNumberGenerator.hpp>
 
 namespace mjolnir
 {
@@ -38,6 +39,7 @@ class SwitchingForceFieldSimulator final : public SimulatorBase
     using system_type     = System<traits_type>;
     using forcefield_type = ForceField<traits_type>;
     using observer_type   = ObserverContainer<traits_type>;
+    using rng_type        = RandomNumberGenerator<traits_type>;
 
   public:
 
@@ -48,6 +50,7 @@ class SwitchingForceFieldSimulator final : public SimulatorBase
         std::vector<forcefield_type>&&                     ff,
         integrator_type&&                                  integr,
         observer_type&&                                    obs,
+        rng_type&&                                         rng,
         std::map<std::string, std::size_t>&&               forcefield_index,
         std::vector<std::pair<std::size_t, std::string>>&& schedule)
         : current_forcefield_(0),
@@ -60,6 +63,7 @@ class SwitchingForceFieldSimulator final : public SimulatorBase
           system_(std::move(sys)),
           integrator_(std::move(integr)),
           observers_(std::move(obs)),
+          rng_(std::move(rng)),
           forcefields_(std::move(ff)),
           forcefield_index_(std::move(forcefield_index)),
           schedule_(std::move(schedule))
@@ -101,6 +105,7 @@ class SwitchingForceFieldSimulator final : public SimulatorBase
     system_type     system_;
     integrator_type integrator_;
     observer_type   observers_;
+    rng_type        rng_;
     std::vector<forcefield_type>                  forcefields_;
     std::map<std::string, std::size_t>       forcefield_index_;
     std::vector<std::pair<std::size_t, std::string>> schedule_;
@@ -119,7 +124,7 @@ inline void SwitchingForceFieldSimulator<traitsT, integratorT>::initialize()
     auto& ff = this->forcefields_[this->current_forcefield_];
 
     ff.initialize(this->system_);
-    this->integrator_.initialize(this->system_, ff);
+    this->integrator_.initialize(this->system_, ff, this->rng_);
 
     observers_.initialize(this->total_step_, this->integrator_.delta_t(),
                           this->system_, ff);
@@ -136,7 +141,8 @@ inline bool SwitchingForceFieldSimulator<traitsT, integratorT>::step()
                           this->system_, forcefields_[current_forcefield_]);
     }
 
-    integrator_.step(this->time_, system_, forcefields_[current_forcefield_]);
+    integrator_.step(this->time_, system_, forcefields_[current_forcefield_],
+                     this->rng_);
 
     ++step_count_;
     this->time_ = this->step_count_ * integrator_.delta_t();
@@ -156,7 +162,8 @@ inline bool SwitchingForceFieldSimulator<traitsT, integratorT>::step()
         forcefields_[current_forcefield_].initialize(this->system_);
         // initialize forces with the current forcefield. the previous forces
         // will be zero-cleared. but velocities are kept.
-        integrator_.initialize(this->system_, forcefields_[current_forcefield_]);
+        integrator_.initialize(this->system_, forcefields_[current_forcefield_],
+                               this->rng_);
         // Observers need to be updated because forcefield changed.
         // especially, EnergyObserver needed to be updated.
         observers_.update(this->step_count_, this->integrator_.delta_t(),
