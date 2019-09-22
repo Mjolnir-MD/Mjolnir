@@ -19,50 +19,61 @@ class ImplicitMembranePotential
 {
   public:
     using real_type = realT;
+    using parameter_type = real_type;
+    using container_type = std::vector<parameter_type>;
 
-    static constexpr real_type cutoff_ratio = 4.0;
+    static constexpr real_type default_cutoff() noexcept
+    {
+        return real_type(4);
+    }
+    static constexpr parameter_type default_parameter() noexcept
+    {
+        return real_type(0);
+    }
 
   public:
-    ImplicitMembranePotential(
-        const real_type thick, const real_type magnitude, const real_type bend,
-        std::vector<real_type> hydrophobicities)
-        : half_thick_(thick / 2), interaction_magnitude_(magnitude),
-          bend_(bend), hydrophobicities_(std::move(hydrophobicities))
-    {}
+
+    ImplicitMembranePotential(const real_type thick, const real_type k,
+        const real_type bend, const real_type cutoff_ratio,
+        const std::vector<std::pair<std::size_t, real_type>>& params)
+        : half_thick_(thick / 2), k_(k), bend_(bend), cutoff_ratio_(cutoff_ratio)
+    {
+        this->parameters_.resize(params.size());
+        for(const auto& idxp: params)
+        {
+            const auto idx = idxp.first;
+            this->participants_.push_back(idx);
+            if(idx >= this->parameters_.size())
+            {
+                this->parameters_.resize(idx+1, default_parameter());
+            }
+            this->parameters_.at(idx) = idxp.second;
+        }
+    }
     ~ImplicitMembranePotential() = default;
 
     real_type potential(const std::size_t i, const real_type z) const noexcept
     {
-        return hydrophobicities_[i] * interaction_magnitude_ *
-            std::tanh(bend_ * (std::abs(z) - half_thick_));
+        return parameters_[i] * k_ * std::tanh(bend_ * (std::abs(z) - half_thick_));
     }
     real_type derivative(const std::size_t i, const real_type z) const noexcept
     {
-        return hydrophobicities_[i] * std::copysign(real_type(1.0), z) *
-            interaction_magnitude_ * bend_ /
-            std::pow((std::cosh(bend_ * (std::abs(z) - half_thick_))), 2);
+        const auto sign = std::copysign(real_type(1), z);
+        const auto x    = std::cosh(bend_ * (std::abs(z) - half_thick_));
+        return parameters_[i] * sign * k_ * bend_ / (x * x);
     }
     real_type max_cutoff_length() const noexcept
     {
-        return cutoff_ratio / this->bend_ + this->half_thick_;
+        return this->cutoff_ratio_ / this->bend_ + this->half_thick_;
     }
 
     // nothing to be done if system parameter (e.g. temperature) changes
     template<typename T>
     void update(const System<T>&) const noexcept {return;}
 
-    std::vector<std::size_t> participants() const
+    std::vector<std::size_t> const& participants() const noexcept
     {
-        std::vector<std::size_t> retval;
-        retval.reserve(this->hydrophobicities_.size());
-        for(std::size_t i=0; i<this->hydrophobicities_.size(); ++i)
-        {
-            if(this->hydrophobicities_[i] != real_type(0))
-            {
-                retval.push_back(i);
-            }
-        }
-        return retval;
+        return participants_;
     }
 
     const char* name() const noexcept {return "ImplicitMembrane";}
@@ -73,25 +84,21 @@ class ImplicitMembranePotential
     real_type  bend() const noexcept {return bend_;}
     real_type& bend()       noexcept {return bend_;}
 
-    real_type  interaction_magnitude() const noexcept
-    {return interaction_magnitude_;}
-    real_type& interaction_magnitude()       noexcept
-    {return interaction_magnitude_;}
+    real_type  k() const noexcept {return k_;}
+    real_type& k()       noexcept {return k_;}
 
-    std::vector<real_type> const&
-    hydrophobicities() const noexcept {return hydrophobicities_;}
+    container_type const& parameters() const noexcept {return parameters_;}
+    container_type&       parameters()       noexcept {return parameters_;}
 
   private:
 
-    real_type half_thick_;            // half of thickness of the membrane.
-    real_type interaction_magnitude_; // overall scaling parameter.
-    real_type bend_;                  // the slope of tanh curve.
-    std::vector<real_type> hydrophobicities_;
+    real_type half_thick_; // half of thickness of the membrane.
+    real_type k_;          // overall scaling parameter.
+    real_type bend_;       // the slope of tanh curve.
+    real_type cutoff_ratio_;
+    container_type           parameters_;
+    std::vector<std::size_t> participants_;
 };
-
-template<typename realT>
-constexpr typename ImplicitMembranePotential<realT>::real_type
-ImplicitMembranePotential<realT>::cutoff_ratio;
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template class ImplicitMembranePotential<double>;
