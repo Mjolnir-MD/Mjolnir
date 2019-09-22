@@ -42,8 +42,10 @@ class RandomNumberGenerator
         return this->nrm_(this->rng_) * stddev + mean;
     }
 
+    std::uint32_t seed() const noexcept {return seed_;}
+
   private:
-    const std::uint32_t seed_;
+    std::uint32_t seed_;
     std::mt19937        rng_;
     std::normal_distribution<real_type> nrm_;
 };
