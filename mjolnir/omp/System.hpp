@@ -17,6 +17,7 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     using boundary_type   = typename traits_type::boundary_type;
     using topology_type   = Topology;
     using attribute_type  = std::map<std::string, real_type>;
+    using rng_type        = RandomNumberGenerator<traits_type>;
 
     using string_type              = std::string;
     using particle_type            = Particle<real_type, coordinate_type>;
@@ -44,6 +45,38 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
               cache_aligned_allocator<coordinate_container_type>{})
     {}
     ~System() = default;
+
+    void initialize(rng_type& rng)
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        if(this->velocity_initialized_)
+        {
+            MJOLNIR_LOG_NOTICE(
+                "velocity is already given, nothing to initialize in System");
+            return ;
+        }
+        assert(this->has_attribute("temperature"));
+
+        const real_type kB    = physics::constants<real_type>::kB();
+        const real_type T_ref = this->attribute("temperature");
+
+        MJOLNIR_LOG_NOTICE("generating velocity with T = ", T_ref, "...");
+
+        // generate Maxwell-Boltzmann distribution
+        const real_type kBT = kB * T_ref;
+        for(std::size_t i=0; i<this->size(); ++i)
+        {
+            const auto vel_coef = std::sqrt(kBT / this->mass(i));
+            math::X(this->velocity(i)) = rng.gaussian(0, vel_coef);
+            math::Y(this->velocity(i)) = rng.gaussian(0, vel_coef);
+            math::Z(this->velocity(i)) = rng.gaussian(0, vel_coef);
+        }
+        MJOLNIR_LOG_NOTICE("done.");
+        return;
+    }
+
 
     coordinate_type adjust_direction(coordinate_type dr) const noexcept
     {return boundary_.adjust_direction(dr);}
