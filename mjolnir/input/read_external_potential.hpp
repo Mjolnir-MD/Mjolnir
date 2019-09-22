@@ -96,6 +96,7 @@ read_excluded_volume_wall_potential(const toml::value& external)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
     using real_type = realT;
+    using potential_type = ExcludedVolumeWallPotential<real_type>;
 
     const auto eps = toml::expect<real_type>(external, u8"ε").or_other(
                      toml::expect<real_type>(external, "epsilon")).unwrap();
@@ -104,21 +105,26 @@ read_excluded_volume_wall_potential(const toml::value& external)
     const auto& env = external.as_table().count("env") == 1 ?
                       external.as_table().at("env") : toml::value{};
 
+    real_type cutoff = potential_type::default_cutoff();
+    if(external.as_table().count("cutoff") != 0)
+    {
+        cutoff = find_parameter<real_type>(external, env, "cutoff");
+    }
+    MJOLNIR_LOG_INFO("cutoff ratio = ", cutoff);
+
     const auto& ps = toml::find<toml::array>(external, "parameters");
     MJOLNIR_LOG_INFO("number of parameters = ", ps.size());
 
-    std::vector<real_type> params;
+    std::vector<std::pair<std::size_t, real_type>> params;
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
         const auto idx = find_parameter<std::size_t>(param, env, "index");
         const auto rad = find_parameter<real_type  >(param, env, "radius");
-        if(params.size() <= idx) {params.resize(idx+1, real_type(0));}
-        params.at(idx) = rad;
-
+        params.emplace_back(idx, rad);
         MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", rad);
     }
-    return ExcludedVolumeWallPotential<real_type>(eps, std::move(params));
+    return potential_type(eps, cutoff, params);
 }
 
 #ifdef MJOLNIR_SEPARATE_BUILD
