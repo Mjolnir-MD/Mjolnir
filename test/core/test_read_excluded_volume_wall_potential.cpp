@@ -35,15 +35,20 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_wall_noenv, T, test_types)
             epsilon        = 3.14
             parameters     = [
                 {index = 0, radius = 2.0},
-                {index = 1, radius = 2.0},
+                {index = 1, radius = 3.0},
+                {index = 5, radius = 4.0},
             ]
         )"_toml;
 
         const auto g = mjolnir::read_excluded_volume_wall_potential<real_type>(v);
 
-        BOOST_TEST(g.parameters().size() == 2u);
+        BOOST_TEST(g.participants().size() == 3u);
+        BOOST_TEST(g.participants().at(0) == 0u);
+        BOOST_TEST(g.participants().at(1) == 1u);
+        BOOST_TEST(g.participants().at(2) == 5u);
         BOOST_TEST(g.parameters().at(0)  == real_type(2.0 ), tolerance<real_type>());
-        BOOST_TEST(g.parameters().at(1)  == real_type(2.0 ), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(1)  == real_type(3.0 ), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(5)  == real_type(4.0 ), tolerance<real_type>());
         BOOST_TEST(g.epsilon()           == real_type(3.14), tolerance<real_type>());
     }
 }
@@ -68,14 +73,20 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_wall_env, T, test_types)
             parameters     = [
                 {index = 0, radius = "large"},
                 {index = 1, radius = "small"},
+                {index = 5, radius = "large"},
             ]
         )"_toml;
 
         const auto g = mjolnir::read_excluded_volume_wall_potential<real_type>(v);
 
-        BOOST_TEST(g.parameters().size() == 2u);
+        BOOST_TEST(g.participants().size() == 3u);
+        BOOST_TEST(g.participants().at(0) == 0u);
+        BOOST_TEST(g.participants().at(1) == 1u);
+        BOOST_TEST(g.participants().at(2) == 5u);
+
         BOOST_TEST(g.parameters().at(0)  == real_type(10.0), tolerance<real_type>());
         BOOST_TEST(g.parameters().at(1)  == real_type(0.01), tolerance<real_type>());
+        BOOST_TEST(g.parameters().at(5)  == real_type(10.0), tolerance<real_type>());
         BOOST_TEST(g.epsilon()           == real_type(3.14), tolerance<real_type>());
     }
 }
