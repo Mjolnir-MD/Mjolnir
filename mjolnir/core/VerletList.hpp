@@ -29,7 +29,7 @@ class VerletList final : public SpatialPartitionBase<traitsT, PotentialT>
     VerletList() : margin_(0.5), current_margin_(-1.0){}
     explicit VerletList(const real_type mgn): margin_(mgn), current_margin_(-1.0){}
 
-    ~VerletList() override = default;
+    ~VerletList() override {}
     VerletList(VerletList const&) = default;
     VerletList(VerletList &&)     = default;
     VerletList& operator=(VerletList const&) = default;

@@ -7,6 +7,7 @@
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/math/vector_util.hpp>
 #include <mjolnir/input/read_path.hpp>
+#include <mjolnir/input/utility.hpp>
 
 namespace mjolnir
 {
@@ -21,11 +22,12 @@ template<typename realT, typename coordT>
 struct read_boundary_impl<UnlimitedBoundary<realT, coordT>>
 {
     static UnlimitedBoundary<realT, coordT>
-    invoke(const toml::value&)
+    invoke(const toml::value& v)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("no boundary is set. unlimited");
+        check_keys_available(v, {}); // no available keys
         return UnlimitedBoundary<realT, coordT>{};
     }
 };
@@ -39,6 +41,7 @@ struct read_boundary_impl<CuboidalPeriodicBoundary<realT, coordT>>
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("shape of periodic boundary is cuboid");
+        check_keys_available(boundary, {"upper"_s, "lower"_s});
 
         const auto upper = toml::find<std::array<realT, 3>>(boundary, "upper");
         const auto lower = toml::find<std::array<realT, 3>>(boundary, "lower");
@@ -76,6 +79,8 @@ System<traitsT> read_system_from_table(const toml::value& system)
 
     MJOLNIR_LOG_NOTICE("reading system ...");
 
+    check_keys_available(system, {"boundary_shape"_s, "attributes"_s, "particles"_s});
+
     const auto& boundary  = toml::find<toml::value>(system, "boundary_shape");
     const auto& particles = toml::find<toml::array>(system, "particles");
 
@@ -92,29 +97,32 @@ System<traitsT> read_system_from_table(const toml::value& system)
 
     const auto find_either = [](const toml::value& v,
         const std::string& key1, const std::string& key2) -> const toml::value&
-    {
-        const auto& table = v.as_table();
-        if(table.count(key1) != 0 && table.count(key2) != 0)
         {
-            throw_exception<std::runtime_error>(toml::format_error("[error] "
-                "key duplicates.", table.at(key1), "here", table.at(key2),
-                "this conflicts the above value definition"));
-        }
-        if(table.count(key1)) {return table.at(key1);}
-        if(table.count(key2)) {return table.at(key2);}
+            const auto& table = v.as_table();
+            if(table.count(key1) != 0 && table.count(key2) != 0)
+            {
+                throw_exception<std::runtime_error>(toml::format_error("[error]"
+                    " key duplicates.", table.at(key1), "here", table.at(key2),
+                    "this conflicts with the above value definition"));
+            }
+            if(table.count(key1) != 0) {return table.at(key1);}
+            if(table.count(key2) != 0) {return table.at(key2);}
 
-        std::ostringstream oss;
-        oss << "[error] both keys \"" << key1 << "\" and \"" << key2
-            << "\" not found.";
-        throw_exception<std::out_of_range>(
-                toml::format_error(oss.str(), v, "in this table"));
-    };
+            std::ostringstream oss;
+            oss << "[error] both keys \"" << key1 << "\" and \"" << key2
+                << "\" not found.";
+            throw_exception<std::out_of_range>(
+                    toml::format_error(oss.str(), v, "in this table"));
+        };
 
     MJOLNIR_LOG_NOTICE(particles.size(), " particles are found.");
     for(std::size_t i=0; i<particles.size(); ++i)
     {
         using vec_type = std::array<real_type, 3>;
         const auto& p = particles.at(i);
+
+        check_keys_available(p, {"mass"_s, "m"_s, "position"_s, "pos"_s,
+                "velocity"_s, "vel"_s, "name"_s, "group"_s});
 
         sys.mass(i)     = toml::get<real_type>(find_either(p, "m",   "mass"));
         sys.position(i) = toml::get< vec_type>(find_either(p, "pos", "position"));

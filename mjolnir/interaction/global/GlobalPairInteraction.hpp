@@ -37,8 +37,8 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
     using partition_type  = SpatialPartition<traits_type, potential_type>;
 
   public:
-    GlobalPairInteraction()  = default;
-    ~GlobalPairInteraction() = default;
+    GlobalPairInteraction()           = default;
+    ~GlobalPairInteraction() override {}
 
     GlobalPairInteraction(potential_type&& pot, partition_type&& part)
         : potential_(std::move(pot)), partition_(std::move(part))
@@ -94,12 +94,19 @@ template<typename traitsT, typename potT>
 void GlobalPairInteraction<traitsT, potT>::calc_force(
         system_type& sys) const noexcept
 {
+    MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+    MJOLNIR_LOG_FUNCTION_DEBUG();
+
     for(const auto i : this->potential_.participants())
     {
+        MJOLNIR_LOG_DEBUG("partners number of particle ", i,
+                          " is ", partition_.partners(i).size());
         for(const auto& ptnr : this->partition_.partners(i))
         {
             const auto  j     = ptnr.index;
             const auto& param = ptnr.parameter();
+
+            MJOLNIR_LOG_DEBUG("calculating force between ", i, " and", j);
 
             const coordinate_type rij =
                 sys.adjust_direction(sys.position(j) - sys.position(i));

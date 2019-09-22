@@ -30,6 +30,8 @@ endif()
 
 foreach(TEST_NAME ${TEST_NAMES})
     add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+    # here we use less-aggressive optimization flag to turn on NaN checking.
+    set_target_properties(${TEST_NAME} PROPERTIES COMPILE_FLAGS "-O2")
 
     if(SEPARATE_BUILD)
         target_link_libraries(${TEST_NAME} mjolnir_core)
@@ -40,6 +42,13 @@ foreach(TEST_NAME ${TEST_NAMES})
     if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
         target_link_libraries(${TEST_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
     endif (Boost_UNIT_TEST_FRAMEWORK_FOUND)
+
+    if(OpenMP_FOUND AND USE_OPENMP)
+        if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
+            # After CMake 3.13, we can use target_link_options
+            set_target_properties(${TEST_NAME} PROPERTIES LINK_FLAGS "-parallel")
+        endif()
+    endif()
 
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} --log_level=warning WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 endforeach(TEST_NAME)

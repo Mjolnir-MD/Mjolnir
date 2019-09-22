@@ -70,13 +70,6 @@ class LennardJonesPotential
             this->parameters_.at(idx) = idxp.second;
         }
     }
-    LennardJonesPotential(
-        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-        const std::map<connection_kind_type, std::size_t>&         exclusions,
-        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-    : LennardJonesPotential(default_cutoff(), parameters, exclusions,
-                            std::move(ignore_mol), std::move(ignore_grp))
-    {}
     ~LennardJonesPotential() = default;
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept

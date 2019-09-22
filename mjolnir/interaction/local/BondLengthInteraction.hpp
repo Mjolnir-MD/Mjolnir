@@ -48,7 +48,7 @@ class BondLengthInteraction final : public LocalInteractionBase<traitsT>
                           container_type&& pot)
         : kind_(kind), potentials_(std::move(pot))
     {}
-    ~BondLengthInteraction() override = default;
+    ~BondLengthInteraction() override {}
 
     void      calc_force (system_type&)       const noexcept override;
     real_type calc_energy(const system_type&) const noexcept override;

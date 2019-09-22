@@ -25,6 +25,9 @@ read_molecular_dynamics_simulator(
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
+    check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
+        "parallelism"_s, "total_step"_s, "save_step"_s, "delta_t"_s, "integrator"_s});
+
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
     MJOLNIR_LOG_NOTICE("total step is ", tstep);
@@ -95,6 +98,9 @@ read_steepest_descent_simulator(
     using real_type      = typename traitsT::real_type;
     using simulator_type = SteepestDescentSimulator<traitsT>;
 
+    check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
+        "parallelism"_s, "step_limit"_s, "save_step"_s, "delta"_s, "threshold"_s});
+
     const auto step_lim  = toml::find<std::size_t>(simulator, "step_limit");
     const auto save_step = toml::find<std::size_t>(simulator, "save_step");
     const auto delta     = toml::find<real_type  >(simulator, "delta");
@@ -119,6 +125,10 @@ read_simulated_annealing_simulator(
     MJOLNIR_LOG_FUNCTION();
     using real_type   = typename traitsT::real_type;
 
+    check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
+            "parallelism"_s, "total_step"_s, "save_step"_s, "delta_t"_s,
+            "integrator"_s, "schedule"_s, "each_step"_s});
+
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
 
@@ -130,6 +140,8 @@ read_simulated_annealing_simulator(
     const auto schedule_begin = toml::find<real_type>  (schedule, "begin");
     const auto schedule_end   = toml::find<real_type>  (schedule, "end");
     const auto each_step      = toml::find<std::size_t>(simulator, "each_step");
+
+    check_keys_available(schedule, {"type"_s, "begin"_s, "end"_s, "each_step"_s});
 
     MJOLNIR_LOG_NOTICE("temperature from ", schedule_begin);
     MJOLNIR_LOG_NOTICE("temperature to   ", schedule_end);
@@ -217,6 +229,10 @@ read_switching_forcefield_simulator(
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
+
+    check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
+            "parallelism"_s, "total_step"_s, "save_step"_s, "delta_t"_s,
+            "integrator"_s, "schedule"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");

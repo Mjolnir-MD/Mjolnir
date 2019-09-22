@@ -7,6 +7,7 @@
 #include <mjolnir/input/read_global_forcefield.hpp>
 #include <mjolnir/input/read_external_forcefield.hpp>
 #include <mjolnir/input/read_path.hpp>
+#include <mjolnir/input/utility.hpp>
 
 namespace mjolnir
 {
@@ -17,6 +18,8 @@ read_forcefield_from_table(const toml::value& ff, const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
+
+    check_keys_available(ff, {"local"_s, "global"_s, "external"_s, "name"_s});
 
     if(ff.as_table().count("name") == 1)
     {
@@ -41,15 +44,6 @@ read_forcefield_from_table(const toml::value& ff, const std::string& input_path)
         ffexternal = toml::find<toml::array>(ff, "external");
     }
 
-    for(const auto kv: ff.as_table())
-    {
-        const auto& key = kv.first;
-        if(key != "local" && key != "global" && key != "external" && key != "name")
-        {
-            MJOLNIR_LOG_WARN("unknown key `", kv.first, "` appeared in "
-                             "[[forcefields]] table. It will be ignored.");
-        }
-    }
     return ForceField<traitsT>(
         read_local_forcefield<traitsT>(std::move(fflocal), input_path),
         read_global_forcefield<traitsT>(std::move(ffglobal), input_path),

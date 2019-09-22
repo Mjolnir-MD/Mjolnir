@@ -21,6 +21,12 @@ jobs:
               git config --global user.email "niina.toru.68u@gmail.com"
               cd book
               ../node_modules/gitbook-cli/bin/gitbook.js install
+              cd node_modules/
+              rm -rf mathjax/
+              git clone git@github.com:mathjax/MathJax.git ./mathjax
+              cd mathjax/
+              git checkout refs/tags/2.7.6
+              cd ../../
               cd node_modules/mathjax-node/lib
               sed -i -e 's/processExpression/toSpeech/g' mj-single.js
               sed -i -e 's/processExpression/toSpeech/g' mj-page.js

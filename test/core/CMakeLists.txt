@@ -21,6 +21,7 @@ set(TEST_NAMES
     test_lennard_jones_potential
     test_uniform_lennard_jones_potential
     test_excluded_volume_potential
+    test_hard_core_excluded_volume_potential
     test_debye_huckel_potential
     test_implicit_membrane_potential
     test_excluded_volume_wall_potential
@@ -54,6 +55,7 @@ set(TEST_NAMES
     test_read_cosine_potential
     test_read_3spn2_bond_potential
     test_read_excluded_volume_potential
+    test_read_hard_core_excluded_volume_potential
     test_read_3spn2_excluded_volume_potential
     test_read_debye_huckel_potential
     test_read_lennard_jones_potential
@@ -99,12 +101,22 @@ endif()
 
 foreach(TEST_NAME ${TEST_NAMES})
     add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+    # here we use less-aggressive optimization flag to turn on NaN checking.
+    # -Ofast sometimes skips NaN check by replacing isnan always false.
+    set_target_properties(${TEST_NAME} PROPERTIES COMPILE_FLAGS "-O2")
 
     if(SEPARATE_BUILD)
         target_link_libraries(${TEST_NAME} mjolnir_core)
     endif()
     if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
         target_link_libraries(${TEST_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+    endif()
+
+    if(OpenMP_FOUND AND USE_OPENMP)
+        if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
+            # After CMake 3.13, we can use target_link_options
+            set_target_properties(${TEST_NAME} PROPERTIES LINK_FLAGS "-parallel")
+        endif()
     endif()
 
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} WORKING_DIRECTORY ${PROJECT_BINARY_DIR})

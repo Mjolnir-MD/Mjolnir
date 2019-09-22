@@ -59,7 +59,7 @@ class DebyeHuckelPotential
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-    : cutoff_ratio_(cutoff_ratio), temperature_(300.0), ion_conc_(0.1),
+    : cutoff_ratio_(cutoff_ratio), temperature_(300.0), ion_strength_(0.1),
       exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
@@ -78,13 +78,6 @@ class DebyeHuckelPotential
         // XXX should be updated before use because T and ion conc are default!
         this->calc_parameters();
     }
-    DebyeHuckelPotential(
-        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-        const std::map<connection_kind_type, std::size_t>& exclusions,
-        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-    : DebyeHuckelPotential(default_cutoff(), parameters,
-                           exclusions, ignore_mol, ignore_grp)
-    {}
     ~DebyeHuckelPotential() = default;
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
@@ -151,11 +144,11 @@ class DebyeHuckelPotential
         assert(sys.has_attribute("temperature"));
         assert(sys.has_attribute("ionic_strength"));
 
-        this->temperature_ = sys.attribute("temperature");
-        this->ion_conc_    = sys.attribute("ionic_strength");
+        this->temperature_  = sys.attribute("temperature");
+        this->ion_strength_ = sys.attribute("ionic_strength");
 
         MJOLNIR_LOG_INFO("temperature    = ", this->temperature_);
-        MJOLNIR_LOG_INFO("ionic strength = ", this->ion_conc_);
+        MJOLNIR_LOG_INFO("ionic strength = ", this->ion_strength_);
 
         this->calc_parameters();
 
@@ -206,7 +199,7 @@ class DebyeHuckelPotential
         const     real_type NA   = phys_const::NA();
         const     real_type eps0 = phys_const::eps0();
 
-        const     real_type epsk = calc_dielectric_water(temperature_, ion_conc_);
+        const     real_type epsk = calc_dielectric_water(temperature_, ion_strength_);
         const     real_type T    = this->temperature_;
 
         MJOLNIR_LOG_INFO("kB               = ", kB);
@@ -218,7 +211,7 @@ class DebyeHuckelPotential
         this->inv_4_pi_eps0_epsk_ = 1.0 / (4 * pi * eps0 * epsk);
 
         // convert [M] (mol/L) or [mM] -> [mol/nm^3] or [mol/A^3]
-        const real_type I = 0.5 * ion_conc_ / phys_const::L_to_volume();
+        const real_type I = ion_strength_ / phys_const::L_to_volume();
 
         this->debye_length_ = std::sqrt((eps0 * epsk * kB * T) / (2 * NA * I));
         this->inv_debye_length_ = 1. / this->debye_length_;
@@ -244,7 +237,7 @@ class DebyeHuckelPotential
     real_type cutoff_ratio_; // relative to the debye length
     real_type coef_at_cutoff_;
     real_type temperature_;  // [K]
-    real_type ion_conc_;     // [M]
+    real_type ion_strength_; // [M]
     real_type inv_4_pi_eps0_epsk_;
     real_type debye_length_;
     real_type inv_debye_length_;

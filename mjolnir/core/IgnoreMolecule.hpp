@@ -24,7 +24,7 @@ class IgnoreMoleculeBase
 {
   public:
     IgnoreMoleculeBase()          = default;
-    virtual ~IgnoreMoleculeBase() = default;
+    virtual ~IgnoreMoleculeBase() {}
 
     virtual bool is_ignored(const MoleculeID& i, const MoleculeID& j) const noexcept = 0;
     virtual const char* name() const noexcept = 0;
@@ -35,7 +35,7 @@ class IgnoreNothing: public IgnoreMoleculeBase<MoleculeID>
 {
   public:
     IgnoreNothing()           = default;
-    ~IgnoreNothing() override = default;
+    ~IgnoreNothing() override {}
 
     bool is_ignored(const MoleculeID&, const MoleculeID&) const noexcept override
     {
@@ -49,7 +49,7 @@ class IgnoreSelf: public IgnoreMoleculeBase<MoleculeID>
 {
   public:
     IgnoreSelf()           = default;
-    ~IgnoreSelf() override = default;
+    ~IgnoreSelf() override {}
 
     bool is_ignored(const MoleculeID& i, const MoleculeID& j) const noexcept override
     {
@@ -63,7 +63,7 @@ class IgnoreOthers: public IgnoreMoleculeBase<MoleculeID>
 {
   public:
     IgnoreOthers()           = default;
-    ~IgnoreOthers() override = default;
+    ~IgnoreOthers() override {}
 
     bool is_ignored(const MoleculeID& i, const MoleculeID& j) const noexcept override
     {
@@ -85,7 +85,7 @@ class IgnoreMolecule
     explicit IgnoreMolecule(std::unique_ptr<IgnoreSomething>&& ptr)
         : ignore_mol_(std::move(ptr))
     {}
-    ~IgnoreMolecule() = default;
+    ~IgnoreMolecule() {}
 
     IgnoreMolecule(IgnoreMolecule const& rhs) {this->reset(rhs.name());}
     IgnoreMolecule(IgnoreMolecule&&      rhs) = default;

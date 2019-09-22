@@ -28,7 +28,7 @@ class SteepestDescentSimulator final : public SimulatorBase
       step_limit_(step_limit), step_count_(0), save_step_(save_step),
       system_(std::move(sys)), ff_(std::move(ff)), observers_(std::move(obs))
     {}
-    ~SteepestDescentSimulator() override = default;
+    ~SteepestDescentSimulator() override {}
 
     void initialize() override;
     bool step()       override;

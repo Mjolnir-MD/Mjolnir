@@ -31,7 +31,8 @@ BOOST_AUTO_TEST_CASE(GlobalPairInteraction_double)
 
     auto normalize = [](const coordinate_type& v){return v / mjolnir::math::length(v);};
 
-    potential_type   potential(std::vector<std::pair<std::size_t, parameter_type>>{
+    potential_type   potential(potential_type::default_cutoff(),
+        std::vector<std::pair<std::size_t, parameter_type>>{
             {0, {/* sigma = */ 1.0, /* epsilon = */1.2}},
             {1, {/* sigma = */ 1.0, /* epsilon = */1.2}}
         }, {}, typename potential_type::ignore_molecule_type("Nothing"),

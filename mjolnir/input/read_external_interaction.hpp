@@ -176,10 +176,15 @@ read_external_position_restraint_interaction(const toml::value& external)
         const auto& parameters = toml::find<toml::array>(external, "parameters");
         potentials.reserve(parameters.size());
 
-        for(const auto& para : parameters)
+        for(auto para : parameters)
         {
             const auto idx = find_parameter<std::size_t>(para, env, "index");
             const auto pos = find_parameter<std::array<real_type, 3>>(para, env, "position");
+
+            // suppress warnings in read_harmonic_potential
+            para.as_table().erase("index");
+            para.as_table().erase("position");
+
             const auto pot = read_harmonic_potential<real_type>(para, env);
             potentials.emplace_back(idx, pos, pot);
         }

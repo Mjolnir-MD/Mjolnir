@@ -35,7 +35,7 @@ class ContactInteraction<
   public:
 
     ContactInteraction() = default;
-    ~ContactInteraction() override = default;
+    ~ContactInteraction() override {}
 
     ContactInteraction(const connection_kind_type kind,
                        const container_type&      pot,

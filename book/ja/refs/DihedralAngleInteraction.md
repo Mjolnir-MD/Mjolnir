@@ -5,8 +5,9 @@
 粒子`i`番目, `j`番目, `k`番目, `l`番目の粒子について、
 `i`, `j`, `k`がなす面と`j`, `k`, `l`のなす面のなす角に対してかかります。
 
-- [ClementiDihedral](ClementiDihedralPotential.md)
+- [Cosine](CosinePotential.md)
 - [Gaussian](GaussianPotential.md)
+- [ClementiDihedral](ClementiDihedralPotential.md)
 - [FlexibleLocalDihedral](FlexibleLocalDihedral.md)
 
 ## 例
@@ -14,7 +15,7 @@
 ```toml
 [[forcefields.local]]
 interaction = "DihedralAngle"
-potential   = "Gaussian"
+potential   = "Cosine"
 topology    = "none"
 parameters  = [
     {indices = [0, 1, 2, 3], ... }, # ポテンシャルによって要求されるパラメータは変化します。
@@ -27,7 +28,7 @@ parameters  = [
 `DihedralAngle`相互作用を用いる場合、`[[forcefields.local]]`テーブルには、以下の値を設定します。
 
 - `interaction`: 文字列型
-  - 結合角相互作用を使用する際は、`"BondAngle"`を指定します。
+  - 二面角相互作用を使用する際は、`"DihedralAngle"`を指定します。
 - `potential`: 文字列型
   - [`"ClementiDihedral"`](ClementiDihedralPotential.md): Clementi-Go力場に使用するポテンシャルです。
   - [`"Gaussian"`](GaussianPotential.md): ガウシアン型のポテンシャルを用います。

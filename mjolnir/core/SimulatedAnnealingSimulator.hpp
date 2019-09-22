@@ -59,7 +59,7 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
       system_(std::move(sys)), ff_(std::move(ff)),
       integrator_(std::move(integr)), observers_(std::move(obs))
     {}
-    ~SimulatedAnnealingSimulator() override = default;
+    ~SimulatedAnnealingSimulator() override {}
 
     void initialize() override;
     bool step()       override;

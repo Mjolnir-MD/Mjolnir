@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_DebyeHuckel_calc_force)
             parameters[i] = std::make_pair(i, parameter_type{1.0});
         }
 
-        potential_type potential(parameters, {},
+        potential_type potential(potential_type::default_cutoff(), parameters, {},
             typename potential_type::ignore_molecule_type("Nothing"),
             typename potential_type::ignore_group_type   ({}));
 

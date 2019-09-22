@@ -9,6 +9,9 @@ namespace mjolnir
 template ExcludedVolumePotential<double> read_excluded_volume_potential(const toml::value& global);
 template ExcludedVolumePotential<float > read_excluded_volume_potential(const toml::value& global);
 
+template HardCoreExcludedVolumePotential<double> read_hard_core_excluded_volume_potential(const toml::value& global);
+template HardCoreExcludedVolumePotential<float > read_hard_core_excluded_volume_potential(const toml::value& global);
+
 template LennardJonesPotential<double> read_lennard_jones_potential(const toml::value& global);
 template LennardJonesPotential<float > read_lennard_jones_potential(const toml::value& global);
 

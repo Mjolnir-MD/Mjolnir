@@ -19,7 +19,8 @@ BOOST_AUTO_TEST_CASE(UniformLennardJones_double)
     constexpr real_type sigma   = 3.0;
     constexpr real_type epsilon = 1.0;
     mjolnir::UniformLennardJonesPotential<real_type> lj{
-        sigma, epsilon, {}, {},
+        sigma, epsilon,
+        mjolnir::UniformLennardJonesPotential<real_type>::default_cutoff(), {}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
     };
@@ -53,7 +54,8 @@ BOOST_AUTO_TEST_CASE(UniformLennardJones_float)
     constexpr real_type sigma   = 3.0;
     constexpr real_type epsilon = 1.0;
     mjolnir::UniformLennardJonesPotential<real_type> lj{
-        sigma, epsilon, {}, {},
+        sigma, epsilon,
+        mjolnir::UniformLennardJonesPotential<real_type>::default_cutoff(), {}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
     };
