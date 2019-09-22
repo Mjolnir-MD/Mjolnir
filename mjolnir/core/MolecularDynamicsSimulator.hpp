@@ -65,6 +65,7 @@ class MolecularDynamicsSimulator final : public SimulatorBase
 template<typename traitsT, typename integratorT>
 inline void MolecularDynamicsSimulator<traitsT, integratorT>::initialize()
 {
+    this->system_.initialize(this->rng_);
     this->ff_.initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_, this->rng_);
 

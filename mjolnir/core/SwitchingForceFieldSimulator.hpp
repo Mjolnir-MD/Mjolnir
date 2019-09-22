@@ -123,6 +123,7 @@ inline void SwitchingForceFieldSimulator<traitsT, integratorT>::initialize()
 
     auto& ff = this->forcefields_[this->current_forcefield_];
 
+    this->system_.initialize(this->rng_);
     ff.initialize(this->system_);
     this->integrator_.initialize(this->system_, ff, this->rng_);
 
