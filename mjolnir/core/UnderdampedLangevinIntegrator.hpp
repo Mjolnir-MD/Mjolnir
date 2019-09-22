@@ -38,8 +38,9 @@ class UnderdampedLangevinIntegrator
     }
     ~UnderdampedLangevinIntegrator() = default;
 
-    void initialize(system_type& sys, forcefield_type& ff);
-    real_type step(const real_type time, system_type& sys, forcefield_type& ff);
+    void initialize(system_type& sys, forcefield_type& ff, rng_type& rng);
+    real_type step(const real_type time, system_type& sys, forcefield_type& ff,
+                   rng_type& rng);
 
     real_type delta_t() const noexcept {return dt_;}
     void  set_delta_t(const real_type dt) noexcept
@@ -88,7 +89,7 @@ class UnderdampedLangevinIntegrator
 
 template<typename traitsT>
 void UnderdampedLangevinIntegrator<traitsT>::initialize(
-        system_type& system, forcefield_type& ff)
+        system_type& system, forcefield_type& ff, rng_type&)
 {
     // initialize temperature and noise intensity
     this->update(system);
@@ -115,7 +116,7 @@ void UnderdampedLangevinIntegrator<traitsT>::initialize(
 template<typename traitsT>
 typename UnderdampedLangevinIntegrator<traitsT>::real_type
 UnderdampedLangevinIntegrator<traitsT>::step(
-        const real_type time, system_type& sys, forcefield_type& ff)
+        const real_type time, system_type& sys, forcefield_type& ff, rng_type&)
 {
     real_type largest_disp2(0.0);
     for(std::size_t i=0; i<sys.size(); ++i)

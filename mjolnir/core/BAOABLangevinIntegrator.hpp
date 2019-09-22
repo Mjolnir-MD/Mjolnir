@@ -35,9 +35,10 @@ class BAOABLangevinIntegrator
     {}
     ~BAOABLangevinIntegrator() = default;
 
-    void initialize(system_type& sys, forcefield_type& ff);
+    void initialize(system_type& sys, forcefield_type& ff, rng_type& rng);
 
-    real_type step(const real_type time, system_type& sys, forcefield_type& ff);
+    real_type step(const real_type time, system_type& sys, forcefield_type& ff,
+                   rng_type& rng);
 
     void update(const system_type& sys)
     {
@@ -93,7 +94,7 @@ class BAOABLangevinIntegrator
 
 template<typename traitsT>
 void BAOABLangevinIntegrator<traitsT>::initialize(
-        system_type& system, forcefield_type& ff)
+        system_type& system, forcefield_type& ff, rng_type&)
 {
     // calculate parameters for each particles
     this->update(system);
@@ -110,7 +111,7 @@ void BAOABLangevinIntegrator<traitsT>::initialize(
 template<typename traitsT>
 typename BAOABLangevinIntegrator<traitsT>::real_type
 BAOABLangevinIntegrator<traitsT>::step(
-        const real_type time, system_type& sys, forcefield_type& ff)
+        const real_type time, system_type& sys, forcefield_type& ff, rng_type&)
 {
     real_type largest_disp2(0.0);
     for(std::size_t i=0; i<sys.size(); ++i)

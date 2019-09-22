@@ -2,6 +2,7 @@
 #define MJOLNIR_CORE_VELOCITY_VERLET_INTEGRATOR_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/RandomNumberGenerator.hpp>
 
 namespace mjolnir
 {
@@ -16,6 +17,7 @@ class VelocityVerletIntegrator
     using coordinate_type = typename traits_type::coordinate_type;
     using system_type     = System<traitsT>;
     using forcefield_type = ForceField<traitsT>;
+    using rng_type        = RandomNumberGenerator<traitsT>;
 
   public:
 
@@ -24,9 +26,10 @@ class VelocityVerletIntegrator
     {}
     ~VelocityVerletIntegrator() = default;
 
-    void initialize(system_type& sys, forcefield_type& ff);
+    void initialize(system_type& sys, forcefield_type& ff, rng_type& rng);
 
-    real_type step(const real_type time, system_type& sys, forcefield_type& ff);
+    real_type step(const real_type time, system_type& sys, forcefield_type& ff,
+                   rng_type& rng);
 
     real_type delta_t() const noexcept {return dt_;}
     void  set_delta_t(const real_type dt) noexcept
@@ -43,7 +46,7 @@ class VelocityVerletIntegrator
 
 template<typename traitsT>
 void VelocityVerletIntegrator<traitsT>::initialize(
-        system_type& system, forcefield_type& ff)
+        system_type& system, forcefield_type& ff, rng_type&)
 {
     this->update(system);
 
@@ -58,7 +61,7 @@ void VelocityVerletIntegrator<traitsT>::initialize(
 template<typename traitsT>
 typename VelocityVerletIntegrator<traitsT>::real_type
 VelocityVerletIntegrator<traitsT>::step(
-        const real_type time, system_type& sys, forcefield_type& ff)
+        const real_type time, system_type& sys, forcefield_type& ff, rng_type&)
 {
     real_type largest_disp2(0);
     for(std::size_t i=0; i<sys.size(); ++i)
