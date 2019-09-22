@@ -26,8 +26,8 @@ class BAOABLangevinIntegrator
   public:
 
     BAOABLangevinIntegrator(const real_type dt,
-            std::vector<real_type>&& gamma, rng_type&& rng)
-        : dt_(dt), halfdt_(dt / 2), rng_(std::move(rng)),
+            std::vector<real_type>&& gamma, rng_type&&)
+        : dt_(dt), halfdt_(dt / 2),
           gammas_(std::move(gamma)),
           exp_gamma_dt_(gammas_.size()),
           noise_coeff_ (gammas_.size()),
@@ -85,7 +85,6 @@ class BAOABLangevinIntegrator
     real_type halfdt_;
     real_type temperature_;
 
-    rng_type  rng_;
     std::vector<real_type>       gammas_;
     std::vector<real_type>       exp_gamma_dt_;
     std::vector<real_type>       noise_coeff_;
