@@ -28,7 +28,7 @@ class UnderdampedLangevinIntegrator
   public:
 
     UnderdampedLangevinIntegrator(const real_type dt,
-            std::vector<real_type>&& gamma, rng_type&&)
+            std::vector<real_type>&& gamma)
         : dt_(dt), halfdt_(dt / 2), halfdt2_(dt * dt / 2),
           sqrt_gamma_over_mass_(gamma.size()),
           acceleration_(gamma.size())

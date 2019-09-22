@@ -26,7 +26,7 @@ class BAOABLangevinIntegrator
   public:
 
     BAOABLangevinIntegrator(const real_type dt,
-            std::vector<real_type>&& gamma, rng_type&&)
+            std::vector<real_type>&& gamma)
         : dt_(dt), halfdt_(dt / 2),
           gammas_(std::move(gamma)),
           exp_gamma_dt_(gammas_.size()),
