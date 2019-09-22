@@ -72,11 +72,11 @@ class BAOABLangevinIntegrator
         return;
     }
 
-    coordinate_type gen_R() noexcept
+    coordinate_type gen_R(rng_type& rng) noexcept
     {
-        const auto x = this->rng_.gaussian();
-        const auto y = this->rng_.gaussian();
-        const auto z = this->rng_.gaussian();
+        const auto x = rng.gaussian();
+        const auto y = rng.gaussian();
+        const auto z = rng.gaussian();
         return math::make_coordinate<coordinate_type>(x, y, z);
     }
 
@@ -111,12 +111,12 @@ void BAOABLangevinIntegrator<traitsT>::initialize(
 template<typename traitsT>
 typename BAOABLangevinIntegrator<traitsT>::real_type
 BAOABLangevinIntegrator<traitsT>::step(
-        const real_type time, system_type& sys, forcefield_type& ff, rng_type&)
+        const real_type time, system_type& sys, forcefield_type& ff, rng_type& rng)
 {
     real_type largest_disp2(0.0);
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        const auto R  = this->gen_R(); // random gaussian vector (0 mean, 1 var)
+        const auto R  = this->gen_R(rng); // random gaussian vector (0 mean, 1 var)
         const auto rm = sys.rmass(i);  // reciprocal mass
         auto&      p  = sys.position(i);
         auto&      v  = sys.velocity(i);

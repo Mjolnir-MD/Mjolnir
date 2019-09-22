@@ -66,12 +66,12 @@ class UnderdampedLangevinIntegrator
 
   private:
 
-    coordinate_type gen_gaussian_vec(const real_type coef)
+    coordinate_type gen_gaussian_vec(rng_type& rng, const real_type coef)
     {
         return math::make_coordinate<coordinate_type>(
-                this->rng_.gaussian(0, coef),
-                this->rng_.gaussian(0, coef),
-                this->rng_.gaussian(0, coef));
+                rng.gaussian(0, coef),
+                rng.gaussian(0, coef),
+                rng.gaussian(0, coef));
     }
 
   private:
@@ -89,7 +89,7 @@ class UnderdampedLangevinIntegrator
 
 template<typename traitsT>
 void UnderdampedLangevinIntegrator<traitsT>::initialize(
-        system_type& system, forcefield_type& ff, rng_type&)
+        system_type& system, forcefield_type& ff, rng_type& rng)
 {
     // initialize temperature and noise intensity
     this->update(system);
@@ -108,7 +108,7 @@ void UnderdampedLangevinIntegrator<traitsT>::initialize(
 
         sqrt_gamma_over_mass_[i] = std::sqrt(gammas_[i] * rmass);
         acceleration_[i] = force * rmass +
-            this->gen_gaussian_vec(this->noise_coef_ * sqrt_gamma_over_mass_[i]);
+            this->gen_gaussian_vec(rng, this->noise_coef_ * sqrt_gamma_over_mass_[i]);
     }
     return;
 }
@@ -116,7 +116,7 @@ void UnderdampedLangevinIntegrator<traitsT>::initialize(
 template<typename traitsT>
 typename UnderdampedLangevinIntegrator<traitsT>::real_type
 UnderdampedLangevinIntegrator<traitsT>::step(
-        const real_type time, system_type& sys, forcefield_type& ff, rng_type&)
+        const real_type time, system_type& sys, forcefield_type& ff, rng_type& rng)
 {
     real_type largest_disp2(0.0);
     for(std::size_t i=0; i<sys.size(); ++i)
@@ -158,7 +158,7 @@ UnderdampedLangevinIntegrator<traitsT>::step(
         const auto& f  = sys.force(i);
         auto&       a  = this->acceleration_[i];
 
-        a  = f * rm + gen_gaussian_vec(noise_coef_ * sqrt_gamma_over_mass_[i]);
+        a  = f * rm + gen_gaussian_vec(rng, noise_coef_ * sqrt_gamma_over_mass_[i]);
         v += halfdt_ * (1 - gammas_[i] * halfdt_) * a;
     }
 
