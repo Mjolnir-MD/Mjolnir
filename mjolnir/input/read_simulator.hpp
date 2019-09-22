@@ -18,6 +18,16 @@ namespace mjolnir
 {
 
 template<typename traitsT>
+RandomNumberGenerator<traitsT> read_rng(const toml::value& simulator)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    const auto seed = toml::find<std::uint32_t>(simulator, "integrator", "seed");
+    MJOLNIR_LOG_NOTICE("seed = ", seed);
+    return RandomNumberGenerator<traitsT>(seed);
+}
+
+template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_molecular_dynamics_simulator(
         const toml::value& root, const toml::value& simulator)
@@ -37,6 +47,7 @@ read_molecular_dynamics_simulator(
     auto sys = read_system    <traitsT>(root, 0);
     auto obs = read_observer  <traitsT>(root);
     auto ff  = read_forcefield<traitsT>(root, 0);
+    auto rng = read_rng       <traitsT>(simulator);
 
     const auto& integrator     = toml::find(simulator, "integrator");
     const auto integrator_type = toml::find<std::string>(integrator, "type");
@@ -50,7 +61,7 @@ read_molecular_dynamics_simulator(
         auto intg = read_velocity_verlet_integrator<traitsT>(simulator);
 
         return make_unique<simulator_t>(tstep, sstep, std::move(sys),
-                std::move(ff), std::move(intg), std::move(obs));
+                std::move(ff), std::move(intg), std::move(obs), std::move(rng));
     }
     else if(integrator_type == "UnderdampedLangevin")
     {
@@ -61,7 +72,7 @@ read_molecular_dynamics_simulator(
         auto intg = read_underdamped_langevin_integrator<traitsT>(simulator);
 
         return make_unique<simulator_t>(tstep, sstep, std::move(sys),
-                std::move(ff), std::move(intg), std::move(obs));
+                std::move(ff), std::move(intg), std::move(obs), std::move(rng));
     }
     else if(integrator_type == "BAOABLangevin")
     {
@@ -72,7 +83,7 @@ read_molecular_dynamics_simulator(
         auto intg = read_BAOAB_langevin_integrator<traitsT>(simulator);
 
         return make_unique<simulator_t>(tstep, sstep, std::move(sys),
-                std::move(ff), std::move(intg), std::move(obs));
+                std::move(ff), std::move(intg), std::move(obs), std::move(rng));
     }
     else
     {
@@ -153,6 +164,7 @@ read_simulated_annealing_simulator(
     auto sys = read_system    <traitsT>(root, 0);
     auto ff  = read_forcefield<traitsT>(root, 0);
     auto obs = read_observer  <traitsT>(root);
+    auto rng = read_rng       <traitsT>(simulator);
 
     if(schedule_type == "linear")
     {
@@ -185,7 +197,7 @@ read_simulated_annealing_simulator(
 
             return make_unique<simulator_t>(tstep, sstep, each_step,
                     std::move(sch),  std::move(sys), std::move(ff),
-                    std::move(intg), std::move(obs));
+                    std::move(intg), std::move(obs), std::move(rng));
         }
         else if(integrator_type == "BAOABLangevin")
         {
@@ -198,7 +210,7 @@ read_simulated_annealing_simulator(
 
             return make_unique<simulator_t>(tstep, sstep, each_step,
                     std::move(sch),  std::move(sys), std::move(ff),
-                    std::move(intg), std::move(obs));
+                    std::move(intg), std::move(obs), std::move(rng));
         }
         else
         {
@@ -242,6 +254,7 @@ read_switching_forcefield_simulator(
     // later move them, so non-const
     auto sys = read_system  <traitsT>(root, 0);
     auto obs = read_observer<traitsT>(root);
+    auto rng = read_rng     <traitsT>(simulator);
 
     // ------------------------------------------------------------------------
     // read schedule
@@ -301,7 +314,7 @@ read_switching_forcefield_simulator(
 
         return make_unique<simulator_t>(tstep, sstep, std::move(sys),
                 std::move(ffs), std::move(intg), std::move(obs),
-                std::move(ffidx), std::move(sch));
+                std::move(rng), std::move(ffidx), std::move(sch));
     }
     else if(integrator_type == "UnderdampedLangevin")
     {
@@ -313,7 +326,7 @@ read_switching_forcefield_simulator(
 
         return make_unique<simulator_t>(tstep, sstep, std::move(sys),
                 std::move(ffs), std::move(intg), std::move(obs),
-                std::move(ffidx), std::move(sch));
+                std::move(rng), std::move(ffidx), std::move(sch));
     }
     else if(integrator_type == "BAOABLangevin")
     {
@@ -325,7 +338,7 @@ read_switching_forcefield_simulator(
 
         return make_unique<simulator_t>(tstep, sstep, std::move(sys),
                 std::move(ffs), std::move(intg), std::move(obs),
-                std::move(ffidx), std::move(sch));
+                std::move(rng), std::move(ffidx), std::move(sch));
     }
     else
     {
