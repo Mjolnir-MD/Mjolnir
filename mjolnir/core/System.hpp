@@ -4,6 +4,7 @@
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <vector>
 #include <map>
 
@@ -21,6 +22,7 @@ class System
     using boundary_type   = typename traits_type::boundary_type;
     using topology_type   = Topology;
     using attribute_type  = std::map<std::string, real_type>;
+    using rng_type        = RandomNumberGenerator<traits_type>;
 
     using particle_type            = Particle<real_type, coordinate_type>;
     using particle_view_type       = ParticleView<real_type, coordinate_type>;
@@ -43,6 +45,11 @@ class System
     System(System&&)      = default;
     System& operator=(const System&) = default;
     System& operator=(System&&)      = default;
+
+    void initialize(rng_type& rng)
+    {
+        return;
+    }
 
     coordinate_type adjust_direction(coordinate_type dr) const noexcept
     {return boundary_.adjust_direction(dr);}
