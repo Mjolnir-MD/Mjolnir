@@ -368,40 +368,41 @@ std::vector<std::tuple<std::array<std::size_t, N>, angle1_potentialT,
                        angle2_potentialT, contact_potentialT>>
 read_directional_contact_potentials(const toml::value& local)
 {
-  MJOLNIR_GET_DEFAULT_LOGGER();
-  MJOLNIR_LOG_FUNCTION();
-  MJOLNIR_LOG_INFO("as", N, "-body interaction");
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    MJOLNIR_LOG_INFO("as", N, "-body interaction");
 
-  using indices_type = std::array<std::size_t, N>;
-  using indices_potentials_tuple_type =
-    std::tuple<indices_type, angle1_potentialT,
-               angle2_potentialT, contact_potentialT>;
+    using indices_type = std::array<std::size_t, N>;
+    using indices_potentials_tuple_type =
+            std::tuple<
+                indices_type, angle1_potentialT, angle2_potentialT, contact_potentialT
+            >;
 
-  const auto& params = toml::find<toml::array>(local, "parameters");
-  MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
+    const auto& params = toml::find<toml::array>(local, "parameters");
+    MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
 
-  const auto& env = local.as_table().count("env") == 1 ?
-                    local.as_table().at("env") : toml::value{};
+    const auto& env = local.as_table().count("env") == 1 ?
+            local.as_table().at("env") : toml::value{};
 
-  std::vector<indices_potentials_tuple_type> retval;
-  retval.reserve(params.size());
-  for(const auto& item : params)
-  {
-    const auto indices = find_parameter<indices_type>(item, env, "indices");
-    MJOLNIR_LOG_INFO_NO_LF("idxs = ", indices, ", ");
+    std::vector<indices_potentials_tuple_type> retval;
+    retval.reserve(params.size());
+    for(const auto& item : params)
+    {
+        const auto indices = find_parameter<indices_type>(item, env, "indices");
+        MJOLNIR_LOG_INFO_NO_LF("idxs = ", indices, ", ");
 
-    const auto angle_pot1 = find_parameter<toml::value>(item, env, "angle1_params");
-    const auto angle_pot2 = find_parameter<toml::value>(item, env, "angle2_params");
-    const auto contact_pot = find_parameter<toml::value>(item, env, "contact_params");
+        const auto angle_pot1 = find_parameter<toml::value>(item, env, "angle1_params");
+        const auto angle_pot2 = find_parameter<toml::value>(item, env, "angle2_params");
+        const auto contact_pot = find_parameter<toml::value>(item, env, "contact_params");
 
-    retval.emplace_back(
-        std::make_tuple(indices,
-            detail::read_local_potential_impl<angle1_potentialT>::invoke(angle_pot1, env),
-            detail::read_local_potential_impl<angle2_potentialT>::invoke(angle_pot2, env),
-            detail::read_local_potential_impl<contact_potentialT>::invoke(contact_pot, env))
-        );
-  }
-  return retval;
+        retval.emplace_back(
+            std::make_tuple(indices,
+                detail::read_local_potential_impl<angle1_potentialT>::invoke(angle_pot1, env),
+                detail::read_local_potential_impl<angle2_potentialT>::invoke(angle_pot2, env),
+                detail::read_local_potential_impl<contact_potentialT>::invoke(contact_pot, env))
+            );
+    }
+    return retval;
 }
 
 #ifdef MJOLNIR_SEPARATE_BUILD
