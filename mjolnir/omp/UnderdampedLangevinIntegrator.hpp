@@ -23,9 +23,8 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
   public:
 
     UnderdampedLangevinIntegrator(const real_type dt,
-            std::vector<real_type>&& gamma, rng_type&& rng)
+            std::vector<real_type>&& gamma)
         : dt_(dt), halfdt_(dt / 2), halfdt2_(dt * dt / 2),
-          rng_(std::move(rng)),
           gammas_(std::move(gamma)),
           sqrt_gamma_over_mass_(gammas_.size()),
           acceleration_(gammas_.size())
@@ -35,7 +34,7 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     }
     ~UnderdampedLangevinIntegrator() = default;
 
-    void initialize(system_type& sys, forcefield_type& ff)
+    void initialize(system_type& sys, forcefield_type& ff, rng_type& rng)
     {
         // initialize temperature and noise intensity
         this->update(sys);
@@ -56,12 +55,13 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
             sqrt_gamma_over_mass_[i] = std::sqrt(gammas_[i] * rmass);
             acceleration_[i]         = force * rmass +
-                this->gen_gaussian_vec(this->noise_coef_ * sqrt_gamma_over_mass_[i]);
+                this->gen_gaussian_vec(rng, this->noise_coef_ * sqrt_gamma_over_mass_[i]);
         }
         return;
     }
 
-    real_type step(const real_type time, system_type& sys, forcefield_type& ff)
+    real_type step(const real_type time, system_type& sys, forcefield_type& ff,
+                   rng_type& rng)
     {
         real_type largest_disp2(0.0);
 
@@ -106,7 +106,7 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             const auto& f  = sys.force(i);
             auto&       a  = this->acceleration_[i];
 
-            a  = f * rm + gen_gaussian_vec(noise_coef_ * sqrt_gamma_over_mass_[i]);
+            a  = f * rm + gen_gaussian_vec(rng, noise_coef_ * sqrt_gamma_over_mass_[i]);
             v += halfdt_ * (1 - gammas_[i] * halfdt_) * a;
         }
         return time + dt_;
@@ -136,12 +136,12 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
   private:
 
-    coordinate_type gen_gaussian_vec(const real_type coef)
+    coordinate_type gen_gaussian_vec(rng_type& rng, const real_type coef)
     {
         return math::make_coordinate<coordinate_type>(
-                this->rng_.gaussian(0, coef),
-                this->rng_.gaussian(0, coef),
-                this->rng_.gaussian(0, coef));
+                rng.gaussian(0, coef),
+                rng.gaussian(0, coef),
+                rng.gaussian(0, coef));
     }
 
   private:
@@ -150,7 +150,6 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     real_type halfdt2_;
     real_type temperature_;
     real_type noise_coef_;
-    rng_type  rng_;
 
     std::vector<real_type>       gammas_;
     std::vector<real_type>       sqrt_gamma_over_mass_;
