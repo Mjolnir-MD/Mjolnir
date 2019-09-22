@@ -47,7 +47,7 @@ class ThreeSPN2BaseStackingPotential
     {}
 
     template<typename ParameterSet>
-    ThreeSPN2BaseStackingPotential(ParameterSet paraset)
+    explicit ThreeSPN2BaseStackingPotential(ParameterSet paraset)
       : K_BS_        (paraset.K_BS),
         pi_over_K_BS_(paraset.pi_over_K_BS),
         alpha_BS_    (paraset.alpha_BS),
