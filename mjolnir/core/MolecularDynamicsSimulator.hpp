@@ -50,6 +50,9 @@ class MolecularDynamicsSimulator final : public SimulatorBase
     real_type& time()       noexcept {return time_;}
     real_type  time() const noexcept {return time_;}
 
+    rng_type&       rng()       noexcept {return rng_;}
+    rng_type const& rng() const noexcept {return rng_;}
+
   protected:
     std::size_t     total_step_;
     std::size_t     step_count_;
