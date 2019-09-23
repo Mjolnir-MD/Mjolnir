@@ -87,6 +87,9 @@ class ImplicitMembranePotential
     real_type  k() const noexcept {return k_;}
     real_type& k()       noexcept {return k_;}
 
+    real_type  cutoff() const noexcept {return cutoff_ratio_;}
+    real_type& cutoff()       noexcept {return cutoff_ratio_;}
+
     container_type const& parameters() const noexcept {return parameters_;}
     container_type&       parameters()       noexcept {return parameters_;}
 
