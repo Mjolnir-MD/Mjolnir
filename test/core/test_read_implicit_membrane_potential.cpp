@@ -53,6 +53,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_implicit_membrane_noenv, T, test_types)
         BOOST_TEST(g.half_thick()          == real_type(3.14 * 0.5), tolerance<real_type>());
         BOOST_TEST(g.k()                   == real_type(6.28      ), tolerance<real_type>());
         BOOST_TEST(g.bend()                == real_type(9.42      ), tolerance<real_type>());
+        BOOST_TEST(g.cutoff()              == real_type(4.0       ), tolerance<real_type>());
     }
 }
 
@@ -71,6 +72,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_implicit_membrane_env, T, test_types)
             shape.position = 1.0
             shape.margin   = 0.5
             thickness      = 3.14
+            cutoff         = 5.0
             interaction_magnitude = 6.28
             bend                  = 9.42
             env.hydrophilic =   0.0
@@ -94,6 +96,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_implicit_membrane_env, T, test_types)
         BOOST_TEST(g.half_thick()          == real_type(3.14 * 0.5), tolerance<real_type>());
         BOOST_TEST(g.k()                   == real_type(6.28      ), tolerance<real_type>());
         BOOST_TEST(g.bend()                == real_type(9.42      ), tolerance<real_type>());
+        BOOST_TEST(g.cutoff()              == real_type(5.0       ), tolerance<real_type>());
     }
 }
 
