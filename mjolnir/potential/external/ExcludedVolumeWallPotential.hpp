@@ -35,6 +35,7 @@ class ExcludedVolumeWallPotential
           coef_at_cutoff_(std::pow(1 / cutoff_ratio, 12))
     {
         this->parameters_.resize(params.size());
+        this->participants_.reserve(params.size());
         for(const auto& idxp: params)
         {
             const auto idx = idxp.first;

@@ -34,6 +34,7 @@ class LennardJonesWallPotential
             std::pow(1 / cutoff_ratio, 12) - std::pow(1 / cutoff_ratio, 6))
     {
         this->parameters_.resize(params.size());
+        this->participants_.reserve(params.size());
         for(const auto& idxp: params)
         {
             const auto idx = idxp.first;

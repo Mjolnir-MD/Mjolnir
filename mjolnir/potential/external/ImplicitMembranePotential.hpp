@@ -39,6 +39,7 @@ class ImplicitMembranePotential
         : half_thick_(thick / 2), k_(k), bend_(bend), cutoff_ratio_(cutoff_ratio)
     {
         this->parameters_.resize(params.size());
+        this->participants_.reserve(params.size());
         for(const auto& idxp: params)
         {
             const auto idx = idxp.first;
