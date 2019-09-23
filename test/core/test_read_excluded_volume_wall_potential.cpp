@@ -90,6 +90,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_wall_env, T, test_types)
         BOOST_TEST(g.parameters().at(1)  == real_type(0.01), tolerance<real_type>());
         BOOST_TEST(g.parameters().at(5)  == real_type(10.0), tolerance<real_type>());
         BOOST_TEST(g.epsilon()           == real_type(3.14), tolerance<real_type>());
-        BOOST_TEST(g.cutoff()/*default*/ == real_type(2.71), tolerance<real_type>());
+        BOOST_TEST(g.cutoff()            == real_type(2.71), tolerance<real_type>());
     }
 }
