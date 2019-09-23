@@ -27,6 +27,7 @@ energy = "kcal/mol"
 type            = "MolecularDynamics"
 precision       = "double"
 boundary_type   = "Unlimited"
+seed            = 1
 total_step      = 1
 save_step       = 1
 delta_t         = 0.1
