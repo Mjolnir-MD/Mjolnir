@@ -41,6 +41,7 @@ BOOST_AUTO_TEST_CASE(read_newtonian_switching_forcefield_simulator)
         delta_t         = 0.1
         total_step      = 30
         save_step       =  1
+        seed            = 12345
         schedule        = [
             {until = 10, forcefield = "open"},
             {until = 20, forcefield = "close"},
@@ -65,6 +66,8 @@ BOOST_AUTO_TEST_CASE(read_newtonian_switching_forcefield_simulator)
     const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
         traits_type, mjolnir::VelocityVerletIntegrator<traits_type>>*>(sim.get());
     BOOST_TEST(static_cast<bool>(mdsim));
+
+    BOOST_TEST(mdsim->rng().seed() == 12345u);
 
     BOOST_TEST(mdsim->forcefields().size() == 2u);
 
@@ -133,10 +136,10 @@ BOOST_AUTO_TEST_CASE(read_underdamped_langevin_switching_forcefield_simulator)
     const auto simulator = u8R"(
         type            = "SwitchingForceField"
         integrator.type = "UnderdampedLangevin"
-        integrator.seed = 1
         integrator.parameters = [{index = 0, gamma = 1.0}, {index = 1, gamma = 1.0}]
         precision       = "double"
         boundary_type   = "Unlimited"
+        seed            = 12345
         delta_t         = 0.1
         total_step      = 30
         save_step       =  1
@@ -165,6 +168,8 @@ BOOST_AUTO_TEST_CASE(read_underdamped_langevin_switching_forcefield_simulator)
     const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
         traits_type, mjolnir::UnderdampedLangevinIntegrator<traits_type>>*>(sim.get());
     BOOST_TEST(static_cast<bool>(mdsim));
+
+    BOOST_TEST(mdsim->rng().seed() == 12345u);
 
     BOOST_TEST(mdsim->forcefields().size() == 2u);
 
@@ -236,7 +241,7 @@ BOOST_AUTO_TEST_CASE(read_BAOAB_langevin_switching_forcefield_simulator)
     const auto simulator = u8R"(
         type            = "SwitchingForceField"
         integrator.type = "BAOABLangevin"
-        integrator.seed = 1
+        seed            = 12345
         integrator.parameters = [{index = 0, gamma = 1.0}, {index = 1, gamma = 1.0}]
         precision       = "double"
         boundary_type   = "Unlimited"
@@ -268,6 +273,8 @@ BOOST_AUTO_TEST_CASE(read_BAOAB_langevin_switching_forcefield_simulator)
     const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
         traits_type, mjolnir::BAOABLangevinIntegrator<traits_type>>*>(sim.get());
     BOOST_TEST(static_cast<bool>(mdsim));
+
+    BOOST_TEST(mdsim->rng().seed() == 12345u);
 
     BOOST_TEST(mdsim->forcefields().size() == 2u);
 
