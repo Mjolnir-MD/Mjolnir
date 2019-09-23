@@ -58,9 +58,8 @@ class ImplicitMembranePotential
     }
     real_type derivative(const std::size_t i, const real_type z) const noexcept
     {
-        const auto sign = std::copysign(real_type(1), z);
-        const auto x    = std::cosh(bend_ * (std::abs(z) - half_thick_));
-        return parameters_[i] * sign * k_ * bend_ / (x * x);
+        return parameters_[i] * std::copysign(real_type(1.0), z) * k_ * bend_ /
+            std::pow(std::cosh(bend_ * (std::abs(z) - half_thick_)), 2);
     }
     real_type max_cutoff_length() const noexcept
     {
