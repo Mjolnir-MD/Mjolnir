@@ -51,6 +51,10 @@ parallelism   = "OpenMP" # optional
 Version 1.1.0 現在、`SteepestDescentSimulator`は並列化に対応していません。
 {% endhint %}
 
+## [SwitchingForceFieldSimulator](SteepestDescentSimulator.md)
+
+あらかじめ決めた時間ステップに使用する力場を変更するシミュレータです。
+
 ## ファイル分割の方法
 
 `[simulator]`テーブルは、メインの入力ファイルと事なるファイルに分割することが可能です。
