@@ -74,9 +74,15 @@ read_boundary(const toml::value& root, const toml::value& simulator)
         MJOLNIR_LOG_NOTICE("Boundary Condition is Unlimited");
         return read_parallelism<realT, UnlimitedBoundary>(root, simulator);
     }
+    else if(boundary == "Periodic")
+    {
+        MJOLNIR_LOG_NOTICE("Boundary Condition is Periodic. "
+                           "The shape is cuboid.");
+        return read_parallelism<realT, CuboidalPeriodicBoundary>(root, simulator);
+    }
     else if(boundary == "PeriodicCuboid")
     {
-        MJOLNIR_LOG_NOTICE("Boundary Condition is CuboidalPeriodic");
+        MJOLNIR_LOG_NOTICE("Boundary Condition is PeriodicCuboid");
         return read_parallelism<realT, CuboidalPeriodicBoundary>(root, simulator);
     }
     else
@@ -85,6 +91,7 @@ read_boundary(const toml::value& root, const toml::value& simulator)
             "mjolnir::read_boundary: invalid boundary",
             toml::find(simulator, "boundary_type"), "here", {
             "- \"Unlimited\"     : no boundary condition. infinite space",
+            "- \"Periodic\"      : periodic boundary. Assuming cuboidal shape.",
             "- \"PeriodicCuboid\": periodic boundary with cuboidal shape"
             }));
     }
