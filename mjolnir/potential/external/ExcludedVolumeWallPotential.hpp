@@ -14,24 +14,44 @@ class ExcludedVolumeWallPotential
 {
   public:
     using real_type = realT;
+    using parameter_type = real_type;
+    using container_type = std::vector<parameter_type>;
+
+    static constexpr real_type default_cutoff() noexcept
+    {
+        return real_type(2);
+    }
+    static constexpr parameter_type default_parameter() noexcept
+    {
+        return real_type(0);
+    }
 
   public:
 
-    ExcludedVolumeWallPotential(const real_type epsilon,
-        const real_type cutoff_ratio, std::vector<real_type> params)
-        : epsilon_(epsilon), cutoff_ratio_(cutoff_ratio),
-          coef_at_cutoff_(std::pow(1 / cutoff_ratio, 12)),
-          radii_(std::move(params))
-    {}
     ExcludedVolumeWallPotential(
-        const real_type epsilon, std::vector<real_type> params)
-        : ExcludedVolumeWallPotential(epsilon, 2.0, std::move(params))
-    {}
+        const real_type epsilon, const real_type cutoff_ratio,
+        const std::vector<std::pair<std::size_t, real_type>>& params)
+        : epsilon_(epsilon), cutoff_ratio_(cutoff_ratio),
+          coef_at_cutoff_(std::pow(1 / cutoff_ratio, 12))
+    {
+        this->parameters_.resize(params.size());
+        this->participants_.reserve(params.size());
+        for(const auto& idxp: params)
+        {
+            const auto idx = idxp.first;
+            this->participants_.push_back(idx);
+            if(idx >= this->parameters_.size())
+            {
+                this->parameters_.resize(idx+1, default_parameter());
+            }
+            this->parameters_.at(idx) = idxp.second;
+        }
+    }
     ~ExcludedVolumeWallPotential(){}
 
     real_type potential(const std::size_t i, const real_type r) const noexcept
     {
-        const real_type d = this->radii_[i];
+        const real_type d = this->parameters_[i];
         if(d * this->cutoff_ratio_ < r){return real_type(0.0);}
 
         const real_type d_r  = d / r;
@@ -43,7 +63,7 @@ class ExcludedVolumeWallPotential
 
     real_type derivative(const std::size_t i, const real_type r) const noexcept
     {
-        const real_type d = this->radii_[i];
+        const real_type d = this->parameters_[i];
         if(d * this->cutoff_ratio_ < r){return real_type(0.0);}
 
         const real_type rinv = real_type(1.0) / r;
@@ -57,23 +77,13 @@ class ExcludedVolumeWallPotential
     real_type max_cutoff_length() const noexcept
     {
         const real_type max_sigma =
-            *(std::max_element(radii_.cbegin(), radii_.cend()));
+            *(std::max_element(parameters_.cbegin(), parameters_.cend()));
         return max_sigma * this->cutoff_ratio_;
     }
 
-    // TODO more sophisticated way to treat this
-    std::vector<std::size_t> participants() const
+    std::vector<std::size_t> const& participants() const noexcept
     {
-        std::vector<std::size_t> retval;
-        retval.reserve(this->radii_.size());
-        for(std::size_t i=0; i<this->radii_.size(); ++i)
-        {
-            if(this->radii_[i] != real_type(0.0))
-            {
-                retval.push_back(i);
-            }
-        }
-        return retval;
+        return participants_;
     }
 
     // nothing to do when system parameters change.
@@ -85,14 +95,17 @@ class ExcludedVolumeWallPotential
     real_type epsilon() const noexcept {return epsilon_;}
 
     // access to the parameters...
-    std::vector<real_type>&       parameters()       noexcept {return radii_;}
-    std::vector<real_type> const& parameters() const noexcept {return radii_;}
+    container_type&       parameters()       noexcept {return parameters_;}
+    container_type const& parameters() const noexcept {return parameters_;}
+
+    real_type cutoff() const noexcept {return this->cutoff_ratio_;}
 
   private:
 
     real_type epsilon_;
     real_type cutoff_ratio_, coef_at_cutoff_;
-    std::vector<real_type> radii_;
+    container_type           parameters_;
+    std::vector<std::size_t> participants_;
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD
