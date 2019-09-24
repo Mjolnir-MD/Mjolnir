@@ -200,8 +200,8 @@ read_angle_in_directional_contact_interaction(
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = typename traitsT::real_type;
 
-    std::string angle_potential_key = angle_potential_keys.back();
-    std::string angle_potential = toml::find<std::string>(local, "potentials", angle_potential_key);
+    const std::string angle_potential_key = angle_potential_keys.back();
+    const auto        angle_potential = toml::find<std::string>(local, "potentials", angle_potential_key);
     angle_potential_keys.pop_back();
     if(angle_potential == "Cosine")
     {

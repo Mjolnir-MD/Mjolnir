@@ -37,9 +37,9 @@ BOOST_AUTO_TEST_CASE(DirectionalContactInteraction_numerical_diff)
     const real_type angle1_native(pi);
     const real_type angle2_native(pi);
     const real_type contact_native(2.0);
-    angle_potential_type angle1_potential    = angle_potential_type{k_angle, 1, angle1_native};
-    angle_potential_type angle2_potential    = angle_potential_type{k_angle, 1, angle2_native};
-    contact_potential_type contact_potential = contact_potential_type{k_contact, contact_native};
+    const auto angle1_potential    = angle_potential_type{k_angle, 1, angle1_native};
+    const auto angle2_potential    = angle_potential_type{k_angle, 1, angle2_native};
+    const auto contact_potential   = contact_potential_type{k_contact, contact_native};
     directional_contact_type interaction("none",
         {{std::make_tuple(std::array<std::size_t, 4>{0,1,2,3},
         angle1_potential, angle2_potential, contact_potential)
@@ -74,8 +74,8 @@ BOOST_AUTO_TEST_CASE(DirectionalContactInteraction_numerical_diff)
         {
             for(std::size_t k = 1; k <= contact_step_num; ++k)
             {
-                real_type theta1 = i * dtheta;
-                real_type theta2 = j * dtheta;
+                const real_type theta1 = i * dtheta;
+                const real_type theta2 = j * dtheta;
                 if(std::sin(theta1) < 1e-2 || std::sin(theta2) < 1e-2)
                 {
                     // In this case, numerical error become big and difficult to
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(DirectionalContactInteraction_numerical_diff)
                     continue;
                 }
 
-                real_type r = k * dr;
+                const real_type r = k * dr;
                 BOOST_TEST_MESSAGE("theta1 = " << theta1 << ", theta2 = " << pi + theta2
                                    << ", r = " << r);
 
@@ -108,15 +108,15 @@ BOOST_AUTO_TEST_CASE(DirectionalContactInteraction_numerical_diff)
                 const auto rot_y = uni(mt) * pi;
                 const auto rot_z = uni(mt) * pi;
 
-                matrix33_type rotm_x(1.0,             0.0,              0.0,
-                                     0.0, std::cos(rot_x), -std::sin(rot_x),
-                                     0.0, std::sin(rot_x),  std::cos(rot_x));
-                matrix33_type rotm_y( std::cos(rot_y), 0.0,  std::sin(rot_y),
-                                      0.0, 1.0,              0.0,
-                                      -std::sin(rot_y), 0.0,  std::cos(rot_y));
-                matrix33_type rotm_z(std::cos(rot_z), -std::sin(rot_z), 0.0,
-                                     std::sin(rot_z),  std::cos(rot_z), 0.0,
-                                     0.0,              0.0, 1.0);
+                const matrix33_type rotm_x(1.0,             0.0,              0.0,
+                                           0.0, std::cos(rot_x), -std::sin(rot_x),
+                                           0.0, std::sin(rot_x),  std::cos(rot_x));
+                const matrix33_type rotm_y(std::cos(rot_y), 0.0,  std::sin(rot_y),
+                                           0.0,             1.0,              0.0,
+                                           -std::sin(rot_y), 0.0,  std::cos(rot_y));
+                const matrix33_type rotm_z(std::cos(rot_z), -std::sin(rot_z), 0.0,
+                                           std::sin(rot_z),  std::cos(rot_z), 0.0,
+                                           0.0,              0.0,             1.0);
 
                 const matrix33_type rotm = rotm_x * rotm_y * rotm_z;
                 for(std::size_t idx=0; idx<sys.size(); ++idx)
