@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(read_directional_contact_cosine_go_contact)
           potentials.contact  = "GoContact"
           topology           = "none"
           parameters = [
-          {indices = [0, 1, 2, 3], angle1_params = {v0 = 0.0, k = -10.0, n = 1}, angle2_params = {v0 = 1.0, k = -20.0, n = 2}, contact_params = {v0 = 2.0, k = 1.0}},
+          {indices = [0, 1, 2, 3], angle1 = {v0 = 0.0, k = -10.0, n = 1}, angle2 = {v0 = 1.0, k = -20.0, n = 2}, contact = {v0 = 2.0, k = 1.0}},
           ]
         )"_toml;
 
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(read_directional_contact_cosine_gaussian)
           potentials.contact  = "Gaussian"
           topology           = "none"
           parameters = [
-          {indices = [0, 1, 2, 3], angle1_params = {v0 = 0.0, k = -10.0, n = 1}, angle2_params = {v0 = 0.0, k = -20.0, n = 2}, contact_params = {v0 = 1.0, k = 1.0, sigma = 5.0}},
+          {indices = [0, 1, 2, 3], angle1 = {v0 = 0.0, k = -10.0, n = 1}, angle2 = {v0 = 0.0, k = -20.0, n = 2}, contact = {v0 = 1.0, k = 1.0, sigma = 5.0}},
           ]
         )"_toml;
 
