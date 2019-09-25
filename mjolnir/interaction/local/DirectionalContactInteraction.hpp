@@ -120,8 +120,8 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
             {
                 this->active_contacts_.push_back(i);
             }
-            this->current_margin_ = this->cutoff_ * this->margin_;
         }
+        this->current_margin_ = abs_margin;
         return;
     }
 
