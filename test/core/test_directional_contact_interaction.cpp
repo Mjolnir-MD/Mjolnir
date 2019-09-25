@@ -50,10 +50,10 @@ BOOST_AUTO_TEST_CASE(DirectionalContactInteraction_numerical_diff)
     sys.mass(1) = 1.0;
     sys.mass(2) = 1.0;
     sys.mass(3) = 1.0;
-    sys.at(0).position = {0.0, 0.0, 0.0};
-    sys.at(1).position = {0.0, 0.0, 0.0};
-    sys.at(2).position = {0.0, 0.0, 0.0};
-    sys.at(3).position = {0.0, 0.0, 0.0};
+    sys.position(0) = mjolnir::math::make_coordinate<coord_type>(0.0, 0.0, 0.0);
+    sys.position(1) = mjolnir::math::make_coordinate<coord_type>(0.0, 0.0, 0.0);
+    sys.position(2) = mjolnir::math::make_coordinate<coord_type>(0.0, 0.0, 0.0);
+    sys.position(3) = mjolnir::math::make_coordinate<coord_type>(0.0, 0.0, 0.0);
     interaction.initialize(sys);
 
     const int angle_step_num           = 108;
