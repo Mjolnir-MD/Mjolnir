@@ -110,9 +110,9 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
         for(std::size_t i=0;i < this->potentials_.size(); ++i)
         {
             const indices_potentials_tuple& pot = this->potentials_[i];
-            const coordinate_type pos0 = sys.position(std::get<0>(pot)[1]);
-            const coordinate_type pos1 = sys.position(std::get<0>(pot)[2]);
-            const coordinate_type dpos = sys.adjust_direction(pos1 - pos0);
+            const coordinate_type& pos0 = sys.position(std::get<0>(pot)[1]);
+            const coordinate_type& pos1 = sys.position(std::get<0>(pot)[2]);
+            const coordinate_type  dpos = sys.adjust_direction(pos1 - pos0);
             const real_type       len2 = math::length_sq(dpos);
 
             const real_type rc = std::get<3>(pot).cutoff() + abs_margin;
@@ -162,9 +162,9 @@ void DirectionalContactInteraction<
     {
         const auto& idxp = this->potentials_[active_contact];
 
-        const auto angle1_pot  = std::get<1>(idxp);
-        const auto angle2_pot  = std::get<2>(idxp);
-        const auto contact_pot = std::get<3>(idxp);
+        const auto& angle1_pot  = std::get<1>(idxp);
+        const auto& angle2_pot  = std::get<2>(idxp);
+        const auto& contact_pot = std::get<3>(idxp);
 
         const std::size_t      Ci  = std::get<0>(idxp)[0];
         const std::size_t      Pi  = std::get<0>(idxp)[1];
@@ -328,9 +328,9 @@ DirectionalContactInteraction<
     {
         const auto& idxp = this->potentials_[active_contact];
 
-        const auto angle1_pot  = std::get<1>(idxp);
-        const auto angle2_pot  = std::get<2>(idxp);
-        const auto contact_pot = std::get<3>(idxp);
+        const auto& angle1_pot  = std::get<1>(idxp);
+        const auto& angle2_pot  = std::get<2>(idxp);
+        const auto& contact_pot = std::get<3>(idxp);
 
         const std::size_t      Ci  = std::get<0>(idxp)[0];
         const std::size_t      Pi  = std::get<0>(idxp)[1];
