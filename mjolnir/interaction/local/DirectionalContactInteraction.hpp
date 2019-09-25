@@ -107,7 +107,7 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
         // absolute length of margin (this->margin_ is a relative length).
         const real_type abs_margin = this->cutoff_ * this->margin_;
 
-        for(std::size_t i=0;i < this->potentials_.size(); ++i)
+        for(std::size_t i=0;i <this->potentials_.size(); ++i)
         {
             const indices_potentials_tuple& pot = this->potentials_[i];
             const coordinate_type& pos0 = sys.position(std::get<0>(pot)[1]);
@@ -158,7 +158,7 @@ void DirectionalContactInteraction<
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
 
-    for(const std::size_t active_contact : this -> active_contacts_)
+    for(const std::size_t active_contact : this->active_contacts_)
     {
         const auto& idxp = this->potentials_[active_contact];
 
@@ -234,7 +234,7 @@ void DirectionalContactInteraction<
         const real_type inv_len_PjCj        = math::rlength(PjCj);
         const coordinate_type PjCj_reg      = PjCj * inv_len_PjCj;
 
-        const coordinate_type Pji_reg       = - Pij_reg;
+        const coordinate_type Pji_reg       = -Pij_reg;
         const real_type PjCj_dot_Pji        = math::dot_product(PjCj_reg, Pji_reg);
         const real_type cos_theta2          = math::clamp(PjCj_dot_Pji, real_type(-1.0), real_type(1.0));
         const real_type theta2              = std::acos(cos_theta2);
@@ -264,7 +264,7 @@ void DirectionalContactInteraction<
         // dU_con(|Pij|) / dr
         const real_type contact_coef      = contact_pot.derivative(lPij);
         const coordinate_type dU_con_drPj = contact_coef * Pij_reg;
-        const coordinate_type dU_con_drPi = - dU_con_drPj;
+        const coordinate_type dU_con_drPi = -dU_con_drPj;
 
         MJOLNIR_LOG_DEBUG("dU_con / drPi = {x = ", math::X(dU_con_drPi), ", ",
                           "y = ", math::Y(dU_con_drPi), ", ",
@@ -365,7 +365,7 @@ DirectionalContactInteraction<
         const real_type inv_len_PjCj   = math::rlength(PjCj);
         const coordinate_type PjCj_reg = PjCj * inv_len_PjCj;
 
-        const coordinate_type Pji_reg = - Pij_reg;
+        const coordinate_type Pji_reg = -Pij_reg;
         const real_type PjCj_dot_Pji  = math::dot_product(PjCj_reg, Pji_reg);
         const real_type cos_theta2    = math::clamp(PjCj_dot_Pji, real_type(-1.0), real_type(1.0));
         const real_type theta2        = std::acos(cos_theta2);
