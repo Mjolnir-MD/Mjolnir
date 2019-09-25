@@ -126,7 +126,7 @@ read_contact_interaction(const std::string& kind, const toml::value& local)
 
 // This is internal function for read_directional_contact_interaction function.
 template<typename traitsT, typename angle1_potentialT, typename angle2_potentialT>
-typename std::unique_ptr<LocalInteractionBase<traitsT>>
+std::unique_ptr<LocalInteractionBase<traitsT>>
 read_contact_in_directional_contact_interaction(const std::string& kind, const toml::value& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
