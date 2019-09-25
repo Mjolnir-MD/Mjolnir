@@ -125,7 +125,7 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
         return;
     }
 
-    const real_type max_cutoff_length() const noexcept
+    real_type max_cutoff_length() const noexcept
     {
         const auto max_cutoff_potential_itr = std::max_element(potentials_.begin(), potentials_.end(),
             [](const indices_potentials_tuple& lhs, const indices_potentials_tuple& rhs)
