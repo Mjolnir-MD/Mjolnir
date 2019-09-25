@@ -60,7 +60,11 @@ class System
                 "velocity is already given, nothing to initialize in System");
             return ;
         }
-        assert(this->has_attribute("temperature"));
+        if(!this->has_attribute("temperature"))
+        {
+            throw std::runtime_error("[error] to generate velocity, "
+                    "system.attributes.temperature is required.");
+        }
 
         const real_type kB    = physics::constants<real_type>::kB();
         const real_type T_ref = this->attribute("temperature");
