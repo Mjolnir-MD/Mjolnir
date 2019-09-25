@@ -31,12 +31,12 @@ BOOST_AUTO_TEST_CASE(DirectionalContactInteraction_numerical_diff)
     using directional_contact_type = mjolnir::DirectionalContactInteraction<
         traits_type, angle_potential_type, angle_potential_type, contact_potential_type>;
 
-    const real_type pi = mjolnir::math::constants<real_type>::pi();
-    const real_type k_angle(1e0);
-    const real_type k_contact(1e0);
-    const real_type angle1_native(pi);
-    const real_type angle2_native(pi);
-    const real_type contact_native(2.0);
+    constexpr real_type pi = mjolnir::math::constants<real_type>::pi();
+    const     real_type k_angle(1e0);
+    const     real_type k_contact(1e0);
+    const     real_type angle1_native(pi);
+    const     real_type angle2_native(pi);
+    const     real_type contact_native(2.0);
     const auto angle1_potential    = angle_potential_type{k_angle, 1, angle1_native};
     const auto angle2_potential    = angle_potential_type{k_angle, 1, angle2_native};
     const auto contact_potential   = contact_potential_type{k_contact, contact_native};
