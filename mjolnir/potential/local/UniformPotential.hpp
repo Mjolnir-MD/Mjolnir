@@ -17,7 +17,7 @@ class UniformPotential
 
  public:
   UniformPotential(const real_type k) noexcept
-      : k_(k), cutoff_(std::numeric_limits<real_type>::max())
+      : k_(k)
   {}
   ~UniformPotential() = default;
 
@@ -37,12 +37,11 @@ class UniformPotential
   static const char* name() noexcept {return "Uniform";}
 
   real_type k()      const noexcept {return k_;}
-  real_type cutoff() const noexcept {return cutoff_;}
+  real_type cutoff() const noexcept {return std::numeric_limits<real_type>::infinity();}
 
  private:
 
   real_type k_;
-  real_type cutoff_;
 };
 
 } // mjolnir
