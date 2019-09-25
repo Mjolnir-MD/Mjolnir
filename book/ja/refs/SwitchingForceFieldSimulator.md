@@ -70,6 +70,12 @@ name = "open"
 - `schedule`: テーブルの配列型
   - 使用する力場のスケジュールを決めます。以下で詳細を説明します。
 
+{% hint style='info' %}
+バージョン1.5.xまでは各`integrator`で乱数シードを設定していましたが、
+1.6.x以降から初期速度を生成する機能を導入するため`[simulator]`で設定するように
+なりました。`simulator.integrator.seed`は1.7.x以降削除予定です。
+{% endhint %}
+
 ### `integrator`
 
 - `type`: 文字列型
