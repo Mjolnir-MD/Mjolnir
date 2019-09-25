@@ -57,7 +57,7 @@ spatial_partition           = {type = "VerletList", margin = 0.2}
 env.pi                      = 3.141592
 epsilon                     = 0.3
 parameters = [
-{indices = [0, 1, 2, 3], angle1_params = {v0 = "pi", k = -10.0, n = 1}, angle2_params = {v0 = "pi", k = -10.0, n = 1}, contact_params = {v0 = 2.0, k = 1.0}},
+{indices = [0, 1, 2, 3], angle1 = {v0 = "pi", k = -10.0, n = 1}, angle2 = {v0 = "pi", k = -10.0, n = 1}, contact = {v0 = 2.0, k = 1.0}},
 ]
 
 [[forcefields.global]]

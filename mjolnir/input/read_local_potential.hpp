@@ -391,9 +391,9 @@ read_directional_contact_potentials(const toml::value& local)
         const auto indices = find_parameter<indices_type>(item, env, "indices");
         MJOLNIR_LOG_INFO_NO_LF("idxs = ", indices, ", ");
 
-        const auto angle_pot1 = find_parameter<toml::value>(item, env, "angle1_params");
-        const auto angle_pot2 = find_parameter<toml::value>(item, env, "angle2_params");
-        const auto contact_pot = find_parameter<toml::value>(item, env, "contact_params");
+        const auto angle_pot1 = find_parameter<toml::value>(item, env, "angle1");
+        const auto angle_pot2 = find_parameter<toml::value>(item, env, "angle2");
+        const auto contact_pot = find_parameter<toml::value>(item, env, "contact");
 
         retval.emplace_back(
             std::make_tuple(indices,
