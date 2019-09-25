@@ -16,6 +16,7 @@
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_local_potential.hpp>
 #include <memory>
+#include <utility>
 
 namespace mjolnir
 {
@@ -184,7 +185,7 @@ typename std::enable_if<
     sizeof...(PotentialTs) == 2, std::unique_ptr<LocalInteractionBase<traitsT>>
     >::type
 read_angle_in_directional_contact_interaction(
-    const std::string& kind, const toml::value& local, std::vector<std::string>&)
+    const std::string& kind, const toml::value& local, std::vector<std::string>&&)
 {
     return read_contact_in_directional_contact_interaction<traitsT, PotentialTs...>(kind, local);
 }
@@ -195,7 +196,7 @@ typename std::enable_if<
     sizeof...(PotentialTs) < 2, std::unique_ptr<LocalInteractionBase<traitsT>>
     >::type
 read_angle_in_directional_contact_interaction(
-    const std::string& kind, const toml::value& local, std::vector<std::string>& angle_potential_keys)
+    const std::string& kind, const toml::value& local, std::vector<std::string>&& angle_potential_keys)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = typename traitsT::real_type;
@@ -210,7 +211,7 @@ read_angle_in_directional_contact_interaction(
 
         return read_angle_in_directional_contact_interaction<
             traitsT, PotentialTs..., angle_potential_T
-            >(kind, local, angle_potential_keys);
+            >(kind, local, std::move(angle_potential_keys));
     }
     else if(angle_potential == "Gaussian")
     {
@@ -219,7 +220,7 @@ read_angle_in_directional_contact_interaction(
 
         return read_angle_in_directional_contact_interaction<
             traitsT, PotentialTs..., angle_potential_T
-            >(kind, local, angle_potential_keys);
+            >(kind, local, std::move(angle_potential_keys));
     }
     else
     {
@@ -239,9 +240,8 @@ read_directional_contact_interaction(const std::string& kind, const toml::value&
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    std::vector<std::string> angle_potential_keys = {"angle2", "angle1"};
 
-    return read_angle_in_directional_contact_interaction<traitsT>(kind, local, angle_potential_keys);
+    return read_angle_in_directional_contact_interaction<traitsT>(kind, local, {"angle2", "angle1"});
 }
 
 template<typename traitsT>
