@@ -185,7 +185,7 @@ read_uniform_potential(const toml::value& param, const toml::value& env)
 
   auto k = find_parameter<real_type>(param, env, "k");
 
-  MJOLNIR_LOG_INFO("UniformPotential");
+  MJOLNIR_LOG_INFO("UniformPotential = {k = ", k, '}');
   return UniformPotential<realT>(k);
 }
 
