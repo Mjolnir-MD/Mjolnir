@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(DirectionalContactInteraction_numerical_diff)
     const auto angle2_potential    = angle_potential_type{k_angle, 1, angle2_native};
     const auto contact_potential   = contact_potential_type{k_contact, contact_native};
     directional_contact_type interaction("none",
-        {{std::make_tuple(std::array<std::size_t, 4>{0,1,2,3},
+        {{std::make_tuple(std::array<std::size_t, 4>{{0,1,2,3}},
         angle1_potential, angle2_potential, contact_potential)
         }});
 
