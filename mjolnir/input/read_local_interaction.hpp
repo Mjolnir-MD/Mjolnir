@@ -124,10 +124,13 @@ read_contact_interaction(const std::string& kind, const toml::value& local)
     }
 }
 
-// This is internal function for read_directional_contact_interaction function.
-template<typename traitsT, typename angle1_potentialT, typename angle2_potentialT>
-std::unique_ptr<LocalInteractionBase<traitsT>>
-read_contact_in_directional_contact_interaction(const std::string& kind, const toml::value& local)
+// This is reading contact part of read_directional_contact_interaction function.
+template<typename traitsT, typename ... PotentialTs>
+typename std::enable_if<
+    sizeof...(PotentialTs) == 2, std::unique_ptr<LocalInteractionBase<traitsT>>
+    >::type
+read_directional_contact_interaction(
+    const std::string& kind, const toml::value& local, std::vector<std::string>&&)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = typename traitsT::real_type;
@@ -146,11 +149,11 @@ read_contact_in_directional_contact_interaction(const std::string& kind, const t
 
         return make_unique<
             DirectionalContactInteraction<
-                traitsT, angle1_potentialT, angle2_potentialT, contact_potentialT
+                traitsT, PotentialTs..., contact_potentialT
                 >
             >(kind,
               read_directional_contact_potentials<
-                  4, real_type, angle1_potentialT, angle2_potentialT, contact_potentialT
+                  4, real_type, PotentialTs..., contact_potentialT
               >(local));
     }
     else if(contact_potential == "Gaussian")
@@ -160,11 +163,11 @@ read_contact_in_directional_contact_interaction(const std::string& kind, const t
 
         return make_unique<
             DirectionalContactInteraction<
-                traitsT, angle1_potentialT, angle2_potentialT, contact_potentialT
+                traitsT, PotentialTs..., contact_potentialT
                 >
             >(kind,
               read_directional_contact_potentials<
-                  4, real_type, angle1_potentialT, angle2_potentialT, contact_potentialT
+                  4, real_type, PotentialTs..., contact_potentialT
               >(local));
     }
     else
@@ -176,27 +179,16 @@ read_contact_in_directional_contact_interaction(const std::string& kind, const t
             "- \"GoContact\": r^12 - r^10 type native contact potential",
             "- \"Gaussian\" : well-known gaussian potential"
             }));
-  }
+    }
 }
 
-// This is internal function for read_directional_contact_interaction function.
-template<typename traitsT, typename ... PotentialTs>
-typename std::enable_if<
-    sizeof...(PotentialTs) == 2, std::unique_ptr<LocalInteractionBase<traitsT>>
-    >::type
-read_angle_in_directional_contact_interaction(
-    const std::string& kind, const toml::value& local, std::vector<std::string>&&)
-{
-    return read_contact_in_directional_contact_interaction<traitsT, PotentialTs...>(kind, local);
-}
-
-// This is internal function for read_directional_contact_interaction function.
+// This is reading angle parts of read_directional_contact_interaction function.
 template<typename traitsT, typename ... PotentialTs>
 typename std::enable_if<
     sizeof...(PotentialTs) < 2, std::unique_ptr<LocalInteractionBase<traitsT>>
     >::type
-read_angle_in_directional_contact_interaction(
-    const std::string& kind, const toml::value& local, std::vector<std::string>&& angle_potential_keys)
+read_directional_contact_interaction(
+    const std::string& kind, const toml::value& local, std::vector<std::string>&& angle_potential_keys = {"angle2", "angle1"})
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = typename traitsT::real_type;
@@ -209,7 +201,7 @@ read_angle_in_directional_contact_interaction(
         MJOLNIR_LOG_NOTICE("-- angle potential function is Cosine potential");
         using angle_potential_T = CosinePotential<real_type>;
 
-        return read_angle_in_directional_contact_interaction<
+        return read_directional_contact_interaction<
             traitsT, PotentialTs..., angle_potential_T
             >(kind, local, std::move(angle_potential_keys));
     }
@@ -218,7 +210,7 @@ read_angle_in_directional_contact_interaction(
         MJOLNIR_LOG_NOTICE("-- angle potential function is Gaussian");
         using angle_potential_T = GaussianPotential<real_type>;
 
-        return read_angle_in_directional_contact_interaction<
+        return read_directional_contact_interaction<
             traitsT, PotentialTs..., angle_potential_T
             >(kind, local, std::move(angle_potential_keys));
     }
@@ -232,16 +224,6 @@ read_angle_in_directional_contact_interaction(
             "- \"Gaussian\" : well-known gaussian potential"
             }));
     }
-}
-
-template<typename traitsT>
-typename std::unique_ptr<LocalInteractionBase<traitsT>>
-read_directional_contact_interaction(const std::string& kind, const toml::value& local)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-
-    return read_angle_in_directional_contact_interaction<traitsT>(kind, local, {"angle2", "angle1"});
 }
 
 template<typename traitsT>
