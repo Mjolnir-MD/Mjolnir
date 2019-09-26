@@ -214,7 +214,7 @@ read_directional_contact_interaction(const std::string& kind,
           >(kind,
             read_directional_contact_potentials<
                 4, real_type, PotentialTs..., contact_potentialT
-            >(local));
+            >(local), margin);
     }
     else
     {
