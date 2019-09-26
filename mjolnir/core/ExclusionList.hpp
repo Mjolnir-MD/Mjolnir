@@ -231,6 +231,16 @@ class ExclusionList
         return ignore_group_.is_ignored(i, j);
     }
 
+    const char* ignored_molecule_type() const noexcept
+    {
+        return this->ignore_molecule_.name();
+    }
+    std::map<group_id_type, std::vector<group_id_type>> const&
+    ignored_groups() const noexcept
+    {
+        return this->ignore_group_.ignores();
+    }
+
   private:
 
     range<typename std::vector<std::size_t>::const_iterator>

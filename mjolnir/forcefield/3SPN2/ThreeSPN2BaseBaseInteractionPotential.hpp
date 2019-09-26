@@ -5,6 +5,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/math/math.hpp>
+#include <mjolnir/util/string.hpp>
 #include <vector>
 #include <algorithm>
 #include <numeric>
@@ -14,9 +15,14 @@
 namespace mjolnir
 {
 
+
 // It calculates a base-pairing energy/force that is a part of 3SPN2 DNA model.
 // - D. M. Hinckley, G. S. Freeman, J. K. Whitmer, and J. J. de Pablo
 //   J. Chem. Phys. (2013)
+//
+// And also 3SPN2.C model.
+// - G. S. Freeman, D. M. Hinckley, J. P. Lequieu, J. K. Whitmer, and J. J. de Pablo
+//   J. Chem. Phys. (2014)
 //
 // The potential function closely tied to the interaction, so this potential
 // will only be used by ThreeSPN2BaseBaseIntearction.
@@ -39,7 +45,7 @@ class ThreeSPN2BaseBaseInteractionPotential
     struct parameter_type
     {
         base_kind   base;
-        std::size_t strand_index; // index in a strand.
+        std::size_t nucleotide_index; // index in a strand.
         std::size_t S_idx, B3_idx, B5_idx;
     };
     struct pair_parameter_type
@@ -77,13 +83,63 @@ class ThreeSPN2BaseBaseInteractionPotential
 
   public:
 
-    ThreeSPN2BaseBaseInteractionPotential(
+    template<typename ParameterSet>
+    ThreeSPN2BaseBaseInteractionPotential(ParameterSet para_set,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-        ignore_group_type ignore_grp)
-        : cutoff_(18.0), cutoff_sq_(18.0*18.0),
-          exclusion_list_({{"next_nucleotide", 3}}, ignore_molecule_type("Nothing"),
-                          std::move(ignore_grp))
+        const std::map<connection_kind_type, std::size_t>&         exclusions,
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+        : cutoff_      (para_set.cutoff),
+          cutoff_sq_   (para_set.cutoff_sq),
+          alpha_BP_    (para_set.alpha_BP),
+          alpha_CS_    (para_set.alpha_CS),
+          K_BP_        (para_set.K_BP),
+          K_CS_        (para_set.K_CS),
+          pi_over_K_BP_(para_set.pi_over_K_BP),
+          pi_over_K_CS_(para_set.pi_over_K_CS),
+          epsilon_AT_  (para_set.epsilon_AT),
+          epsilon_GC_  (para_set.epsilon_GC),
+          r0_AT_       (para_set.r0_AT),
+          r0_GC_       (para_set.r0_GC),
+          // --------------------------------
+          theta1_0_AT_(para_set.theta1_0_AT),
+          theta1_0_TA_(para_set.theta1_0_TA),
+          theta1_0_GC_(para_set.theta1_0_GC),
+          theta1_0_CG_(para_set.theta1_0_CG),
+          // --------------------------------
+          theta2_0_AT_(para_set.theta2_0_AT),
+          theta2_0_TA_(para_set.theta2_0_TA),
+          theta2_0_GC_(para_set.theta2_0_GC),
+          theta2_0_CG_(para_set.theta2_0_CG),
+          // --------------------------------
+          theta3_0_AT_(para_set.theta3_0_AT),
+          theta3_0_TA_(para_set.theta3_0_TA),
+          theta3_0_GC_(para_set.theta3_0_GC),
+          theta3_0_CG_(para_set.theta3_0_CG),
+          // --------------------------------
+          phi_0_AT_(para_set.phi_0_AT),
+          phi_0_TA_(para_set.phi_0_TA),
+          phi_0_GC_(para_set.phi_0_GC),
+          phi_0_CG_(para_set.phi_0_CG),
+          // --------------------------------
+          epsilon_CS_(para_set.epsilon_CS),
+          r0_CS_     (para_set.r0_CS),
+          theta_CS_0_(para_set.theta_CS_0),
+          exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        // Normally, DNA has two chains and this potential should be applied to
+        // both inter-strand and intra-strand particle pairs. So the parameter
+        // should be `ignore.molecule = "Nothing"`.
+        if(this->exclusion_list_.ignored_molecule_type() != "Nothing"_s)
+        {
+            MJOLNIR_LOG_WARN("3SPN2 potential requires ignore.molecule = "
+                             "\"Nothing\" but you manually set \"",
+                             this->exclusion_list_.ignored_molecule_type(),
+                             "\". I trust that you know what you are doing.");
+        }
+
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
         for(const auto& idxp : parameters)
@@ -148,7 +204,7 @@ class ThreeSPN2BaseBaseInteractionPotential
         //  3'    o -- o===o -- o     5'
         //       Bj_next   Bj_next
 
-        const bool i_is_sense_strand = (para_i.strand_index < para_j.strand_index);
+        const bool i_is_sense_strand = (para_i.nucleotide_index < para_j.nucleotide_index);
         const auto Bi_next = i_is_sense_strand ? para_i.B3_idx : para_i.B5_idx;
         const auto Bj_next = i_is_sense_strand ? para_j.B5_idx : para_j.B3_idx;
 
@@ -563,44 +619,103 @@ class ThreeSPN2BaseBaseInteractionPotential
     // in `initialize()`, the units will be converted.
     bool unit_converted     = false;
 
-    real_type cutoff_       = 18.0;        // [angstrom]
-    real_type cutoff_sq_    = 18.0 * 18.0; // [angstrom^2]
+    // -----------------------------------------------------------------------
+    // forcefield parameters
 
-    real_type alpha_BP_     =  2.0;
-    real_type alpha_CS_     =  4.0;
+    real_type cutoff_;    // initially, [angstrom]
+    real_type cutoff_sq_; //            [angstrom^2]
 
-    real_type K_BP_         = 12.0;
-    real_type K_CS_         =  8.0;
-    real_type pi_over_K_BP_ = math::constants<real_type>::pi() / 12.0;
-    real_type pi_over_K_CS_ = math::constants<real_type>::pi() /  8.0;
+    real_type alpha_BP_;
+    real_type alpha_CS_;
 
-    real_type epsilon_AT_   = 16.73; // [kJ/mol]
-    real_type epsilon_GC_   = 21.18; // [kJ/mol]
+    real_type K_BP_;
+    real_type K_CS_;
+    real_type pi_over_K_BP_;
+    real_type pi_over_K_CS_;
 
-    real_type r0_AT_        = 5.941; // [angstrom]
-    real_type r0_GC_        = 5.530; // [angstrom]
+    real_type epsilon_AT_; // initially, [kJ/mol]
+    real_type epsilon_GC_; //            [kJ/mol]
 
-    real_type theta1_0_AT_  = 156.54 / 180.0 * math::constants<real_type>::pi();
-    real_type theta1_0_TA_  = 135.78 / 180.0 * math::constants<real_type>::pi();
-    real_type theta1_0_GC_  = 159.81 / 180.0 * math::constants<real_type>::pi();
-    real_type theta1_0_CG_  = 141.16 / 180.0 * math::constants<real_type>::pi();
+    real_type r0_AT_; // initially, [angstrom]
+    real_type r0_GC_; //            [angstrom]
 
-    real_type theta2_0_AT_  = 135.78 / 180.0 * math::constants<real_type>::pi();
-    real_type theta2_0_TA_  = 156.54 / 180.0 * math::constants<real_type>::pi();
-    real_type theta2_0_GC_  = 141.16 / 180.0 * math::constants<real_type>::pi();
-    real_type theta2_0_CG_  = 159.81 / 180.0 * math::constants<real_type>::pi();
+    real_type theta1_0_AT_; // [radian]
+    real_type theta1_0_TA_;
+    real_type theta1_0_GC_;
+    real_type theta1_0_CG_;
 
-    real_type theta3_0_AT_  = 116.09 / 180.0 * math::constants<real_type>::pi();
-    real_type theta3_0_TA_  = 116.09 / 180.0 * math::constants<real_type>::pi();
-    real_type theta3_0_GC_  = 124.94 / 180.0 * math::constants<real_type>::pi();
-    real_type theta3_0_CG_  = 124.94 / 180.0 * math::constants<real_type>::pi();
+    real_type theta2_0_AT_;
+    real_type theta2_0_TA_;
+    real_type theta2_0_GC_;
+    real_type theta2_0_CG_;
 
-    real_type phi_0_AT_     = -38.35 / 180.0 * math::constants<real_type>::pi();
-    real_type phi_0_TA_     = -38.35 / 180.0 * math::constants<real_type>::pi();
-    real_type phi_0_GC_     = -42.98 / 180.0 * math::constants<real_type>::pi();
-    real_type phi_0_CG_     = -42.98 / 180.0 * math::constants<real_type>::pi();
+    real_type theta3_0_AT_;
+    real_type theta3_0_TA_;
+    real_type theta3_0_GC_;
+    real_type theta3_0_CG_;
 
-    std::array<real_type, 32> epsilon_CS_ = {{ // [kJ/mol]
+    real_type phi_0_AT_;
+    real_type phi_0_TA_;
+    real_type phi_0_GC_;
+    real_type phi_0_CG_;
+
+    std::array<real_type, 32> epsilon_CS_; // [kJ/mol]
+    std::array<real_type, 32> r0_CS_     ; // [angstrom]
+    std::array<real_type, 32> theta_CS_0_; // [degree] XXX should be converted in initialize()
+
+    // -----------------------------------------------------------------------
+    // runtime parameters
+
+    container_type           parameters_;   // indices
+    std::vector<std::size_t> participants_; // base beads
+
+    exclusion_list_type exclusion_list_;
+};
+
+// parameter set for 3SPN2.
+template<typename realT>
+struct ThreeSPN2BaseBaseGlobalPotentialParameter
+{
+    using real_type = realT;
+
+    real_type cutoff       = 18.0;        // [angstrom]
+    real_type cutoff_sq    = 18.0 * 18.0; // [angstrom^2]
+
+    real_type alpha_BP     =  2.0;
+    real_type alpha_CS     =  4.0;
+
+    real_type K_BP         = 12.0;
+    real_type K_CS         =  8.0;
+    real_type pi_over_K_BP = math::constants<real_type>::pi() / 12.0;
+    real_type pi_over_K_CS = math::constants<real_type>::pi() /  8.0;
+
+    real_type epsilon_AT   = 16.73; // [kJ/mol]
+    real_type epsilon_GC   = 21.18; // [kJ/mol]
+
+    real_type r0_AT        = 5.941; // [angstrom]
+    real_type r0_GC        = 5.530; // [angstrom]
+
+    real_type theta1_0_AT  = 156.54 / 180.0 * math::constants<real_type>::pi();
+    real_type theta1_0_TA  = 135.78 / 180.0 * math::constants<real_type>::pi();
+    real_type theta1_0_GC  = 159.81 / 180.0 * math::constants<real_type>::pi();
+    real_type theta1_0_CG  = 141.16 / 180.0 * math::constants<real_type>::pi();
+
+    real_type theta2_0_AT  = 135.78 / 180.0 * math::constants<real_type>::pi();
+    real_type theta2_0_TA  = 156.54 / 180.0 * math::constants<real_type>::pi();
+    real_type theta2_0_GC  = 141.16 / 180.0 * math::constants<real_type>::pi();
+    real_type theta2_0_CG  = 159.81 / 180.0 * math::constants<real_type>::pi();
+
+    real_type theta3_0_AT  = 116.09 / 180.0 * math::constants<real_type>::pi();
+    real_type theta3_0_TA  = 116.09 / 180.0 * math::constants<real_type>::pi();
+    real_type theta3_0_GC  = 124.94 / 180.0 * math::constants<real_type>::pi();
+    real_type theta3_0_CG  = 124.94 / 180.0 * math::constants<real_type>::pi();
+
+    real_type phi_0_AT     = -38.35 / 180.0 * math::constants<real_type>::pi();
+    real_type phi_0_TA     = -38.35 / 180.0 * math::constants<real_type>::pi();
+    real_type phi_0_GC     = -42.98 / 180.0 * math::constants<real_type>::pi();
+    real_type phi_0_CG     = -42.98 / 180.0 * math::constants<real_type>::pi();
+
+    std::array<real_type, 32> epsilon_CS = {{ // [kJ/mol]
         /* AA5 */ 2.186, /* AT5 */ 2.774, /* AG5 */ 2.833, /* AC5 */ 1.951,
         /* TA5 */ 2.774, /* TT5 */ 2.186, /* TG5 */ 2.539, /* TC5 */ 2.980,
         /* GA5 */ 2.833, /* GT5 */ 2.539, /* GG5 */ 3.774, /* GC5 */ 1.129,
@@ -611,7 +726,7 @@ class ThreeSPN2BaseBaseInteractionPotential
         /* GA3 */ 2.980, /* GT3 */ 1.951, /* GG3 */ 4.802, /* GC3 */ 1.129,
         /* CA3 */ 2.539, /* CT3 */ 2.833, /* CG3 */ 1.129, /* CC3 */ 3.774
     }};
-    std::array<real_type, 32> r0_CS_      = {{ // [angstrom]
+    std::array<real_type, 32> r0_CS      = {{ // [angstrom]
         /* AA5 */ 6.208, /* AT5 */ 6.876, /* AG5 */ 6.072, /* AC5 */ 6.811,
         /* TA5 */ 6.876, /* TT5 */ 7.480, /* TG5 */ 6.771, /* TC5 */ 7.453,
         /* GA5 */ 6.072, /* GT5 */ 6.771, /* GG5 */ 5.921, /* GC5 */ 6.688,
@@ -623,7 +738,7 @@ class ThreeSPN2BaseBaseInteractionPotential
         /* CA3 */ 6.082, /* CT3 */ 6.981, /* CG3 */ 5.811, /* CC3 */ 6.757
     }};
     // XXX in [degree]. would be converted to [radian] in `initialize()`
-    std::array<real_type, 32> theta_CS_0_ = {{
+    std::array<real_type, 32> theta_CS_0 = {{
         /* AA5 */ 154.38, /* AT5 */ 159.10, /* AG5 */ 152.46, /* AC5 */ 158.38,
         /* TA5 */ 147.10, /* TT5 */ 153.79, /* TG5 */ 144.44, /* TC5 */ 151.48,
         /* GA5 */ 154.69, /* GT5 */ 157.83, /* GG5 */ 153.43, /* GC5 */ 158.04,
@@ -634,11 +749,87 @@ class ThreeSPN2BaseBaseInteractionPotential
         /* GA3 */ 119.34, /* GT3 */ 124.72, /* GG3 */ 116.51, /* GC3 */ 121.98,
         /* CA3 */ 114.60, /* CT3 */ 118.26, /* CG3 */ 112.45, /* CC3 */ 115.88
     }};
+};
 
-    container_type           parameters_;   // indices
-    std::vector<std::size_t> participants_; // base beads
+// parameter for 3SPN2.C
+template<typename realT>
+struct ThreeSPN2CBaseBaseGlobalPotentialParameter
+{
+    using real_type = realT;
 
-    exclusion_list_type exclusion_list_;
+    real_type cutoff       = 18.0;        // [angstrom]
+    real_type cutoff_sq    = 18.0 * 18.0; // [angstrom^2]
+
+    real_type alpha_BP     =  2.0;
+    real_type alpha_CS     =  4.0;
+
+    real_type K_BP         = 12.0;
+    real_type K_CS         =  8.0;
+    real_type pi_over_K_BP = math::constants<real_type>::pi() / 12.0;
+    real_type pi_over_K_CS = math::constants<real_type>::pi() /  8.0;
+
+    real_type epsilon_AT   = 14.41; // [kJ/mol]
+    real_type epsilon_GC   = 18.24; // [kJ/mol]
+
+    real_type r0_AT        = 5.82; // [angstrom]
+    real_type r0_GC        = 5.52; // [angstrom]
+
+    real_type theta1_0_AT  = 153.17 / 180.0 * math::constants<real_type>::pi();
+    real_type theta1_0_TA  = 133.51 / 180.0 * math::constants<real_type>::pi();
+    real_type theta1_0_GC  = 159.50 / 180.0 * math::constants<real_type>::pi();
+    real_type theta1_0_CG  = 138.08 / 180.0 * math::constants<real_type>::pi();
+
+    real_type theta2_0_AT  = 133.51 / 180.0 * math::constants<real_type>::pi();
+    real_type theta2_0_TA  = 153.17 / 180.0 * math::constants<real_type>::pi();
+    real_type theta2_0_GC  = 138.08 / 180.0 * math::constants<real_type>::pi();
+    real_type theta2_0_CG  = 159.50 / 180.0 * math::constants<real_type>::pi();
+
+    real_type theta3_0_AT  = 110.92 / 180.0 * math::constants<real_type>::pi();
+    real_type theta3_0_TA  = 110.92 / 180.0 * math::constants<real_type>::pi();
+    real_type theta3_0_GC  = 120.45 / 180.0 * math::constants<real_type>::pi();
+    real_type theta3_0_CG  = 120.45 / 180.0 * math::constants<real_type>::pi();
+
+    real_type phi_0_AT     = -38.18 / 180.0 * math::constants<real_type>::pi();
+    real_type phi_0_TA     = -38.18 / 180.0 * math::constants<real_type>::pi();
+    real_type phi_0_GC     = -35.75 / 180.0 * math::constants<real_type>::pi();
+    real_type phi_0_CG     = -35.75 / 180.0 * math::constants<real_type>::pi();
+
+    std::array<real_type, 32> epsilon_CS = {{ // [kJ/mol]
+        /* AA5 */ 1.882, /* AT5 */ 2.388, /* AG5 */ 2.439, /* AC5 */ 1.680,
+        /* TA5 */ 2.388, /* TT5 */ 1.882, /* TG5 */ 2.187, /* TC5 */ 2.566,
+        /* GA5 */ 2.439, /* GT5 */ 2.187, /* GG5 */ 3.250, /* GC5 */ 0.972,
+        /* CA5 */ 1.680, /* CT5 */ 2.566, /* CG5 */ 0.972, /* CC5 */ 4.135,
+
+        /* AA3 */ 1.882, /* AT3 */ 2.388, /* AG3 */ 2.566, /* AC3 */ 2.187,
+        /* TA3 */ 2.388, /* TT3 */ 1.882, /* TG3 */ 1.680, /* TC3 */ 2.439,
+        /* GA3 */ 2.566, /* GT3 */ 1.680, /* GG3 */ 4.135, /* GC3 */ 0.972,
+        /* CA3 */ 2.187, /* CT3 */ 2.439, /* CG3 */ 0.972, /* CC3 */ 3.250
+    }};
+
+    std::array<real_type, 32> r0_CS      = {{ // [angstrom]
+        /* AA5 */ 6.420, /* AT5 */ 6.770, /* AG5 */ 6.270, /* AC5 */ 6.840,
+        /* TA5 */ 6.770, /* TT5 */ 7.210, /* TG5 */ 6.530, /* TC5 */ 7.080,
+        /* GA5 */ 6.270, /* GT5 */ 6.530, /* GG5 */ 5.740, /* GC5 */ 6.860,
+        /* CA5 */ 6.840, /* CT5 */ 7.080, /* CG5 */ 6.860, /* CC5 */ 6.790,
+
+        /* AA3 */ 5.580, /* AT3 */ 6.140, /* AG3 */ 5.630, /* AC3 */ 6.180,
+        /* TA3 */ 6.140, /* TT3 */ 6.800, /* TG3 */ 6.070, /* TC3 */ 6.640,
+        /* GA3 */ 5.630, /* GT3 */ 6.070, /* GG3 */ 5.870, /* GC3 */ 5.660,
+        /* CA3 */ 6.180, /* CT3 */ 6.640, /* CG3 */ 5.660, /* CC3 */ 6.800
+    }};
+
+    // XXX in [degree]. would be converted to [radian] in `initialize()`
+    std::array<real_type, 32> theta_CS_0 = {{
+        /* AA5 */ 154.04, /* AT5 */ 158.77, /* AG5 */ 153.88, /* AC5 */ 157.69,
+        /* TA5 */ 148.62, /* TT5 */ 155.05, /* TG5 */ 147.54, /* TC5 */ 153.61,
+        /* GA5 */ 153.91, /* GT5 */ 155.72, /* GG5 */ 151.84, /* GC5 */ 157.80,
+        /* CA5 */ 152.04, /* CT5 */ 157.72, /* CG5 */ 151.65, /* CC5 */ 154.49,
+
+        /* AA3 */ 116.34, /* AT3 */ 119.61, /* AG3 */ 115.19, /* AC3 */ 120.92,
+        /* TA3 */ 107.40, /* TT3 */ 110.76, /* TG3 */ 106.33, /* TC3 */ 111.57,
+        /* GA3 */ 121.61, /* GT3 */ 124.92, /* GG3 */ 120.52, /* GC3 */ 124.88,
+        /* CA3 */ 112.45, /* CT3 */ 115.43, /* CG3 */ 110.51, /* CC3 */ 115.80
+    }};
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD

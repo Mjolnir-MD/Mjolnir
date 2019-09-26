@@ -24,6 +24,10 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_base_interaction)
         const toml::value v = u8R"(
             interaction = "Pair"
             potential = "3SPN2ExcludedVolume"
+            ignore.particles_within.bond            = 1
+            ignore.particles_within.3SPN2_angle     = 1
+            ignore.particles_within.3SPN2_dihedral  = 1
+            ignore.particles_within.next_nucleotide = 1
             spatial_partition = {type = "VerletList", margin = 1.0}
             parameters = [
                 {index = 0, kind = "P"},

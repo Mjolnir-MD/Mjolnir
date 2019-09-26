@@ -8,6 +8,7 @@
 - [LennardJones](LennardJonesPotential.md)
 - [UniformLennardJones](UniformLennardJonesPotential.md)
 - [DebyeHuckel](DebyeHuckelPotential.md)
+- [3SPN2ExcludedVolume](3SPN2ExcludedVolumePotential.md)
 
 ## 例
 

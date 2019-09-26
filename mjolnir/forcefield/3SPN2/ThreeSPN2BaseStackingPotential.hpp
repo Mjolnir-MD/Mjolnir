@@ -10,9 +10,18 @@
 namespace mjolnir
 {
 
+template<typename realT>
+struct ThreeSPN2BaseStackingPotentialParameter;
+template<typename realT>
+struct ThreeSPN2CBaseStackingPotentialParameter;
+
 // It calculates a stacking energy/force that is a part of 3SPN2 DNA model.
 // - D. M. Hinckley, G. S. Freeman, J. K. Whitmer, and J. J. de Pablo
 //   J. Chem. Phys. (2013)
+//
+// And also 3SPN2.C model.
+// - G. S. Freeman, D. M. Hinckley, J. P. Lequieu, J. K. Whitmer, and J. J. de Pablo
+//   J. Chem. Phys. (2014)
 //
 // The potential function closely tied to the interaction, so this interaction
 // class is implemented with its own, uninterchangeable potential class.
@@ -32,7 +41,20 @@ class ThreeSPN2BaseStackingPotential
 
   public:
 
-    ThreeSPN2BaseStackingPotential() = default;
+    ThreeSPN2BaseStackingPotential()
+        : ThreeSPN2BaseStackingPotential(
+            ThreeSPN2BaseStackingPotentialParameter<real_type>{})
+    {}
+
+    template<typename ParameterSet>
+    explicit ThreeSPN2BaseStackingPotential(ParameterSet paraset)
+      : K_BS_        (paraset.K_BS),
+        pi_over_K_BS_(paraset.pi_over_K_BS),
+        alpha_BS_    (paraset.alpha_BS),
+        epsilon_BS_  (paraset.epsilon_BS),
+        r0_BS_       (paraset.r0_BS),
+        theta0_BS_   (paraset.theta0_BS)
+    {}
     ~ThreeSPN2BaseStackingPotential() = default;
 
     ThreeSPN2BaseStackingPotential(const ThreeSPN2BaseStackingPotential&) = default;
@@ -261,28 +283,77 @@ class ThreeSPN2BaseStackingPotential
 
   private:
 
-    bool unit_converted_    = false;
-    real_type K_BS_         = 6.0;
-    real_type pi_over_K_BS_ = math::constants<real_type>::pi() / 6.0;
-    real_type alpha_BS_     = 3.0;
+    bool unit_converted_ = false;
+    real_type K_BS_         ;
+    real_type pi_over_K_BS_ ;
+    real_type alpha_BS_     ;
 
-    std::array<real_type, 16> epsilon_BS_ = {{ // [kJ/mol]
+    std::array<real_type, 16> epsilon_BS_;
+    std::array<real_type, 16> r0_BS_;
+    std::array<real_type, 16> theta0_BS_;
+};
+
+// ----------------------------------------------------------------------------
+// 3SPN2 parameters
+
+template<typename realT>
+struct ThreeSPN2BaseStackingPotentialParameter
+{
+    using real_type = realT;
+
+    real_type K_BS         = 6.0;
+    real_type pi_over_K_BS = math::constants<real_type>::pi() / 6.0;
+    real_type alpha_BS     = 3.0;
+
+    std::array<real_type, 16> epsilon_BS = {{ // [kJ/mol]
         /* AA */ 14.39, /* AT */ 14.34, /* AG */ 13.25, /* AC */ 14.51,
         /* TA */ 10.37, /* TT */ 13.36, /* TG */ 10.34, /* TC */ 12.89,
         /* GA */ 14.81, /* GT */ 15.57, /* GG */ 14.93, /* GC */ 15.39,
         /* CA */ 11.42, /* CT */ 12.79, /* CG */ 10.52, /* CC */ 13.24
     }};
-    std::array<real_type, 16> r0_BS_ = {{ // [angstrom]
+    std::array<real_type, 16> r0_BS = {{ // [angstrom]
         /* AA */ 3.716, /* AT */ 3.675, /* AG */ 3.827, /* AC */ 3.744,
         /* TA */ 4.238, /* TT */ 3.984, /* TG */ 4.416, /* TC */ 4.141,
         /* GA */ 3.576, /* GT */ 3.598, /* GG */ 3.664, /* GC */ 3.635,
         /* CA */ 4.038, /* CT */ 3.798, /* CG */ 4.208, /* CC */ 3.935
     }};
-    std::array<real_type, 16> theta0_BS_ = {{ // [degree]
+    std::array<real_type, 16> theta0_BS = {{ // [degree]
         /* AA */ 101.15, /* AT */ 85.94, /* AG */ 105.26, /* AC */ 89.00,
         /* TA */ 101.59, /* TT */ 89.50, /* TG */ 104.31, /* TC */ 91.28,
         /* GA */ 100.89, /* GT */ 84.83, /* GG */ 105.48, /* GC */ 88.28,
         /* CA */ 106.49, /* CT */ 93.31, /* CG */ 109.54, /* CC */ 95.46
+    }};
+};
+
+// ----------------------------------------------------------------------------
+// 3SPN2.C parameters
+
+template<typename realT>
+struct ThreeSPN2CBaseStackingPotentialParameter
+{
+    using real_type = realT;
+
+    real_type K_BS         = 6.0;
+    real_type pi_over_K_BS = math::constants<real_type>::pi() / 6.0;
+    real_type alpha_BS     = 3.0;
+
+    std::array<real_type, 16> epsilon_BS = {{ // [kJ/mol]
+        /* AA */ 13.82, /* AT */ 15.05, /* AG */ 13.32, /* AC */ 15.82,
+        /* TA */  9.15, /* TT */ 12.44, /* TG */  9.58, /* TC */ 13.11,
+        /* GA */ 13.76, /* GT */ 14.59, /* GG */ 14.77, /* GC */ 15.17,
+        /* CA */  9.25, /* CT */ 12.42, /* CG */  8.83, /* CC */ 14.01
+    }};
+    std::array<real_type, 16> r0_BS = {{ // [angstrom]
+        /* AA */ 3.58, /* AT */ 3.56, /* AG */ 3.85, /* AC */ 3.45,
+        /* TA */ 4.15, /* TT */ 3.93, /* TG */ 4.32, /* TC */ 3.87,
+        /* GA */ 3.51, /* GT */ 3.47, /* GG */ 3.67, /* GC */ 3.42,
+        /* CA */ 4.15, /* CT */ 3.99, /* CG */ 4.34, /* CC */ 3.84,
+    }};
+    std::array<real_type, 16> theta0_BS = {{ // [degree]
+        /* AA */ 100.13, /* AT */ 90.48, /* AG */ 104.39, /* AC */  93.23,
+        /* TA */ 102.59, /* TT */ 93.32, /* TG */ 103.70, /* TC */  94.55,
+        /* GA */  95.45, /* GT */ 87.63, /* GG */ 106.36, /* GC */  83.12,
+        /* CA */ 102.69, /* CT */ 96.05, /* CG */ 100.46, /* CC */ 100.68,
     }};
 };
 

@@ -120,10 +120,12 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
     using parameter_type      = typename potential_type::parameter_type;
 
     // [[forcefields.global]]
-    // interaction = "3SPNBaseBase"
+    // interaction = "3SPN2BaseBase"
+    // potential   = "3SPN2"
     // spatial_partition = {type = "CellList", margin = 1.0}
     // parameters = [
-    // {nucleotide_index = 0, S = 0, B = 1, base = "A", B5 = "none", B3 = 4},
+    // {strand = 0, nucleotide =  0,          S =   0, B =   1, Base = "A"},
+    // {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
     // # ...
     // ]
 
@@ -136,64 +138,109 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
-    std::vector<std::pair<std::size_t, parameter_type>> params;
-    params.reserve(ps.size());
-    for(const auto& param : ps)
+    using nucleotide_index_type = parameter_3SPN2::NucleotideIndex;
+    std::vector<nucleotide_index_type> nuc_idxs;
+
+    nuc_idxs.reserve(ps.size());
+    for(const auto& item : ps)
     {
-        const auto B    = find_parameter<std::size_t>(param, env, "B");
-        const auto base = find_parameter<std::string>(param, env, "base");
-        if(base != "A" && base != "T" && base != "G" && base != "C")
+        nucleotide_index_type nuc_idx;
+
+        // at the edge of the DNA, Phosphate may not exist.
+        if(item.as_table().count("P") != 0)
+        {
+            nuc_idx.P = find_parameter<std::size_t>(item, env, "P");
+        }
+        nuc_idx.S          = find_parameter<std::size_t>(item, env, "S");
+        nuc_idx.B          = find_parameter<std::size_t>(item, env, "B");
+        nuc_idx.strand     = find_parameter<std::size_t>(item, env, "strand");
+        nuc_idx.nucleotide = find_parameter<std::size_t>(item, env, "nucleotide");
+
+        const auto bk      = find_parameter<std::string>(item, env, "Base");
+        if     (bk == "A") {nuc_idx.base = base_kind::A;}
+        else if(bk == "T") {nuc_idx.base = base_kind::T;}
+        else if(bk == "G") {nuc_idx.base = base_kind::G;}
+        else if(bk == "C") {nuc_idx.base = base_kind::C;}
+        else
         {
             throw_exception<std::runtime_error>(toml::format_error("[error] "
-                "mjolnir::read_global_3spn2_base_base_interaction: invalid base",
-                find_parameter<toml::value>(param, env, "base"),
-                "expected A, T, C, G"));
+                "mjolnir::read_local_3spn2_base_base_interaction: "
+                "invalid Base", item, "here", {
+                "expected value is one of the \"A\", \"T\", \"C\", \"G\"."
+                }));
         }
+
+        MJOLNIR_LOG_INFO("ThreeSPN2BaseBaseInteraction: nucleotide = ", nuc_idx);
+        nuc_idxs.push_back(nuc_idx);
+    }
+
+    std::sort(nuc_idxs.begin(), nuc_idxs.end(),
+        [](const nucleotide_index_type& lhs, const nucleotide_index_type& rhs) {
+            return std::make_pair(lhs.strand, lhs.nucleotide) <
+                   std::make_pair(rhs.strand, rhs.nucleotide);
+        });
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
+    params.reserve(nuc_idxs.size());
+    for(std::size_t i=0; i<nuc_idxs.size(); ++i)
+    {
+        const auto& base = nuc_idxs.at(i);
+        const auto  B = base.B;
+
         parameter_type p;
-        p.S_idx        = find_parameter<std::size_t>(param, env, "S");
-        p.strand_index = find_parameter<std::size_t>(param, env, "nucleotide_index");
-        switch(base.front())
+        p.nucleotide_index = base.nucleotide;
+        p.base   = base.base;
+        p.S_idx  = base.S;
+        p.B5_idx = potential_type::invalid();
+        p.B3_idx = potential_type::invalid();
+
+        if(i != 0 && nuc_idxs.at(i-1).strand == base.strand)
         {
-            case 'A': p.base = base_kind::A; break;
-            case 'T': p.base = base_kind::T; break;
-            case 'G': p.base = base_kind::G; break;
-            case 'C': p.base = base_kind::C; break;
-            default: assert(false);
+            p.B5_idx = nuc_idxs.at(i-1).B;
         }
-        const auto B5 = toml::find(param, "B5");
-        const auto B3 = toml::find(param, "B3");
-        if(B5.is_string() && B5.as_string(std::nothrow) == "none")
+        if(i+1 < nuc_idxs.size() && nuc_idxs.at(i+1).strand == base.strand)
         {
-            p.B5_idx = potential_type::invalid();
+            p.B3_idx = nuc_idxs.at(i+1).B;
         }
-        else
-        {
-            p.B5_idx = toml::get<std::size_t>(B5);
-        }
-        if(B3.is_string() && B3.as_string(std::nothrow) == "none")
-        {
-            p.B3_idx = potential_type::invalid();
-        }
-        else
-        {
-            p.B3_idx = toml::get<std::size_t>(B3);
-        }
-        MJOLNIR_LOG_INFO("Base idx = ", B, ", base = ", base, ", Sugar idx = ",
+        MJOLNIR_LOG_INFO("Base idx = ", B, ", base = ", p.base, ", Sugar idx = ",
             p.S_idx, ", 5' adjacent = ", p.B5_idx, ", 3' adjacent", p.B3_idx);
 
         params.emplace_back(B, p);
     }
 
-    IgnoreGroup<typename Topology::group_id_type> ignore_grp({});
-    if(global.as_table().count("ignore") == 1)
+    const auto pot = toml::find<std::string>(global, "potential");
+    if(pot == "3SPN2")
     {
-        const auto& ignore = toml::find<toml::value>(global, "ignore");
-        ignore_grp = read_ignored_group(ignore);
-    }
-    potential_type potential(std::move(params), ignore_grp);
+        ThreeSPN2BaseBaseGlobalPotentialParameter<real_type> para_3SPN2;
+        potential_type potential(para_3SPN2, std::move(params),
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
 
-    return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(std::move(potential),
-            read_spatial_partition<traitsT, potential_type>(global));
+        return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(
+                std::move(potential),
+                read_spatial_partition<traitsT, potential_type>(global));
+    }
+    else if(pot == "3SPN2C")
+    {
+        ThreeSPN2CBaseBaseGlobalPotentialParameter<real_type> para_3SPN2C;
+        potential_type potential(para_3SPN2C, std::move(params),
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
+
+        return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(
+                std::move(potential),
+                read_spatial_partition<traitsT, potential_type>(global));
+    }
+    else
+    {
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_local_3spn2_base_stacking_interaction: "
+            "invalid potential", toml::find(global, "potential"), "here", {
+            "expected value is one of the following.",
+            "- \"3SPN2\" : The general 3SPN2 parameter set.",
+            "- \"3SPN2C\": The parameter set optimized to reproduce curveture of dsDNA."
+            }));
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -225,7 +272,7 @@ read_global_interaction(const toml::value& global)
             toml::find<toml::value>(global, "interaction"), "here", {
             "expected value is one of the following.",
             "- \"Pair\": well-known pair interaction depends only on the distance",
-            "- \"3SPN2BaseBase\": Base-Base interaction for 3SPN2 DNA model"
+            "- \"3SPN2BaseBase\": Base pair and cross stacking interaction for 3SPN2 DNA model"
             }));
     }
 }

@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_FORCEFIELD_3SPN2_COMMON_HPP
 #define MJOLNIR_FORCEFIELD_3SPN2_COMMON_HPP
 #include <iosfwd>
+#include <limits>
 #include <cstdint>
 
 namespace mjolnir
@@ -44,6 +45,29 @@ enum class cross_stack_kind: std::uint8_t
     GA3 = 24, GT3 = 25, GG3 = 26, GC3 = 27,
     CA3 = 28, CT3 = 29, CG3 = 30, CC3 = 31,
     INVALID = 255
+};
+
+struct NucleotideIndex
+{
+    static constexpr std::size_t nil() noexcept
+    {
+        return std::numeric_limits<std::size_t>::max();
+    }
+
+    NucleotideIndex() noexcept
+        : strand(nil()), nucleotide(nil()), P(nil()), S(nil()), B(nil()),
+          base(base_kind::X)
+    {}
+    ~NucleotideIndex() noexcept = default;
+    NucleotideIndex(NucleotideIndex const&) = default;
+    NucleotideIndex(NucleotideIndex &&)     = default;
+    NucleotideIndex& operator=(NucleotideIndex const&) = default;
+    NucleotideIndex& operator=(NucleotideIndex &&)     = default;
+
+    std::size_t strand;
+    std::size_t nucleotide;
+    std::size_t P, S, B;
+    base_kind   base;
 };
 
 template<typename charT, typename traitsT>
@@ -166,6 +190,15 @@ operator<<(std::basic_ostream<charT, traitsT>& os, const cross_stack_kind cs)
 
         default: {os << "invalid"; return os;}
     }
+}
+
+template<typename charT, typename traitsT>
+std::basic_ostream<charT, traitsT>&
+operator<<(std::basic_ostream<charT, traitsT>& os, const NucleotideIndex& ni)
+{
+    os << "{strand = " << ni.strand << ", nucleotide = " << ni.nucleotide
+       << ", P = " << ni.P << ", S = " << ni.S << ", B = " << ni.B << "}";
+    return os;
 }
 
 } // 3SPN2
