@@ -1,5 +1,22 @@
 # Change Log
 
+## 1.6.0
+
+### Added
+
+- add 3SPN2C potential for DNA
+- add HardCoreExcludedVolumePotential
+- enable to generate initial velocity
+- allow boundary.type = "Periodic"
+
+### Changed
+
+- change 3SPN2 input format
+
+### Fixed
+
+- suppress incorrect warnings
+
 ## 1.5.2
 
 ### Fixed
