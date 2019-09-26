@@ -23,13 +23,15 @@ parallelism   = "OpenMP" # optional
 - `boundary_type`: 文字列型
   - 境界条件の種類を選択します。具体的な形状は[`System`](System.md)で指定します。
   - `"Unlimited"`: 境界条件を設定しません。シミュレーションボックスは無限大の大きさになります。
+  - `"Periodic"`: 直方体型の周期境界条件を指定します。
   - `"PeriodicCuboid"`: 直方体型の周期境界条件を指定します。
+    - 他の形の境界条件が実装された場合は、こちらの方が紛らわしくないでしょう。
 - `precition`: 文字列型
   - シミュレーションに用いる浮動小数点数型の種類を指定します。
   - `"float"`: 32bit浮動小数点数を使用します。
   - `"double"`: 64bit浮動小数点数を使用します。
 - `parallelism`: 文字列型(省略可)
-  - 並列化する際の実装を選択します。
+  - 並列化する際の実装を選択します。省略した際は、シングルコアで実行されます。
   - `"OpenMP"`: OpenMPを使った実装を使用します。
   - `"sequencial"`: 並列化を行いません。省略した場合はこれが選択されます。
 
@@ -50,6 +52,10 @@ parallelism   = "OpenMP" # optional
 {% hint style='working' %}
 Version 1.1.0 現在、`SteepestDescentSimulator`は並列化に対応していません。
 {% endhint %}
+
+## [SwitchingForceFieldSimulator](SteepestDescentSimulator.md)
+
+あらかじめ決めた時間ステップに使用する力場を変更するシミュレータです。
 
 ## ファイル分割の方法
 

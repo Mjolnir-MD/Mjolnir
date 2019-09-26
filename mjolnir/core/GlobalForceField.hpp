@@ -72,8 +72,12 @@ class GlobalForceField
 
     void calc_force(system_type& sys) const noexcept
     {
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+        MJOLNIR_LOG_FUNCTION_DEBUG();
+
         for(const auto& item : this->interactions_)
         {
+            MJOLNIR_LOG_DEBUG("interaction name is ", item->name());
             item->calc_force(sys);
         }
         return;

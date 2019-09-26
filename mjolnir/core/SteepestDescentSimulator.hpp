@@ -57,6 +57,8 @@ class SteepestDescentSimulator final : public SimulatorBase
 template<typename traitsT>
 inline void SteepestDescentSimulator<traitsT>::initialize()
 {
+    // XXX: Because this simulator does not use velocity,
+    //      it does not initialize System.
     this->ff_.initialize(this->system_);
 
     // here, steepest_descent method has no physical `time`.

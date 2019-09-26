@@ -28,9 +28,8 @@ class UnderdampedLangevinIntegrator
   public:
 
     UnderdampedLangevinIntegrator(const real_type dt,
-            std::vector<real_type>&& gamma, rng_type&& rng)
+            std::vector<real_type>&& gamma)
         : dt_(dt), halfdt_(dt / 2), halfdt2_(dt * dt / 2),
-          rng_(std::move(rng)),
           sqrt_gamma_over_mass_(gamma.size()),
           acceleration_(gamma.size())
     {
@@ -38,8 +37,9 @@ class UnderdampedLangevinIntegrator
     }
     ~UnderdampedLangevinIntegrator() = default;
 
-    void initialize(system_type& sys, forcefield_type& ff);
-    real_type step(const real_type time, system_type& sys, forcefield_type& ff);
+    void initialize(system_type& sys, forcefield_type& ff, rng_type& rng);
+    real_type step(const real_type time, system_type& sys, forcefield_type& ff,
+                   rng_type& rng);
 
     real_type delta_t() const noexcept {return dt_;}
     void  set_delta_t(const real_type dt) noexcept
@@ -65,12 +65,12 @@ class UnderdampedLangevinIntegrator
 
   private:
 
-    coordinate_type gen_gaussian_vec(const real_type coef)
+    coordinate_type gen_gaussian_vec(rng_type& rng, const real_type coef)
     {
         return math::make_coordinate<coordinate_type>(
-                this->rng_.gaussian(0, coef),
-                this->rng_.gaussian(0, coef),
-                this->rng_.gaussian(0, coef));
+                rng.gaussian(0, coef),
+                rng.gaussian(0, coef),
+                rng.gaussian(0, coef));
     }
 
   private:
@@ -79,7 +79,6 @@ class UnderdampedLangevinIntegrator
     real_type halfdt2_;
     real_type temperature_;
     real_type noise_coef_;
-    rng_type  rng_;
 
     std::vector<real_type>       gammas_;
     std::vector<real_type>       sqrt_gamma_over_mass_;
@@ -88,7 +87,7 @@ class UnderdampedLangevinIntegrator
 
 template<typename traitsT>
 void UnderdampedLangevinIntegrator<traitsT>::initialize(
-        system_type& system, forcefield_type& ff)
+        system_type& system, forcefield_type& ff, rng_type& rng)
 {
     // initialize temperature and noise intensity
     this->update(system);
@@ -107,7 +106,7 @@ void UnderdampedLangevinIntegrator<traitsT>::initialize(
 
         sqrt_gamma_over_mass_[i] = std::sqrt(gammas_[i] * rmass);
         acceleration_[i] = force * rmass +
-            this->gen_gaussian_vec(this->noise_coef_ * sqrt_gamma_over_mass_[i]);
+            this->gen_gaussian_vec(rng, this->noise_coef_ * sqrt_gamma_over_mass_[i]);
     }
     return;
 }
@@ -115,7 +114,7 @@ void UnderdampedLangevinIntegrator<traitsT>::initialize(
 template<typename traitsT>
 typename UnderdampedLangevinIntegrator<traitsT>::real_type
 UnderdampedLangevinIntegrator<traitsT>::step(
-        const real_type time, system_type& sys, forcefield_type& ff)
+        const real_type time, system_type& sys, forcefield_type& ff, rng_type& rng)
 {
     real_type largest_disp2(0.0);
     for(std::size_t i=0; i<sys.size(); ++i)
@@ -157,7 +156,7 @@ UnderdampedLangevinIntegrator<traitsT>::step(
         const auto& f  = sys.force(i);
         auto&       a  = this->acceleration_[i];
 
-        a  = f * rm + gen_gaussian_vec(noise_coef_ * sqrt_gamma_over_mass_[i]);
+        a  = f * rm + gen_gaussian_vec(rng, noise_coef_ * sqrt_gamma_over_mass_[i]);
         v += halfdt_ * (1 - gammas_[i] * halfdt_) * a;
     }
 

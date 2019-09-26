@@ -15,7 +15,13 @@
 
 #include <random>
 
-BOOST_AUTO_TEST_CASE(ThreeSPN2BaseStackingInteraction_numerical_diff)
+using parameter_set_to_test = std::tuple<
+    mjolnir::ThreeSPN2BaseStackingPotentialParameter<double>,
+    mjolnir::ThreeSPN2CBaseStackingPotentialParameter<double>
+>;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BaseStackingInteraction_numerical_diff,
+        ParameterSet, parameter_set_to_test)
 {
     mjolnir::LoggerManager::set_default_logger(
             "test_3spn2_base_stacking_interaction.log");
@@ -79,11 +85,11 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BaseStackingInteraction_numerical_diff)
                               base_stack_kind::CA, base_stack_kind::CT,
                               base_stack_kind::CG, base_stack_kind::CC})
     {
-        potential_type   potential{};
+        potential_type   potential(ParameterSet{});
         interaction_type interaction("none",
                 std::vector<std::pair<std::array<std::size_t, 3>, base_stack_kind>>{
                     { {{0, 1, 2}}, bs_kind }
-                }, potential_type{});
+                }, potential_type(potential), {});
 
         system_type sys(3, boundary_type{});
 

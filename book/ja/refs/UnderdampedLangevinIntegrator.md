@@ -20,7 +20,6 @@ m_i\boldsymbol{a}_i = \boldsymbol{f}_i - m_i\gamma_i\boldsymbol{v}_i + m_i\xi_i
 ```toml
 [simulator]
 integrator.type = "UnderdampedLangevin"
-integrator.seed = 12345
 integrator.parameters = [
     {index = 0, gamma = 1.0},
     {index = 1, gamma = 1.0},
@@ -34,7 +33,11 @@ integrator.parameters = [
 
 - `type`: 文字列型
   - [Integrator](Integrator.md)の種類を指定します。`"UnderdampedLangevin"`です。
-- `seed`: 整数型
-  - 乱数のシードを設定します。
 - `parameters`: テーブルの配列型
   - 各粒子の摩擦係数$$\gamma_i$$を指定します。
+
+{% hint style='danger' %}
+バージョン1.5.xまではここで乱数シードを設定していましたが、1.6.x以降から各
+`[simulator]`で設定するようになりました。`simulator.integrator.seed`は
+1.7.x以降削除予定です。
+{% endhint %}

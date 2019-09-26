@@ -5,6 +5,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/math/math.hpp>
+#include <mjolnir/util/string.hpp>
 #include <vector>
 #include <algorithm>
 #include <numeric>
@@ -48,13 +49,35 @@ class ThreeSPN2ExcludedVolumePotential
 
   public:
 
-    ThreeSPN2ExcludedVolumePotential(
+    template<typename ParameterSet>
+    ThreeSPN2ExcludedVolumePotential(const ParameterSet params,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-        ignore_group_type ignore_grp)
-        : exclusion_list_({{"next_nucleotide", 1}, {"bond",           1},
-                           {"3SPN2_angle", 1},     {"3SPN2_dihedral", 1}},
-                          ignore_molecule_type("Nothing"), std::move(ignore_grp))
+        const std::map<connection_kind_type, std::size_t>&         exclusions,
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+        : epsilon_(params.epsilon),
+          sigma_P_(params.sigma_P), sigma_S_(params.sigma_S),
+          sigma_A_(params.sigma_A), sigma_T_(params.sigma_T),
+          sigma_G_(params.sigma_G), sigma_C_(params.sigma_C),
+          exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        // Normally, DNA has two chains and this potential should be applied to
+        // both inter-strand and intra-strand particle pairs. So the parameter
+        // should be `ignore.molecule = "Nothing"`.
+        if(this->exclusion_list_.ignored_molecule_type() != "Nothing"_s)
+        {
+            MJOLNIR_LOG_WARN("3SPN2 potential requires ignore.molecule = "
+                             "\"Nothing\" but you manually set \"",
+                             this->exclusion_list_.ignored_molecule_type(),
+                             "\". I trust that you know what you are doing.");
+        }
+
+        // WCA takes 0 at the sigma. So the cutoff is at the largest sigma.
+        this->cutoff_ = std::max(sigma_P_, std::max(sigma_S_, std::max(sigma_A_,
+                        std::max(sigma_T_, std::max(sigma_G_, sigma_C_)))));
+
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
         for(const auto& idxp : parameters)
@@ -302,15 +325,14 @@ class ThreeSPN2ExcludedVolumePotential
   private:
 
     bool unit_converted_ = false;
-    real_type epsilon_   = 1.0; // [kJ/mol]
-    real_type sigma_P_   = 4.5; // [angstrom]
-    real_type sigma_S_   = 6.2;
-    real_type sigma_A_   = 5.4;
-    real_type sigma_T_   = 7.1;
-    real_type sigma_G_   = 4.9;
-    real_type sigma_C_   = 6.4;
-
-    real_type cutoff_    = 7.1; // the maximum sigma_ij
+    real_type epsilon_; // [kJ/mol]
+    real_type sigma_P_; // [angstrom]
+    real_type sigma_S_;
+    real_type sigma_A_;
+    real_type sigma_T_;
+    real_type sigma_G_;
+    real_type sigma_C_;
+    real_type cutoff_; // the maximum sigma_ij
 
     container_type           parameters_;
     std::vector<std::size_t> participants_;
@@ -322,6 +344,19 @@ class ThreeSPN2ExcludedVolumePotential
     // In that case, excluded volume will be applied.
     std::vector<std::size_t> within_3_nucl_;
     std::vector<std::pair<std::ptrdiff_t, std::ptrdiff_t>> within_3_nucl_ranges_;
+};
+
+template<typename realT>
+struct ThreeSPN2ExcludedVolumePotentialParameter
+{
+    using real_type = realT;
+    real_type epsilon = 1.0; // [kJ/mol]
+    real_type sigma_P = 4.5; // [angstrom]
+    real_type sigma_S = 6.2;
+    real_type sigma_A = 5.4;
+    real_type sigma_T = 7.1;
+    real_type sigma_G = 4.9;
+    real_type sigma_C = 6.4;
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD

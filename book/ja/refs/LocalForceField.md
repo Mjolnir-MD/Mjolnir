@@ -30,3 +30,7 @@ LocalForceFieldでは、結合長や結合角、二面角など特定の粒子�
 粒子`i`, `j`を指定すると、その粒子間に力をかけることなくトポロジーを設定することができます。
 
 トポロジーの効果については、[Topology](Topology.md)を参照して下さい。
+
+## [3SPN2BaseStacking](3SPN2BaseStackingInteraction.md)
+
+`3SPN2BaseStacking`相互作用は、3SPN2系統の力場で用いられるスタッキング相互作用です。

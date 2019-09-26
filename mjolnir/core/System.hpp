@@ -1,11 +1,15 @@
 #ifndef MJOLNIR_CORE_SYSTEM_HPP
 #define MJOLNIR_CORE_SYSTEM_HPP
+#include <mjolnir/core/Unit.hpp>
 #include <mjolnir/core/Particle.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/RandomNumberGenerator.hpp>
+#include <mjolnir/util/logger.hpp>
 #include <vector>
 #include <map>
+#include <cassert>
 
 namespace mjolnir
 {
@@ -21,6 +25,7 @@ class System
     using boundary_type   = typename traits_type::boundary_type;
     using topology_type   = Topology;
     using attribute_type  = std::map<std::string, real_type>;
+    using rng_type        = RandomNumberGenerator<traits_type>;
 
     using particle_type            = Particle<real_type, coordinate_type>;
     using particle_view_type       = ParticleView<real_type, coordinate_type>;
@@ -32,17 +37,52 @@ class System
   public:
 
     System(const std::size_t num_particles, const boundary_type& bound)
-        : boundary_(bound), topology_(num_particles),
-          attributes_(), num_particles_(num_particles),
-          masses_   (num_particles), rmasses_   (num_particles),
-          positions_(num_particles), velocities_(num_particles),
-          forces_   (num_particles)
+        : velocity_initialized_(false), boundary_(bound),
+          topology_(num_particles),  attributes_(),
+          num_particles_(num_particles), masses_   (num_particles),
+          rmasses_      (num_particles), positions_(num_particles),
+          velocities_   (num_particles), forces_   (num_particles)
     {}
     ~System() = default;
     System(const System&) = default;
     System(System&&)      = default;
     System& operator=(const System&) = default;
     System& operator=(System&&)      = default;
+
+    void initialize(rng_type& rng)
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        if(this->velocity_initialized_)
+        {
+            MJOLNIR_LOG_NOTICE(
+                "velocity is already given, nothing to initialize in System");
+            return ;
+        }
+        if(!this->has_attribute("temperature"))
+        {
+            throw std::runtime_error("[error] to generate velocity, "
+                    "system.attributes.temperature is required.");
+        }
+
+        const real_type kB    = physics::constants<real_type>::kB();
+        const real_type T_ref = this->attribute("temperature");
+
+        MJOLNIR_LOG_NOTICE("generating velocity with T = ", T_ref, "...");
+
+        // generate Maxwell-Boltzmann distribution
+        const real_type kBT = kB * T_ref;
+        for(std::size_t i=0; i<this->size(); ++i)
+        {
+            const auto vel_coef = std::sqrt(kBT / this->mass(i));
+            math::X(this->velocity(i)) = rng.gaussian(0, vel_coef);
+            math::Y(this->velocity(i)) = rng.gaussian(0, vel_coef);
+            math::Z(this->velocity(i)) = rng.gaussian(0, vel_coef);
+        }
+        MJOLNIR_LOG_NOTICE("done.");
+        return;
+    }
 
     coordinate_type adjust_direction(coordinate_type dr) const noexcept
     {return boundary_.adjust_direction(dr);}
@@ -114,8 +154,12 @@ class System
     real_type& attribute(const std::string& key)       {return attributes_[key];}
     bool   has_attribute(const std::string& key) const {return attributes_.count(key) == 1;}
 
+    bool  velocity_initialized() const noexcept {return velocity_initialized_;}
+    bool& velocity_initialized()       noexcept {return velocity_initialized_;}
+
   private:
 
+    bool           velocity_initialized_;
     boundary_type  boundary_;
     topology_type  topology_;
     attribute_type attributes_;

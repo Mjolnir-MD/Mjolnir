@@ -17,9 +17,9 @@ BOOST_AUTO_TEST_CASE(ExcludedVolumeWallPotential_double)
 
     const real_type epsilon = 1.0;
     const real_type radius  = 1.0;
-    const std::vector<real_type> radii{radius};
+    const std::vector<std::pair<std::size_t, real_type>> radii{{0, radius}};
 
-    mjolnir::ExcludedVolumeWallPotential<real_type> exvw(epsilon, radii);
+    mjolnir::ExcludedVolumeWallPotential<real_type> exvw(epsilon, 2.0, radii);
 
     const real_type cutoff_length = exvw.max_cutoff_length();
     const real_type z_max         = cutoff_length;

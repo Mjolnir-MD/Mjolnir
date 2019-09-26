@@ -15,8 +15,8 @@ precision     = "double"
 delta_t       = 0.1
 total_step    = 50_000
 save_step     = 100
+seed          = 2374
 integrator.type = "UnderdampedLangevin"
-integrator.seed = 2374
 integrator.parameters = [ # {{{
 {index =  0, gamma = 0.8435},
 {index =  1, gamma = 0.8435},

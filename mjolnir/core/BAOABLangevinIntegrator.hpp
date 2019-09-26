@@ -26,8 +26,8 @@ class BAOABLangevinIntegrator
   public:
 
     BAOABLangevinIntegrator(const real_type dt,
-            std::vector<real_type>&& gamma, rng_type&& rng)
-        : dt_(dt), halfdt_(dt / 2), rng_(std::move(rng)),
+            std::vector<real_type>&& gamma)
+        : dt_(dt), halfdt_(dt / 2),
           gammas_(std::move(gamma)),
           exp_gamma_dt_(gammas_.size()),
           noise_coeff_ (gammas_.size()),
@@ -35,9 +35,10 @@ class BAOABLangevinIntegrator
     {}
     ~BAOABLangevinIntegrator() = default;
 
-    void initialize(system_type& sys, forcefield_type& ff);
+    void initialize(system_type& sys, forcefield_type& ff, rng_type& rng);
 
-    real_type step(const real_type time, system_type& sys, forcefield_type& ff);
+    real_type step(const real_type time, system_type& sys, forcefield_type& ff,
+                   rng_type& rng);
 
     void update(const system_type& sys)
     {
@@ -71,11 +72,11 @@ class BAOABLangevinIntegrator
         return;
     }
 
-    coordinate_type gen_R() noexcept
+    coordinate_type gen_R(rng_type& rng) noexcept
     {
-        const auto x = this->rng_.gaussian(0, 1);
-        const auto y = this->rng_.gaussian(0, 1);
-        const auto z = this->rng_.gaussian(0, 1);
+        const auto x = rng.gaussian();
+        const auto y = rng.gaussian();
+        const auto z = rng.gaussian();
         return math::make_coordinate<coordinate_type>(x, y, z);
     }
 
@@ -84,7 +85,6 @@ class BAOABLangevinIntegrator
     real_type halfdt_;
     real_type temperature_;
 
-    rng_type  rng_;
     std::vector<real_type>       gammas_;
     std::vector<real_type>       exp_gamma_dt_;
     std::vector<real_type>       noise_coeff_;
@@ -93,7 +93,7 @@ class BAOABLangevinIntegrator
 
 template<typename traitsT>
 void BAOABLangevinIntegrator<traitsT>::initialize(
-        system_type& system, forcefield_type& ff)
+        system_type& system, forcefield_type& ff, rng_type&)
 {
     // calculate parameters for each particles
     this->update(system);
@@ -110,12 +110,12 @@ void BAOABLangevinIntegrator<traitsT>::initialize(
 template<typename traitsT>
 typename BAOABLangevinIntegrator<traitsT>::real_type
 BAOABLangevinIntegrator<traitsT>::step(
-        const real_type time, system_type& sys, forcefield_type& ff)
+        const real_type time, system_type& sys, forcefield_type& ff, rng_type& rng)
 {
     real_type largest_disp2(0.0);
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        const auto R  = this->gen_R(); // random gaussian vector (0 mean, 1 var)
+        const auto R  = this->gen_R(rng); // random gaussian vector (0 mean, 1 var)
         const auto rm = sys.rmass(i);  // reciprocal mass
         auto&      p  = sys.position(i);
         auto&      v  = sys.velocity(i);

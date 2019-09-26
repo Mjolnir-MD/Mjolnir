@@ -522,7 +522,8 @@ ThreeSPN2BaseBaseInteraction<traitsT>::calc_energy(
     constexpr auto pi        = math::constants<real_type>::pi();
     constexpr auto two_pi    = math::constants<real_type>::two_pi();
 
-    real_type E = 0.0;
+    real_type E_BP = 0.0;
+    real_type E_CS = 0.0;
     for(const auto Bi : this->potential_.participants())
     {
         const auto& rBi = sys.position(Bi);
@@ -560,7 +561,7 @@ ThreeSPN2BaseBaseInteraction<traitsT>::calc_energy(
             //
             // U_rep = e_ij(1 - exp(-a_ij(rij - r0_ij)))^2 ... r < r0
             //         0                                   ... otherwise
-            E += potential_.U_rep(bp_kind, lBij);
+            E_BP += potential_.U_rep(bp_kind, lBij);
 
             // ----------------------------------------------------------------
             // calc theta1 and 2
@@ -647,7 +648,7 @@ ThreeSPN2BaseBaseInteraction<traitsT>::calc_energy(
                 // ------------------------------------------------------------
                 // The second term of base-pairing
                 //  = 1/2(1 + cos(dphi)) f(dtheta1) f(dtheta2) U_attr(rij)
-                E += 0.5 * (1 + cos_dphi) * f1 * f2 * U_attr;
+                E_BP += 0.5 * (1 + cos_dphi) * f1 * f2 * U_attr;
             }
 
             // ================================================================
@@ -719,7 +720,7 @@ ThreeSPN2BaseBaseInteraction<traitsT>::calc_energy(
                 {
                     const auto lBj5i  = lBj5i_sq * rlBj5i;
                     const auto U_attr = potential_.U_attr(cs_kind, lBj5i);
-                    E += f3 * fCS * U_attr;
+                    E_CS += f3 * fCS * U_attr;
                 }
             }
             if(Bi_next_exists)
@@ -758,12 +759,12 @@ ThreeSPN2BaseBaseInteraction<traitsT>::calc_energy(
                 {
                     const auto lBi3j  = lBi3j_sq * rlBi3j;
                     const auto U_attr = potential_.U_attr(cs_kind, lBi3j);
-                    E += f3 * fCS * U_attr;
+                    E_CS += f3 * fCS * U_attr;
                 }
             }
         }
     }
-    return E;
+    return E_BP + E_CS;
 }
 } // mjolnir
 

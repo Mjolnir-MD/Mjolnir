@@ -6,7 +6,6 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-
 #include <mjolnir/potential/external/LennardJonesWallPotential.hpp>
 
 BOOST_AUTO_TEST_CASE(LennardJonesWallPotential_double)
@@ -18,11 +17,10 @@ BOOST_AUTO_TEST_CASE(LennardJonesWallPotential_double)
 
     const real_type sigma   = 1.0;
     const real_type epsilon = 1.0;
-    const std::vector<std::pair<real_type, real_type>> sigma_epsilon{
-        {sigma, epsilon}
-    };
+    const std::vector<std::pair<std::size_t, std::pair<real_type, real_type>>>
+        sigma_epsilon{{0u, {sigma, epsilon}}};
 
-    mjolnir::LennardJonesWallPotential<real_type> ljw(sigma_epsilon);
+    mjolnir::LennardJonesWallPotential<real_type> ljw(2.5, sigma_epsilon);
 
     const real_type cutoff_length = ljw.max_cutoff_length();
     const real_type z_min         = sigma * 0.5;

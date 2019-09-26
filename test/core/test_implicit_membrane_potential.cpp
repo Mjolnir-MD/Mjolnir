@@ -16,12 +16,14 @@ BOOST_AUTO_TEST_CASE(ImplicitMembranePotential_double)
     constexpr static real_type tol = 1e-5;
 
     const real_type thickness = 10.0;
-    const real_type interaction_magnitude = 1.0;
+    const real_type magnitude = 1.0;
     const real_type bend = 1.5;
-    const std::vector<real_type> hydrophobicities{1., 0.};
+    const std::vector<std::pair<std::size_t, real_type>> hydrophobicities{
+        {0, 1.}, {1, 0.}
+    };
 
     mjolnir::ImplicitMembranePotential<real_type>
-        im(thickness, interaction_magnitude, bend, hydrophobicities);
+        im(thickness, magnitude, bend, 4.0, hydrophobicities);
 
     const real_type cutoff_length = im.max_cutoff_length();
     const real_type z_min = -1 * cutoff_length;

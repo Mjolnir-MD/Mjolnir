@@ -33,13 +33,19 @@ class RandomNumberGenerator
         return this->uniform_real01() * (max - min) + min;
     }
 
+    real_type gaussian()
+    {
+        return this->nrm_(this->rng_);
+    }
     real_type gaussian(const real_type mean, const real_type stddev)
     {
         return this->nrm_(this->rng_) * stddev + mean;
     }
 
+    std::uint32_t seed() const noexcept {return seed_;}
+
   private:
-    const std::uint32_t seed_;
+    std::uint32_t seed_;
     std::mt19937        rng_;
     std::normal_distribution<real_type> nrm_;
 };
