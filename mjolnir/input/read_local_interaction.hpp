@@ -154,7 +154,7 @@ read_directional_contact_interaction(
             >(kind,
               read_directional_contact_potentials<
                   4, real_type, PotentialTs..., contact_potentialT
-              >(local));
+              >(local), margin);
     }
     else if(contact_potential == "Gaussian")
     {
@@ -168,7 +168,7 @@ read_directional_contact_interaction(
             >(kind,
               read_directional_contact_potentials<
                   4, real_type, PotentialTs..., contact_potentialT
-              >(local));
+              >(local), margin);
     }
     else
     {
