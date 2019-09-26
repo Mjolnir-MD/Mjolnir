@@ -230,7 +230,7 @@ typename std::enable_if<
     sizeof...(PotentialTs) < 2, std::unique_ptr<LocalInteractionBase<traitsT>>
     >::type
 read_directional_contact_interaction(
-    const std::string& kind, const toml::value& local, std::vector<std::string>&& angle_potential_keys = {"angle2", "angle1"})
+    const std::string& kind, const toml::value& local, std::vector<std::string>&& angle_potential_keys)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = typename traitsT::real_type;
@@ -576,7 +576,7 @@ read_local_interaction(const toml::value& local)
     else if(interaction == "DirectionalContact")
     {
         MJOLNIR_LOG_NOTICE("Directional Contact interaction found.");
-        return read_directional_contact_interaction<traitsT>(kind, local);
+        return read_directional_contact_interaction<traitsT>(kind, local, {"angle2", "angle1"});
     }
     else if(interaction == "BondAngle")
     {
