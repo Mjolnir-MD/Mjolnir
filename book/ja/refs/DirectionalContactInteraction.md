@@ -31,7 +31,7 @@ topology           = "none"
 margin             = 0.5 # relative length to longest cutoff
 parameters         = [
     # 各ポテンシャルそれぞれについて、要求されるパラメータを設定します。
-    {indices = [0, 1, 2, 3], ... }, angle1 = { v0 = ... }, angle2 = { v0 = ... }, contact = { v0 = ... }},
+    {indices = [0, 1, 2, 3], angle1 = { v0 = ... }, angle2 = { v0 = ... }, contact = { v0 = ... }},
     # 必要に応じて続きます...
 ]
 ```
