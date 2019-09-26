@@ -179,17 +179,7 @@ read_dihedral_angle_interaction(const std::string& kind, const toml::value& loca
 
     const auto potential = toml::find<std::string>(local, "potential");
 
-    if(potential == "Harmonic")
-    {
-        MJOLNIR_LOG_NOTICE("-- potential function is Harmonic.");
-        MJOLNIR_LOG_WARN  ("[deprecated] There is a indifferentiable point.");
-        MJOLNIR_LOG_WARN  ("[deprecated] Reconsider to use different stuff.");
-        using potentialT = HarmonicPotential<real_type>;
-
-        return make_unique<DihedralAngleInteraction<traitsT, potentialT>>(
-            kind, read_local_potential<4, potentialT>(local));
-    }
-    else if(potential == "ClementiDihedral")
+    if(potential == "ClementiDihedral")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Clementi-Go's dihedral.");
         using potentialT = ClementiDihedralPotential<real_type>;
@@ -251,7 +241,6 @@ read_dihedral_angle_interaction(const std::string& kind, const toml::value& loca
             "mjolnir::read_dihedral_angle_interaction: invalid potential",
             toml::find<toml::value>(local, "potential"), "here", {
             "expected value is one of the following.",
-            "- \"Harmonic\"             : well-known harmonic potential",
             "- \"Gaussian\"             : well-known gaussian potential"
             "- \"ClementiDihedral\"     : potential used in the off-lattice Go protein model"
             "- \"FlexibleLocalDihedral\": table-based potential for C-alpha protein model",
