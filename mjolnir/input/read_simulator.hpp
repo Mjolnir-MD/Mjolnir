@@ -18,6 +18,38 @@ namespace mjolnir
 {
 
 template<typename traitsT>
+RandomNumberGenerator<traitsT> read_rng(const toml::value& simulator)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+
+    std::uint32_t seed = 0;
+    if(simulator.as_table().count("integrator") != 0)
+    {
+        const auto& integrator = toml::find(simulator, "integrator");
+        if(integrator.as_table().count("seed") != 0)
+        {
+            MJOLNIR_LOG_WARN("deprecated: put `seed` under [simulator] table.");
+            MJOLNIR_LOG_WARN("deprecated: ```toml");
+            MJOLNIR_LOG_WARN("deprecated: [simulator]");
+            MJOLNIR_LOG_WARN("deprecated: seed = 12345");
+            MJOLNIR_LOG_WARN("deprecated: ```");
+            seed = toml::find<std::uint32_t>(integrator, "seed");
+        }
+        else
+        {
+            seed = toml::find<std::uint32_t>(simulator, "seed");
+        }
+    }
+    else
+    {
+        seed = toml::find<std::uint32_t>(simulator, "seed");
+    }
+    MJOLNIR_LOG_NOTICE("seed is ", seed);
+    return RandomNumberGenerator<traitsT>(seed);
+}
+
+template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_molecular_dynamics_simulator(
         const toml::value& root, const toml::value& simulator)
@@ -26,7 +58,8 @@ read_molecular_dynamics_simulator(
     MJOLNIR_LOG_FUNCTION();
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
-        "parallelism"_s, "total_step"_s, "save_step"_s, "delta_t"_s, "integrator"_s});
+        "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s, "delta_t"_s,
+        "integrator"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
@@ -37,6 +70,7 @@ read_molecular_dynamics_simulator(
     auto sys = read_system    <traitsT>(root, 0);
     auto obs = read_observer  <traitsT>(root);
     auto ff  = read_forcefield<traitsT>(root, 0);
+    auto rng = read_rng       <traitsT>(simulator);
 
     const auto& integrator     = toml::find(simulator, "integrator");
     const auto integrator_type = toml::find<std::string>(integrator, "type");
@@ -50,7 +84,7 @@ read_molecular_dynamics_simulator(
         auto intg = read_velocity_verlet_integrator<traitsT>(simulator);
 
         return make_unique<simulator_t>(tstep, sstep, std::move(sys),
-                std::move(ff), std::move(intg), std::move(obs));
+                std::move(ff), std::move(intg), std::move(obs), std::move(rng));
     }
     else if(integrator_type == "UnderdampedLangevin")
     {
@@ -61,7 +95,7 @@ read_molecular_dynamics_simulator(
         auto intg = read_underdamped_langevin_integrator<traitsT>(simulator);
 
         return make_unique<simulator_t>(tstep, sstep, std::move(sys),
-                std::move(ff), std::move(intg), std::move(obs));
+                std::move(ff), std::move(intg), std::move(obs), std::move(rng));
     }
     else if(integrator_type == "BAOABLangevin")
     {
@@ -72,7 +106,7 @@ read_molecular_dynamics_simulator(
         auto intg = read_BAOAB_langevin_integrator<traitsT>(simulator);
 
         return make_unique<simulator_t>(tstep, sstep, std::move(sys),
-                std::move(ff), std::move(intg), std::move(obs));
+                std::move(ff), std::move(intg), std::move(obs), std::move(rng));
     }
     else
     {
@@ -126,8 +160,8 @@ read_simulated_annealing_simulator(
     using real_type   = typename traitsT::real_type;
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
-            "parallelism"_s, "total_step"_s, "save_step"_s, "delta_t"_s,
-            "integrator"_s, "schedule"_s, "each_step"_s});
+            "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s,
+            "delta_t"_s, "integrator"_s, "schedule"_s, "each_step"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
@@ -153,6 +187,7 @@ read_simulated_annealing_simulator(
     auto sys = read_system    <traitsT>(root, 0);
     auto ff  = read_forcefield<traitsT>(root, 0);
     auto obs = read_observer  <traitsT>(root);
+    auto rng = read_rng       <traitsT>(simulator);
 
     if(schedule_type == "linear")
     {
@@ -185,7 +220,7 @@ read_simulated_annealing_simulator(
 
             return make_unique<simulator_t>(tstep, sstep, each_step,
                     std::move(sch),  std::move(sys), std::move(ff),
-                    std::move(intg), std::move(obs));
+                    std::move(intg), std::move(obs), std::move(rng));
         }
         else if(integrator_type == "BAOABLangevin")
         {
@@ -198,7 +233,7 @@ read_simulated_annealing_simulator(
 
             return make_unique<simulator_t>(tstep, sstep, each_step,
                     std::move(sch),  std::move(sys), std::move(ff),
-                    std::move(intg), std::move(obs));
+                    std::move(intg), std::move(obs), std::move(rng));
         }
         else
         {
@@ -231,8 +266,8 @@ read_switching_forcefield_simulator(
     MJOLNIR_LOG_FUNCTION();
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
-            "parallelism"_s, "total_step"_s, "save_step"_s, "delta_t"_s,
-            "integrator"_s, "schedule"_s});
+            "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s,
+            "delta_t"_s, "integrator"_s, "schedule"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
@@ -242,6 +277,7 @@ read_switching_forcefield_simulator(
     // later move them, so non-const
     auto sys = read_system  <traitsT>(root, 0);
     auto obs = read_observer<traitsT>(root);
+    auto rng = read_rng     <traitsT>(simulator);
 
     // ------------------------------------------------------------------------
     // read schedule
@@ -301,7 +337,7 @@ read_switching_forcefield_simulator(
 
         return make_unique<simulator_t>(tstep, sstep, std::move(sys),
                 std::move(ffs), std::move(intg), std::move(obs),
-                std::move(ffidx), std::move(sch));
+                std::move(rng), std::move(ffidx), std::move(sch));
     }
     else if(integrator_type == "UnderdampedLangevin")
     {
@@ -313,7 +349,7 @@ read_switching_forcefield_simulator(
 
         return make_unique<simulator_t>(tstep, sstep, std::move(sys),
                 std::move(ffs), std::move(intg), std::move(obs),
-                std::move(ffidx), std::move(sch));
+                std::move(rng), std::move(ffidx), std::move(sch));
     }
     else if(integrator_type == "BAOABLangevin")
     {
@@ -325,7 +361,7 @@ read_switching_forcefield_simulator(
 
         return make_unique<simulator_t>(tstep, sstep, std::move(sys),
                 std::move(ffs), std::move(intg), std::move(obs),
-                std::move(ffidx), std::move(sch));
+                std::move(rng), std::move(ffidx), std::move(sch));
     }
     else
     {

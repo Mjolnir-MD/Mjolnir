@@ -4,6 +4,7 @@
 #include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/RandomNumberGenerator.hpp>
 
 namespace mjolnir
 {
@@ -19,14 +20,17 @@ class MolecularDynamicsSimulator final : public SimulatorBase
     using system_type     = System<traits_type>;
     using forcefield_type = ForceField<traits_type>;
     using observer_type   = ObserverContainer<traits_type>;
+    using rng_type        = RandomNumberGenerator<traits_type>;
 
     MolecularDynamicsSimulator(
             const std::size_t tstep, const std::size_t save_step,
             system_type&& sys, forcefield_type&& ff,
-            integrator_type&& integr, observer_type&& obs)
+            integrator_type&& integr, observer_type&& obs,
+            rng_type&& rng)
     : total_step_(tstep), step_count_(0), save_step_(save_step), time_(0.),
       system_(std::move(sys)), ff_(std::move(ff)),
-      integrator_(std::move(integr)), observers_(std::move(obs))
+      integrator_(std::move(integr)), observers_(std::move(obs)),
+      rng_(std::move(rng))
     {}
     ~MolecularDynamicsSimulator() override {}
 
@@ -46,6 +50,9 @@ class MolecularDynamicsSimulator final : public SimulatorBase
     real_type& time()       noexcept {return time_;}
     real_type  time() const noexcept {return time_;}
 
+    rng_type&       rng()       noexcept {return rng_;}
+    rng_type const& rng() const noexcept {return rng_;}
+
   protected:
     std::size_t     total_step_;
     std::size_t     step_count_;
@@ -55,13 +62,15 @@ class MolecularDynamicsSimulator final : public SimulatorBase
     forcefield_type ff_;
     integrator_type integrator_;
     observer_type   observers_;
+    rng_type        rng_;
 };
 
 template<typename traitsT, typename integratorT>
 inline void MolecularDynamicsSimulator<traitsT, integratorT>::initialize()
 {
+    this->system_.initialize(this->rng_);
     this->ff_.initialize(this->system_);
-    this->integrator_.initialize(this->system_, this->ff_);
+    this->integrator_.initialize(this->system_, this->ff_, this->rng_);
 
     observers_.initialize(this->total_step_, this->integrator_.delta_t(),
                           this->system_, this->ff_);
@@ -77,7 +86,7 @@ inline bool MolecularDynamicsSimulator<traitsT, integratorT>::step()
                           this->system_, this->ff_);
     }
 
-    integrator_.step(this->time_, system_, ff_);
+    integrator_.step(this->time_, system_, ff_, this->rng_);
     ++step_count_;
     this->time_ = this->step_count_ * integrator_.delta_t();
 

@@ -21,10 +21,10 @@ BOOST_AUTO_TEST_CASE(read_simulated_annealing_simulator)
         const auto v = u8R"(
             type            = "SimulatedAnnealing"
             integrator.type = "UnderdampedLangevin"
-            integrator.seed = 12345
             integrator.parameters = []
             precision       = "double"
             boundary_type   = "Unlimited"
+            seed            = 12345
             total_step      = 100
             save_step       = 10
             each_step       = 1
@@ -43,6 +43,8 @@ BOOST_AUTO_TEST_CASE(read_simulated_annealing_simulator)
             traits_type, mjolnir::UnderdampedLangevinIntegrator<traits_type>,
             mjolnir::LinearScheduler>*>(sim.get());
         BOOST_TEST(static_cast<bool>(sasim));
+
+        BOOST_TEST(sasim->rng().seed() == 12345u);
 
         sim->initialize();
         for(std::size_t i=0; i<99; ++i)
@@ -71,10 +73,10 @@ BOOST_AUTO_TEST_CASE(read_BAOAB_Langevin_simulated_annealing_simulator)
         const auto v = u8R"(
             type            = "SimulatedAnnealing"
             integrator.type = "BAOABLangevin"
-            integrator.seed = 12345
             integrator.parameters = []
             precision       = "double"
             boundary_type   = "Unlimited"
+            seed            = 12345
             total_step      = 100
             save_step       = 10
             each_step       = 1
@@ -93,6 +95,8 @@ BOOST_AUTO_TEST_CASE(read_BAOAB_Langevin_simulated_annealing_simulator)
             traits_type, mjolnir::BAOABLangevinIntegrator<traits_type>,
             mjolnir::LinearScheduler>*>(sim.get());
         BOOST_TEST(static_cast<bool>(sasim));
+
+        BOOST_TEST(sasim->rng().seed() == 12345u);
 
         sim->initialize();
         for(std::size_t i=0; i<99; ++i)
