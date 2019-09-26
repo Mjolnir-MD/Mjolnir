@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(DirectionalContactInteraction_numerical_diff)
                                            0.0, std::sin(rot_x),  std::cos(rot_x));
                 const matrix33_type rotm_y(std::cos(rot_y), 0.0,  std::sin(rot_y),
                                            0.0,             1.0,              0.0,
-                                           -std::sin(rot_y), 0.0,  std::cos(rot_y));
+                                          -std::sin(rot_y), 0.0,  std::cos(rot_y));
                 const matrix33_type rotm_z(std::cos(rot_z), -std::sin(rot_z), 0.0,
                                            std::sin(rot_z),  std::cos(rot_z), 0.0,
                                            0.0,              0.0,             1.0);
