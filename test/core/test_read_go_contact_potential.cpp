@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_go_contact_env, T, test_types)
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(read_local_potential_go_contact_noenv, T, test_types)
 {
-    mjolnir::LoggerManager::set_default_logger("test_read_harmonic.log");
+    mjolnir::LoggerManager::set_default_logger("test_read_go_contact.log");
 
     using real_type = T;
     {
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_local_potential_go_contact_noenv, T, test_typ
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(read_local_potential_go_contact_env, T, test_types)
 {
-    mjolnir::LoggerManager::set_default_logger("test_read_harmonic.log");
+    mjolnir::LoggerManager::set_default_logger("test_read_go_contact.log");
 
     using real_type = T;
     {
