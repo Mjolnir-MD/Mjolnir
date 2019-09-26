@@ -13,9 +13,9 @@ precision     = "double"
 delta_t       = 0.1
 total_step    = 3_000_000
 save_step     = 100
+seed          = 2374
 
 integrator.type = "BAOABLangevin"
-integrator.seed = 2374
 integrator.parameters = [
 {index =  0, gamma = 1.00},
 {index =  1, gamma = 1.00},
@@ -56,6 +56,8 @@ name = "open"
   - 並列化する際の実装を選択します。
   - `"OpenMP"`: OpenMPを使った実装を使用します。
   - `"sequencial"`: 並列化を行いません。省略した場合はこれが選択されます。
+- `seed`: 整数型
+  - 乱数生成器の初期化に用いるシードを設定します。
 - `delta_t`: 浮動小数点数型
   - シミュレーションの時間刻みを指定します。
   - 時間の単位は[`units`](Units.md)で指定した単位系に依存します。
@@ -67,6 +69,12 @@ name = "open"
   - 時間積分の方法を指定します。積分方法によって必要なパラメータが異なります。
 - `schedule`: テーブルの配列型
   - 使用する力場のスケジュールを決めます。以下で詳細を説明します。
+
+{% hint style='info' %}
+バージョン1.5.xまでは各`integrator`で乱数シードを設定していましたが、
+1.6.x以降から初期速度を生成する機能を導入するため`[simulator]`で設定するように
+なりました。`simulator.integrator.seed`は1.7.x以降削除予定です。
+{% endhint %}
 
 ### `integrator`
 

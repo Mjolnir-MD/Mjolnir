@@ -39,7 +39,6 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
 
     check_keys_available(integrator, {"type"_s, "seed"_s, "parameters"_s});
 
-    const auto seed       = toml::find<std::uint32_t>(integrator, "seed");
     const auto parameters = toml::find<toml::array  >(integrator, "parameters");
 
     std::vector<real_type> gamma(parameters.size());
@@ -53,8 +52,7 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
 
         MJOLNIR_LOG_INFO("idx = ", idx, ", gamma = ", gm);
     }
-    return UnderdampedLangevinIntegrator<traitsT>(delta_t, std::move(gamma),
-            RandomNumberGenerator<traitsT>(seed));
+    return UnderdampedLangevinIntegrator<traitsT>(delta_t, std::move(gamma));
 }
 
 template<typename traitsT>
@@ -72,7 +70,6 @@ read_BAOAB_langevin_integrator(const toml::value& simulator)
 
     check_keys_available(integrator, {"type"_s, "seed"_s, "parameters"_s});
 
-    const auto seed       = toml::find<std::uint32_t>(integrator, "seed");
     const auto parameters = toml::find<toml::array  >(integrator, "parameters");
 
     std::vector<real_type> gamma(parameters.size());
@@ -86,8 +83,7 @@ read_BAOAB_langevin_integrator(const toml::value& simulator)
 
         MJOLNIR_LOG_INFO("idx = ", idx, ", gamma = ", gm);
     }
-    return BAOABLangevinIntegrator<traitsT>(delta_t, std::move(gamma),
-            RandomNumberGenerator<traitsT>(seed));
+    return BAOABLangevinIntegrator<traitsT>(delta_t, std::move(gamma));
 }
 
 #ifdef MJOLNIR_SEPARATE_BUILD

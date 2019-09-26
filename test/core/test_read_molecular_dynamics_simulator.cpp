@@ -23,6 +23,7 @@ BOOST_AUTO_TEST_CASE(read_newtonian_molecular_dynamics_simulator)
             integrator.type = "VelocityVerlet"
             precision       = "double"
             boundary_type   = "Unlimited"
+            seed            = 12345
             delta_t         = 0.1
             total_step      = 100
             save_step       = 10
@@ -35,6 +36,8 @@ BOOST_AUTO_TEST_CASE(read_newtonian_molecular_dynamics_simulator)
         const auto mdsim = dynamic_cast<mjolnir::MolecularDynamicsSimulator<
             traits_type, mjolnir::VelocityVerletIntegrator<traits_type>>*>(sim.get());
         BOOST_TEST(static_cast<bool>(mdsim));
+
+        BOOST_TEST(mdsim->rng().seed() == 12345u);
 
         sim->initialize();
         for(std::size_t i=0; i<99; ++i)
@@ -62,8 +65,8 @@ BOOST_AUTO_TEST_CASE(read_langevin_molecular_dynamics_simulator)
         const auto v = u8R"(
             type            = "MolecularDynamics"
             integrator.type = "UnderdampedLangevin"
-            integrator.seed = 12345
             integrator.parameters = []
+            seed            = 12345
             precision       = "double"
             boundary_type   = "Unlimited"
             delta_t         = 0.1
@@ -78,6 +81,8 @@ BOOST_AUTO_TEST_CASE(read_langevin_molecular_dynamics_simulator)
         const auto mdsim = dynamic_cast<mjolnir::MolecularDynamicsSimulator<
             traits_type, mjolnir::UnderdampedLangevinIntegrator<traits_type>>*>(sim.get());
         BOOST_TEST(static_cast<bool>(mdsim));
+
+        BOOST_TEST(mdsim->rng().seed() == 12345u);
 
         sim->initialize();
         for(std::size_t i=0; i<99; ++i)
@@ -105,8 +110,8 @@ BOOST_AUTO_TEST_CASE(read_BAOAB_langevin_molecular_dynamics_simulator)
         const auto v = u8R"(
             type            = "MolecularDynamics"
             integrator.type = "BAOABLangevin"
-            integrator.seed = 12345
             integrator.parameters = []
+            seed            = 12345
             precision       = "double"
             boundary_type   = "Unlimited"
             delta_t         = 0.1
@@ -121,6 +126,8 @@ BOOST_AUTO_TEST_CASE(read_BAOAB_langevin_molecular_dynamics_simulator)
         const auto mdsim = dynamic_cast<mjolnir::MolecularDynamicsSimulator<
             traits_type, mjolnir::BAOABLangevinIntegrator<traits_type>>*>(sim.get());
         BOOST_TEST(static_cast<bool>(mdsim));
+
+        BOOST_TEST(mdsim->rng().seed() == 12345u);
 
         sim->initialize();
         for(std::size_t i=0; i<99; ++i)
