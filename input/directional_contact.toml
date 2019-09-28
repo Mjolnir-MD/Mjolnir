@@ -15,7 +15,7 @@ boundary_type         = "PeriodicCuboid"
 delta_t               = 0.1
 total_step            = 100_000
 save_step             = 100
-integrator.seed       = 42
+seed                  = 42
 integrator.type       = "UnderdampedLangevin"
 integrator.parameters = [
 {index = 0, gamma = 0.875},
@@ -29,10 +29,10 @@ attributes.temperature = 300.0
 boundary_shape.lower = [  0.0,   0.0,   0.0]
 boundary_shape.upper = [100.0, 100.0, 100.0]
 particles = [
-{mass = 2000.0, pos = [ 50.0, 44.0, 50.0], vel = [ 0.0, 0.0, 0.0], name = "origin1"},
-{mass = 10.0,   pos = [ 50.0, 48.0, 50.0], vel = [ 0.0, 0.0, 0.0], name = "patch1"},
-{mass = 140.0,  pos = [ 50.0, 56.0, 50.0], vel = [ 0.0, 0.0, 0.0], name = "origin2"},
-{mass = 10.0,   pos = [ 50.0, 52.0, 50.0], vel = [ 0.0, 0.0, 0.0], name = "patch2"},
+{mass = 2000.0, pos = [ 50.0, 44.0, 50.0], name = "origin1"},
+{mass = 10.0,   pos = [ 50.0, 48.0, 50.0], name = "patch1"},
+{mass = 140.0,  pos = [ 50.0, 56.0, 50.0], name = "origin2"},
+{mass = 10.0,   pos = [ 50.0, 52.0, 50.0], name = "patch2"},
 ]
 
 [[forcefields]]
