@@ -85,6 +85,7 @@ class ThreeSPN2BaseStackingInteraction<
 #pragma omp for nowait
         for(std::size_t idx=0; idx<this->parameters_.size(); ++idx)
         {
+            const std::size_t thread_id = omp_get_thread_num();
             const auto& idxp = this->parameters_[idx];
             // ====================================================================
             // Base Stacking
@@ -123,8 +124,8 @@ class ThreeSPN2BaseStackingInteraction<
             const auto dU_rep = potential_.dU_rep(bs_kind, lBji);
             if(dU_rep != real_type(0.0))
             {
-                sys.force(Bi) -= dU_rep * Bji_reg;
-                sys.force(Bj) += dU_rep * Bji_reg;
+                sys.force_thread(thread_id, Bi) -= dU_rep * Bji_reg;
+                sys.force_thread(thread_id, Bj) += dU_rep * Bji_reg;
             }
 
             // --------------------------------------------------------------------
@@ -175,9 +176,9 @@ class ThreeSPN2BaseStackingInteraction<
                 const auto fSi = (coef_rsin * rlSBi) * (Bji_reg - cos_theta * SBi_reg);
                 const auto fBj = (coef_rsin * rlBji) * (SBi_reg - cos_theta * Bji_reg);
 
-                sys.force(Si) +=  fSi;
-                sys.force(Bi) -= (fSi + fBj);
-                sys.force(Bj) +=        fBj;
+                sys.force_thread(thread_id, Si) +=  fSi;
+                sys.force_thread(thread_id, Bi) -= (fSi + fBj);
+                sys.force_thread(thread_id, Bj) +=        fBj;
             }
 
             // --------------------------------------------------------------------
@@ -187,8 +188,8 @@ class ThreeSPN2BaseStackingInteraction<
             if(U_dU_attr.second != real_type(0.0))
             {
                 const auto coef = f_theta * U_dU_attr.second;
-                sys.force(Bi) -= coef * Bji_reg;
-                sys.force(Bj) += coef * Bji_reg;
+                sys.force_thread(thread_id, Bi) -= coef * Bji_reg;
+                sys.force_thread(thread_id, Bj) += coef * Bji_reg;
             }
         }
         return ;

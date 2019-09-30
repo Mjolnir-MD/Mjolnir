@@ -81,6 +81,8 @@ class ThreeSPN2BaseBaseInteraction<
 #pragma omp for nowait
         for(std::size_t idx=0; idx < this->potential_.participants().size(); ++idx)
         {
+            const std::size_t thread_id = omp_get_thread_num();
+
             const auto Bi = this->potential_.participants()[idx];
             const auto& rBi = sys.position(Bi);
             for(const auto& ptnr : this->partition_.partners(Bi))
@@ -123,8 +125,8 @@ class ThreeSPN2BaseBaseInteraction<
                     if(dU_rep != real_type(0))
                     {
                         // remember that F = -dU.
-                        sys.force(Bi) -= dU_rep * Bji_reg;
-                        sys.force(Bj) -= dU_rep * Bij_reg;
+                        sys.force_thread(thread_id, Bi) -= dU_rep * Bji_reg;
+                        sys.force_thread(thread_id, Bj) -= dU_rep * Bij_reg;
                     }
                 }
 
@@ -230,10 +232,10 @@ class ThreeSPN2BaseBaseInteraction<
                             const auto coef_Bi = dot_SBiBj * rlBij_sq;
                             const auto coef_Bj = dot_SBjBi * rlBij_sq;
 
-                            sys.force(Si) += fSi;
-                            sys.force(Bi) += (coef_Bi - real_type(1.0)) * fSi - coef_Bj * fSj;
-                            sys.force(Bj) += (coef_Bj - real_type(1.0)) * fSj - coef_Bi * fSi;
-                            sys.force(Sj) += fSj;
+                            sys.force_thread(thread_id, Si) += fSi;
+                            sys.force_thread(thread_id, Bi) += (coef_Bi - real_type(1.0)) * fSi - coef_Bj * fSj;
+                            sys.force_thread(thread_id, Bj) += (coef_Bj - real_type(1.0)) * fSj - coef_Bi * fSi;
+                            sys.force_thread(thread_id, Sj) += fSj;
                         }
 
                         const auto dihd_term = real_type(0.5) * (real_type(1.0) + cos_dphi);
@@ -254,9 +256,9 @@ class ThreeSPN2BaseBaseInteraction<
                                              (cos_theta1 * BSi_reg - Bij_reg);
                             const auto fBj = (coef_rsin * rlBij) *
                                              (cos_theta1 * Bij_reg - BSi_reg);
-                            sys.force(Si) += fSi;
-                            sys.force(Bi) -= (fSi + fBj);
-                            sys.force(Bj) += fBj;
+                            sys.force_thread(thread_id, Si) += fSi;
+                            sys.force_thread(thread_id, Bi) -= (fSi + fBj);
+                            sys.force_thread(thread_id, Bj) += fBj;
                         }
                         // --------------------------------------------------------
                         // calc theta2 term
@@ -274,9 +276,9 @@ class ThreeSPN2BaseBaseInteraction<
                                              (cos_theta2 * Bji_reg - BSj_reg);
                             const auto fSj = (coef_rsin * rlSBj) *
                                              (cos_theta2 * BSj_reg - Bji_reg);
-                            sys.force(Bi) += fBi;
-                            sys.force(Bj) -= (fBi + fSj);
-                            sys.force(Sj) += fSj;
+                            sys.force_thread(thread_id, Bi) += fBi;
+                            sys.force_thread(thread_id, Bj) -= (fBi + fSj);
+                            sys.force_thread(thread_id, Sj) += fSj;
                         }
                         // --------------------------------------------------------
                         // calc distance
@@ -285,8 +287,8 @@ class ThreeSPN2BaseBaseInteraction<
                         {
                             // remember that F = -dU. Here `coef` = -dU.
                             const auto coef = -dihd_term * f1 * f2 * U_dU_attr.second;
-                            sys.force(Bi) += coef * Bji_reg;
-                            sys.force(Bj) += coef * Bij_reg;
+                            sys.force_thread(thread_id, Bi) += coef * Bji_reg;
+                            sys.force_thread(thread_id, Bj) += coef * Bij_reg;
                         }
                     }
                 }
@@ -393,10 +395,10 @@ class ThreeSPN2BaseBaseInteraction<
                         if(df3 != real_type(0))
                         {
                             const auto coef = -df3 * fCS * U_dU_attr.first;
-                            sys.force(Si) += coef * fSi_theta3;
-                            sys.force(Sj) += coef * fSj_theta3;
-                            sys.force(Bi) += coef * fBi_theta3;
-                            sys.force(Bj) += coef * fBj_theta3;
+                            sys.force_thread(thread_id, Si) += coef * fSi_theta3;
+                            sys.force_thread(thread_id, Sj) += coef * fSj_theta3;
+                            sys.force_thread(thread_id, Bi) += coef * fBi_theta3;
+                            sys.force_thread(thread_id, Bj) += coef * fBj_theta3;
                         }
                         // --------------------------------------------------------
                         // f(theta_3) df/dtheta_CS U_attr(eps, alp, rij) dtheta_CS/dr
@@ -410,17 +412,17 @@ class ThreeSPN2BaseBaseInteraction<
                             const auto fSi  =  coef_rsin * rlSBi  * (cos_theta_CS * BSi_reg + Bj5i_reg);
                             const auto fBj5 = -coef_rsin * rlBj5i * (cos_theta_CS * Bj5i_reg + BSi_reg);
 
-                            sys.force(Si)      += fSi;
-                            sys.force(Bi)      -= (fSi + fBj5);
-                            sys.force(Bj_next) += fBj5;
+                            sys.force_thread(thread_id, Si)      += fSi;
+                            sys.force_thread(thread_id, Bi)      -= (fSi + fBj5);
+                            sys.force_thread(thread_id, Bj_next) += fBj5;
                         }
                         // --------------------------------------------------------
                         // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
                         if(U_dU_attr.second != real_type(0.0))
                         {
                             const auto coef = -f3 * fCS * U_dU_attr.second;
-                            sys.force(Bi)      += coef * Bj5i_reg;
-                            sys.force(Bj_next) -= coef * Bj5i_reg;
+                            sys.force_thread(thread_id, Bi)      += coef * Bj5i_reg;
+                            sys.force_thread(thread_id, Bj_next) -= coef * Bj5i_reg;
                         }
                     }
                 }
@@ -467,10 +469,10 @@ class ThreeSPN2BaseBaseInteraction<
                         if(df3 != real_type(0))
                         {
                             const auto coef = -df3 * fCS * U_dU_attr.first;
-                            sys.force(Si) += coef * fSi_theta3;
-                            sys.force(Sj) += coef * fSj_theta3;
-                            sys.force(Bi) += coef * fBi_theta3;
-                            sys.force(Bj) += coef * fBj_theta3;
+                            sys.force_thread(thread_id, Si) += coef * fSi_theta3;
+                            sys.force_thread(thread_id, Sj) += coef * fSj_theta3;
+                            sys.force_thread(thread_id, Bi) += coef * fBi_theta3;
+                            sys.force_thread(thread_id, Bj) += coef * fBj_theta3;
                         }
                         // --------------------------------------------------------
                         // f(theta_3) df/dtheta_CS U_attr(eps, alp, rij) dtheta_CS/dr
@@ -483,17 +485,17 @@ class ThreeSPN2BaseBaseInteraction<
 
                             const auto fSj  =  coef_rsin * rlSBj  * (cos_theta_CS * BSj_reg + Bi3j_reg);
                             const auto fBi3 = -coef_rsin * rlBi3j * (cos_theta_CS * Bi3j_reg + BSj_reg);
-                            sys.force(Sj)      += fSj;
-                            sys.force(Bj)      -= (fSj + fBi3);
-                            sys.force(Bi_next) += fBi3;
+                            sys.force_thread(thread_id, Sj)      += fSj;
+                            sys.force_thread(thread_id, Bj)      -= (fSj + fBi3);
+                            sys.force_thread(thread_id, Bi_next) += fBi3;
                         }
                         // --------------------------------------------------------
                         // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
                         if(U_dU_attr.second != real_type(0.0))
                         {
                             const auto coef = -f3 * fCS * U_dU_attr.second;
-                            sys.force(Bj)      += coef * Bi3j_reg;
-                            sys.force(Bi_next) -= coef * Bi3j_reg;
+                            sys.force_thread(thread_id, Bj)      += coef * Bi3j_reg;
+                            sys.force_thread(thread_id, Bi_next) -= coef * Bi3j_reg;
                         }
                     }
                 }
