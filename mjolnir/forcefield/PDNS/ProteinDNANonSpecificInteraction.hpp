@@ -16,12 +16,12 @@ namespace mjolnir
 // - T.Niina, G.B.Brandani, C.Tan, and S.Takada (2017) PLoS. Comp. Biol.
 //
 //
-//     U(r, theta, phi) = k f(r) g(theta) g(phi)
+// U(r, theta, phi) = k f(r) g(theta) g(phi)
 //
-//     f(r)   = exp(-(r-r0)^2 / sigma^2)
-//     g(phi) = 1                               ...        |phi - phi0| <  dphi
-//              1 - cos^2(pi(phi-phi0) / 2dphi) ... dphi < |phi - phi0| < 2dphi
-//              0                               ... otherwise
+// f(r)   = exp(-(r-r0)^2 / sigma^2)
+// g(phi) = 1                                ...         |phi - phi0| <  delta
+//          1 - cos^2(pi(phi-phi0) / 2delta) ... delta < |phi - phi0| < 2delta
+//          0                                ... otherwise
 //
 template<typename traitsT>
 class ProteinDNANonSpecificInteraction final : public GlobalInteractionBase<traitsT>
