@@ -146,7 +146,7 @@ class ProteinDNANonSpecificPotential
         const real_type abs_dtheta = std::abs(dtheta);
         if(abs_dtheta < this->delta_)
         {
-            return std::pair<real_type, real_type>(1, 0);
+            return std::make_pair(real_type(1), real_type(0));
         }
         else if(abs_dtheta < this->delta2_)
         {
@@ -156,7 +156,7 @@ class ProteinDNANonSpecificPotential
         }
         else
         {
-            return std::pair<real_type, real_type>(0, 0);
+            return std::make_pair(real_type(0), real_type(0));
         }
     }
 
