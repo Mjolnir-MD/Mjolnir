@@ -40,7 +40,7 @@ read_global_pair_interaction(const toml::value& global)
             read_excluded_volume_potential<real_type>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
-    if(potential == "HardCoreExcludedVolume")
+    else if(potential == "HardCoreExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Hard Core Excluded Volume.");
         using potential_t   = HardCoreExcludedVolumePotential<real_type>;
@@ -260,7 +260,7 @@ read_global_interaction(const toml::value& global)
         MJOLNIR_LOG_NOTICE("Pair interaction found.");
         return read_global_pair_interaction<traitsT>(global);
     }
-    if(interaction == "3SPN2BaseBase")
+    else if(interaction == "3SPN2BaseBase")
     {
         MJOLNIR_LOG_NOTICE("3SPN2BaseBaseInteraction found.");
         return read_global_3spn2_base_base_interaction<traitsT>(global);
