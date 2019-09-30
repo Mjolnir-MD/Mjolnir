@@ -260,21 +260,21 @@ template<typename realT>
 HardCoreExcludedVolumePotential<realT>
 read_hard_core_excluded_volume_potential(const toml::value& global)
 {
-  MJOLNIR_GET_DEFAULT_LOGGER();
-  MJOLNIR_LOG_FUNCTION();
-  using potential_type = HardCoreExcludedVolumePotential<realT>;
-  using real_type      = typename potential_type::real_type;
-  using parameter_type = typename potential_type::parameter_type;
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using potential_type = HardCoreExcludedVolumePotential<realT>;
+    using real_type      = typename potential_type::real_type;
+    using parameter_type = typename potential_type::parameter_type;
 
-  const auto ignore = toml::find<toml::value>(global, "ignore");
+    const auto ignore = toml::find<toml::value>(global, "ignore");
 
-  const auto ignore_particle_within = toml::find<
-    std::map<std::string, std::size_t>>(ignore, "particles_within");
-  for(const auto& connection : ignore_particle_within)
-  {
-    MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
-        "within", connection.second, " will be ignored");
-  }
+    const auto ignore_particle_within = toml::find<
+      std::map<std::string, std::size_t>>(ignore, "particles_within");
+    for(const auto& connection : ignore_particle_within)
+    {
+      MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
+          "within", connection.second, " will be ignored");
+    }
 
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
@@ -294,8 +294,11 @@ read_hard_core_excluded_volume_potential(const toml::value& global)
     for(const auto& param : ps)
     {
       const auto idx = find_parameter<std::size_t>(param, env, "index");
-      const auto core_radius = find_parameter<real_type>(param, env, "core_radius");
-      const auto soft_shell_thickness = find_parameter<real_type>(param, env, "soft_shell_thickness");
+
+      const auto core_radius          =
+          find_parameter<real_type>(param, env, "core_radius");
+      const auto soft_shell_thickness =
+          find_parameter<real_type>(param, env, "soft_shell_thickness");
 
       params.emplace_back(idx, parameter_type{soft_shell_thickness, core_radius});
       MJOLNIR_LOG_INFO("idx = ", idx, ", core_radius = ", core_radius,
