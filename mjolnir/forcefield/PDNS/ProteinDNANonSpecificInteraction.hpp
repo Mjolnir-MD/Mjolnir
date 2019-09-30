@@ -85,19 +85,30 @@ template<typename traitsT>
 void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
         system_type& sys) const noexcept
 {
+    MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+    MJOLNIR_LOG_FUNCTION_DEBUG();
+
     constexpr auto tolerance = math::abs_tolerance<real_type>();
     // XXX Note: P is ambiguous because both Protein and Phosphate has `P`.
     // But this interaction is named as P-D ns, so here it uses `P` for protein
     // and `D` for DNA.
 
-    for(const auto P : this->potential_.proteins())
+    for(const auto i : this->potential_.participants())
     {
-        const auto& rP = sys.position(P);
-        for(const auto& ptnr : this->partition_.partners(P))
+        const auto& ri = sys.position(i);
+        for(const auto& ptnr : this->partition_.partners(i))
         {
-            const auto  D    = ptnr.index;
+            const auto  j    = ptnr.index;
+            const auto& rj   = sys.position(j);
+
             const auto& para = ptnr.parameter();
-            const auto& rD   = sys.position(D);
+
+            const auto& rD = (para.DNA == i) ? ri : rj;
+            const auto   D = (para.DNA == i) ?  i :  j;
+            const auto& rP = (para.DNA == i) ? rj : ri;
+            const auto   P = (para.DNA == i) ?  j :  i;
+
+            MJOLNIR_LOG_DEBUG("protein = ", P, ", DNA = ", D);
 
             //  PC          S5'    |
             //    o         o--o B | theta is an angle formed by the vector
@@ -120,6 +131,8 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
             }
             const auto f_df   = potential_.f_df(para.r0, lPD);
 
+            MJOLNIR_LOG_DEBUG("f = ", f_df.first, ", df = ", f_df.second);
+
             // ----------------------------------------------------------------
             // calculates the angle part (theta)
 
@@ -133,6 +146,9 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
 
             const auto g_dg_theta = potential_.g_dg(para.theta0, theta);
 
+            MJOLNIR_LOG_DEBUG("g(theta) = ", g_dg_theta.first,
+                             ", dg(theta) = ", g_dg_theta.second);
+
             // ----------------------------------------------------------------
             // calculates the angle part (phi)
 
@@ -145,29 +161,36 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
 
             const auto g_dg_phi = potential_.g_dg(para.phi0, phi);
 
+            MJOLNIR_LOG_DEBUG("g(phi) = ", g_dg_phi.first,
+                             ", dg(phi) = ", g_dg_phi.second);
+
             // ----------------------------------------------------------------
             // calculate force
             //
-            //   d/dr [k f(r) g(theta) g(phi)]
-            // = k [df(r)  g(theta)  g(phi) +
-            //       f(r) dg(theta)  g(phi) +
-            //       f(r)  g(theta) dg(phi) ]
+            //   d/dr [kf(r)  g(theta)  g(phi)]
+            // =    k [df(r)  g(theta)  g(phi) +
+            //          f(r) dg(theta)  g(phi) +
+            //          f(r)  g(theta) dg(phi) ]
             const auto k = para.k;
 
             // df(r) g(theta) g(phi)
-            if(g_dg_theta.first  != 0 && g_dg_theta.first  != 0)
+            if(g_dg_theta.first  != 0 && g_dg_phi.first  != 0)
             {
+                MJOLNIR_LOG_DEBUG("calculating distance force");
+
                 const auto coef = rlPD * k *
                     f_df.second * g_dg_theta.first * g_dg_phi.first;
-                const auto f = coef * rPD;
+                const auto F = -coef * rPD;
 
-                sys.force(P) -= f;
-                sys.force(D) += f;
+                sys.force(P) -= F;
+                sys.force(D) += F;
             }
 
             // f(r) dg(theta) g(phi)
-            if(g_dg_theta.second != 0 && g_dg_theta.first  != 0)
+            if(g_dg_theta.second != 0 && g_dg_phi.first  != 0)
             {
+                MJOLNIR_LOG_DEBUG("calculating theta force");
+
                 const auto deriv =
                     k * f_df.first * g_dg_theta.second * g_dg_phi.first;
 
@@ -187,19 +210,21 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
             }
 
             // f(r) dg(theta) g(phi)
-            if(g_dg_theta.first  != 0 && g_dg_theta.second != 0)
+            if(g_dg_theta.first  != 0 && g_dg_phi.second != 0)
             {
+                MJOLNIR_LOG_DEBUG("calculating phi force");
+
                 const auto deriv =
                     k * f_df.first * g_dg_theta.first * g_dg_phi.second;
 
                 const auto sin_phi  = std::sin(phi);
-                const auto coef_sin = deriv / std::max(sin_theta, tolerance);
+                const auto coef_sin = deriv / std::max(sin_phi, tolerance);
 
                 const auto rPD_reg  = rlPD  * rPD;
                 const auto rS3D_reg = rlS3D * rS3D;
 
-                const auto F_P = coef_sin * rlPD  * (rS3D_reg - cos_S3D * rPD_reg);
-                const auto F_S = coef_sin * rlS3D * (rPD_reg  - cos_S3D * rS3D_reg);
+                const auto F_P = -coef_sin * rlPD  * (rS3D_reg - cosS3D * rPD_reg);
+                const auto F_S = -coef_sin * rlS3D * (rPD_reg  - cosS3D * rS3D_reg);
 
                 sys.force(P)       += F_P;
                 sys.force(D)       -= F_P + F_S;
@@ -215,20 +240,25 @@ typename ProteinDNANonSpecificInteraction<traitsT>::real_type
 ProteinDNANonSpecificInteraction<traitsT>::calc_energy(
         const system_type& sys) const noexcept
 {
-    constexpr auto tolerance = math::abs_tolerance<real_type>();
+    MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+    MJOLNIR_LOG_FUNCTION_DEBUG();
     // XXX Note: P is ambiguous because both Protein and Phosphate has `P`.
     // But this interaction is named as P-D ns, so here it uses `P` for protein
     // and `D` for DNA.
 
     real_type E = 0.0;
-    for(const auto P : this->potential_.proteins())
+    for(const auto i : this->potential_.participants())
     {
-        const auto& rP = sys.position(P);
-        for(const auto& ptnr : this->partition_.partners(P))
+        const auto& ri = sys.position(i);
+        for(const auto& ptnr : this->partition_.partners(i))
         {
-            const auto  D    = ptnr.index;
+            const auto  j    = ptnr.index;
+            const auto& rj   = sys.position(j);
+
             const auto& para = ptnr.parameter();
-            const auto& rD   = sys.position(D);
+
+            const auto& rD = (para.DNA == i) ? ri : rj;
+            const auto& rP = (para.DNA == i) ? rj : ri;
 
             //  PC          S5'    |
             //    o         o--o B | theta is an angle formed by the vector
@@ -243,14 +273,13 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_energy(
 
             const auto rPD    = sys.adjust_direction(rD - rP); // PRO -> DNA
             const auto lPD_sq = math::length_sq(rPD);
-            if(lPD_sq > potential_.cutoff_sq())
+            const auto rlPD   = math::rsqrt(lPD_sq);
+            const auto  lPD   = lPD_sq * rlPD;
+            if(std::abs(lPD - para.r0) > potential_.gaussian_cutoff())
             {
                 continue;
             }
-
-            const auto rlPD = math::rsqrt(lPD_sq);
-            const auto  lPD = lPD_sq * rlPD;
-            const auto    f = potential_.f(para.r0, lPD);
+            const auto f = potential_.f(para.r0, lPD);
 
             // ----------------------------------------------------------------
             // calculates the angle part (theta)
@@ -264,6 +293,8 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_energy(
             const auto theta   = std::acos(math::clamp<real_type>(cosPNC,-1,1));
             const auto g_theta = potential_.g(para.theta0, theta);
 
+            if(g_theta == real_type(0)) {continue;}
+
             // ----------------------------------------------------------------
             // calculates the angle part (phi)
 
@@ -274,6 +305,8 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_energy(
             const auto cosS3D = dotS3D * rlS3D * rlPD;
             const auto phi    = std::acos(math::clamp<real_type>(cosS3D,-1,1));
             const auto g_phi  = potential_.g(para.phi0, phi);
+
+            if(g_phi == real_type(0)) {continue;}
 
             // ----------------------------------------------------------------
             // calculate energy
