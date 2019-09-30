@@ -82,9 +82,9 @@ class ProteinDNANonSpecificPotential
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
     using exclusion_list_type  = ExclusionList;
 
-    static constexpr std::size_t invalid() noexcept
+    static constexpr std::uint32_t invalid() noexcept
     {
-        return std::numeric_limits<std::size_t>::max();
+        return std::numeric_limits<std::uint32_t>::max();
     }
     static constexpr parameter_type default_parameter() noexcept
     {
@@ -130,7 +130,7 @@ class ProteinDNANonSpecificPotential
     ~ProteinDNANonSpecificPotential() = default;
 
     std::pair<real_type, real_type>
-    f_df(const real_type r0, const real_type r) noexcept
+    f_df(const real_type r0, const real_type r) const noexcept
     {
         const real_type rsigma   = real_type(1) / this->sigma_;
         const real_type dr_sigma = (r - r0) * rsigma;
@@ -139,7 +139,7 @@ class ProteinDNANonSpecificPotential
         return std::make_pair(term, -2 * dr_sigma * rsigma * term);
     }
     std::pair<real_type, real_type>
-    g_dg(const real_type theta0, const real_type theta) noexcept
+    g_dg(const real_type theta0, const real_type theta) const noexcept
     {
         constexpr auto  pi         = math::constants<real_type>::pi();
         const real_type dtheta     = theta - theta0;
@@ -160,12 +160,12 @@ class ProteinDNANonSpecificPotential
         }
     }
 
-    real_type f(const real_type r0, const real_type r) noexcept
+    real_type f(const real_type r0, const real_type r) const noexcept
     {
         const real_type dr_sigma = (r - r0) / this->sigma_;
         return std::exp(-dr_sigma * dr_sigma);
     }
-    real_type g(const real_type theta0, const real_type theta) noexcept
+    real_type g(const real_type theta0, const real_type theta) const noexcept
     {
         constexpr auto pi = math::constants<real_type>::pi();
         const real_type dtheta     = theta - theta0;
@@ -247,7 +247,7 @@ class ProteinDNANonSpecificPotential
 
     // ------------------------------------------------------------------------
     // used by Observer.
-    static const char* name() noexcept {return "LennardJones";}
+    static const char* name() noexcept {return "PDNS";}
 
     // ------------------------------------------------------------------------
     // the following accessers would be used in tests.
@@ -261,7 +261,7 @@ class ProteinDNANonSpecificPotential
 
   private:
 
-    real_type sigma, delta, delta2_, one_over_2delta_, cutoff_ratio_;
+    real_type sigma_, delta_, delta2_, one_over_2delta_, cutoff_ratio_;
     container_type           parameters_;     // indices
     std::vector<std::size_t> participants_;   // PRO + DNA beads
     std::vector<std::size_t> proteins_;       // PRO only; to reduce loop size
