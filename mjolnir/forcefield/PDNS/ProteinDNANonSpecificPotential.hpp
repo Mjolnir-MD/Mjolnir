@@ -20,8 +20,8 @@ namespace mjolnir
 // sigma = 1.0
 // delta = 0.17453
 // parameters  = [
-// {index =    2, S = 1, kind = "DNA"},
-// {index =    5, S = 4, kind = "DNA"},
+// {index =    2, S3 = 1, kind = "DNA"},
+// {index =    5, S3 = 4, kind = "DNA"},
 // # ...
 // {index = 1000, kind = "Protein", PN =  999, PC = 1001, k = 1.2, r0 = 5.0, theta0 = 100.0, phi0 = 130.0},
 // {index = 1023, kind = "Protein", PN = 1022, PC = 1024, k = 1.2, r0 = 6.0, theta0 = 110.0, phi0 = 120.0},
@@ -62,13 +62,13 @@ class ProteinDNANonSpecificPotential
     struct parameter_type
     {
         bead_kind     kind;
-        std::uint32_t S_idx;        // for DNA
-        std::uint32_t N_idx, C_idx; // for PRO
+        std::uint32_t S3;     // for DNA
+        std::uint32_t PN, PC; // for PRO
         real_type k, r0, theta0, phi0;
     };
     struct pair_parameter_type
     {
-        std::uint32_t S3, PN, PC;
+        std::uint32_t S3, PN, PC, DNA; // `DNA` represents which idx is DNA
         real_type k, r0, theta0, phi0;
     };
     using container_type = std::vector<parameter_type>;
@@ -183,6 +183,46 @@ class ProteinDNANonSpecificPotential
         {
             return 0;
         }
+    }
+
+    pair_parameter_type
+    prepare_params(const std::size_t i, const std::size_t j) const noexcept
+    {
+        const auto& pi = this->parameters_[i];
+        const auto& pj = this->parameters_[j];
+        assert(pi.kind != bead_kind::invalid);
+        assert(pj.kind != bead_kind::invalid);
+        assert(pi.kind != pj.kind);
+
+        pair_parameter_type pp;
+
+        if(pi.kind == bead_kind::DNA && pj.kind == bead_kind::Protein)
+        {
+            pp.DNA    = static_cast<std::uint32_t>(i);
+            pp.S3     = pi.S3;
+            pp.PN     = pj.PN;
+            pp.PC     = pj.PC;
+            pp.k      = pj.k;
+            pp.r0     = pj.r0;
+            pp.theta0 = pj.theta0;
+            pp.phi0   = pj.phi0;
+        }
+        else if(pi.kind == bead_kind::Protein && pj.kind == bead_kind::DNA)
+        {
+            pp.DNA    = static_cast<std::uint32_t>(j);
+            pp.S3     = pj.S3;
+            pp.PN     = pi.PN;
+            pp.PC     = pi.PC;
+            pp.k      = pi.k;
+            pp.r0     = pi.r0;
+            pp.theta0 = pi.theta0;
+            pp.phi0   = pi.phi0;
+        }
+        else
+        {
+            assert(false);
+        }
+        return pp;
     }
 
     real_type cutoff_ratio()      const noexcept {return cutoff_ratio_;}
