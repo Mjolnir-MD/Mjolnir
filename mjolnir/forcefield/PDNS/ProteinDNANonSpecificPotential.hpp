@@ -92,6 +92,7 @@ class ProteinDNANonSpecificPotential
             bead_kind::invalid, invalid(), invalid(), invalid(), 0, 0, 0, 0
         };
     }
+    static constexpr real_type default_cutoff() noexcept {return 5.0;}
 
   public:
 
