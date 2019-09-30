@@ -9,7 +9,7 @@
     - [MolecularDynamics](refs/MolecularDynamicsSimulator.md)
     - [SimulatedAnnealing](refs/SimulatedAnnealingSimulator.md)
     - [SteepestDescent](refs/SteepestDescentSimulator.md)
-    - [SwitchingForceField](refs/SwitchingForceField.md)
+    - [SwitchingForceField](refs/SwitchingForceFieldSimulator.md)
   - [Integrator](refs/Integrator.md)
     - [BAOABLangevin](refs/BAOABLangevinIntegrator.md)
     - [UnderdampedLangevin](refs/UnderdampedLangevinIntegrator.md)
