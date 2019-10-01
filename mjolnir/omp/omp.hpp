@@ -16,10 +16,13 @@
 // consider what files should be included to use OpenMP.
 
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
+#include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/System.hpp>
 #include <mjolnir/omp/ForceField.hpp>
 #include <mjolnir/omp/BondLengthInteraction.hpp>
+#include <mjolnir/omp/BondLengthGoContactInteraction.hpp>
 #include <mjolnir/omp/ContactInteraction.hpp>
+#include <mjolnir/omp/GoContactInteraction.hpp>
 #include <mjolnir/omp/BondAngleInteraction.hpp>
 #include <mjolnir/omp/DihedralAngleInteraction.hpp>
 #include <mjolnir/omp/ThreeSPN2BaseStackingInteraction.hpp>
@@ -30,7 +33,6 @@
 #include <mjolnir/omp/ThreeSPN2BaseBaseInteraction.hpp>
 #include <mjolnir/omp/PositionRestraintInteraction.hpp>
 #include <mjolnir/omp/ExternalDistanceInteraction.hpp>
-#include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/UnlimitedGridCellList.hpp>
 #include <mjolnir/omp/PeriodicGridCellList.hpp>
 #include <mjolnir/omp/UnderdampedLangevinIntegrator.hpp>
