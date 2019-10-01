@@ -1,9 +1,9 @@
 #ifndef MJOLNIR_OMP_SYSTEM_HPP
 #define MJOLNIR_OMP_SYSTEM_HPP
 #include <mjolnir/util/aligned_allocator.hpp>
+#include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 
 namespace mjolnir
 {
