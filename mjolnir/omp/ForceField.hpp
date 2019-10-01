@@ -1,7 +1,8 @@
 #ifndef MJOLNIR_OMP_FORCE_FIELD_HPP
 #define MJOLNIR_OMP_FORCE_FIELD_HPP
-#include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
+#include <mjolnir/core/ForceField.hpp>
 
 namespace mjolnir
 {

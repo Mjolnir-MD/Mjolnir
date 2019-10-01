@@ -1,8 +1,10 @@
 #ifndef MJOLNIR_OMP_BAOAB_LANGEVIN_INTEGRATOR_HPP
 #define MJOLNIR_OMP_BAOAB_LANGEVIN_INTEGRATOR_HPP
-#include <mjolnir/util/aligned_allocator.hpp>
-#include <mjolnir/core/BAOABLangevinIntegrator.hpp>
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
+#include <mjolnir/omp/System.hpp>
+#include <mjolnir/omp/ForceField.hpp>
+#include <mjolnir/omp/RandomNumberGenerator.hpp>
+#include <mjolnir/core/BAOABLangevinIntegrator.hpp>
 
 namespace mjolnir
 {
@@ -156,7 +158,6 @@ extern template class BAOABLangevinIntegrator<OpenMPSimulatorTraits<float,  Unli
 extern template class BAOABLangevinIntegrator<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>;
 extern template class BAOABLangevinIntegrator<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 #endif
-
 
 } // mjolnir
 #endif /* MJOLNIR_BAOAB_LANGEVIN_INTEGRATOR */

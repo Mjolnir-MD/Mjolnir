@@ -1,8 +1,10 @@
 #ifndef MJOLNIR_OMP_UNDERDAMPED_LANGEVIN_INTEGRATOR
 #define MJOLNIR_OMP_UNDERDAMPED_LANGEVIN_INTEGRATOR
-#include <mjolnir/util/aligned_allocator.hpp>
-#include <mjolnir/core/UnderdampedLangevinIntegrator.hpp>
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
+#include <mjolnir/omp/System.hpp>
+#include <mjolnir/omp/ForceField.hpp>
+#include <mjolnir/omp/RandomNumberGenerator.hpp>
+#include <mjolnir/core/UnderdampedLangevinIntegrator.hpp>
 
 namespace mjolnir
 {
