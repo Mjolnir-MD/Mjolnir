@@ -2,6 +2,10 @@
 #define MJOLNIR_CORE_SIMULATOR_TRAITS_HPP
 #include <mjolnir/math/Vector.hpp>
 
+#ifdef MJOLNIR_WITH_OPENMP
+#include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
+#endif
+
 namespace mjolnir
 {
 
