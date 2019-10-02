@@ -18,5 +18,12 @@ struct OpenMPSimulatorTraits
     using boundary_type = boundaryT<real_type, coordinate_type>;
 };
 
+template<typename T>
+struct is_openmp_simulator_traits : std::false_type{};
+
+template<typename realT, template<typename, typename> class boundaryT>
+struct is_openmp_simulator_traits<OpenMPSimulatorTraits<realT, boundaryT>>: std::true_type{};
+
+
 } // mjolnir
 #endif /* MJOLNIR_DEFAULT_TRAITS */

@@ -17,5 +17,11 @@ struct SimulatorTraits
     using boundary_type = boundaryT<real_type, coordinate_type>;
 };
 
+template<typename T>
+struct is_simulator_traits : std::false_type{};
+
+template<typename realT, template<typename, typename> class boundaryT>
+struct is_simulator_traits<SimulatorTraits<realT, boundaryT>>: std::true_type{};
+
 } // mjolnir
 #endif /* MJOLNIR_DEFAULT_TRAITS */
