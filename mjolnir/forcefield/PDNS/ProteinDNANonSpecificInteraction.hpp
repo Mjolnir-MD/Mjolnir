@@ -18,7 +18,7 @@ namespace mjolnir
 //
 // U(r, theta, phi) = k f(r) g(theta) g(phi)
 //
-// f(r)   = exp(-(r-r0)^2 / sigma^2)
+// f(r)   = exp(-(r-r0)^2 / 2sigma^2)
 // g(phi) = 1                                ...         |phi - phi0| <  delta
 //          1 - cos^2(pi(phi-phi0) / 2delta) ... delta < |phi - phi0| < 2delta
 //          0                                ... otherwise

@@ -134,9 +134,9 @@ class ProteinDNANonSpecificPotential
     {
         const real_type rsigma   = real_type(1) / this->sigma_;
         const real_type dr_sigma = (r - r0) * rsigma;
-        const real_type term     = std::exp(-dr_sigma * dr_sigma);
+        const real_type term     = std::exp(real_type(-0.5) * dr_sigma * dr_sigma);
 
-        return std::make_pair(term, -2 * dr_sigma * rsigma * term);
+        return std::make_pair(term, -dr_sigma * rsigma * term);
     }
     std::pair<real_type, real_type>
     g_dg(const real_type theta0, const real_type theta) const noexcept
@@ -163,7 +163,7 @@ class ProteinDNANonSpecificPotential
     real_type f(const real_type r0, const real_type r) const noexcept
     {
         const real_type dr_sigma = (r - r0) / this->sigma_;
-        return std::exp(-dr_sigma * dr_sigma);
+        return std::exp(real_type(-0.5) * dr_sigma * dr_sigma);
     }
     real_type g(const real_type theta0, const real_type theta) const noexcept
     {
