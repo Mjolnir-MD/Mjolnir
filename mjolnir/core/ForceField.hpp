@@ -10,6 +10,13 @@ namespace mjolnir
 template<typename traitsT>
 class ForceField
 {
+    // Other implementations, such as OpenMP impl, uses different
+    // definition to avoid data-race or to handle device memories, e.g.
+    // merging thread-local forces to the master container or
+    // merging forces calculated on host to the device.
+    static_assert(is_simulator_traits<traitsT>::value,
+            "this is an implementation for the default simulator traits.");
+
   public:
     using traits_type              = traitsT;
     using real_type                = typename traits_type::real_type;

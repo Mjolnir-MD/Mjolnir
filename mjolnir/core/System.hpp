@@ -17,6 +17,11 @@ namespace mjolnir
 template<typename traitsT>
 class System
 {
+    // Other implementations, such as OpenMP impl, uses different system
+    // definition to avoid data-race or to handle device memories.
+    static_assert(is_simulator_traits<traitsT>::value,
+            "this is an implementation for the default simulator traits.");
+
   public:
     using traits_type     = traitsT;
     using string_type     = std::string;
