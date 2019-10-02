@@ -1,7 +1,8 @@
 #ifndef MJOLNIR_FORCEFIELD_3SPN2_BASE_STACKING_INTEARACTION_HPP
 #define MJOLNIR_FORCEFIELD_3SPN2_BASE_STACKING_INTEARACTION_HPP
-#include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingPotential.hpp>
+#include <mjolnir/core/LocalInteractionBase.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/util/string.hpp>
@@ -148,6 +149,13 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
     container_type parameters_;
     potential_type potential_;
     std::vector<nucleotide_index_type> nucleotide_index_;
+
+#ifdef MJOLNIR_WITH_OPENMP
+    // OpenMP implementation uses its own implementation to run it in parallel.
+    // So this implementation should not be instanciated with OpenMP Traits.
+    static_assert(!is_openmp_simulator_traits<traits_type>::value,
+                  "this is the default implementation, not for OpenMP");
+#endif
 };
 
 template<typename traitsT>

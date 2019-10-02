@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_INTERACTION_CONTACT_INTERACTION_HPP
 #define MJOLNIR_INTERACTION_CONTACT_INTERACTION_HPP
 #include <mjolnir/core/LocalInteractionBase.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -148,6 +149,13 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
     real_type margin_;
     real_type current_margin_;
     std::vector<std::size_t> active_contacts_;
+
+#ifdef MJOLNIR_WITH_OPENMP
+    // OpenMP implementation uses its own implementation to run it in parallel.
+    // So this implementation should not be instanciated with OpenMP Traits.
+    static_assert(!is_openmp_simulator_traits<traits_type>::value,
+                  "this is the default implementation, not for OpenMP");
+#endif
 };
 
 template<typename traitsT, typename potentialT>
