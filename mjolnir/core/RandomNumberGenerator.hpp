@@ -11,6 +11,9 @@ namespace mjolnir
 template<typename traitsT>
 class RandomNumberGenerator
 {
+    static_assert(is_simulator_traits<traitsT>::value,
+            "this is an implementation for the default simulator traits.");
+
   public:
     using traits_type     = traitsT;
     using real_type       = typename traits_type::real_type;
