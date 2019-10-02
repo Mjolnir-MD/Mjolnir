@@ -7,6 +7,9 @@ namespace mjolnir
 {
 
 template<typename traitsT>
+class System;
+
+template<typename traitsT>
 class LoaderBase
 {
   public:
@@ -36,4 +39,18 @@ class LoaderBase
 };
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+
+namespace mjolnir
+{
+extern template class LoaderBase<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class LoaderBase<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class LoaderBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class LoaderBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+} // mjolnir
+#endif
+
 #endif//MJOLNIR_CORE_LOADER_BASE_HPP

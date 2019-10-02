@@ -1,6 +1,8 @@
 #ifndef MJOLNIR_CORE_XYZ_LOADER_HPP
 #define MJOLNIR_CORE_XYZ_LOADER_HPP
 #include <mjolnir/core/LoaderBase.hpp>
+#include <mjolnir/core/System.hpp>
+#include <mjolnir/util/logger.hpp>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -21,7 +23,7 @@ class XYZLoader final : public LoaderBase<traitsT>
   public:
 
     explicit XYZLoader(const std::string& filename)
-      : base_type(), filename_(filename), file_(filename_), line_number_(0)
+        : base_type(), filename_(filename), file_(filename_), line_number_(0)
     {
         if(!file_.good())
         {
@@ -134,4 +136,18 @@ class XYZLoader final : public LoaderBase<traitsT>
 };
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+
+namespace mjolnir
+{
+extern template class XYZLoader<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class XYZLoader<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class XYZLoader<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class XYZLoader<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+} // mjolnir
+#endif
+
 #endif//MJOLNIR_CORE_XYZ_LOADER_HPP
