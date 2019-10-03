@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.6.1
+
+### Fixed
+
+- concurrency bug while generating velocity
+  - Do __NOT__ use OpenMP stuff in 1.6.0
+- add missing docs about potential combination in Dihedral
+
+### Misc
+
+- refactoring
+
 ## 1.6.0
 
 ### Added
