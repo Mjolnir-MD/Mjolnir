@@ -8,7 +8,7 @@ namespace mjolnir
 template<typename intT>
 std::string format_nth(const intT idx)
 {
-    if(10 < idx < 20) {return std::to_string(idx) + "th"_s;}
+    if(10 < idx && idx < 20) {return std::to_string(idx) + "th"_s;}
 
     const auto idx_s = std::to_string(idx);
     switch(idx_s.back())
