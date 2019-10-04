@@ -20,6 +20,7 @@ BOOST_AUTO_TEST_CASE(read_system_with_unlimited_boundary)
     {
         using namespace toml::literals;
         const auto v = u8R"(
+            [[systems]]
             boundary_shape = {}
             attributes = {test_attr = 3.14}
             particles  = [
@@ -29,7 +30,7 @@ BOOST_AUTO_TEST_CASE(read_system_with_unlimited_boundary)
             ]
         )"_toml;
 
-        const auto sys = mjolnir::read_system_from_table<traits_type>(v);
+        const auto sys = mjolnir::read_system<traits_type>(v, 0);
         BOOST_TEST(sys.size() == 3u);
 
         BOOST_TEST(sys.mass(0) == 1.0, boost::test_tools::tolerance(tol));
@@ -93,6 +94,7 @@ BOOST_AUTO_TEST_CASE(read_system_with_cuboidal_periodic_boundary)
     {
         using namespace toml::literals;
         const auto v = u8R"(
+            [[systems]]
             boundary_shape.upper = [10.0, 11.0, 12.0]
             boundary_shape.lower = [ 0.0,  1.0,  2.0]
             attributes = {test_attr = 3.14}
@@ -103,7 +105,7 @@ BOOST_AUTO_TEST_CASE(read_system_with_cuboidal_periodic_boundary)
             ]
         )"_toml;
 
-        const auto sys = mjolnir::read_system_from_table<traits_type>(v);
+        const auto sys = mjolnir::read_system<traits_type>(v, 0);
 
         BOOST_TEST(sys.boundary().lower_bound().at(0) == 0.0, boost::test_tools::tolerance(tol));
         BOOST_TEST(sys.boundary().lower_bound().at(1) == 1.0, boost::test_tools::tolerance(tol));
