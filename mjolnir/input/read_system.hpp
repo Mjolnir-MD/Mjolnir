@@ -81,7 +81,8 @@ read_system(const toml::value& root, const std::size_t N)
 
     MJOLNIR_LOG_NOTICE("reading system ...");
 
-    const auto system = read_table_from_file(root, "systems", N);
+    const auto system = read_table_from_file(
+            root, "systems", N, read_input_path(root));
 
     check_keys_available(system, {"boundary_shape"_s, "attributes"_s, "particles"_s});
 

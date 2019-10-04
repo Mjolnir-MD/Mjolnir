@@ -58,7 +58,9 @@ read_forcefield(const toml::value& root, const std::size_t N)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
-    const auto ff = read_table_from_file(root, "forcefields", N);
+    const auto ff = read_table_from_file(
+            root, "forcefields", N, read_input_path(root));
+
     check_keys_available(ff, {"local"_s, "global"_s, "external"_s, "name"_s});
 
     if(ff.as_table().count("name") == 1)

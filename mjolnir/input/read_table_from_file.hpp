@@ -17,7 +17,8 @@ namespace mjolnir
 
 template<typename C, template<typename...> class T, template<typename...> class A>
 toml::basic_value<C, T, A>
-read_table_from_file(const toml::basic_value<C, T, A>& root, const std::string& name)
+read_table_from_file(const toml::basic_value<C, T, A>& root,
+        const std::string& name, const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -38,8 +39,7 @@ read_table_from_file(const toml::basic_value<C, T, A>& root, const std::string& 
     }
 
     // file_name is provided. we need to read it.
-    const auto input_path = toml::find<std::string>(table, "file_name");
-    const auto file_name  = read_input_path(root) + input_path;
+    const auto file_name = input_path + toml::find<std::string>(table, "file_name");
 
     MJOLNIR_LOG_NOTICE("[[", name, "]] is defined in ", file_name);
     if(table.as_table().size() != 1)
@@ -75,7 +75,7 @@ read_table_from_file(const toml::basic_value<C, T, A>& root, const std::string& 
 template<typename C, template<typename...> class T, template<typename...> class A>
 toml::basic_value<C, T, A>
 read_table_from_file(const toml::basic_value<C, T, A>& root,
-                     const std::string& name, const std::size_t N)
+    const std::string& name, const std::size_t N, const std::string& input_path)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -98,8 +98,7 @@ read_table_from_file(const toml::basic_value<C, T, A>& root,
     }
 
     // file_name is provided. we need to read it.
-    const auto input_path = toml::find<std::string>(table, "file_name");
-    const auto file_name  = read_input_path(root) + input_path;
+    const auto file_name = input_path + toml::find<std::string>(table, "file_name");
 
     MJOLNIR_LOG_NOTICE("[[", name, "]] is defined in ", file_name);
     if(table.as_table().size() != 1)
@@ -130,9 +129,11 @@ read_table_from_file(const toml::basic_value<C, T, A>& root,
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
-read_table_from_file(const toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>& root, const std::string& name);
+read_table_from_file(const toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>& root,
+                     const std::string& name, const std::string& input_path);
 extern template toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
-read_table_from_file(const toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>& root, const std::string& name, const std::size_t N);
+read_table_from_file(const toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>& root,
+                     const std::string& name, const std::size_t N, const std::string& input_path);
 #endif
 
 } // mjolnir
