@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_CORE_PERIODIC_GRID_CELL_LIST_HPP
 #define MJOLNIR_CORE_PERIODIC_GRID_CELL_LIST_HPP
+#include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/SpatialPartitionBase.hpp>
 #include <mjolnir/util/range.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -123,6 +124,13 @@ class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, Potentia
     cell_index_container_type index_by_cell_;
     // index_by_cell_ has {particle idx, cell idx} and sorted by cell idx
     // first term of cell list contains first and last idx of index_by_cell
+
+#ifdef MJOLNIR_WITH_OPENMP
+    // OpenMP implementation uses its own specialization to run it in parallel.
+    // So this implementation should not be instanciated with the OpenMP traits.
+    static_assert(!is_openmp_simulator_traits<traits_type>::value,
+                  "this is the default implementation, not for OpenMP");
+#endif
 };
 
 template<typename traitsT, typename potentialT>

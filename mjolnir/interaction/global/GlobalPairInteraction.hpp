@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_INTEARACTION_GLOBAL_PAIR_INTEARACTION_HPP
 #define MJOLNIR_INTEARACTION_GLOBAL_PAIR_INTEARACTION_HPP
+#include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/GlobalInteractionBase.hpp>
 #include <mjolnir/core/SpatialPartitionBase.hpp>
 #include <mjolnir/math/math.hpp>
@@ -88,6 +89,13 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
 
     potential_type potential_;
     partition_type partition_;
+
+#ifdef MJOLNIR_WITH_OPENMP
+    // OpenMP implementation uses its own implementation to run it in parallel.
+    // So this implementation should not be instanciated with OpenMP Traits.
+    static_assert(!is_openmp_simulator_traits<traits_type>::value,
+                  "this is the default implementation, not for OpenMP");
+#endif
 };
 
 template<typename traitsT, typename potT>

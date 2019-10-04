@@ -48,6 +48,13 @@ class RandomNumberGenerator
     std::uint32_t seed_;
     std::mt19937        rng_;
     std::normal_distribution<real_type> nrm_;
+
+#ifdef MJOLNIR_WITH_OPENMP
+    // OpenMP implementation uses its own specialization to avoid data race.
+    // So this implementation should not be instanciated with the OpenMP traits.
+    static_assert(!is_openmp_simulator_traits<traits_type>::value,
+                  "this is the default implementation, not for OpenMP");
+#endif
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD

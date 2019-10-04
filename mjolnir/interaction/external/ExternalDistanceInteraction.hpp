@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_INTERACTION_EXTERNAL_DISTANCE_INTERACTION_HPP
 #define MJOLNIR_INTERACTION_EXTERNAL_DISTANCE_INTERACTION_HPP
 #include <mjolnir/core/ExternalForceInteractionBase.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/string.hpp>
 
@@ -66,6 +67,13 @@ class ExternalDistanceInteraction final
 
     shape_type     shape_;
     potential_type potential_;
+
+#ifdef MJOLNIR_WITH_OPENMP
+    // OpenMP implementation uses its own implementation to run it in parallel.
+    // So this implementation should not be instanciated with OpenMP Traits.
+    static_assert(!is_openmp_simulator_traits<traits_type>::value,
+                  "this is the default implementation, not for OpenMP");
+#endif
 };
 
 template<typename traitsT, typename potT, typename spaceT>

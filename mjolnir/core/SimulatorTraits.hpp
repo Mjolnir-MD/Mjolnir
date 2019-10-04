@@ -2,6 +2,10 @@
 #define MJOLNIR_CORE_SIMULATOR_TRAITS_HPP
 #include <mjolnir/math/Vector.hpp>
 
+#ifdef MJOLNIR_WITH_OPENMP
+#include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
+#endif
+
 namespace mjolnir
 {
 
@@ -16,6 +20,12 @@ struct SimulatorTraits
 
     using boundary_type = boundaryT<real_type, coordinate_type>;
 };
+
+template<typename T>
+struct is_simulator_traits : std::false_type{};
+
+template<typename realT, template<typename, typename> class boundaryT>
+struct is_simulator_traits<SimulatorTraits<realT, boundaryT>>: std::true_type{};
 
 } // mjolnir
 #endif /* MJOLNIR_DEFAULT_TRAITS */

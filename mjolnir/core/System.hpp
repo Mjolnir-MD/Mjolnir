@@ -171,6 +171,13 @@ class System
     coordinate_container_type    velocities_;
     coordinate_container_type    forces_;
     // names and groups are in Topology class
+
+#ifdef MJOLNIR_WITH_OPENMP
+    // OpenMP implementation uses its own System<OpenMP> to avoid data race.
+    // So this implementation should not be instanciated with OpenMP Traits.
+    static_assert(!is_openmp_simulator_traits<traits_type>::value,
+                  "this is the default implementation, not for OpenMP");
+#endif
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD
