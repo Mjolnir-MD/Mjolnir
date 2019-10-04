@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_INTERACTION_BOND_ANGLE_INTERACTION_HPP
 #define MJOLNIR_INTERACTION_BOND_ANGLE_INTERACTION_HPP
+#include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/LocalInteractionBase.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/math/constants.hpp>
@@ -79,6 +80,13 @@ class BondAngleInteraction final : public LocalInteractionBase<traitsT>
   private:
     connection_kind_type kind_;
     container_type potentials_;
+
+#ifdef MJOLNIR_WITH_OPENMP
+    // OpenMP implementation uses its own implementation to run it in parallel.
+    // So this implementation should not be instanciated with OpenMP Traits.
+    static_assert(!is_openmp_simulator_traits<traits_type>::value,
+                  "this is the default implementation, not for OpenMP");
+#endif
 };
 
 template<typename traitsT, typename potentialT>

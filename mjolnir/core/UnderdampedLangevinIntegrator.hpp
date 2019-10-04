@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_CORE_UNDERDAMPED_LANGEVIN_INTEGRATOR_HPP
 #define MJOLNIR_CORE_UNDERDAMPED_LANGEVIN_INTEGRATOR_HPP
+#include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
@@ -83,6 +84,13 @@ class UnderdampedLangevinIntegrator
     std::vector<real_type>       gammas_;
     std::vector<real_type>       sqrt_gamma_over_mass_;
     std::vector<coordinate_type> acceleration_;
+
+#ifdef MJOLNIR_WITH_OPENMP
+    // OpenMP implementation uses its own specialization to run it in parallel.
+    // So this implementation should not be instanciated with the OpenMP traits.
+    static_assert(!is_openmp_simulator_traits<traits_type>::value,
+                  "this is the default implementation, not for OpenMP");
+#endif
 };
 
 template<typename traitsT>

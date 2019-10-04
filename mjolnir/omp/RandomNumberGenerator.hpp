@@ -12,9 +12,6 @@ namespace mjolnir
 template<typename realT, template<typename, typename> class boundaryT>
 class RandomNumberGenerator<OpenMPSimulatorTraits<realT, boundaryT>>
 {
-    static_assert(is_openmp_simulator_traits<traitsT>::value,
-            "this is an implementation for the default simulator traits.");
-
   public:
     using traits_type     = OpenMPSimulatorTraits<realT, boundaryT>;
     using real_type       = typename traits_type::real_type;

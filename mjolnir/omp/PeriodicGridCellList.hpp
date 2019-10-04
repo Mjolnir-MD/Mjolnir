@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_OMP_PERIODIC_GRID_CELL_LIST_HPP
 #define MJOLNIR_OMP_PERIODIC_GRID_CELL_LIST_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
+#include <mjolnir/omp/System.hpp>
 #include <mjolnir/omp/sort.hpp>
 #include <mjolnir/core/PeriodicGridCellList.hpp>
 

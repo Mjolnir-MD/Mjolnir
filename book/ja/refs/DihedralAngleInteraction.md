@@ -40,3 +40,43 @@ parameters  = [
   - `indices`: 整数の配列型
     - どの粒子の間の距離に適用するかを指定します。最初の粒子は0番目です。
   - 他のパラメータは、ポテンシャルによって異なります。
+
+## 組み合わせ
+
+いくつかの力場では、同じ二面角に複数のポテンシャルが適用されていることがあります。
+そのような場合に計算を高速化するため、以下の組み合わせがサポートされています。
+
+それぞれのポテンシャルのパラメータは、`PotentialName = {...}`のようなインライン
+テーブルとして与えられます。
+
+{% hint style='info' %}
+全ての組み合わせがサポートされているわけではありません。
+{% endhint %}
+
+### `potential = "Gaussian+FlexibleLocalDihedral"`
+
+```toml
+[[forcefields.local]]
+interaction = "DihedralAngle"
+potential   = "Gaussian+FlexibleLocalDihedral"
+topology    = "none"
+env.ALA-ALA = [2.2056, 0.2183, -0.0795, 0.0451, -0.3169, 0.0165, -0.1375]
+parameters  = [
+{indices = [0,1,2,3], Gaussian = {v0=-2.2, k=-0.43,sigma=0.15}, FlexibleLocalDihedral = {k=1.0, coef="ALA-ALA"}},
+# ...
+]
+```
+
+### `potential = "Gaussian+Cosine"`
+
+```toml
+[[forcefields.local]]
+interaction = "DihedralAngle"
+potential   = "Gaussian+Cosine"
+topology    = "none"
+parameters  = [
+{indices = [0,1,2,3], Gaussian = {v0=-1.57, k=-1.0,sigma=0.15}, Cosine = {k=1.0, n=1, v0 = 1.57}},
+# ...
+]
+```
+
