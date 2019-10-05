@@ -306,12 +306,12 @@ read_global_pdns_interaction(const toml::value& global)
         if(kind == "Protein")
         {
             para.kind = bead_kind::Protein;
-            para.PN     = toml::find<std::uint32_t>(item, "PN");
-            para.PC     = toml::find<std::uint32_t>(item, "PC");
-            para.k      = toml::find<real_type>(item, "k");
-            para.r0     = toml::find<real_type>(item, "r0");
-            para.theta0 = toml::find<real_type>(item, "theta0");
-            para.phi0   = toml::find<real_type>(item, "phi0");
+            para.PN     = find_parameter<std::uint32_t>(item, env, "PN");
+            para.PC     = find_parameter<std::uint32_t>(item, env, "PC");
+            para.k      = find_parameter<real_type>(item, env, "k");
+            para.r0     = find_parameter<real_type>(item, env, "r0");
+            para.theta0 = find_parameter<real_type>(item, env, "theta0");
+            para.phi0   = find_parameter<real_type>(item, env, "phi0");
             MJOLNIR_LOG_INFO("kind = ", para.kind,
                 ", PN = ", para.PN, ", PC = ", para.PC, ", k = ", para.k,
                 ", r0 = ", para.r0, ", theta0 = ", para.theta0,
@@ -320,7 +320,7 @@ read_global_pdns_interaction(const toml::value& global)
         else if (kind == "DNA")
         {
             para.kind = bead_kind::DNA;
-            para.S3   = toml::find<std::uint32_t>(item, "S3");
+            para.S3   = find_parameter<std::uint32_t>(item, env, "S3");
             MJOLNIR_LOG_INFO("kind = ", para.kind, ", S3 = ", para.S3);
         }
         else
