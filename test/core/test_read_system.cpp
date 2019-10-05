@@ -20,6 +20,9 @@ BOOST_AUTO_TEST_CASE(read_system_with_unlimited_boundary)
     {
         using namespace toml::literals;
         const auto v = u8R"(
+            [files]
+            # this table is required because [[systems]] table can be provided
+            # as a different file
             [[systems]]
             boundary_shape = {}
             attributes = {test_attr = 3.14}
@@ -94,6 +97,9 @@ BOOST_AUTO_TEST_CASE(read_system_with_cuboidal_periodic_boundary)
     {
         using namespace toml::literals;
         const auto v = u8R"(
+            [files]
+            # this table is required because [[systems]] table can be provided
+            # as a different file
             [[systems]]
             boundary_shape.upper = [10.0, 11.0, 12.0]
             boundary_shape.lower = [ 0.0,  1.0,  2.0]
