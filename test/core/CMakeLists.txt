@@ -38,6 +38,7 @@ set(TEST_NAMES
     test_3spn2_base_stacking_interaction
     test_3spn2_base_base_interaction
     test_global_pair_interaction
+    test_pdns_interaction
     test_position_restraint_interaction
 
     test_neighbor_list
