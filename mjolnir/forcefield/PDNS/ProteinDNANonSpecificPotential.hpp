@@ -1,6 +1,11 @@
 #ifndef MJOLNIR_FORCEFIELD_PDNS_PROTEIN_DNA_NON_SPECIFIC_POTENTIAL_HPP
 #define MJOLNIR_FORCEFIELD_PDNS_PROTEIN_DNA_NON_SPECIFIC_POTENTIAL_HPP
 #include <mjolnir/math/math.hpp>
+#include <mjolnir/util/logger.hpp>
+#include <mjolnir/core/Unit.hpp>
+#include <mjolnir/core/ExclusionList.hpp>
+#include <mjolnir/core/System.hpp>
+#include <mjolnir/core/Topology.hpp>
 #include <cstdint>
 
 namespace mjolnir

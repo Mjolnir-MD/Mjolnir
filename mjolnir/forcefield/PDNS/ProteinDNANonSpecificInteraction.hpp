@@ -5,6 +5,7 @@
 #include <mjolnir/core/SpatialPartitionBase.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/math/math.hpp>
+#include <mjolnir/util/logger.hpp>
 #include <memory>
 
 namespace mjolnir
