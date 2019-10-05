@@ -32,6 +32,7 @@ set(TEST_NAMES
     test_bond_length_gocontact_interaction
     test_contact_interaction
     test_contact_gocontact_interaction
+    test_directional_contact_interaction
     test_bond_angle_interaction
     test_dihedral_angle_interaction
     test_3spn2_base_stacking_interaction
@@ -70,6 +71,7 @@ set(TEST_NAMES
     test_read_bond_length_interaction
     test_read_bond_angle_interaction
     test_read_dihedral_angle_interaction
+    test_read_directional_contact_interaction
     test_read_dummy_interaction
     test_read_3spn2_base_stacking_interaction
     test_read_3spn2_base_base_interaction
