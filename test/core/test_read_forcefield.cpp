@@ -14,13 +14,15 @@ BOOST_AUTO_TEST_CASE(read_empty_forcefield)
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
-        const toml::table v = toml::table{
-            {"local",       toml::array{}},
-            {"global",      toml::array{}},
-            {"external",    toml::array{}}
-        };
+        using namespace toml::literals;
+        const auto v = u8R"(
+        [files]
+        output.prefix = "test"
+        [[forcefields]]
+        # empty
+        )"_toml;
 
-        const auto ff = mjolnir::read_forcefield_from_table<traits_type>(v, "./");
+        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
 
         BOOST_TEST(ff.local().size()    == 0u);
         BOOST_TEST(ff.global().size()   == 0u);
@@ -36,18 +38,21 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
-        const toml::table v = toml::get<toml::table>(u8R"(
-            [[local]]
+        const auto v = u8R"(
+            [files]
+            output.prefix = "test"
+            [[forcefields]]
+            [[forcefields.local]]
                 interaction = "BondLength"
                 potential   = "Harmonic"
                 topology    = "bond"
                 parameters  = []
-            [[local]]
+            [[forcefields.local]]
                 interaction = "BondAngle"
                 potential   = "Harmonic"
                 topology    = "none"
                 parameters  = []
-            [[global]]
+            [[forcefields.global]]
                 interaction = "Pair"
                 potential   = "ExcludedVolume"
                 epsilon     = 3.14
@@ -55,27 +60,27 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield)
                 ignore.molecule = "Nothing"
                 ignore.particles_within = {bond = 3, contact = 1}
                 spatial_partition.type = "Naive"
-            [[global]]
+            [[forcefields.global]]
                 interaction = "Pair"
                 potential   = "LennardJones"
                 parameters  = []
                 ignore.molecule = "Nothing"
                 ignore.particles_within = {bond = 3, contact = 1}
                 spatial_partition.type = "Naive"
-            [[external]]
+            [[forcefields.external]]
                 interaction = "Distance"
                 potential   = "ExcludedVolumeWall"
                 epsilon     = 3.14
                 parameters  = []
                 shape = {name = "AxisAlignedPlane", axis="+X", position=1.0, margin=0.5}
-            [[external]]
+            [[forcefields.external]]
                 interaction = "Distance"
                 potential   = "LennardJonesWall"
                 parameters  = []
                 shape = {name = "AxisAlignedPlane", axis="+X", position=1.0, margin=0.5}
-        )"_toml);
+        )"_toml;
 
-        const auto ff = mjolnir::read_forcefield_from_table<traits_type>(v, "./");
+        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
         BOOST_TEST(ff.local().size()    == 2u);
         BOOST_TEST(ff.global().size()   == 2u);
         BOOST_TEST(ff.external().size() == 2u);

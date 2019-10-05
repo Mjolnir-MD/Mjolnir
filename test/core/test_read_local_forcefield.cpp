@@ -7,7 +7,7 @@
 #endif
 
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/input/read_local_forcefield.hpp>
+#include <mjolnir/input/read_forcefield.hpp>
 
 #include <typeindex>
 #include <typeinfo>
@@ -19,10 +19,16 @@ BOOST_AUTO_TEST_CASE(read_empty_local_forcefield)
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
-        const toml::array v{};
-        const auto ff = mjolnir::read_local_forcefield<traits_type>(v, "./");
-        BOOST_TEST(ff.empty());
-        BOOST_TEST(ff.size() == 0u);
+        using namespace toml::literals;
+        const auto v = u8R"(
+        [files]
+        output.prefix = "name"
+        [[forcefields]]
+        )"_toml;
+
+        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
+        BOOST_TEST(ff.local().empty());
+        BOOST_TEST(ff.local().size() == 0u);
     }
 }
 
@@ -34,19 +40,22 @@ BOOST_AUTO_TEST_CASE(read_local_forcefield)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
-        const toml::array v{u8R"(
-                interaction = "BondAngle"
-                potential   = "Harmonic"
-                topology    = "none"
-                parameters  = []
-            )"_toml
-        };
+        const auto v = u8R"(
+        [files]
+        # empty
+        [[forcefields]]
+        [[forcefields.local]]
+        interaction = "BondAngle"
+        potential   = "Harmonic"
+        topology    = "none"
+        parameters  = []
+        )"_toml;
 
-        const auto lff = mjolnir::read_local_forcefield<traits_type>(v, "./");
-        BOOST_TEST(!lff.empty());
-        BOOST_TEST(lff.size() == 1u);
+        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
+        BOOST_TEST(!ff.local().empty());
+        BOOST_TEST(ff.local().size() == 1u);
 
-        const auto& interaction_ptr = *lff.begin();
+        const auto& interaction_ptr = *(ff.local().begin());
         BOOST_TEST(static_cast<bool>(interaction_ptr));
 
         const auto bond_angle_ptr  = dynamic_cast<mjolnir::BondAngleInteraction<
@@ -64,22 +73,25 @@ BOOST_AUTO_TEST_CASE(read_several_local_forcefield)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
-        const toml::array v{u8R"(
-                interaction = "BondAngle"
-                potential   = "Harmonic"
-                topology    = "none"
-                parameters  = []
-            )"_toml, u8R"(
-                interaction = "BondLength"
-                potential   = "Harmonic"
-                topology    = "bond"
-                parameters  = []
-            )"_toml
-        };
+        const auto v = u8R"(
+        [files]
+        # empty
+        [[forcefields]]
+        [[forcefields.local]]
+        interaction = "BondAngle"
+        potential   = "Harmonic"
+        topology    = "none"
+        parameters  = []
+        [[forcefields.local]]
+        interaction = "BondLength"
+        potential   = "Harmonic"
+        topology    = "bond"
+        parameters  = []
+        )"_toml;
 
-        const auto lff = mjolnir::read_local_forcefield<traits_type>(v, "./");
-        BOOST_TEST(!lff.empty());
-        BOOST_TEST(lff.size() == 2u);
+        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
+        BOOST_TEST(!ff.local().empty());
+        BOOST_TEST( ff.local().size() == 2u);
 
         using bond_length_interaction = mjolnir::BondLengthInteraction<
             traits_type, mjolnir::HarmonicPotential<real_type>>;
@@ -90,7 +102,7 @@ BOOST_AUTO_TEST_CASE(read_several_local_forcefield)
         found[typeid(bond_length_interaction)] = false;
         found[typeid(bond_angle_interaction)]  = false;
 
-        for(const auto& interaction_ptr : lff)
+        for(const auto& interaction_ptr : ff.local())
         {
             BOOST_TEST(static_cast<bool>(interaction_ptr));
             const auto& deref = *interaction_ptr;
