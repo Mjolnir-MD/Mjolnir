@@ -10,8 +10,7 @@
 
 BOOST_AUTO_TEST_CASE(PDNS_Potential_f)
 {
-    mjolnir::LoggerManager::set_default_logger(
-            "test_3spn2_base_base_interaction_potential.log");
+    mjolnir::LoggerManager::set_default_logger("test_pdns_potential.log");
 
     using real_type = double;
     using potential_type = mjolnir::ProteinDNANonSpecificPotential<real_type>;
