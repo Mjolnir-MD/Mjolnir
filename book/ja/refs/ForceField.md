@@ -34,15 +34,15 @@ input.path = "./input/"
 file_name = "forcefield.toml"
 ```
 
-`files.input.path`と`file_name`を結合した名前のファイルが読み込まれます。
-
 ```toml
 # ./input/forcefield.toml
 [[forcefields]]
-# ここでは統一感の為にテーブルの配列を使っていますが、個別のファイルには一つしか
-# テーブルを書かないので、単なるテーブルでも構いません。
 # ...
 ```
+
+`files.input.path`と`file_name`を結合した名前のファイルが読み込まれます。
+
+----
 
 あるいは、もう少し細かく、相互作用ごとに分割することも可能です。
 
@@ -52,3 +52,18 @@ file_name = "bond_length.toml"
 [[forcefields.global]]
 file_name = "electrostatic.toml"
 ```
+
+```toml
+# ./input/bond_length.toml
+[[local]]
+# ...
+```
+
+```toml
+# ./input/electrostatic.toml
+[[global]]]
+# ...
+```
+
+ここで、テーブルの階層を合わせるため、`forcefields.local`ではなく単に`local`が
+キーとして使用されています。
