@@ -315,6 +315,7 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_energy(
             const auto k = para.k;
 
             E += k * f * g_theta * g_phi;
+            MJOLNIR_LOG_INFO_DEBUG("PDNS: i = ", i, " j = ", j, " r0 = ", para.r0);
         }
     }
     return E;
