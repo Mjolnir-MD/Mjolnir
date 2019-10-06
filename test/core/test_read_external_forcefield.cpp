@@ -7,7 +7,7 @@
 #endif
 
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/input/read_external_forcefield.hpp>
+#include <mjolnir/input/read_forcefield.hpp>
 
 #include <typeindex>
 #include <typeinfo>
@@ -19,10 +19,15 @@ BOOST_AUTO_TEST_CASE(read_empty_external_forcefield)
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
-        const toml::array v{};
-        const auto ff = mjolnir::read_external_forcefield<traits_type>(v, "./");
-        BOOST_TEST(ff.empty());
-        BOOST_TEST(ff.size() == 0u);
+        using namespace toml::literals;
+        const auto v = u8R"(
+            [files]
+            output.prefix = "test"
+            [[forcefields]]
+        )"_toml;
+        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
+        BOOST_TEST(ff.external().empty());
+        BOOST_TEST(ff.external().size() == 0u);
     }
 }
 
@@ -34,7 +39,11 @@ BOOST_AUTO_TEST_CASE(read_external_forcefield)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
-        const toml::array v = {u8R"(
+        const auto v = u8R"(
+            [files]
+            output.prefix = "test"
+            [[forcefields]]
+            [[forcefields.external]]
             interaction    = "Distance"
             potential      = "ExcludedVolumeWall"
             shape.name     = "AxisAlignedPlane"
@@ -46,13 +55,13 @@ BOOST_AUTO_TEST_CASE(read_external_forcefield)
                 {index = 0, radius = 2.0},
                 {index = 1, radius = 2.0},
             ]
-        )"_toml};
+        )"_toml;
 
-        const auto ff = mjolnir::read_external_forcefield<traits_type>(v, "./");
-        BOOST_TEST(!ff.empty());
-        BOOST_TEST(ff.size() == 1u);
+        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
+        BOOST_TEST(!ff.external().empty());
+        BOOST_TEST(ff.external().size() == 1u);
 
-        const auto& interaction_ptr = *ff.begin();
+        const auto& interaction_ptr = *(ff.external().begin());
         BOOST_TEST(static_cast<bool>(interaction_ptr));
 
         const auto derived_ptr  = dynamic_cast<mjolnir::ExternalDistanceInteraction<
@@ -71,7 +80,11 @@ BOOST_AUTO_TEST_CASE(read_several_external_forcefield)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
-        const toml::array v = {u8R"(
+        const auto v = u8R"(
+            [files]
+            output.prefix = "test"
+            [[forcefields]]
+            [[forcefields.external]]
             interaction    = "Distance"
             potential      = "ExcludedVolumeWall"
             shape.name     = "AxisAlignedPlane"
@@ -83,7 +96,7 @@ BOOST_AUTO_TEST_CASE(read_several_external_forcefield)
                 {index = 0, radius = 2.0},
                 {index = 1, radius = 2.0},
             ]
-        )"_toml, u8R"(
+            [[forcefields.external]]
             interaction    = "Distance"
             potential      = "LennardJonesWall"
             shape.name     = "AxisAlignedPlane"
@@ -94,11 +107,11 @@ BOOST_AUTO_TEST_CASE(read_several_external_forcefield)
                 {index = 0, sigma = 2.0, epsilon = 2.0},
                 {index = 1, sigma = 2.0, epsilon = 2.0},
             ]
-        )"_toml};
+        )"_toml;
 
-        const auto ff = mjolnir::read_external_forcefield<traits_type>(v, "./");
-        BOOST_TEST(!ff.empty());
-        BOOST_TEST(ff.size() == 2u);
+        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
+        BOOST_TEST(!ff.external().empty());
+        BOOST_TEST(ff.external().size() == 2u);
 
         using exv_interaction = mjolnir::ExternalDistanceInteraction<
             traits_type, mjolnir::ExcludedVolumeWallPotential<real_type>,
@@ -113,7 +126,7 @@ BOOST_AUTO_TEST_CASE(read_several_external_forcefield)
         found[typeid(exv_interaction)] = false;
         found[typeid( lj_interaction)] = false;
 
-        for(const auto& interaction_ptr : ff)
+        for(const auto& interaction_ptr : ff.external())
         {
             BOOST_TEST(static_cast<bool>(interaction_ptr));
             const auto& deref = *interaction_ptr;
