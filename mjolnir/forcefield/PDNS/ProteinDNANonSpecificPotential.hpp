@@ -3,9 +3,7 @@
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/core/Unit.hpp>
-#include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/core/Topology.hpp>
 #include <cstdint>
 
 namespace mjolnir
@@ -15,7 +13,7 @@ namespace mjolnir
 // side chain atoms in proteins and the phosphate residues in DNA.
 // This is an implementation of the potential developed in the following paper.
 // - T.Niina, G.B.Brandani, C.Tan, and S.Takada (2017) PLoS. Comput. Biol.
-
+//
 // ```toml
 // [[forcefields.global]]
 // interaction = "PDNS"
@@ -33,28 +31,6 @@ namespace mjolnir
 // # ...
 // ]
 // ```
-namespace parameter_PDNS
-{
-enum bead_kind : std::uint8_t
-{
-    Protein,
-    DNA,
-    invalid
-};
-
-template<typename charT, typename traits>
-std::basic_ostream<charT, traits>&
-operator<<(std::basic_ostream<charT, traits>& os, const bead_kind bk)
-{
-    switch(bk)
-    {
-        case bead_kind::Protein: {os << "PRO"; return os;}
-        case bead_kind::DNA:     {os << "DNA"; return os;}
-        case bead_kind::invalid: {os << "INV"; return os;}
-        default:                 {os << "UNK"; return os;}
-    }
-}
-} // pdns
 
 template<typename realT>
 class ProteinDNANonSpecificPotential
@@ -62,30 +38,15 @@ class ProteinDNANonSpecificPotential
   public:
     using real_type = realT;
     using self_type = ProteinDNANonSpecificPotential<real_type>;
-    using bead_kind = parameter_PDNS::bead_kind;
 
     struct parameter_type
     {
-        bead_kind     kind;
-        std::uint32_t S3;     // for DNA
-        std::uint32_t PN, PC; // for PRO
+        std::uint32_t P, PN, PC; // for PRO
         real_type k, r0, theta0, phi0;
-    };
-    struct pair_parameter_type
-    {
-        std::uint32_t S3, PN, PC, DNA; // `DNA` represents which idx is DNA
-        real_type k, r0, theta0, phi0;
+        real_type r_cut, r_cut_sq;
     };
     using container_type = std::vector<parameter_type>;
-
-    // topology stuff
-    using topology_type        = Topology;
-    using molecule_id_type     = typename topology_type::molecule_id_type;
-    using group_id_type        = typename topology_type::group_id_type;
-    using connection_kind_type = typename topology_type::connection_kind_type;
-    using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
-    using ignore_group_type    = IgnoreGroup   <group_id_type>;
-    using exclusion_list_type  = ExclusionList;
+    using dna_index_type = std::pair<std::uint32_t, std::uint32_t>;
 
     static constexpr std::uint32_t invalid() noexcept
     {
@@ -93,46 +54,50 @@ class ProteinDNANonSpecificPotential
     }
     static constexpr parameter_type default_parameter() noexcept
     {
-        return parameter_type{
-            bead_kind::invalid, invalid(), invalid(), invalid(), 0, 0, 0, 0
-        };
+        return parameter_type{invalid(), invalid(), 0, 0, 0, 0};
     }
     static constexpr real_type default_cutoff() noexcept {return 5.0;}
 
   public:
 
-    ProteinDNANonSpecificPotential(const real_type sigma, const real_type delta,
-        const real_type cutoff_ratio,
-        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-        const std::map<connection_kind_type, std::size_t>&         exclusions,
-        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+    ProteinDNANonSpecificPotential(const real_type sigma,
+        const real_type delta, const real_type cutoff_ratio,
+        const std::vector<parameter_type>& parameters,
+        const std::vector<dna_index_type>& dna_idxs)
         : sigma_(sigma), delta_(delta), delta2_(delta * 2),
-          one_over_2delta_(0.5 / delta), cutoff_ratio_(cutoff_ratio),
-          exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
+          pi_over_2delta_(math::constants<real_type>::pi() * 0.5 / delta),
+          cutoff_ratio_(cutoff_ratio), max_cutoff_length_(0),
+          parameters_(parameters), dnas_(dna_idxs)
+    {}
+    ~ProteinDNANonSpecificPotential() = default;
+
+    template<typename traitsT>
+    void initialize(const System<traitsT>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        this->parameters_  .reserve(parameters.size());
-        this->participants_.reserve(parameters.size());
-        for(const auto& idxp : parameters)
-        {
-            const auto idx = idxp.first;
-
-            this->participants_.push_back(idx);
-            if(idxp.second.kind == bead_kind::Protein)
-            {
-                this->proteins_.push_back(idx);
-            }
-
-            if(idx >= this->parameters_.size())
-            {
-                this->parameters_.resize(idx+1, self_type::default_parameter());
-            }
-            this->parameters_.at(idx) = idxp.second;
-        }
+        this->update(sys);
+        return;
     }
-    ~ProteinDNANonSpecificPotential() = default;
+
+    template<typename traitsT>
+    void update(const System<traitsT>&) noexcept
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+        // re-set cutoff length
+
+        this->max_cutoff_length_ = real_type(0);
+        for(auto& para : this->parameters_)
+        {
+            para.r_cut    = para.r0 + cutoff_ratio_ * sigma_;
+            para.r_cut_sq = para.r_cut * para.r_cut;
+
+            this->max_cutoff_length_ = std::max(max_cutoff_length_, para.r_cut);
+        }
+        return;
+    }
 
     std::pair<real_type, real_type>
     f_df(const real_type r0, const real_type r) const noexcept
@@ -146,7 +111,6 @@ class ProteinDNANonSpecificPotential
     std::pair<real_type, real_type>
     g_dg(const real_type theta0, const real_type theta) const noexcept
     {
-        constexpr auto  pi         = math::constants<real_type>::pi();
         const real_type dtheta     = theta - theta0;
         const real_type abs_dtheta = std::abs(dtheta);
         if(abs_dtheta < this->delta_)
@@ -155,9 +119,9 @@ class ProteinDNANonSpecificPotential
         }
         else if(abs_dtheta < this->delta2_)
         {
-            const real_type c = std::cos(pi * dtheta * one_over_2delta_);
-            const real_type s = std::sin(pi * dtheta * one_over_2delta_);
-            return std::make_pair(1 - c * c, 2 * s * c * pi * one_over_2delta_);
+            const real_type c = std::cos(dtheta * pi_over_2delta_);
+            const real_type s = std::sin(dtheta * pi_over_2delta_);
+            return std::make_pair(1 - c * c, 2 * s * c * pi_over_2delta_);
         }
         else
         {
@@ -172,7 +136,6 @@ class ProteinDNANonSpecificPotential
     }
     real_type g(const real_type theta0, const real_type theta) const noexcept
     {
-        constexpr auto pi = math::constants<real_type>::pi();
         const real_type dtheta     = theta - theta0;
         const real_type abs_dtheta = std::abs(dtheta);
         if(abs_dtheta < this->delta_)
@@ -181,7 +144,7 @@ class ProteinDNANonSpecificPotential
         }
         else if(abs_dtheta < this->delta2_)
         {
-            const real_type term = std::cos(pi * dtheta * one_over_2delta_);
+            const real_type term = std::cos(dtheta * pi_over_2delta_);
             return real_type(1) - term * term;
         }
         else
@@ -190,127 +153,25 @@ class ProteinDNANonSpecificPotential
         }
     }
 
-    pair_parameter_type
-    prepare_params(const std::size_t i, const std::size_t j) const noexcept
-    {
-        const auto& pi = this->parameters_[i];
-        const auto& pj = this->parameters_[j];
-        assert(pi.kind != bead_kind::invalid);
-        assert(pj.kind != bead_kind::invalid);
-        assert(pi.kind != pj.kind);
-
-        pair_parameter_type pp;
-
-        if(pi.kind == bead_kind::DNA && pj.kind == bead_kind::Protein)
-        {
-            pp.DNA    = static_cast<std::uint32_t>(i);
-            pp.S3     = pi.S3;
-            pp.PN     = pj.PN;
-            pp.PC     = pj.PC;
-            pp.k      = pj.k;
-            pp.r0     = pj.r0;
-            pp.theta0 = pj.theta0;
-            pp.phi0   = pj.phi0;
-        }
-        else if(pi.kind == bead_kind::Protein && pj.kind == bead_kind::DNA)
-        {
-            pp.DNA    = static_cast<std::uint32_t>(j);
-            pp.S3     = pj.S3;
-            pp.PN     = pi.PN;
-            pp.PC     = pi.PC;
-            pp.k      = pi.k;
-            pp.r0     = pi.r0;
-            pp.theta0 = pi.theta0;
-            pp.phi0   = pi.phi0;
-        }
-        else
-        {
-            assert(false);
-        }
-        return pp;
-    }
-
     real_type cutoff_ratio()      const noexcept {return cutoff_ratio_;}
-    real_type gaussian_cutoff()   const noexcept {return sigma_ * cutoff_ratio_;}
-    real_type max_cutoff_length() const noexcept
-    {
-        real_type max_r0 = 0.0;
-        for(const auto pro : this->proteins_)
-        {
-            const auto& para = this->parameters_.at(pro);
-            max_r0 = std::max(max_r0, para.r0);
-        }
-        return max_r0 + this->sigma_ * this->cutoff_ratio_;
-    }
+    real_type max_cutoff_length() const noexcept {return this->max_cutoff_length_;}
 
-    template<typename traitsT>
-    void initialize(const System<traitsT>& sys) noexcept
-    {
-        MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_LOG_FUNCTION();
-
-        this->update(sys);
-        return;
-    }
-
-    template<typename traitsT>
-    void update(const System<traitsT>& sys) noexcept
-    {
-        MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_LOG_FUNCTION();
-
-        // update exclusion list based on sys.topology()
-        exclusion_list_.make(sys);
-        return;
-    }
-
-    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
-    {
-        // if not excluded, the pair has interaction.
-        if(exclusion_list_.is_excluded(i, j))
-        {
-            return false;
-        }
-        const auto i_kind = this->parameters_[i].kind;
-        const auto j_kind = this->parameters_[j].kind;
-        if(i_kind == bead_kind::Protein && j_kind == bead_kind::DNA)
-        {
-            return true; // Protein-DNA
-        }
-        else if(i_kind == bead_kind::DNA && j_kind == bead_kind::Protein)
-        {
-            return true; // DNA-Protein
-        }
-        return false; // other pair
-    }
-
-    // for testing
-    exclusion_list_type const& exclusion_list() const noexcept
-    {
-        return exclusion_list_;
-    }
+    // access to the parameters...
+    std::vector<parameter_type>&       contacts()       noexcept {return parameters_;}
+    std::vector<parameter_type> const& contacts() const noexcept {return parameters_;}
+    std::vector<dna_index_type>&       dnas()       noexcept {return dnas_;}
+    std::vector<dna_index_type> const& dnas() const noexcept {return dnas_;}
 
     // ------------------------------------------------------------------------
     // used by Observer.
     static const char* name() noexcept {return "PDNS";}
 
-    // ------------------------------------------------------------------------
-    // the following accessers would be used in tests.
-
-    // access to the parameters...
-    std::vector<parameter_type>&       parameters()       noexcept {return parameters_;}
-    std::vector<parameter_type> const& parameters() const noexcept {return parameters_;}
-
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
-    std::vector<std::size_t> const& proteins()     const noexcept {return proteins_;}
-
   private:
 
-    real_type sigma_, delta_, delta2_, one_over_2delta_, cutoff_ratio_;
-    container_type           parameters_;     // indices
-    std::vector<std::size_t> participants_;   // PRO + DNA beads
-    std::vector<std::size_t> proteins_;       // PRO only; to reduce loop size
-    exclusion_list_type      exclusion_list_;
+    real_type sigma_, delta_, delta2_, pi_over_2delta_;
+    real_type cutoff_ratio_, max_cutoff_length_;
+    std::vector<parameter_type> parameters_;
+    std::vector<dna_index_type> dnas_;
 };
 
 } // mjolnir
