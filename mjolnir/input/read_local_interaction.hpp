@@ -575,7 +575,7 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
 
 template<typename traitsT>
 std::unique_ptr<LocalInteractionBase<traitsT>>
-read_pdns_interaction(const std::string topol, const toml::value& local)
+read_pdns_interaction(const std::string& topol, const toml::value& local)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
