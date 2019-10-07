@@ -9,6 +9,7 @@
 
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingPotential.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingInteraction.hpp>
+#include <mjolnir/forcefield/PDNS/ProteinDNANonSpecificInteraction.hpp>
 
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
@@ -422,6 +423,111 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
             std::move(parameters), std::move(potential), std::move(nuc_idxs));
 }
 
+
+// ----------------------------------------------------------------------------
+// PDNS Interaction
+
+template<typename traitsT>
+std::unique_ptr<LocalInteractionBase<traitsT>>
+read_pdns_interaction(const std::string topol, const toml::value& local)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type      = typename traitsT::real_type;
+    using potential_type = ProteinDNANonSpecificPotential<real_type>;
+    using parameter_type = typename potential_type::parameter_type;
+    using dna_index_type = typename potential_type::dna_index_type;
+
+    if(topol != "none")
+    {
+        MJOLNIR_LOG_WARN("In PDNS Interaction, contacting particle pair changes"
+                         " every step. Topology cannot be defined.");
+    }
+    // ```toml
+    // [[forcefields.local]]
+    // interaction = "PDNS"
+    // potential   = "PDNS"
+    // topology    = "none"
+    // sigma  = 1.0
+    // delta  = 0.17453
+    // cutoff = 5.0 # relative to sigma
+    // parameters  = [
+    // {index =    2, kind = "DNA", S3 = 1},
+    // {index =    5, kind = "DNA", S3 = 4},
+    // # ...
+    // {index = 1000, kind = "Protein", PN =  999, PC = 1001, k = 1.2, r0 = 5.0, theta0 = 100.0, phi0 = 130.0},
+    // {index = 1023, kind = "Protein", PN = 1022, PC = 1024, k = 1.2, r0 = 6.0, theta0 = 110.0, phi0 = 120.0},
+    // # ...
+    // ]
+    // ```
+
+    // ------------------------------------------------------------------------
+    // read parameters
+
+    const real_type dlt = toml::find<real_type>(local, "delta");
+    const real_type sgm = toml::find<real_type>(local, "sigma");
+
+    real_type cut = potential_type::default_cutoff();
+    if(local.as_table().count("cutoff") != 0)
+    {
+        cut = toml::find<real_type>(local, "cutoff");
+    }
+    const real_type cutoff = cut;
+    const real_type margin = toml::find_or<real_type>(local, "margin", 0.5);
+
+    const auto& env = local.as_table().count("env") == 1 ?
+                      local.as_table().at("env") : toml::value{};
+
+    const auto& ps = toml::find<toml::array>(local, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    std::vector<parameter_type> params;
+    std::vector<dna_index_type> dnas;
+    params.reserve(ps.size());
+    dnas  .reserve(ps.size());
+
+    for(const auto& item : ps)
+    {
+        const auto idx  = toml::find<std::size_t>(item, "index");
+        const auto kind = toml::find<std::string>(item, "kind");
+        if(kind == "Protein")
+        {
+            parameter_type para;
+            para.P      = idx;
+            para.PN     = find_parameter<std::uint32_t>(item, env, "PN");
+            para.PC     = find_parameter<std::uint32_t>(item, env, "PC");
+            para.k      = find_parameter<real_type>(item, env, "k");
+            para.r0     = find_parameter<real_type>(item, env, "r0");
+            para.theta0 = find_parameter<real_type>(item, env, "theta0");
+            para.phi0   = find_parameter<real_type>(item, env, "phi0");
+            params.push_back(para);
+
+            MJOLNIR_LOG_INFO("Protein: idx = ", idx, ", PN = ", para.PN,
+                ", PC = ", para.PC, ", k = ", para.k, ", r0 = ", para.r0,
+                ", theta0 = ", para.theta0, ", phi0 = ", para.phi0);
+        }
+        else if (kind == "DNA")
+        {
+            const auto S3 = find_parameter<std::uint32_t>(item, env, "S3");
+            dnas.emplace_back(idx, S3);
+            MJOLNIR_LOG_INFO("DNA: idx = ", idx, ", S3 = ", S3);
+        }
+        else
+        {
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "mjolnir::read_pdns_interaction: unknown kind ",
+                toml::find(item, "kind"), "here", {
+                "expected value is one of the following.",
+                "- \"Protein\": Protein bead has PN, PC and native parameters",
+                "- \"DNA\"    : DNA bead has index of the corresponding Sugar."
+                }));
+        }
+    }
+    return make_unique<ProteinDNANonSpecificInteraction<traitsT>>(
+        potential_type(sgm, dlt, cutoff, std::move(params), std::move(dnas)),
+        margin);
+}
+
 // ----------------------------------------------------------------------------
 // general read_local_interaction function
 // ----------------------------------------------------------------------------
@@ -467,6 +573,11 @@ read_local_interaction(const toml::value& local)
         MJOLNIR_LOG_NOTICE("3SPN2BaseStacking interaction found.");
         return read_3spn2_base_stacking_interaction<traitsT>(kind, local);
     }
+    else if(interaction == "PDNS")
+    {
+        MJOLNIR_LOG_NOTICE("P-D ns Interaction found.");
+        return read_pdns_interaction<traitsT>(kind, local);
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -477,6 +588,7 @@ read_local_interaction(const toml::value& local)
             "- \"BondAngle\"     : 3-body well-known bond angle interaction",
             "- \"DihedralAngle\" : 4-body well-known dihedral angle interaction",
             "- \"Dummy\"         : To represent a strange topology. It does nothing",
+            "- \"PDNS\"          : directional contact representing H-bond between protein and DNA"
             }));
     }
 }

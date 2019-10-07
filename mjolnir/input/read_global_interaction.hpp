@@ -6,7 +6,6 @@
 #include <mjolnir/interaction/global/GlobalPairUniformLennardJonesInteraction.hpp>
 #include <mjolnir/interaction/global/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseBaseInteraction.hpp>
-#include <mjolnir/forcefield/PDNS/ProteinDNANonSpecificInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -245,105 +244,6 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
 }
 
 // ----------------------------------------------------------------------------
-// PDNS Interaction
-
-template<typename traitsT>
-std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_global_pdns_interaction(const toml::value& global)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    using real_type      = typename traitsT::real_type;
-    using bead_kind      = parameter_PDNS::bead_kind;
-    using potential_type = ProteinDNANonSpecificPotential<real_type>;
-    using parameter_type = typename potential_type::parameter_type;
-
-    // ```toml
-    // [[forcefields.global]]
-    // interaction = "PDNS"
-    // potential   = "PDNS"
-    // spatial_partition.type   = "CellList"
-    // spatial_partition.margin = 1.0
-    // sigma = 1.0
-    // delta = 0.17453
-    // parameters  = [
-    // {index =    2, S3 = 1, kind = "DNA"},
-    // {index =    5, S3 = 4, kind = "DNA"},
-    // # ...
-    // {index = 1000, kind = "Protein", PN =  999, PC = 1001, k = 1.2, r0 = 5.0, theta0 = 100.0, phi0 = 130.0},
-    // {index = 1023, kind = "Protein", PN = 1022, PC = 1024, k = 1.2, r0 = 6.0, theta0 = 110.0, phi0 = 120.0},
-    // # ...
-    // ]
-    // ```
-
-    // ------------------------------------------------------------------------
-    // read parameters
-
-    const real_type dlt = toml::find<real_type>(global, "delta");
-    const real_type sgm = toml::find<real_type>(global, "sigma");
-
-    real_type cut = potential_type::default_cutoff();
-    if(global.as_table().count("cutoff") != 0)
-    {
-        cut = toml::find<real_type>(global, "cutoff");
-    }
-    const real_type cutoff = cut;
-
-    const auto& env = global.as_table().count("env") == 1 ?
-                      global.as_table().at("env") : toml::value{};
-
-    const auto& ps = toml::find<toml::array>(global, "parameters");
-    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-    std::vector<std::pair<std::size_t, parameter_type>> params;
-    params.reserve(ps.size());
-    for(const auto& item : ps)
-    {
-        parameter_type para;
-
-        const auto idx  = toml::find<std::size_t>(item, "index");
-        const auto kind = toml::find<std::string>(item, "kind");
-        if(kind == "Protein")
-        {
-            para.kind = bead_kind::Protein;
-            para.PN     = find_parameter<std::uint32_t>(item, env, "PN");
-            para.PC     = find_parameter<std::uint32_t>(item, env, "PC");
-            para.k      = find_parameter<real_type>(item, env, "k");
-            para.r0     = find_parameter<real_type>(item, env, "r0");
-            para.theta0 = find_parameter<real_type>(item, env, "theta0");
-            para.phi0   = find_parameter<real_type>(item, env, "phi0");
-            MJOLNIR_LOG_INFO("kind = ", para.kind,
-                ", PN = ", para.PN, ", PC = ", para.PC, ", k = ", para.k,
-                ", r0 = ", para.r0, ", theta0 = ", para.theta0,
-                ", phi0 = ", para.phi0);
-        }
-        else if (kind == "DNA")
-        {
-            para.kind = bead_kind::DNA;
-            para.S3   = find_parameter<std::uint32_t>(item, env, "S3");
-            MJOLNIR_LOG_INFO("kind = ", para.kind, ", S3 = ", para.S3);
-        }
-        else
-        {
-            throw_exception<std::runtime_error>(toml::format_error("[error] "
-                "mjolnir::read_pdns_interaction: unknown kind ",
-                toml::find(item, "kind"), "here", {
-                "expected value is one of the following.",
-                "- \"Protein\": Protein bead has PN, PC and native parameters",
-                "- \"DNA\"    : DNA bead has index of the corresponding Sugar."
-                }));
-        }
-        params.emplace_back(idx, para);
-    }
-
-    return make_unique<ProteinDNANonSpecificInteraction<traitsT>>(
-            ProteinDNANonSpecificPotential<real_type>(sgm, dlt, cutoff,
-                std::move(params), read_ignore_particles_within(global),
-                read_ignored_molecule(global), read_ignored_group(global)),
-            read_spatial_partition<traitsT, potential_type>(global));
-}
-
-// ----------------------------------------------------------------------------
 // general read_global_interaction function
 // ----------------------------------------------------------------------------
 
@@ -365,11 +265,6 @@ read_global_interaction(const toml::value& global)
         MJOLNIR_LOG_NOTICE("3SPN2BaseBaseInteraction found.");
         return read_global_3spn2_base_base_interaction<traitsT>(global);
     }
-    else if(interaction == "PDNS")
-    {
-        MJOLNIR_LOG_NOTICE("P-D ns Interaction found.");
-        return read_global_pdns_interaction<traitsT>(global);
-    }
     else
     {
         throw std::runtime_error(toml::format_error("[error] "
@@ -378,7 +273,6 @@ read_global_interaction(const toml::value& global)
             "expected value is one of the following.",
             "- \"Pair\"         : well-known pair interaction depends only on the distance",
             "- \"3SPN2BaseBase\": Base pair and cross stacking interaction for 3SPN2 DNA model",
-            "- \"PDNS\"         : directional contact representing H-bond between protein and DNA"
             }));
     }
 }
