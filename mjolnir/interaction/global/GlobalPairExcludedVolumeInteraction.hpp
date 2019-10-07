@@ -141,8 +141,7 @@ class GlobalPairInteraction<
         return E;
     }
 
-    std::string name() const override
-    {return "GlobalPairExcludedVolumeInteraction";}
+    std::string name() const override {return "GlobalPairExcludedVolume";}
 
   private:
 

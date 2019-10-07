@@ -7,7 +7,7 @@
 #endif
 
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/input/read_global_forcefield.hpp>
+#include <mjolnir/input/read_forcefield.hpp>
 
 #include <typeindex>
 #include <typeinfo>
@@ -19,10 +19,15 @@ BOOST_AUTO_TEST_CASE(read_empty_global_forcefield)
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
-        const toml::array v{};
-        const auto ff = mjolnir::read_global_forcefield<traits_type>(v, "./");
-        BOOST_TEST(ff.empty());
-        BOOST_TEST(ff.size() == 0u);
+        using namespace toml::literals;
+        const auto v = u8R"(
+            [files]
+            output.prefix = "test"
+            [[forcefields]]
+        )"_toml;
+        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
+        BOOST_TEST(ff.global().empty());
+        BOOST_TEST(ff.global().size() == 0u);
     }
 }
 
@@ -34,7 +39,11 @@ BOOST_AUTO_TEST_CASE(read_global_forcefield)
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
-        const toml::array v{u8R"(
+        const auto v = u8R"(
+            [files]
+            output.prefix = "test"
+            [[forcefields]]
+            [[forcefields.global]]
             interaction                     = "Pair"
             potential                       = "ExcludedVolume"
             spatial_partition.type          = "Naive"
@@ -43,14 +52,13 @@ BOOST_AUTO_TEST_CASE(read_global_forcefield)
             ignore.particles_within.bond    = 3
             ignore.particles_within.contact = 1
             parameters = []
-            )"_toml
-        };
+        )"_toml;
 
-        const auto ff = mjolnir::read_global_forcefield<traits_type>(v, "./");
-        BOOST_TEST(!ff.empty());
-        BOOST_TEST(ff.size() == 1u);
+        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
+        BOOST_TEST(!ff.global().empty());
+        BOOST_TEST( ff.global().size() == 1u);
 
-        const auto& interaction_ptr = *ff.begin();
+        const auto& interaction_ptr = *(ff.global().begin());
         BOOST_TEST(static_cast<bool>(interaction_ptr));
 
         using exv_interaction = mjolnir::GlobalPairInteraction<
@@ -62,15 +70,19 @@ BOOST_AUTO_TEST_CASE(read_global_forcefield)
     }
 }
 
-BOOST_AUTO_TEST_CASE(read_several_global_forcefield)
+BOOST_AUTO_TEST_CASE(read_several_forcefield)
 {
-    mjolnir::LoggerManager::set_default_logger("test_read_global_forcefield.log");
+    mjolnir::LoggerManager::set_default_logger("test_read_forcefield.log");
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
-        const toml::array v{u8R"(
+        const auto v = u8R"(
+            [files]
+            output.prefix = "test"
+            [[forcefields]]
+            [[forcefields.global]]
             interaction                     = "Pair"
             potential                       = "ExcludedVolume"
             spatial_partition.type          = "Naive"
@@ -79,7 +91,7 @@ BOOST_AUTO_TEST_CASE(read_several_global_forcefield)
             ignore.particles_within.bond    = 3
             ignore.particles_within.contact = 1
             parameters = []
-            )"_toml, u8R"(
+            [[forcefields.global]]
             interaction                     = "Pair"
             potential                       = "LennardJones"
             spatial_partition.type          = "Naive"
@@ -87,12 +99,11 @@ BOOST_AUTO_TEST_CASE(read_several_global_forcefield)
             ignore.particles_within.bond    = 3
             ignore.particles_within.contact = 1
             parameters = []
-            )"_toml
-        };
+        )"_toml;
 
-        const auto ff = mjolnir::read_global_forcefield<traits_type>(v, "./");
-        BOOST_TEST(!ff.empty());
-        BOOST_TEST(ff.size() == 2u);
+        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
+        BOOST_TEST(!ff.global().empty());
+        BOOST_TEST( ff.global().size() == 2u);
 
         using exv_interaction = mjolnir::GlobalPairInteraction<
                 traits_type, mjolnir::ExcludedVolumePotential<real_type>
@@ -105,7 +116,7 @@ BOOST_AUTO_TEST_CASE(read_several_global_forcefield)
         found[typeid(exv_interaction)] = false;
         found[typeid(lj_interaction)]  = false;
 
-        for(const auto& interaction_ptr : ff)
+        for(const auto& interaction_ptr : ff.global())
         {
             BOOST_TEST(static_cast<bool>(interaction_ptr));
             const auto& deref = *interaction_ptr;

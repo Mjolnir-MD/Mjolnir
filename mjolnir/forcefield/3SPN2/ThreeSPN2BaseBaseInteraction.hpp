@@ -73,7 +73,7 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
     void      calc_force (system_type& sys)       const noexcept override;
     real_type calc_energy(const system_type& sys) const noexcept override;
 
-    std::string name() const override {return "3SPN2BaseBaseInteraction";}
+    std::string name() const override {return "3SPN2BaseBase";}
 
     potential_type const& potential() const noexcept {return potential_;}
     potential_type&       potential()       noexcept {return potential_;}

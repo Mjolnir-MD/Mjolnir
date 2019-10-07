@@ -137,8 +137,7 @@ class GlobalPairInteraction<
         return E;
     }
 
-    std::string name() const override
-    {return "GlobalPairUniformLennardJonesInteraction";}
+    std::string name() const override {return "GlobalPairUniformLennardJones";}
 
   private:
 
