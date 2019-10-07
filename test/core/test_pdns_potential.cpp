@@ -14,17 +14,13 @@ BOOST_AUTO_TEST_CASE(PDNS_Potential_f)
     mjolnir::LoggerManager::set_default_logger("test_pdns_potential.log");
 
     using real_type = double;
-    using potential_type = mjolnir::ProteinDNANonSpecificPotential<real_type>;
-    using ignore_molecule_type = typename potential_type::ignore_molecule_type;
-    using ignore_group_type    = typename potential_type::ignore_group_type;
 
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
     constexpr real_type  pi = mjolnir::math::constants<real_type>::pi();
 
     mjolnir::ProteinDNANonSpecificPotential<real_type> potential(
-        1.0, pi / 18.0, 5.0, {/* parameter = empty */}, {/* exclude = empty */},
-        ignore_molecule_type("Nothing"), ignore_group_type({}));
+        1.0, pi / 18.0, 5.0, {/* parameter = empty */}, {/* exclude = empty */});
 
     const real_type r_0   = 7.0;
     const real_type r_min = 1.0;
@@ -60,17 +56,13 @@ BOOST_AUTO_TEST_CASE(PDNS_Potential_g)
     mjolnir::LoggerManager::set_default_logger("test_pdns_potential.log");
 
     using real_type = double;
-    using potential_type = mjolnir::ProteinDNANonSpecificPotential<real_type>;
-    using ignore_molecule_type = typename potential_type::ignore_molecule_type;
-    using ignore_group_type    = typename potential_type::ignore_group_type;
 
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
     constexpr real_type  pi = mjolnir::math::constants<real_type>::pi();
 
     mjolnir::ProteinDNANonSpecificPotential<real_type> potential(
-        1.0, pi / 18.0, 5.0, {/* parameter = empty */}, {/* exclude = empty */},
-        ignore_molecule_type("Nothing"), ignore_group_type({}));
+        1.0, pi / 18.0, 5.0, {/* parameter = empty */}, {/* exclude = empty */});
 
     const real_type theta_0   = pi * 0.5;
     const real_type theta_min = pi * 0.3;
@@ -98,63 +90,4 @@ BOOST_AUTO_TEST_CASE(PDNS_Potential_g)
         BOOST_TEST(g1 == g1_, boost::test_tools::tolerance(h));
         BOOST_TEST(g2 == g2_, boost::test_tools::tolerance(h));
     }
-}
-
-BOOST_AUTO_TEST_CASE(PDNS_Potential_interacting_pair)
-{
-    mjolnir::LoggerManager::set_default_logger("test_pdns_potential.log");
-
-    using real_type = double;
-    using potential_type = mjolnir::ProteinDNANonSpecificPotential<real_type>;
-    using parameter_type = typename potential_type::parameter_type;
-    using bead_kind      = typename potential_type::bead_kind;
-    using ignore_molecule_type = typename potential_type::ignore_molecule_type;
-    using ignore_group_type    = typename potential_type::ignore_group_type;
-
-    constexpr real_type  pi = mjolnir::math::constants<real_type>::pi();
-    const auto nil = potential_type::invalid();
-
-    const parameter_type p_pro{bead_kind::Protein, nil, 1,   2,   1.0, 2.0, 3.0, 4.0};
-    const parameter_type p_dna{bead_kind::DNA,     3,   nil, nil, 0.0, 0.0, 0.0, 0.0};
-
-    mjolnir::ProteinDNANonSpecificPotential<real_type> potential(
-        1.0, pi / 18.0, 5.0, {{0, p_pro}, {1, p_pro}, {2, p_dna}, {3, p_dna}},
-        {/* exclude */}, ignore_molecule_type("Nothing"), ignore_group_type({})
-    );
-
-    using traits_type     = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using boundary_type   = typename traits_type::boundary_type;
-    using coordinate_type = typename traits_type::coordinate_type;
-
-    mjolnir::System<traits_type> sys(4, boundary_type{});
-    for(std::size_t i=0; i<4; ++i)
-    {
-        sys.mass(i)     = 0.0;
-        sys.rmass(i)    = 0.0;
-        sys.position(i) = mjolnir::math::make_coordinate<coordinate_type>(0,0,0);
-        sys.velocity(i) = mjolnir::math::make_coordinate<coordinate_type>(0,0,0);
-        sys.force(i)    = mjolnir::math::make_coordinate<coordinate_type>(0,0,0);
-        sys.name(i)     = "X";
-        sys.group(i)    = "NONE";
-    }
-
-    sys.topology().construct_molecules();
-    potential.initialize(sys);
-
-    BOOST_TEST(!potential.has_interaction(0, 1));
-    BOOST_TEST( potential.has_interaction(0, 2));
-    BOOST_TEST( potential.has_interaction(0, 3));
-    BOOST_TEST( potential.has_interaction(1, 2));
-    BOOST_TEST( potential.has_interaction(1, 3));
-    BOOST_TEST(!potential.has_interaction(2, 3));
-
-    const auto pp = potential.prepare_params(0, 2);
-    BOOST_TEST(pp.PN == 1);
-    BOOST_TEST(pp.PC == 2);
-    BOOST_TEST(pp.S3 == 3);
-
-    BOOST_TEST(pp.k      == 1.0);
-    BOOST_TEST(pp.r0     == 2.0);
-    BOOST_TEST(pp.theta0 == 3.0);
-    BOOST_TEST(pp.phi0   == 4.0);
 }

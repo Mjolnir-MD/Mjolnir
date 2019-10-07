@@ -20,14 +20,11 @@ BOOST_AUTO_TEST_CASE(PDNS_Interaction)
     using boundary_type     = traits_type::boundary_type;
     using system_type       = mjolnir::System<traits_type>;
 
-    using real_type = double;
-    using potential_type       = mjolnir::ProteinDNANonSpecificPotential<real_type>;
-    using parameter_type       = typename potential_type::parameter_type;
-    using bead_kind            = typename potential_type::bead_kind;
-    using ignore_molecule_type = typename potential_type::ignore_molecule_type;
-    using ignore_group_type    = typename potential_type::ignore_group_type;
-    using partition_type       = mjolnir::VerletList<traits_type, potential_type>;
-    using interaction_type     = mjolnir::ProteinDNANonSpecificInteraction<traits_type>;
+    using real_type        = double;
+    using potential_type   = mjolnir::ProteinDNANonSpecificPotential<real_type>;
+    using parameter_type   = typename potential_type::parameter_type;
+    using dna_index_type   = typename potential_type::dna_index_type;
+    using interaction_type = mjolnir::ProteinDNANonSpecificInteraction<traits_type>;
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
@@ -38,7 +35,6 @@ BOOST_AUTO_TEST_CASE(PDNS_Interaction)
     //     /       \     |
     //  2 o         o 4  |
 
-    constexpr auto nil = potential_type::invalid();
     constexpr auto pi  = mjolnir::math::constants<real_type>::pi();
 
     const real_type r0     = 5.0;
@@ -48,18 +44,13 @@ BOOST_AUTO_TEST_CASE(PDNS_Interaction)
     const real_type sigma  = 1.0;
     const real_type delta  = pi / 18.0;
 
-    const parameter_type p_pro{
-        bead_kind::Protein, nil, 0, 2, -1.2, r0, theta0, phi0};
-    const parameter_type p_dna{
-        bead_kind::DNA,     4,   nil, nil, 0.0, 0.0, 0.0, 0.0};
+    const parameter_type p_pro{1, 0, 2, -1.2, r0, theta0, phi0, r0+5.0, (r0+5.0)*(r0+5.0)};
+    const dna_index_type p_dna{3, 4};
 
     mjolnir::ProteinDNANonSpecificPotential<real_type> potential(
-        sigma, delta, 5.0, {{1, p_pro}, {3, p_dna}}, {/* exclude = empty */},
-        ignore_molecule_type("Nothing"), ignore_group_type({}));
+        sigma, delta, 5.0, {p_pro}, {p_dna});
 
-    interaction_type interaction(potential_type(potential),
-        mjolnir::SpatialPartition<traits_type, potential_type>(
-            mjolnir::make_unique<partition_type>()));
+    interaction_type interaction(potential_type(potential), 0.5);
 
     system_type sys(5, boundary_type{});
 
@@ -170,6 +161,7 @@ BOOST_AUTO_TEST_CASE(PDNS_Interaction)
             sys.force(idx)     = coord_type(0.0, 0.0, 0.0);
         }
         const system_type init = sys;
+        interaction.initialize(init);
 
         constexpr real_type tol = 1e-4;
         constexpr real_type dr  = 1e-5;
@@ -198,6 +190,8 @@ BOOST_AUTO_TEST_CASE(PDNS_Interaction)
 
                 BOOST_TEST(-dE / dr == mjolnir::math::X(sys.force(idx)),
                            boost::test_tools::tolerance(tol));
+                BOOST_TEST_MESSAGE("force.x = " << mjolnir::math::X(sys.force(idx)) <<
+                                   ", -dE/dr = " << -dE/dr);
             }
             {
                 // ----------------------------------------------------------------
@@ -222,6 +216,8 @@ BOOST_AUTO_TEST_CASE(PDNS_Interaction)
 
                 BOOST_TEST(-dE / dr == mjolnir::math::Y(sys.force(idx)),
                            boost::test_tools::tolerance(tol));
+                BOOST_TEST_MESSAGE("force.y = " << mjolnir::math::Y(sys.force(idx)) <<
+                                   ", -dE/dr = " << -dE/dr);
             }
             {
                 // ----------------------------------------------------------------
@@ -246,6 +242,8 @@ BOOST_AUTO_TEST_CASE(PDNS_Interaction)
 
                 BOOST_TEST(-dE / dr == mjolnir::math::Z(sys.force(idx)),
                            boost::test_tools::tolerance(tol));
+                BOOST_TEST_MESSAGE("force.z = " << mjolnir::math::Z(sys.force(idx)) <<
+                                   ", -dE/dr = " << -dE/dr);
             }
         }
     } // theta2
