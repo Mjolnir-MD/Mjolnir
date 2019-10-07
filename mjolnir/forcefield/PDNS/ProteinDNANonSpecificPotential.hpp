@@ -77,16 +77,7 @@ class ProteinDNANonSpecificPotential
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        this->update(sys);
-        return;
-    }
-
-    template<typename traitsT>
-    void update(const System<traitsT>&) noexcept
-    {
-        MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_LOG_FUNCTION();
-        // re-set cutoff length
+        // set cutoff length
 
         this->max_cutoff_length_ = real_type(0);
         for(auto& para : this->parameters_)
@@ -96,6 +87,14 @@ class ProteinDNANonSpecificPotential
 
             this->max_cutoff_length_ = std::max(max_cutoff_length_, para.r_cut);
         }
+
+        this->update(sys);
+        return;
+    }
+
+    template<typename traitsT>
+    void update(const System<traitsT>&) noexcept
+    {
         return;
     }
 
