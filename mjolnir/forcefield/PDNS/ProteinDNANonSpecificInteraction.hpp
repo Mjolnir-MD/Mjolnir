@@ -399,4 +399,20 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_energy(
 }
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize major use-cases
+#include <mjolnir/core/BoundaryCondition.hpp>
+
+namespace mjolnir
+{
+
+extern template class ProteinDNANonSpecificInteraction<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ProteinDNANonSpecificInteraction<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ProteinDNANonSpecificInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ProteinDNANonSpecificInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif// MJOLNIR_FORCEFIELD_PDNS_PROTEIN_DNA_NON_SPECIFIC_INTERACTION_HPP

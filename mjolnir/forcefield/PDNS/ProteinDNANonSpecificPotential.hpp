@@ -173,5 +173,10 @@ class ProteinDNANonSpecificPotential
     std::vector<dna_index_type> dnas_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ProteinDNANonSpecificPotential<double>;
+extern template class ProteinDNANonSpecificPotential<float >;
+#endif// MJOLNIR_SEPARATE_BUILD
+
 } // mjolnir
 #endif// MJOLNIR_FORCEFIELD_PDNS_PROTEIN_DNA_NON_SPECIFIC_INTERACTION_HPP
