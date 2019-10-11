@@ -26,6 +26,7 @@
 #include <mjolnir/omp/BondAngleInteraction.hpp>
 #include <mjolnir/omp/DihedralAngleInteraction.hpp>
 #include <mjolnir/omp/ThreeSPN2BaseStackingInteraction.hpp>
+#include <mjolnir/omp/ProteinDNANonSpecificInteraction.hpp>
 #include <mjolnir/omp/GlobalPairInteraction.hpp>
 #include <mjolnir/omp/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/omp/GlobalPairLennardJonesInteraction.hpp>
