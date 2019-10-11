@@ -54,7 +54,7 @@ class ProteinDNANonSpecificPotential
     }
     static constexpr parameter_type default_parameter() noexcept
     {
-        return parameter_type{invalid(), invalid(), 0, 0, 0, 0};
+        return parameter_type{invalid(), invalid(), invalid(), 0, 0, 0, 0, 0, 0};
     }
     static constexpr real_type default_cutoff() noexcept {return 5.0;}
 
