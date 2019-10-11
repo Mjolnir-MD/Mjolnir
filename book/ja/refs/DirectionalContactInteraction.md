@@ -7,8 +7,7 @@
 
 {% math %}
 U(r, \theta_1, \theta_2) = U_contact (r) U_{angle_1} (\theta_1) U_{angle_2} (\theta_2)
-{% math %}
-
+{% endmath %}
 
 角度に関する利用可能なポテンシャルには以下のようなものがあります。
 
