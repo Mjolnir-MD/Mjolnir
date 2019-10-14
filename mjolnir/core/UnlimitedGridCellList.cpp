@@ -6,15 +6,15 @@
 
 namespace mjolnir
 {
-template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
-template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float >>;
+template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, DebyeHuckelPotential<double>,         true>;
+template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, DebyeHuckelPotential<float >,         true>;
 
-template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
-template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float >>;
+template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, ExcludedVolumePotential<double>,      true>;
+template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, ExcludedVolumePotential<float >,      true>;
 
-template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        LennardJonesPotential<double>>;
-template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        LennardJonesPotential<float >>;
+template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<double>,        true>;
+template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<float >,        true>;
 
-template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
-template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float >>;
+template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<double>, true>;
+template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<float >, true>;
 } // mjolnir

@@ -12,7 +12,7 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename PotentialT>
+template<typename traitsT, typename PotentialT, bool Newtons3rdLaw = true>
 class UnlimitedGridCellList final : public SpatialPartitionBase<traitsT, PotentialT>
 {
   public:
@@ -130,9 +130,9 @@ class UnlimitedGridCellList final : public SpatialPartitionBase<traitsT, Potenti
 
 };
 
-template<typename traitsT, typename potentialT>
-void UnlimitedGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbors,
-        const system_type& sys, const potential_type& pot)
+template<typename traitsT, typename potentialT, bool N3L>
+void UnlimitedGridCellList<traitsT, potentialT, N3L>::make(
+    neighbor_list_type& neighbors, const system_type& sys, const potential_type& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
@@ -200,10 +200,18 @@ void UnlimitedGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighb
             {
                 const auto j = pici.first;
                 MJOLNIR_LOG_DEBUG("looking particle ", j);
-                if(j <= i || !pot.has_interaction(i, j))
+
+                // When N3L flag is activated, (j, i) is omitted if i < j.
+                // Since forces on an interacting pair are always equal in
+                // magnitude and opposite in direction, we normally don't need
+                // to calculate forces twice.
+                //     In some cases, like a special forcefield, requires a
+                // complete list of interacting pair.
+                if(!pot.has_interaction(i, j) || (N3L && j <= i))
                 {
                     continue;
                 }
+
                 // here we don't need to search `participants` because
                 // cell list contains only participants. non-related
                 // particles are already filtered.
@@ -216,7 +224,8 @@ void UnlimitedGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighb
                 }
             }
         }
-        // make the result consistent with NaivePairCalculation...
+        // Sofr the list to make the result the same as NaivePairCalculation.
+        // Reordering floating-point calculation often changes the result.
         std::sort(partner.begin(), partner.end());
         neighbors.add_list_for(i, partner.begin(), partner.end());
     }
@@ -224,8 +233,8 @@ void UnlimitedGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighb
     return ;
 }
 
-template<typename traitsT, typename potentialT>
-void UnlimitedGridCellList<traitsT, potentialT>::initialize(
+template<typename traitsT, typename potentialT, bool N3L>
+void UnlimitedGridCellList<traitsT, potentialT, N3L>::initialize(
         neighbor_list_type& neighbors,
         const system_type& sys, const potential_type& pot)
 {
@@ -296,17 +305,17 @@ void UnlimitedGridCellList<traitsT, potentialT>::initialize(
 
 namespace mjolnir
 {
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float >>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, DebyeHuckelPotential<double>,         true>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, DebyeHuckelPotential<float >,         true>;
 
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float >>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, ExcludedVolumePotential<double>,      true>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, ExcludedVolumePotential<float >,      true>;
 
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        LennardJonesPotential<double>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        LennardJonesPotential<float >>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<double>,        true>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<float >,        true>;
 
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float >>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<double>, true>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<float >, true>;
 }
 #endif // SEPARATE_BUILD
 

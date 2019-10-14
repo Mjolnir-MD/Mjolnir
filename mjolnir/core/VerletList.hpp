@@ -7,7 +7,7 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename PotentialT>
+template<typename traitsT, typename PotentialT, bool Newtons3rdLaw = true>
 class VerletList final : public SpatialPartitionBase<traitsT, PotentialT>
 {
   public:
@@ -77,8 +77,8 @@ class VerletList final : public SpatialPartitionBase<traitsT, PotentialT>
     real_type      current_margin_;
 };
 
-template<typename traitsT, typename potentialT>
-void VerletList<traitsT, potentialT>::make(neighbor_list_type& neighbors,
+template<typename traitsT, typename potentialT, bool N3L>
+void VerletList<traitsT, potentialT, N3L>::make(neighbor_list_type& neighbors,
         const system_type& sys, const potential_type& pot)
 {
     neighbors.clear();
@@ -97,7 +97,12 @@ void VerletList<traitsT, potentialT>::make(neighbor_list_type& neighbors,
         const auto   i = participants[idx];
         const auto& ri = sys.position(i);
 
-        for(std::size_t jdx=idx+1; jdx<participants.size(); ++jdx)
+        // When N3L flag is activated, (j, i) is omitted if i < j. Since forces
+        // on an interacting pair are always equal in magnitude and opposite in
+        // direction, we normally don't need to calculate forces twice.
+        //     In some cases, like a special forcefield, requires a complete
+        // list of interacting pair.
+        for(std::size_t jdx = (N3L ? idx+1 : 0); jdx<participants.size(); ++jdx)
         {
             const auto j = participants[jdx];
             if(!pot.has_interaction(i, j))
@@ -127,25 +132,25 @@ void VerletList<traitsT, potentialT>::make(neighbor_list_type& neighbors,
 
 namespace mjolnir
 {
-extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
-extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float >>;
-extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>;
-extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float >>;
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>, true>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float >, true>;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>, true>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float >, true>;
 
-extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
-extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float >>;
-extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;
-extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float >>;
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>, true>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float >, true>;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>, true>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float >, true>;
 
-extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        LennardJonesPotential<double>>;
-extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        LennardJonesPotential<float >>;
-extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<double>>;
-extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<float >>;
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        LennardJonesPotential<double>, true>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        LennardJonesPotential<float >, true>;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<double>, true>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<float >, true>;
 
-extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
-extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float >>;
-extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
-extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float >>;
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>, true>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float >, true>;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>, true>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float >, true>;
 }
 #endif // SEPARATE_BUILD
 

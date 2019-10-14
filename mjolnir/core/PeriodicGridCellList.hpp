@@ -15,7 +15,7 @@ namespace mjolnir
 // XXX: almost same as UnlimitedGridCellList.
 // the difference between UnlimitedGridCellList is only the number of cells.
 // PeriodicGridCellList can optimize the number of cells using boundary size.
-template<typename traitsT, typename PotentialT>
+template<typename traitsT, typename PotentialT, bool Newtons3rdLaw = true>
 class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, PotentialT>
 {
   public:
@@ -66,8 +66,17 @@ class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, Potentia
                     const system_type& sys, const potential_type& pot) override;
     void make  (neighbor_list_type& neighbors,
                 const system_type& sys, const potential_type& pot) override;
-    void update(neighbor_list_type& neighbors, const real_type,
-                const system_type&, const potential_type&) override;
+
+    void update(neighbor_list_type& neighbors, const real_type dmargin,
+                const system_type& sys, const potential_type& pot) override
+    {
+        this->current_margin_ -= dmargin;
+        if(this->current_margin_ < 0.)
+        {
+            this->make(neighbors, sys, pot);
+        }
+        return ;
+    }
 
     real_type cutoff() const noexcept override {return this->cutoff_;}
     real_type margin() const noexcept override {return this->margin_;}
@@ -133,20 +142,9 @@ class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, Potentia
 #endif
 };
 
-template<typename traitsT, typename potentialT>
-void PeriodicGridCellList<traitsT, potentialT>::update(neighbor_list_type& neighbors,
-        const real_type dmargin, const system_type& sys, const potential_type& pot)
-{
-    this->current_margin_ -= dmargin;
-    if(this->current_margin_ < 0.)
-    {
-        this->make(neighbors, sys, pot);
-    }
-    return ;
-}
-
-template<typename traitsT, typename potentialT>
-void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbors,
+template<typename traitsT, typename potentialT, bool N3L>
+void PeriodicGridCellList<traitsT, potentialT, N3L>::make(
+        neighbor_list_type& neighbors,
         const system_type& sys, const potential_type& pot)
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
@@ -214,7 +212,14 @@ void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbo
             {
                 const auto j = pici.first;
                 MJOLNIR_LOG_DEBUG("looking particle", j);
-                if(j <= i || !pot.has_interaction(i, j))
+
+                // When N3L flag is activated, (j, i) is omitted if i < j.
+                // Since forces on an interacting pair are always equal in
+                // magnitude and opposite in direction, we normally don't need
+                // to calculate forces twice.
+                //     In some cases, like a special forcefield, requires a
+                // complete list of interacting pair.
+                if(!pot.has_interaction(i, j) || (N3L && j <= i))
                 {
                     continue;
                 }
@@ -239,8 +244,8 @@ void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbo
     return ;
 }
 
-template<typename traitsT, typename potentialT>
-void PeriodicGridCellList<traitsT, potentialT>::initialize(
+template<typename traitsT, typename potentialT, bool N3L>
+void PeriodicGridCellList<traitsT, potentialT, N3L>::initialize(
         neighbor_list_type& neighbors,
         const system_type& sys, const potential_type& pot)
 {
@@ -352,17 +357,17 @@ void PeriodicGridCellList<traitsT, potentialT>::initialize(
 
 namespace mjolnir
 {
-extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>;
-extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float >>;
+extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>,         true>;
+extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float >,         true>;
 
-extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;
-extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float >>;
+extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>,      true>;
+extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float >,      true>;
 
-extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<double>>;
-extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<float >>;
+extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<double>,        true>;
+extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<float >,        true>;
 
-extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
-extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float >>;
+extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>, true>;
+extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float >, true>;
 }
 #endif // SEPARATE_BUILD
 
