@@ -38,7 +38,7 @@ read_global_pair_interaction(const toml::value& global)
 
         return make_unique<interaction_t>(
             read_excluded_volume_potential<real_type>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+            read_spatial_partition<traitsT, potential_t, true>(global));
     }
     else if(potential == "HardCoreExcludedVolume")
     {
@@ -48,7 +48,7 @@ read_global_pair_interaction(const toml::value& global)
 
         return make_unique<interaction_t>(
             read_hard_core_excluded_volume_potential<real_type>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+            read_spatial_partition<traitsT, potential_t, true>(global));
     }
     else if(potential == "DebyeHuckel")
     {
@@ -58,7 +58,7 @@ read_global_pair_interaction(const toml::value& global)
 
         return make_unique<interaction_t>(
             read_debye_huckel_potential<real_type>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+            read_spatial_partition<traitsT, potential_t, true>(global));
     }
     else if(potential == "LennardJones")
     {
@@ -68,7 +68,7 @@ read_global_pair_interaction(const toml::value& global)
 
         return make_unique<interaction_t>(
             read_lennard_jones_potential<real_type>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+            read_spatial_partition<traitsT, potential_t, true>(global));
     }
     else if(potential == "UniformLennardJones")
     {
@@ -78,7 +78,7 @@ read_global_pair_interaction(const toml::value& global)
 
         return make_unique<interaction_t>(
             read_uniform_lennard_jones_potential<real_type>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+            read_spatial_partition<traitsT, potential_t, true>(global));
     }
     else if(potential == "3SPN2ExcludedVolume")
     {
@@ -88,7 +88,7 @@ read_global_pair_interaction(const toml::value& global)
 
         return make_unique<interaction_t>(
             read_3spn2_excluded_volume_potential<real_type>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+            read_spatial_partition<traitsT, potential_t, true>(global));
     }
     else
     {
@@ -218,7 +218,7 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
 
         return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(
                 std::move(potential),
-                read_spatial_partition<traitsT, potential_type>(global));
+                read_spatial_partition<traitsT, potential_type, true>(global));
     }
     else if(pot == "3SPN2C")
     {
@@ -229,7 +229,7 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
 
         return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(
                 std::move(potential),
-                read_spatial_partition<traitsT, potential_type>(global));
+                read_spatial_partition<traitsT, potential_type, true>(global));
     }
     else
     {
