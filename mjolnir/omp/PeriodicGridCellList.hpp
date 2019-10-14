@@ -9,8 +9,8 @@ namespace mjolnir
 {
 
 template<typename realT, template<typename, typename> class boundaryT,
-         typename potentialT>
-class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
+         typename potentialT, bool N3L>
+class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT, N3L>
     final : public SpatialPartitionBase<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 {
   public:
@@ -234,10 +234,18 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
                 for(auto pici : cell_list_[cidx].first)
                 {
                     const auto j = pici.first;
-                    if(j <= i || !pot.has_interaction(i, j))
+
+                    // When N3L flag is activated, (j, i) is omitted if i < j.
+                    // Since forces on an interacting pair are always equal in
+                    // magnitude and opposite in direction, we normally don't
+                    // need to calculate forces twice.
+                    //     In some cases, like a special forcefield, requires a
+                    // complete list of interacting pair.
+                    if(!pot.has_interaction(i, j) || (N3L && j <= i))
                     {
                         continue;
                     }
+
                     // here we don't need to search `participants` because
                     // cell list contains only participants. non-related
                     // particles are already filtered.
@@ -335,17 +343,17 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 
 namespace mjolnir
 {
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>;
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float >>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>, true>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float >, true>;
 
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float >>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>, true>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float >, true>;
 
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<double>>;
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<float >>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<double>, true>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<float >, true>;
 
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float >>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>, true>;
+extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float >, true>;
 }
 #endif // SEPARATE_BUILD
 
