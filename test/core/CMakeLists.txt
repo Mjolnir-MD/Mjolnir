@@ -88,6 +88,7 @@ set(TEST_NAMES
     test_read_steepest_descent_simulator
     test_read_switching_forcefield_simulator
 
+    test_read_spatial_partition
     test_read_observer
     test_read_integrator
     test_read_system
