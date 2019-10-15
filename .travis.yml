@@ -127,6 +127,7 @@ matrix:
          packages:
          - cmake
          - boost
+         update: true
 
 # to override default CMake (3.12), use absolute path in LATEST_CMAKE.
 # the default cmake is installed /usr/local/cmake-3.12.4/bin/cmake, and
