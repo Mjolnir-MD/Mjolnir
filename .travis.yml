@@ -6,120 +6,136 @@ matrix:
   - os: linux
     language: cpp
     compiler: gcc
-    env: COMPILER="g++-9" SEPARATE="ON"
+    env: COMPILER="g++-9" SEPARATE="ON" LATEST_CMAKE="/usr/bin/cmake"
     addons:
       apt:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
         - sourceline: 'ppa:ubuntu-toolchain-r/test'
+        - sourceline: 'deb https://apt.kitware.com/ubuntu/ xenial main'
+          key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
         packages:
         - g++-9
         - boost1.70
+        - cmake
   - os: linux
     language: cpp
     compiler: gcc
-    env: COMPILER="g++-9" SEPARATE="OFF"
+    env: COMPILER="g++-9" SEPARATE="OFF" LATEST_CMAKE="/usr/bin/cmake"
     addons:
       apt:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
         - sourceline: 'ppa:ubuntu-toolchain-r/test'
+        - sourceline: 'deb https://apt.kitware.com/ubuntu/ xenial main'
+          key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
         packages:
         - g++-9
         - boost1.70
+        - cmake
   - os: linux
     language: cpp
     compiler: gcc
-    env: COMPILER="g++-8" SEPARATE="OFF"
+    env: COMPILER="g++-8" SEPARATE="OFF" LATEST_CMAKE="/usr/bin/cmake"
     addons:
       apt:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
         - sourceline: 'ppa:ubuntu-toolchain-r/test'
+        - sourceline: 'deb https://apt.kitware.com/ubuntu/ xenial main'
+          key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
         packages:
         - g++-8
         - boost1.70
+        - cmake
   - os: linux
     language: cpp
     compiler: gcc
-    env: COMPILER="g++-7" SEPARATE="OFF"
+    env: COMPILER="g++-7" SEPARATE="OFF" LATEST_CMAKE="/usr/bin/cmake"
     addons:
       apt:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
         - sourceline: 'ppa:ubuntu-toolchain-r/test'
+        - sourceline: 'deb https://apt.kitware.com/ubuntu/ xenial main'
+          key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
         packages:
         - g++-7
         - boost1.70
+        - cmake
   - os: linux
     language: cpp
     compiler: clang
-    env: COMPILER="clang++-8" SEPARATE="ON"
+    env: COMPILER="clang++-8" SEPARATE="ON" LATEST_CMAKE="/usr/bin/cmake"
     addons:
       apt:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
         - sourceline: 'ppa:ubuntu-toolchain-r/test'
+        - sourceline: 'deb https://apt.kitware.com/ubuntu/ xenial main'
+          key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
         - llvm-toolchain-xenial-8
         packages:
         - clang-8
         - boost1.70
+        - cmake
   - os: linux
     language: cpp
     compiler: clang
-    env: COMPILER="clang++-8" SEPARATE="OFF"
+    env: COMPILER="clang++-8" SEPARATE="OFF" LATEST_CMAKE="/usr/bin/cmake"
     addons:
       apt:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
         - sourceline: 'ppa:ubuntu-toolchain-r/test'
+        - sourceline: 'deb https://apt.kitware.com/ubuntu/ xenial main'
+          key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
         - llvm-toolchain-xenial-8
         packages:
         - clang-8
         - boost1.70
+        - cmake
   - os: linux
     language: cpp
     compiler: clang
-    env: COMPILER="clang++-7" SEPARATE="OFF"
+    env: COMPILER="clang++-7" SEPARATE="OFF" LATEST_CMAKE="/usr/bin/cmake"
     addons:
       apt:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
-        - ubuntu-toolchain-r-test
+        - sourceline: 'ppa:ubuntu-toolchain-r/test'
+        - sourceline: 'deb https://apt.kitware.com/ubuntu/ xenial main'
+          key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
         - llvm-toolchain-xenial-7
         packages:
         - clang-7
         - boost1.70
+        - cmake
   - os: osx
     language: cpp
     compiler: clang
-    env: COMPILER="clang++" SEPARATE="OFF"
+    env: COMPILER="clang++" SEPARATE="OFF" LATEST_CMAKE="cmake"
     addons:
       homebrew:
          packages:
          - cmake
          - boost
 
-before_install:
-- |
-  if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-    mkdir -p cmake
-    travis_retry wget "https://github.com/Kitware/CMake/releases/download/v3.14.5/cmake-3.14.5-Linux-x86_64.tar.gz"
-    tar xf cmake-3.14.5-Linux-x86_64.tar.gz -C cmake --strip-components=1
-    export PATH=${TRAVIS_BUILD_DIR}/cmake/bin:${PATH}
-  fi
-- cmake --version
+# to override default CMake (3.12), use absolute path in LATEST_CMAKE.
+# the default cmake is installed /usr/local/cmake-3.12.4/bin/cmake, and
+# the path takes precedence over the /usr/bin.
 
 script:
+- $LATEST_CMAKE --version
 - mkdir build
 - cd build
-- cmake -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON -DUSE_OPENMP=OFF -DBUILD_INTEGRATION_TEST=OFF -DSEPARATE_BUILD="${SEPARATE}" ..
+- $LATEST_CMAKE -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON -DUSE_OPENMP=OFF -DBUILD_INTEGRATION_TEST=OFF -DSEPARATE_BUILD="${SEPARATE}" ..
 - make VERBOSE=1
 - ctest --output-on-failure
