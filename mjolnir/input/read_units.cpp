@@ -6,8 +6,8 @@
 
 namespace mjolnir
 {
-template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<double, UnlimitedBoundary       >>(const toml::value& data);
-template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<float,  UnlimitedBoundary       >>(const toml::value& data);
-template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value& data);
-template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value& data);
+template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<double, UnlimitedBoundary       >>(const toml::value&, const toml::value&);
+template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<float,  UnlimitedBoundary       >>(const toml::value&, const toml::value&);
+template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
+template std::unique_ptr<SimulatorBase> read_units<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
 } // mjolnir
