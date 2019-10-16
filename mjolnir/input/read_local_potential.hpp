@@ -180,13 +180,13 @@ template<typename realT>
 UniformPotential<realT>
 read_uniform_potential(const toml::value& param, const toml::value& env)
 {
-  MJOLNIR_GET_DEFAULT_LOGGER();
-  using real_type = realT;
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    using real_type = realT;
 
-  auto k = find_parameter<real_type>(param, env, "k");
+    auto k = find_parameter<real_type>(param, env, "k");
 
-  MJOLNIR_LOG_INFO("UniformPotential = {k = ", k, '}');
-  return UniformPotential<realT>(k);
+    MJOLNIR_LOG_INFO("UniformPotential = {k = ", k, '}');
+    return UniformPotential<realT>(k);
 }
 
 template<typename realT>
@@ -292,11 +292,11 @@ struct read_local_potential_impl<CosinePotential<realT>>
 template<typename realT>
 struct read_local_potential_impl<UniformPotential<realT>>
 {
-  static UniformPotential<realT>
-  invoke(const toml::value& param, const toml::value& env)
-  {
-    return read_uniform_potential<realT>(param, env);
-  }
+    static UniformPotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
+    {
+        return read_uniform_potential<realT>(param, env);
+    }
 };
 template<typename realT>
 struct read_local_potential_impl<ThreeSPN2BondPotential<realT>>

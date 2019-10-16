@@ -204,17 +204,17 @@ read_directional_contact_interaction(const std::string& kind,
     }
     else if(contact_potential == "Uniform")
     {
-      MJOLNIR_LOG_NOTICE("-- contact potential function is Uniform potential");
-      using contact_potentialT = UniformPotential<real_type>;
+        MJOLNIR_LOG_NOTICE("-- contact potential function is Uniform potential");
+        using contact_potentialT = UniformPotential<real_type>;
 
-      return make_unique<
-          DirectionalContactInteraction<
-              traitsT, PotentialTs..., contact_potentialT
-              >
-          >(kind,
-            read_directional_contact_potentials<
-                4, real_type, PotentialTs..., contact_potentialT
-            >(local), margin);
+        return make_unique<
+            DirectionalContactInteraction<
+                traitsT, PotentialTs..., contact_potentialT
+                >
+            >(kind,
+              read_directional_contact_potentials<
+                  4, real_type, PotentialTs..., contact_potentialT
+              >(local), margin);
     }
     else
     {

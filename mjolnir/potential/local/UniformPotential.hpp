@@ -12,36 +12,36 @@ template<typename T> class System;
 template<typename realT>
 class UniformPotential
 {
- public:
-  using real_type = realT;
+  public:
+    using real_type = realT;
 
- public:
-  UniformPotential(const real_type k) noexcept
-      : k_(k)
-  {}
-  ~UniformPotential() = default;
+  public:
+    UniformPotential(const real_type k) noexcept
+        : k_(k)
+    {}
+    ~UniformPotential() = default;
 
-  real_type potential(const real_type) const noexcept
-  {
-    return k_;
-  }
+    real_type potential(const real_type) const noexcept
+    {
+        return k_;
+    }
 
-  real_type derivative(const real_type) const noexcept
-  {
-    return 0.0;
-  }
+    real_type derivative(const real_type) const noexcept
+    {
+        return 0.0;
+    }
 
-  template<typename T>
-  void update(const System<T>&) const noexcept {return;}
+    template<typename T>
+    void update(const System<T>&) const noexcept {return;}
 
-  static const char* name() noexcept {return "Uniform";}
+    static const char* name() noexcept {return "Uniform";}
 
-  real_type k()      const noexcept {return k_;}
-  real_type cutoff() const noexcept {return std::numeric_limits<real_type>::infinity();}
+    real_type k()      const noexcept {return k_;}
+    real_type cutoff() const noexcept {return std::numeric_limits<real_type>::infinity();}
 
- private:
+  private:
 
-  real_type k_;
+    real_type k_;
 };
 
 } // mjolnir
