@@ -122,6 +122,9 @@ matrix:
     language: cpp
     compiler: clang
     env: COMPILER="clang++" SEPARATE="OFF" LATEST_CMAKE="cmake"
+    cache:
+      directories:
+        - $HOME/Library/Caches/Homebrew
     addons:
       homebrew:
          packages:
@@ -140,3 +143,6 @@ script:
 - $LATEST_CMAKE -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON -DUSE_OPENMP=OFF -DBUILD_INTEGRATION_TEST=OFF -DSEPARATE_BUILD="${SEPARATE}" ..
 - make VERBOSE=1
 - ctest --output-on-failure
+
+before_cache:
+- if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then brew cleanup; fi
