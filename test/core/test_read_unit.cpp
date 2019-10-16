@@ -62,13 +62,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_input_angstrom_kcalmol, Real, test_targets)
 
     auto input = mjolnir::test::make_empty_input();
     auto& units = toml::find<toml::table>(input, "units");
+    const auto& sim   = toml::find(input, "simulator");
 
     units["length"] = "angstrom"_s;
     units["energy"] = "kcal/mol"_s;
 
     // update units and physical constants here
     phys::reset();
-    mjolnir::read_units<mjolnir::SimulatorTraits<Real, mjolnir::UnlimitedBoundary>>(input);
+    mjolnir::read_units<mjolnir::SimulatorTraits<Real, mjolnir::UnlimitedBoundary>>(input, sim);
 
     BOOST_TEST(phys::m_to_length() == unit::m_to_angstrom(), test::tolerance<Real>());
     BOOST_TEST(phys::length_to_m() == unit::angstrom_to_m(), test::tolerance<Real>());
@@ -100,13 +101,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_input_angstrom_kJmol, Real, test_targets)
 
     auto input  = mjolnir::test::make_empty_input();
     auto& units = toml::find<toml::table>(input, "units");
+    const auto& sim   = toml::find(input, "simulator");
 
     units["length"] = "angstrom"_s;
     units["energy"] = "kJ/mol"_s;
 
     // reset units and physical constants here
     phys::reset();
-    mjolnir::read_units<mjolnir::SimulatorTraits<Real, mjolnir::UnlimitedBoundary>>(input);
+    mjolnir::read_units<mjolnir::SimulatorTraits<Real, mjolnir::UnlimitedBoundary>>(input, sim);
 
     BOOST_TEST(phys::m_to_length() == unit::m_to_angstrom(), test::tolerance<Real>());
     BOOST_TEST(phys::length_to_m() == unit::angstrom_to_m(), test::tolerance<Real>());
@@ -138,13 +140,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_input_nm_kcalmol, Real, test_targets)
 
     auto input = mjolnir::test::make_empty_input();
     auto& units = toml::find<toml::table>(input, "units");
+    const auto& sim   = toml::find(input, "simulator");
 
     units["length"] = "nm"_s;
     units["energy"] = "kcal/mol"_s;
 
     // update units and physical constants here
     phys::reset();
-    mjolnir::read_units<mjolnir::SimulatorTraits<Real, mjolnir::UnlimitedBoundary>>(input);
+    mjolnir::read_units<mjolnir::SimulatorTraits<Real, mjolnir::UnlimitedBoundary>>(input, sim);
 
     BOOST_TEST(phys::m_to_length() == unit::m_to_nm(), test::tolerance<Real>());
     BOOST_TEST(phys::length_to_m() == unit::nm_to_m(), test::tolerance<Real>());
@@ -176,13 +179,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_input_nm_kJmol, Real, test_targets)
 
     auto input  = mjolnir::test::make_empty_input();
     auto& units = toml::find<toml::table>(input, "units");
+    const auto& sim   = toml::find(input, "simulator");
 
     units["length"] = "nm"_s;
     units["energy"] = "kJ/mol"_s;
 
     // update units and physical constants here
     phys::reset();
-    mjolnir::read_units<mjolnir::SimulatorTraits<Real, mjolnir::UnlimitedBoundary>>(input);
+    mjolnir::read_units<mjolnir::SimulatorTraits<Real, mjolnir::UnlimitedBoundary>>(input, sim);
 
     BOOST_TEST(phys::m_to_length() == unit::m_to_nm(), test::tolerance<Real>());
     BOOST_TEST(phys::length_to_m() == unit::nm_to_m(), test::tolerance<Real>());
