@@ -427,40 +427,8 @@ read_simulator(const toml::value& root)
     MJOLNIR_LOG_FUNCTION();
 
     const auto& simulator  = toml::find(root, "simulator");
-    if(simulator.as_table().count("file_name") == 1)
-    {
-        MJOLNIR_LOG_SCOPE(if(simulator.as_table().count("file_name") == 1));
-
-        const auto input_path = read_input_path(root);
-        const auto file_name  = toml::find<std::string>(simulator, "file_name");
-        MJOLNIR_LOG_INFO("file_name = ", file_name);
-
-        if(simulator.as_table().size() != 1)
-        {
-            MJOLNIR_LOG_WARN("[simulator] has `file_name` key and other keys.");
-            MJOLNIR_LOG_WARN("When `file_name` is provided, other values are "
-                             "ignored because those are read from the specified"
-                             " file (", input_path, file_name, ").");
-        }
-
-        MJOLNIR_LOG_NOTICE("simulator is defined in ", input_path, file_name);
-        MJOLNIR_LOG_NOTICE("reading ", input_path, file_name, " ...");
-        const auto simfile = toml::parse(input_path + file_name);
-        MJOLNIR_LOG_NOTICE(" done.");
-
-        if(simfile.as_table().count("simulator") != 1)
-        {
-            throw_exception<std::out_of_range>("[error] mjolnir::read_simulator: "
-                "table [simulator] not found in the toml file\n --> ",
-                input_path, file_name, "\n | the file should define [simulator] "
-                "table and define values in it.");
-        }
-        return read_simulator_from_table<traitsT>(root, simfile.as_table().at("simulator"));
-    }
-    else
-    {
-        return read_simulator_from_table<traitsT>(root, simulator);
-    }
+    return read_simulator_from_table<traitsT>(root,
+        read_table_from_file(simulator, "simulator", read_input_path(root)));
 }
 
 } // mjolnir
