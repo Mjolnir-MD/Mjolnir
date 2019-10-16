@@ -16,7 +16,7 @@ class UniformPotential
     using real_type = realT;
 
   public:
-    UniformPotential(const real_type k) noexcept
+    explicit UniformPotential(const real_type k) noexcept
         : k_(k)
     {}
     ~UniformPotential() = default;
