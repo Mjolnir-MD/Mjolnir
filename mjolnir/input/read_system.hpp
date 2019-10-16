@@ -5,6 +5,7 @@
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <mjolnir/util/format_nth.hpp>
 #include <mjolnir/math/vector_util.hpp>
 #include <mjolnir/input/read_table_from_file.hpp>
 #include <mjolnir/input/read_path.hpp>
@@ -79,10 +80,10 @@ read_system(const toml::value& root, const std::size_t N)
     using real_type       = typename traitsT::real_type;
     using coordinate_type = typename traitsT::coordinate_type;
 
-    MJOLNIR_LOG_NOTICE("reading system ...");
-
-    const auto system = read_table_from_file(
-            root, "systems", N, read_input_path(root));
+    const auto& systems = toml::find(root, "systems");
+    MJOLNIR_LOG_NOTICE("reading ", format_nth(N), " system ...");
+    const auto system = read_table_from_file(systems.as_array().at(N),
+                                             "systems", read_input_path(root));
 
     check_keys_available(system, {"boundary_shape"_s, "attributes"_s, "particles"_s});
 

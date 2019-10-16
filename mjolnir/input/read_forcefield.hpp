@@ -3,6 +3,7 @@
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <mjolnir/util/format_nth.hpp>
 #include <mjolnir/input/read_local_interaction.hpp>
 #include <mjolnir/input/read_global_interaction.hpp>
 #include <mjolnir/input/read_external_interaction.hpp>
@@ -21,7 +22,8 @@ read_forcefield(const toml::value& root, const std::size_t N)
     MJOLNIR_LOG_FUNCTION();
 
     const auto input_path = read_input_path(root);
-    const auto ff = read_table_from_file(root, "forcefields", N, input_path);
+    const auto ff = read_table_from_file(toml::find(root, "forcefields").at(N),
+                                         "forcefields", input_path);
     check_keys_available(ff, {"local"_s, "global"_s, "external"_s, "name"_s});
 
     if(ff.as_table().count("name") == 1)
@@ -36,32 +38,36 @@ read_forcefield(const toml::value& root, const std::size_t N)
 
     if(ff.as_table().count("local") != 0)
     {
-        const auto num_loc = toml::find(ff, "local").as_array().size();
-        MJOLNIR_LOG_INFO("LocalForceField (x", num_loc, ") found");
-        for(std::size_t i=0; i<num_loc; ++i)
+        const auto& locals = toml::find(ff, "local").as_array();
+        MJOLNIR_LOG_NOTICE("LocalForceField (x", locals.size(), ") found");
+
+        for(std::size_t i=0; i<locals.size(); ++i)
         {
+            MJOLNIR_LOG_NOTICE("reading ", format_nth(i), " [[forcefields.local]]");
             loc.emplace(read_local_interaction<traitsT>(
-                read_table_from_file(ff, "local", i, input_path)));
+                read_table_from_file(locals.at(i), "local", input_path)));
         }
     }
     if(ff.as_table().count("global") != 0)
     {
-        const auto num_glo = toml::find(ff, "global").as_array().size();
-        MJOLNIR_LOG_INFO("GlobalForceField (x", num_glo, ") found");
-        for(std::size_t i=0; i<num_glo; ++i)
+        const auto& globals = toml::find(ff, "global").as_array();
+        MJOLNIR_LOG_NOTICE("GlobalForceField (x", globals.size(), ") found");
+        for(std::size_t i=0; i<globals.size(); ++i)
         {
+            MJOLNIR_LOG_NOTICE("reading ", format_nth(i), " [[forcefields.global]]");
             glo.emplace(read_global_interaction<traitsT>(
-                read_table_from_file(ff, "global", i, input_path)));
+                read_table_from_file(globals.at(i), "global", input_path)));
         }
     }
     if(ff.as_table().count("external") != 0)
     {
-        const auto num_ext = toml::find(ff, "external").as_array().size();
-        MJOLNIR_LOG_INFO("ExternalForceField (x", num_ext, ") found");
-        for(std::size_t i=0; i<num_ext; ++i)
+        const auto& externals = toml::find(ff, "external").as_array();
+        MJOLNIR_LOG_NOTICE("ExternalForceField (x", externals.size(), ") found");
+        for(std::size_t i=0; i<externals.size(); ++i)
         {
+            MJOLNIR_LOG_NOTICE("reading ", format_nth(i), " [[forcefields.external]]");
             ext.emplace(read_external_interaction<traitsT>(
-                read_table_from_file(ff, "external", i, input_path)));
+                read_table_from_file(externals.at(i), "external", input_path)));
         }
     }
     return ForceField<traitsT>(std::move(loc), std::move(glo), std::move(ext));
