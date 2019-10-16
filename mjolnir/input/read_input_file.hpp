@@ -161,24 +161,8 @@ read_input_file(const std::string& filename)
     // Thus first read [simulator] here and pass it to the latter functions.
 
     const auto& simulator = toml::find(root, "simulator");
-    if(simulator.as_table().count("file_name") == 1)
-    {
-        // [simulator] can be provided in a different file. In that case, the
-        // table has `file_name` field. In that case, input_path is also needed
-        // to determine the location of the file.
-        const auto filename   = toml::find<std::string>(simulator, "file_name");
-        const auto input_path = read_input_path(root);
-        const auto simfile    = toml::parse(input_path + filename);
-        if(simfile.as_table().count("simulator") != 1)
-        {
-            throw_exception<std::out_of_range>("[error] mjolnir::read_simulator: "
-                "table [simulator] not found in the toml file\n --> ",
-                input_path, filename, "\n | the file should define [simulator] "
-                "table and define values in it.");
-        }
-        return read_precision(root, simfile.as_table().at("simulator"));
-    }
-    return read_precision(root, simulator);
+    return read_precision(root, read_table_from_file(
+                simulator, "simulator", read_input_path(root)));
 }
 
 #ifdef MJOLNIR_SEPARATE_BUILD
