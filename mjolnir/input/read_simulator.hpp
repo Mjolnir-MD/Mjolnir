@@ -379,7 +379,7 @@ read_switching_forcefield_simulator(
 
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
-read_simulator_from_table(const toml::value& root, const toml::value& simulator)
+read_simulator(const toml::value& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -417,18 +417,6 @@ read_simulator_from_table(const toml::value& root, const toml::value& simulator)
             "- \"SwitchingForceField\": switch forcefield while running simulation"
             }));
     }
-}
-
-template<typename traitsT>
-std::unique_ptr<SimulatorBase>
-read_simulator(const toml::value& root)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-
-    const auto& simulator  = toml::find(root, "simulator");
-    return read_simulator_from_table<traitsT>(root,
-        read_table_from_file(simulator, "simulator", read_input_path(root)));
 }
 
 } // mjolnir

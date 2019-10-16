@@ -28,14 +28,14 @@ read_parallelism(const toml::value& root, const toml::value& simulator)
 
     if(simulator.as_table().count("parallelism") == 0)
     {
-        return read_units<SimulatorTraits<realT, boundaryT>>(root);
+        return read_units<SimulatorTraits<realT, boundaryT>>(root, simulator);
     }
 
     const auto parallelism = toml::find(simulator, "parallelism");
     if(parallelism.is_string() && parallelism.as_string() == "sequencial")
     {
         MJOLNIR_LOG_NOTICE("execute on single core");
-        return read_units<SimulatorTraits<realT, boundaryT>>(root);
+        return read_units<SimulatorTraits<realT, boundaryT>>(root, simulator);
     }
     else if(parallelism.is_string() &&
            (parallelism.as_string() == "openmp" ||
@@ -43,11 +43,11 @@ read_parallelism(const toml::value& root, const toml::value& simulator)
     {
 #ifdef MJOLNIR_WITH_OPENMP
         MJOLNIR_LOG_NOTICE("execute on ", omp_get_max_threads() ," cores with openmp");
-        return read_units<OpenMPSimulatorTraits<realT, boundaryT>>(root);
+        return read_units<OpenMPSimulatorTraits<realT, boundaryT>>(root, simulator);
 #else
         MJOLNIR_LOG_WARN("OpenMP flag is set, but OpenMP is not enabled when building.");
         MJOLNIR_LOG_WARN("Cannot use OpenMP, running with single core.");
-        return read_units<SimulatorTraits<realT, boundaryT>>(root);
+        return read_units<SimulatorTraits<realT, boundaryT>>(root, simulator);
 #endif
     }
     else
