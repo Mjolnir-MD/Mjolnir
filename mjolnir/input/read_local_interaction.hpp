@@ -268,7 +268,7 @@ read_directional_contact_interaction(const std::string& kind,
 
         return read_directional_contact_interaction<
             traitsT, PotentialTs..., angle_potential_T
-            >(kind, local, std::move(angle_potential_keys));
+            >(kind, local, std::move(angle_keys));
     }
     else
     {
