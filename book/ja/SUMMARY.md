@@ -62,6 +62,7 @@
     - [XYZObserver](refs/XYZObserver.md)
     - [DCDObserver](refs/DCDObserver.md)
     - [TRRObserver](refs/TRRObserver.md)
+- [Glossary](Glossary.md)
 - [Developer's Guide](DevelopersGuide.md)
   - [Design Philosophy](dev/DesignPhilosophy.md)
   - [Components](dev/ComponentsOverview.md)

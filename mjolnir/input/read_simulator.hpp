@@ -379,7 +379,7 @@ read_switching_forcefield_simulator(
 
 template<typename traitsT>
 std::unique_ptr<SimulatorBase>
-read_simulator_from_table(const toml::value& root, const toml::value& simulator)
+read_simulator(const toml::value& root, const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -419,50 +419,6 @@ read_simulator_from_table(const toml::value& root, const toml::value& simulator)
     }
 }
 
-template<typename traitsT>
-std::unique_ptr<SimulatorBase>
-read_simulator(const toml::value& root)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-
-    const auto& simulator  = toml::find(root, "simulator");
-    if(simulator.as_table().count("file_name") == 1)
-    {
-        MJOLNIR_LOG_SCOPE(if(simulator.as_table().count("file_name") == 1));
-
-        const auto input_path = read_input_path(root);
-        const auto file_name  = toml::find<std::string>(simulator, "file_name");
-        MJOLNIR_LOG_INFO("file_name = ", file_name);
-
-        if(simulator.as_table().size() != 1)
-        {
-            MJOLNIR_LOG_WARN("[simulator] has `file_name` key and other keys.");
-            MJOLNIR_LOG_WARN("When `file_name` is provided, other values are "
-                             "ignored because those are read from the specified"
-                             " file (", input_path, file_name, ").");
-        }
-
-        MJOLNIR_LOG_NOTICE("simulator is defined in ", input_path, file_name);
-        MJOLNIR_LOG_NOTICE("reading ", input_path, file_name, " ...");
-        const auto simfile = toml::parse(input_path + file_name);
-        MJOLNIR_LOG_NOTICE(" done.");
-
-        if(simfile.as_table().count("simulator") != 1)
-        {
-            throw_exception<std::out_of_range>("[error] mjolnir::read_simulator: "
-                "table [simulator] not found in the toml file\n --> ",
-                input_path, file_name, "\n | the file should define [simulator] "
-                "table and define values in it.");
-        }
-        return read_simulator_from_table<traitsT>(root, simfile.as_table().at("simulator"));
-    }
-    else
-    {
-        return read_simulator_from_table<traitsT>(root, simulator);
-    }
-}
-
 } // mjolnir
 
 
@@ -472,15 +428,10 @@ read_simulator(const toml::value& root)
 
 namespace mjolnir
 {
-extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::value& data);
-extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::value& data);
-extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value& data);
-extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value& data);
-
-extern template std::unique_ptr<SimulatorBase> read_simulator_from_table<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::value&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_simulator_from_table<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::value&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_simulator_from_table<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
-extern template std::unique_ptr<SimulatorBase> read_simulator_from_table<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
 
 extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::value&, const toml::value&);
 extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::value&, const toml::value&);
@@ -496,6 +447,16 @@ extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator
 extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::value&, const toml::value&);
 extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
 extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
+
+extern template std::unique_ptr<SimulatorBase> read_switching_forcefield_simulator<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_switching_forcefield_simulator<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_switching_forcefield_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_switching_forcefield_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value&, const toml::value&);
+
+extern template RandomNumberGenerator<SimulatorTraits<double, UnlimitedBoundary>       > read_rng(const toml::value&);
+extern template RandomNumberGenerator<SimulatorTraits<float,  UnlimitedBoundary>       > read_rng(const toml::value&);
+extern template RandomNumberGenerator<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_rng(const toml::value&);
+extern template RandomNumberGenerator<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_rng(const toml::value&);
 } // mjolnir
 #endif
 

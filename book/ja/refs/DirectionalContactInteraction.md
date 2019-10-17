@@ -6,9 +6,8 @@
 粒子`i`番目,`j`番目,`k`番目,`l`番目の粒子について、`i`,`j`,`k`がなす角に`angle1`で指定したポテンシャルが、`j`,`k`,`l`がなす角に`angle2`で指定したポテンシャルが、`j`,`k`間の距離に`contact`で指定したポテンシャルがかかります。
 
 {% math %}
-U(r, \theta_1, \theta_2) = U_contact (r) U_{angle_1} (\theta_1) U_{angle_2} (\theta_2)
-{% math %}
-
+U(r, \theta_1, \theta_2) = U_{contact} (r) U_{angle_1} (\theta_1) U_{angle_2} (\theta_2)
+{% endmath %}
 
 角度に関する利用可能なポテンシャルには以下のようなものがあります。
 

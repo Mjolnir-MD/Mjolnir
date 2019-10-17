@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(read_steepest_descent_simulator)
         )"_toml;
 
         root.as_table()["simulator"] = v;
-        const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
+        const auto sim = mjolnir::read_simulator<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
 
         const auto sdsim = dynamic_cast<

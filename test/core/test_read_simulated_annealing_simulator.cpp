@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(read_simulated_annealing_simulator)
         )"_toml;
 
         root.as_table()["simulator"] = v;
-        const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
+        const auto sim = mjolnir::read_simulator<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
 
         const auto sasim = dynamic_cast<mjolnir::SimulatedAnnealingSimulator<
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(read_BAOAB_Langevin_simulated_annealing_simulator)
         )"_toml;
 
         root.as_table()["simulator"] = v;
-        const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
+        const auto sim = mjolnir::read_simulator<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
 
         const auto sasim = dynamic_cast<mjolnir::SimulatedAnnealingSimulator<
