@@ -25,8 +25,8 @@
 // ]
 // ```
 //
-// To allow both, this function checks if the table has `file_name` and parse
-// the file if the file_name is provided. The path is under `files.input.path`.
+// This function checks if the table has `file_name` and parse the file if
+// `file_name` is provided.
 
 namespace mjolnir
 {
@@ -41,7 +41,7 @@ read_table_from_file(const toml::basic_value<C, T, A>& target,
 
     if(target.as_table().count("file_name") == 0)
     {
-        // no file_name = "..." is defined. we don't need to parse another file
+        // no `file_name` is defined. we don't need to parse another file.
         return target;
     }
     if(target.as_table().size() != 1)
@@ -73,6 +73,7 @@ read_table_from_file(const toml::basic_value<C, T, A>& target,
     // particles = [
     // # ...
     // ]
+    // ```
     if(table_from_file.as_table().at(table_name).is_array())
     {
         return toml::find(table_from_file, table_name).as_array().front();
