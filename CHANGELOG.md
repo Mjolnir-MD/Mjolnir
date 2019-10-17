@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.6.2
+
+### Fixed
+
+- bug in openmp implementation of CellLists
+  - Do __NOT__ use OpenMP and CellList if a potential is not applied to all the particles
+  - Global potentials that are applied to all the particles, such as an excluded volume, are not affected
+
 ## 1.6.1
 
 ### Fixed
