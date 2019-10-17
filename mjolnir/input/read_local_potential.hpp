@@ -196,7 +196,7 @@ read_3spn2_bond_potential(const toml::value& param, const toml::value& env)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
-    check_keys_available(param, {"indices", "k"});
+    check_keys_available(param, {"indices", "k", "v0"});
 
     auto k  = find_parameter<real_type>(param, env, "k");
     auto v0 = find_parameter<real_type>(param, env, "v0");
