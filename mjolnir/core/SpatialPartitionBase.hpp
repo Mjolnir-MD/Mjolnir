@@ -72,8 +72,8 @@ class SpatialPartition
     using neighbor_type       = typename neighbor_list_type::neighbor_type;
     using range_type          = typename neighbor_list_type::range_type;
 
-    using partition_type      =
-        std::unique_ptr<SpatialPartitionBase<traits_type, potential_type>>;
+    using partition_base_type = SpatialPartitionBase<traits_type, potential_type>;
+    using partition_type      = std::unique_ptr<partition_base_type>;
 
   public:
 
@@ -111,6 +111,10 @@ class SpatialPartition
     real_type margin() const noexcept {return partition_->margin();}
 
     range_type partners(std::size_t i) const noexcept {return neighbors_[i];}
+
+    // for testing
+    partition_base_type const& base() const noexcept {return *partition_;}
+    partition_base_type &      base()       noexcept {return *partition_;}
 
   private:
 

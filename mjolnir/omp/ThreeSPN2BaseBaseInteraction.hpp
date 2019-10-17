@@ -755,7 +755,7 @@ class ThreeSPN2BaseBaseInteraction<
         return E;
     }
 
-    std::string name() const override {return "3SPN2BaseBaseInteraction";}
+    std::string name() const override {return "3SPN2BaseBase";}
 
     potential_type const& potential() const noexcept {return potential_;}
     potential_type&       potential()       noexcept {return potential_;}

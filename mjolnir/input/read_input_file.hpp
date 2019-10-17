@@ -28,14 +28,14 @@ read_parallelism(const toml::value& root, const toml::value& simulator)
 
     if(simulator.as_table().count("parallelism") == 0)
     {
-        return read_units<SimulatorTraits<realT, boundaryT>>(root);
+        return read_units<SimulatorTraits<realT, boundaryT>>(root, simulator);
     }
 
     const auto parallelism = toml::find(simulator, "parallelism");
     if(parallelism.is_string() && parallelism.as_string() == "sequencial")
     {
         MJOLNIR_LOG_NOTICE("execute on single core");
-        return read_units<SimulatorTraits<realT, boundaryT>>(root);
+        return read_units<SimulatorTraits<realT, boundaryT>>(root, simulator);
     }
     else if(parallelism.is_string() &&
            (parallelism.as_string() == "openmp" ||
@@ -43,11 +43,11 @@ read_parallelism(const toml::value& root, const toml::value& simulator)
     {
 #ifdef MJOLNIR_WITH_OPENMP
         MJOLNIR_LOG_NOTICE("execute on ", omp_get_max_threads() ," cores with openmp");
-        return read_units<OpenMPSimulatorTraits<realT, boundaryT>>(root);
+        return read_units<OpenMPSimulatorTraits<realT, boundaryT>>(root, simulator);
 #else
         MJOLNIR_LOG_WARN("OpenMP flag is set, but OpenMP is not enabled when building.");
         MJOLNIR_LOG_WARN("Cannot use OpenMP, running with single core.");
-        return read_units<SimulatorTraits<realT, boundaryT>>(root);
+        return read_units<SimulatorTraits<realT, boundaryT>>(root, simulator);
 #endif
     }
     else
@@ -161,24 +161,8 @@ read_input_file(const std::string& filename)
     // Thus first read [simulator] here and pass it to the latter functions.
 
     const auto& simulator = toml::find(root, "simulator");
-    if(simulator.as_table().count("file_name") == 1)
-    {
-        // [simulator] can be provided in a different file. In that case, the
-        // table has `file_name` field. In that case, input_path is also needed
-        // to determine the location of the file.
-        const auto filename   = toml::find<std::string>(simulator, "file_name");
-        const auto input_path = read_input_path(root);
-        const auto simfile    = toml::parse(input_path + filename);
-        if(simfile.as_table().count("simulator") != 1)
-        {
-            throw_exception<std::out_of_range>("[error] mjolnir::read_simulator: "
-                "table [simulator] not found in the toml file\n --> ",
-                input_path, filename, "\n | the file should define [simulator] "
-                "table and define values in it.");
-        }
-        return read_precision(root, simfile.as_table().at("simulator"));
-    }
-    return read_precision(root, simulator);
+    return read_precision(root, read_table_from_file(
+                simulator, "simulator", read_input_path(root)));
 }
 
 #ifdef MJOLNIR_SEPARATE_BUILD

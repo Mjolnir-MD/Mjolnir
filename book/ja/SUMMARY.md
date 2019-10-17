@@ -26,6 +26,12 @@
       - [ConcactInteraction](refs/ContactInteraction.md)
         - [Gaussian](refs/GaussianPotential.md)
         - [GoContact](refs/GoContactPotential.md)
+      - [DirectionalContactInteraction](refs/DirectionalContactInteraction.md)
+        - AnglePotential
+          - [Cosine](refs/CosinePotential.md)
+        - ContactPotential
+          - [Gaussian](refs/GaussianPotential.md)
+          - [GoContact](refs/GoContactPotential.md)
       - [BondAngleInteraction](refs/BondAngleInteraction.md)
         - [Harmonic](refs/HarmonicPotential.md)
         - [Gaussian](refs/GaussianPotential.md)
@@ -56,6 +62,7 @@
     - [XYZObserver](refs/XYZObserver.md)
     - [DCDObserver](refs/DCDObserver.md)
     - [TRRObserver](refs/TRRObserver.md)
+- [Glossary](Glossary.md)
 - [Developer's Guide](DevelopersGuide.md)
   - [Design Philosophy](dev/DesignPhilosophy.md)
   - [Components](dev/ComponentsOverview.md)

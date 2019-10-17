@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(read_newtonian_switching_forcefield_simulator)
     )"_toml;
     root.as_table()["systems"] = toml::array{system};
 
-    const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, simulator);
+    const auto sim = mjolnir::read_simulator<traits_type>(root, simulator);
     BOOST_TEST(static_cast<bool>(sim));
 
     const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(read_underdamped_langevin_switching_forcefield_simulator)
     )"_toml;
     root.as_table()["systems"] = toml::array{system};
 
-    const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, simulator);
+    const auto sim = mjolnir::read_simulator<traits_type>(root, simulator);
     BOOST_TEST(static_cast<bool>(sim));
 
     const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
@@ -267,7 +267,7 @@ BOOST_AUTO_TEST_CASE(read_BAOAB_langevin_switching_forcefield_simulator)
     )"_toml;
     root.as_table()["systems"] = toml::array{system};
 
-    const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, simulator);
+    const auto sim = mjolnir::read_simulator<traits_type>(root, simulator);
     BOOST_TEST(static_cast<bool>(sim));
 
     const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
