@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(read_newtonian_molecular_dynamics_simulator)
         )"_toml;
 
         root.as_table()["simulator"] = v;
-        const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
+        const auto sim = mjolnir::read_simulator<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
 
         const auto mdsim = dynamic_cast<mjolnir::MolecularDynamicsSimulator<
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(read_langevin_molecular_dynamics_simulator)
         )"_toml;
 
         root.as_table()["simulator"] = v;
-        const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
+        const auto sim = mjolnir::read_simulator<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
 
         const auto mdsim = dynamic_cast<mjolnir::MolecularDynamicsSimulator<
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(read_BAOAB_langevin_molecular_dynamics_simulator)
         )"_toml;
 
         root.as_table()["simulator"] = v;
-        const auto sim = mjolnir::read_simulator_from_table<traits_type>(root, v);
+        const auto sim = mjolnir::read_simulator<traits_type>(root, v);
         BOOST_TEST(static_cast<bool>(sim));
 
         const auto mdsim = dynamic_cast<mjolnir::MolecularDynamicsSimulator<
