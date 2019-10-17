@@ -82,16 +82,17 @@ class XYZLoader final : public LoaderBase<traitsT>
         std::string line;
         std::getline(file_, line);
         ++line_number_;
+        std::size_t N_tmp;
         try
         {
-            const std::size_t N = std::stoull(line);
+            N_tmp = std::stoull(line);
         }
         catch(const std::exception&)
         {
             std::cout << " " << line_number_ << " | " << line << std::endl;
             throw;
         }
-        const std::size_t N = std::stoull(line);
+        const std::size_t N = N_tmp;
 
         if(sys.size() != N)
         {
