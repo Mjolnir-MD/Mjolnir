@@ -4,6 +4,7 @@
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/color.hpp>
+#include <mjolnir/util/range.hpp>
 #include <array>
 #include <vector>
 #include <map>
@@ -39,6 +40,16 @@ namespace logger_detail
 // To avoid fixing the output format, these are defined in the special namespace
 // `logger_detail`. loggers first imports this namespace and output using these
 // operators.
+
+template<typename charT, typename traits, typename Iterator>
+std::basic_ostream<charT, traits>&
+operator<<(std::basic_ostream<charT, traits>& os, const range<Iterator>& rg)
+{
+    os << '[';
+    for(const auto& v : rg){os << v << ", ";}
+    os << ']';
+    return os;
+}
 
 template<typename charT, typename traits, typename T, std::size_t N>
 std::basic_ostream<charT, traits>&
