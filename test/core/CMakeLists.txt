@@ -64,6 +64,7 @@ set(TEST_NAMES
     test_read_excluded_volume_wall_potential
     test_read_lennard_jones_wall_potential
     test_read_implicit_membrane_potential
+    test_read_uniform_potential
 
     test_read_ignore_molecule
     test_read_ignore_group
