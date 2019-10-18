@@ -172,7 +172,8 @@ class HardCoreExcludedVolumePotential
         return make_range(participants_.begin(), std::prev(participants_.end()));
     }
     range<typename std::vector<std::size_t>::const_iterator>
-    possible_partners_of(const std::size_t participant_idx, const std::size_t particle_idx) const noexcept
+    possible_partners_of(const std::size_t participant_idx,
+                         const std::size_t /*particle_idx*/) const noexcept
     {
         return make_range(participants_.begin() + participant_idx + 1, participants_.end());
     }
