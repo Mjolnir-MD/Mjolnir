@@ -9,10 +9,9 @@
 ## 例
 
 ```toml
-[[forcefields.local]]
+[[forcefields.global]]
 interaction = "PDNS"
 potential   = "PDNS"
-topology    = "none"
 sigma = 1.0
 delta = 0.17453
 parameters  = [
@@ -31,8 +30,6 @@ parameters  = [
   - 相互作用の種類を設定します。 `PDNS`です。
 - `potential`: 文字列型
   - ポテンシャルの種類を設定します。`PDNS`です。
-- `topology`: 文字列型
-  - このポテンシャルでは`none`以外選択できません。
 - `sigma`: 浮動小数点型
   - 距離項の届く範囲を決めるパラメータです。
 - `delta`: 浮動小数点型
