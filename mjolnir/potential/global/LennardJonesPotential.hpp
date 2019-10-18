@@ -156,6 +156,22 @@ class LennardJonesPotential
         exclusion_list_.make(sys);
         return;
     }
+
+    // -----------------------------------------------------------------------
+    // for spatial partitions
+
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+
+    range<typename std::vector<std::size_t>::const_iterator>
+    leading_participants() const noexcept
+    {
+        return make_range(participants_.begin(), std::prev(participants_.end()));
+    }
+    range<typename std::vector<std::size_t>::const_iterator>
+    possible_partners_of(const std::size_t participant_idx, const std::size_t particle_idx) const noexcept
+    {
+        return make_range(participants_.begin() + participant_idx + 1, participants_.end());
+    }
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
         // if not excluded, the pair has interaction.
@@ -177,8 +193,6 @@ class LennardJonesPotential
     // access to the parameters...
     std::vector<parameter_type>&       parameters()       noexcept {return parameters_;}
     std::vector<parameter_type> const& parameters() const noexcept {return parameters_;}
-
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
 
   private:
 
