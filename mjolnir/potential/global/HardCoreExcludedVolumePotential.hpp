@@ -15,12 +15,12 @@ namespace mjolnir
 // This class contains radii of hard core, thicknesses of soft layer represented
 // by default excluded volume, calculates energy and derivative of the potential
 // function.
-template<typename realT>
+template<typename traitsT>
 class HardCoreExcludedVolumePotential
 {
   public:
-
-    using real_type = realT;
+    using traits_type    = traitsT;
+    using real_type      = typename traits_type::real_type;
     using parameter_type = std::pair<real_type, real_type>; // {sigma, hardcore_radius}
     using container_type = std::vector<parameter_type>;
     // `pair_parameter_type` is a parameter for a interacting pair.
@@ -128,8 +128,7 @@ class HardCoreExcludedVolumePotential
         return -12.0 * this->epsilon_ * sigma12gap12 * gapinv;
     }
 
-    template<typename traitsT>
-    void initialize(const System<traitsT>& sys) noexcept
+    void initialize(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -138,8 +137,7 @@ class HardCoreExcludedVolumePotential
         return;
     }
 
-    template<typename traitsT>
-    void update(const System<traitsT>& sys) noexcept
+    void update(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -201,11 +199,19 @@ class HardCoreExcludedVolumePotential
         return this->cutoff_ratio_ * pram.first + pram.second;
     }
 };
+} // mjolnir
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class HardCoreExcludedVolumePotential<double>;
-extern template class HardCoreExcludedVolumePotential<float>;
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+
+namespace mjolnir
+{
+extern template class HardCoreExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class HardCoreExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class HardCoreExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class HardCoreExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+} // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
-} // mjolnir
 #endif /* MJOLNIR_HARD_CORE_EXCLUDED_VOLUME_POTENTIAL */

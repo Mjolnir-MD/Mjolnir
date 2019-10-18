@@ -6,6 +6,8 @@
 
 namespace mjolnir
 {
-template class LennardJonesPotential<double>;
-template class LennardJonesPotential<float>;
+template class LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+template class LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+template class LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+template class LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir

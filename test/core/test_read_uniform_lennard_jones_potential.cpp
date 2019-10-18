@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_noenv, T, test_types)
             epsilon = 1.5
         )"_toml;
 
-        auto pot = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
+        auto pot = mjolnir::read_uniform_lennard_jones_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_noenv, T, test_types)
             "ε" = 1.5
         )"_toml;
 
-        auto pot = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
+        auto pot = mjolnir::read_uniform_lennard_jones_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_noenv, T, test_types)
             ]
         )"_toml;
 
-        auto pot = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
+        auto pot = mjolnir::read_uniform_lennard_jones_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_env, T, test_types)
             ]
         )"_toml;
 
-        auto pot = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
+        auto pot = mjolnir::read_uniform_lennard_jones_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_ignore_self, T, test_ty
             epsilon = 1.5
         )"_toml;
 
-        auto pot = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
+        auto pot = mjolnir::read_uniform_lennard_jones_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_ignore_others, T, test_
             epsilon = 1.5
         )"_toml;
 
-        auto pot = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
+        auto pot = mjolnir::read_uniform_lennard_jones_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_ignore_group, T, test_t
             epsilon = 1.5
         )"_toml;
 
-        auto pot = mjolnir::read_uniform_lennard_jones_potential<real_type>(v);
+        auto pot = mjolnir::read_uniform_lennard_jones_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(

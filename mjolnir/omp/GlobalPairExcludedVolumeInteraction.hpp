@@ -11,7 +11,7 @@ namespace mjolnir
 template<typename realT, template<typename, typename> class boundaryT>
 class GlobalPairInteraction<
     OpenMPSimulatorTraits<realT, boundaryT>,
-    ExcludedVolumePotential<realT>
+    ExcludedVolumePotential<OpenMPSimulatorTraits<realT, boundaryT>>
     > final : public GlobalInteractionBase<OpenMPSimulatorTraits<realT, boundaryT>>
 {
   public:
@@ -21,7 +21,7 @@ class GlobalPairInteraction<
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
-    using potential_type  = ExcludedVolumePotential<real_type>;
+    using potential_type  = ExcludedVolumePotential<traits_type>;
     using partition_type  = SpatialPartition<traits_type, potential_type>;
 
   public:
@@ -159,10 +159,10 @@ class GlobalPairInteraction<
 
 namespace mjolnir
 {
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float> >;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float> >;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>       , ExcludedVolumePotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>       >>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       , ExcludedVolumePotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       >>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
 

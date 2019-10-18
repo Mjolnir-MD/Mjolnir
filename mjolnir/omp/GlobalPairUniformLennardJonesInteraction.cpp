@@ -6,8 +6,8 @@
 
 namespace mjolnir
 {
-template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
-template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float> >;
-template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
-template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float> >;
+template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>       , UniformLennardJonesPotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>       >>;
+template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       , UniformLennardJonesPotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       >>;
+template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
 } // mjolnir

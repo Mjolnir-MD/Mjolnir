@@ -11,7 +11,7 @@ namespace mjolnir
 template<typename realT, template<typename, typename> class boundaryT>
 class GlobalPairInteraction<
     OpenMPSimulatorTraits<realT, boundaryT>,
-    UniformLennardJonesPotential<realT>
+    UniformLennardJonesPotential<OpenMPSimulatorTraits<realT, boundaryT>>
     > final : public GlobalInteractionBase<OpenMPSimulatorTraits<realT, boundaryT>>
 {
   public:
@@ -22,7 +22,7 @@ class GlobalPairInteraction<
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
-    using potential_type  = UniformLennardJonesPotential<real_type>;
+    using potential_type  = UniformLennardJonesPotential<traits_type>;
     using partition_type  = SpatialPartition<traits_type, potential_type>;
 
   public:
@@ -152,10 +152,10 @@ class GlobalPairInteraction<
 
 namespace mjolnir
 {
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float> >;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float> >;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>       , UniformLennardJonesPotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>       >>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       , UniformLennardJonesPotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       >>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
 

@@ -12,10 +12,11 @@ BOOST_AUTO_TEST_CASE(HCEXV_double)
 {
     mjolnir::LoggerManager::set_default_logger("test_hard_core_excluded_volume_potential.log");
 
-    using real_type = double;
+    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type   = typename traits_type::real_type;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
     using group_id_type    = mjolnir::Topology::group_id_type;
-    using potential_type   = mjolnir::HardCoreExcludedVolumePotential<real_type>;
+    using potential_type   = mjolnir::HardCoreExcludedVolumePotential<traits_type>;
     using parameter_type   = potential_type::parameter_type;
 
     constexpr static std::size_t N = 10000;
@@ -25,7 +26,7 @@ BOOST_AUTO_TEST_CASE(HCEXV_double)
     const real_type hard_core_radius = 10.0;
     const real_type soft_shell_thickness = 3.0;
     const parameter_type param{hard_core_radius, soft_shell_thickness};
-    mjolnir::HardCoreExcludedVolumePotential<real_type> hdexv{
+    potential_type hdexv{
       epsilon, potential_type::default_cutoff(), {{0, param}, {1, param}}, {},
       mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
       mjolnir::IgnoreGroup<group_id_type>({})
@@ -49,10 +50,11 @@ BOOST_AUTO_TEST_CASE(HCEXV_double)
 
 BOOST_AUTO_TEST_CASE(HCEXV_float)
 {
-    using real_type = float;
+    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type   = typename traits_type::real_type;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
     using group_id_type    = mjolnir::Topology::group_id_type;
-    using potential_type   = mjolnir::HardCoreExcludedVolumePotential<real_type>;
+    using potential_type   = mjolnir::HardCoreExcludedVolumePotential<traits_type>;
     using parameter_type   = potential_type::parameter_type;
 
     constexpr static std::size_t N = 1000;
@@ -63,7 +65,7 @@ BOOST_AUTO_TEST_CASE(HCEXV_float)
     const real_type hard_core_radius = 10.0;
     const real_type soft_shell_thickness = 3.0;
     const parameter_type param{hard_core_radius, soft_shell_thickness};
-    mjolnir::HardCoreExcludedVolumePotential<real_type> hdexv{
+    potential_type hdexv{
       epsilon, potential_type::default_cutoff(), {{0, param}, {1, param}}, {},
       mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
       mjolnir::IgnoreGroup<group_id_type>({})

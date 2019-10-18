@@ -7,13 +7,16 @@
 #endif
 
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
 
 BOOST_AUTO_TEST_CASE(LennardJones_double)
 {
-    using real_type        = double;
+    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type   = typename traits_type::real_type;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
     using group_id_type    = mjolnir::Topology::group_id_type;
-    using potential_type   = mjolnir::LennardJonesPotential<real_type>;
+    using potential_type   = mjolnir::LennardJonesPotential<traits_type>;
     using parameter_type   = potential_type::parameter_type;
 
     constexpr static std::size_t N = 10000;
@@ -22,8 +25,8 @@ BOOST_AUTO_TEST_CASE(LennardJones_double)
     const real_type sigma   = 3.0;
     const real_type epsilon = 1.0;
     const parameter_type param{sigma, epsilon};
-    mjolnir::LennardJonesPotential<real_type> lj{
-        mjolnir::LennardJonesPotential<real_type>::default_cutoff(),
+    potential_type lj{
+        potential_type::default_cutoff(),
         {{0, param}, {1, param}}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
@@ -47,10 +50,11 @@ BOOST_AUTO_TEST_CASE(LennardJones_double)
 
 BOOST_AUTO_TEST_CASE(LennardJones_float)
 {
-    using real_type = float;
+    using traits_type = mjolnir::SimulatorTraits<float, mjolnir::UnlimitedBoundary>;
+    using real_type   = typename traits_type::real_type;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
     using group_id_type    = mjolnir::Topology::group_id_type;
-    using potential_type   = mjolnir::LennardJonesPotential<real_type>;
+    using potential_type   = mjolnir::LennardJonesPotential<traits_type>;
     using parameter_type   = potential_type::parameter_type;
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 0.002f;
@@ -59,8 +63,7 @@ BOOST_AUTO_TEST_CASE(LennardJones_float)
     const real_type sigma   = 3.0f;
     const real_type epsilon = 1.0f;
     const parameter_type param{sigma, epsilon};
-    mjolnir::LennardJonesPotential<real_type> lj{
-        mjolnir::LennardJonesPotential<real_type>::default_cutoff(),
+    potential_type lj{potential_type::default_cutoff(),
         {{0, param}, {1, param}}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})

@@ -305,14 +305,14 @@ namespace mjolnir
 extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, DebyeHuckelPotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>>>;
 extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, DebyeHuckelPotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>>;
 
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, ExcludedVolumePotential<double>>;
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, ExcludedVolumePotential<float >>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, ExcludedVolumePotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>>>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, ExcludedVolumePotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>>;
 
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<double>>;
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<float >>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>>>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>>;
 
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<double>>;
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<float >>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>>>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>>;
 }
 #endif // MJOLNIR_SEPARATE_BUILD
 #endif/* MJOLNIR_UNLIMITED_GRID_CELL_LIST */

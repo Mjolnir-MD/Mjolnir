@@ -33,21 +33,21 @@ read_global_pair_interaction(const toml::value& global)
     if(potential == "ExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Excluded Volume.");
-        using potential_t   = ExcludedVolumePotential<real_type>;
+        using potential_t   = ExcludedVolumePotential<traitsT>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
         return make_unique<interaction_t>(
-            read_excluded_volume_potential<real_type>(global),
+            read_excluded_volume_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "HardCoreExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Hard Core Excluded Volume.");
-        using potential_t   = HardCoreExcludedVolumePotential<real_type>;
+        using potential_t   = HardCoreExcludedVolumePotential<traitsT>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
         return make_unique<interaction_t>(
-            read_hard_core_excluded_volume_potential<real_type>(global),
+            read_hard_core_excluded_volume_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "DebyeHuckel")
@@ -63,21 +63,21 @@ read_global_pair_interaction(const toml::value& global)
     else if(potential == "LennardJones")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Lennard-Jones.");
-        using potential_t   = LennardJonesPotential<real_type>;
+        using potential_t   = LennardJonesPotential<traitsT>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
         return make_unique<interaction_t>(
-            read_lennard_jones_potential<real_type>(global),
+            read_lennard_jones_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "UniformLennardJones")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Uniform Lennard-Jones.");
-        using potential_t   = UniformLennardJonesPotential<real_type>;
+        using potential_t   = UniformLennardJonesPotential<traitsT>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
         return make_unique<interaction_t>(
-            read_uniform_lennard_jones_potential<real_type>(global),
+            read_uniform_lennard_jones_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "3SPN2ExcludedVolume")
