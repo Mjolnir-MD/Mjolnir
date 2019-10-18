@@ -12,13 +12,6 @@ namespace mjolnir
 // This is an implementation of the potential developed in the following paper.
 // - T.Niina, G.B.Brandani, C.Tan, and S.Takada (2017) PLoS. Comp. Biol.
 //
-// XXX: It inherits LocalInteraction, but it is a bit different from other
-// XXX: local interactions because a protein particle can have contacts with
-// XXX: multiple DNA (phosphate) particles. But it also differs from global
-// XXX: interactions because protein particle can have multiple interacting
-// XXX: angles. The nature of this interaction is closer to a local interaction
-// XXX: than a global, so it is classified as a local interaction.
-//
 // U(r, theta, phi) = k f(r) g(theta) g(phi)
 //
 // f(r)   = exp(-(r-r0)^2 / 2sigma^2)
@@ -28,19 +21,18 @@ namespace mjolnir
 //
 template<typename realT, template<typename, typename> class boundaryT>
 class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
-    final : public LocalInteractionBase<OpenMPSimulatorTraits<realT, boundaryT>>
+    final : public GlobalInteractionBase<OpenMPSimulatorTraits<realT, boundaryT>>
 {
   public:
 
-    using traits_type          = OpenMPSimulatorTraits<realT, boundaryT>;
-    using base_type            = LocalInteractionBase<traits_type>;
-    using real_type            = typename base_type::real_type;
-    using coordinate_type      = typename base_type::coordinate_type;
-    using system_type          = typename base_type::system_type;
-    using topology_type        = typename base_type::topology_type;
-    using connection_kind_type = typename base_type::connection_kind_type;
-    using boundary_type        = typename base_type::boundary_type;
-    using potential_type       = ProteinDNANonSpecificPotential<real_type>;
+    using traits_type     = OpenMPSimulatorTraits<realT, boundaryT>;
+    using base_type       = GlobalInteractionBase<traits_type>;
+    using real_type       = typename base_type::real_type;
+    using coordinate_type = typename base_type::coordinate_type;
+    using system_type     = typename base_type::system_type;
+    using boundary_type   = typename base_type::boundary_type;
+    using potential_type  = ProteinDNANonSpecificPotential<real_type>;
+    using partition_type  = SpatialPartition<traits_type, potential_type>;
 
     // neighbor list stuff
     using neighbor_type = std::pair<std::size_t, std::size_t>; // {DNA, S3}
@@ -85,12 +77,6 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
             this->make_list(sys);
         }
         return ;
-    }
-
-    void write_topology(topology_type&) const
-    {
-        // no fixed topology here because contactee changes every step...
-        return;
     }
 
     void calc_force(system_type& sys) const noexcept override
