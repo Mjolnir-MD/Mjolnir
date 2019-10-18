@@ -26,7 +26,6 @@ read_global_pair_interaction(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type = typename traitsT::real_type;
 
     const auto potential = toml::find<std::string>(global, "potential");
 
@@ -83,11 +82,11 @@ read_global_pair_interaction(const toml::value& global)
     else if(potential == "3SPN2ExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is 3SPN2ExcludedVolume.");
-        using potential_t   = ThreeSPN2ExcludedVolumePotential<real_type>;
+        using potential_t   = ThreeSPN2ExcludedVolumePotential<traitsT>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
         return make_unique<interaction_t>(
-            read_3spn2_excluded_volume_potential<real_type>(global),
+            read_3spn2_excluded_volume_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
     else
@@ -116,7 +115,7 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
     MJOLNIR_LOG_FUNCTION();
     using real_type           = typename traitsT::real_type;
     using base_kind           = parameter_3SPN2::base_kind;
-    using potential_type      = ThreeSPN2BaseBaseInteractionPotential<real_type>;
+    using potential_type      = ThreeSPN2BaseBaseInteractionPotential<traitsT>;
     using parameter_type      = typename potential_type::parameter_type;
 
     // [[forcefields.global]]

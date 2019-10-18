@@ -427,14 +427,14 @@ read_debye_huckel_potential(const toml::value& global)
             read_ignored_molecule(global), read_ignored_group(global));
 }
 
-template<typename realT>
-ThreeSPN2ExcludedVolumePotential<realT>
+template<typename traitsT>
+ThreeSPN2ExcludedVolumePotential<traitsT>
 read_3spn2_excluded_volume_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type      = realT;
-    using potential_type = ThreeSPN2ExcludedVolumePotential<real_type>;
+    using potential_type = ThreeSPN2ExcludedVolumePotential<traitsT>;
+    using real_type      = typename potential_type::real_type;
     using parameter_type = typename potential_type::parameter_type;
     using bead_kind      = parameter_3SPN2::bead_kind;
 
@@ -508,8 +508,10 @@ extern template DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary> 
 extern template DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_debye_huckel_potential(const toml::value& global);
 extern template DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_debye_huckel_potential(const toml::value& global);
 
-extern template ThreeSPN2ExcludedVolumePotential<double> read_3spn2_excluded_volume_potential(const toml::value& global);
-extern template ThreeSPN2ExcludedVolumePotential<float > read_3spn2_excluded_volume_potential(const toml::value& global);
+extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_3spn2_excluded_volume_potential(const toml::value& global);
+extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_3spn2_excluded_volume_potential(const toml::value& global);
+extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_3spn2_excluded_volume_potential(const toml::value& global);
+extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_3spn2_excluded_volume_potential(const toml::value& global);
 #endif
 
 } // mjolnir
