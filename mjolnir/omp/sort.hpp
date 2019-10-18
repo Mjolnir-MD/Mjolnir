@@ -18,6 +18,7 @@ void sort(std::vector<Value, Alloc>& vec, std::vector<Value, Alloc>& buf,
           Comparator comp)
 {
     const std::size_t max_threads = omp_get_max_threads();
+    const std::size_t vec_size = vec.size();
     if(max_threads == 1 || vec.size() < max_threads * 4)
     {
         std::sort(vec.begin(), vec.end(), comp);
@@ -83,6 +84,7 @@ void sort(std::vector<Value, Alloc>& vec, std::vector<Value, Alloc>& buf,
             } // an implicit barrier here
         }
     }
+    assert(vec.size() == vec_size);
     return;
 }
 

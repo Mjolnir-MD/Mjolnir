@@ -168,11 +168,11 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         const auto& participants = pot.participants();
 
         neighbors.clear();
-        if(index_by_cell_    .size() != sys.size() ||
-           index_by_cell_buf_.size() != sys.size())
+        if(index_by_cell_    .size() != participants.size() ||
+           index_by_cell_buf_.size() != participants.size())
         {
-            index_by_cell_    .resize(sys.size());
-            index_by_cell_buf_.resize(sys.size());
+            index_by_cell_    .resize(participants.size());
+            index_by_cell_buf_.resize(participants.size());
         }
 
 #pragma omp parallel for
