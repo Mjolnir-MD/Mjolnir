@@ -43,6 +43,7 @@
         - [Cosine](refs/CosinePotential.md)
       - [DummyInteraction](refs/DummyInteraction.md)
       - [3SPN2BaseStackingInteraction](refs/3SPN2BaseStackingInteraction.md)
+      - [ProteinDNANonSpecificInteraction](refs/ProteinDNANonSpecificInteraction.md)
     - [GlobalForceField](refs/GlobalForceField.md)
       - [GlobalPairInteraction](refs/GlobalPairInteraction.md)
         - [LennardJones](refs/LennardJonesPotential.md)
