@@ -8,7 +8,7 @@
 
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
-#include <mjolnir/input/read_local_interaction.hpp>
+#include <mjolnir/input/read_global_interaction.hpp>
 
 BOOST_AUTO_TEST_CASE(read_pdns_interaction)
 {
@@ -20,7 +20,6 @@ BOOST_AUTO_TEST_CASE(read_pdns_interaction)
         const toml::value v = u8R"(
             interaction = "PDNS"
             potential   = "PDNS"
-            topology = "none"
             sigma = 1.0
             delta = 0.17453
             cutoff = 10.0
@@ -35,7 +34,7 @@ BOOST_AUTO_TEST_CASE(read_pdns_interaction)
             ]
         )"_toml;
 
-        const auto base = mjolnir::read_local_interaction<traits_type>(v);
+        const auto base = mjolnir::read_global_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
         const auto derv = dynamic_cast<
