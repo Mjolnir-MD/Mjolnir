@@ -18,8 +18,10 @@ template LennardJonesPotential<float > read_lennard_jones_potential(const toml::
 template UniformLennardJonesPotential<double> read_uniform_lennard_jones_potential(const toml::value& global);
 template UniformLennardJonesPotential<float > read_uniform_lennard_jones_potential(const toml::value& global);
 
-template DebyeHuckelPotential<double> read_debye_huckel_potential(const toml::value& global);
-template DebyeHuckelPotential<float > read_debye_huckel_potential(const toml::value& global);
+template DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_debye_huckel_potential(const toml::value& global);
+template DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_debye_huckel_potential(const toml::value& global);
+template DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_debye_huckel_potential(const toml::value& global);
+template DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_debye_huckel_potential(const toml::value& global);
 
 template ThreeSPN2ExcludedVolumePotential<double> read_3spn2_excluded_volume_potential(const toml::value& global);
 template ThreeSPN2ExcludedVolumePotential<float > read_3spn2_excluded_volume_potential(const toml::value& global);

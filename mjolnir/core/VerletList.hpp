@@ -127,23 +127,23 @@ void VerletList<traitsT, potentialT>::make(neighbor_list_type& neighbors,
 
 namespace mjolnir
 {
-extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
-extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float >>;
-extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>;
-extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float >>;
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>       , DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       >>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>       , DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       >>;
+extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
 
-extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
-extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float >>;
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>       , ExcludedVolumePotential<double>>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>       , ExcludedVolumePotential<float >>;
 extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;
 extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float >>;
 
-extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        LennardJonesPotential<double>>;
-extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        LennardJonesPotential<float >>;
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>       , LennardJonesPotential<double>>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>       , LennardJonesPotential<float >>;
 extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<double>>;
 extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<float >>;
 
-extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
-extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float >>;
+extern template class VerletList<SimulatorTraits<double, UnlimitedBoundary>       , UniformLennardJonesPotential<double>>;
+extern template class VerletList<SimulatorTraits<float,  UnlimitedBoundary>       , UniformLennardJonesPotential<float >>;
 extern template class VerletList<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
 extern template class VerletList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float >>;
 }

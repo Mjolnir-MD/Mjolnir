@@ -53,11 +53,11 @@ read_global_pair_interaction(const toml::value& global)
     else if(potential == "DebyeHuckel")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Debye-Huckel.");
-        using potential_t   = DebyeHuckelPotential<real_type>;
+        using potential_t   = DebyeHuckelPotential<traitsT>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
         return make_unique<interaction_t>(
-            read_debye_huckel_potential<real_type>(global),
+            read_debye_huckel_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "LennardJones")

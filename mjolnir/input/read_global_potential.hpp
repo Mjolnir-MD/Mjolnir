@@ -397,13 +397,13 @@ read_uniform_lennard_jones_potential(const toml::value& global)
             read_ignored_molecule(global), read_ignored_group(global));
 }
 
-template<typename realT>
-DebyeHuckelPotential<realT>
+template<typename traitsT>
+DebyeHuckelPotential<traitsT>
 read_debye_huckel_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using potential_type = DebyeHuckelPotential<realT>;
+    using potential_type = DebyeHuckelPotential<traitsT>;
     using real_type      = typename potential_type::real_type;
     using parameter_type = typename potential_type::parameter_type;
 
@@ -490,7 +490,6 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
             read_ignored_molecule(global), read_ignored_group(global));
 }
 
-
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template ExcludedVolumePotential<double> read_excluded_volume_potential(const toml::value& global);
 extern template ExcludedVolumePotential<float > read_excluded_volume_potential(const toml::value& global);
@@ -504,8 +503,10 @@ extern template LennardJonesPotential<float > read_lennard_jones_potential(const
 extern template UniformLennardJonesPotential<double> read_uniform_lennard_jones_potential(const toml::value& global);
 extern template UniformLennardJonesPotential<float > read_uniform_lennard_jones_potential(const toml::value& global);
 
-extern template DebyeHuckelPotential<double> read_debye_huckel_potential(const toml::value& global);
-extern template DebyeHuckelPotential<float > read_debye_huckel_potential(const toml::value& global);
+extern template DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_debye_huckel_potential(const toml::value& global);
+extern template DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_debye_huckel_potential(const toml::value& global);
+extern template DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_debye_huckel_potential(const toml::value& global);
+extern template DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_debye_huckel_potential(const toml::value& global);
 
 extern template ThreeSPN2ExcludedVolumePotential<double> read_3spn2_excluded_volume_potential(const toml::value& global);
 extern template ThreeSPN2ExcludedVolumePotential<float > read_3spn2_excluded_volume_potential(const toml::value& global);
