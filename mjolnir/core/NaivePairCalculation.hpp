@@ -58,16 +58,15 @@ void NaivePairCalculation<traitsT, potentialT>::make(neighbor_list_type& neighbo
 {
     neighbors.clear();
 
-    const auto& participants = pot.participants();
+    const auto leading_participants = pot.leading_participants();
 
     std::vector<neighbor_type> partners;
-    for(std::size_t idx=0; idx<participants.size(); ++idx)
+    for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
     {
         partners.clear();
-        const auto   i = participants[idx];
-        for(std::size_t jdx=idx+1; jdx<participants.size(); ++jdx)
+        const auto i = leading_participants[idx];
+        for(const auto j : pot.possible_partners_of(idx, i))
         {
-            const auto j = participants[jdx];
             if(pot.has_interaction(i, j)) // likely
             {
                 partners.emplace_back(j, pot.prepare_params(i, j));
