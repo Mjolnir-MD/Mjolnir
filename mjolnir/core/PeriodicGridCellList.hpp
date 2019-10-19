@@ -157,7 +157,7 @@ void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbo
     const auto& participants = pot.participants();
 
     neighbors.clear();
-    index_by_cell_.resize(sys.size());
+    index_by_cell_.resize(participants.size());
 
     for(std::size_t i=0; i<participants.size(); ++i)
     {
