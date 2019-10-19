@@ -262,7 +262,7 @@ class ThreeSPN2ExcludedVolumePotential
     // to check bases has base-pairing interaction.
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
-        if(exclusion_list_.is_excluded(i, j))
+        if(j <= i || exclusion_list_.is_excluded(i, j))
         {
             return false;
         }
