@@ -16,11 +16,12 @@ namespace mjolnir
 // Well-known Lennard-Jones interaction with uniform parameters.
 // This class contains a sigma and an epsilon that are the same among all the
 // particles.
-template<typename realT>
+template<typename traitsT>
 class UniformLennardJonesPotential
 {
   public:
-    using real_type           = realT;
+    using traits_type         = traitsT;
+    using real_type           = typename traits_type::real_type;
     using parameter_type      = empty_t; // no particle-specific parameter
     using container_type      = empty_t; // no parameter, so no container there.
     using pair_parameter_type = empty_t; // no particle-pair-specific parameter
@@ -113,8 +114,7 @@ class UniformLennardJonesPotential
         return sigma_ * cutoff_ratio_;
     }
 
-    template<typename traitsT>
-    void initialize(const System<traitsT>& sys) noexcept
+    void initialize(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -135,8 +135,7 @@ class UniformLennardJonesPotential
         return;
     }
 
-    template<typename traitsT>
-    void update(const System<traitsT>& sys) noexcept
+    void update(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -193,11 +192,19 @@ class UniformLennardJonesPotential
 
     exclusion_list_type  exclusion_list_;
 };
+} // mjolnir
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class UniformLennardJonesPotential<double>;
-extern template class UniformLennardJonesPotential<float>;
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+
+namespace mjolnir
+{
+extern template class UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+} // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
-} // mjolnir
 #endif /* MJOLNIR_LENNARD_JONES_POTENTIAL */

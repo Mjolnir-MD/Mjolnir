@@ -21,12 +21,13 @@ namespace mjolnir
 //
 // Note: an identifier starts with a digit is not allowed in C++ standard.
 //       see N3337 2.11 for detail. So `3SPN2BaseBaseInteraction` is not a valid name.
-template<typename realT>
+template<typename traitsT>
 class ThreeSPN2ExcludedVolumePotential
 {
   public:
-    using real_type = realT;
-    using bead_kind = parameter_3SPN2::bead_kind;
+    using traits_type = traitsT;
+    using real_type   = typename traits_type::real_type;
+    using bead_kind   = parameter_3SPN2::bead_kind;
 
     using parameter_type      = bead_kind;
     using pair_parameter_type = real_type; // sigma_ij
@@ -138,8 +139,7 @@ class ThreeSPN2ExcludedVolumePotential
         return this->cutoff_;
     }
 
-    template<typename traitsT>
-    void initialize(const System<traitsT>& sys) noexcept
+    void initialize(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -191,8 +191,7 @@ class ThreeSPN2ExcludedVolumePotential
     }
 
     // nothing to do when system parameters change.
-    template<typename traitsT>
-    void update(const System<traitsT>& sys) noexcept
+    void update(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -374,10 +373,19 @@ struct ThreeSPN2ExcludedVolumePotentialParameter
     real_type sigma_C = 6.4;
 };
 
+} // mjolnir
+
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class ThreeSPN2ExcludedVolumePotential<double>;
-extern template class ThreeSPN2ExcludedVolumePotential<float>;
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+
+namespace mjolnir
+{
+extern template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+} // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
-} // mjolnir
 #endif // MJOLNIR_POTENTIAL_GLOBAL_3SPN2_EXV_POTENTIAL_HPP

@@ -32,12 +32,13 @@ namespace mjolnir
 //
 // Note: an identifier starts with a digit is not allowed in C++ standard.
 //       see N3337 2.11 for detail. So `3SPN2BaseBaseInteraction` is not a valid name.
-template<typename realT>
+template<typename traitsT>
 class ThreeSPN2BaseBaseInteractionPotential
 {
   public:
-    using real_type        = realT;
-    using self_type        = ThreeSPN2BaseBaseInteractionPotential<real_type>;
+    using traits_type      = traitsT;
+    using real_type        = typename traits_type::real_type;
+    using self_type        = ThreeSPN2BaseBaseInteractionPotential<traits_type>;
     using base_kind        = parameter_3SPN2::base_kind;
     using base_pair_kind   = parameter_3SPN2::base_pair_kind;
     using cross_stack_kind = parameter_3SPN2::cross_stack_kind;
@@ -401,8 +402,7 @@ class ThreeSPN2BaseBaseInteractionPotential
         return this->cutoff_;
     }
 
-    template<typename traitsT>
-    void initialize(const System<traitsT>& sys) noexcept
+    void initialize(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -468,8 +468,7 @@ class ThreeSPN2BaseBaseInteractionPotential
     }
 
     // nothing to do when system parameters change.
-    template<typename traitsT>
-    void update(const System<traitsT>& sys) noexcept
+    void update(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -846,10 +845,20 @@ struct ThreeSPN2CBaseBaseGlobalPotentialParameter
     }};
 };
 
+} // mjolnir
+
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class ThreeSPN2BaseBaseInteractionPotential<double>;
-extern template class ThreeSPN2BaseBaseInteractionPotential<float>;
+// explicitly specialize major use-cases
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+
+namespace mjolnir
+{
+extern template class ThreeSPN2BaseBaseInteractionPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ThreeSPN2BaseBaseInteractionPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ThreeSPN2BaseBaseInteractionPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ThreeSPN2BaseBaseInteractionPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+} // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
-} // mjolnir
 #endif // MJOLNIR_POTENTIAL_GLOBAL_3SPN2_BASE_BASE_POTENTIAL_HPP

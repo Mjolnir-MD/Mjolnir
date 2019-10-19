@@ -14,11 +14,12 @@ namespace mjolnir
 // Well-known Lennard-Jones interaction with Lorentz-Berthelot combining rules.
 // This class contains sigmas and epsilons of the particles and calculates
 // energy and derivative of the potential function.
-template<typename realT>
+template<typename traitsT>
 class LennardJonesPotential
 {
   public:
-    using real_type            = realT;
+    using traits_type          = traitsT;
+    using real_type            = typename traits_type::real_type;
     using parameter_type       = std::pair<real_type, real_type>; // {sigma, epsilon}
     using container_type       = std::vector<parameter_type>;
 
@@ -136,8 +137,7 @@ class LennardJonesPotential
         return max_sigma * this->cutoff_ratio_;
     }
 
-    template<typename traitsT>
-    void initialize(const System<traitsT>& sys) noexcept
+    void initialize(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -146,8 +146,7 @@ class LennardJonesPotential
         return;
     }
 
-    template<typename traitsT>
-    void update(const System<traitsT>& sys) noexcept
+    void update(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -205,10 +204,19 @@ class LennardJonesPotential
     exclusion_list_type  exclusion_list_;
 };
 
+} // mjolnir
+
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class LennardJonesPotential<double>;
-extern template class LennardJonesPotential<float>;
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+
+namespace mjolnir
+{
+extern template class LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+} // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
-} // mjolnir
 #endif /* MJOLNIR_LENNARD_JONES_POTENTIAL */

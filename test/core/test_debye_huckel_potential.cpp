@@ -7,6 +7,8 @@
 #endif
 
 #include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/logger.hpp>
 
@@ -14,7 +16,8 @@ BOOST_AUTO_TEST_CASE(DH_double)
 {
     mjolnir::LoggerManager::set_default_logger("test_debye_huckel_potential.log");
 
-    using real_type = double;
+    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type   = typename traits_type::real_type;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
     using group_id_type    = mjolnir::Topology::group_id_type;
 
@@ -39,8 +42,8 @@ BOOST_AUTO_TEST_CASE(DH_double)
     constexpr real_type   h = 1e-6;
 
     const real_type charge = 1.0;
-    mjolnir::DebyeHuckelPotential<real_type> dh(
-        mjolnir::DebyeHuckelPotential<real_type>::default_cutoff(),
+    mjolnir::DebyeHuckelPotential<traits_type> dh(
+        mjolnir::DebyeHuckelPotential<traits_type>::default_cutoff(),
         {{0u, charge}, {1u, charge}}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
@@ -64,7 +67,8 @@ BOOST_AUTO_TEST_CASE(DH_double)
 
 BOOST_AUTO_TEST_CASE(DH_float)
 {
-    using real_type = float;
+    using traits_type = mjolnir::SimulatorTraits<float, mjolnir::UnlimitedBoundary>;
+    using real_type   = typename traits_type::real_type;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
     using group_id_type    = mjolnir::Topology::group_id_type;
 
@@ -88,8 +92,8 @@ BOOST_AUTO_TEST_CASE(DH_float)
     constexpr static real_type   h = 1e-2;
 
     const real_type charge = 1.0;
-    mjolnir::DebyeHuckelPotential<real_type> dh(
-        mjolnir::DebyeHuckelPotential<real_type>::default_cutoff(),
+    mjolnir::DebyeHuckelPotential<traits_type> dh(
+        mjolnir::DebyeHuckelPotential<traits_type>::default_cutoff(),
         {{0u, charge}, {1u, charge}}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})

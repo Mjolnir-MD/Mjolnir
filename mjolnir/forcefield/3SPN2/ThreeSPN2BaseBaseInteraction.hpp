@@ -33,7 +33,7 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
-    using potential_type  = ThreeSPN2BaseBaseInteractionPotential<real_type>;
+    using potential_type  = ThreeSPN2BaseBaseInteractionPotential<traits_type>;
     using partition_type  = SpatialPartition<traitsT, potential_type>;
 
     using base_kind        = parameter_3SPN2::bead_kind;

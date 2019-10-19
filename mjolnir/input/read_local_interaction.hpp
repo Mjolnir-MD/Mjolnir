@@ -202,6 +202,20 @@ read_directional_contact_interaction(const std::string& kind,
                   4, real_type, PotentialTs..., contact_potentialT
               >(local), margin);
     }
+    else if(contact_potential == "Uniform")
+    {
+        MJOLNIR_LOG_NOTICE("-- contact potential function is Uniform potential");
+        using contact_potentialT = UniformPotential<real_type>;
+
+        return make_unique<
+            DirectionalContactInteraction<
+                traitsT, PotentialTs..., contact_potentialT
+                >
+            >(kind,
+              read_directional_contact_potentials<
+                  4, real_type, PotentialTs..., contact_potentialT
+              >(local), margin);
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -242,6 +256,15 @@ read_directional_contact_interaction(const std::string& kind,
     {
         MJOLNIR_LOG_NOTICE("-- angle potential function is Gaussian");
         using angle_potential_T = GaussianPotential<real_type>;
+
+        return read_directional_contact_interaction<
+            traitsT, PotentialTs..., angle_potential_T
+            >(kind, local, std::move(angle_keys));
+    }
+    else if(angle_potential == "Uniform")
+    {
+        MJOLNIR_LOG_NOTICE("-- angle potential function is Uniform potential");
+        using angle_potential_T = UniformPotential<real_type>;
 
         return read_directional_contact_interaction<
             traitsT, PotentialTs..., angle_potential_T
