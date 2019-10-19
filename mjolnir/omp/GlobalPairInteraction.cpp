@@ -8,9 +8,8 @@ namespace mjolnir
 {
 
 // D-H
-template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
-template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float> >;
-template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>;
-template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float> >;
-
+template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>       , DebyeHuckelPotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>       >>;
+template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       , DebyeHuckelPotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       >>;
+template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
 } // mjolnir

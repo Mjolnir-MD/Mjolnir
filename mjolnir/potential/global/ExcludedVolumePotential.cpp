@@ -6,6 +6,8 @@
 
 namespace mjolnir
 {
-template class ExcludedVolumePotential<double>;
-template class ExcludedVolumePotential<float>;
+template class ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+template class ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+template class ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+template class ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir

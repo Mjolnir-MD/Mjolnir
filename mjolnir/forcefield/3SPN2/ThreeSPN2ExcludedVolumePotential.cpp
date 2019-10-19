@@ -6,6 +6,8 @@
 
 namespace mjolnir
 {
-template class ThreeSPN2ExcludedVolumePotential<double>;
-template class ThreeSPN2ExcludedVolumePotential<float>;
+template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir

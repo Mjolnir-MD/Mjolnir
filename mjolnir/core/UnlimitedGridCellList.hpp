@@ -296,17 +296,17 @@ void UnlimitedGridCellList<traitsT, potentialT>::initialize(
 
 namespace mjolnir
 {
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float >>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
 
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float >>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
 
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        LennardJonesPotential<double>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        LennardJonesPotential<float >>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
 
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float >>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
 }
 #endif // SEPARATE_BUILD
 

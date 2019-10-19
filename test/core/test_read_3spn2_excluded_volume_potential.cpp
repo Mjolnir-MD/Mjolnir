@@ -17,8 +17,7 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_base_interaction)
     using bead_kind = mjolnir::parameter_3SPN2::bead_kind;
 
     using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type   = typename traits_type::real_type;
-    using potential_type      = mjolnir::ThreeSPN2ExcludedVolumePotential<real_type>;
+    using potential_type = mjolnir::ThreeSPN2ExcludedVolumePotential<traits_type>;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(

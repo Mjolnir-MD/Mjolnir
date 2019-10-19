@@ -26,68 +26,67 @@ read_global_pair_interaction(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type = typename traitsT::real_type;
 
     const auto potential = toml::find<std::string>(global, "potential");
 
     if(potential == "ExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Excluded Volume.");
-        using potential_t   = ExcludedVolumePotential<real_type>;
+        using potential_t   = ExcludedVolumePotential<traitsT>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
         return make_unique<interaction_t>(
-            read_excluded_volume_potential<real_type>(global),
+            read_excluded_volume_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "HardCoreExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Hard Core Excluded Volume.");
-        using potential_t   = HardCoreExcludedVolumePotential<real_type>;
+        using potential_t   = HardCoreExcludedVolumePotential<traitsT>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
         return make_unique<interaction_t>(
-            read_hard_core_excluded_volume_potential<real_type>(global),
+            read_hard_core_excluded_volume_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "DebyeHuckel")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Debye-Huckel.");
-        using potential_t   = DebyeHuckelPotential<real_type>;
+        using potential_t   = DebyeHuckelPotential<traitsT>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
         return make_unique<interaction_t>(
-            read_debye_huckel_potential<real_type>(global),
+            read_debye_huckel_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "LennardJones")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Lennard-Jones.");
-        using potential_t   = LennardJonesPotential<real_type>;
+        using potential_t   = LennardJonesPotential<traitsT>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
         return make_unique<interaction_t>(
-            read_lennard_jones_potential<real_type>(global),
+            read_lennard_jones_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "UniformLennardJones")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Uniform Lennard-Jones.");
-        using potential_t   = UniformLennardJonesPotential<real_type>;
+        using potential_t   = UniformLennardJonesPotential<traitsT>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
         return make_unique<interaction_t>(
-            read_uniform_lennard_jones_potential<real_type>(global),
+            read_uniform_lennard_jones_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "3SPN2ExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is 3SPN2ExcludedVolume.");
-        using potential_t   = ThreeSPN2ExcludedVolumePotential<real_type>;
+        using potential_t   = ThreeSPN2ExcludedVolumePotential<traitsT>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
         return make_unique<interaction_t>(
-            read_3spn2_excluded_volume_potential<real_type>(global),
+            read_3spn2_excluded_volume_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
     else
@@ -116,7 +115,7 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
     MJOLNIR_LOG_FUNCTION();
     using real_type           = typename traitsT::real_type;
     using base_kind           = parameter_3SPN2::base_kind;
-    using potential_type      = ThreeSPN2BaseBaseInteractionPotential<real_type>;
+    using potential_type      = ThreeSPN2BaseBaseInteractionPotential<traitsT>;
     using parameter_type      = typename potential_type::parameter_type;
 
     // [[forcefields.global]]

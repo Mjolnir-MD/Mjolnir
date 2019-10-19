@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE(read_global_pair_exv)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using potential_type = mjolnir::ExcludedVolumePotential<real_type>;
+    using potential_type = mjolnir::ExcludedVolumePotential<traits_type>;
     {
         using namespace toml::literals;
         const auto v = u8R"(
@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(read_global_pair_dh)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using potential_type = mjolnir::DebyeHuckelPotential<real_type>;
+    using potential_type = mjolnir::DebyeHuckelPotential<traits_type>;
     {
         using namespace toml::literals;
         const auto v = u8R"(
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(read_global_pair_lj)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using potential_type = mjolnir::LennardJonesPotential<real_type>;
+    using potential_type = mjolnir::LennardJonesPotential<traits_type>;
 
     {
         using namespace toml::literals;
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(read_global_pair_uni_lj)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using potential_type = mjolnir::UniformLennardJonesPotential<real_type>;
+    using potential_type = mjolnir::UniformLennardJonesPotential<traits_type>;
 
     {
         using namespace toml::literals;

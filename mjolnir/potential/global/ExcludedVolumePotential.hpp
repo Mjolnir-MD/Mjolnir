@@ -22,12 +22,13 @@ namespace mjolnir
 //       and `calc_energy` implemented here will not be used because we can
 //       optimize the runtime efficiency by specializing GlobalPairInteraction.
 //       See mjolnir/interaction/GlobalExcludedVolumeInteraction.hpp for detail.
-template<typename realT>
+template<typename traitsT>
 class ExcludedVolumePotential
 {
   public:
 
-    using real_type            = realT;
+    using traits_type          = traitsT;
+    using real_type            = typename traits_type::real_type;
     using parameter_type       = real_type;
     using container_type       = std::vector<parameter_type>;
 
@@ -131,8 +132,7 @@ class ExcludedVolumePotential
         return -12.0 * this->epsilon_ * dr12 * rinv;
     }
 
-    template<typename traitsT>
-    void initialize(const System<traitsT>& sys) noexcept
+    void initialize(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -142,8 +142,7 @@ class ExcludedVolumePotential
     }
 
     // nothing to be done if system parameter (e.g. temperature) changes
-    template<typename traitsT>
-    void update(const System<traitsT>& sys) noexcept
+    void update(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -199,11 +198,19 @@ class ExcludedVolumePotential
 
     exclusion_list_type  exclusion_list_;
 };
+} // mjolnir
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class ExcludedVolumePotential<double>;
-extern template class ExcludedVolumePotential<float>;
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+
+namespace mjolnir
+{
+extern template class ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+} // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
-} // mjolnir
 #endif /* MJOLNIR_EXCLUDED_VOLUME_POTENTIAL */

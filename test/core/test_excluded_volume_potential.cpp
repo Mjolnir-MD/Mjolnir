@@ -7,12 +7,13 @@
 #endif
 
 #include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
 
 BOOST_AUTO_TEST_CASE(EXV_double)
 {
-    mjolnir::LoggerManager::set_default_logger("test_excluded_volume_potential.log");
-
-    using real_type = double;
+    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type   = typename traits_type::real_type;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
     using group_id_type    = mjolnir::Topology::group_id_type;
     constexpr std::size_t N = 10000;
@@ -20,8 +21,8 @@ BOOST_AUTO_TEST_CASE(EXV_double)
 
     const real_type sigma   = 3.0;
     const real_type epsilon = 1.0;
-    mjolnir::ExcludedVolumePotential<real_type> exv{
-        epsilon, mjolnir::ExcludedVolumePotential<real_type>::default_cutoff(),
+    mjolnir::ExcludedVolumePotential<traits_type> exv{
+        epsilon, mjolnir::ExcludedVolumePotential<traits_type>::default_cutoff(),
         {{0, sigma}, {1, sigma}}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
@@ -45,7 +46,8 @@ BOOST_AUTO_TEST_CASE(EXV_double)
 
 BOOST_AUTO_TEST_CASE(EXV_float)
 {
-    using real_type = float;
+    using traits_type = mjolnir::SimulatorTraits<float, mjolnir::UnlimitedBoundary>;
+    using real_type   = typename traits_type::real_type;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
     using group_id_type    = mjolnir::Topology::group_id_type;
     constexpr static std::size_t N = 1000;
@@ -55,8 +57,8 @@ BOOST_AUTO_TEST_CASE(EXV_float)
     const real_type sigma   = 3.0;
     const real_type epsilon = 1.0;
 
-    mjolnir::ExcludedVolumePotential<real_type> exv{
-        epsilon, mjolnir::ExcludedVolumePotential<real_type>::default_cutoff(),
+    mjolnir::ExcludedVolumePotential<traits_type> exv{
+        epsilon, mjolnir::ExcludedVolumePotential<traits_type>::default_cutoff(),
         {{0, sigma}, {1, sigma}}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})

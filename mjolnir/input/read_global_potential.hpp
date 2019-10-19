@@ -216,13 +216,13 @@ void check_parameter_overlap(const toml::value& env, const toml::array& setting,
     return ;
 }
 
-template<typename realT>
-ExcludedVolumePotential<realT>
+template<typename traitsT>
+ExcludedVolumePotential<traitsT>
 read_excluded_volume_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using potential_type = ExcludedVolumePotential<realT>;
+    using potential_type = ExcludedVolumePotential<traitsT>;
     using real_type      = typename potential_type::real_type;
     using parameter_type = typename potential_type::parameter_type;
 
@@ -256,25 +256,15 @@ read_excluded_volume_potential(const toml::value& global)
             read_ignored_molecule(global), read_ignored_group(global));
 }
 
-template<typename realT>
-HardCoreExcludedVolumePotential<realT>
+template<typename traitsT>
+HardCoreExcludedVolumePotential<traitsT>
 read_hard_core_excluded_volume_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using potential_type = HardCoreExcludedVolumePotential<realT>;
+    using potential_type = HardCoreExcludedVolumePotential<traitsT>;
     using real_type      = typename potential_type::real_type;
     using parameter_type = typename potential_type::parameter_type;
-
-    const auto ignore = toml::find<toml::value>(global, "ignore");
-
-    const auto ignore_particle_within = toml::find<
-      std::map<std::string, std::size_t>>(ignore, "particles_within");
-    for(const auto& connection : ignore_particle_within)
-    {
-      MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
-          "within", connection.second, " will be ignored");
-    }
 
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
@@ -305,18 +295,20 @@ read_hard_core_excluded_volume_potential(const toml::value& global)
                        ", soft_shell_thickness = ", soft_shell_thickness);
     }
 
-    return HardCoreExcludedVolumePotential<realT>(
-        eps, cutoff, std::move(params), ignore_particle_within,
-        read_ignored_molecule(ignore), read_ignored_group(ignore));
+    check_parameter_overlap(env, ps, params);
+
+    return potential_type(eps, cutoff, std::move(params),
+        read_ignore_particles_within(global),
+        read_ignored_molecule(global), read_ignored_group(global));
 }
 
-template<typename realT>
-LennardJonesPotential<realT>
+template<typename traitsT>
+LennardJonesPotential<traitsT>
 read_lennard_jones_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using potential_type = LennardJonesPotential<realT>;
+    using potential_type = LennardJonesPotential<traitsT>;
     using real_type      = typename potential_type::real_type;
     using parameter_type = typename potential_type::parameter_type;
 
@@ -349,13 +341,13 @@ read_lennard_jones_potential(const toml::value& global)
             read_ignored_molecule(global), read_ignored_group(global));
 }
 
-template<typename realT>
-UniformLennardJonesPotential<realT>
+template<typename traitsT>
+UniformLennardJonesPotential<traitsT>
 read_uniform_lennard_jones_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using potential_type = UniformLennardJonesPotential<realT>;
+    using potential_type = UniformLennardJonesPotential<traitsT>;
     using real_type      = typename potential_type::real_type;
     using parameter_type = typename potential_type::parameter_type;
 
@@ -397,13 +389,13 @@ read_uniform_lennard_jones_potential(const toml::value& global)
             read_ignored_molecule(global), read_ignored_group(global));
 }
 
-template<typename realT>
-DebyeHuckelPotential<realT>
+template<typename traitsT>
+DebyeHuckelPotential<traitsT>
 read_debye_huckel_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using potential_type = DebyeHuckelPotential<realT>;
+    using potential_type = DebyeHuckelPotential<traitsT>;
     using real_type      = typename potential_type::real_type;
     using parameter_type = typename potential_type::parameter_type;
 
@@ -435,14 +427,14 @@ read_debye_huckel_potential(const toml::value& global)
             read_ignored_molecule(global), read_ignored_group(global));
 }
 
-template<typename realT>
-ThreeSPN2ExcludedVolumePotential<realT>
+template<typename traitsT>
+ThreeSPN2ExcludedVolumePotential<traitsT>
 read_3spn2_excluded_volume_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type      = realT;
-    using potential_type = ThreeSPN2ExcludedVolumePotential<real_type>;
+    using potential_type = ThreeSPN2ExcludedVolumePotential<traitsT>;
+    using real_type      = typename potential_type::real_type;
     using parameter_type = typename potential_type::parameter_type;
     using bead_kind      = parameter_3SPN2::bead_kind;
 
@@ -490,25 +482,36 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
             read_ignored_molecule(global), read_ignored_group(global));
 }
 
-
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template ExcludedVolumePotential<double> read_excluded_volume_potential(const toml::value& global);
-extern template ExcludedVolumePotential<float > read_excluded_volume_potential(const toml::value& global);
+extern template ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_excluded_volume_potential(const toml::value& global);
+extern template ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_excluded_volume_potential(const toml::value& global);
+extern template ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_excluded_volume_potential(const toml::value& global);
+extern template ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_excluded_volume_potential(const toml::value& global);
 
-extern template HardCoreExcludedVolumePotential<double> read_hard_core_excluded_volume_potential(const toml::value& global);
-extern template HardCoreExcludedVolumePotential<float > read_hard_core_excluded_volume_potential(const toml::value& global);
+extern template HardCoreExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_hard_core_excluded_volume_potential(const toml::value& global);
+extern template HardCoreExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_hard_core_excluded_volume_potential(const toml::value& global);
+extern template HardCoreExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_hard_core_excluded_volume_potential(const toml::value& global);
+extern template HardCoreExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_hard_core_excluded_volume_potential(const toml::value& global);
 
-extern template LennardJonesPotential<double> read_lennard_jones_potential(const toml::value& global);
-extern template LennardJonesPotential<float > read_lennard_jones_potential(const toml::value& global);
+extern template LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_lennard_jones_potential(const toml::value& global);
+extern template LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_lennard_jones_potential(const toml::value& global);
+extern template LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_lennard_jones_potential(const toml::value& global);
+extern template LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_lennard_jones_potential(const toml::value& global);
 
-extern template UniformLennardJonesPotential<double> read_uniform_lennard_jones_potential(const toml::value& global);
-extern template UniformLennardJonesPotential<float > read_uniform_lennard_jones_potential(const toml::value& global);
+extern template UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_uniform_lennard_jones_potential(const toml::value& global);
+extern template UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_uniform_lennard_jones_potential(const toml::value& global);
+extern template UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_uniform_lennard_jones_potential(const toml::value& global);
+extern template UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_uniform_lennard_jones_potential(const toml::value& global);
 
-extern template DebyeHuckelPotential<double> read_debye_huckel_potential(const toml::value& global);
-extern template DebyeHuckelPotential<float > read_debye_huckel_potential(const toml::value& global);
+extern template DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_debye_huckel_potential(const toml::value& global);
+extern template DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_debye_huckel_potential(const toml::value& global);
+extern template DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_debye_huckel_potential(const toml::value& global);
+extern template DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_debye_huckel_potential(const toml::value& global);
 
-extern template ThreeSPN2ExcludedVolumePotential<double> read_3spn2_excluded_volume_potential(const toml::value& global);
-extern template ThreeSPN2ExcludedVolumePotential<float > read_3spn2_excluded_volume_potential(const toml::value& global);
+extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_3spn2_excluded_volume_potential(const toml::value& global);
+extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_3spn2_excluded_volume_potential(const toml::value& global);
+extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_3spn2_excluded_volume_potential(const toml::value& global);
+extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_3spn2_excluded_volume_potential(const toml::value& global);
 #endif
 
 } // mjolnir

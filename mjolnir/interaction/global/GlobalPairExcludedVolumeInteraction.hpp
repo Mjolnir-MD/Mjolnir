@@ -14,7 +14,7 @@ namespace mjolnir
 template<typename realT, template<typename, typename> class boundaryT>
 class GlobalPairInteraction<
     SimulatorTraits<realT, boundaryT>,
-    ExcludedVolumePotential<realT>
+    ExcludedVolumePotential<SimulatorTraits<realT, boundaryT>>
     > final : public GlobalInteractionBase<SimulatorTraits<realT, boundaryT>>
 {
   public:
@@ -25,7 +25,7 @@ class GlobalPairInteraction<
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
-    using potential_type  = ExcludedVolumePotential<real_type>;
+    using potential_type  = ExcludedVolumePotential<traits_type>;
     using partition_type  = SpatialPartition<traits_type, potential_type>;
 
   public:
@@ -160,10 +160,10 @@ namespace mjolnir
 // ============================================================================
 // exv
 // CellList
-extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float> >;
-extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float> >;
+extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>       , ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       >>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>       , ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       >>;
+extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
 

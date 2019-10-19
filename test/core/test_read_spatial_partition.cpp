@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(read_spatial_partition_naive)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using potential_type = mjolnir::DebyeHuckelPotential<real_type>;
+    using potential_type = mjolnir::DebyeHuckelPotential<traits_type>;
 
     {
         using namespace toml::literals;
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(read_spatial_partition_verlet)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using potential_type = mjolnir::DebyeHuckelPotential<real_type>;
+    using potential_type = mjolnir::DebyeHuckelPotential<traits_type>;
 
     {
         using namespace toml::literals;
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(read_spatial_partition_unlimited_cell_list)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using potential_type = mjolnir::DebyeHuckelPotential<real_type>;
+    using potential_type = mjolnir::DebyeHuckelPotential<traits_type>;
 
     {
         using namespace toml::literals;
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(read_spatial_partition_periodic_cell_list)
 
     using real_type = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::CuboidalPeriodicBoundary>;
-    using potential_type = mjolnir::DebyeHuckelPotential<real_type>;
+    using potential_type = mjolnir::DebyeHuckelPotential<traits_type>;
 
     {
         using namespace toml::literals;
