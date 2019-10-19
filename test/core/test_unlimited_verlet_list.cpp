@@ -8,6 +8,7 @@
 
 #include <mjolnir/util/empty.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <mjolnir/util/range.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/VerletList.hpp>
@@ -41,7 +42,6 @@ struct dummy_potential
 
     bool is_ignored_molecule(std::size_t, std::size_t) const {return false;}
     bool is_ignored_group   (std::string, std::string) const {return false;}
-    bool has_interaction    (std::size_t, std::size_t) const {return true;}
 
     std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within() const
     {
@@ -51,6 +51,22 @@ struct dummy_potential
     std::vector<std::size_t> const& participants() const noexcept
     {
         return this->participants_;
+    }
+    mjolnir::range<typename std::vector<std::size_t>::const_iterator>
+    leading_participants() const noexcept
+    {
+        return mjolnir::make_range(participants_.begin(), std::prev(participants_.end()));
+    }
+    mjolnir::range<typename std::vector<std::size_t>::const_iterator>
+    possible_partners_of(const std::size_t participant_idx,
+                         const std::size_t /*particle_idx*/) const noexcept
+    {
+        return mjolnir::make_range(participants_.begin() + participant_idx + 1,
+                                   participants_.end());
+    }
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
+    {
+        return (i < j);
     }
 
     std::string name() const {return "dummy potential";}
@@ -109,7 +125,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_all)
     vlist.make(sys, pot);
     BOOST_TEST(vlist.valid());
 
-    for(const auto i : participants)
+    for(const auto i : pot.leading_participants())
     {
         const auto partners = vlist.partners(i);
         for(std::size_t j=i+1; j<N; ++j)
@@ -134,7 +150,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_all)
     }
 
     // check parameter_type.
-    for(const auto i : participants)
+    for(const auto i : pot.leading_participants())
     {
         for(const auto& p_j : vlist.partners(i))
         {
@@ -197,7 +213,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_partial)
     vlist.make(sys, pot);
     BOOST_TEST(vlist.valid());
 
-    for(const auto i : participants)
+    for(const auto i : pot.leading_participants())
     {
         const auto partners = vlist.partners(i);
 
@@ -298,7 +314,7 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_partial_2)
     vlist.make(sys, pot);
     BOOST_TEST(vlist.valid());
 
-    for(const auto i : participants)
+    for(const auto i : pot.leading_participants())
     {
         const auto partners = vlist.partners(i);
 
