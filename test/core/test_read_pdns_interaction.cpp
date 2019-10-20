@@ -48,13 +48,23 @@ BOOST_AUTO_TEST_CASE(read_pdns_interaction)
 
         BOOST_TEST_REQUIRE(pot.cutoff_ratio() == 10.0);
 
+        const auto nil = mjolnir::ProteinDNANonSpecificPotential<double>::invalid();
+
+        BOOST_TEST_REQUIRE(pot.proteins().size() == 3u);
+        BOOST_TEST_REQUIRE(pot.proteins().at(0) == 10u);
+        BOOST_TEST_REQUIRE(pot.proteins().at(1) == 11u);
+        BOOST_TEST_REQUIRE(pot.proteins().at(2) == 12u);
+        BOOST_TEST_REQUIRE(pot.parameters().at(pot.proteins().at(0)).S3 == nil);
+        BOOST_TEST_REQUIRE(pot.parameters().at(pot.proteins().at(1)).S3 == nil);
+        BOOST_TEST_REQUIRE(pot.parameters().at(pot.proteins().at(2)).S3 == nil);
+
         BOOST_TEST_REQUIRE(pot.dnas().size() == 3u);
-        BOOST_TEST_REQUIRE(pot.dnas().at(0).first == 1u);
-        BOOST_TEST_REQUIRE(pot.dnas().at(1).first == 4u);
-        BOOST_TEST_REQUIRE(pot.dnas().at(2).first == 7u);
-        BOOST_TEST_REQUIRE(pot.dnas().at(0).second == 0u);
-        BOOST_TEST_REQUIRE(pot.dnas().at(1).second == 3u);
-        BOOST_TEST_REQUIRE(pot.dnas().at(2).second == 6u);
+        BOOST_TEST_REQUIRE(pot.dnas().at(0) == 1u);
+        BOOST_TEST_REQUIRE(pot.dnas().at(1) == 4u);
+        BOOST_TEST_REQUIRE(pot.dnas().at(2) == 7u);
+        BOOST_TEST_REQUIRE(pot.parameters().at(pot.dnas().at(0)).S3 == 0u);
+        BOOST_TEST_REQUIRE(pot.parameters().at(pot.dnas().at(1)).S3 == 3u);
+        BOOST_TEST_REQUIRE(pot.parameters().at(pot.dnas().at(2)).S3 == 6u);
 
         BOOST_TEST_REQUIRE(pot.contacts().size()   == 3u);
         BOOST_TEST_REQUIRE(pot.contacts().at(0).P  == 10u);
