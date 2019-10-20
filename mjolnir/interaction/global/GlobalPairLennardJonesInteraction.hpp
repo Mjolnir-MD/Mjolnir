@@ -71,8 +71,12 @@ class GlobalPairInteraction<
     {
         const auto  cutoff_ratio    = potential_.cutoff_ratio();
         const auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-        for(const auto i : this->potential_.participants())
+
+        const auto leading_participants = this->potential_.leading_participants();
+        for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
         {
+            const auto i = leading_participants[idx];
+
             for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto  j     = ptnr.index;
@@ -108,8 +112,12 @@ class GlobalPairInteraction<
         const auto cutoff_ratio    = potential_.cutoff_ratio();
         const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
         const auto coef_at_cutoff  = potential_.coef_at_cutoff();
-        for(const auto i : this->potential_.participants())
+
+        const auto leading_participants = this->potential_.leading_participants();
+        for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
         {
+            const auto i = leading_participants[idx];
+
             for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto  j     = ptnr.index;

@@ -195,11 +195,13 @@ void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbo
     const real_type r_c  = cutoff_ * (1. + margin_);
     const real_type r_c2 = r_c * r_c;
 
+    const auto leading_participants = pot.leading_participants();
+
     std::vector<neighbor_type> partner;
-    for(std::size_t idx=0; idx<participants.size(); ++idx)
+    for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
     {
         partner.clear();
-        const auto   i = participants[idx];
+        const auto   i = leading_participants[idx];
         const auto& ri = sys.position(i);
 
         const auto& cell = cell_list_[calc_index(ri)];
@@ -214,7 +216,7 @@ void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbo
             {
                 const auto j = pici.first;
                 MJOLNIR_LOG_DEBUG("looking particle", j);
-                if(j <= i || !pot.has_interaction(i, j))
+                if(!pot.has_interaction(i, j))
                 {
                     continue;
                 }

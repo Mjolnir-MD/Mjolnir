@@ -83,23 +83,20 @@ void VerletList<traitsT, potentialT>::make(neighbor_list_type& neighbors,
 {
     neighbors.clear();
 
-    // `participants` is a list that contains indices of particles that are
-    // related to the potential.
-    const auto& participants = pot.participants();
-
     const real_type rc = cutoff_ * (1. + margin_);
     const real_type rc2 = rc * rc;
 
+    const auto leading_participants = pot.leading_participants();
+
     std::vector<neighbor_type> partner;
-    for(std::size_t idx=0; idx<participants.size(); ++idx)
+    for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
     {
         partner.clear();
-        const auto   i = participants[idx];
+        const auto   i = leading_participants[idx];
         const auto& ri = sys.position(i);
 
-        for(std::size_t jdx=idx+1; jdx<participants.size(); ++jdx)
+        for(const auto j : pot.possible_partners_of(idx, i))
         {
-            const auto j = participants[jdx];
             if(!pot.has_interaction(i, j))
             {
                 continue;

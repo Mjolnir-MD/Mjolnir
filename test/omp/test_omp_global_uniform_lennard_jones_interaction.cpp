@@ -21,7 +21,6 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_UniformLennardJones_calc_force)
     mjolnir::LoggerManager::set_default_logger("test_omp_global_pair_uniform_lennard_jones_interaction.log");
 
     using traits_type      = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type        = typename traits_type::real_type;
     using coordinate_type  = typename traits_type::coordinate_type;
     using boundary_type    = typename traits_type::boundary_type;
     using system_type      = mjolnir::System<traits_type>;

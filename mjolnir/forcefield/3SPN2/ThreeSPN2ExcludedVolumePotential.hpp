@@ -241,11 +241,28 @@ class ThreeSPN2ExcludedVolumePotential
         return;
     }
 
+    // -----------------------------------------------------------------------
+    // for spatial partitions
+
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+
+    range<typename std::vector<std::size_t>::const_iterator>
+    leading_participants() const noexcept
+    {
+        return make_range(participants_.begin(), std::prev(participants_.end()));
+    }
+    range<typename std::vector<std::size_t>::const_iterator>
+    possible_partners_of(const std::size_t participant_idx,
+                         const std::size_t /*particle_idx*/) const noexcept
+    {
+        return make_range(participants_.begin() + participant_idx + 1, participants_.end());
+    }
+
     // ------------------------------------------------------------------------
     // to check bases has base-pairing interaction.
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
-        if(exclusion_list_.is_excluded(i, j))
+        if(j <= i || exclusion_list_.is_excluded(i, j))
         {
             return false;
         }
@@ -307,8 +324,6 @@ class ThreeSPN2ExcludedVolumePotential
             default:{assert(false);}
         }
     }
-
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
 
   private:
 

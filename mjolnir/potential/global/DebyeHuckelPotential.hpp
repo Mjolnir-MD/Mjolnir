@@ -75,7 +75,6 @@ class DebyeHuckelPotential
             }
             this->parameters_.at(idx) = idxp.second;
         }
-
         // XXX should be updated before use because T and ion conc are default!
         this->calc_parameters();
     }
@@ -156,16 +155,38 @@ class DebyeHuckelPotential
         return;
     }
 
+    // -----------------------------------------------------------------------
+    // for spatial partitions
+    //
+    // Here, the default implementation uses Newton's 3rd law to reduce
+    // calculation. For an interacting pair (i, j), forces applied to i and j
+    // are equal in magnitude and opposite in direction. So, if a pair (i, j) is
+    // listed, (j, i) is not needed.
+    //     See implementation of VerletList, CellList and GlobalPairInteraction
+    // for more details about the usage of these functions.
+
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+
+    range<typename std::vector<std::size_t>::const_iterator>
+    leading_participants() const noexcept
+    {
+        return make_range(participants_.begin(), std::prev(participants_.end()));
+    }
+    range<typename std::vector<std::size_t>::const_iterator>
+    possible_partners_of(const std::size_t participant_idx,
+                         const std::size_t /*particle_idx*/) const noexcept
+    {
+        return make_range(participants_.begin() + participant_idx + 1,
+                          participants_.end());
+    }
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
-        // if not excluded, the pair has interaction.
-        return !exclusion_list_.is_excluded(i, j);
+        return (i < j) && !exclusion_list_.is_excluded(i, j);
     }
 
-    // for testing
     exclusion_list_type const& exclusion_list() const noexcept
     {
-        return exclusion_list_;
+        return exclusion_list_; // for testing
     }
 
     // ------------------------------------------------------------------------
@@ -178,8 +199,6 @@ class DebyeHuckelPotential
     // access to the parameters.
     std::vector<real_type>&       charges()       noexcept {return parameters_;}
     std::vector<real_type> const& charges() const noexcept {return parameters_;}
-
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
 
     real_type debye_length() const noexcept {return this->debye_length_;}
 

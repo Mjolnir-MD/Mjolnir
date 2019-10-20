@@ -211,6 +211,9 @@ class NeighborList
         {
             this->ranges_.resize(i+2, 0);
         }
+
+        assert(ranges_[i] == 0 || ranges_[i] == this->neighbors_.size());
+
         this->ranges_[i]   = this->neighbors_.size();
         this->ranges_[i+1] = this->neighbors_.size() + std::distance(first, last);
 

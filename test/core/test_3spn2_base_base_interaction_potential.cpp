@@ -353,7 +353,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(bp_kind_3SPN2_BaseBaseInteraction,
             "test_3spn2_base_base_interaction_potential.log");
 
     using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type        = traits_type::real_type;
     using potential_type   = mjolnir::ThreeSPN2BaseBaseInteractionPotential<traits_type>;
     using base_kind        = mjolnir::parameter_3SPN2::base_kind;
     using base_pair_kind   = mjolnir::parameter_3SPN2::base_pair_kind;
@@ -374,7 +373,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(cs_kind_3SPN2_BaseBaseInteraction,
     mjolnir::LoggerManager::set_default_logger(
             "test_3spn2_base_base_interaction_potential.log");
     using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type        = traits_type::real_type;
     using potential_type   = mjolnir::ThreeSPN2BaseBaseInteractionPotential<traits_type>;
     using base_kind = mjolnir::parameter_3SPN2::base_kind;
     using cross_stack_kind = mjolnir::parameter_3SPN2::cross_stack_kind;

@@ -99,8 +99,10 @@ void ThreeSPN2BaseBaseInteraction<traitsT>::calc_force(
     constexpr auto two_pi    = math::constants<real_type>::two_pi();
     constexpr auto tolerance = math::abs_tolerance<real_type>();
 
-    for(const auto Bi : this->potential_.participants())
+    const auto leading_participants = this->potential_.leading_participants();
+    for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
     {
+        const auto   Bi = leading_participants[idx];
         const auto& rBi = sys.position(Bi);
         for(const auto& ptnr : this->partition_.partners(Bi))
         {
@@ -531,8 +533,11 @@ ThreeSPN2BaseBaseInteraction<traitsT>::calc_energy(
 
     real_type E_BP = 0.0;
     real_type E_CS = 0.0;
-    for(const auto Bi : this->potential_.participants())
+
+    const auto leading_participants = this->potential_.leading_participants();
+    for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
     {
+        const auto   Bi = leading_participants[idx];
         const auto& rBi = sys.position(Bi);
 
         for(const auto& ptnr : this->partition_.partners(Bi))
