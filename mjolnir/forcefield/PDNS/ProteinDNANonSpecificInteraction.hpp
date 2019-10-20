@@ -38,11 +38,6 @@ class ProteinDNANonSpecificInteraction final : public GlobalInteractionBase<trai
     using potential_type  = ProteinDNANonSpecificPotential<real_type>;
     using partition_type  = SpatialPartition<traitsT, potential_type>;
 
-    // neighbor list stuff
-    using neighbor_type = std::pair<std::size_t, std::size_t>; // {DNA, S3}
-    using neighbor_container_type = std::vector<neighbor_type>;
-    using range_type = range<typename neighbor_container_type::const_iterator>;
-
   public:
     ProteinDNANonSpecificInteraction(potential_type&& pot, partition_type&& part)
         : potential_(std::move(pot)), partition_(std::move(part))
