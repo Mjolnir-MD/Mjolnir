@@ -6,8 +6,8 @@
 
 namespace mjolnir
 {
-
-template class ProteinDNANonSpecificPotential<double>;
-template class ProteinDNANonSpecificPotential<float >;
-
+template class ProteinDNANonSpecificPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+template class ProteinDNANonSpecificPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+template class ProteinDNANonSpecificPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+template class ProteinDNANonSpecificPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir

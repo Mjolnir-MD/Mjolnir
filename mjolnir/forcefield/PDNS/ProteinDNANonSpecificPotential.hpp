@@ -35,12 +35,13 @@ namespace mjolnir
 //
 // XXX one particle on protein can have multiple contact direction.
 
-template<typename realT>
+template<typename traitsT>
 class ProteinDNANonSpecificPotential
 {
   public:
-    using real_type = realT;
-    using self_type = ProteinDNANonSpecificPotential<real_type>;
+    using traits_type = traitsT;
+    using real_type   = typename traits_type::real_type;
+    using self_type   = ProteinDNANonSpecificPotential<traits_type>;
 
     struct contact_parameter_type
     {
@@ -136,8 +137,7 @@ class ProteinDNANonSpecificPotential
     }
     ~ProteinDNANonSpecificPotential() = default;
 
-    template<typename traitsT>
-    void initialize(const System<traitsT>& sys) noexcept
+    void initialize(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -157,8 +157,7 @@ class ProteinDNANonSpecificPotential
         return;
     }
 
-    template<typename traitsT>
-    void update(const System<traitsT>&) noexcept
+    void update(const System<traits_type>&) noexcept
     {
         return;
     }
@@ -302,11 +301,20 @@ class ProteinDNANonSpecificPotential
                                                      // `invalid`(Protein)
     exclusion_list_type exclusion_list_;
 };
+} // mjolnir
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class ProteinDNANonSpecificPotential<double>;
-extern template class ProteinDNANonSpecificPotential<float >;
+// explicitly specialize major use-cases
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+
+namespace mjolnir
+{
+extern template class ProteinDNANonSpecificPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ProteinDNANonSpecificPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ProteinDNANonSpecificPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ProteinDNANonSpecificPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+} // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
-} // mjolnir
 #endif// MJOLNIR_FORCEFIELD_PDNS_PROTEIN_DNA_NON_SPECIFIC_INTERACTION_HPP

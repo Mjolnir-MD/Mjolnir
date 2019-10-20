@@ -252,8 +252,8 @@ read_pdns_interaction(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type      = typename traitsT::real_type;
-    using potential_type = ProteinDNANonSpecificPotential<real_type>;
+    using potential_type         = ProteinDNANonSpecificPotential<traitsT>;
+    using real_type              = typename potential_type::real_type;
     using contact_parameter_type = typename potential_type::contact_parameter_type;
     using dna_index_type         = typename potential_type::dna_index_type;
 

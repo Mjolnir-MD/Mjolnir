@@ -35,7 +35,7 @@ class ProteinDNANonSpecificInteraction final : public GlobalInteractionBase<trai
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
-    using potential_type  = ProteinDNANonSpecificPotential<real_type>;
+    using potential_type  = ProteinDNANonSpecificPotential<traits_type>;
     using partition_type  = SpatialPartition<traitsT, potential_type>;
 
   public:
