@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE(PDNS_Interaction)
     using system_type       = mjolnir::System<traits_type>;
 
     using real_type              = double;
-    using potential_type         = mjolnir::ProteinDNANonSpecificPotential<real_type>;
+    using potential_type         = mjolnir::ProteinDNANonSpecificPotential<traits_type>;
     using contact_parameter_type = typename potential_type::contact_parameter_type;
     using dna_index_type         = typename potential_type::dna_index_type;
     using interaction_type       = mjolnir::ProteinDNANonSpecificInteraction<traits_type>;
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(PDNS_Interaction)
     const contact_parameter_type p_pro{1, 0, 2, -1.2, r0, theta0, phi0, r0+5.0, (r0+5.0)*(r0+5.0)};
     const dna_index_type p_dna{3, 4};
 
-    mjolnir::ProteinDNANonSpecificPotential<real_type> potential(
+    potential_type potential(
         sigma, delta, 5.0, {p_pro}, {p_dna}, {/*exclusion*/},
         ignore_molecule_type("Nothing"), ignore_group_type({}));
 

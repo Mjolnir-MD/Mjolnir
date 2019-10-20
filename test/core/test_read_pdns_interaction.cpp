@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(read_pdns_interaction)
 
         BOOST_TEST_REQUIRE(pot.cutoff_ratio() == 10.0);
 
-        const auto nil = mjolnir::ProteinDNANonSpecificPotential<double>::invalid();
+        const auto nil = mjolnir::ProteinDNANonSpecificPotential<traits_type>::invalid();
 
         BOOST_TEST_REQUIRE(pot.proteins().size() == 3u);
         BOOST_TEST_REQUIRE(pot.proteins().at(0) == 10u);

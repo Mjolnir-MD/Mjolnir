@@ -7,6 +7,8 @@
 #endif
 
 #include <mjolnir/core/System.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/forcefield/PDNS/ProteinDNANonSpecificPotential.hpp>
 
 BOOST_AUTO_TEST_CASE(PDNS_Potential_f)
@@ -14,7 +16,8 @@ BOOST_AUTO_TEST_CASE(PDNS_Potential_f)
     mjolnir::LoggerManager::set_default_logger("test_pdns_potential.log");
 
     using real_type = double;
-    using potential_type = mjolnir::ProteinDNANonSpecificPotential<real_type>;
+    using traits_type  = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    using potential_type = mjolnir::ProteinDNANonSpecificPotential<traits_type>;
     using ignore_group_type    = typename potential_type::ignore_group_type;
     using ignore_molecule_type = typename potential_type::ignore_molecule_type;
 
@@ -60,7 +63,8 @@ BOOST_AUTO_TEST_CASE(PDNS_Potential_g)
     mjolnir::LoggerManager::set_default_logger("test_pdns_potential.log");
 
     using real_type = double;
-    using potential_type = mjolnir::ProteinDNANonSpecificPotential<real_type>;
+    using traits_type  = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    using potential_type = mjolnir::ProteinDNANonSpecificPotential<traits_type>;
     using ignore_group_type    = typename potential_type::ignore_group_type;
     using ignore_molecule_type = typename potential_type::ignore_molecule_type;
 
