@@ -188,12 +188,15 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 //XXX neighbor-list construction cannot be parallelized, but it becomes still
 //XXX faster.
 
+        const auto leading_participants = pot.leading_participants();
+
         std::vector<neighbor_type> partner;
-        for(std::size_t idx=0; idx<participants.size(); ++idx)
+        for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
         {
             partner.clear();
-            const auto  i    = participants[idx];
-            const auto& ri   = sys.position(i);
+            const auto   i = leading_participants[idx];
+            const auto& ri = sys.position(i);
+
             const auto& cell = cell_list_[this->calc_index(ri)];
 
             MJOLNIR_LOG_DEBUG("particle position ", sys.position(i));
@@ -207,7 +210,7 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
                 {
                     const auto j = pici.first;
                     MJOLNIR_LOG_DEBUG("looking particle ", j);
-                    if(j <= i || !pot.has_interaction(i, j))
+                    if(!pot.has_interaction(i, j))
                     {
                         continue;
                     }
@@ -227,7 +230,6 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
             std::sort(partner.begin(), partner.end());
             neighbors.add_list_for(i, partner.begin(), partner.end());
         }
-
         this->current_margin_ = cutoff_ * margin_;
         return ;
     }
