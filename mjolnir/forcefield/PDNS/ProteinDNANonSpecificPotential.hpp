@@ -274,6 +274,22 @@ class ProteinDNANonSpecificPotential
     // used by Observer.
     static const char* name() noexcept {return "PDNS";}
 
+    // ------------------------------------------------------------------------
+    // for tests
+
+    std::vector<parameter_type> const& parameters() const noexcept
+    {
+        return parameters_;
+    }
+    std::vector<std::size_t> const& dnas() const noexcept
+    {
+        return dnas_;
+    }
+    std::vector<std::size_t> const& proteins() const noexcept
+    {
+        return proteins_;
+    }
+
   private:
 
     real_type sigma_, delta_, delta2_, pi_over_2delta_;
