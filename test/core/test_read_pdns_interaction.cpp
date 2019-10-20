@@ -20,6 +20,8 @@ BOOST_AUTO_TEST_CASE(read_pdns_interaction)
         const toml::value v = u8R"(
             interaction = "PDNS"
             potential   = "PDNS"
+            spatial_partition.type   = "VerletList"
+            spatial_partition.margin = 0.4
             sigma = 1.0
             delta = 0.17453
             cutoff = 10.0

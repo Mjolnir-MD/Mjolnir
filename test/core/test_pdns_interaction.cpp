@@ -9,6 +9,7 @@
 #include <mjolnir/forcefield/PDNS/ProteinDNANonSpecificInteraction.hpp>
 #include <mjolnir/core/VerletList.hpp>
 #include <mjolnir/core/SpatialPartitionBase.hpp>
+#include <mjolnir/core/NaivePairCalculation.hpp>
 
 BOOST_AUTO_TEST_CASE(PDNS_Interaction)
 {
@@ -20,11 +21,14 @@ BOOST_AUTO_TEST_CASE(PDNS_Interaction)
     using boundary_type     = traits_type::boundary_type;
     using system_type       = mjolnir::System<traits_type>;
 
-    using real_type        = double;
-    using potential_type   = mjolnir::ProteinDNANonSpecificPotential<real_type>;
-    using parameter_type   = typename potential_type::parameter_type;
-    using dna_index_type   = typename potential_type::dna_index_type;
-    using interaction_type = mjolnir::ProteinDNANonSpecificInteraction<traits_type>;
+    using real_type              = double;
+    using potential_type         = mjolnir::ProteinDNANonSpecificPotential<real_type>;
+    using contact_parameter_type = typename potential_type::contact_parameter_type;
+    using dna_index_type         = typename potential_type::dna_index_type;
+    using interaction_type       = mjolnir::ProteinDNANonSpecificInteraction<traits_type>;
+    using ignore_molecule_type   = typename potential_type::ignore_molecule_type;
+    using ignore_group_type      = typename potential_type::ignore_group_type;
+    using partition_type         = mjolnir::NaivePairCalculation<traits_type, potential_type>;
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
@@ -44,13 +48,16 @@ BOOST_AUTO_TEST_CASE(PDNS_Interaction)
     const real_type sigma  = 1.0;
     const real_type delta  = pi / 18.0;
 
-    const parameter_type p_pro{1, 0, 2, -1.2, r0, theta0, phi0, r0+5.0, (r0+5.0)*(r0+5.0)};
+    const contact_parameter_type p_pro{1, 0, 2, -1.2, r0, theta0, phi0, r0+5.0, (r0+5.0)*(r0+5.0)};
     const dna_index_type p_dna{3, 4};
 
     mjolnir::ProteinDNANonSpecificPotential<real_type> potential(
-        sigma, delta, 5.0, {p_pro}, {p_dna});
+        sigma, delta, 5.0, {p_pro}, {p_dna}, {/*exclusion*/},
+        ignore_molecule_type("Nothing"), ignore_group_type({}));
 
-    interaction_type interaction(potential_type(potential), 0.5);
+    interaction_type interaction(potential_type(potential),
+        mjolnir::SpatialPartition<traits_type, potential_type>(
+            mjolnir::make_unique<partition_type>()));
 
     system_type sys(5, boundary_type{});
 

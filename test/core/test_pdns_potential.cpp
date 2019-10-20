@@ -14,13 +14,17 @@ BOOST_AUTO_TEST_CASE(PDNS_Potential_f)
     mjolnir::LoggerManager::set_default_logger("test_pdns_potential.log");
 
     using real_type = double;
+    using potential_type = mjolnir::ProteinDNANonSpecificPotential<real_type>;
+    using ignore_group_type    = typename potential_type::ignore_group_type;
+    using ignore_molecule_type = typename potential_type::ignore_molecule_type;
 
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
     constexpr real_type  pi = mjolnir::math::constants<real_type>::pi();
 
-    mjolnir::ProteinDNANonSpecificPotential<real_type> potential(
-        1.0, pi / 18.0, 5.0, {/* parameter = empty */}, {/* exclude = empty */});
+    potential_type potential(
+        1.0, pi / 18.0, 5.0, {/* contact = empty */}, {/*dnas = empty*/},
+        {/* exclude = empty */}, ignore_molecule_type("Nothing"), ignore_group_type({}));
 
     const real_type r_0   = 7.0;
     const real_type r_min = 1.0;
@@ -56,13 +60,17 @@ BOOST_AUTO_TEST_CASE(PDNS_Potential_g)
     mjolnir::LoggerManager::set_default_logger("test_pdns_potential.log");
 
     using real_type = double;
+    using potential_type = mjolnir::ProteinDNANonSpecificPotential<real_type>;
+    using ignore_group_type    = typename potential_type::ignore_group_type;
+    using ignore_molecule_type = typename potential_type::ignore_molecule_type;
 
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
     constexpr real_type  pi = mjolnir::math::constants<real_type>::pi();
 
-    mjolnir::ProteinDNANonSpecificPotential<real_type> potential(
-        1.0, pi / 18.0, 5.0, {/* parameter = empty */}, {/* exclude = empty */});
+    potential_type potential(
+        1.0, pi / 18.0, 5.0, {/* contact = empty */}, {/*dnas = empty*/},
+        {/* exclude = empty */}, ignore_molecule_type("Nothing"), ignore_group_type({}));
 
     const real_type theta_0   = pi * 0.5;
     const real_type theta_min = pi * 0.3;
