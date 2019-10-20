@@ -4,6 +4,7 @@
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/core/System.hpp>
+#include <mjolnir/core/ExclusionList.hpp>
 #include <cstdint>
 
 namespace mjolnir
@@ -31,6 +32,8 @@ namespace mjolnir
 // # ...
 // ]
 // ```
+//
+// XXX one particle on protein can have multiple contact direction.
 
 template<typename realT>
 class ProteinDNANonSpecificPotential
@@ -39,14 +42,34 @@ class ProteinDNANonSpecificPotential
     using real_type = realT;
     using self_type = ProteinDNANonSpecificPotential<real_type>;
 
-    struct parameter_type
+    struct contact_parameter_type
     {
-        std::uint32_t P, PN, PC; // for PRO
+        std::uint32_t P, PN, PC;
         real_type k, r0, theta0, phi0;
         real_type r_cut, r_cut_sq;
     };
+    struct dna_index_type
+    {
+        std::uint32_t D, S3;
+    };
+    struct parameter_type
+    {
+        std::uint32_t S3; // if a particle is a protein, set `invalid()`
+    };
+    struct pair_parameter_type
+    {
+        std::uint32_t S3;
+    };
     using container_type = std::vector<parameter_type>;
-    using dna_index_type = std::pair<std::uint32_t, std::uint32_t>;
+
+    // topology stuff
+    using topology_type        = Topology;
+    using molecule_id_type     = typename topology_type::molecule_id_type;
+    using group_id_type        = typename topology_type::group_id_type;
+    using connection_kind_type = typename topology_type::connection_kind_type;
+    using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type    = IgnoreGroup   <group_id_type>;
+    using exclusion_list_type  = ExclusionList;
 
     static constexpr std::uint32_t invalid() noexcept
     {
@@ -54,7 +77,7 @@ class ProteinDNANonSpecificPotential
     }
     static constexpr parameter_type default_parameter() noexcept
     {
-        return parameter_type{invalid(), invalid(), invalid(), 0, 0, 0, 0, 0, 0};
+        return parameter_type{invalid()};
     }
     static constexpr real_type default_cutoff() noexcept {return 5.0;}
 
@@ -62,13 +85,55 @@ class ProteinDNANonSpecificPotential
 
     ProteinDNANonSpecificPotential(const real_type sigma,
         const real_type delta, const real_type cutoff_ratio,
-        const std::vector<parameter_type>& parameters,
-        const std::vector<dna_index_type>& dna_idxs)
+        const std::vector<contact_parameter_type>&         contacts,
+        const std::vector<dna_index_type>&                 dnas,
+        const std::map<connection_kind_type, std::size_t>& exclusions,
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
         : sigma_(sigma), delta_(delta), delta2_(delta * 2),
           pi_over_2delta_(math::constants<real_type>::pi() * 0.5 / delta),
           cutoff_ratio_(cutoff_ratio), max_cutoff_length_(0),
-          parameters_(parameters), dnas_(dna_idxs)
-    {}
+          contacts_(contacts),
+          exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
+    {
+        // this->contacts is already initialized
+        this->participants_.reserve(dnas.size() + contacts.size());
+        this->parameters_  .reserve(dnas.size() + contacts.size());
+        this->dnas_        .reserve(dnas.size());
+        this->proteins_    .reserve(contacts.size());
+        for(const auto& dna : dnas)
+        {
+            this->participants_.push_back(dna.D);
+            this->dnas_        .push_back(dna.D);
+            if(this->parameters_.size() <= dna.D)
+            {
+                this->parameters_.resize(dna.D+1, default_parameter());
+            }
+            this->parameters_.at(dna.D).S3 = dna.S3;
+        }
+        for(const auto& contact : contacts)
+        {
+            this->participants_.push_back(contact.P);
+            this->proteins_    .push_back(contact.P);
+            if(this->parameters_.size() <= contact.P)
+            {
+                this->parameters_.resize(contact.P+1, default_parameter());
+            }
+            this->parameters_.at(contact.P).S3 = invalid();
+        }
+
+        // Protein particles can have multiple contact sites, so `participants_`
+        // and `proteins_` may have duplicated indices.
+
+        std::sort(participants_.begin(), participants_.end());
+        const auto uniq_participants =
+            std::unique(participants_.begin(), participants_.end());
+        participants_.erase(uniq_participants, participants_.end());
+
+        std::sort(proteins_.begin(), proteins_.end());
+        const auto uniq_proteins =
+            std::unique(proteins_.begin(), proteins_.end());
+        proteins_.erase(uniq_proteins, proteins_.end());
+    }
     ~ProteinDNANonSpecificPotential() = default;
 
     template<typename traitsT>
@@ -80,7 +145,7 @@ class ProteinDNANonSpecificPotential
         // set cutoff length
 
         this->max_cutoff_length_ = real_type(0);
-        for(auto& para : this->parameters_)
+        for(auto& para : this->contacts_)
         {
             para.r_cut    = para.r0 + cutoff_ratio_ * sigma_;
             para.r_cut_sq = para.r_cut * para.r_cut;
@@ -152,14 +217,58 @@ class ProteinDNANonSpecificPotential
         }
     }
 
+    std::vector<contact_parameter_type> const& contacts() const noexcept
+    {
+        return contacts_;
+    }
+
+    // -----------------------------------------------------------------------
+    // for NeighborList
+
+    pair_parameter_type
+    prepare_params(const std::size_t i, const std::size_t j) const noexcept
+    {
+        assert(this->parameters_.at(i).S3 == invalid());
+        assert(this->parameters_.at(j).S3 != invalid());
+        return pair_parameter_type{this->parameters_[j].S3};
+    }
+
+    // {PRO-Ca} U {DNA-P}
+    std::vector<std::size_t> const& participants() const noexcept
+    {
+        return participants_;
+    }
+    // {Pro-Ca}
+    std::vector<std::size_t> const& leading_participants() const noexcept
+    {
+        return this->proteins_;
+    }
+    // {DNA-P}
+    std::vector<std::size_t> const&
+    possible_partners_of(const std::size_t /*participant_idx*/,
+                         const std::size_t /*particle_idx*/) const noexcept
+    {
+        return this->dnas_;
+    }
+
+    // to check bases has base-pairing interaction.
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
+    {
+        const bool i_is_dna = (parameters_[i].S3 != invalid());
+        const bool j_is_dna = (parameters_[j].S3 != invalid());
+        // {protein, dna} pair has interaction, others not.
+        if(!i_is_dna && j_is_dna)
+        {
+            return true;
+        }
+        assert(!i_is_dna || j_is_dna); // {dna, pro} pair should not be listed
+        return false;
+    }
+
+    exclusion_list_type const& exclusion_list() const noexcept {return exclusion_list_;}
+
     real_type cutoff_ratio()      const noexcept {return cutoff_ratio_;}
     real_type max_cutoff_length() const noexcept {return this->max_cutoff_length_;}
-
-    // access to the parameters...
-    std::vector<parameter_type>&       contacts()       noexcept {return parameters_;}
-    std::vector<parameter_type> const& contacts() const noexcept {return parameters_;}
-    std::vector<dna_index_type>&       dnas()       noexcept {return dnas_;}
-    std::vector<dna_index_type> const& dnas() const noexcept {return dnas_;}
 
     // ------------------------------------------------------------------------
     // used by Observer.
@@ -169,8 +278,13 @@ class ProteinDNANonSpecificPotential
 
     real_type sigma_, delta_, delta2_, pi_over_2delta_;
     real_type cutoff_ratio_, max_cutoff_length_;
-    std::vector<parameter_type> parameters_;
-    std::vector<dna_index_type> dnas_;
+    std::vector<std::size_t> participants_;          // all participants
+    std::vector<std::size_t> proteins_;              // indices of protein
+    std::vector<std::size_t> dnas_;                  // indices of DNA
+    std::vector<contact_parameter_type> contacts_;   // contact parameters
+    std::vector<parameter_type>         parameters_; // S3 index(DNA) or
+                                                     // `invalid`(Protein)
+    exclusion_list_type exclusion_list_;
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD
