@@ -32,7 +32,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
     using potential_type  = ProteinDNANonSpecificPotential<real_type>;
-    using partition_type  = SpatialPartition<traitsT, potential_type>;
+    using partition_type  = SpatialPartition<traits_type, potential_type>;
 
   public:
 
@@ -65,11 +65,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
     void update_margin(const real_type dmargin, const system_type& sys) override
     {
-        this->current_margin_ -= dmargin;
-        if(this->current_margin_ < 0)
-        {
-            this->make_list(sys);
-        }
+        this->partition_.update(dmargin, sys, this->potential_);
         return ;
     }
 
