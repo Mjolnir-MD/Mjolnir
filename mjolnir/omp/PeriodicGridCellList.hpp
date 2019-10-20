@@ -219,14 +219,15 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 //XXX that normal NeighborList works good for most of the cases. Some part of
 //XXX neighbor-list construction cannot be parallelized, but it becomes still
 //XXX faster.
+        const auto leading_participants = pot.leading_participants();
 
         std::vector<neighbor_type> partner;
-        for(std::size_t idx=0; idx<participants.size(); ++idx)
+        for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
         {
             partner.clear();
-            const auto  i    = participants[idx];
-
+            const auto   i = leading_participants[idx];
             const auto& ri = sys.position(i);
+
             const auto& cell = cell_list_[calc_index(ri)];
 
             for(std::size_t cidx : cell.second) // for all adjacent cells...
@@ -234,7 +235,7 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
                 for(auto pici : cell_list_[cidx].first)
                 {
                     const auto j = pici.first;
-                    if(j <= i || !pot.has_interaction(i, j))
+                    if(!pot.has_interaction(i, j))
                     {
                         continue;
                     }
