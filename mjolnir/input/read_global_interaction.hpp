@@ -254,13 +254,15 @@ read_pdns_interaction(const toml::value& global)
     MJOLNIR_LOG_FUNCTION();
     using real_type      = typename traitsT::real_type;
     using potential_type = ProteinDNANonSpecificPotential<real_type>;
-    using parameter_type = typename potential_type::parameter_type;
-    using dna_index_type = typename potential_type::dna_index_type;
+    using contact_parameter_type = typename potential_type::contact_parameter_type;
+    using dna_index_type         = typename potential_type::dna_index_type;
 
     // ```toml
     // [[forcefields.global]]
     // interaction = "PDNS"
     // potential   = "PDNS"
+    // spatial_partition.type = "VerletList"
+    // spatial_partition.margin = 0.4
     // sigma  = 1.0
     // delta  = 0.17453
     // cutoff = 5.0 # relative to sigma
@@ -286,7 +288,6 @@ read_pdns_interaction(const toml::value& global)
         cut = toml::find<real_type>(global, "cutoff");
     }
     const real_type cutoff = cut;
-    const real_type margin = toml::find_or<real_type>(global, "margin", 0.5);
 
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
@@ -294,10 +295,10 @@ read_pdns_interaction(const toml::value& global)
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
-    std::vector<parameter_type> params;
-    std::vector<dna_index_type> dnas;
-    params.reserve(ps.size());
-    dnas  .reserve(ps.size());
+    std::vector<contact_parameter_type> contacts;
+    std::vector<dna_index_type>         dnas;
+    contacts.reserve(ps.size());
+    dnas    .reserve(ps.size());
 
     for(const auto& item : ps)
     {
@@ -305,7 +306,7 @@ read_pdns_interaction(const toml::value& global)
         const auto kind = toml::find<std::string>(item, "kind");
         if(kind == "Protein")
         {
-            parameter_type para;
+            contact_parameter_type para;
             para.P      = idx;
             para.PN     = find_parameter<std::uint32_t>(item, env, "PN");
             para.PC     = find_parameter<std::uint32_t>(item, env, "PC");
@@ -313,7 +314,7 @@ read_pdns_interaction(const toml::value& global)
             para.r0     = find_parameter<real_type>(item, env, "r0");
             para.theta0 = find_parameter<real_type>(item, env, "theta0");
             para.phi0   = find_parameter<real_type>(item, env, "phi0");
-            params.push_back(para);
+            contacts.push_back(para);
 
             MJOLNIR_LOG_INFO("Protein: idx = ", idx, ", PN = ", para.PN,
                 ", PC = ", para.PC, ", k = ", para.k, ", r0 = ", para.r0,
@@ -321,9 +322,11 @@ read_pdns_interaction(const toml::value& global)
         }
         else if (kind == "DNA")
         {
-            const auto S3 = find_parameter<std::uint32_t>(item, env, "S3");
-            dnas.emplace_back(idx, S3);
-            MJOLNIR_LOG_INFO("DNA: idx = ", idx, ", S3 = ", S3);
+            dna_index_type di;
+            di.D = idx;
+            di.S3 = find_parameter<std::uint32_t>(item, env, "S3");
+            dnas.push_back(di);
+            MJOLNIR_LOG_INFO("DNA: idx = ", di.D, ", S3 = ", di.S3);
         }
         else
         {
@@ -337,8 +340,10 @@ read_pdns_interaction(const toml::value& global)
         }
     }
     return make_unique<ProteinDNANonSpecificInteraction<traitsT>>(
-        potential_type(sgm, dlt, cutoff, std::move(params), std::move(dnas)),
-        margin);
+        potential_type(sgm, dlt, cutoff, std::move(contacts), std::move(dnas),
+            read_ignore_particles_within(global), read_ignored_molecule(global),
+            read_ignored_group(global)),
+        read_spatial_partition<traitsT, potential_type>(global));
 }
 
 // ----------------------------------------------------------------------------
