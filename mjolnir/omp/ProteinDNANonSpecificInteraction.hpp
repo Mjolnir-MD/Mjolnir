@@ -32,18 +32,12 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
     using potential_type  = ProteinDNANonSpecificPotential<real_type>;
-    using partition_type  = SpatialPartition<traits_type, potential_type>;
-
-    // neighbor list stuff
-    using neighbor_type = std::pair<std::size_t, std::size_t>; // {DNA, S3}
-    using neighbor_container_type = std::vector<neighbor_type>;
-    using range_type = range<typename neighbor_container_type::const_iterator>;
+    using partition_type  = SpatialPartition<traitsT, potential_type>;
 
   public:
 
-    ProteinDNANonSpecificInteraction(
-            potential_type&& pot, const real_type margin)
-        : margin_(margin), current_margin_(0), potential_(std::move(pot))
+    ProteinDNANonSpecificInteraction(potential_type&& pot, partition_type&& part)
+        : potential_(std::move(pot)), partition_(std::move(part))
     {}
     ~ProteinDNANonSpecificInteraction() {}
 
@@ -54,7 +48,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         MJOLNIR_LOG_INFO("potential is PDNS");
 
         this->potential_.initialize(sys);
-        this->make_list(sys);
+        this->partition_.initialize(sys, this->potential_);
         return;
     }
 
@@ -65,7 +59,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         MJOLNIR_LOG_INFO("potential is PDNS");
 
         this->potential_.update(sys);
-        this->make_list(sys);
+        this->partition_.initialize(sys, this->potential_);
         return;
     }
 
@@ -96,10 +90,10 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
             const auto  P  = para.P;
             const auto& rP = sys.position(P);
-            for(const auto& ptnr : this->partners_of(i))
+            for(const auto& ptnr : this->partition_.partners(P))
             {
-                const auto  D  = ptnr.first;  // DNA phosphate
-                const auto  S3 = ptnr.second; // 3' Sugar
+                const auto  D  = ptnr.index;  // DNA phosphate
+                const auto  S3 = ptnr.parameter().S3; // 3' Sugar
                 const auto& rD = sys.position(D);
 
                 MJOLNIR_LOG_DEBUG("protein = ", P, ", DNA = ", D, ", r0 = ", para.r0);
@@ -246,10 +240,10 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
             const auto  P  = para.P;
             const auto& rP = sys.position(P);
-            for(const auto& ptnr : this->partners_of(i))
+            for(const auto& ptnr : this->partition_.partners(P))
             {
-                const auto  D  = ptnr.first;
-                const auto  S3 = ptnr.second;
+                const auto  D  = ptnr.index;  // DNA phosphate
+                const auto  S3 = ptnr.parameter().S3; // 3' Sugar
                 const auto& rD = sys.position(D);
 
                 //  PC          S5'    |
@@ -320,61 +314,8 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
   private:
 
-    // TODO: it uses brute force search because there are not so many particles
-    //       that have contacts. In future, Cell-list or some kind of spatial
-    //       partition method would be needed ?
-    void make_list(const system_type& sys)
-    {
-        // absolute length of margin (this->margin_ is a relative length).
-        const real_type abs_margin =
-            this->potential_.max_cutoff_length() * this->margin_;
-
-        this->neighbors_.clear();
-        this->neighbors_.reserve(this->potential_.contacts().size()*2);
-
-        this->ranges_.clear();
-        this->ranges_.resize(this->potential_.contacts().size()+1);
-        this->ranges_.front() = 0u;
-        for(std::size_t i=0; i < this->potential_.contacts().size(); ++i)
-        {
-            const auto& para = potential_.contacts()[i];
-            const auto  P    = para.P;
-            const auto& rP   = sys.position(P);
-            const auto  rc   = para.r_cut + abs_margin;
-            for(const auto DS : potential_.dnas())
-            {
-                const auto   D  = DS.first;
-                const auto& rD  = sys.position(D);
-                const auto dpos = sys.adjust_direction(rP - rD);
-                const auto len2 = math::length_sq(dpos);
-
-                if(len2 < rc * rc)
-                {
-                    this->neighbors_.push_back(DS);
-                }
-            }
-            // assign a range for i-th contact
-            this->ranges_[i+1] = this->neighbors_.size();
-        }
-        this->current_margin_ = abs_margin;
-        return;
-    }
-
-    range_type partners_of(const std::size_t i) const noexcept
-    {
-        return range_type{
-            this->neighbors_.begin() + this->ranges_[i],
-            this->neighbors_.begin() + this->ranges_[i+1]
-        };
-    }
-
-  private:
-
-    real_type      margin_, current_margin_;
     potential_type potential_;
-
-    neighbor_container_type  neighbors_; // dna idxs for each contacts
-    std::vector<std::size_t> ranges_;    // ranges of `neighbors_`
+    partition_type partition_;
 };
 } // mjolnir
 
