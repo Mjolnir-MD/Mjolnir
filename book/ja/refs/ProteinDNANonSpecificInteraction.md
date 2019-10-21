@@ -12,6 +12,8 @@
 [[forcefields.global]]
 interaction = "PDNS"
 potential   = "PDNS"
+spatial_partition.type   = "VerletList"
+spatial_partition.margin = 0.5
 sigma = 1.0
 delta = 0.17453
 parameters  = [
