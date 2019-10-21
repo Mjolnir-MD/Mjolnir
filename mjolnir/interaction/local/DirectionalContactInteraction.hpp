@@ -94,7 +94,7 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
 
     // DirectionalContact is a Contact, so the topology is defined between
     // indices[1] and [2].
-    void write_topology(topology_type&) const override
+    void write_topology(topology_type& topol) const override
     {
         if(this->kind_.empty() || this->kind_ == "none") {return;}
 
@@ -400,4 +400,158 @@ DirectionalContactInteraction<
 }
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/potential/local/CosinePotential.hpp>
+#include <mjolnir/potential/local/UniformPotential.hpp>
+#include <mjolnir/potential/local/GoContactPotential.hpp>
+#include <mjolnir/potential/local/GaussianPotential.hpp>
+
+namespace mjolnir
+{
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, CosinePotential<double>, CosinePotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, CosinePotential<float> , CosinePotential<float> , GaussianPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, CosinePotential<double>, CosinePotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, CosinePotential<float> , CosinePotential<float> , GaussianPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, GaussianPotential<double>, GaussianPotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, GaussianPotential<float> , GaussianPotential<float> , GaussianPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>, GaussianPotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> , GaussianPotential<float> , GaussianPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, UniformPotential<double>, UniformPotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, UniformPotential<float> , UniformPotential<float> , GaussianPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformPotential<double>, UniformPotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformPotential<float> , UniformPotential<float> , GaussianPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, CosinePotential<double>, GaussianPotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, CosinePotential<float> , GaussianPotential<float> , GaussianPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, CosinePotential<double>, GaussianPotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, CosinePotential<float> , GaussianPotential<float> , GaussianPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, CosinePotential<double>, UniformPotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, CosinePotential<float> , UniformPotential<float> , GaussianPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, CosinePotential<double>, UniformPotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, CosinePotential<float> , UniformPotential<float> , GaussianPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, GaussianPotential<double>, CosinePotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, GaussianPotential<float> , CosinePotential<float> , GaussianPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>, CosinePotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> , CosinePotential<float> , GaussianPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, GaussianPotential<double>, UniformPotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, GaussianPotential<float> , UniformPotential<float> , GaussianPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>, UniformPotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> , UniformPotential<float> , GaussianPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, UniformPotential<double>, CosinePotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, UniformPotential<float> , CosinePotential<float> , GaussianPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformPotential<double>, CosinePotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformPotential<float> , CosinePotential<float> , GaussianPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, UniformPotential<double>, GaussianPotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, UniformPotential<float> , GaussianPotential<float> , GaussianPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformPotential<double>, GaussianPotential<double>, GaussianPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformPotential<float> , GaussianPotential<float> , GaussianPotential<float> >;
+
+// ---------------------------------------------------------
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, CosinePotential<double>, CosinePotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, CosinePotential<float> , CosinePotential<float> , GoContactPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, CosinePotential<double>, CosinePotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, CosinePotential<float> , CosinePotential<float> , GoContactPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, GaussianPotential<double>, GaussianPotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, GaussianPotential<float> , GaussianPotential<float> , GoContactPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>, GaussianPotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> , GaussianPotential<float> , GoContactPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, UniformPotential<double>, UniformPotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, UniformPotential<float> , UniformPotential<float> , GoContactPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformPotential<double>, UniformPotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformPotential<float> , UniformPotential<float> , GoContactPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, CosinePotential<double>, GaussianPotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, CosinePotential<float> , GaussianPotential<float> , GoContactPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, CosinePotential<double>, GaussianPotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, CosinePotential<float> , GaussianPotential<float> , GoContactPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, CosinePotential<double>, UniformPotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, CosinePotential<float> , UniformPotential<float> , GoContactPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, CosinePotential<double>, UniformPotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, CosinePotential<float> , UniformPotential<float> , GoContactPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, GaussianPotential<double>, CosinePotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, GaussianPotential<float> , CosinePotential<float> , GoContactPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>, CosinePotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> , CosinePotential<float> , GoContactPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, GaussianPotential<double>, UniformPotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, GaussianPotential<float> , UniformPotential<float> , GoContactPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>, UniformPotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> , UniformPotential<float> , GoContactPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, UniformPotential<double>, CosinePotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, UniformPotential<float> , CosinePotential<float> , GoContactPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformPotential<double>, CosinePotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformPotential<float> , CosinePotential<float> , GoContactPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, UniformPotential<double>, GaussianPotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, UniformPotential<float> , GaussianPotential<float> , GoContactPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformPotential<double>, GaussianPotential<double>, GoContactPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformPotential<float> , GaussianPotential<float> , GoContactPotential<float> >;
+
+// --------------------------------------------
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, CosinePotential<double>, CosinePotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, CosinePotential<float> , CosinePotential<float> , UniformPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, CosinePotential<double>, CosinePotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, CosinePotential<float> , CosinePotential<float> , UniformPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, GaussianPotential<double>, GaussianPotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, GaussianPotential<float> , GaussianPotential<float> , UniformPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>, GaussianPotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> , GaussianPotential<float> , UniformPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, UniformPotential<double>, UniformPotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, UniformPotential<float> , UniformPotential<float> , UniformPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformPotential<double>, UniformPotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformPotential<float> , UniformPotential<float> , UniformPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, CosinePotential<double>, GaussianPotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, CosinePotential<float> , GaussianPotential<float> , UniformPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, CosinePotential<double>, GaussianPotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, CosinePotential<float> , GaussianPotential<float> , UniformPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, CosinePotential<double>, UniformPotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, CosinePotential<float> , UniformPotential<float> , UniformPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, CosinePotential<double>, UniformPotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, CosinePotential<float> , UniformPotential<float> , UniformPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, GaussianPotential<double>, CosinePotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, GaussianPotential<float> , CosinePotential<float> , UniformPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>, CosinePotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> , CosinePotential<float> , UniformPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, GaussianPotential<double>, UniformPotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, GaussianPotential<float> , UniformPotential<float> , UniformPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, GaussianPotential<double>, UniformPotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GaussianPotential<float> , UniformPotential<float> , UniformPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, UniformPotential<double>, CosinePotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, UniformPotential<float> , CosinePotential<float> , UniformPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformPotential<double>, CosinePotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformPotential<float> , CosinePotential<float> , UniformPotential<float> >;
+
+extern template class DirectionalContactInteraction<SimulatorTraits<double, UnlimitedBoundary       >, UniformPotential<double>, GaussianPotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  UnlimitedBoundary       >, UniformPotential<float> , GaussianPotential<float> , UniformPotential<float> >;
+extern template class DirectionalContactInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformPotential<double>, GaussianPotential<double>, UniformPotential<double>>;
+extern template class DirectionalContactInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformPotential<float> , GaussianPotential<float> , UniformPotential<float> >;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif /* MJOLNIR_INTERACTION_LOCAL_DIRECTIONAL_CONTACT_INTERACTION_HPP */
