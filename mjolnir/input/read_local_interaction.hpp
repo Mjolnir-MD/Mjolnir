@@ -179,7 +179,9 @@ read_directional_contact_interaction(const std::string& kind,
     }
     const real_type margin = mgn;
 
-    const auto contact_potential = toml::find<std::string>(local, "potentials", "contact");
+    const auto contact_potential =
+        toml::find<std::string>(local, "potentials", "contact");
+
     if(contact_potential == "GoContact")
     {
         MJOLNIR_LOG_NOTICE("-- contact potential function is 10-12 Go contact.");
@@ -207,11 +209,8 @@ read_directional_contact_interaction(const std::string& kind,
         MJOLNIR_LOG_NOTICE("-- contact potential function is Uniform potential");
         using contact_potentialT = UniformPotential<real_type>;
 
-        return make_unique<
-            DirectionalContactInteraction<
-                traitsT, PotentialTs..., contact_potentialT
-                >
-            >(kind,
+        return make_unique<DirectionalContactInteraction<
+                traitsT, PotentialTs..., contact_potentialT>>(kind,
               read_directional_contact_potentials<
                   4, real_type, PotentialTs..., contact_potentialT
               >(local), margin);
