@@ -282,12 +282,8 @@ read_pdns_interaction(const toml::value& global)
     const real_type dlt = toml::find<real_type>(global, "delta");
     const real_type sgm = toml::find<real_type>(global, "sigma");
 
-    real_type cut = potential_type::default_cutoff();
-    if(global.as_table().count("cutoff") != 0)
-    {
-        cut = toml::find<real_type>(global, "cutoff");
-    }
-    const real_type cutoff = cut;
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff());
 
     const auto& env = global.as_table().count("env") == 1 ?
                       global.as_table().at("env") : toml::value{};
