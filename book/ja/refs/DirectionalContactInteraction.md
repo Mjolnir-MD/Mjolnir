@@ -11,6 +11,7 @@ U(r, \theta_1, \theta_2) = U_{contact} (r) U_{angle_1} (\theta_1) U_{angle_2} (\
 
 角度に関する利用可能なポテンシャルには以下のようなものがあります。
 
+- [Gaussian](GaussianPotential.md)
 - [Cosine](CosinePotential.md)
 
 距離に関する利用可能なポテンシャルには以下のようなものがあります。
@@ -43,6 +44,7 @@ parameters         = [
   - 結合長相互作用を使用する際は、`"DirectionalContact"`を指定します。
 - `potentials`
   - `angle1`,`angle2`: 文字列型
+    - ["Gaussian"](Gaussian.md): ガウシアン型のポテンシャルを用います。
     - ["Cosine"](Cosine.md): コサイン関数を使った汎用的なポテンシャルです。
   - `contact`: 文字列型
     - ["Gaussian"](Gaussian.md): ガウシアン型のポテンシャルを用います。
