@@ -17,7 +17,6 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_base_interaction)
     using base_kind = mjolnir::parameter_3SPN2::base_kind;
 
     using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type   = typename traits_type::real_type;
     using potential_type      = mjolnir::ThreeSPN2BaseBaseInteractionPotential<traits_type>;
     {
         using namespace toml::literals;

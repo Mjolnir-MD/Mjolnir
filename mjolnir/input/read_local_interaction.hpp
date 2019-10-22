@@ -639,11 +639,13 @@ read_local_interaction(const toml::value& local)
             "mjolnir::read_local_interaction: invalid interaction",
             toml::find<toml::value>(local, "interaction"), "here", {
             "expected value is one of the following.",
-            "- \"BondLength\"         : 2-body well-known chemical bond interaction",
+            "- \"BondLength\"    : 2-body well-known chemical bond interaction",
+            "- \"BondAngle\"     : 3-body well-known bond angle interaction",
+            "- \"Contact\"       : 2-body bond interaction that might be broken",
+            "- \"DihedralAngle\" : 4-body well-known dihedral angle interaction",
             "- \"DirectionalContact\" : 4-body contact interaction depends on the contact angle",
-            "- \"BondAngle\"          : 3-body well-known bond angle interaction",
-            "- \"DihedralAngle\"      : 4-body well-known dihedral angle interaction",
-            "- \"Dummy\"              : To represent a strange topology. It does nothing",
+            "- \"Dummy\"         : To represent a strange topology. It does nothing",
+            "- \"PDNS\"          : directional contact representing H-bond between protein and DNA"
             }));
     }
 }
