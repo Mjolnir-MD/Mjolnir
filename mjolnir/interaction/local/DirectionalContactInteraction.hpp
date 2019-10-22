@@ -234,18 +234,9 @@ void DirectionalContactInteraction<
 
         const auto dU_angle1_drPi = -(dU_angle1_drCi + dU_angle1_drPj);
 
-        MJOLNIR_LOG_DEBUG("dU_angle1 / drCi = {"
-                          "x = ", math::X(dU_angle1_drCi), ", ",
-                          "y = ", math::Y(dU_angle1_drCi), ", ",
-                          "z = ", math::Z(dU_angle1_drCi), "}");
-        MJOLNIR_LOG_DEBUG("dU_angle1 / drPj = {"
-                          "x = ", math::X(dU_angle1_drPj), ", ",
-                          "y = ", math::Y(dU_angle1_drPj), ", ",
-                          "z = ", math::Z(dU_angle1_drPj), "}");
-        MJOLNIR_LOG_DEBUG("dU_angle1 / drPi = {"
-                          "x = ", math::X(dU_angle1_drPi), ", ",
-                          "y = ", math::Y(dU_angle1_drPi), ", ",
-                          "z = ", math::Z(dU_angle1_drPi), "}");
+        MJOLNIR_LOG_DEBUG("dU_angle1 / drCi = {", dU_angle1_drCi, "}");
+        MJOLNIR_LOG_DEBUG("dU_angle1 / drPj = {", dU_angle1_drPj, "}");
+        MJOLNIR_LOG_DEBUG("dU_angle1 / drPi = {", dU_angle1_drPi, "}");
 
         // dU_angle2(theta2) / dr
         const auto PjCj         = sys.adjust_direction(rCj - rPj);
@@ -268,30 +259,17 @@ void DirectionalContactInteraction<
 
         const auto dU_angle2_drPj = -(dU_angle2_drCj + dU_angle2_drPi);
 
-        MJOLNIR_LOG_DEBUG("dU_angle2 / drCj = {"
-                          "x = ", math::X(dU_angle2_drCj), ", ",
-                          "y = ", math::Y(dU_angle2_drCj), ", ",
-                          "z = ", math::Z(dU_angle2_drCj), "}");
-        MJOLNIR_LOG_DEBUG("dU_angle2 / drPi = {"
-                          "x = ", math::X(dU_angle2_drPi), ", ",
-                          "y = ", math::Y(dU_angle2_drPi), ", ",
-                          "z = ", math::Z(dU_angle2_drPi), "}");
-        MJOLNIR_LOG_DEBUG("dU_angle2 / drPj = {"
-                          "x = ", math::X(dU_angle2_drPj), ", ",
-                          "y = ", math::Y(dU_angle2_drPj), ", ",
-                          "z = ", math::Z(dU_angle2_drPj), "}");
+        MJOLNIR_LOG_DEBUG("dU_angle2 / drCj = {", dU_angle2_drCj, "}");
+        MJOLNIR_LOG_DEBUG("dU_angle2 / drPi = {", dU_angle2_drPi, "}");
+        MJOLNIR_LOG_DEBUG("dU_angle2 / drPj = {", dU_angle2_drPj, "}");
 
         // dU_con(|Pij|) / dr
         const auto contact_coef = contact_pot.derivative(lPij);
         const auto dU_con_drPj  = contact_coef * Pij_reg;
         const auto dU_con_drPi  = -dU_con_drPj;
 
-        MJOLNIR_LOG_DEBUG("dU_con / drPi = {x = ", math::X(dU_con_drPi), ", ",
-                          "y = ", math::Y(dU_con_drPi), ", ",
-                          "z = ", math::Z(dU_con_drPi), "}");
-        MJOLNIR_LOG_DEBUG("dU_con / drPj = {x = ", math::X(dU_con_drPj), ", ",
-                          "y = ", math::Y(dU_con_drPj), ", ",
-                          "z = ", math::Z(dU_con_drPj), "}");
+        MJOLNIR_LOG_DEBUG("dU_con / drPi = {", dU_con_drPi, "}");
+        MJOLNIR_LOG_DEBUG("dU_con / drPj = {", dU_con_drPj, "}");
 
         const real_type U_angle1          =  angle1_pot.potential(theta1);
         const real_type U_angle2          =  angle2_pot.potential(theta2);
@@ -313,22 +291,10 @@ void DirectionalContactInteraction<
                                  U_angle1_U_angle2 * dU_con_drPj;
         const auto dU_dir_drCj = dU_angle2_drCj * U_angle1_U_con;
 
-        MJOLNIR_LOG_DEBUG("dU_dir / drCi = {"
-                          "x = ", math::X(dU_dir_drCi), ", ",
-                          "y = ", math::Y(dU_dir_drCi), ", ",
-                          "z = ", math::Z(dU_dir_drCi), "}");
-        MJOLNIR_LOG_DEBUG("dU_dir / drPi = {"
-                          "x = ", math::X(dU_dir_drPi), ", ",
-                          "y = ", math::Y(dU_dir_drPi), ", ",
-                          "z = ", math::Z(dU_dir_drPi), "}");
-        MJOLNIR_LOG_DEBUG("dU_dir / drPj = {"
-                          "x = ", math::X(dU_dir_drPj), ", ",
-                          "y = ", math::Y(dU_dir_drPj), ", ",
-                          "z = ", math::Z(dU_dir_drPj), "}");
-        MJOLNIR_LOG_DEBUG("dU_dir / drCj = {"
-                          "x = ", math::X(dU_dir_drCj), ", ",
-                          "y = ", math::Y(dU_dir_drCj), ", ",
-                          "z = ", math::Z(dU_dir_drCj), "}");
+        MJOLNIR_LOG_DEBUG("dU_dir / drCi = {", dU_dir_drCi, "}");
+        MJOLNIR_LOG_DEBUG("dU_dir / drPi = {", dU_dir_drPi, "}");
+        MJOLNIR_LOG_DEBUG("dU_dir / drPj = {", dU_dir_drPj, "}");
+        MJOLNIR_LOG_DEBUG("dU_dir / drCj = {", dU_dir_drCj, "}");
 
         sys.force(Ci) -= dU_dir_drCi;
         sys.force(Pi) -= dU_dir_drPi;
