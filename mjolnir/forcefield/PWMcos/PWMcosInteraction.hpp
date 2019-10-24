@@ -107,6 +107,8 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
     //   e(b) f(r) g(theta1) dg/dtheta2 dtheta2/dq g(theta3) +
     //   e(b) f(r) g(theta1) g(theta2) dg/dtheta3 dtheta3/dq
 
+    constexpr auto abs_tol = math::abs_tolerance<real_type>();
+
     const auto energy_unit  = potential_.energy_unit();  // overall coefficient
     const auto energy_shift = potential_.energy_shift(); // overall energy shift
 
@@ -197,7 +199,7 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
             // ================================================================
             // calculates the force direction
 
-            const auto Bk    = ptnr.parameter().base;
+            const auto Bk    = static_cast<std::size_t>(ptnr.parameter().base);
             const auto e_pwm = PWM[Bk];
 
             const auto coef  = para.gamma   * energy_unit;
@@ -230,7 +232,17 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
                 const auto magnitude = factor *
                     f_df.first * g_dg_1.second * g_dg_2.first * g_dg_3.first;
 
-                // TODO
+                const auto sin_theta = std::sin(theta1);
+                const auto coef_rsin = magnitude / std::max(sin_theta, abs_tol);
+
+                const auto Fi = (coef_rsin * rlBCa) *
+                                ((cos1 * rlBCa) * rBCa - rlBS  * rBS );
+                const auto Fk = (coef_rsin * rlBS ) *
+                                ((cos1 * rlBS ) * rBS  - rlBCa * rBCa);
+
+                F_Ca         -= Fi;
+                F_B          += (Fi + Fk);
+                sys.force(S) -= Fk
             }
 
             // ----------------------------------------------------------------
@@ -242,7 +254,18 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
                 const auto magnitude = factor *
                     f_df.first * g_dg_1.first * g_dg_2.second * g_dg_3.first;
 
-                // TODO
+                const auto sin_theta = std::sin(theta2);
+                const auto coef_rsin = magnitude / std::max(sin_theta, abs_tol);
+
+                const auto Fi = (coef_rsin * rlBCa) *
+                                ((cos1 * rlBCa) * rBCa - rlB53 * rB53);
+                const auto Fk = (coef_rsin * rlB53) *
+                                ((cos1 * rlB53) * rB53 - rlBCa * rBCa);
+
+                F_Ca          -= Fi;
+                F_B           += Fi;
+                sys.force(B5) += Fk;
+                sys.force(B3) -= Fk;
             }
 
             // ----------------------------------------------------------------
@@ -254,10 +277,22 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
                 const auto magnitude = factor *
                     f_df.first * g_dg_1.first * g_dg_2.first * g_dg_3.second;
 
-                // TODO
+                const auto sin_theta = std::sin(theta3);
+                const auto coef_rsin = magnitude / std::max(sin_theta, abs_tol);
+
+                const auto Fi = (coef_rsin * rlBCa) *
+                                ((cos1 * rlBCa) * rBCa - rlCCN * rCCN);
+                const auto Fk = (coef_rsin * rlCCN) *
+                                ((cos1 * rlCCN) * rCCN - rlBCa * rBCa);
+
+                F_Ca           -= Fi;
+                F_B            += Fi;
+                sys.force(CaC) += Fk;
+                sys.force(CaN) -= Fk;
             }
 
             // ----------------------------------------------------------------
+            // collect force on Ca and B
 
             sys.force(Ca) += F_Ca;
             sys.force(B ) += F_B ;
@@ -350,10 +385,10 @@ PWMcosInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
             // ================================================================
             // calculates the force direction
 
-            const auto Bk    = ptnr.parameter().base_kind;
+            const auto Bk    = static_cast<std::size_t>(ptnr.parameter().base);
+            const auto e_pwm = PWM[Bk];
             const auto coef  = para.coef  * energy_unit;
             const auto shift = para.shift + energy_shift;
-            const auto e_pwm = PWM[Bk];
 
             E += coef * (e_pwm + shift) * f * g1 * g2 * g3;
         }
