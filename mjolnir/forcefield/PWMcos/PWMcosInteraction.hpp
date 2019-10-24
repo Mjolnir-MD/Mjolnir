@@ -132,7 +132,7 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
 
             const auto& rB     = sys.position(B);
             const auto rBCa    = sys.adjust_direction(rCa - rB); // Bi -> Cj
-            const auto lBCa_sq = math::length_sq(rCaB);
+            const auto lBCa_sq = math::length_sq(rBCa);
 
             if(para.r_cut_sq < lBCa_sq) {continue;}
 
@@ -242,7 +242,7 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
 
                 F_Ca         -= Fi;
                 F_B          += (Fi + Fk);
-                sys.force(S) -= Fk
+                sys.force(S) -= Fk;
             }
 
             // ----------------------------------------------------------------
@@ -330,7 +330,7 @@ PWMcosInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
 
             const auto& rB     = sys.position(B);
             const auto rBCa    = sys.adjust_direction(rCa - rB); // Bi -> Cj
-            const auto lBCa_sq = math::length_sq(rCaB);
+            const auto lBCa_sq = math::length_sq(rBCa);
 
             if(para.r_cut_sq < lBCa_sq) {continue;}
 

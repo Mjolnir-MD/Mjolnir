@@ -49,12 +49,12 @@ enum class base_kind : std::uint8_t
 } // parameter_PWMcos
 
 template<typename traitsT>
-class ProteinDNANonSpecificPotential
+class PWMcosPotential
 {
   public:
     using traits_type = traitsT;
     using real_type   = typename traits_type::real_type;
-    using self_type   = ProteinDNANonSpecificPotential<traits_type>;
+    using self_type   = PWMcosPotential<traits_type>;
     using base_kind   = parameter_PWMcos::base_kind;
 
     struct contact_parameter_type
@@ -109,7 +109,7 @@ class ProteinDNANonSpecificPotential
 
   public:
 
-    ProteinDNANonSpecificPotential(const real_type sigma, const real_type phi,
+    PWMcosPotential(const real_type sigma, const real_type phi,
         const real_type energy_unit, const real_type energy_shift,
         const real_type cutoff_ratio,
         const std::vector<contact_parameter_type>&         contacts,
@@ -164,7 +164,7 @@ class ProteinDNANonSpecificPotential
             std::unique(proteins_.begin(), proteins_.end());
         proteins_.erase(uniq_proteins, proteins_.end());
     }
-    ~ProteinDNANonSpecificPotential() = default;
+    ~PWMcosPotential() = default;
 
     void initialize(const System<traits_type>& sys) noexcept
     {
