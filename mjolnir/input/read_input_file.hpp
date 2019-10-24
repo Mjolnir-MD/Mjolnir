@@ -28,6 +28,7 @@ read_parallelism(const toml::value& root, const toml::value& simulator)
 
     if(simulator.as_table().count("parallelism") == 0)
     {
+        MJOLNIR_LOG_NOTICE("execute on single core");
         return read_units<SimulatorTraits<realT, boundaryT>>(root, simulator);
     }
 

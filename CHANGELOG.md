@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.6.3
+
+### Fixed
+
+- fix default periodic cell list
+  - Global potentials that are applied to all the particles, such as an excluded volume, are not affected
+
+### Added
+
+- add the `-static-intel` flag to the optimization flags when intel compiler is used
+- notice if simulation runs on single core.
+
 ## 1.6.2
 
 ### Fixed
