@@ -27,11 +27,11 @@ namespace mjolnir
 // energy_shift = 0.0     # overall energy shift
 // cutoff       = 5.0     # 5sigma
 // parameters  = [
-// {index =    0, S = 1,         B5 = 3, base = "A"},
-// {index =    3, S = 4, B3 = 0, B5 = 6, base = "T"},
+// {index =    0, kind = "DNA", S = 1,         B5 = 3, base = "A"},
+// {index =    3, kind = "DNA", S = 4, B3 = 0, B5 = 6, base = "T"},
 // # ...
-// {index = 1000, PN =  999, PC = 1001, gamma = 1.2, epsilon = -0.4, r0 = 5.0, theta1_0 = 1.57, theta2_0 = 1.57, theta3_0 = 3.14, A = 0.5, C = 0.1, G = 0.4, T = 0.2},
-// {index = 1023, PN = 1022, PC = 1024, gamma = 1.2, epsilon = -0.4, r0 = 6.0, theta1_0 = 1.57, theta2_0 = 1.57, theta3_0 = 3.14, A = 0.2, C = 0.4, G = 0.1, T = 0.4},
+// {index = 1000, kind = "Protein", CaN =  999, CaC = 1001, gamma = 1.2, epsilon = -0.4, r0 = 5.0, theta1_0 = 1.57, theta2_0 = 1.57, theta3_0 = 3.14, A = 0.5, C = 0.1, G = 0.4, T = 0.2},
+// {index = 1023, kind = "Protein", CaN = 1022, CaC = 1024, gamma = 1.2, epsilon = -0.4, r0 = 6.0, theta1_0 = 1.57, theta2_0 = 1.57, theta3_0 = 3.14, A = 0.2, C = 0.4, G = 0.1, T = 0.4},
 // # ...
 // ]
 // ```
