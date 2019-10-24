@@ -100,9 +100,9 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
 
         for(const auto& idxp : this->potentials_)
         {
-            const auto indices = std::get<0>(idxp);
-            const auto Pi = indices[1];
-            const auto Pj = indices[2];
+            const auto& indices = std::get<0>(idxp);
+            const auto  Pi = indices[1];
+            const auto  Pj = indices[2];
             topol.add_connection(Pi, Pj, this->kind_);
         }
         return;
