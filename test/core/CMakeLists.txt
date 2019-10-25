@@ -80,6 +80,7 @@ set(TEST_NAMES
     test_read_3spn2_base_base_interaction
     test_read_global_pair_interaction
     test_read_pdns_interaction
+    test_read_pwmcos_interaction
     test_read_position_restraint_interaction
 
     test_read_local_forcefield
