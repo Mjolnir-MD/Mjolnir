@@ -198,7 +198,6 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
             if(g_dg_3.first == 0 && g_dg_3.second == 0)
             {
                 MJOLNIR_LOG_DEBUG("theta3 - theta3_0 > 2phi");
-                // means theta3 - theta3_0 > 2phi.
                 continue;
             }
 
@@ -264,9 +263,9 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
                 const auto coef_rsin = magnitude / std::max(sin_theta, abs_tol);
 
                 const auto Fi = (coef_rsin * rlBCa) *
-                                ((cos1 * rlBCa) * rBCa - rlB53 * rB53);
+                                ((cos2 * rlBCa) * rBCa - rlB53 * rB53);
                 const auto Fk = (coef_rsin * rlB53) *
-                                ((cos1 * rlB53) * rB53 - rlBCa * rBCa);
+                                ((cos2 * rlB53) * rB53 - rlBCa * rBCa);
 
                 F_Ca          -= Fi;
                 F_B           += Fi;
@@ -287,9 +286,9 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
                 const auto coef_rsin = magnitude / std::max(sin_theta, abs_tol);
 
                 const auto Fi = (coef_rsin * rlBCa) *
-                                ((cos1 * rlBCa) * rBCa - rlCCN * rCCN);
+                                ((cos3 * rlBCa) * rBCa - rlCCN * rCCN);
                 const auto Fk = (coef_rsin * rlCCN) *
-                                ((cos1 * rlCCN) * rCCN - rlBCa * rBCa);
+                                ((cos3 * rlCCN) * rCCN - rlBCa * rBCa);
 
                 F_Ca           -= Fi;
                 F_B            += Fi;
