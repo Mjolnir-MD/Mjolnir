@@ -24,6 +24,7 @@ set(TEST_NAMES
     test_hard_core_excluded_volume_potential
     test_debye_huckel_potential
     test_pdns_potential
+    test_pwmcos_potential
     test_implicit_membrane_potential
     test_excluded_volume_wall_potential
     test_lennard_jones_wall_potential
