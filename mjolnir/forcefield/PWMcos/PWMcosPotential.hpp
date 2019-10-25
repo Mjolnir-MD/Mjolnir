@@ -72,6 +72,11 @@ class PWMcosPotential
         dna_parameter_type() : base(base_kind::X),
             B(invalid()), S(invalid()), B5(invalid()), B3(invalid())
         {}
+        ~dna_parameter_type() = default;
+        dna_parameter_type(const dna_parameter_type&) = default;
+        dna_parameter_type(dna_parameter_type&&)      = default;
+        dna_parameter_type& operator=(const dna_parameter_type&) = default;
+        dna_parameter_type& operator=(dna_parameter_type&&)      = default;
     };
     struct parameter_type
     {
@@ -85,6 +90,15 @@ class PWMcosPotential
         pair_parameter_type(): base(base_kind::X),
             S(invalid()), B5(invalid()), B3(invalid())
         {}
+        ~pair_parameter_type() = default;
+        pair_parameter_type(const base_kind     b,  const std::uint32_t s,
+                            const std::uint32_t b5, const std::uint32_t b3)
+            noexcept : base(b), S(s), B5(b5), B3(b3)
+        {}
+        pair_parameter_type(const pair_parameter_type&) = default;
+        pair_parameter_type(pair_parameter_type&&)      = default;
+        pair_parameter_type& operator=(const pair_parameter_type&) = default;
+        pair_parameter_type& operator=(pair_parameter_type&&)      = default;
     };
     using container_type = std::vector<parameter_type>;
 
@@ -176,8 +190,8 @@ class PWMcosPotential
         this->max_cutoff_length_ = real_type(0);
         for(auto& para : this->contacts_)
         {
-            const auto r_cut = para.r0 + cutoff_ratio_ * sigma_;
-            para.r_cut_sq = para.r_cut * para.r_cut;
+            const auto r_cut = para.r0 + this->cutoff_ratio_ * sigma_;
+            para.r_cut_sq = r_cut * r_cut;
             this->max_cutoff_length_ = std::max(max_cutoff_length_, r_cut);
         }
 
@@ -244,6 +258,9 @@ class PWMcosPotential
         }
     }
 
+    real_type energy_shift() const noexcept {return energy_shift_;}
+    real_type energy_unit()  const noexcept {return energy_unit_;}
+
     std::vector<contact_parameter_type> const& contacts() const noexcept
     {
         return contacts_;
@@ -259,6 +276,8 @@ class PWMcosPotential
         assert(this->parameters_.at(i).dna_index == invalid());
         assert(this->parameters_.at(j).dna_index != invalid());
         const auto& d = this->dna_params_[this->parameters_.at(j).dna_index];
+
+
         return pair_parameter_type{d.base, d.S, d.B5, d.B3};
     }
 

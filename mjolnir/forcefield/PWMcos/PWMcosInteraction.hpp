@@ -88,6 +88,8 @@ class PWMcosInteraction final : public GlobalInteractionBase<traitsT>
 template<typename traitsT>
 void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
 {
+    MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+    MJOLNIR_LOG_FUNCTION_DEBUG();
     //   DNA        protein    |
     //        i-1              | r is the length of vector `v0`.
     //     S--B       C        | angle1 is an angle formed by v0 and v1.
@@ -123,18 +125,21 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
         const auto  CaN = para.CaN; // N-term Ca (Cj-1)
         const auto  CaC = para.CaC; // C-term Ca (Cj+1)
 
+        MJOLNIR_LOG_DEBUG("Calpha = ", Ca);
         for(const auto& ptnr : this->partition_.partners(Ca))
         {
             const auto  B  = ptnr.index;          // DNA Base
             const auto  S  = ptnr.parameter().S;  // corresponding Sugar
             const auto  B5 = ptnr.parameter().B5; // Base (Bi-1)
             const auto  B3 = ptnr.parameter().B3; // Base (Bi+1)
+            MJOLNIR_LOG_DEBUG("Base = ", B);
 
             const auto& rB     = sys.position(B);
             const auto rBCa    = sys.adjust_direction(rCa - rB); // Bi -> Cj
             const auto lBCa_sq = math::length_sq(rBCa);
 
             if(para.r_cut_sq < lBCa_sq) {continue;}
+            MJOLNIR_LOG_DEBUG("within the cutoff");
 
             // ----------------------------------------------------------------
             // calculates the distance term (f(r))
@@ -156,7 +161,7 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
 
             if(g_dg_1.first == 0 && g_dg_1.second == 0)
             {
-                // means theta1 - theta1_0 > 2phi
+                MJOLNIR_LOG_DEBUG("theta1 - theta1_0 > 2phi");
                 continue;
             }
 
@@ -174,7 +179,7 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
 
             if(g_dg_2.first == 0 && g_dg_2.second == 0)
             {
-                // means theta2 - theta2_0 > 2phi
+                MJOLNIR_LOG_DEBUG("theta2 - theta2_0 > 2phi");
                 continue;
             }
 
@@ -192,6 +197,7 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
 
             if(g_dg_3.first == 0 && g_dg_3.second == 0)
             {
+                MJOLNIR_LOG_DEBUG("theta3 - theta3_0 > 2phi");
                 // means theta3 - theta3_0 > 2phi.
                 continue;
             }
@@ -387,8 +393,8 @@ PWMcosInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
 
             const auto Bk    = static_cast<std::size_t>(ptnr.parameter().base);
             const auto e_pwm = PWM[Bk];
-            const auto coef  = para.coef  * energy_unit;
-            const auto shift = para.shift + energy_shift;
+            const auto coef  = para.gamma   * energy_unit;
+            const auto shift = para.epsilon + energy_shift;
 
             E += coef * (e_pwm + shift) * f * g1 * g2 * g3;
         }

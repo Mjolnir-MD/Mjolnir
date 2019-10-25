@@ -355,7 +355,7 @@ read_pwmcos_interaction(const toml::value& global)
     using potential_type         = PWMcosPotential<traitsT>;
     using real_type              = typename potential_type::real_type;
     using contact_parameter_type = typename potential_type::contact_parameter_type;
-    using dna_index_type         = typename potential_type::dna_index_type;
+    using dna_parameter_type     = typename potential_type::dna_parameter_type;
     using base_kind              = typename potential_type::base_kind;
 
     // ```toml
@@ -397,7 +397,7 @@ read_pwmcos_interaction(const toml::value& global)
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
     std::vector<contact_parameter_type> contacts;
-    std::vector<dna_index_type>         dnas;
+    std::vector<dna_parameter_type>     dnas;
     contacts.reserve(ps.size());
     dnas    .reserve(ps.size());
 
@@ -439,19 +439,19 @@ read_pwmcos_interaction(const toml::value& global)
         }
         else if (kind == "DNA")
         {
-            dna_index_type di;
-            di.B  = idx;
-            di.S  = find_parameter<std::uint32_t>(item, env, "S");
+            dna_parameter_type dp;
+            dp.B  = idx;
+            dp.S  = find_parameter<std::uint32_t>(item, env, "S");
 
             // it seems that 3' and 5' bases are required.
-            di.B5 = find_parameter<std::uint32_t>(item, env, "B5");
-            di.B3 = find_parameter<std::uint32_t>(item, env, "B3");
+            dp.B5 = find_parameter<std::uint32_t>(item, env, "B5");
+            dp.B3 = find_parameter<std::uint32_t>(item, env, "B3");
 
             const auto& bk = toml::find<std::string>(item, "base");
-            if     (bk == "A") {di.base = base_kind::A;}
-            else if(bk == "C") {di.base = base_kind::C;}
-            else if(bk == "G") {di.base = base_kind::G;}
-            else if(bk == "T") {di.base = base_kind::T;}
+            if     (bk == "A") {dp.base = base_kind::A;}
+            else if(bk == "C") {dp.base = base_kind::C;}
+            else if(bk == "G") {dp.base = base_kind::G;}
+            else if(bk == "T") {dp.base = base_kind::T;}
             else
             {
                 throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -459,9 +459,9 @@ read_pwmcos_interaction(const toml::value& global)
                     "none of \"A\", \"T\", \"C\", \"G\"",
                     toml::find(item, "base"), "here"));
             }
-            dnas.push_back(di);
-            MJOLNIR_LOG_INFO("DNA: idx = ", di.B, ", base = ", bk,
-                             ", S = ", di.S, ", B3 = ", di.B3, ", B5 = ", di.B5);
+            dnas.push_back(dp);
+            MJOLNIR_LOG_INFO("DNA: idx = ", dp.B, ", base = ", bk,
+                             ", S = ", dp.S, ", B3 = ", dp.B3, ", B5 = ", dp.B5);
         }
         else
         {
@@ -513,7 +513,7 @@ read_global_interaction(const toml::value& global)
     else if(interaction == "PWMcos")
     {
         MJOLNIR_LOG_NOTICE("PWMcos Interaction found.");
-        return read_pdns_interaction<traitsT>(global);
+        return read_pwmcos_interaction<traitsT>(global);
     }
     else
     {
