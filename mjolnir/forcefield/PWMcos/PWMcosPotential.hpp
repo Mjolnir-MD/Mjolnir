@@ -46,6 +46,21 @@ enum class base_kind : std::uint8_t
     T = 3,
     X = 255,
 };
+template<typename charT, typename traits>
+std::basic_ostream<charT, traits>&
+operator<<(std::basic_ostream<charT, traits>& os, const base_kind bk)
+{
+    switch(bk)
+    {
+        case base_kind::A: {os << 'A'; return os;}
+        case base_kind::C: {os << 'C'; return os;}
+        case base_kind::G: {os << 'G'; return os;}
+        case base_kind::T: {os << 'T'; return os;}
+        case base_kind::X: {os << 'X'; return os;}
+        default: {os << "invalid PWMcos base kind"; return os;}
+    }
+    return os;
+}
 } // parameter_PWMcos
 
 template<typename traitsT>
@@ -260,6 +275,9 @@ class PWMcosPotential
 
     real_type energy_shift() const noexcept {return energy_shift_;}
     real_type energy_unit()  const noexcept {return energy_unit_;}
+
+    real_type sigma() const noexcept {return sigma_;}
+    real_type phi()   const noexcept {return phi_;}
 
     std::vector<contact_parameter_type> const& contacts() const noexcept
     {
