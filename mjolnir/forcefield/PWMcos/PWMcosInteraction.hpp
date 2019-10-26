@@ -402,4 +402,20 @@ PWMcosInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
 }
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize major use-cases
+#include <mjolnir/core/BoundaryCondition.hpp>
+
+namespace mjolnir
+{
+
+extern template class PWMcosInteraction<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class PWMcosInteraction<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class PWMcosInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class PWMcosInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif// MJOLNIR_FORCEFIELD_PWMCOS_PWMCOS_INTERACTION_HPP
