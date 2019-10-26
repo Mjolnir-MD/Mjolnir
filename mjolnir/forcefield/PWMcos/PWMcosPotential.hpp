@@ -87,6 +87,10 @@ class PWMcosPotential
         dna_parameter_type() : base(base_kind::X),
             B(invalid()), S(invalid()), B5(invalid()), B3(invalid())
         {}
+        dna_parameter_type(const base_kind bk, const std::uint32_t b,
+            const std::uint32_t s, const std::uint32_t b5, const std::uint32_t b3)
+            : base(bk), B(b), S(s), B5(b5), B3(b3)
+        {}
         ~dna_parameter_type() = default;
         dna_parameter_type(const dna_parameter_type&) = default;
         dna_parameter_type(dna_parameter_type&&)      = default;
