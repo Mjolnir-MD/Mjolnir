@@ -64,10 +64,11 @@ class GlobalPairInteraction<
 
     void calc_force (system_type& sys) const noexcept override
     {
+        const auto leading_participants = this->potential_.leading_participants();
 #pragma omp for nowait
-        for(std::size_t idx=0; idx < this->potential_.participants().size(); ++idx)
+        for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
         {
-            const auto i = this->potential_.participants()[idx];
+            const auto i = leading_participants[idx];
             for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto  j     = ptnr.index;
@@ -94,10 +95,11 @@ class GlobalPairInteraction<
     real_type calc_energy(const system_type& sys) const noexcept override
     {
         real_type E = 0.0;
+        const auto leading_participants = this->potential_.leading_participants();
 #pragma omp parallel for reduction(+:E)
-        for(std::size_t idx=0; idx < this->potential_.participants().size(); ++idx)
+        for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
         {
-            const auto i = this->potential_.participants()[idx];
+            const auto i = leading_participants[idx];
             for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto  j     = ptnr.index;
@@ -138,10 +140,10 @@ namespace mjolnir
 // EXV, L-J and UL-J have its own specialization, so DO NOT specialize here.
 
 // D-H
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float> >;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>;
-extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float> >;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>       , DebyeHuckelPotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>       >>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       , DebyeHuckelPotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       >>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+extern template class GlobalPairInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
 

@@ -34,7 +34,7 @@ class ThreeSPN2BaseBaseInteraction<
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
-    using potential_type  = ThreeSPN2BaseBaseInteractionPotential<real_type>;
+    using potential_type  = ThreeSPN2BaseBaseInteractionPotential<traits_type>;
     using partition_type  = SpatialPartition<traits_type, potential_type>;
 
     using base_kind        = parameter_3SPN2::bead_kind;
@@ -78,12 +78,13 @@ class ThreeSPN2BaseBaseInteraction<
         constexpr auto two_pi    = math::constants<real_type>::two_pi();
         constexpr auto tolerance = math::abs_tolerance<real_type>();
 
+        const auto leading_participants = this->potential_.leading_participants();
 #pragma omp for nowait
-        for(std::size_t idx=0; idx < this->potential_.participants().size(); ++idx)
+        for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
         {
             const std::size_t thread_id = omp_get_thread_num();
 
-            const auto Bi = this->potential_.participants()[idx];
+            const auto   Bi = leading_participants[idx];
             const auto& rBi = sys.position(Bi);
             for(const auto& ptnr : this->partition_.partners(Bi))
             {
@@ -510,10 +511,12 @@ class ThreeSPN2BaseBaseInteraction<
         constexpr auto two_pi    = math::constants<real_type>::two_pi();
 
         real_type E = 0.0;
+
+        const auto leading_participants = this->potential_.leading_participants();
 #pragma omp parallel for reduction(+:E)
-        for(std::size_t idx=0; idx < this->potential_.participants().size(); ++idx)
+        for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
         {
-            const auto   Bi = this->potential_.participants()[idx];
+            const auto   Bi = leading_participants[idx];
             const auto& rBi = sys.position(Bi);
 
             for(const auto& ptnr : this->partition_.partners(Bi))

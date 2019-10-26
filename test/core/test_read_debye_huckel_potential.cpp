@@ -7,6 +7,8 @@
 #endif
 
 #include <mjolnir/input/read_global_potential.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
 #include <tuple>
 
 using test_types = std::tuple<double, float>;
@@ -23,6 +25,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_noenv, T, test_types)
     mjolnir::LoggerManager::set_default_logger("test_read_debye_huckel.log");
 
     using real_type = T;
+    using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -42,7 +45,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_noenv, T, test_types)
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_debye_huckel_potential<real_type>(v);
+        const auto pot = mjolnir::read_debye_huckel_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
@@ -74,6 +77,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_env, T, test_types)
     mjolnir::LoggerManager::set_default_logger("test_read_debye_huckel.log");
 
     using real_type = T;
+    using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -96,7 +100,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_env, T, test_types)
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_debye_huckel_potential<real_type>(v);
+        const auto pot = mjolnir::read_debye_huckel_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
@@ -128,6 +132,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_ignore_self, T, test_types)
     mjolnir::LoggerManager::set_default_logger("test_read_debye_huckel.log");
 
     using real_type = T;
+    using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -142,7 +147,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_ignore_self, T, test_types)
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_debye_huckel_potential<real_type>(v);
+        const auto pot = mjolnir::read_debye_huckel_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
@@ -168,6 +173,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_ignore_others, T, test_types)
     mjolnir::LoggerManager::set_default_logger("test_read_debye_huckel.log");
 
     using real_type = T;
+    using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -182,7 +188,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_ignore_others, T, test_types)
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_debye_huckel_potential<real_type>(v);
+        const auto pot = mjolnir::read_debye_huckel_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
@@ -209,6 +215,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_ignore_group, T, test_types)
     mjolnir::LoggerManager::set_default_logger("test_read_debye_huckel.log");
 
     using real_type = T;
+    using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -227,7 +234,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_debye_huckel_ignore_group, T, test_types)
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_debye_huckel_potential<real_type>(v);
+        const auto pot = mjolnir::read_debye_huckel_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(

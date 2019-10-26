@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(read_global_forcefield)
         BOOST_TEST(static_cast<bool>(interaction_ptr));
 
         using exv_interaction = mjolnir::GlobalPairInteraction<
-                traits_type, mjolnir::ExcludedVolumePotential<real_type>
+                traits_type, mjolnir::ExcludedVolumePotential<traits_type>
             >;
 
         const auto derived_ptr  = dynamic_cast<exv_interaction*>(interaction_ptr.get());
@@ -106,10 +106,10 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield)
         BOOST_TEST( ff.global().size() == 2u);
 
         using exv_interaction = mjolnir::GlobalPairInteraction<
-                traits_type, mjolnir::ExcludedVolumePotential<real_type>
+                traits_type, mjolnir::ExcludedVolumePotential<traits_type>
             >;
         using lj_interaction  = mjolnir::GlobalPairInteraction<
-                traits_type, mjolnir::LennardJonesPotential<real_type>
+                traits_type, mjolnir::LennardJonesPotential<traits_type>
             >;
 
         std::map<std::type_index, bool> found;

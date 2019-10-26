@@ -10,7 +10,8 @@
 
 BOOST_AUTO_TEST_CASE(UniformLennardJones_double)
 {
-    using real_type = double;
+    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type   = typename traits_type::real_type;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
     using group_id_type    = mjolnir::Topology::group_id_type;
     constexpr std::size_t N = 10000;
@@ -18,9 +19,9 @@ BOOST_AUTO_TEST_CASE(UniformLennardJones_double)
 
     constexpr real_type sigma   = 3.0;
     constexpr real_type epsilon = 1.0;
-    mjolnir::UniformLennardJonesPotential<real_type> lj{
+    mjolnir::UniformLennardJonesPotential<traits_type> lj{
         sigma, epsilon,
-        mjolnir::UniformLennardJonesPotential<real_type>::default_cutoff(), {}, {},
+        mjolnir::UniformLennardJonesPotential<traits_type>::default_cutoff(), {}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
     };
@@ -44,7 +45,8 @@ BOOST_AUTO_TEST_CASE(UniformLennardJones_double)
 
 BOOST_AUTO_TEST_CASE(UniformLennardJones_float)
 {
-    using real_type = float;
+    using traits_type = mjolnir::SimulatorTraits<float, mjolnir::UnlimitedBoundary>;
+    using real_type   = typename traits_type::real_type;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
     using group_id_type    = mjolnir::Topology::group_id_type;
     constexpr std::size_t N = 1000;
@@ -53,9 +55,9 @@ BOOST_AUTO_TEST_CASE(UniformLennardJones_float)
 
     constexpr real_type sigma   = 3.0;
     constexpr real_type epsilon = 1.0;
-    mjolnir::UniformLennardJonesPotential<real_type> lj{
+    mjolnir::UniformLennardJonesPotential<traits_type> lj{
         sigma, epsilon,
-        mjolnir::UniformLennardJonesPotential<real_type>::default_cutoff(), {}, {},
+        mjolnir::UniformLennardJonesPotential<traits_type>::default_cutoff(), {}, {},
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
     };
