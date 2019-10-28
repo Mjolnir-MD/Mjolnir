@@ -159,6 +159,7 @@ read_external_position_restraint_interaction(const toml::value& external)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
     using real_type       = typename traitsT::real_type;
+    using coordinate_type = typename traitsT::coordinate_type;
 
     const auto& env = external.as_table().count("env") == 1 ?
                       external.as_table().at("env") : toml::value{};
@@ -180,13 +181,14 @@ read_external_position_restraint_interaction(const toml::value& external)
         {
             const auto idx = find_parameter<std::size_t>(para, env, "index");
             const auto pos = find_parameter<std::array<real_type, 3>>(para, env, "position");
+            const auto crd = math::make_coordinate<coordinate_type>(pos[0], pos[1], pos[2]);
 
             // suppress warnings in read_harmonic_potential
             para.as_table().erase("index");
             para.as_table().erase("position");
 
             const auto pot = read_harmonic_potential<real_type>(para, env);
-            potentials.emplace_back(idx, pos, pot);
+            potentials.emplace_back(idx, crd, pot);
         }
         return make_unique<interaction_t>(std::move(potentials));
     }
