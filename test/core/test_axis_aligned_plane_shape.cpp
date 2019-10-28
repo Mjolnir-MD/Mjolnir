@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_PositiveZ_geometry_unlimited)
     std::uniform_real_distribution<double> uni(-100, 100);
 
     boundary_type bdry;
-    mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveZDirection> xyplane(0.0);
+    mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveZDirection<traits_type>> xyplane(0.0);
 
     for(std::size_t i=0; i<100000; ++i)
     {
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_NegativeZ_geometry_unlimited)
     std::uniform_real_distribution<double> uni(-100, 100);
 
     boundary_type bdry;
-    mjolnir::AxisAlignedPlane<traits_type, mjolnir::NegativeZDirection> xyplane(0.0);
+    mjolnir::AxisAlignedPlane<traits_type, mjolnir::NegativeZDirection<traits_type>> xyplane(0.0);
 
     for(std::size_t i=0; i<100000; ++i)
     {
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_geometry_periodic)
 
     const coord_type lower(0, 0, 0), upper(100, 100, 100);
     boundary_type bdry(lower, upper);
-    mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveZDirection> xyplane(0.0);
+    mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveZDirection<traits_type>> xyplane(0.0);
 
     for(std::size_t i=0; i<100000; ++i)
     {
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_neighbors_unlimited)
     }
 
     dummy_potential<double> dummy; dummy.cutoff = 1.0; dummy.N = 1000;
-    mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveZDirection>
+    mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveZDirection<traits_type>>
         xyplane(0.0, 0.0); // no mergin here
     xyplane.initialize(sys, dummy);
 
