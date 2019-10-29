@@ -59,7 +59,7 @@ bool inject_test_potential(std::unique_ptr<mjolnir::SimulatorBase>& sim_base)
     using integrator_type = mjolnir::BAOABLangevinIntegrator<traits_type>;
     using simulator_type  = mjolnir::MolecularDynamicsSimulator<traits_type, integrator_type>;
 
-    using shape_type       = mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveXDirection>;
+    using shape_type       = mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveXDirection<traits_type>>;
     using potential_type   = mjolnir::TestPotential<typename traits_type::real_type>;
     using interaction_type = mjolnir::ExternalDistanceInteraction<traits_type, potential_type, shape_type>;
 
