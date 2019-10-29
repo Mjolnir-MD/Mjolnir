@@ -299,5 +299,12 @@ class ExclusionList
     std::vector<std::pair<std::size_t, std::size_t>> idx_ranges_;
 };
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ExclusionList<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ExclusionList<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ExclusionList<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ExclusionList<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 } // mjolnir
 #endif// MJOLNIR_NEIGHBOR_LIST_HPP
