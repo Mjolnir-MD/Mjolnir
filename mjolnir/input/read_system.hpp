@@ -56,7 +56,9 @@ struct read_boundary_impl<CuboidalPeriodicBoundary<realT, coordT>>
         }
         MJOLNIR_LOG_INFO("upper limit of the boundary = ", upper);
         MJOLNIR_LOG_INFO("lower limit of the boundary = ", lower);
-        return CuboidalPeriodicBoundary<realT, coordT>(lower, upper);
+        return CuboidalPeriodicBoundary<realT, coordT>(
+            math::make_coordinate<coordT>(lower[0], lower[1], lower[2]),
+            math::make_coordinate<coordT>(upper[0], upper[1], upper[2]));
     }
 };
 
@@ -130,13 +132,16 @@ read_system(const toml::value& root, const std::size_t N)
         check_keys_available(p, {"mass"_s, "m"_s, "position"_s, "pos"_s,
                 "velocity"_s, "vel"_s, "name"_s, "group"_s});
 
-        sys.mass(i)     = toml::get<real_type>(find_either(p, "m",   "mass"));
-        sys.position(i) = toml::get< vec_type>(find_either(p, "pos", "position"));
+        sys.mass(i) = toml::get<real_type>(find_either(p, "m", "mass"));
+
+        const auto pos = toml::get<vec_type>(find_either(p, "pos", "position"));
+        sys.position(i) = math::make_coordinate<coordinate_type>(pos[0], pos[1], pos[2]);
         sys.velocity(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
 
         if(sys.velocity_initialized()) // it requires `velocity`.
         {
-            sys.velocity(i) = toml::get<vec_type>(find_either(p, "vel", "velocity"));
+            const auto vel = toml::get<vec_type>(find_either(p, "vel", "velocity"));
+            sys.velocity(i) = math::make_coordinate<coordinate_type>(vel[0], vel[1], vel[2]);
         }
         else // velocity should not be there. check it.
         {

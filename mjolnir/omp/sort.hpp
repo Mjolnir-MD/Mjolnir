@@ -5,6 +5,7 @@
 #include <functional>
 #include <utility>
 #include <vector>
+#include <cassert>
 #include <omp.h>
 
 namespace mjolnir
