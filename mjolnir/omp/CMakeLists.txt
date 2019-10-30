@@ -17,6 +17,7 @@ set(mjolnir_omp_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/ThreeSPN2BaseBaseInteraction.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ThreeSPN2BaseStackingInteraction.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ProteinDNANonSpecificInteraction.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/PWMcosInteraction.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/UnlimitedGridCellList.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/PeriodicGridCellList.cpp"
     )
