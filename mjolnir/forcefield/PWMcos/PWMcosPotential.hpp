@@ -128,7 +128,7 @@ class PWMcosPotential
     using connection_kind_type = typename topology_type::connection_kind_type;
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
-    using exclusion_list_type  = ExclusionList;
+    using exclusion_list_type  = ExclusionList<traits_type>;
 
     static constexpr std::uint32_t invalid() noexcept
     {
