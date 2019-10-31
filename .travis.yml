@@ -12,10 +12,11 @@ matrix:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
-        - ubuntu-toolchain-r-test
+        - sourceline: 'ppa:ubuntu-toolchain-r/test'
         packages:
         - g++-9
         - boost1.70
+        - cmake
   - os: linux
     language: cpp
     compiler: gcc
@@ -25,10 +26,11 @@ matrix:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
-        - ubuntu-toolchain-r-test
+        - sourceline: 'ppa:ubuntu-toolchain-r/test'
         packages:
         - g++-9
         - boost1.70
+        - cmake
   - os: linux
     language: cpp
     compiler: gcc
@@ -38,10 +40,11 @@ matrix:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
-        - ubuntu-toolchain-r-test
+        - sourceline: 'ppa:ubuntu-toolchain-r/test'
         packages:
         - g++-8
         - boost1.70
+        - cmake
   - os: linux
     language: cpp
     compiler: gcc
@@ -51,10 +54,11 @@ matrix:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
-        - ubuntu-toolchain-r-test
+        - sourceline: 'ppa:ubuntu-toolchain-r/test'
         packages:
         - g++-7
         - boost1.70
+        - cmake
   - os: linux
     language: cpp
     compiler: clang
@@ -64,11 +68,12 @@ matrix:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
-        - ubuntu-toolchain-r-test
+        - sourceline: 'ppa:ubuntu-toolchain-r/test'
         - llvm-toolchain-xenial-8
         packages:
         - clang-8
         - boost1.70
+        - cmake
   - os: linux
     language: cpp
     compiler: clang
@@ -78,11 +83,12 @@ matrix:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
-        - ubuntu-toolchain-r-test
+        - sourceline: 'ppa:ubuntu-toolchain-r/test'
         - llvm-toolchain-xenial-8
         packages:
         - clang-8
         - boost1.70
+        - cmake
   - os: linux
     language: cpp
     compiler: clang
@@ -92,30 +98,28 @@ matrix:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
-        - ubuntu-toolchain-r-test
+        - sourceline: 'ppa:ubuntu-toolchain-r/test'
         - llvm-toolchain-xenial-7
         packages:
         - clang-7
         - boost1.70
+        - cmake
   - os: osx
     language: cpp
     compiler: clang
     env: COMPILER="clang++" SEPARATE="OFF"
-    addons:
-      homebrew:
-        packages:
-        - cmake
-        - boost
-        update: true
 
 before_install:
+- mkdir -p cmake
 - |
   if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-    mkdir -p cmake
-    travis_retry wget "https://github.com/Kitware/CMake/releases/download/v3.14.5/cmake-3.14.5-Linux-x86_64.tar.gz"
-    tar xf cmake-3.14.5-Linux-x86_64.tar.gz -C cmake --strip-components=1
-    export PATH=${TRAVIS_BUILD_DIR}/cmake/bin:${PATH}
+    travis_retry wget "https://github.com/Kitware/CMake/releases/download/v3.15.4/cmake-3.15.4-Linux-x86_64.tar.gz"
+    tar xf cmake-3.15.4-Linux-x86_64.tar.gz -C cmake --strip-components=1
+  else
+    travis_retry wget "https://github.com/Kitware/CMake/releases/download/v3.15.4/cmake-3.15.4-Darwin-x86_64.tar.gz"
+    tar xf cmake-3.15.4-Darwin-x86_64.tar.gz -C cmake --strip-components=1
   fi
+- export PATH=${TRAVIS_BUILD_DIR}/cmake/bin:${PATH}
 - cmake --version
 
 script:

@@ -180,11 +180,13 @@ void UnlimitedGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighb
     const real_type r_c  = cutoff_ * (1 + margin_);
     const real_type r_c2 = r_c * r_c;
 
+    const auto leading_participants = pot.leading_participants();
+
     std::vector<neighbor_type> partner;
-    for(std::size_t idx=0; idx<participants.size(); ++idx)
+    for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
     {
         partner.clear();
-        const auto   i = participants[idx];
+        const auto   i = leading_participants[idx];
         const auto& ri = sys.position(i);
 
         const auto& cell = cell_list_[this->calc_index(ri)];
@@ -200,7 +202,7 @@ void UnlimitedGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighb
             {
                 const auto j = pici.first;
                 MJOLNIR_LOG_DEBUG("looking particle ", j);
-                if(j <= i || !pot.has_interaction(i, j))
+                if(!pot.has_interaction(i, j))
                 {
                     continue;
                 }
@@ -296,17 +298,17 @@ void UnlimitedGridCellList<traitsT, potentialT>::initialize(
 
 namespace mjolnir
 {
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float >>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
 
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float >>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
 
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        LennardJonesPotential<double>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        LennardJonesPotential<float >>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
 
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float >>;
+extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
 }
 #endif // SEPARATE_BUILD
 

@@ -15,12 +15,12 @@ namespace mjolnir
 // This class contains radii of hard core, thicknesses of soft layer represented
 // by default excluded volume, calculates energy and derivative of the potential
 // function.
-template<typename realT>
+template<typename traitsT>
 class HardCoreExcludedVolumePotential
 {
   public:
-
-    using real_type = realT;
+    using traits_type    = traitsT;
+    using real_type      = typename traits_type::real_type;
     using parameter_type = std::pair<real_type, real_type>; // {sigma, hardcore_radius}
     using container_type = std::vector<parameter_type>;
     // `pair_parameter_type` is a parameter for a interacting pair.
@@ -35,7 +35,7 @@ class HardCoreExcludedVolumePotential
     using connection_kind_type = typename topology_type::connection_kind_type;
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
-    using exclusion_list_type  = ExclusionList;
+    using exclusion_list_type  = ExclusionList <traits_type>;
 
     static constexpr real_type default_cutoff() noexcept
     {
@@ -128,8 +128,7 @@ class HardCoreExcludedVolumePotential
         return -12.0 * this->epsilon_ * sigma12gap12 * gapinv;
     }
 
-    template<typename traitsT>
-    void initialize(const System<traitsT>& sys) noexcept
+    void initialize(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -138,8 +137,7 @@ class HardCoreExcludedVolumePotential
         return;
     }
 
-    template<typename traitsT>
-    void update(const System<traitsT>& sys) noexcept
+    void update(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -161,11 +159,35 @@ class HardCoreExcludedVolumePotential
         return max_param.first * this->cutoff_ratio_ + max_param.second;
     }
 
+    // -----------------------------------------------------------------------
+    // for spatial partitions
+    //
+    // Here, the default implementation uses Newton's 3rd law to reduce
+    // calculation. For an interacting pair (i, j), forces applied to i and j
+    // are equal in magnitude and opposite in direction. So, if a pair (i, j) is
+    // listed, (j, i) is not needed.
+    //     See implementation of VerletList, CellList and GlobalPairInteraction
+    // for more details about the usage of these functions.
+
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+
+    range<typename std::vector<std::size_t>::const_iterator>
+    leading_participants() const noexcept
+    {
+        return make_range(participants_.begin(), std::prev(participants_.end()));
+    }
+    range<typename std::vector<std::size_t>::const_iterator>
+    possible_partners_of(const std::size_t participant_idx,
+                         const std::size_t /*particle_idx*/) const noexcept
+    {
+        return make_range(participants_.begin() + participant_idx + 1,
+                          participants_.end());
+    }
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
-        // if not excluded, the pair has interaction.
-        return !exclusion_list_.is_excluded(i, j);
+        return (i < j) && !exclusion_list_.is_excluded(i, j);
     }
+
     // for testing
     exclusion_list_type const& exclusion_list() const noexcept
     {
@@ -184,8 +206,6 @@ class HardCoreExcludedVolumePotential
     std::vector<parameter_type>&       parameters()       noexcept {return parameters_;}
     std::vector<parameter_type> const& parameters() const noexcept {return parameters_;}
 
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
-
  private:
     real_type epsilon_;
     real_type hard_raius;
@@ -201,11 +221,19 @@ class HardCoreExcludedVolumePotential
         return this->cutoff_ratio_ * pram.first + pram.second;
     }
 };
+} // mjolnir
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class HardCoreExcludedVolumePotential<double>;
-extern template class HardCoreExcludedVolumePotential<float>;
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+
+namespace mjolnir
+{
+extern template class HardCoreExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class HardCoreExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class HardCoreExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class HardCoreExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+} // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
-} // mjolnir
 #endif /* MJOLNIR_HARD_CORE_EXCLUDED_VOLUME_POTENTIAL */

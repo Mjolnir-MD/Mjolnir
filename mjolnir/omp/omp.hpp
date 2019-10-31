@@ -26,11 +26,13 @@
 #include <mjolnir/omp/BondAngleInteraction.hpp>
 #include <mjolnir/omp/DihedralAngleInteraction.hpp>
 #include <mjolnir/omp/ThreeSPN2BaseStackingInteraction.hpp>
+#include <mjolnir/omp/ProteinDNANonSpecificInteraction.hpp>
 #include <mjolnir/omp/GlobalPairInteraction.hpp>
 #include <mjolnir/omp/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/omp/GlobalPairLennardJonesInteraction.hpp>
 #include <mjolnir/omp/GlobalPairUniformLennardJonesInteraction.hpp>
 #include <mjolnir/omp/ThreeSPN2BaseBaseInteraction.hpp>
+#include <mjolnir/omp/PWMcosInteraction.hpp>
 #include <mjolnir/omp/PositionRestraintInteraction.hpp>
 #include <mjolnir/omp/ExternalDistanceInteraction.hpp>
 #include <mjolnir/omp/UnlimitedGridCellList.hpp>

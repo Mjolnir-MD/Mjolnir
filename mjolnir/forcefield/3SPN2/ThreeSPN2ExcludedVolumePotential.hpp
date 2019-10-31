@@ -21,12 +21,13 @@ namespace mjolnir
 //
 // Note: an identifier starts with a digit is not allowed in C++ standard.
 //       see N3337 2.11 for detail. So `3SPN2BaseBaseInteraction` is not a valid name.
-template<typename realT>
+template<typename traitsT>
 class ThreeSPN2ExcludedVolumePotential
 {
   public:
-    using real_type = realT;
-    using bead_kind = parameter_3SPN2::bead_kind;
+    using traits_type = traitsT;
+    using real_type   = typename traits_type::real_type;
+    using bead_kind   = parameter_3SPN2::bead_kind;
 
     using parameter_type      = bead_kind;
     using pair_parameter_type = real_type; // sigma_ij
@@ -40,7 +41,7 @@ class ThreeSPN2ExcludedVolumePotential
     using connection_kind_type = typename topology_type::connection_kind_type;
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
-    using exclusion_list_type  = ExclusionList;
+    using exclusion_list_type  = ExclusionList <traits_type>;
 
     static constexpr parameter_type default_parameter() noexcept
     {
@@ -138,8 +139,7 @@ class ThreeSPN2ExcludedVolumePotential
         return this->cutoff_;
     }
 
-    template<typename traitsT>
-    void initialize(const System<traitsT>& sys) noexcept
+    void initialize(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -191,8 +191,7 @@ class ThreeSPN2ExcludedVolumePotential
     }
 
     // nothing to do when system parameters change.
-    template<typename traitsT>
-    void update(const System<traitsT>& sys) noexcept
+    void update(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -242,11 +241,28 @@ class ThreeSPN2ExcludedVolumePotential
         return;
     }
 
+    // -----------------------------------------------------------------------
+    // for spatial partitions
+
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+
+    range<typename std::vector<std::size_t>::const_iterator>
+    leading_participants() const noexcept
+    {
+        return make_range(participants_.begin(), std::prev(participants_.end()));
+    }
+    range<typename std::vector<std::size_t>::const_iterator>
+    possible_partners_of(const std::size_t participant_idx,
+                         const std::size_t /*particle_idx*/) const noexcept
+    {
+        return make_range(participants_.begin() + participant_idx + 1, participants_.end());
+    }
+
     // ------------------------------------------------------------------------
     // to check bases has base-pairing interaction.
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
-        if(exclusion_list_.is_excluded(i, j))
+        if(j <= i || exclusion_list_.is_excluded(i, j))
         {
             return false;
         }
@@ -309,8 +325,6 @@ class ThreeSPN2ExcludedVolumePotential
         }
     }
 
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
-
   private:
 
     range<typename std::vector<std::size_t>::const_iterator>
@@ -359,10 +373,19 @@ struct ThreeSPN2ExcludedVolumePotentialParameter
     real_type sigma_C = 6.4;
 };
 
+} // mjolnir
+
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class ThreeSPN2ExcludedVolumePotential<double>;
-extern template class ThreeSPN2ExcludedVolumePotential<float>;
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+
+namespace mjolnir
+{
+extern template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+} // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
-} // mjolnir
 #endif // MJOLNIR_POTENTIAL_GLOBAL_3SPN2_EXV_POTENTIAL_HPP

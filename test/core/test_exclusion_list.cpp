@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_noignore)
         }
         sys.topology().construct_molecules();
 
-        mjolnir::ExclusionList exl({},
+        mjolnir::ExclusionList<traits_type> exl({},
                 ignore_molecule_type("Nothing"), ignore_group_type({}));
         exl.make(sys);
 
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_noignore)
 
         sys.topology().construct_molecules();
 
-        mjolnir::ExclusionList exl({},
+        mjolnir::ExclusionList<traits_type> exl({},
                 ignore_molecule_type("Nothing"), ignore_group_type({}));
         exl.make(sys);
 
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_topology_dependent)
         }
         sys.topology().construct_molecules();
 
-        mjolnir::ExclusionList exl({{"bond", 3}, {"contact", 1}},
+        mjolnir::ExclusionList<traits_type> exl({{"bond", 3}, {"contact", 1}},
                                    ignore_molecule_type("Nothing"),
                                    ignore_group_type({}));
         exl.make(sys);
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_topology_dependent)
 
         sys.topology().construct_molecules();
 
-        mjolnir::ExclusionList exl({{"bond", 3}, {"contact", 1}},
+        mjolnir::ExclusionList<traits_type> exl({{"bond", 3}, {"contact", 1}},
                                    ignore_molecule_type("Nothing"),
                                    ignore_group_type({}));
         exl.make(sys);
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_topology_dependent)
 
         sys.topology().construct_molecules();
 
-        mjolnir::ExclusionList exl({{"bond", 3}, {"contact", 1}},
+        mjolnir::ExclusionList<traits_type> exl({{"bond", 3}, {"contact", 1}},
                                    ignore_molecule_type("Nothing"),
                                    ignore_group_type({}));
         exl.make(sys);
@@ -367,7 +367,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
             }
             sys.topology().construct_molecules();
 
-            mjolnir::ExclusionList exl({{"bond", 1}},
+            mjolnir::ExclusionList<traits_type> exl({{"bond", 1}},
                 ignore_molecule_type("Self"),
                 ignore_group_type({}));
             exl.make(sys);
@@ -396,7 +396,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
 
             sys.topology().construct_molecules();
 
-            mjolnir::ExclusionList exl({{"bond", 1}},
+            mjolnir::ExclusionList<traits_type> exl({{"bond", 1}},
                 ignore_molecule_type("Self"),
                 ignore_group_type({}));
             exl.make(sys);
@@ -434,7 +434,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
             }
             sys.topology().construct_molecules();
 
-            mjolnir::ExclusionList exl({{"bond", 1}},
+            mjolnir::ExclusionList<traits_type> exl({{"bond", 1}},
                 ignore_molecule_type("Others"),
                 ignore_group_type({}));
             exl.make(sys);
@@ -472,7 +472,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
 
             BOOST_TEST(sys.topology().number_of_molecules() == 2u);
 
-            mjolnir::ExclusionList exl({{"bond", 1}},
+            mjolnir::ExclusionList<traits_type> exl({{"bond", 1}},
                 ignore_molecule_type("Others"),
                 ignore_group_type({}));
             exl.make(sys);
@@ -534,7 +534,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_gruop_dependent)
             sys.topology().erase_connection(4, 5, "bond");
             sys.topology().construct_molecules();
 
-            mjolnir::ExclusionList exl({{"bond", 1}},
+            mjolnir::ExclusionList<traits_type> exl({{"bond", 1}},
                 ignore_molecule_type("Nothing"),
                 ignore_group_type({
                     // interact only if groups are different (intra-groups are ignored)
@@ -581,7 +581,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_gruop_dependent)
             sys.topology().erase_connection(4, 5, "bond");
             sys.topology().construct_molecules();
 
-            mjolnir::ExclusionList exl({{"bond", 1}},
+            mjolnir::ExclusionList<traits_type> exl({{"bond", 1}},
                 ignore_molecule_type("Nothing"),
                 ignore_group_type({
                     // interact only if groups are different (inter-groups are ignored)
@@ -635,7 +635,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_gruop_dependent)
             sys.topology().erase_connection(4, 5, "bond");
             sys.topology().construct_molecules();
 
-            mjolnir::ExclusionList exl({{"bond", 1}},
+            mjolnir::ExclusionList<traits_type> exl({{"bond", 1}},
                 ignore_molecule_type("Nothing"),
                 ignore_group_type({
                     // everything will be ignored

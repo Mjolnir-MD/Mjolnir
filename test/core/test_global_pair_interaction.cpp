@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(GlobalPairInteraction_double)
     using coordinate_type  = traits::coordinate_type;
     using boundary_type    = traits::boundary_type;
     using system_type      = mjolnir::System<traits>;
-    using potential_type   = mjolnir::LennardJonesPotential<real_type>;
+    using potential_type   = mjolnir::LennardJonesPotential<traits>;
     using parameter_type   = typename potential_type::parameter_type;
     using partition_type   = mjolnir::NaivePairCalculation<traits, potential_type>;
     using interaction_type = mjolnir::GlobalPairInteraction<traits, potential_type>;

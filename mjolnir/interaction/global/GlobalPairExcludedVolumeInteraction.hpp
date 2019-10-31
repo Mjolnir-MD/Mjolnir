@@ -14,7 +14,7 @@ namespace mjolnir
 template<typename realT, template<typename, typename> class boundaryT>
 class GlobalPairInteraction<
     SimulatorTraits<realT, boundaryT>,
-    ExcludedVolumePotential<realT>
+    ExcludedVolumePotential<SimulatorTraits<realT, boundaryT>>
     > final : public GlobalInteractionBase<SimulatorTraits<realT, boundaryT>>
 {
   public:
@@ -25,7 +25,7 @@ class GlobalPairInteraction<
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
-    using potential_type  = ExcludedVolumePotential<real_type>;
+    using potential_type  = ExcludedVolumePotential<traits_type>;
     using partition_type  = SpatialPartition<traits_type, potential_type>;
 
   public:
@@ -75,8 +75,11 @@ class GlobalPairInteraction<
         const auto cutoff_ratio    = potential_.cutoff_ratio();
         const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
         const auto epsilon12       = 12 * potential_.epsilon();
-        for(const auto i : this->potential_.participants())
+
+        const auto leading_participants = this->potential_.leading_participants();
+        for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
         {
+            const auto i = leading_participants[idx];
             for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto  j     = ptnr.index;
@@ -116,8 +119,11 @@ class GlobalPairInteraction<
         const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
         const auto coef_at_cutoff  = potential_.coef_at_cutoff();
         const auto epsilon         = potential_.epsilon();
-        for(const auto i : this->potential_.participants())
+
+        const auto leading_participants = this->potential_.leading_participants();
+        for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
         {
+            const auto i = leading_participants[idx];
             for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto  j     = ptnr.index;
@@ -141,8 +147,7 @@ class GlobalPairInteraction<
         return E;
     }
 
-    std::string name() const override
-    {return "GlobalPairExcludedVolumeInteraction";}
+    std::string name() const override {return "GlobalPairExcludedVolume";}
 
   private:
 
@@ -161,10 +166,10 @@ namespace mjolnir
 // ============================================================================
 // exv
 // CellList
-extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumePotential<double>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumePotential<float> >;
-extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float> >;
+extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>       , ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       >>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>       , ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       >>;
+extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
 

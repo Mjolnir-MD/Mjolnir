@@ -5,7 +5,9 @@
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <mjolnir/util/format_nth.hpp>
 #include <mjolnir/math/vector_util.hpp>
+#include <mjolnir/input/read_table_from_file.hpp>
 #include <mjolnir/input/read_path.hpp>
 #include <mjolnir/input/utility.hpp>
 
@@ -54,7 +56,9 @@ struct read_boundary_impl<CuboidalPeriodicBoundary<realT, coordT>>
         }
         MJOLNIR_LOG_INFO("upper limit of the boundary = ", upper);
         MJOLNIR_LOG_INFO("lower limit of the boundary = ", lower);
-        return CuboidalPeriodicBoundary<realT, coordT>(lower, upper);
+        return CuboidalPeriodicBoundary<realT, coordT>(
+            math::make_coordinate<coordT>(lower[0], lower[1], lower[2]),
+            math::make_coordinate<coordT>(upper[0], upper[1], upper[2]));
     }
 };
 
@@ -70,14 +74,18 @@ read_boundary(const toml::value& boundary)
 
 // It reads particles and other system-specific attributes (e.g. temperature)
 template<typename traitsT>
-System<traitsT> read_system_from_table(const toml::value& system)
+System<traitsT>
+read_system(const toml::value& root, const std::size_t N)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
     using real_type       = typename traitsT::real_type;
     using coordinate_type = typename traitsT::coordinate_type;
 
-    MJOLNIR_LOG_NOTICE("reading system ...");
+    const auto& systems = toml::find(root, "systems");
+    MJOLNIR_LOG_NOTICE("reading ", format_nth(N), " system ...");
+    const auto system = read_table_from_file(systems.as_array().at(N),
+                                             "systems", read_input_path(root));
 
     check_keys_available(system, {"boundary_shape"_s, "attributes"_s, "particles"_s});
 
@@ -124,13 +132,16 @@ System<traitsT> read_system_from_table(const toml::value& system)
         check_keys_available(p, {"mass"_s, "m"_s, "position"_s, "pos"_s,
                 "velocity"_s, "vel"_s, "name"_s, "group"_s});
 
-        sys.mass(i)     = toml::get<real_type>(find_either(p, "m",   "mass"));
-        sys.position(i) = toml::get< vec_type>(find_either(p, "pos", "position"));
+        sys.mass(i) = toml::get<real_type>(find_either(p, "m", "mass"));
+
+        const auto pos = toml::get<vec_type>(find_either(p, "pos", "position"));
+        sys.position(i) = math::make_coordinate<coordinate_type>(pos[0], pos[1], pos[2]);
         sys.velocity(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
 
         if(sys.velocity_initialized()) // it requires `velocity`.
         {
-            sys.velocity(i) = toml::get<vec_type>(find_either(p, "vel", "velocity"));
+            const auto vel = toml::get<vec_type>(find_either(p, "vel", "velocity"));
+            sys.velocity(i) = math::make_coordinate<coordinate_type>(vel[0], vel[1], vel[2]);
         }
         else // velocity should not be there. check it.
         {
@@ -169,69 +180,7 @@ System<traitsT> read_system_from_table(const toml::value& system)
     return sys;
 }
 
-// reads N-th system. In some (abnormal) simulation, e.g. REMD or string method,
-// we may have N different systems. This function reads N-th system. but in most
-// of the cases, N is always equal to 0.
-template<typename traitsT>
-System<traitsT> read_system(const toml::value& root, std::size_t N)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    if(N != 0) {MJOLNIR_LOG_NOTICE("reading ", N, "-th [[system]].");}
-    else       {MJOLNIR_LOG_NOTICE("reading [[system]].");}
-
-    const auto& system_params = toml::find<toml::array>(root, "systems");
-    if(system_params.size() <= N)
-    {
-        throw_exception<std::out_of_range>("[error] mjolnir::read_system: "
-            "no enough system definitions: ", N, " is required, but only ",
-            system_params.size(), " defined.");
-    }
-    MJOLNIR_LOG_INFO(system_params.size(), " systems are provided");
-    MJOLNIR_LOG_INFO("using ", N, "-th system");
-
-    const auto& system = toml::get<toml::table>(system_params.at(N));
-    if(system.count("file_name") == 1)
-    {
-        const auto input_path = read_input_path(root);
-        const auto file_name = toml::get<std::string>(system.at("file_name"));
-        MJOLNIR_LOG_NOTICE("system is defined in ", input_path + file_name);
-        if(system.size() != 1)
-        {
-            MJOLNIR_LOG_WARN("[[systems]] has \"file_name\" and other values.");
-            MJOLNIR_LOG_WARN("When \"file_name\" is provided, other values are "
-                             "ignored because those are read from the specified"
-                             " file (", input_path, file_name, ").");
-        }
-
-        MJOLNIR_LOG_NOTICE("reading ", input_path, file_name, " ...");
-        const auto system_file = toml::parse(input_path + file_name);
-        MJOLNIR_LOG_NOTICE(" done.");
-
-        if(system_file.as_table().count("systems") != 1)
-        {
-            throw_exception<std::out_of_range>("[error] mjolnir::read_system: "
-                "table [[systems]] not found in toml file\n --> ",
-                input_path, file_name, "\n | the file should define [[systems]]"
-                " table and define values in it.");
-        }
-        if(system_file.as_table().at("systems").is_array())
-        {
-            return read_system_from_table<traitsT>(
-                toml::find<toml::array>(system_file, "systems").front());
-        }
-        return read_system_from_table<traitsT>(
-                toml::find(system_file, "systems"));
-    }
-    return read_system_from_table<traitsT>(system_params.at(N));
-}
-
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template System<SimulatorTraits<double, UnlimitedBoundary>       > read_system_from_table<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::value& system);
-extern template System<SimulatorTraits<float,  UnlimitedBoundary>       > read_system_from_table<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::value& system);
-extern template System<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_system_from_table<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value& system);
-extern template System<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_system_from_table<SimulatorTraits<float,  CuboidalPeriodicBoundary>>(const toml::value& system);
-
 extern template System<SimulatorTraits<double, UnlimitedBoundary>       > read_system<SimulatorTraits<double, UnlimitedBoundary>       >(const toml::value& root, std::size_t N);
 extern template System<SimulatorTraits<float,  UnlimitedBoundary>       > read_system<SimulatorTraits<float,  UnlimitedBoundary>       >(const toml::value& root, std::size_t N);
 extern template System<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_system<SimulatorTraits<double, CuboidalPeriodicBoundary>>(const toml::value& root, std::size_t N);

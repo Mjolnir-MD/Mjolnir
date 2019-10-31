@@ -1,0 +1,67 @@
+[files]
+output.prefix = "directional_contact"
+output.path   = "./"
+output.format = "xyz"
+
+[units]
+length = "angstrom"
+energy = "kcal/mol"
+
+[simulator]
+type                  = "MolecularDynamics"
+precision             = "double"
+boundary_type         = "PeriodicCuboid"
+delta_t               = 0.1
+total_step            = 100_000
+save_step             = 100
+seed                  = 42
+integrator.type       = "UnderdampedLangevin"
+integrator.parameters = [
+{index = 0, gamma = 0.875},
+{index = 1, gamma = 0.875},
+{index = 2, gamma = 0.875},
+{index = 3, gamma = 0.875},
+]
+
+[[systems]]
+attributes.temperature = 300.0
+boundary_shape.lower = [  0.0,   0.0,   0.0]
+boundary_shape.upper = [100.0, 100.0, 100.0]
+particles = [
+{mass = 200.0, pos = [46.0, 48.0, 50.0], name = "origin1"},
+{mass = 10.0,  pos = [50.0, 48.0, 50.0], name = "patch1"},
+{mass = 10.0,  pos = [50.0, 52.0, 50.0], name = "patch2"},
+{mass = 140.0, pos = [54.0, 52.0, 50.0], name = "origin2"},
+]
+
+[[forcefields]]
+[[forcefields.local]]
+interaction = "BondLength"
+potential   = "Harmonic"
+topology    = "bond"
+parameters  = [
+{indices = [0, 1], v0 = 4.0, k = 10.0},
+{indices = [2, 3], v0 = 4.0, k = 10.0},
+]
+
+[[forcefields.local]]
+interaction                 = "DirectionalContact"
+potentials.angle1           = "Gaussian"
+potentials.angle2           = "Gaussian"
+potentials.contact          = "GoContact"
+topology                    = "none"
+parameters = [
+{indices = [0, 1, 2, 3], angle1 = {v0 = 1.57, k = 1.0, sigma = 0.15}, angle2 = {v0 = 1.57, k = 1.0, sigma = 0.15}, contact = {v0 = 4.0, k = 100.0}},
+]
+
+[[forcefields.global]]
+interaction             = "Pair"
+potential               = "ExcludedVolume"
+ignore.molecule         = "Self"
+ignore.particles_within = {bond = 3}
+spatial_partition       = {type = "VerletList", margin = 0.5}
+epsilon                 = 0.3
+parameters = [
+{index = 0, radius = 5.0},
+{index = 3, radius = 5.0},
+]

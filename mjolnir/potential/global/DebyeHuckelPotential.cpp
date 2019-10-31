@@ -6,6 +6,8 @@
 
 namespace mjolnir
 {
-template class DebyeHuckelPotential<double>;
-template class DebyeHuckelPotential<float>;
+template class DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+template class DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+template class DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+template class DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir

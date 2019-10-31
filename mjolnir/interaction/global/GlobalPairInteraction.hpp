@@ -102,21 +102,16 @@ template<typename traitsT, typename potT>
 void GlobalPairInteraction<traitsT, potT>::calc_force(
         system_type& sys) const noexcept
 {
-    MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
-    MJOLNIR_LOG_FUNCTION_DEBUG();
-
-    for(const auto i : this->potential_.participants())
+    const auto leading_participants = this->potential_.leading_participants();
+    for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
     {
-        MJOLNIR_LOG_DEBUG("partners number of particle ", i,
-                          " is ", partition_.partners(i).size());
+        const auto i = leading_participants[idx];
         for(const auto& ptnr : this->partition_.partners(i))
         {
             const auto  j     = ptnr.index;
             const auto& param = ptnr.parameter();
 
-            MJOLNIR_LOG_DEBUG("calculating force between ", i, " and", j);
-
-            const coordinate_type rij =
+            const auto rij =
                 sys.adjust_direction(sys.position(j) - sys.position(i));
             const real_type l2 = math::length_sq(rij); // |rij|^2
             const real_type rl = math::rsqrt(l2);      // 1 / |rij|
@@ -139,9 +134,12 @@ typename GlobalPairInteraction<traitsT, potT>::real_type
 GlobalPairInteraction<traitsT, potT>::calc_energy(
         const system_type& sys) const noexcept
 {
-    real_type e = 0.0;
-    for(const auto i : this->potential_.participants())
+    real_type E = 0.0;
+
+    const auto leading_participants = this->potential_.leading_participants();
+    for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
     {
+        const auto i = leading_participants[idx];
         for(const auto& ptnr : this->partition_.partners(i))
         {
             const auto  j     = ptnr.index;
@@ -149,10 +147,10 @@ GlobalPairInteraction<traitsT, potT>::calc_energy(
 
             const real_type l = math::length(
                 sys.adjust_direction(sys.position(j) - sys.position(i)));
-            e += potential_.potential(l, param);
+            E += potential_.potential(l, param);
         }
     }
-    return e;
+    return E;
 }
 
 } // mjolnir
@@ -173,10 +171,10 @@ namespace mjolnir
 // EXV, L-J and UL-J have its own specialization, so DO NOT specialize here.
 
 // D-H
-extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<double>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<float> >;
-extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float> >;
+extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       >>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       >>;
+extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
 

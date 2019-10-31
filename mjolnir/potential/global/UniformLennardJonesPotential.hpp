@@ -16,11 +16,12 @@ namespace mjolnir
 // Well-known Lennard-Jones interaction with uniform parameters.
 // This class contains a sigma and an epsilon that are the same among all the
 // particles.
-template<typename realT>
+template<typename traitsT>
 class UniformLennardJonesPotential
 {
   public:
-    using real_type           = realT;
+    using traits_type         = traitsT;
+    using real_type           = typename traits_type::real_type;
     using parameter_type      = empty_t; // no particle-specific parameter
     using container_type      = empty_t; // no parameter, so no container there.
     using pair_parameter_type = empty_t; // no particle-pair-specific parameter
@@ -32,7 +33,7 @@ class UniformLennardJonesPotential
     using connection_kind_type = typename topology_type::connection_kind_type;
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
-    using exclusion_list_type  = ExclusionList;
+    using exclusion_list_type  = ExclusionList <traits_type>;
 
     static constexpr real_type default_cutoff() noexcept
     {
@@ -113,8 +114,7 @@ class UniformLennardJonesPotential
         return sigma_ * cutoff_ratio_;
     }
 
-    template<typename traitsT>
-    void initialize(const System<traitsT>& sys) noexcept
+    void initialize(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -135,8 +135,7 @@ class UniformLennardJonesPotential
         return;
     }
 
-    template<typename traitsT>
-    void update(const System<traitsT>& sys) noexcept
+    void update(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -145,10 +144,35 @@ class UniformLennardJonesPotential
         exclusion_list_.make(sys);
         return;
     }
+
+    // -----------------------------------------------------------------------
+    // for spatial partitions
+    //
+    // Here, the default implementation uses Newton's 3rd law to reduce
+    // calculation. For an interacting pair (i, j), forces applied to i and j
+    // are equal in magnitude and opposite in direction. So, if a pair (i, j) is
+    // listed, (j, i) is not needed.
+    //     See implementation of VerletList, CellList and GlobalPairInteraction
+    // for more details about the usage of these functions.
+
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+
+    range<typename std::vector<std::size_t>::const_iterator>
+    leading_participants() const noexcept
+    {
+        return make_range(participants_.begin(), std::prev(participants_.end()));
+    }
+    range<typename std::vector<std::size_t>::const_iterator>
+    possible_partners_of(const std::size_t participant_idx,
+                         const std::size_t /*particle_idx*/) const noexcept
+    {
+        return make_range(participants_.begin() + participant_idx + 1,
+                          participants_.end());
+    }
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
         // if not excluded, the pair has interaction.
-        return !exclusion_list_.is_excluded(i, j);
+        return (i < j) && !exclusion_list_.is_excluded(i, j);
     }
     exclusion_list_type const& exclusion_list() const noexcept
     {
@@ -168,8 +192,6 @@ class UniformLennardJonesPotential
     real_type& epsilon()       noexcept {return epsilon_;}
     real_type  epsilon() const noexcept {return epsilon_;}
 
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
-
   private:
 
     real_type cutoff_ratio_, coef_at_cutoff_;
@@ -178,11 +200,19 @@ class UniformLennardJonesPotential
 
     exclusion_list_type  exclusion_list_;
 };
+} // mjolnir
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class UniformLennardJonesPotential<double>;
-extern template class UniformLennardJonesPotential<float>;
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+
+namespace mjolnir
+{
+extern template class UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+} // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
-} // mjolnir
 #endif /* MJOLNIR_LENNARD_JONES_POTENTIAL */

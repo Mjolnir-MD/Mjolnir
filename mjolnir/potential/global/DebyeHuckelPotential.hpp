@@ -20,11 +20,12 @@ namespace mjolnir
 // series of the coarse-grained DNA models (Knotts et al., (2007), Sambriski and
 // de Pablo, (2009), Hinckley et al., (2013), and Freeman et al., (2014))
 // It is same as the default electrostatic term in CafeMol (Kenzaki et al. 2011)
-template<typename realT>
+template<typename traitsT>
 class DebyeHuckelPotential
 {
   public:
-    using real_type            = realT;
+    using traits_type          = traitsT;
+    using real_type            = typename traits_type::real_type;
     using parameter_type       = real_type;
     using container_type       = std::vector<parameter_type>;
 
@@ -42,7 +43,7 @@ class DebyeHuckelPotential
     using connection_kind_type = typename topology_type::connection_kind_type;
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
-    using exclusion_list_type  = ExclusionList;
+    using exclusion_list_type  = ExclusionList<traits_type>;
 
     static constexpr real_type default_cutoff() noexcept
     {
@@ -74,7 +75,6 @@ class DebyeHuckelPotential
             }
             this->parameters_.at(idx) = idxp.second;
         }
-
         // XXX should be updated before use because T and ion conc are default!
         this->calc_parameters();
     }
@@ -116,8 +116,7 @@ class DebyeHuckelPotential
         return this->debye_length_ * this->cutoff_ratio_;
     }
 
-    template<typename traitsT>
-    void initialize(const System<traitsT>& sys) noexcept
+    void initialize(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -135,8 +134,7 @@ class DebyeHuckelPotential
     }
 
     // for temperature/ionic concentration changes...
-    template<typename traitsT>
-    void update(const System<traitsT>& sys) noexcept
+    void update(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -157,16 +155,38 @@ class DebyeHuckelPotential
         return;
     }
 
+    // -----------------------------------------------------------------------
+    // for spatial partitions
+    //
+    // Here, the default implementation uses Newton's 3rd law to reduce
+    // calculation. For an interacting pair (i, j), forces applied to i and j
+    // are equal in magnitude and opposite in direction. So, if a pair (i, j) is
+    // listed, (j, i) is not needed.
+    //     See implementation of VerletList, CellList and GlobalPairInteraction
+    // for more details about the usage of these functions.
+
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+
+    range<typename std::vector<std::size_t>::const_iterator>
+    leading_participants() const noexcept
+    {
+        return make_range(participants_.begin(), std::prev(participants_.end()));
+    }
+    range<typename std::vector<std::size_t>::const_iterator>
+    possible_partners_of(const std::size_t participant_idx,
+                         const std::size_t /*particle_idx*/) const noexcept
+    {
+        return make_range(participants_.begin() + participant_idx + 1,
+                          participants_.end());
+    }
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
-        // if not excluded, the pair has interaction.
-        return !exclusion_list_.is_excluded(i, j);
+        return (i < j) && !exclusion_list_.is_excluded(i, j);
     }
 
-    // for testing
     exclusion_list_type const& exclusion_list() const noexcept
     {
-        return exclusion_list_;
+        return exclusion_list_; // for testing
     }
 
     // ------------------------------------------------------------------------
@@ -179,8 +199,6 @@ class DebyeHuckelPotential
     // access to the parameters.
     std::vector<real_type>&       charges()       noexcept {return parameters_;}
     std::vector<real_type> const& charges() const noexcept {return parameters_;}
-
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
 
     real_type debye_length() const noexcept {return this->debye_length_;}
 
@@ -247,11 +265,19 @@ class DebyeHuckelPotential
 
     exclusion_list_type  exclusion_list_;
 };
+} // mjolnir
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class DebyeHuckelPotential<double>;
-extern template class DebyeHuckelPotential<float>;
+#include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
+
+namespace mjolnir
+{
+extern template class DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+} // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
-} // mjolnir
 #endif /* MJOLNIR_DEBYE_HUCKEL_POTENTIAL */

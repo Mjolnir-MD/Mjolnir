@@ -23,6 +23,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_hard_core_excluded_volume_noenv, T, test_type
     mjolnir::LoggerManager::set_default_logger("test_read_hard_core_excluded_volume.log");
 
     using real_type = T;
+    using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -38,7 +39,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_hard_core_excluded_volume_noenv, T, test_type
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_hard_core_excluded_volume_potential<real_type>(v);
+        const auto pot = mjolnir::read_hard_core_excluded_volume_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
@@ -71,6 +72,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_hard_core_excluded_volume_env, T, test_types)
     mjolnir::LoggerManager::set_default_logger("test_read_hard_core_excluded_volume.log");
 
     using real_type = T;
+    using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -88,7 +90,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_hard_core_excluded_volume_env, T, test_types)
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_hard_core_excluded_volume_potential<real_type>(v);
+        const auto pot = mjolnir::read_hard_core_excluded_volume_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(

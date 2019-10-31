@@ -18,13 +18,16 @@ namespace mjolnir
 // from interacting pairs.
 // This class constructs a list that contains a list of pairs that are excluded
 // from interacting pairs using information in a topology.
+template<typename traitsT>
 class ExclusionList
 {
   public:
+    using traits_type          = traitsT;
     using topology_type        = Topology;
     using molecule_id_type     = topology_type::molecule_id_type;
     using group_id_type        = topology_type::group_id_type;
     using connection_kind_type = topology_type::connection_kind_type;
+    using system_type          = System<traits_type>;
 
     using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
@@ -80,8 +83,7 @@ class ExclusionList
         return false;
     }
 
-    template<typename traitsT>
-    void make(const System<traitsT>& sys)
+    void make(const system_type& sys)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -296,6 +298,13 @@ class ExclusionList
     std::vector<std::size_t> ignored_idxs_;
     std::vector<std::pair<std::size_t, std::size_t>> idx_ranges_;
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class ExclusionList<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ExclusionList<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ExclusionList<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ExclusionList<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
 
 } // mjolnir
 #endif// MJOLNIR_NEIGHBOR_LIST_HPP

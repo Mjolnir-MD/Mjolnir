@@ -23,6 +23,8 @@ set(TEST_NAMES
     test_excluded_volume_potential
     test_hard_core_excluded_volume_potential
     test_debye_huckel_potential
+    test_pdns_potential
+    test_pwmcos_potential
     test_implicit_membrane_potential
     test_excluded_volume_wall_potential
     test_lennard_jones_wall_potential
@@ -32,11 +34,14 @@ set(TEST_NAMES
     test_bond_length_gocontact_interaction
     test_contact_interaction
     test_contact_gocontact_interaction
+    test_directional_contact_interaction
     test_bond_angle_interaction
     test_dihedral_angle_interaction
     test_3spn2_base_stacking_interaction
     test_3spn2_base_base_interaction
     test_global_pair_interaction
+    test_pdns_interaction
+    test_pwmcos_interaction
     test_position_restraint_interaction
 
     test_neighbor_list
@@ -63,6 +68,7 @@ set(TEST_NAMES
     test_read_excluded_volume_wall_potential
     test_read_lennard_jones_wall_potential
     test_read_implicit_membrane_potential
+    test_read_uniform_potential
 
     test_read_ignore_molecule
     test_read_ignore_group
@@ -70,10 +76,13 @@ set(TEST_NAMES
     test_read_bond_length_interaction
     test_read_bond_angle_interaction
     test_read_dihedral_angle_interaction
+    test_read_directional_contact_interaction
     test_read_dummy_interaction
     test_read_3spn2_base_stacking_interaction
     test_read_3spn2_base_base_interaction
     test_read_global_pair_interaction
+    test_read_pdns_interaction
+    test_read_pwmcos_interaction
     test_read_position_restraint_interaction
 
     test_read_local_forcefield
@@ -86,6 +95,7 @@ set(TEST_NAMES
     test_read_steepest_descent_simulator
     test_read_switching_forcefield_simulator
 
+    test_read_spatial_partition
     test_read_observer
     test_read_integrator
     test_read_system

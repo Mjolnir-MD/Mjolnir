@@ -14,7 +14,7 @@ namespace mjolnir
 template<typename realT, template<typename, typename> class boundaryT>
 class GlobalPairInteraction<
     SimulatorTraits<realT, boundaryT>,
-    UniformLennardJonesPotential<realT>
+    UniformLennardJonesPotential<SimulatorTraits<realT, boundaryT>>
     > final : public GlobalInteractionBase<SimulatorTraits<realT, boundaryT>>
 {
   public:
@@ -25,7 +25,7 @@ class GlobalPairInteraction<
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
     using boundary_type   = typename base_type::boundary_type;
-    using potential_type  = UniformLennardJonesPotential<real_type>;
+    using potential_type  = UniformLennardJonesPotential<traits_type>;
     using partition_type  = SpatialPartition<traits_type, potential_type>;
 
   public:
@@ -76,8 +76,11 @@ class GlobalPairInteraction<
         const auto r_cutoff_sq     = cutoff_ratio_sq * sigma_sq;
         const auto epsilon         = this->potential_.epsilon();
 
-        for(const auto i : this->potential_.participants())
+        const auto leading_participants = this->potential_.leading_participants();
+        for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
         {
+            const auto i = leading_participants[idx];
+
             for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto j = ptnr.index;
@@ -114,8 +117,10 @@ class GlobalPairInteraction<
         const auto r_cutoff_sq     = cutoff_ratio_sq * sigma_sq;
         const auto epsilon         = this->potential_.epsilon();
 
-        for(const auto i : this->potential_.participants())
+        const auto leading_participants = this->potential_.leading_participants();
+        for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
         {
+            const auto i = leading_participants[idx];
             for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto j = ptnr.index;
@@ -135,8 +140,7 @@ class GlobalPairInteraction<
         return E;
     }
 
-    std::string name() const override
-    {return "GlobalPairUniformLennardJonesInteraction";}
+    std::string name() const override {return "GlobalPairUniformLennardJones";}
 
   private:
 
@@ -155,10 +159,10 @@ namespace mjolnir
 {
 
 // Uniform L-J
-extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<double>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<float> >;
-extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<double>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<float> >;
+extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       >>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       >>;
+extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
 
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
