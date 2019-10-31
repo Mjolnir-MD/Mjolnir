@@ -1,5 +1,18 @@
 # Change Log
 
+## 1.7.0
+
+### Added
+
+- PDNS interaction
+- PWMcos interaction
+- DirectionalContactInteraction (@yutakashi634)
+
+### Changed
+
+- update toml11 from v3.0.1 to v3.1.0
+- internal architectural changes around neighboring list
+
 ## 1.6.3
 
 ### Fixed
@@ -37,7 +50,7 @@
 ### Added
 
 - add 3SPN2C potential for DNA
-- add HardCoreExcludedVolumePotential
+- add HardCoreExcludedVolumePotential (@yutakashi634)
 - enable to generate initial velocity
 - allow boundary.type = "Periodic"
 
