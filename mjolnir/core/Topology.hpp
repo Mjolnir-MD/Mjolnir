@@ -39,8 +39,9 @@ class Topology
 
     using molecule_id_type     = std::size_t;
     using group_id_type        = std::string;
+    using name_type            = std::string;
     using connection_kind_type = std::string;
-    using edge_type = std::pair<std::size_t, connection_kind_type>;
+    using edge_type            = std::pair<std::size_t, connection_kind_type>;
 
     static constexpr molecule_id_type uninitialized() noexcept
     {
@@ -49,9 +50,7 @@ class Topology
 
     struct node
     {
-        std::size_t   molecule_id;
-        std::string   name;
-        group_id_type group;
+        std::size_t molecule_id;
         std::vector<edge_type> adjacents;
     };
 
@@ -65,22 +64,18 @@ class Topology
     Topology& operator=(Topology&&)      = default;
 
     explicit Topology(const std::size_t N)
-        : num_molecules_(1), nodes_(N, node{
-                uninitialized(), "uninitialized", "uninitialized", {}})
+        : num_molecules_(1), nodes_(N, node{uninitialized(), {}}),
+          names_(N, "uninitialized"), groups_(N, "uninitialized")
     {}
 
     void        clear()                {return nodes_.clear();}
     bool        empty() const noexcept {return nodes_.empty();}
     std::size_t size()  const noexcept {return nodes_.size();}
 
-    std::string&       name_of(const std::size_t i)
-    {return this->nodes_.at(i).name;}
-    std::string const& name_of(const std::size_t i) const
-    {return this->nodes_.at(i).name;}
-    std::string&       name_of(const std::size_t i, const std::nothrow_t&) noexcept
-    {return this->nodes_[i].name;}
-    std::string const& name_of(const std::size_t i, const std::nothrow_t&) const noexcept
-    {return this->nodes_[i].name;}
+    name_type&       name_of(const std::size_t i)       {return this->names_.at(i);}
+    name_type const& name_of(const std::size_t i) const {return this->names_.at(i);}
+    name_type&       name_of(const std::size_t i, const std::nothrow_t&)       noexcept {return this->names_[i];}
+    name_type const& name_of(const std::size_t i, const std::nothrow_t&) const noexcept {return this->names_[i];}
 
     molecule_id_type  molecule_of(const std::size_t i) const
     {return nodes_.at(i).molecule_id;}
@@ -92,15 +87,10 @@ class Topology
     molecule_id_type& molecule_of(const std::size_t i, const std::nothrow_t&)
     {return nodes_[i].molecule_id;}
 
-    std::string&       group_of(const std::size_t i)
-    {return this->nodes_.at(i).group;}
-    std::string const& group_of(const std::size_t i) const
-    {return this->nodes_.at(i).group;}
-
-    std::string&       group_of(const std::size_t i, const std::nothrow_t&) noexcept
-    {return this->nodes_[i].group;}
-    std::string const& group_of(const std::size_t i, const std::nothrow_t&) const noexcept
-    {return this->nodes_[i].group;}
+    group_id_type&       group_of(const std::size_t i)       {return this->groups_.at(i);}
+    group_id_type const& group_of(const std::size_t i) const {return this->groups_.at(i);}
+    group_id_type&       group_of(const std::size_t i, const std::nothrow_t&)       noexcept {return this->groups_[i];}
+    group_id_type const& group_of(const std::size_t i, const std::nothrow_t&) const noexcept {return this->groups_[i];}
 
     void add_connection  (const std::size_t i, const std::size_t j,
                           const connection_kind_type& kind);
@@ -149,9 +139,11 @@ class Topology
     }
 
   private:
-    std::size_t num_molecules_;
-    std::vector<node>   nodes_;
     // each node corresponds to the particle having the same idx in a system.
+    std::size_t                num_molecules_;
+    std::vector<node>          nodes_;
+    std::vector<name_type>     names_;
+    std::vector<group_id_type> groups_;
 };
 
 inline void Topology::add_connection(
