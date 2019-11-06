@@ -86,6 +86,45 @@ read_BAOAB_langevin_integrator(const toml::value& simulator)
     return BAOABLangevinIntegrator<traitsT>(delta_t, std::move(gamma));
 }
 
+// A mapping object from type information (template parameter) to the actual
+// read_xxx_integrator function
+
+template<typename T>
+struct read_integrator_impl;
+
+template<typename traitsT>
+struct read_integrator_impl<VelocityVerletIntegrator<traitsT>>
+{
+    static VelocityVerletIntegrator<traitsT> invoke(const toml::value& sim)
+    {
+        return read_velocity_verlet_integrator<traitsT>(sim);
+    }
+};
+
+template<typename traitsT>
+struct read_integrator_impl<UnderdampedLangevinIntegrator<traitsT>>
+{
+    static UnderdampedLangevinIntegrator<traitsT> invoke(const toml::value& sim)
+    {
+        return read_underdamped_langevin_integrator<traitsT>(sim);
+    }
+};
+
+template<typename traitsT>
+struct read_integrator_impl<BAOABLangevinIntegrator<traitsT>>
+{
+    static BAOABLangevinIntegrator<traitsT> invoke(const toml::value& sim)
+    {
+        return read_underdamped_langevin_integrator<traitsT>(sim);
+    }
+};
+
+template<typename integratorT>
+integratorT read_integrator(const toml::value& sim)
+{
+    return read_integrator_impl<integratorT>::invoke(sim);
+}
+
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template VelocityVerletIntegrator<SimulatorTraits<double, UnlimitedBoundary>       > read_velocity_verlet_integrator(const toml::value& simulator);
 extern template VelocityVerletIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       > read_velocity_verlet_integrator(const toml::value& simulator);
