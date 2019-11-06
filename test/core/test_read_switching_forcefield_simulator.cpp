@@ -14,6 +14,7 @@ BOOST_AUTO_TEST_CASE(read_newtonian_switching_forcefield_simulator)
 
     using real_type   = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    using integrator_type = mjolnir::VelocityVerletIntegrator<traits_type>;
     auto root = mjolnir::test::make_empty_input();
 
     using namespace toml::literals;
@@ -60,52 +61,102 @@ BOOST_AUTO_TEST_CASE(read_newtonian_switching_forcefield_simulator)
     )"_toml;
     root.as_table()["systems"] = toml::array{system};
 
-    const auto sim = mjolnir::read_simulator<traits_type>(root, simulator);
-    BOOST_TEST(static_cast<bool>(sim));
-
-    const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
-        traits_type, mjolnir::VelocityVerletIntegrator<traits_type>>*>(sim.get());
-    BOOST_TEST(static_cast<bool>(mdsim));
-
-    BOOST_TEST(mdsim->rng().seed() == 12345u);
-
-    BOOST_TEST(mdsim->forcefields().size() == 2u);
-
-    BOOST_TEST(mdsim->forcefield_index().at("open" ) == 0u);
-    BOOST_TEST(mdsim->forcefield_index().at("close") == 1u);
-
-    for(const auto& kv : mdsim->schedule())
     {
-        std::cout << '{' << kv.first << ':' << kv.second << '}' << std::endl;
-    }
+        const auto sim = mjolnir::read_simulator<traits_type, integrator_type>(root, simulator);
+        BOOST_TEST(static_cast<bool>(sim));
 
-    BOOST_TEST(mdsim->schedule().size() == 3u);
-    BOOST_TEST(mdsim->schedule().at(0).first  == 10u);
-    BOOST_TEST(mdsim->schedule().at(0).second == "open");
-    BOOST_TEST(mdsim->schedule().at(1).first  == 20u);
-    BOOST_TEST(mdsim->schedule().at(1).second == "close");
-    BOOST_TEST(mdsim->schedule().at(2).first  == 30u);
-    BOOST_TEST(mdsim->schedule().at(2).second == "open");
+        const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
+            traits_type, integrator_type>*>(sim.get());
+        BOOST_TEST(static_cast<bool>(mdsim));
 
-    BOOST_TEST(mdsim->system().size() == 2u);
+        BOOST_TEST(mdsim->rng().seed() == 12345u);
 
-    mdsim->initialize();
-    for(std::size_t i=0; i<10; ++i)
-    {
-        BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
-        mdsim->step();
+        BOOST_TEST(mdsim->forcefields().size() == 2u);
+
+        BOOST_TEST(mdsim->forcefield_index().at("open" ) == 0u);
+        BOOST_TEST(mdsim->forcefield_index().at("close") == 1u);
+
+        for(const auto& kv : mdsim->schedule())
+        {
+            std::cout << '{' << kv.first << ':' << kv.second << '}' << std::endl;
+        }
+
+        BOOST_TEST(mdsim->schedule().size() == 3u);
+        BOOST_TEST(mdsim->schedule().at(0).first  == 10u);
+        BOOST_TEST(mdsim->schedule().at(0).second == "open");
+        BOOST_TEST(mdsim->schedule().at(1).first  == 20u);
+        BOOST_TEST(mdsim->schedule().at(1).second == "close");
+        BOOST_TEST(mdsim->schedule().at(2).first  == 30u);
+        BOOST_TEST(mdsim->schedule().at(2).second == "open");
+
+        BOOST_TEST(mdsim->system().size() == 2u);
+
+        mdsim->initialize();
+        for(std::size_t i=0; i<10; ++i)
+        {
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
+            mdsim->step();
+        }
+        for(std::size_t i=0; i<10; ++i)
+        {
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) != 0.0);
+            mdsim->step();
+        }
+        for(std::size_t i=0; i<10; ++i)
+        {
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
+            mdsim->step();
+        }
+        mdsim->finalize();
     }
-    for(std::size_t i=0; i<10; ++i)
     {
-        BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) != 0.0);
-        mdsim->step();
+        const auto sim = mjolnir::read_integrator_type<traits_type>(root, simulator);
+        BOOST_TEST(static_cast<bool>(sim));
+
+        const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
+            traits_type, integrator_type>*>(sim.get());
+        BOOST_TEST(static_cast<bool>(mdsim));
+
+        BOOST_TEST(mdsim->rng().seed() == 12345u);
+
+        BOOST_TEST(mdsim->forcefields().size() == 2u);
+
+        BOOST_TEST(mdsim->forcefield_index().at("open" ) == 0u);
+        BOOST_TEST(mdsim->forcefield_index().at("close") == 1u);
+
+        for(const auto& kv : mdsim->schedule())
+        {
+            std::cout << '{' << kv.first << ':' << kv.second << '}' << std::endl;
+        }
+
+        BOOST_TEST(mdsim->schedule().size() == 3u);
+        BOOST_TEST(mdsim->schedule().at(0).first  == 10u);
+        BOOST_TEST(mdsim->schedule().at(0).second == "open");
+        BOOST_TEST(mdsim->schedule().at(1).first  == 20u);
+        BOOST_TEST(mdsim->schedule().at(1).second == "close");
+        BOOST_TEST(mdsim->schedule().at(2).first  == 30u);
+        BOOST_TEST(mdsim->schedule().at(2).second == "open");
+
+        BOOST_TEST(mdsim->system().size() == 2u);
+
+        mdsim->initialize();
+        for(std::size_t i=0; i<10; ++i)
+        {
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
+            mdsim->step();
+        }
+        for(std::size_t i=0; i<10; ++i)
+        {
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) != 0.0);
+            mdsim->step();
+        }
+        for(std::size_t i=0; i<10; ++i)
+        {
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
+            mdsim->step();
+        }
+        mdsim->finalize();
     }
-    for(std::size_t i=0; i<10; ++i)
-    {
-        BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
-        mdsim->step();
-    }
-    mdsim->finalize();
 }
 
 BOOST_AUTO_TEST_CASE(read_underdamped_langevin_switching_forcefield_simulator)
@@ -114,6 +165,7 @@ BOOST_AUTO_TEST_CASE(read_underdamped_langevin_switching_forcefield_simulator)
 
     using real_type   = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    using integrator_type = mjolnir::UnderdampedLangevinIntegrator<traits_type>;
     auto root = mjolnir::test::make_empty_input();
 
     using namespace toml::literals;
@@ -162,55 +214,109 @@ BOOST_AUTO_TEST_CASE(read_underdamped_langevin_switching_forcefield_simulator)
     )"_toml;
     root.as_table()["systems"] = toml::array{system};
 
-    const auto sim = mjolnir::read_simulator<traits_type>(root, simulator);
-    BOOST_TEST(static_cast<bool>(sim));
-
-    const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
-        traits_type, mjolnir::UnderdampedLangevinIntegrator<traits_type>>*>(sim.get());
-    BOOST_TEST(static_cast<bool>(mdsim));
-
-    BOOST_TEST(mdsim->rng().seed() == 12345u);
-
-    BOOST_TEST(mdsim->forcefields().size() == 2u);
-
-    BOOST_TEST(mdsim->forcefield_index().at("open" ) == 0u);
-    BOOST_TEST(mdsim->forcefield_index().at("close") == 1u);
-
-    for(const auto& kv : mdsim->schedule())
     {
-        std::cout << '{' << kv.first << ':' << kv.second << '}' << std::endl;
+        const auto sim = mjolnir::read_simulator<traits_type, integrator_type>(root, simulator);
+        BOOST_TEST(static_cast<bool>(sim));
+
+        const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
+            traits_type, integrator_type>*>(sim.get());
+        BOOST_TEST(static_cast<bool>(mdsim));
+
+        BOOST_TEST(mdsim->rng().seed() == 12345u);
+
+        BOOST_TEST(mdsim->forcefields().size() == 2u);
+
+        BOOST_TEST(mdsim->forcefield_index().at("open" ) == 0u);
+        BOOST_TEST(mdsim->forcefield_index().at("close") == 1u);
+
+        for(const auto& kv : mdsim->schedule())
+        {
+            std::cout << '{' << kv.first << ':' << kv.second << '}' << std::endl;
+        }
+
+        BOOST_TEST(mdsim->schedule().size() == 3u);
+        BOOST_TEST(mdsim->schedule().at(0).first  == 10u);
+        BOOST_TEST(mdsim->schedule().at(0).second == "open");
+        BOOST_TEST(mdsim->schedule().at(1).first  == 20u);
+        BOOST_TEST(mdsim->schedule().at(1).second == "close");
+        BOOST_TEST(mdsim->schedule().at(2).first  == 30u);
+        BOOST_TEST(mdsim->schedule().at(2).second == "open");
+
+        BOOST_TEST(mdsim->system().size() == 2u);
+
+        mdsim->initialize();
+        for(std::size_t i=0; i<10; ++i)
+        {
+            // empty forcefield. no forces.
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
+            mdsim->step();
+        }
+        for(std::size_t i=0; i<10; ++i)
+        {
+            // harmonic potential is applied. non-zero force.
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) != 0.0);
+            mdsim->step();
+        }
+        for(std::size_t i=0; i<10; ++i)
+        {
+            // empty forcefield. no forces.
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
+            mdsim->step();
+        }
+        mdsim->finalize();
+    }
+    {
+        const auto sim = mjolnir::read_integrator_type<traits_type>(root, simulator);
+        BOOST_TEST(static_cast<bool>(sim));
+
+        const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
+            traits_type, integrator_type>*>(sim.get());
+        BOOST_TEST(static_cast<bool>(mdsim));
+
+        BOOST_TEST(mdsim->rng().seed() == 12345u);
+
+        BOOST_TEST(mdsim->forcefields().size() == 2u);
+
+        BOOST_TEST(mdsim->forcefield_index().at("open" ) == 0u);
+        BOOST_TEST(mdsim->forcefield_index().at("close") == 1u);
+
+        for(const auto& kv : mdsim->schedule())
+        {
+            std::cout << '{' << kv.first << ':' << kv.second << '}' << std::endl;
+        }
+
+        BOOST_TEST(mdsim->schedule().size() == 3u);
+        BOOST_TEST(mdsim->schedule().at(0).first  == 10u);
+        BOOST_TEST(mdsim->schedule().at(0).second == "open");
+        BOOST_TEST(mdsim->schedule().at(1).first  == 20u);
+        BOOST_TEST(mdsim->schedule().at(1).second == "close");
+        BOOST_TEST(mdsim->schedule().at(2).first  == 30u);
+        BOOST_TEST(mdsim->schedule().at(2).second == "open");
+
+        BOOST_TEST(mdsim->system().size() == 2u);
+
+        mdsim->initialize();
+        for(std::size_t i=0; i<10; ++i)
+        {
+            // empty forcefield. no forces.
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
+            mdsim->step();
+        }
+        for(std::size_t i=0; i<10; ++i)
+        {
+            // harmonic potential is applied. non-zero force.
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) != 0.0);
+            mdsim->step();
+        }
+        for(std::size_t i=0; i<10; ++i)
+        {
+            // empty forcefield. no forces.
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
+            mdsim->step();
+        }
+        mdsim->finalize();
     }
 
-    BOOST_TEST(mdsim->schedule().size() == 3u);
-    BOOST_TEST(mdsim->schedule().at(0).first  == 10u);
-    BOOST_TEST(mdsim->schedule().at(0).second == "open");
-    BOOST_TEST(mdsim->schedule().at(1).first  == 20u);
-    BOOST_TEST(mdsim->schedule().at(1).second == "close");
-    BOOST_TEST(mdsim->schedule().at(2).first  == 30u);
-    BOOST_TEST(mdsim->schedule().at(2).second == "open");
-
-    BOOST_TEST(mdsim->system().size() == 2u);
-
-    mdsim->initialize();
-    for(std::size_t i=0; i<10; ++i)
-    {
-        // empty forcefield. no forces.
-        BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
-        mdsim->step();
-    }
-    for(std::size_t i=0; i<10; ++i)
-    {
-        // harmonic potential is applied. non-zero force.
-        BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) != 0.0);
-        mdsim->step();
-    }
-    for(std::size_t i=0; i<10; ++i)
-    {
-        // empty forcefield. no forces.
-        BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
-        mdsim->step();
-    }
-    mdsim->finalize();
 }
 
 BOOST_AUTO_TEST_CASE(read_BAOAB_langevin_switching_forcefield_simulator)
@@ -219,6 +325,7 @@ BOOST_AUTO_TEST_CASE(read_BAOAB_langevin_switching_forcefield_simulator)
 
     using real_type   = double;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    using integrator_type = mjolnir::BAOABLangevinIntegrator<traits_type>;
     auto root = mjolnir::test::make_empty_input();
 
     using namespace toml::literals;
@@ -267,50 +374,101 @@ BOOST_AUTO_TEST_CASE(read_BAOAB_langevin_switching_forcefield_simulator)
     )"_toml;
     root.as_table()["systems"] = toml::array{system};
 
-    const auto sim = mjolnir::read_simulator<traits_type>(root, simulator);
-    BOOST_TEST(static_cast<bool>(sim));
-
-    const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
-        traits_type, mjolnir::BAOABLangevinIntegrator<traits_type>>*>(sim.get());
-    BOOST_TEST(static_cast<bool>(mdsim));
-
-    BOOST_TEST(mdsim->rng().seed() == 12345u);
-
-    BOOST_TEST(mdsim->forcefields().size() == 2u);
-
-    BOOST_TEST(mdsim->forcefield_index().at("open" ) == 0u);
-    BOOST_TEST(mdsim->forcefield_index().at("close") == 1u);
-
-    for(const auto& kv : mdsim->schedule())
     {
-        std::cout << '{' << kv.first << ':' << kv.second << '}' << std::endl;
+        const auto sim = mjolnir::read_simulator<traits_type, integrator_type>(root, simulator);
+        BOOST_TEST(static_cast<bool>(sim));
+
+        const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
+            traits_type, integrator_type>*>(sim.get());
+        BOOST_TEST(static_cast<bool>(mdsim));
+
+        BOOST_TEST(mdsim->rng().seed() == 12345u);
+
+        BOOST_TEST(mdsim->forcefields().size() == 2u);
+
+        BOOST_TEST(mdsim->forcefield_index().at("open" ) == 0u);
+        BOOST_TEST(mdsim->forcefield_index().at("close") == 1u);
+
+        for(const auto& kv : mdsim->schedule())
+        {
+            std::cout << '{' << kv.first << ':' << kv.second << '}' << std::endl;
+        }
+
+        BOOST_TEST(mdsim->schedule().size() == 3u);
+        BOOST_TEST(mdsim->schedule().at(0).first  == 10u);
+        BOOST_TEST(mdsim->schedule().at(0).second == "open");
+        BOOST_TEST(mdsim->schedule().at(1).first  == 20u);
+        BOOST_TEST(mdsim->schedule().at(1).second == "close");
+        BOOST_TEST(mdsim->schedule().at(2).first  == 30u);
+        BOOST_TEST(mdsim->schedule().at(2).second == "open");
+
+        BOOST_TEST(mdsim->system().size() == 2u);
+
+        mdsim->initialize();
+        for(std::size_t i=0; i<10; ++i)
+        {
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
+            mdsim->step();
+        }
+        for(std::size_t i=0; i<10; ++i)
+        {
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) != 0.0);
+            mdsim->step();
+        }
+        for(std::size_t i=0; i<10; ++i)
+        {
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
+            mdsim->step();
+        }
+        mdsim->finalize();
+    }
+    {
+        const auto sim = mjolnir::read_integrator_type<traits_type>(root, simulator);
+        BOOST_TEST(static_cast<bool>(sim));
+
+        const auto mdsim = dynamic_cast<mjolnir::SwitchingForceFieldSimulator<
+            traits_type, integrator_type>*>(sim.get());
+        BOOST_TEST(static_cast<bool>(mdsim));
+
+        BOOST_TEST(mdsim->rng().seed() == 12345u);
+
+        BOOST_TEST(mdsim->forcefields().size() == 2u);
+
+        BOOST_TEST(mdsim->forcefield_index().at("open" ) == 0u);
+        BOOST_TEST(mdsim->forcefield_index().at("close") == 1u);
+
+        for(const auto& kv : mdsim->schedule())
+        {
+            std::cout << '{' << kv.first << ':' << kv.second << '}' << std::endl;
+        }
+
+        BOOST_TEST(mdsim->schedule().size() == 3u);
+        BOOST_TEST(mdsim->schedule().at(0).first  == 10u);
+        BOOST_TEST(mdsim->schedule().at(0).second == "open");
+        BOOST_TEST(mdsim->schedule().at(1).first  == 20u);
+        BOOST_TEST(mdsim->schedule().at(1).second == "close");
+        BOOST_TEST(mdsim->schedule().at(2).first  == 30u);
+        BOOST_TEST(mdsim->schedule().at(2).second == "open");
+
+        BOOST_TEST(mdsim->system().size() == 2u);
+
+        mdsim->initialize();
+        for(std::size_t i=0; i<10; ++i)
+        {
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
+            mdsim->step();
+        }
+        for(std::size_t i=0; i<10; ++i)
+        {
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) != 0.0);
+            mdsim->step();
+        }
+        for(std::size_t i=0; i<10; ++i)
+        {
+            BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
+            mdsim->step();
+        }
+        mdsim->finalize();
     }
 
-    BOOST_TEST(mdsim->schedule().size() == 3u);
-    BOOST_TEST(mdsim->schedule().at(0).first  == 10u);
-    BOOST_TEST(mdsim->schedule().at(0).second == "open");
-    BOOST_TEST(mdsim->schedule().at(1).first  == 20u);
-    BOOST_TEST(mdsim->schedule().at(1).second == "close");
-    BOOST_TEST(mdsim->schedule().at(2).first  == 30u);
-    BOOST_TEST(mdsim->schedule().at(2).second == "open");
-
-    BOOST_TEST(mdsim->system().size() == 2u);
-
-    mdsim->initialize();
-    for(std::size_t i=0; i<10; ++i)
-    {
-        BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
-        mdsim->step();
-    }
-    for(std::size_t i=0; i<10; ++i)
-    {
-        BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) != 0.0);
-        mdsim->step();
-    }
-    for(std::size_t i=0; i<10; ++i)
-    {
-        BOOST_TEST(mjolnir::math::X(mdsim->system().force(0)) == 0.0);
-        mdsim->step();
-    }
-    mdsim->finalize();
 }
