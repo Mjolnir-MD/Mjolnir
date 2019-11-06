@@ -115,28 +115,24 @@ struct read_integrator_impl<BAOABLangevinIntegrator<traitsT>>
 {
     static BAOABLangevinIntegrator<traitsT> invoke(const toml::value& sim)
     {
-        return read_underdamped_langevin_integrator<traitsT>(sim);
-    }
-};
-
-// An empty struct that represents there is no integrator definition.
-struct NoIntegrator{};
-
-template<>
-struct read_integrator_impl<NoIntegrator>
-{
-    [[noreturn]]
-    static NoIntegrator invoke(const toml::value& sim)
-    {
-        throw_exception<std::runtime_error>(toml::format_error("[error] "
-            "mjolnir::read_integrator: No integrator is defined. ",
-            sim, "here", {}));
+        return read_BAOAB_langevin_integrator<traitsT>(sim);
     }
 };
 
 template<typename integratorT>
 integratorT read_integrator(const toml::value& sim)
 {
+    if(sim.as_table().count("integrator") == 0)
+    {
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_integrator: No integrator defined: ", sim, "here", {
+            "expected value is one of the following.",
+            "- \"VelocityVerlet\"     : simple and standard Velocity Verlet integrator.",
+            "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
+                                      " based on the Velocity Verlet",
+            "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator"
+            }));
+    }
     return read_integrator_impl<integratorT>::invoke(sim);
 }
 
