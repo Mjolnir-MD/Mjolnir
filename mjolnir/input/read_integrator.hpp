@@ -6,6 +6,7 @@
 #include <mjolnir/core/BAOABLangevinIntegrator.hpp>
 #include <mjolnir/input/utility.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <mjolnir/util/throw_exception.hpp>
 
 namespace mjolnir
 {
@@ -88,7 +89,6 @@ read_BAOAB_langevin_integrator(const toml::value& simulator)
 
 // A mapping object from type information (template parameter) to the actual
 // read_xxx_integrator function
-
 template<typename T>
 struct read_integrator_impl;
 
@@ -116,6 +116,21 @@ struct read_integrator_impl<BAOABLangevinIntegrator<traitsT>>
     static BAOABLangevinIntegrator<traitsT> invoke(const toml::value& sim)
     {
         return read_underdamped_langevin_integrator<traitsT>(sim);
+    }
+};
+
+// An empty struct that represents there is no integrator definition.
+struct NoIntegrator{};
+
+template<>
+struct read_integrator_impl<NoIntegrator>
+{
+    [[noreturn]]
+    static NoIntegrator invoke(const toml::value& sim)
+    {
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_integrator: No integrator is defined. ",
+            sim, "here", {}));
     }
 };
 
