@@ -12,42 +12,11 @@
 #include <mjolnir/input/read_forcefield.hpp>
 #include <mjolnir/input/read_integrator.hpp>
 #include <mjolnir/input/read_observer.hpp>
+#include <mjolnir/input/read_random_number_generator.hpp>
 #include <mjolnir/input/read_path.hpp>
 
 namespace mjolnir
 {
-
-template<typename traitsT>
-RandomNumberGenerator<traitsT> read_rng(const toml::value& simulator)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-
-    std::uint32_t seed = 0;
-    if(simulator.as_table().count("integrator") != 0)
-    {
-        const auto& integrator = toml::find(simulator, "integrator");
-        if(integrator.as_table().count("seed") != 0)
-        {
-            MJOLNIR_LOG_WARN("deprecated: put `seed` under [simulator] table.");
-            MJOLNIR_LOG_WARN("deprecated: ```toml");
-            MJOLNIR_LOG_WARN("deprecated: [simulator]");
-            MJOLNIR_LOG_WARN("deprecated: seed = 12345");
-            MJOLNIR_LOG_WARN("deprecated: ```");
-            seed = toml::find<std::uint32_t>(integrator, "seed");
-        }
-        else
-        {
-            seed = toml::find<std::uint32_t>(simulator, "seed");
-        }
-    }
-    else
-    {
-        seed = toml::find<std::uint32_t>(simulator, "seed");
-    }
-    MJOLNIR_LOG_NOTICE("seed is ", seed);
-    return RandomNumberGenerator<traitsT>(seed);
-}
 
 template<typename traitsT, typename integratorT>
 std::unique_ptr<SimulatorBase>
@@ -363,11 +332,6 @@ read_integrator_type(const toml::value& root, const toml::value& simulator)
 
 namespace mjolnir
 {
-extern template RandomNumberGenerator<SimulatorTraits<double, UnlimitedBoundary>       > read_rng(const toml::value&);
-extern template RandomNumberGenerator<SimulatorTraits<float,  UnlimitedBoundary>       > read_rng(const toml::value&);
-extern template RandomNumberGenerator<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_rng(const toml::value&);
-extern template RandomNumberGenerator<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_rng(const toml::value&);
-
 // ----------------------------------------------------------------------------
 // read_molecular_dynamics_simulator
 
