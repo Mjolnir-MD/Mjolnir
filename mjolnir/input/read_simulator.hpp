@@ -202,7 +202,7 @@ read_simulated_annealing_simulator(
             throw_exception<std::runtime_error>(toml::format_error("[error] "
                 "mjolnir::read_simulated_annealing_simulator: invalid integrator: ",
                 toml::find(integrator, "type"), "here", {
-                "Newtonian Integrator does not controls temperature."
+                "Newtonian Integrator does not controls temperature. "
                 "expected value is one of the following.",
                 "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
                                           " based on the Velocity Verlet",
