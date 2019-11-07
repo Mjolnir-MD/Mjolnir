@@ -18,11 +18,13 @@ total_step     = 50_000
 save_step      = 100
 each_step      = 100
 schedule.type  = "linear"
-schedule.begin = 300
-schedule.end   = 150
-[simulator.integrator]
-type = "UnderdampedLangevin"
-# ...
+schedule.begin = 300.0 # temperature in [K]
+schedule.end   = 150.0 # temperature in [K]
+
+integrator.type = "UnderdampedLangevin"
+integrator.parameters = [
+    # ...
+]
 ```
 
 ## 入力
