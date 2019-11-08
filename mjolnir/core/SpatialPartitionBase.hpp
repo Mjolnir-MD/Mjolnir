@@ -53,6 +53,8 @@ class SpatialPartitionBase
 
     virtual real_type cutoff() const noexcept = 0;
     virtual real_type margin() const noexcept = 0;
+
+    virtual SpatialPartitionBase* clone() const = 0;
 };
 
 template<typename traitsT, typename PotentialT>
@@ -80,12 +82,19 @@ class SpatialPartition
     explicit SpatialPartition(partition_type&& part)
         : partition_(std::move(part))
     {}
-
     ~SpatialPartition() = default;
-    SpatialPartition(SpatialPartition const&) = default;
-    SpatialPartition(SpatialPartition&&)      = default;
-    SpatialPartition& operator=(SpatialPartition const&) = default;
-    SpatialPartition& operator=(SpatialPartition&&)      = default;
+    SpatialPartition(SpatialPartition&&)            = default;
+    SpatialPartition& operator=(SpatialPartition&&) = default;
+
+    SpatialPartition(SpatialPartition const& other)
+        : partition_(other.base().clone()), neighbors_(other.neighbors())
+    {}
+    SpatialPartition& operator=(SpatialPartition const& other)
+    {
+        this->partition_.reset(other.base().clone());
+        this->neighbors_ = other.neighbors();
+        return *this;
+    }
 
     bool valid() const noexcept {return partition_->valid();}
 
@@ -115,6 +124,9 @@ class SpatialPartition
     // for testing
     partition_base_type const& base() const noexcept {return *partition_;}
     partition_base_type &      base()       noexcept {return *partition_;}
+
+    neighbor_list_type const& neighbors() const noexcept {return neighbors_;}
+    neighbor_list_type &      neighbors()       noexcept {return neighbors_;}
 
   private:
 

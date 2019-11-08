@@ -50,6 +50,8 @@ class NaivePairCalculation final : public SpatialPartitionBase<traitsT, Potentia
 
     real_type cutoff() const noexcept override {return std::numeric_limits<real_type>::infinity();}
     real_type margin() const noexcept override {return std::numeric_limits<real_type>::infinity();}
+
+    base_type* clone() const override {return new NaivePairCalculation();}
 };
 
 template<typename traitsT, typename potentialT>
