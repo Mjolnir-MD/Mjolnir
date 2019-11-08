@@ -155,6 +155,11 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         return;
     }
 
+    base_type* clone() const override
+    {
+        return new BondAngleInteraction(kind_, container_type(potentials));
+    }
+
   private:
     connection_kind_type kind_;
     container_type potentials;

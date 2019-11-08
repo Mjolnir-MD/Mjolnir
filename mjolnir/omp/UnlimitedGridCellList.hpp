@@ -250,6 +250,11 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
     real_type cutoff() const noexcept override {return this->cutoff_;}
     real_type margin() const noexcept override {return this->margin_;}
 
+    base_type* clone() const override
+    {
+        return new UnlimitedGridCellList(margin_);
+    }
+
   private:
 
     // calc cell index of the position
