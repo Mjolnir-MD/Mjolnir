@@ -113,7 +113,8 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
 
     base_type* clone() const override
     {
-        return new DirectionalContactInteraction(kind_, potentials_);
+        return new DirectionalContactInteraction(
+                kind_, container_type(potentials_));
     }
 
   private:

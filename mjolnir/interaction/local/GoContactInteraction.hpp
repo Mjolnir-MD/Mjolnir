@@ -161,7 +161,7 @@ class ContactInteraction<
 
     base_type* clone() const override
     {
-        return new ContactInteraction(kind_, potentials_);
+        return new ContactInteraction(kind_, container_type(potentials_));
     }
 
   private:

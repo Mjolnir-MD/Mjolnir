@@ -81,7 +81,7 @@ class DummyInteraction final : public LocalInteractionBase<traitsT>
 
     base_type* clone() const override
     {
-        return new DummyInteraction(kind_, potentials_);
+        return new DummyInteraction(kind_, container_type(potentials_));
     }
 
   private:

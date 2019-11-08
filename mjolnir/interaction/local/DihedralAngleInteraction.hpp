@@ -78,7 +78,7 @@ class DihedralAngleInteraction final : public LocalInteractionBase<traitsT>
 
     base_type* clone() const override
     {
-        return new DihedralAngleInteraction(kind_, potentials_);
+        return new DihedralAngleInteraction(kind_, container_type(potentials_));
     }
 
    private:

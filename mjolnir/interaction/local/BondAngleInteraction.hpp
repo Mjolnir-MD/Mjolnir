@@ -83,7 +83,7 @@ class BondAngleInteraction final : public LocalInteractionBase<traitsT>
 
     base_type* clone() const override
     {
-        return new BondAngleInteraction(kind_, potentials_);
+        return new BondAngleInteraction(kind_, container_type(potentials_));
     }
 
   private:

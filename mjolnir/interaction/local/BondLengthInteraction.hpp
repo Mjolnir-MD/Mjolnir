@@ -85,7 +85,7 @@ class BondLengthInteraction final : public LocalInteractionBase<traitsT>
 
     base_type* clone() const override
     {
-        return new BondLengthInteraction(kind_, potentials_);
+        return new BondLengthInteraction(kind_, container_type(potentials_));
     }
 
   private:
