@@ -131,6 +131,11 @@ class BondLengthInteraction<
     container_type const& potentials() const noexcept {return potentials_;}
     container_type&       potentials()       noexcept {return potentials_;}
 
+    base_type* clone() const override
+    {
+        return new BondLengthInteraction(kind_, potentials_);
+    }
+
   private:
     connection_kind_type kind_;
     container_type potentials_;

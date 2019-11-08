@@ -43,6 +43,10 @@ class BondAngleInteraction final : public LocalInteractionBase<traitsT>
                          container_type&& pot)
         : kind_(kind), potentials_(std::move(pot))
     {}
+    BondAngleInteraction(const BondAngleInteraction&) = default;
+    BondAngleInteraction(BondAngleInteraction&&)      = default;
+    BondAngleInteraction& operator=(const BondAngleInteraction&) = default;
+    BondAngleInteraction& operator=(BondAngleInteraction&&)      = default;
     ~BondAngleInteraction() override {}
 
     void      calc_force (system_type&)        const noexcept override;
@@ -76,6 +80,11 @@ class BondAngleInteraction final : public LocalInteractionBase<traitsT>
 
     container_type const& potentials() const noexcept {return potentials_;}
     container_type&       potentials()       noexcept {return potentials_;}
+
+    base_type* clone() const override
+    {
+        return new BondAngleInteraction(kind_, potentials_);
+    }
 
   private:
     connection_kind_type kind_;

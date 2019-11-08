@@ -63,6 +63,12 @@ class ExternalDistanceInteraction final
     std::string name() const override
     {return "ExternalDistance:"_s + potential_.name();}
 
+    base_type* clone() const override
+    {
+        return new ExternalDistanceInteraction(
+                shape_type(shape_), potential_type(potential_));
+    }
+
   private:
 
     shape_type     shape_;

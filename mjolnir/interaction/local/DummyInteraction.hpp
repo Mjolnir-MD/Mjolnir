@@ -79,6 +79,11 @@ class DummyInteraction final : public LocalInteractionBase<traitsT>
     container_type const& potentials() const noexcept {return potentials_;}
     container_type&       potentials()       noexcept {return potentials_;}
 
+    base_type* clone() const override
+    {
+        return new DummyInteraction(kind_, potentials_);
+    }
+
   private:
     connection_kind_type kind_;
     container_type       potentials_;
