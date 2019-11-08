@@ -28,10 +28,26 @@ class LocalForceField
 
     LocalForceField()  = default;
     ~LocalForceField() = default;
-    LocalForceField(LocalForceField const&) = delete;
-    LocalForceField(LocalForceField&&)      = default;
-    LocalForceField& operator=(LocalForceField const&) = delete;
-    LocalForceField& operator=(LocalForceField&&)      = default;
+    LocalForceField(LocalForceField&&)            = default;
+    LocalForceField& operator=(LocalForceField&&) = default;
+
+    LocalForceField(LocalForceField const& other)
+        : interactions_(other.size())
+    {
+        std::transform(other.begin(), other.end(), this->interactions_.begin(),
+            [](const interaction_ptr& interaction) -> interaction_ptr {
+                return interaction_ptr(interaction->clone());
+            });
+    }
+    LocalForceField& operator=(LocalForceField const& other)
+    {
+        this->interactions_.resize(other.size());
+        std::transform(other.begin(), other.end(), this->interactions_.begin(),
+            [](const interaction_ptr& interaction) -> interaction_ptr {
+                return interaction_ptr(interaction->clone());
+            });
+        return *this;
+    }
 
     void emplace(interaction_ptr&& interaction)
     {

@@ -27,10 +27,26 @@ class GlobalForceField
   public:
     GlobalForceField() = default;
     ~GlobalForceField() = default;
-    GlobalForceField(const GlobalForceField&) = delete;
-    GlobalForceField(GlobalForceField&&)      = default;
-    GlobalForceField& operator=(const GlobalForceField&) = delete;
-    GlobalForceField& operator=(GlobalForceField&&)      = default;
+    GlobalForceField(GlobalForceField&&)            = default;
+    GlobalForceField& operator=(GlobalForceField&&) = default;
+
+    GlobalForceField(const GlobalForceField& other)
+        : interactions_(other.size())
+    {
+        std::transform(other.begin(), other.end(), this->interactions_.begin(),
+            [](const interaction_ptr& interaction) -> interaction_ptr {
+                return interaction_ptr(interaction->clone());
+            });
+    }
+    GlobalForceField& operator=(const GlobalForceField& other)
+    {
+        this->interactions_.resize(other.size());
+        std::transform(other.begin(), other.end(), this->interactions_.begin(),
+            [](const interaction_ptr& interaction) -> interaction_ptr {
+                return interaction_ptr(interaction->clone());
+            });
+        return *this;
+    }
 
     void emplace(interaction_ptr&& inter)
     {
