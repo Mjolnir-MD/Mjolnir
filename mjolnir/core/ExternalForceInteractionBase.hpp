@@ -26,6 +26,8 @@ class ExternalForceInteractionBase
     virtual void      calc_force (system_type&)       const noexcept = 0;
     virtual real_type calc_energy(const system_type&) const noexcept = 0;
 
+    virtual ExternalInteractionBase* clone() const noexcept = 0;
+
     virtual std::string name() const = 0;
 };
 
