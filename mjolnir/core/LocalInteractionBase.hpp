@@ -30,7 +30,7 @@ class LocalInteractionBase
     virtual void      calc_force (system_type&)       const noexcept = 0;
     virtual real_type calc_energy(const system_type&) const noexcept = 0;
 
-    virtual LocalInteractionBase* clone() const noexcept = 0;
+    virtual LocalInteractionBase* clone() const = 0;
 
     virtual std::string name() const = 0;
     virtual void write_topology(topology_type&) const = 0;
