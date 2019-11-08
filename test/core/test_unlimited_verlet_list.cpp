@@ -361,3 +361,19 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_partial_2)
     }
 }
 
+
+BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_clone)
+{
+    mjolnir::LoggerManager::set_default_logger("test_unlimited_verlet_list.log");
+
+    using traits_type     = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type       = typename traits_type::real_type;
+    using potential_type  = dummy_potential<real_type>;
+
+    mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
+            mjolnir::VerletList<traits_type, potential_type>>(10.0));
+
+    mjolnir::SpatialPartition<traits_type, potential_type> vlist2(vlist);
+
+    BOOST_TEST(vlist.margin() == vlist2.margin());
+}
