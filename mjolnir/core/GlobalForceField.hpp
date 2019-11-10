@@ -40,11 +40,11 @@ class GlobalForceField
     }
     GlobalForceField& operator=(const GlobalForceField& other)
     {
-        this->interactions_.resize(other.size());
-        std::transform(other.begin(), other.end(), this->interactions_.begin(),
-            [](const interaction_ptr& interaction) -> interaction_ptr {
-                return interaction_ptr(interaction->clone());
-            });
+        this->interactions_.reserve(other.size());
+        for(const auto& interaction : other)
+        {
+            this->emplace(interaction_ptr(interaction->clone()));
+        }
         return *this;
     }
 
