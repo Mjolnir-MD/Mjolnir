@@ -111,6 +111,12 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
     container_type const& potentials() const noexcept {return potentials_;}
     container_type&       potentials()       noexcept {return potentials_;}
 
+    base_type* clone() const override
+    {
+        return new DirectionalContactInteraction(
+                kind_, container_type(potentials_));
+    }
+
   private:
 
     void make_list(const system_type& sys)

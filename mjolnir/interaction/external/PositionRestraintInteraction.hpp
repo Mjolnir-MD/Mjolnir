@@ -74,6 +74,12 @@ class PositionRestraintInteraction final
     // for tests
     potential_container_type const& potentials() const noexcept {return potentials_;}
 
+    base_type* clone() const override
+    {
+        return new PositionRestraintInteraction(
+                potential_container_type(potentials_));
+    }
+
   private:
 
     potential_container_type potentials_;

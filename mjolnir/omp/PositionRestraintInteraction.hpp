@@ -110,6 +110,14 @@ class PositionRestraintInteraction<
     std::string name() const override
     {return "PositionRestraint:"_s + potential_type::name();}
 
+
+    base_type* clone() const override
+    {
+        return new PositionRestraintInteraction(
+                potential_container_type(potentials_));
+    }
+
+
   private:
 
     potential_container_type potentials_;
