@@ -284,7 +284,7 @@ void PeriodicGridCellList<traitsT, potentialT>::initialize(
 
     const int dimx = dim_x_;
     const int dimy = dim_y_;
-    const int dimz = dim_x_;
+    const int dimz = dim_z_;
 
     for(int x = 0; x < dimx; ++x)
     {
