@@ -99,7 +99,7 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 
         const int dimx = dim_x_;
         const int dimy = dim_y_;
-        const int dimz = dim_x_;
+        const int dimz = dim_z_;
 
 #pragma omp parallel for
         for(int x = 0; x < dimx; ++x)
