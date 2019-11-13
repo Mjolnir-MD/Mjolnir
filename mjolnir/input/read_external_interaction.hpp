@@ -199,7 +199,7 @@ read_external_position_restraint_interaction(const toml::value& external)
             "mjolnir::read_external_position_restraint_interaction: invalid potential",
             toml::find(external, "potential"), "here", {
             "expected value is one of the following.",
-            "- \"Harmonic\": very famous `k(x-x0)^2` potential",
+            "- \"Harmonic\": very famous `k(x-x0)^2` potential"
             }));
     }
 }

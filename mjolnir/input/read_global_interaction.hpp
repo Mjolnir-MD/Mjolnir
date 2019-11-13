@@ -522,7 +522,7 @@ read_global_interaction(const toml::value& global)
             toml::find<toml::value>(global, "interaction"), "here", {
             "expected value is one of the following.",
             "- \"Pair\"         : well-known pair interaction depends only on the distance",
-            "- \"3SPN2BaseBase\": Base pair and cross stacking interaction for 3SPN2 DNA model",
+            "- \"3SPN2BaseBase\": Base pair and cross stacking interaction for 3SPN2 DNA model"
             }));
     }
 }
