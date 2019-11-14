@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <limits>
 #include <cmath>
+#include <map>
 
 namespace mjolnir
 {
@@ -26,16 +27,35 @@ class FlexibleLocalDihedralPotential
             const std::array<real_type, 7>& term) noexcept
         : k_(k), term_(term)
     {
-        real_type phi = -math::constants<real_type>::pi();
-        this->min_energy = std::numeric_limits<real_type>::max();
-        while(phi < math::constants<real_type>::pi())
+        // min_enegry correction term depends only on `term`. If the parameters
+        // are completely the same, the minimum point should be the same.
+        if(cache_min_energies_.count(term) == 0)
         {
-            this->min_energy = std::min(this->min_energy,
-                    term_[1] * std::cos(  phi) + term_[2] * std::sin(  phi) +
-                    term_[3] * std::cos(2*phi) + term_[4] * std::sin(2*phi) +
-                    term_[5] * std::cos(3*phi) + term_[6] * std::sin(3*phi) +
-                    term_[0]);
-            phi += 1e-4;
+            real_type phi = -math::constants<real_type>::pi();
+            this->min_energy = std::numeric_limits<real_type>::max();
+            while(phi < math::constants<real_type>::pi())
+            {
+                const real_type sin1   = std::sin(phi);
+                const real_type cos1   = std::cos(phi);
+                const real_type sin_sq = sin1 * sin1;
+                const real_type cos_sq = cos1 * cos1;
+                const real_type sin2   = 2 * sin1 * cos1;
+                const real_type cos2   = cos_sq - sin_sq;
+                const real_type sin3   = sin1 * (3 - 4 * sin_sq);
+                const real_type cos3   = cos1 * (4 * cos_sq - 3);
+
+                this->min_energy = std::min(this->min_energy,
+                        term_[1] * cos1 + term_[2] * sin1 +
+                        term_[3] * cos2 + term_[4] * sin2 +
+                        term_[5] * cos3 + term_[6] * sin3 +
+                        term_[0]);
+                phi += 1e-4;
+            }
+            cache_min_energies_[term] = this->min_energy;
+        }
+        else
+        {
+            this->min_energy = cache_min_energies_.at(term);
         }
     }
     ~FlexibleLocalDihedralPotential() = default;
@@ -85,10 +105,17 @@ class FlexibleLocalDihedralPotential
     {return std::numeric_limits<real_type>::infinity();}
 
   private:
+
+    static std::map<std::array<real_type, 7>, real_type> cache_min_energies_;
+
     real_type min_energy;
     real_type k_;
     std::array<real_type, 7> term_;
 };
+
+template<typename realT>
+std::map<std::array<realT, 7>, realT>
+FlexibleLocalDihedralPotential<realT>::cache_min_energies_ = {};
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template class FlexibleLocalDihedralPotential<double>;
