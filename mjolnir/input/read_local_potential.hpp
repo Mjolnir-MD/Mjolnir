@@ -15,6 +15,7 @@
 #include <mjolnir/potential/local/CosinePotential.hpp>
 #include <mjolnir/potential/local/SumLocalPotential.hpp>
 #include <mjolnir/potential/local/UniformPotential.hpp>
+#include <mjolnir/potential/local/WormLikeChainPotential.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BondPotential.hpp>
 
 #include <mjolnir/core/Topology.hpp>
@@ -225,6 +226,21 @@ read_uniform_potential(const toml::value& param, const toml::value& env)
 }
 
 template<typename realT>
+WormLikeChainPotential<realT>
+read_worm_like_chain_potential(const toml::value& param, const toml::value& env)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    using real_type = realT;
+    check_keys_available(param, {"indices", "p", "lc"});
+
+    auto p  = find_parameter<real_type>(param, env, "p");
+    auto lc = find_parameter<real_type>(param, env, "lc");
+
+    MJOLNIR_LOG_INFO("UniformPotential = {p = ", p, ", lc = ", lc,"}");
+    return WormLikeChainPotential<realT>(p, lc);
+}
+
+template<typename realT>
 ThreeSPN2BondPotential<realT>
 read_3spn2_bond_potential(const toml::value& param, const toml::value& env)
 {
@@ -349,6 +365,15 @@ struct read_local_potential_impl<UniformPotential<realT>>
     invoke(const toml::value& param, const toml::value& env)
     {
         return read_uniform_potential<realT>(param, env);
+    }
+};
+template<typename realT>
+struct read_local_potential_impl<WormLikeChainPotential<realT>>
+{
+    static WormLikeChainPotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
+    {
+        return read_worm_like_chain_potential<realT>(param, env);
     }
 };
 template<typename realT>
