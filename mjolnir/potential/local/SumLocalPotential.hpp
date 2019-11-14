@@ -41,6 +41,14 @@ class SumLocalPotential
     }
 
     template<typename traitsT>
+    void initialize(const System<traitsT>& sys) const noexcept
+    {
+        potential1_.initialize(sys);
+        potential2_.initialize(sys);
+        return;
+    }
+
+    template<typename traitsT>
     void update(const System<traitsT>& sys) const noexcept
     {
         potential1_.update(sys);
