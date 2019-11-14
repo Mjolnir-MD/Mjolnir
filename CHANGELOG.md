@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.7.1
+
+### Fixed
+
+- fails to run simulation when non-uniform boundary is applied
+- add missing line feed in the error message about dihedral potentials
+- fix typo in the name of SI unit (@yutakashi)
+
+### Changed
+
+- speedup initialization of FlexibleLocalDihedral potential
+
 ## 1.7.0
 
 ### Added
