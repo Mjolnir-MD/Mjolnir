@@ -160,8 +160,8 @@ template<typename realT> realT constants<realT>::m_to_length_ = 1.0;
 template<typename realT> realT constants<realT>::length_to_m_ = 1.0;
 template<typename realT> realT constants<realT>::L_to_volume_ = 1e-3;
 template<typename realT> realT constants<realT>::volume_to_L_ = 1e+3;
-template<typename realT> std::string constants<realT>::length_unit_ = "J";
-template<typename realT> std::string constants<realT>::energy_unit_ = "m";
+template<typename realT> std::string constants<realT>::length_unit_ = "m";
+template<typename realT> std::string constants<realT>::energy_unit_ = "J";
 
 } // physics
 
