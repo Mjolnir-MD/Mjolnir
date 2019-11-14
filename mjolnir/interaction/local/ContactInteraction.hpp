@@ -75,6 +75,10 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
                 return lhs.second.cutoff() < rhs.second.cutoff();
             })->second.cutoff();
         this->make_list(sys);
+        for(auto& potential : this->potentials_)
+        {
+            potential.second.initialize(sys);
+        }
         return;
     }
 
