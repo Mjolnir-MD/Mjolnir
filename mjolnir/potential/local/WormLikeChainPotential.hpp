@@ -99,6 +99,11 @@ class WormLikeChainPotential
     real_type temperature_; // [K]
     real_type kBT_4p_; // kBT / 4p
 };
-} // mjolnir
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class WormLikeChainPotential<double>;
+extern template class WormLikeChainPotential<float>;
+#endif// MJOLNIR_SEPARATE_BUILD
+
+} // mjolnir
 # endif /* MJOLNIR_POTENTIAL_LOCAL_WORM_LIKE_CHAIN_POTENTIAL_HPP */
