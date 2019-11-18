@@ -8,6 +8,7 @@
 - [Harmonic](HarmonicPotential.md)
 - [Gaussian](GaussianPotential.md)
 - [GoContact](GoContactPotential.md)
+- [WormLikeChain](WormLikeChainPotential.md)
 
 ## 例
 
@@ -32,6 +33,7 @@ parameters  = [
   - [`"Harmonic"`](HarmonicPotential.md): 調和振動子ポテンシャルを用います。
   - [`"Gaussian"`](GaussianPotential.md): ガウシアン型のポテンシャルを用います。
   - [`"GoContact"`](GoContactPotential.md): L-J(10,12)型のポテンシャルを用います。
+  - [`"WormLikeChain"`](WormLikeChainPotential.md): Worm-like chainモデルを元にしたポテンシャルを用います。
 - `topology`: 文字列型
   - [`"Topology"`](Topology.md)に設定する名前を指定します。
 - `parameters`: テーブルの配列型
