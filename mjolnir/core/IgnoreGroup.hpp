@@ -39,6 +39,7 @@ class IgnoreGroup
             }
         }
 
+        // check whether the opposite direction is constructed
         for(const auto& kv : this->ignores_)
         {
             for(const auto& ignored : kv.second)
@@ -49,6 +50,18 @@ class IgnoreGroup
                                  this->ignores_.at(ignored).end());
             }
         }
+
+        // list all the groups defined (for error-check)
+        for(const auto& kv : this->ignores_)
+        {
+            this->groups_.push_back(kv.first);
+            for(const auto& v : kv.second)
+            {
+                this->groups_.push_back(v);
+            }
+        }
+        std::sort(groups_.begin(), groups_.end());
+        groups_.erase(std::unique(groups_.begin(), groups_.end()), groups_.end());
     }
 
     ~IgnoreGroup() = default;
@@ -78,9 +91,13 @@ class IgnoreGroup
         return this->ignores_;
     }
 
+    // returns all the groups specified
+    std::vector<GroupID> const& all_groups() const noexcept {return groups_;}
+
   private:
 
     std::map<GroupID, std::vector<GroupID>> ignores_;
+    std::vector<GroupID> groups_;
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD
