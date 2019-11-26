@@ -91,21 +91,41 @@ class ExclusionList
         const auto& topol = sys.topology();
         const std::size_t N = sys.size();
 
-        // count groups and assign indices
-        this->grp_list_.clear();
-        for(std::size_t i=0; i<N; ++i)
         {
-            if(std::find(this->grp_list_.begin(), this->grp_list_.end(),
-                         topol.group_of(i)) == this->grp_list_.end())
+            // all groups defined in `ignore.group` table. check mistakes
+            auto groups_defined = this->ignore_group_.all_groups();
+
+            // count groups and assign indices
+            this->grp_list_.clear();
+            for(std::size_t i=0; i<N; ++i)
             {
-                // if not found, push it to the list
-                this->grp_list_.push_back(topol.group_of(i));
-                MJOLNIR_LOG_INFO("group ", topol.group_of(i), " found. ",
-                                 this->grp_list_.size(), "-th group is ",
-                                 topol.group_of(i));
+                if(std::find(this->grp_list_.begin(), this->grp_list_.end(),
+                             topol.group_of(i)) == this->grp_list_.end())
+                {
+                    // if not found, push it to the list
+                    this->grp_list_.push_back(topol.group_of(i));
+                    MJOLNIR_LOG_INFO("group ", topol.group_of(i), " found. ",
+                                     this->grp_list_.size(), "-th group is ",
+                                     topol.group_of(i));
+                }
+
+                const auto found = std::find(groups_defined.begin(),
+                        groups_defined.end(), topol.group_of(i));
+                if(found != groups_defined.end())
+                {
+                    groups_defined.erase(found);
+                }
+            }
+            MJOLNIR_LOG_INFO("all groups are found {", this->grp_list_, "}.");
+            if(!groups_defined.empty())
+            {
+                MJOLNIR_LOG_WARN("unknown group is specified in `ignore.group`");
+                for(const auto& g : groups_defined)
+                {
+                    MJOLNIR_LOG_WARN("- ", g);
+                }
             }
         }
-        MJOLNIR_LOG_INFO("all groups are found {", this->grp_list_, "}.");
 
         // Here, the list of all groups is constructed.
         // Next, construct grp_ids_. assign corresponding group-ids
