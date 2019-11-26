@@ -223,7 +223,7 @@ read_switching_forcefield_simulator(
             std::move(obs), std::move(rng), std::move(ffidx), std::move(sch));
 }
 
-template<typename traitsT, typename integratorT>
+template<typename traitsT>
 std::unique_ptr<SimulatorBase>
 read_energy_calculation_simulator(
         const toml::value& root, const toml::value& simulator)
@@ -240,7 +240,7 @@ read_energy_calculation_simulator(
     // construct observers manually ...
     //
     // This is the only simulator that does not need to output a trajectory,
-    // therefore `XXXObserver`s are not needed.
+    // therefore `XXXObserver`s are not needed except EnergyObserver.
 
     const auto& output = toml::find(root, "files", "output");
     const auto progress_bar_enabled = toml::find_or<bool>(output, "progress_bar", true);
@@ -264,6 +264,10 @@ read_energy_calculation_simulator(
     {
         loader = make_unique<XYZLoader<traitsT>>(input_file);
     }
+    else if(input_file.substr(input_file.size()-4, 4) == ".dcd")
+    {
+        loader = make_unique<DCDLoader<traitsT>>(input_file);
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -277,6 +281,9 @@ read_energy_calculation_simulator(
 
     // ------------------------------------------------------------------------
     // read [[systems]] manualy ...
+    //
+    // XXX We don't need the initial configuration, but still, the name and the
+    //     group names are required to calculate energy correctly.
     //
     // This is the only simulator that loads the current state from a different
     // file. So here `positions` are not required.
@@ -309,6 +316,7 @@ read_energy_calculation_simulator(
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         const auto& p = particles.at(i);
+        // position(pos), velocity(vel) are ignored here
         check_keys_available(p, {"m"_s, "mass"_s, "name"_s, "group"_s});
 
         if(p.as_table().count("m") == 1)
@@ -341,7 +349,7 @@ read_energy_calculation_simulator(
 }
 
 
-template<typename traitsT>
+template<typename traitsT, typename integratorT>
 std::unique_ptr<SimulatorBase>
 read_simulator(const toml::value& root, const toml::value& simulator)
 {
@@ -374,6 +382,8 @@ read_simulator(const toml::value& root, const toml::value& simulator)
     else if(type == "EnergyCalculation")
     {
         MJOLNIR_LOG_NOTICE("Simulator type is EnergyCalculation.");
+
+        // It does not do "time integration", so integratorT is not needed.
         return read_energy_calculation_simulator<traitsT>(root, simulator);
     }
     else
@@ -385,7 +395,8 @@ read_simulator(const toml::value& root, const toml::value& simulator)
             "- \"MolecularDynamcis\"  : standard MD simulation",
             "- \"SteepestDescent\"    : energy minimization by gradient method",
             "- \"SimulatedAnnealing\" : energy minimization by Annealing",
-            "- \"SwitchingForceField\": switch forcefield while running simulation"
+            "- \"SwitchingForceField\": switch forcefield while running simulation",
+            "- \"EnergyCalculation\"  : calculate energy based on a trajectory file"
             }));
     }
 }
