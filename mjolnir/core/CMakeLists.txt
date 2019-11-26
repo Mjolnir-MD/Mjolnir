@@ -24,6 +24,8 @@ set(mjolnir_core_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/ObserverContainer.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/LoaderBase.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/XYZLoader.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/DCDLoader.cpp"
+#     "${CMAKE_CURRENT_SOURCE_DIR}/TRRLoader.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ForceField.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/LocalForceField.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/GlobalForceField.cpp"

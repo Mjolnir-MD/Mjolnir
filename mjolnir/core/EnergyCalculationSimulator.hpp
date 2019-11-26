@@ -6,6 +6,8 @@
 #include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/core/LoaderBase.hpp>
 #include <mjolnir/core/XYZLoader.hpp>
+#include <mjolnir/core/DCDLoader.hpp>
+// #include <mjolnir/core/TRRLoader.hpp>
 
 namespace mjolnir
 {
