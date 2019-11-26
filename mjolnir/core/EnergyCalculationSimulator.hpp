@@ -79,7 +79,11 @@ inline bool EnergyCalculationSimulator<traitsT>::step()
     // this calculates the energy.
     obs_.output(this->step_count_, 0.0, this->sys_, this->ff_);
 
-    ld_->load_next(sys_);
+    if(!ld_->load_next(sys_))
+    {
+        // if loader returns false, it means it fails to read the next traj.
+        return false;
+    }
 
     ff_.update(sys_); // force update the neighboring lists
 
@@ -91,11 +95,7 @@ inline bool EnergyCalculationSimulator<traitsT>::step()
 template<typename traitsT>
 inline void EnergyCalculationSimulator<traitsT>::run()
 {
-    for(std::size_t i=0; i<total_step_; ++i)
-    {
-        this->step();
-    }
-    assert(this->ld_->is_eof());
+    while(this->step()) {};
     return;
 }
 
