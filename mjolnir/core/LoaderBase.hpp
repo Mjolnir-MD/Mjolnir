@@ -42,13 +42,13 @@ namespace detail
 {
 // it is a helper function to read value as an array of bytes
 template<typename T>
-T read_bytes_as(std::ostream& os)
+T read_bytes_as(std::istream& os)
 {
     T v;
     os.read(reinterpret_cast<char*>(std::addressof(v)), sizeof(T));
     return v;
 }
-inline void skip_bytes(std::ostream& os, std::size_t N)
+inline void skip_bytes(std::istream& os, std::size_t N)
 {
     os.ignore(N);
     return;
