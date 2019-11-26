@@ -116,6 +116,8 @@ if(SEPARATE_BUILD)
 #     add_definitions(-flto)
 endif()
 
+option(BUILD_UNIT_TEST "build unit tests" ON)
+
 # -----------------------------------------------------------------------------
 
 execute_process(COMMAND git submodule update --init --recursive
@@ -132,6 +134,7 @@ else()
         include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_69_0)
     else()
         message(STATUS "Boost library not found. Donwloading...")
+        message(STATUS "It can take minutes. hang tight!")
 
         file(DOWNLOAD https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.bz2
             ${PROJECT_SOURCE_DIR}/extlib/boost_1_69_0.tar.bz2
@@ -163,4 +166,7 @@ if(SEPARATE_BUILD)
 endif()
 
 add_subdirectory(src)
-add_subdirectory(test)
+
+if(BUILD_UNIT_TEST OR BUILD_INTEGRATION_TEST)
+    add_subdirectory(test)
+endif()

@@ -6,6 +6,7 @@
 #include <mjolnir/core/BAOABLangevinIntegrator.hpp>
 #include <mjolnir/input/utility.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <mjolnir/util/throw_exception.hpp>
 
 namespace mjolnir
 {
@@ -84,6 +85,55 @@ read_BAOAB_langevin_integrator(const toml::value& simulator)
         MJOLNIR_LOG_INFO("idx = ", idx, ", gamma = ", gm);
     }
     return BAOABLangevinIntegrator<traitsT>(delta_t, std::move(gamma));
+}
+
+// A mapping object from type information (template parameter) to the actual
+// read_xxx_integrator function
+template<typename T>
+struct read_integrator_impl;
+
+template<typename traitsT>
+struct read_integrator_impl<VelocityVerletIntegrator<traitsT>>
+{
+    static VelocityVerletIntegrator<traitsT> invoke(const toml::value& sim)
+    {
+        return read_velocity_verlet_integrator<traitsT>(sim);
+    }
+};
+
+template<typename traitsT>
+struct read_integrator_impl<UnderdampedLangevinIntegrator<traitsT>>
+{
+    static UnderdampedLangevinIntegrator<traitsT> invoke(const toml::value& sim)
+    {
+        return read_underdamped_langevin_integrator<traitsT>(sim);
+    }
+};
+
+template<typename traitsT>
+struct read_integrator_impl<BAOABLangevinIntegrator<traitsT>>
+{
+    static BAOABLangevinIntegrator<traitsT> invoke(const toml::value& sim)
+    {
+        return read_BAOAB_langevin_integrator<traitsT>(sim);
+    }
+};
+
+template<typename integratorT>
+integratorT read_integrator(const toml::value& sim)
+{
+    if(sim.as_table().count("integrator") == 0)
+    {
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_integrator: No integrator defined: ", sim, "here", {
+            "expected value is one of the following.",
+            "- \"VelocityVerlet\"     : simple and standard Velocity Verlet integrator.",
+            "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
+                                      " based on the Velocity Verlet",
+            "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator"
+            }));
+    }
+    return read_integrator_impl<integratorT>::invoke(sim);
 }
 
 #ifdef MJOLNIR_SEPARATE_BUILD

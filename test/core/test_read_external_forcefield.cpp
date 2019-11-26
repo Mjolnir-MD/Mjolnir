@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(read_external_forcefield)
 
         const auto derived_ptr  = dynamic_cast<mjolnir::ExternalDistanceInteraction<
             traits_type, mjolnir::ExcludedVolumeWallPotential<real_type>,
-            mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveXDirection>
+            mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveXDirection<traits_type>>
             >*>(interaction_ptr.get());
         BOOST_TEST(static_cast<bool>(derived_ptr));
     }
@@ -115,11 +115,11 @@ BOOST_AUTO_TEST_CASE(read_several_external_forcefield)
 
         using exv_interaction = mjolnir::ExternalDistanceInteraction<
             traits_type, mjolnir::ExcludedVolumeWallPotential<real_type>,
-            mjolnir::AxisAlignedPlane<traits_type, mjolnir::NegativeXDirection>
+            mjolnir::AxisAlignedPlane<traits_type, mjolnir::NegativeXDirection<traits_type>>
             >;
         using lj_interaction = mjolnir::ExternalDistanceInteraction<
             traits_type, mjolnir::LennardJonesWallPotential<real_type>,
-            mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveXDirection>
+            mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveXDirection<traits_type>>
             >;
 
         std::map<std::type_index, bool> found;

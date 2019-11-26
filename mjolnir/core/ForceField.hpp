@@ -31,9 +31,9 @@ class ForceField
 
     ForceField()  = default;
     ~ForceField() = default;
-    ForceField(const ForceField&) = delete;
+    ForceField(const ForceField&) = default;
     ForceField(ForceField&&)      = default;
-    ForceField& operator=(const ForceField&) = delete;
+    ForceField& operator=(const ForceField&) = default;
     ForceField& operator=(ForceField&&)      = default;
 
     // this modify system::topology by using local interaction info.

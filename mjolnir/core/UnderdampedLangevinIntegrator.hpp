@@ -5,6 +5,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/core/Unit.hpp>
+#include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
 {
@@ -97,6 +98,9 @@ template<typename traitsT>
 void UnderdampedLangevinIntegrator<traitsT>::initialize(
         system_type& system, forcefield_type& ff, rng_type& rng)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+
     // initialize temperature and noise intensity
     this->update(system);
     for(std::size_t i=0; i<system.size(); ++i)

@@ -177,6 +177,11 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
         return;
     }
 
+    base_type* clone() const override
+    {
+        return new DihedralAngleInteraction(kind_, container_type(potentials));
+    }
+
    private:
     connection_kind_type kind_;
     container_type potentials;

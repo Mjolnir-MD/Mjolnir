@@ -3,6 +3,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
+#include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
 {
@@ -48,6 +49,8 @@ template<typename traitsT>
 void VelocityVerletIntegrator<traitsT>::initialize(
         system_type& system, forcefield_type& ff, rng_type&)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
     this->update(system);
 
     for(std::size_t i=0; i<system.size(); ++i)

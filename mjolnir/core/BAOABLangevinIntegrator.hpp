@@ -5,6 +5,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/core/Unit.hpp>
+#include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
 {
@@ -28,11 +29,8 @@ class BAOABLangevinIntegrator
 
     BAOABLangevinIntegrator(const real_type dt,
             std::vector<real_type>&& gamma)
-        : dt_(dt), halfdt_(dt / 2),
-          gammas_(std::move(gamma)),
-          exp_gamma_dt_(gammas_.size()),
-          noise_coeff_ (gammas_.size()),
-          acceleration_(gammas_.size())
+        : dt_(dt), halfdt_(dt / 2), gammas_(std::move(gamma)),
+          exp_gamma_dt_(gammas_.size()), noise_coeff_ (gammas_.size())
     {}
     ~BAOABLangevinIntegrator() = default;
 
@@ -86,10 +84,9 @@ class BAOABLangevinIntegrator
     real_type halfdt_;
     real_type temperature_;
 
-    std::vector<real_type>       gammas_;
-    std::vector<real_type>       exp_gamma_dt_;
-    std::vector<real_type>       noise_coeff_;
-    std::vector<coordinate_type> acceleration_;
+    std::vector<real_type> gammas_;
+    std::vector<real_type> exp_gamma_dt_;
+    std::vector<real_type> noise_coeff_;
 
 #ifdef MJOLNIR_WITH_OPENMP
     // OpenMP implementation uses its own specialization to run it in parallel.
@@ -103,6 +100,9 @@ template<typename traitsT>
 void BAOABLangevinIntegrator<traitsT>::initialize(
         system_type& system, forcefield_type& ff, rng_type&)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+
     // calculate parameters for each particles
     this->update(system);
 

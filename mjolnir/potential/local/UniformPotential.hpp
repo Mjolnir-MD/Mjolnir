@@ -7,7 +7,7 @@ namespace mjolnir
 template<typename T> class System;
 
 // Uniform potential is for test potentila.
-// V(r) = 1
+// V(r) = k
 // dV/dr = 0
 template<typename realT>
 class UniformPotential

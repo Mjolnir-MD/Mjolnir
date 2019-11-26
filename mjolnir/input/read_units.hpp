@@ -128,7 +128,7 @@ read_units(const toml::value& root, const toml::value& simulator)
     MJOLNIR_LOG_INFO(u8"phys::ε0 = ", phys_type::eps0(),
                      " [e^2 / (", energy, '*', length, ")]");
 
-    return read_simulator<traitsT>(root, simulator);
+    return read_integrator_type<traitsT>(root, simulator);
 }
 
 #ifdef MJOLNIR_SEPARATE_BUILD

@@ -14,6 +14,7 @@ set(TEST_NAMES
     test_omp_global_excluded_volume_interaction
     test_omp_global_debye_huckel_interaction
     test_omp_global_pdns_interaction
+    test_omp_global_pwmcos_interaction
 
     test_omp_external_distance_interaction
     test_omp_position_restraint_interaction

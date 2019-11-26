@@ -317,8 +317,8 @@ read_bond_angle_interaction(const std::string& kind, const toml::value& local)
             toml::find<toml::value>(local, "potential"), "here", {
             "expected value is one of the following.",
             "- \"Harmonic\"          : well-known harmonic potential",
-            "- \"Gaussian\"          : well-known gaussian potential"
-            "- \"FlexibleLocalAngle\": table-based potential for C-alpha protein model",
+            "- \"Gaussian\"          : well-known gaussian potential",
+            "- \"FlexibleLocalAngle\": table-based potential for C-alpha protein model"
             }));
     }
 }
@@ -395,9 +395,9 @@ read_dihedral_angle_interaction(const std::string& kind, const toml::value& loca
             "mjolnir::read_dihedral_angle_interaction: invalid potential",
             toml::find<toml::value>(local, "potential"), "here", {
             "expected value is one of the following.",
-            "- \"Gaussian\"             : well-known gaussian potential"
-            "- \"ClementiDihedral\"     : potential used in the off-lattice Go protein model"
-            "- \"FlexibleLocalDihedral\": table-based potential for C-alpha protein model",
+            "- \"Gaussian\"             : well-known gaussian potential",
+            "- \"ClementiDihedral\"     : potential used in the off-lattice Go protein model",
+            "- \"FlexibleLocalDihedral\": table-based potential for C-alpha protein model"
             }));
     }
 }

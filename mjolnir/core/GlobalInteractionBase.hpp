@@ -26,6 +26,8 @@ class GlobalInteractionBase
     virtual void      calc_force (system_type&)       const noexcept = 0;
     virtual real_type calc_energy(const system_type&) const noexcept = 0;
 
+    virtual GlobalInteractionBase* clone() const = 0;
+
     virtual std::string name() const = 0;
 };
 

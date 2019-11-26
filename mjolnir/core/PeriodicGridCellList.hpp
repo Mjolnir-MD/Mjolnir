@@ -72,6 +72,11 @@ class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, Potentia
     real_type cutoff() const noexcept override {return this->cutoff_;}
     real_type margin() const noexcept override {return this->margin_;}
 
+    base_type* clone() const override
+    {
+        return new PeriodicGridCellList(margin_);
+    }
+
   private:
 
     std::size_t calc_index(const coordinate_type& pos) const noexcept
@@ -284,7 +289,7 @@ void PeriodicGridCellList<traitsT, potentialT>::initialize(
 
     const int dimx = dim_x_;
     const int dimy = dim_y_;
-    const int dimz = dim_x_;
+    const int dimz = dim_z_;
 
     for(int x = 0; x < dimx; ++x)
     {

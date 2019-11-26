@@ -143,6 +143,13 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
     potential_type const& potential() const noexcept {return potential_;}
     potential_type&       potential()       noexcept {return potential_;}
 
+    base_type* clone() const override
+    {
+        return new ThreeSPN2BaseStackingInteraction(kind_,
+                container_type(parameters_), potential_type(potential_),
+                std::vector<nucleotide_index_type>(nucleotide_index_));
+    }
+
   private:
 
     connection_kind_type kind_;

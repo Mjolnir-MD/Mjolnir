@@ -141,6 +141,12 @@ class GlobalPairInteraction<
 
     std::string name() const override {return "GlobalPairLennardJones";}
 
+    base_type* clone() const override
+    {
+        return new GlobalPairInteraction(
+                potential_type(potential_), partition_type(partition_));
+    }
+
   private:
 
     potential_type potential_;

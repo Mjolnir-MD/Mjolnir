@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(omp_ExternalDistacne_calc_force)
     using system_type      = mjolnir::System<traits_type>;
     using potential_type   = mjolnir::LennardJonesWallPotential<real_type>;
     using parameter_type   = typename potential_type::parameter_type;
-    using shape_type       = mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveZDirection>;
+    using shape_type       = mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveZDirection<traits_type>>;
     using interaction_type = mjolnir::ExternalDistanceInteraction<traits_type, potential_type, shape_type>;
     using rng_type         = mjolnir::RandomNumberGenerator<traits_type>;
 
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(omp_ExternalDistacne_calc_force)
         mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>>;
     using sequencial_shape_type       = mjolnir::AxisAlignedPlane<
         mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>,
-        mjolnir::PositiveZDirection>;
+        mjolnir::PositiveZDirection<traits_type>>;
     using sequencial_interaction_type = mjolnir::ExternalDistanceInteraction<
         mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>,
         potential_type, sequencial_shape_type>;
