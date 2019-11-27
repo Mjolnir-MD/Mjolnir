@@ -37,6 +37,7 @@ read_ignored_molecule(const toml::value& global)
     }
 
     const auto& ignore = toml::find(global, "ignore");
+    check_keys_available(ignore, {"molecule", "group", "particles_within"});
 
     if(ignore.as_table().count("molecule") == 0)
     {
@@ -118,6 +119,8 @@ read_ignored_group(const toml::value& global)
     }
 
     const auto group = toml::find(ignore, "group");
+    check_keys_available(group, {"intra", "inter"});
+
     if(group.as_table().count("intra") == 1)
     {
         for(auto intra : toml::find<std::vector<std::string>>(group, "intra"))
