@@ -82,21 +82,19 @@ class DCDLoader final : public LoaderBase<traitsT>
         {
             const auto block_size_beg  = detail::read_bytes_as<std::int32_t>(file_);
             const auto number_of_lines = detail::read_bytes_as<std::int32_t>(file_);
-            std::vector<char> comments(80 * number_of_lines);
-            file_.read(comments.data(), comments.size());
+            for(std::int32_t i=0; i<number_of_lines; ++i)
+            {
+                std::vector<char> comments(81, '\0');
+                file_.read(comments.data(), 80);
+                const std::string line(comments.begin(), comments.end());
+                MJOLNIR_LOG_NOTICE("comment: ", line);
+            }
             const auto block_size_end = detail::read_bytes_as<std::int32_t>(file_);
 
             if(block_size_beg != block_size_end)
             {
                 MJOLNIR_LOG_WARN("DCD file ", filename_, " seems to be broken.");
                 MJOLNIR_LOG_WARN("Size of the second header block is inconsistent");
-            }
-
-            for(std::int32_t i=0; i<number_of_lines; ++i)
-            {
-                const std::string line(comments.begin() + i * 80,
-                                       comments.begin() + (i+1) * 80);
-                MJOLNIR_LOG_NOTICE("comment: ", line);
             }
         }
 
@@ -135,6 +133,7 @@ class DCDLoader final : public LoaderBase<traitsT>
         {
             const auto block_beg = detail::read_bytes_as<std::int32_t>(file_);
 
+            assert(buffer_x_.size() == this->number_of_particles_);
             file_.read(reinterpret_cast<char*>(this->buffer_x_.data()),
                        this->number_of_particles_ * sizeof(float));
 
@@ -149,6 +148,7 @@ class DCDLoader final : public LoaderBase<traitsT>
         {
             const auto block_beg = detail::read_bytes_as<std::int32_t>(file_);
 
+            assert(buffer_y_.size() == this->number_of_particles_);
             file_.read(reinterpret_cast<char*>(this->buffer_y_.data()),
                        this->number_of_particles_ * sizeof(float));
 
@@ -163,6 +163,7 @@ class DCDLoader final : public LoaderBase<traitsT>
         {
             const auto block_beg = detail::read_bytes_as<std::int32_t>(file_);
 
+            assert(buffer_z_.size() == this->number_of_particles_);
             file_.read(reinterpret_cast<char*>(this->buffer_z_.data()),
                        this->number_of_particles_ * sizeof(float));
 
