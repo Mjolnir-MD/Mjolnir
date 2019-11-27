@@ -23,8 +23,8 @@ class DCDLoader final : public LoaderBase<traitsT>
   public:
 
     explicit DCDLoader(const std::string& filename) : base_type(),
-        filename_(filename), file_(filename_, std::ios::binary | std::ios::in),
-        has_unitcell_(false)
+        has_unitcell_(false), filename_(filename),
+        file_(filename_, std::ios::binary | std::ios::in)
     {
         if(!file_.good())
         {
@@ -251,6 +251,7 @@ class DCDLoader final : public LoaderBase<traitsT>
 
   private:
 
+    bool               has_unitcell_;
     std::string        filename_;
     std::ifstream      file_;
     std::size_t        number_of_frames_;
@@ -258,7 +259,6 @@ class DCDLoader final : public LoaderBase<traitsT>
     std::vector<float> buffer_x_;
     std::vector<float> buffer_y_;
     std::vector<float> buffer_z_;
-    bool               has_unitcell_;
 };
 
 } // mjolnir
