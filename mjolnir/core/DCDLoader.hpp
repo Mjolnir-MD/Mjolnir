@@ -22,10 +22,9 @@ class DCDLoader final : public LoaderBase<traitsT>
 
   public:
 
-    explicit DCDLoader(const std::string& filename)
-        : base_type(), filename_(filename),
-          file_(filename_, std::ios::binary | std::ios::in),
-          has_unitcell_(false)
+    explicit DCDLoader(const std::string& filename) : base_type(),
+        filename_(filename), file_(filename_, std::ios::binary | std::ios::in),
+        has_unitcell_(false)
     {
         if(!file_.good())
         {
