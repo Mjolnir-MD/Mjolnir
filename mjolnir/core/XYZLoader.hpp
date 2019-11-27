@@ -23,7 +23,8 @@ class XYZLoader final : public LoaderBase<traitsT>
   public:
 
     explicit XYZLoader(const std::string& filename)
-        : base_type(), filename_(filename), file_(filename_), line_number_(0)
+        : base_type(), filename_(filename), file_(filename_), line_number_(0),
+          number_of_frames_(0), number_of_particles_(0)
     {
         if(!file_.good())
         {
