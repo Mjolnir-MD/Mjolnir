@@ -111,6 +111,10 @@ class ContactInteraction<
                 return lhs.second.cutoff() < rhs.second.cutoff();
             })->second.cutoff();
         this->make_list(sys);
+        for(auto& potential : potentials_)
+        {
+            potential.second.initialize(sys);
+        }
         return;
     }
 

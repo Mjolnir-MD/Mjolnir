@@ -100,12 +100,16 @@ class BondLengthInteraction<
         return E;
     }
 
-    void initialize(const system_type&) override
+    void initialize(const system_type& sys) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential = ", potential_type::name(),
                          ", number of bonds = ", potentials_.size());
+        for(auto& potential : potentials_)
+        {
+            potential.second.initialize(sys);
+        }
         return;
     }
 
