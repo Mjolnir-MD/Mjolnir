@@ -129,7 +129,6 @@ read_ignored_group(const toml::value& global)
     }
     if(group.as_table().count("inter") == 1)
     {
-        const auto inter = toml::find(group, "inter");
         for(auto inter : toml::find<
             std::vector<std::pair<std::string, std::string>>>(group, "inter"))
         {
