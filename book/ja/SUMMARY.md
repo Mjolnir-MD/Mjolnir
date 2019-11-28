@@ -10,6 +10,7 @@
     - [SimulatedAnnealing](refs/SimulatedAnnealingSimulator.md)
     - [SteepestDescent](refs/SteepestDescentSimulator.md)
     - [SwitchingForceField](refs/SwitchingForceFieldSimulator.md)
+    - [EnergyCalculation](refs/EnergyCalculationSimulator.md)
   - [Integrator](refs/Integrator.md)
     - [BAOABLangevin](refs/BAOABLangevinIntegrator.md)
     - [UnderdampedLangevin](refs/UnderdampedLangevinIntegrator.md)
