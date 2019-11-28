@@ -5,6 +5,7 @@
 #include <mjolnir/core/SteepestDescentSimulator.hpp>
 #include <mjolnir/core/SimulatedAnnealingSimulator.hpp>
 #include <mjolnir/core/SwitchingForceFieldSimulator.hpp>
+#include <mjolnir/core/EnergyCalculationSimulator.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -222,6 +223,138 @@ read_switching_forcefield_simulator(
             std::move(obs), std::move(rng), std::move(ffidx), std::move(sch));
 }
 
+template<typename traitsT>
+std::unique_ptr<SimulatorBase>
+read_energy_calculation_simulator(
+        const toml::value& root, const toml::value& simulator)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type       = typename traitsT::real_type;
+    using coordinate_type = typename traitsT::coordinate_type;
+
+    check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
+            "file"_s, "parallelism"_s});
+
+    // ------------------------------------------------------------------------
+    // construct observers manually ...
+    //
+    // This is the only simulator that does not need to output a trajectory,
+    // therefore `XXXObserver`s are not needed except EnergyObserver.
+
+    const auto& output = toml::find(root, "files", "output");
+    const auto progress_bar_enabled = toml::find_or<bool>(output, "progress_bar", true);
+
+    const auto output_path   = read_output_path(root);
+    const auto output_prefix = toml::find<std::string>(output, "prefix");
+    const auto output_name   = output_path + output_prefix;
+    MJOLNIR_LOG_NOTICE("output file prefix is `", output_path, output_prefix, '`');
+
+    // push EnergyObserver to the observer.
+    ObserverContainer<traitsT> obs(progress_bar_enabled);
+    obs.push_back(make_unique<EnergyObserver<traitsT>>(output_name));
+
+    // ------------------------------------------------------------------------
+    // read filename, set-up Loader
+
+    const auto input_file = toml::find<std::string>(simulator, "file");
+    std::unique_ptr<LoaderBase<traitsT>> loader;
+
+    if(input_file.substr(input_file.size()-4, 4) == ".xyz")
+    {
+        loader = make_unique<XYZLoader<traitsT>>(input_file);
+    }
+    else if(input_file.substr(input_file.size()-4, 4) == ".dcd")
+    {
+        loader = make_unique<DCDLoader<traitsT>>(input_file);
+    }
+    else if(input_file.substr(input_file.size()-4, 4) == ".trr")
+    {
+        loader = make_unique<TRRLoader<traitsT>>(input_file);
+    }
+    else
+    {
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_energy_calculation_simulator: invalid file extension: ",
+            toml::find(simulator, "file"), "here", {
+            "expected filetype is one of the following:",
+            "- \"xyz\" : simple ascii file format.",
+            "- \"dcd\" : binary file format.",
+            "- \"trr\" : binary file format."
+            }));
+    }
+    loader->initialize();
+
+    // ------------------------------------------------------------------------
+    // read [[systems]] manualy ...
+    //
+    // XXX We don't need the initial configuration, but still, the name and the
+    //     group names are required to calculate energy correctly.
+    //
+    // This is the only simulator that loads the current state from a different
+    // file. So here `positions` are not required.
+
+    const auto& systems = toml::find(root, "systems").as_array();
+    if(systems.size() != 1)
+    {
+        throw_exception<std::out_of_range>("[error] mjolnir::read_system: "
+            "invalid number of system definitions: ", systems.size());
+    }
+
+    MJOLNIR_LOG_NOTICE("reading a system ...");
+    const auto system = read_table_from_file(systems.at(0), "systems",
+                                             read_input_path(root));
+
+    const auto& boundary = toml::find(system, "boundary_shape");
+    const auto& particles = toml::find(system, "particles").as_array();
+    System<traitsT> sys(particles.size(), read_boundary<traitsT>(boundary));
+
+    if(particles.size() != loader->num_particles())
+    {
+        throw_exception<std::runtime_error>("[error] "
+            "mjolnir::read_energy_calculation_simulator: invalid number of "
+            "particles: [[systems]] table has ", particles.size(),
+            " elements but ", input_file, " has ", sys.size(), " particles.",
+            toml::format_error("", toml::find(system, "particles"), "here"));
+    }
+
+    // clear all parameters once
+    for(std::size_t i=0; i<sys.size(); ++i)
+    {
+        const auto& p = particles.at(i);
+        // position(pos), velocity(vel) are ignored here
+        check_keys_available(p, {"m"_s, "mass"_s, "name"_s, "group"_s});
+
+        if(p.as_table().count("m") == 1)
+        {
+            sys.mass(i) = toml::find<real_type>(p, "m");
+        }
+        else
+        {
+            sys.mass(i) = toml::find<real_type>(p, "mass");
+        }
+        sys.rmass(i)    = real_type(1) / sys.mass(i);
+        sys.position(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
+        sys.velocity(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
+        sys.force(i)    = math::make_coordinate<coordinate_type>(0, 0, 0);
+        sys.name(i)     = toml::find_or<std::string>(p, "name",  "X"   );
+        sys.group(i)    = toml::find_or<std::string>(p, "group", "NONE");
+    }
+
+    for(const auto& attr : toml::find<toml::table>(system, "attributes"))
+    {
+        const real_type attribute = toml::get<real_type>(attr.second);
+        sys.attribute(attr.first) = attribute;
+        MJOLNIR_LOG_INFO("attribute.", attr.first, " = ", attribute);
+    }
+
+    auto ff = read_forcefield<traitsT>(root, 0);
+
+    return make_unique<EnergyCalculationSimulator<traitsT>>(loader->num_frames(),
+            std::move(loader), std::move(sys), std::move(ff), std::move(obs));
+}
+
+
 template<typename traitsT, typename integratorT>
 std::unique_ptr<SimulatorBase>
 read_simulator(const toml::value& root, const toml::value& simulator)
@@ -252,6 +385,13 @@ read_simulator(const toml::value& root, const toml::value& simulator)
         MJOLNIR_LOG_NOTICE("Simulator type is SwitchingForceField.");
         return read_switching_forcefield_simulator<traitsT, integratorT>(root, simulator);
     }
+    else if(type == "EnergyCalculation")
+    {
+        MJOLNIR_LOG_NOTICE("Simulator type is EnergyCalculation.");
+
+        // It does not do "time integration", so integratorT is not needed.
+        return read_energy_calculation_simulator<traitsT>(root, simulator);
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -261,7 +401,8 @@ read_simulator(const toml::value& root, const toml::value& simulator)
             "- \"MolecularDynamcis\"  : standard MD simulation",
             "- \"SteepestDescent\"    : energy minimization by gradient method",
             "- \"SimulatedAnnealing\" : energy minimization by Annealing",
-            "- \"SwitchingForceField\": switch forcefield while running simulation"
+            "- \"SwitchingForceField\": switch forcefield while running simulation",
+            "- \"EnergyCalculation\"  : calculate energy based on a trajectory file"
             }));
     }
 }
