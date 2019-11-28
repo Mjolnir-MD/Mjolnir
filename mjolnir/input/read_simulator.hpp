@@ -279,6 +279,8 @@ read_energy_calculation_simulator(
             toml::find(simulator, "file"), "here", {
             "expected filetype is one of the following:",
             "- \"xyz\" : simple ascii file format.",
+            "- \"dcd\" : binary file format.",
+            "- \"trr\" : binary file format."
             }));
     }
     loader->initialize();
