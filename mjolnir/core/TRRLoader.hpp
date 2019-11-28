@@ -23,7 +23,9 @@ class TRRLoader final : public LoaderBase<traitsT>
   public:
 
     explicit TRRLoader(const std::string& filename)
-        : base_type(), filename_(filename),
+        : base_type(), has_unitcell_(false), filename_(filename),
+          number_of_frames_(0), number_of_particles_(0),
+          position_block_size_(0), velocity_block_size_(0), force_block_size_(0),
           file_(filename_, std::ios::binary | std::ios::in)
     {
         if(!file_.good())
@@ -234,14 +236,14 @@ class TRRLoader final : public LoaderBase<traitsT>
 
   private:
 
+    bool          has_unitcell_;
     std::string   filename_;
-    std::ifstream file_;
     std::size_t   number_of_frames_;
     std::size_t   number_of_particles_;
     std::size_t   position_block_size_;
     std::size_t   velocity_block_size_;
     std::size_t   force_block_size_;
-    bool          has_unitcell_;
+    std::ifstream file_;
 };
 
 } // mjolnir
