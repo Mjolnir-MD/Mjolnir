@@ -75,6 +75,10 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
                 return lhs.second.cutoff() < rhs.second.cutoff();
             })->second.cutoff();
         this->make_list(sys);
+        for(auto& potential : this->potentials_)
+        {
+            potential.second.initialize(sys);
+        }
         return;
     }
 
@@ -111,6 +115,11 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
 
     container_type const& potentials() const noexcept {return potentials_;}
     container_type&       potentials()       noexcept {return potentials_;}
+
+    base_type* clone() const override
+    {
+        return new ContactInteraction(kind_, container_type(potentials_));
+    }
 
   private:
 

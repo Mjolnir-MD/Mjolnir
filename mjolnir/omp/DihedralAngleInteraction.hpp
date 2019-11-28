@@ -136,12 +136,16 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
         return E;
     }
 
-    void initialize(const system_type&) override
+    void initialize(const system_type& sys) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("With OpenMP: potential = ", potential_type::name(),
                          ", number of dihedrals = ", potentials.size());
+        for(auto& potential : potentials)
+        {
+            potential.second.initialize(sys);
+        }
         return;
     }
 
@@ -175,6 +179,11 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
             topol.add_connection(k, l, this->kind_);
         }
         return;
+    }
+
+    base_type* clone() const override
+    {
+        return new DihedralAngleInteraction(kind_, container_type(potentials));
     }
 
    private:

@@ -347,3 +347,18 @@ BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_partial_2)
         }
     }
 }
+
+BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_clone)
+{
+    mjolnir::LoggerManager::set_default_logger("test_periodic_grid_cell_list.log");
+    using traits_type     = mjolnir::SimulatorTraits<double, mjolnir::CuboidalPeriodicBoundary>;
+    using real_type       = typename traits_type::real_type;
+    using potential_type  = dummy_potential<real_type>;
+
+    mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
+            mjolnir::PeriodicGridCellList<traits_type, potential_type>>(10.0));
+
+    mjolnir::SpatialPartition<traits_type, potential_type> vlist2(vlist);
+
+    BOOST_TEST(vlist.margin() == vlist2.margin());
+}

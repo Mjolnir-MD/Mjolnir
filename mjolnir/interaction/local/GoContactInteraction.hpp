@@ -111,6 +111,10 @@ class ContactInteraction<
                 return lhs.second.cutoff() < rhs.second.cutoff();
             })->second.cutoff();
         this->make_list(sys);
+        for(auto& potential : potentials_)
+        {
+            potential.second.initialize(sys);
+        }
         return;
     }
 
@@ -158,6 +162,11 @@ class ContactInteraction<
 
     container_type const& potentials() const noexcept {return potentials_;}
     container_type&       potentials()       noexcept {return potentials_;}
+
+    base_type* clone() const override
+    {
+        return new ContactInteraction(kind_, container_type(potentials_));
+    }
 
   private:
 

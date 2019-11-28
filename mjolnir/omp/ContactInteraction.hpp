@@ -145,6 +145,11 @@ class ContactInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         return;
     }
 
+    base_type* clone() const override
+    {
+        return new ContactInteraction(kind_, container_type(potentials));
+    }
+
   private:
 
     void make_list(const system_type& sys)

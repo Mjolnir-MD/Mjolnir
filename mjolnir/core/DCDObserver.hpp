@@ -27,7 +27,8 @@ class DCDObserver final : public ObserverBase<traitsT>
     explicit DCDObserver(const std::string& filename_prefix)
       : base_type(), prefix_(filename_prefix),
         pos_name_(filename_prefix + std::string("_position.dcd")),
-        vel_name_(filename_prefix + std::string("_velocity.dcd"))
+        vel_name_(filename_prefix + std::string("_velocity.dcd")),
+        number_of_frames_(0)
     {
         // clear files and throw an error if the files cannot be opened.
         this->clear_file(this->pos_name_);

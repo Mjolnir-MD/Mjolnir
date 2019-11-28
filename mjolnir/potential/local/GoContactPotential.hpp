@@ -47,6 +47,9 @@ class GoContactPotential
     }
 
     template<typename T>
+    void initialize(const System<T>&) const noexcept {return;}
+
+    template<typename T>
     void update(const System<T>&) const noexcept {return;}
 
     static const char* name() noexcept {return "GoContact";}

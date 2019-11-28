@@ -59,6 +59,12 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
                          ", number of contacts = ", potentials_.size());
         this->cutoff_ = this->max_cutoff_length();
         this->make_list(sys);
+        for(auto& potential : this->potentials_)
+        {
+            std::get<1>(potential).initialize(sys);
+            std::get<2>(potential).initialize(sys);
+            std::get<3>(potential).initialize(sys);
+        }
         return;
     }
 
@@ -110,6 +116,12 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
 
     container_type const& potentials() const noexcept {return potentials_;}
     container_type&       potentials()       noexcept {return potentials_;}
+
+    base_type* clone() const override
+    {
+        return new DirectionalContactInteraction(
+                kind_, container_type(potentials_));
+    }
 
   private:
 

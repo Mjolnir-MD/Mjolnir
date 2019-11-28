@@ -85,6 +85,12 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
     potential_type const& potential() const noexcept {return potential_;}
     potential_type &      potential()       noexcept {return potential_;}
 
+    base_type* clone() const override
+    {
+        return new GlobalPairInteraction(
+                potential_type(potential_), partition_type(partition_));
+    }
+
   private:
 
     potential_type potential_;

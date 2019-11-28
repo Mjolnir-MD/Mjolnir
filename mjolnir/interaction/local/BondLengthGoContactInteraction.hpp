@@ -92,12 +92,16 @@ class BondLengthInteraction<
         return E;
     }
 
-    void initialize(const system_type&) override
+    void initialize(const system_type& sys) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential = ", potential_type::name(),
                          ", number of bonds = ", potentials_.size());
+        for(auto& potential : potentials_)
+        {
+            potential.second.initialize(sys);
+        }
         return;
     }
 
@@ -130,6 +134,11 @@ class BondLengthInteraction<
 
     container_type const& potentials() const noexcept {return potentials_;}
     container_type&       potentials()       noexcept {return potentials_;}
+
+    base_type* clone() const override
+    {
+        return new BondLengthInteraction(kind_, container_type(potentials_));
+    }
 
   private:
     connection_kind_type kind_;

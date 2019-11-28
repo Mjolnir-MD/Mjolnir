@@ -116,12 +116,16 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         return E;
     }
 
-    void initialize(const system_type&) override
+    void initialize(const system_type& sys) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("With OpenMP: potential = ", potential_type::name(),
                          ", number of angles = ", potentials.size());
+        for(auto& potential : potentials)
+        {
+            potential.second.initialize(sys);
+        }
         return;
     }
 
@@ -153,6 +157,11 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
             topol.add_connection(j, k, this->kind_);
         }
         return;
+    }
+
+    base_type* clone() const override
+    {
+        return new BondAngleInteraction(kind_, container_type(potentials));
     }
 
   private:
