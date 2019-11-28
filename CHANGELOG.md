@@ -1,5 +1,22 @@
 # Change Log
 
+## 1.8.0
+
+## Added
+
+- add EnergyCalculationSimulator
+
+## Changed
+
+- warn if undefined group is found in `[[forcefield.global]]`
+- warn if invalid key appears in `[[forcefield.global]]`
+
+## Misc
+
+- enable to clone forcefield
+- add initialize() to local potentials (@yutakasi634)
+- refactor input funstions
+
 ## 1.7.1
 
 ### Fixed
