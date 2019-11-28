@@ -268,6 +268,10 @@ read_energy_calculation_simulator(
     {
         loader = make_unique<DCDLoader<traitsT>>(input_file);
     }
+    else if(input_file.substr(input_file.size()-4, 4) == ".trr")
+    {
+        loader = make_unique<TRRLoader<traitsT>>(input_file);
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "

@@ -7,7 +7,7 @@
 #include <mjolnir/core/LoaderBase.hpp>
 #include <mjolnir/core/XYZLoader.hpp>
 #include <mjolnir/core/DCDLoader.hpp>
-// #include <mjolnir/core/TRRLoader.hpp>
+#include <mjolnir/core/TRRLoader.hpp>
 
 namespace mjolnir
 {
@@ -66,6 +66,8 @@ inline void EnergyCalculationSimulator<traitsT>::initialize()
     //
     // To obtain the total number of snapshots, the loader is already initialized.
     ld_->load_next(this->sys_);
+
+    // sys.initialize() generates the initial velocity, so here it is not needed
 
     this->ff_.initialize(this->sys_);
 
