@@ -15,6 +15,8 @@ set(TEST_NAMES
     test_flp_dihedral_potential
     test_clementi_dihedral_potential
     test_go_contact_potential
+    test_go_attractive_potential
+    test_go_repulsive_potential
     test_3spn2_bond_potential
     test_3spn2_base_stacking_potential
     test_3spn2_base_base_interaction_potential
@@ -52,6 +54,8 @@ set(TEST_NAMES
 
     test_read_harmonic_potential
     test_read_go_contact_potential
+    test_read_go_attractive_potential
+    test_read_go_repulsive_potential
     test_read_clementi_dihedral_potential
     test_read_gaussian_potential
     test_read_periodic_gaussian_potential
