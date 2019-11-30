@@ -51,6 +51,22 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
                 kind, read_local_potential<2, potentialT>(local));
     }
+    else if(potential == "RepulsiveGoContact")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Repulsive Go contact.");
+        using potentialT = GoContactRepulsivePotential<real_type>;
+
+        return make_unique<BondLengthInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<2, potentialT>(local));
+    }
+    else if(potential == "AttractiveGoContact")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Attractive Go contact.");
+        using potentialT = GoContactAttractivePotential<real_type>;
+
+        return make_unique<BondLengthInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<2, potentialT>(local));
+    }
     else if(potential == "Gaussian")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Gaussian.");
@@ -73,10 +89,12 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
             "mjolnir::read_bond_length_interaction: invalid potential",
             toml::find<toml::value>(local, "potential"), "here", {
             "expected value is one of the following.",
-            "- \"Harmonic\" : well-known harmonic potential",
-            "- \"GoContact\": r^12 - r^10 type native contact potential",
-            "- \"Gaussian\" : well-known gaussian potential",
-            "- \"3SPN2Bond\": bond length potential for 3SPN2"
+            "- \"Harmonic\"           : well-known harmonic potential",
+            "- \"GoContact\"          : r^12 - r^10 type native contact potential",
+            "- \"AttractiveGoContact\": attractive part of native contact potential",
+            "- \"RepulsiveGoContact\" : repulsive part of native contact potential",
+            "- \"Gaussian\"           : well-known gaussian potential",
+            "- \"3SPN2Bond\"          : bond length potential for 3SPN2"
             }));
     }
 }
@@ -104,6 +122,22 @@ read_contact_interaction(const std::string& kind, const toml::value& local)
         return make_unique<ContactInteraction<traitsT, potentialT>>(
                 kind, read_local_potential<2, potentialT>(local), margin);
     }
+    else if(potential == "RepulsiveGoContact")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Repulsive Go contact.");
+        using potentialT = GoContactRepulsivePotential<real_type>;
+
+        return make_unique<ContactInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<2, potentialT>(local), margin);
+    }
+    else if(potential == "AttractiveGoContact")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Attractive Go contact.");
+        using potentialT = GoContactAttractivePotential<real_type>;
+
+        return make_unique<ContactInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<2, potentialT>(local), margin);
+    }
     else if(potential == "Gaussian")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Gaussian.");
@@ -118,8 +152,10 @@ read_contact_interaction(const std::string& kind, const toml::value& local)
             "mjolnir::read_bond_length_interaction: invalid potential",
             toml::find<toml::value>(local, "potential"), "here", {
             "expected value is one of the following.",
-            "- \"GoContact\": r^12 - r^10 type native contact potential",
-            "- \"Gaussian\" : well-known gaussian potential"
+            "- \"GoContact\"          : r^12 - r^10 type native contact potential",
+            "- \"AttractiveGoContact\": attractive part of native contact potential",
+            "- \"RepulsiveGoContact\" : repulsive part of native contact potential",
+            "- \"Gaussian\"           : well-known gaussian potential"
             }));
     }
 }
