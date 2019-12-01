@@ -40,6 +40,7 @@ class GlobalForceField
     }
     GlobalForceField& operator=(const GlobalForceField& other)
     {
+        this->interactions_.clear();
         this->interactions_.reserve(other.size());
         for(const auto& interaction : other)
         {

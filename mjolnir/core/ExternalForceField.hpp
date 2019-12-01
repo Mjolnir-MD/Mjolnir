@@ -41,6 +41,7 @@ class ExternalForceField
     }
     ExternalForceField& operator=(ExternalForceField const& other)
     {
+        this->interactions_.clear();
         this->interactions_.reserve(other.size());
         for(const auto& interaction : other)
         {
