@@ -16,6 +16,11 @@ template std::vector<std::pair<std::array<std::size_t, 4>, HarmonicPotential<flo
 
 template std::vector<std::pair<std::array<std::size_t, 2>, GoContactPotential<double>>> read_local_potential(const toml::value& local);
 template std::vector<std::pair<std::array<std::size_t, 2>, GoContactPotential<float >>> read_local_potential(const toml::value& local);
+template std::vector<std::pair<std::array<std::size_t, 2>, GoContactAttractivePotential<double>>> read_local_potential(const toml::value& local);
+template std::vector<std::pair<std::array<std::size_t, 2>, GoContactAttractivePotential<float >>> read_local_potential(const toml::value& local);
+template std::vector<std::pair<std::array<std::size_t, 2>, GoContactRepulsivePotential<double>>> read_local_potential(const toml::value& local);
+template std::vector<std::pair<std::array<std::size_t, 2>, GoContactRepulsivePotential<float >>> read_local_potential(const toml::value& local);
+
 
 template std::vector<std::pair<std::array<std::size_t, 4>, ClementiDihedralPotential<double>>> read_local_potential(const toml::value& local);
 template std::vector<std::pair<std::array<std::size_t, 4>, ClementiDihedralPotential<float >>> read_local_potential(const toml::value& local);
