@@ -236,7 +236,7 @@ read_worm_like_chain_potential(const toml::value& param, const toml::value& env)
     auto p  = find_parameter<real_type>(param, env, "p");
     auto lc = find_parameter<real_type>(param, env, "lc");
 
-    MJOLNIR_LOG_INFO("UniformPotential = {p = ", p, ", lc = ", lc,"}");
+    MJOLNIR_LOG_INFO("WormLikeChainPotential = {p = ", p, ", lc = ", lc,"}");
     return WormLikeChainPotential<realT>(p, lc);
 }
 
