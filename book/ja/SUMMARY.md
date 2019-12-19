@@ -25,6 +25,7 @@
         - [GoContact](refs/GoContactPotential.md)
         - [AttractiveGoContact](refs/AttractiveGoContactPotential.md)
         - [RepulsiveGoContact](refs/RepulsiveGoContactPotential.md)
+        - [WormLikeChain](refs/WormLikeChainPotential.md)
         - [3SPN2Bond](refs/3SPN2BondPotential.md)
       - [ConcactInteraction](refs/ContactInteraction.md)
         - [Gaussian](refs/GaussianPotential.md)
