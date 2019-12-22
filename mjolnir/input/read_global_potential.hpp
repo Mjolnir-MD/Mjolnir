@@ -3,6 +3,7 @@
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/input/utility.hpp>
 #include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
+#include <mjolnir/potential/global/InversePowerPotential.hpp>
 #include <mjolnir/potential/global/HardCoreExcludedVolumePotential.hpp>
 #include <mjolnir/potential/global/LennardJonesPotential.hpp>
 #include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
@@ -272,20 +273,20 @@ read_inverse_power_potential(const toml::value& global)
     const auto& env = global.as_table().count("env") == 1?
                       global.as_table().at("env") : toml::value{};
 
-    const real_type eps = toml::find<real_type>(global. "epsilon");
+    const real_type eps = toml::find<real_type>(global, "epsilon");
     MJOLNIR_LOG_INFO("epsilon = ", eps);
 
     const integer_type n   = toml::find<integer_type>(global, "n");
     MJOLNIR_LOG_INFO("n = ", n);
 
     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
-            potential_type::default_cutoff());
+            potential_type::default_cutoff(n));
     MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
 
-    const auto& ps = toml::find<toml:array>(global, "parameters");
+    const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
-    std:vector<std::pair<std::size_t, parameter_type>> params;
+    std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
