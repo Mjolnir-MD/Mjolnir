@@ -166,8 +166,8 @@ read_ignore_particles_within(const toml::value& global)
             ignore, "particles_within", map_type{});
     for(const auto& connection : ignore_particle_within)
     {
-        MJOLNIR_LOG_INFO("particles that have connection ", connection.first,
-                         " within ", connection.second, " will be ignored");
+        MJOLNIR_LOG_NOTICE("particles that have connection ", connection.first,
+                           " within ", connection.second, " will be ignored");
     }
     return ignore_particle_within;
 }
