@@ -111,7 +111,7 @@ class InversePowerPotential
 
         const real_type rinv = 1.0 / r;
         const real_type d_r = d * rinv;
-        const drn = std::pow(d_r, n_);
+        const real_type drn = std::pow(d_r, n_);
         return -n_ * this->epsilon_ * drn * rinv;
     }
 
@@ -155,7 +155,7 @@ class InversePowerPotential
     //     See implementation of VerletList, CellList and GlobalPairInteraction
     // for more details about the usage of these functions.
 
-    std::vector<std::size_t> const& participants_() const noexcept {return participants_;}
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
 
     range<typename std::vector<std::size_t>::const_iterator>
     leading_participants() const noexcept
@@ -176,7 +176,7 @@ class InversePowerPotential
 
     // ------------------------------------------------------------------------
     // for testing
-    exclusion_list_type cosnt& exclusion_list() const noexcept
+    exclusion_list_type const& exclusion_list() const noexcept
     {
         return exclusion_list_;
     }
@@ -201,7 +201,7 @@ class InversePowerPotential
 
     real_type epsilon_;
     integer_type n_;
-    real_type cutoff_ratio;
+    real_type cutoff_ratio_;
     real_type coef_at_cutoff_; // correction of energy value at cutoff length
     std::vector<parameter_type> parameters_;
     std::vector<std::size_t>    participants_;
