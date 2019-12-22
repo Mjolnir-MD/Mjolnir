@@ -49,7 +49,7 @@ read_global_pair_interaction(const toml::value& global)
 
         return make_unique<interaction_t>(
             read_inverse_power_potential<traitsT>(global),
-            read_spatial_partitition<traitsT, potential_t>(global));
+            read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "HardCoreExcludedVolume")
     {
