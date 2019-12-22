@@ -36,7 +36,7 @@ class ExcludedVolumePotential
     // Although it is the same type as `parameter_type` in this potential,
     // it can be different from normal parameter for each particle.
     // This enables NeighborList to cache a value to calculate forces between
-    // the particles, e.g. by having (radius_i + radius_)/2 for a pair of {i, j}.
+    // the particles, e.g. by having (radius_i + radius_j)/2 for a pair of {i, j}.
     using pair_parameter_type  = parameter_type;
 
     // ------------------------------------------------------------------------
