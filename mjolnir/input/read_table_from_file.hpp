@@ -76,6 +76,13 @@ read_table_from_file(const toml::basic_value<C, T, A>& target,
     // ```
     if(table_from_file.as_table().at(table_name).is_array())
     {
+        if(table_from_file.at(table_name).as_array().size() > 1)
+        {
+            throw_exception<std::out_of_range>(toml::format_error("[error] "
+                "splitted file should only have 1 table",
+                table_from_file.at(table_name).as_array().at(1),
+                "these will be ignored"));
+        }
         return toml::find(table_from_file, table_name).as_array().front();
     }
     return toml::find(table_from_file, table_name);
