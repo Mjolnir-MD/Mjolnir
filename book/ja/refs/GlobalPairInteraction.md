@@ -5,6 +5,7 @@
 利用可能なポテンシャルには以下のようなものがあります。
 
 - [ExcludedVolume](ExcludedVolumePotential.md)
+- [InversePower](InversePowerPotential.md)
 - [LennardJones](LennardJonesPotential.md)
 - [UniformLennardJones](UniformLennardJonesPotential.md)
 - [DebyeHuckel](DebyeHuckelPotential.md)
@@ -32,6 +33,7 @@ parameters = [
 - `potential`: 文字列型
   - ポテンシャルの種類を設定します。
   - [`"ExcludedVolume"`](ExcludedVolumePotential.md): 排除体積ポテンシャルを用います。
+  - [`"InversePower"`](InversePowerPotential.md): 排除体積ポテンシャルの硬さを変更したい場合に用います。
   - [`"HardCoreExcludedVolume"`](HardCoreExcludedVolumePotential.md): 硬い核と、排除体積ポテンシャルに相当する殻を持ったポテンシャルを用います。
   - [`"LennardJones"`](LennardJonesPotential.md): レナード・ジョーンズポテンシャルを用います。
   - [`"UniformLennardJones"`](UniformLennardJonesPotential.md): パラメータが粒子によらず一定なレナード・ジョーンズポテンシャルを用います。
