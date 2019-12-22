@@ -141,7 +141,7 @@ class ExcludedVolumePotential
         return;
     }
 
-    // nothing to be done if system parameter (e.g. temperature) changes
+    // nothing to be done if system parameter (e.g. temperature) do not changes
     void update(const System<traits_type>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
