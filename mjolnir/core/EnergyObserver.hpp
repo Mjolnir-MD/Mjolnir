@@ -31,7 +31,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
     ~EnergyObserver() override {}
 
     void initialize(const std::size_t, const real_type,
-                    const system_type&, const forcefield_type& ff) override
+                    const system_type& sys, const forcefield_type& ff) override
     {
         using phys_constants = physics::constants<real_type>;
         std::ofstream ofs(this->file_name_, std::ios::app);
@@ -46,13 +46,18 @@ class EnergyObserver final : public ObserverBase<traitsT>
             ofs << names.at(i) << ' ';
             this->widths_.push_back(names.at(i).size());
         }
-        ofs << " kinetic_energy\n";
+        ofs << " kinetic_energy";
+        for(const auto& attr : sys.attributes())
+        {
+            ofs << " attribute:" << attr.first;
+        }
+        ofs << '\n';
         return;
     }
 
     // update column names and widths if forcefield changed.
     void update(const std::size_t,  const real_type,
-                const system_type&, const forcefield_type& ff) override
+                const system_type& sys, const forcefield_type& ff) override
     {
         std::ofstream ofs(this->file_name_, std::ios::app);
         ofs << "# timestep  ";
@@ -63,7 +68,12 @@ class EnergyObserver final : public ObserverBase<traitsT>
             ofs << names.at(i) << ' ';
             this->widths_.push_back(names.at(i).size());
         }
-        ofs << " kinetic_energy\n";
+        ofs << " kinetic_energy";
+        for(const auto& attr : sys.attributes())
+        {
+            ofs << " attribute:" << attr.first;
+        }
+        ofs << '\n';
         return;
     }
 
@@ -82,9 +92,13 @@ class EnergyObserver final : public ObserverBase<traitsT>
             ofs << std::setw(this->widths_.at(i)) << std::fixed
                 << std::right << energies.at(i) << ' ';
         }
-        ofs << std::setw(14) << std::right << this->calc_kinetic_energy(sys)
-            << '\n';
-
+        ofs << std::setw(14) << std::right << this->calc_kinetic_energy(sys);
+        for(const auto& attr : sys.attributes())
+        {
+            ofs << ' ' << std::setw(10 + attr.first.size()) << std::right
+                << attr.second;
+        }
+        ofs << '\n';
         return;
     }
 
