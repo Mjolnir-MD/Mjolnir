@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_inverse_power_noenv, T, test_types)
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_excluded_volume_potential<traits_type>(v);
+        const auto pot = mjolnir::read_inverse_power_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_inverse_power_env, T, test_types)
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_excluded_volume_potential<traits_type>(v);
+        const auto pot = mjolnir::read_inverse_power_potential<traits_type>(v);
 
         const auto ignore_within = pot.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
