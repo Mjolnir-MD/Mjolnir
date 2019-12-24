@@ -10,12 +10,12 @@
 #include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
 #include <mjolnir/potential/local/GaussianPotential.hpp>
 #include <mjolnir/potential/local/PeriodicGaussianPotential.hpp>
-#include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
-#include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
 #include <mjolnir/potential/local/CosinePotential.hpp>
 #include <mjolnir/potential/local/SumLocalPotential.hpp>
 #include <mjolnir/potential/local/UniformPotential.hpp>
 #include <mjolnir/potential/local/WormLikeChainPotential.hpp>
+#include <mjolnir/forcefield/FLP/FlexibleLocalAnglePotential.hpp>
+#include <mjolnir/forcefield/FLP/FlexibleLocalDihedralPotential.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BondPotential.hpp>
 
 #include <mjolnir/core/Topology.hpp>

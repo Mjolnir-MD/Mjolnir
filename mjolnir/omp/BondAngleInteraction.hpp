@@ -176,7 +176,7 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/potential/local/GaussianPotential.hpp>
-#include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
+#include <mjolnir/forcefield/FLP/FlexibleLocalAnglePotential.hpp>
 
 namespace mjolnir
 {

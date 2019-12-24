@@ -222,8 +222,8 @@ void DihedralAngleInteraction<traitsT, potentialT>::write_topology(
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
 #include <mjolnir/potential/local/PeriodicGaussianPotential.hpp>
-#include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
 #include <mjolnir/potential/local/CosinePotential.hpp>
+#include <mjolnir/forcefield/FLP/FlexibleLocalDihedralPotential.hpp>
 
 namespace mjolnir
 {
