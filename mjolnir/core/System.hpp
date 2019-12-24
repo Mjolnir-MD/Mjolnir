@@ -153,6 +153,7 @@ class System
     real_type  attribute(const std::string& key) const {return attributes_.at(key);}
     real_type& attribute(const std::string& key)       {return attributes_[key];}
     bool   has_attribute(const std::string& key) const {return attributes_.count(key) == 1;}
+    attribute_type const& attributes() const noexcept {return attributes_;}
 
     bool  velocity_initialized() const noexcept {return velocity_initialized_;}
     bool& velocity_initialized()       noexcept {return velocity_initialized_;}
