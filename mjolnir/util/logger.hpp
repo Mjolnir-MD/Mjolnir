@@ -198,11 +198,11 @@ class basic_logger
             std::cerr << "-- ";
             if(level == Level::Warn)
             {
-                std::cerr << '[' << io::yellow << "warning" << io::nocolor << "] ";
+                std::cerr << '[' << io::bold << io::yellow << "warning" << io::nocolor << "] ";
             }
             else if(level == Level::Error)
             {
-                std::cerr << '[' << io::red << "error" << io::nocolor << "] ";
+                std::cerr << '[' << io::bold << io::red << "error" << io::nocolor << "] ";
             }
             output_message(std::cerr, std::forward<Ts>(args)...);
             std::cerr << std::endl;
@@ -235,11 +235,11 @@ class basic_logger
             std::cerr << "-- ";
             if(level == Level::Warn)
             {
-                std::cerr << '[' << io::yellow << "warning" << io::nocolor << "] ";
+                std::cerr << '[' << io::bold << io::yellow << "warning" << io::nocolor << "] ";
             }
             else if(level == Level::Error)
             {
-                std::cerr << '[' << io::red << "error" << io::nocolor << "] ";
+                std::cerr << '[' << io::bold << io::red << "error" << io::nocolor << "] ";
             }
             output_message(std::cerr, std::forward<Ts>(args)...);
             std::cerr << std::flush; // no Line Feed
