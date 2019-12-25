@@ -65,7 +65,12 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
     void update_margin(const real_type dmargin, const system_type& sys) override
     {
-        this->partition_.update(dmargin, sys, this->potential_);
+        this->partition_.reduce_margin(dmargin, sys, this->potential_);
+        return ;
+    }
+    void scale_margin(const real_type scale, const system_type& sys) override
+    {
+        this->partition_.scale_margin(scale, sys, this->potential_);
         return ;
     }
 
