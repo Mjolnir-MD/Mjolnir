@@ -88,8 +88,13 @@ class ExternalDistanceInteraction<
 
     void update_margin(const real_type dmargin, const system_type& sys) override
     {
-        this->shape_.update(dmargin, sys);
+        this->shape_.reduce_margin(dmargin, sys);
     }
+    void scale_margin(const real_type scale, const system_type& sys) override
+    {
+        this->shape_.scale_margin(scale, sys);
+    }
+
 
     std::string name() const override
     {return "ExternalDistance:"_s + potential_.name();}
