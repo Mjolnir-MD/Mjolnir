@@ -160,6 +160,7 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
     // do nothing. this is used to reduce margin of neighbor list, and added
     // to this class for the consistency.
     void update_margin(const real_type, const system_type&) override {return;}
+    void  scale_margin(const real_type, const system_type&) override {return;}
 
     std::string name() const override
     {return "DihedralAngle:"_s + potential_type::name();}
