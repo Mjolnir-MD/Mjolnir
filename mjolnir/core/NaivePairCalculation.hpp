@@ -47,6 +47,11 @@ class NaivePairCalculation final : public SpatialPartitionBase<traitsT, Potentia
     {
         return;
     }
+    void scale_margin(neighbor_list_type&, const real_type,
+                      const system_type&, const potential_type&) override
+    {
+        return;
+    }
 
     real_type cutoff() const noexcept override {return std::numeric_limits<real_type>::infinity();}
     real_type margin() const noexcept override {return std::numeric_limits<real_type>::infinity();}

@@ -76,6 +76,16 @@ class UnlimitedGridCellList final : public SpatialPartitionBase<traitsT, Potenti
         }
         return ;
     }
+    void scale_margin(neighbor_list_type& neighbors, const real_type scale,
+                const system_type& sys, const potential_type& pot) override
+    {
+        this->current_margin_ = (cutoff_ + current_margin_) * scale - cutoff_;
+        if(this->current_margin_ < 0)
+        {
+            this->make(neighbors, sys, pot);
+        }
+        return;
+    }
 
     real_type cutoff() const noexcept override {return this->cutoff_;}
     real_type margin() const noexcept override {return this->margin_;}

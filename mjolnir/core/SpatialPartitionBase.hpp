@@ -48,8 +48,11 @@ class SpatialPartitionBase
     virtual void make  (neighbor_list_type&,
             const system_type&, const potential_type&) = 0;
 
-    virtual void update(neighbor_list_type&,
-            const real_type,    const system_type&, const potential_type&) = 0;
+    virtual void update(neighbor_list_type&, const real_type,
+            const system_type&, const potential_type&) = 0;
+
+    virtual void scale_margin(neighbor_list_type&, const real_type,
+            const system_type&, const potential_type&) = 0;
 
     virtual real_type cutoff() const noexcept = 0;
     virtual real_type margin() const noexcept = 0;
@@ -113,6 +116,12 @@ class SpatialPartition
                 const potential_type& pot)
     {
         partition_->update(neighbors_, dmargin, sys, pot);
+        return ;
+    }
+    void scale_margin(const real_type scale, const system_type& sys,
+                      const potential_type& pot)
+    {
+        partition_->scale_margin(neighbors_, scale, sys, pot);
         return ;
     }
 
