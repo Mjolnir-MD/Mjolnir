@@ -48,7 +48,7 @@ class SpatialPartitionBase
     virtual void make  (neighbor_list_type&,
             const system_type&, const potential_type&) = 0;
 
-    virtual void update(neighbor_list_type&, const real_type,
+    virtual void reduce_margin(neighbor_list_type&, const real_type,
             const system_type&, const potential_type&) = 0;
 
     virtual void scale_margin(neighbor_list_type&, const real_type,
@@ -112,10 +112,10 @@ class SpatialPartition
         partition_->make(neighbors_, sys, pot);
         return ;
     }
-    void update(const real_type dmargin, const system_type& sys,
-                const potential_type& pot)
+    void reduce_margin(const real_type dmargin, const system_type& sys,
+                       const potential_type& pot)
     {
-        partition_->update(neighbors_, dmargin, sys, pot);
+        partition_->reduce_margin(neighbors_, dmargin, sys, pot);
         return ;
     }
     void scale_margin(const real_type scale, const system_type& sys,
@@ -142,8 +142,6 @@ class SpatialPartition
     partition_type     partition_;
     neighbor_list_type neighbors_;
 };
-
-
 
 } // mjolnir
 #endif// MJOLNIR_CORE_SPATIAL_PARTITON_BASE_HPP
