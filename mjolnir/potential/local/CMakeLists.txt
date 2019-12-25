@@ -1,8 +1,6 @@
 set(mjolnir_potential_local_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/ClementiDihedralPotential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/CosinePotential.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/FlexibleLocalAnglePotential.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/FlexibleLocalDihedralPotential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/GaussianPotential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/GoContactPotential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/GoContactAttractivePotential.cpp"

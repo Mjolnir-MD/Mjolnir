@@ -201,7 +201,7 @@ void BondAngleInteraction<traitsT, potentialT>::write_topology(
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/potential/local/GaussianPotential.hpp>
-#include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
+#include <mjolnir/forcefield/FLP/FlexibleLocalAnglePotential.hpp>
 
 namespace mjolnir
 {
