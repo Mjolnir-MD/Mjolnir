@@ -70,6 +70,11 @@ class PWMcosInteraction final : public GlobalInteractionBase<traitsT>
         this->partition_.update(dmargin, sys, this->potential_);
         return ;
     }
+    void scale_margin(const real_type scale, const system_type& sys) override
+    {
+        this->partition_.scale_margin(scale, sys, this->potential_);
+        return ;
+    }
 
     void      calc_force (system_type& sys)       const noexcept override;
     real_type calc_energy(const system_type& sys) const noexcept override;
