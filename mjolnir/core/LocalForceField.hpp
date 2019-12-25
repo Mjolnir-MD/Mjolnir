@@ -86,6 +86,14 @@ class LocalForceField
         }
         return;
     }
+    void scale_margin(const real_type scale, const system_type& sys)
+    {
+        for(auto& item : this->interactions_)
+        {
+            item->scale_margin(scale, sys);
+        }
+        return;
+    }
 
     // Topology is defined based on LocalForceField.
     void write_topology(typename system_type::topology_type& topol)

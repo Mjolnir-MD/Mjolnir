@@ -86,6 +86,15 @@ class GlobalForceField
         }
         return;
     }
+    void scale_margin(const real_type scale, const system_type& sys)
+    {
+        for(auto& item : this->interactions_)
+        {
+            item->scale_margin(scale, sys);
+        }
+        return;
+    }
+
 
     void calc_force(system_type& sys) const noexcept
     {

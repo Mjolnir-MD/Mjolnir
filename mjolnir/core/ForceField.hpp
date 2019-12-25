@@ -82,6 +82,13 @@ class ForceField
         external_.update_margin(dmargin, sys);
         return;
     }
+    void scale_margin(const real_type scale, const system_type& sys)
+    {
+        local_   .scale_margin(scale, sys);
+        global_  .scale_margin(scale, sys);
+        external_.scale_margin(scale, sys);
+        return;
+    }
 
     void calc_force(system_type& sys) const noexcept
     {
