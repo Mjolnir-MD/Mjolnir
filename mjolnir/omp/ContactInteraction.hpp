@@ -119,7 +119,7 @@ class ContactInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         return;
     }
 
-    void update_margin(const real_type dmargin, const system_type& sys) override
+    void reduce_margin(const real_type dmargin, const system_type& sys) override
     {
         this->current_margin_ -= dmargin;
         if(this->current_margin_ < 0)

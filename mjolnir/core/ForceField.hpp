@@ -64,7 +64,7 @@ class ForceField
     }
 
     // update margin of neighbor list
-    void update_margin(const real_type dmargin, const system_type& sys)
+    void reduce_margin(const real_type dmargin, const system_type& sys)
     {
         // TODO:
         // dmargin is a maximum (safe) length to reduce the margin. Since global
@@ -77,9 +77,9 @@ class ForceField
         // forcefields). In most cases, the most time-consuming part is global
         // forcefields, so I implemented in this way for now. If some idea that
         // works more efficiently is came up, this part would be re-implemented.
-        local_   .update_margin(dmargin, sys);
-        global_  .update_margin(dmargin, sys);
-        external_.update_margin(dmargin, sys);
+        local_   .reduce_margin(dmargin, sys);
+        global_  .reduce_margin(dmargin, sys);
+        external_.reduce_margin(dmargin, sys);
         return;
     }
     void scale_margin(const real_type scale, const system_type& sys)

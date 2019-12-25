@@ -59,11 +59,11 @@ class ForceField<OpenMPSimulatorTraits<realT, boundaryT>>
     }
 
     // update margin of neighbor list
-    void update_margin(const real_type dmargin, const system_type& sys)
+    void reduce_margin(const real_type dmargin, const system_type& sys)
     {
-        local_   .update_margin(dmargin, sys);
-        global_  .update_margin(dmargin, sys);
-        external_.update_margin(dmargin, sys);
+        local_   .reduce_margin(dmargin, sys);
+        global_  .reduce_margin(dmargin, sys);
+        external_.reduce_margin(dmargin, sys);
     }
     void scale_margin(const real_type scale, const system_type& sys)
     {

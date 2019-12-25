@@ -21,7 +21,7 @@ class ExternalForceInteractionBase
 
     virtual void initialize(const system_type&) = 0;
     virtual void update    (const system_type&) = 0;
-    virtual void update_margin(const real_type, const system_type&) = 0;
+    virtual void reduce_margin(const real_type, const system_type&) = 0;
     virtual void  scale_margin(const real_type, const system_type&) = 0;
 
     virtual void      calc_force (system_type&)       const noexcept = 0;

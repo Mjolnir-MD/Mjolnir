@@ -80,7 +80,7 @@ VelocityVerletIntegrator<traitsT>::step(
     }
 
     // update neighbor list; reduce margin, reconstruct the list if needed
-    ff.update_margin(2 * std::sqrt(largest_disp2), sys);
+    ff.reduce_margin(2 * std::sqrt(largest_disp2), sys);
 
     // calc f(t+dt)
     ff.calc_force(sys);
