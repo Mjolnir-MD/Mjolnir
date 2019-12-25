@@ -52,6 +52,7 @@ class DummyInteraction final : public LocalInteractionBase<traitsT>
 
     void update       (const system_type&)                  override {return;}
     void update_margin(const real_type, const system_type&) override {return;}
+    void  scale_margin(const real_type, const system_type&) override {return;}
 
     std::string name() const override {return "Dummy:"_s + this->kind_;}
 

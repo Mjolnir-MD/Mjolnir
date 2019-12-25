@@ -107,6 +107,15 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
         }
         return;
     }
+    void scale_margin(const real_type scale, const system_type& sys) override
+    {
+        this->current_margin_ = (cutoff_ + current_margin_) * scale - cutoff_;
+        if(this->current_margin_ < 0)
+        {
+            this->make_list(sys);
+        }
+        return;
+    }
 
     std::string name() const override
     {return "Contact:"_s + potential_type::name();}
