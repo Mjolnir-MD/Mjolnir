@@ -66,8 +66,27 @@ class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, Potentia
                     const system_type& sys, const potential_type& pot) override;
     void make  (neighbor_list_type& neighbors,
                 const system_type& sys, const potential_type& pot) override;
-    void update(neighbor_list_type& neighbors, const real_type,
-                const system_type&, const potential_type&) override;
+
+    void reduce_margin(neighbor_list_type& neighbors, const real_type dmargin,
+                       const system_type& sys, const potential_type& pot) override
+    {
+        this->current_margin_ -= dmargin;
+        if(this->current_margin_ < 0)
+        {
+            this->make(neighbors, sys, pot);
+        }
+        return;
+    }
+    void scale_margin(neighbor_list_type& neighbors, const real_type scale,
+                const system_type& sys, const potential_type& pot) override
+    {
+        this->current_margin_ = (cutoff_ + current_margin_) * scale - cutoff_;
+        if(this->current_margin_ < 0)
+        {
+            this->make(neighbors, sys, pot);
+        }
+        return;
+    }
 
     real_type cutoff() const noexcept override {return this->cutoff_;}
     real_type margin() const noexcept override {return this->margin_;}
@@ -137,18 +156,6 @@ class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, Potentia
                   "this is the default implementation, not for OpenMP");
 #endif
 };
-
-template<typename traitsT, typename potentialT>
-void PeriodicGridCellList<traitsT, potentialT>::update(neighbor_list_type& neighbors,
-        const real_type dmargin, const system_type& sys, const potential_type& pot)
-{
-    this->current_margin_ -= dmargin;
-    if(this->current_margin_ < 0.)
-    {
-        this->make(neighbors, sys, pot);
-    }
-    return ;
-}
 
 template<typename traitsT, typename potentialT>
 void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbors,

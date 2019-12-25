@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(Contact_calc_force)
         sys[1].force    = coord_type(0,0,0);
         sys[1].position[0] = dist;
 
-        interaction.update_margin(dr, sys);
+        interaction.reduce_margin(dr, sys);
 
         const real_type deriv = potential.derivative(dist);
         const real_type coef  = std::abs(deriv);
