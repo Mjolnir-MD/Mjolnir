@@ -198,13 +198,22 @@ class basic_logger
             std::cerr << "-- ";
             if(level == Level::Warn)
             {
-                std::cerr << '[' << io::bold << io::yellow << "warning" << io::nocolor << "] ";
+                std::cerr << '[' << io::bold << io::yellow << "warning"
+                          << io::nocolor << "] " << io::bold;
+                output_message(std::cerr, std::forward<Ts>(args)...);
+                std::cerr << io::nocolor;
             }
             else if(level == Level::Error)
             {
-                std::cerr << '[' << io::bold << io::red << "error" << io::nocolor << "] ";
+                std::cerr << '[' << io::bold << io::red << "error"
+                          << io::nocolor << "] " << io::bold;
+                output_message(std::cerr, std::forward<Ts>(args)...);
+                std::cerr << io::nocolor;
             }
-            output_message(std::cerr, std::forward<Ts>(args)...);
+            else
+            {
+                output_message(std::cerr, std::forward<Ts>(args)...);
+            }
             std::cerr << std::endl;
         }
 
