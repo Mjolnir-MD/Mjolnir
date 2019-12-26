@@ -1,17 +1,36 @@
 # Change Log
 
+## 1.9.0
+
+### Added
+
+- Add `RepulsiveGoContact` and `AttractiveGoContact`
+- Add `WormLikeChainPotential` (@yutakasi634)
+
+### Changed
+
+- Update toml11 to v3.2.1
+- Warn if splitted input file has several top-level tables
+- Notice `ignore.particles_within` status
+- Write system attribute status (e.g. reference `temperature`) to `.ene` file
+
+### Misc
+
+- Add API to re-scale neighbor-list margin
+- Move FlexibleLocalPotential from general potential directory to forcefield/FLP
+
 ## 1.8.0
 
-## Added
+### Added
 
 - add EnergyCalculationSimulator
 
-## Changed
+### Changed
 
 - warn if undefined group is found in `[[forcefield.global]]`
 - warn if invalid key appears in `[[forcefield.global]]`
 
-## Misc
+### Misc
 
 - enable to clone forcefield
 - add initialize() to local potentials (@yutakasi634)
