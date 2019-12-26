@@ -96,7 +96,7 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
         // This function parallelize itself inside. `parallel` block is not
         // needed here to parallelize it.
-        ff.update_margin(2 * std::sqrt(largest_disp2), sys);
+        ff.reduce_margin(2 * std::sqrt(largest_disp2), sys);
         ff.calc_force(sys);
 
         // calc a(t+dt) and v(t+dt), generate noise

@@ -66,7 +66,8 @@ class PositionRestraintInteraction final
     }
 
     // no margin to be updated exists.
-    void update_margin(const real_type, const system_type&) override {return;}
+    void reduce_margin(const real_type, const system_type&) override {return;}
+    void  scale_margin(const real_type, const system_type&) override {return;}
 
     std::string name() const override
     {return "PositionRestraint:"_s + potential_type::name();}

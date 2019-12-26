@@ -148,7 +148,7 @@ BAOABLangevinIntegrator<traitsT>::step(
     }
 
     // update neighbor list; reduce margin, reconstruct the list if needed
-    ff.update_margin(2 * std::sqrt(largest_disp2), sys);
+    ff.reduce_margin(2 * std::sqrt(largest_disp2), sys);
 
     // calc f(p(n+1))
     ff.calc_force(sys);

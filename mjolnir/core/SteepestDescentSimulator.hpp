@@ -102,7 +102,7 @@ inline bool SteepestDescentSimulator<traitsT>::step()
     }
 
     // update neighbor list; reduce margin, reconstruct the list if needed
-    this->ff_.update_margin(2 * std::sqrt(max_disp2), this->system_);
+    this->ff_.reduce_margin(2 * std::sqrt(max_disp2), this->system_);
 
     ++step_count_;
     return this->step_count_ < this->step_limit_;

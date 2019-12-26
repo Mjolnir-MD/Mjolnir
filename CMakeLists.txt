@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS       OFF) # not gnu11, c++11
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/extlib)
+add_definitions(-DTOML11_COLORIZE_ERROR_MESSAGE)
 
 # -----------------------------------------------------------------------------
 # add compilation flags (for general)

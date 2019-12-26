@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
+#include <mjolnir/forcefield/FLP/FlexibleLocalDihedralPotential.hpp>
 #include <mjolnir/math/constants.hpp>
 
 BOOST_AUTO_TEST_CASE(FlexibleLocalDihedral_double)

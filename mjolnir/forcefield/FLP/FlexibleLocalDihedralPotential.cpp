@@ -1,4 +1,4 @@
-#include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
+#include <mjolnir/forcefield/FLP/FlexibleLocalDihedralPotential.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

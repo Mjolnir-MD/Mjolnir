@@ -68,9 +68,9 @@ class XYZLoader final : public LoaderBase<traitsT>
         return;
     }
 
-    std::size_t num_particles() const noexcept {return number_of_particles_;}
-    std::size_t num_frames()    const noexcept {return number_of_frames_;}
-    bool        is_eof()        const noexcept {return file_.eof();}
+    std::size_t num_particles() const noexcept override {return number_of_particles_;}
+    std::size_t num_frames()    const noexcept override {return number_of_frames_;}
+    bool        is_eof()        const noexcept override {return file_.eof();}
 
     bool load_next(system_type& sys) override
     {

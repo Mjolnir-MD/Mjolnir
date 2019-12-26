@@ -81,7 +81,7 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
         return;
     }
 
-    void update_margin(const real_type dmargin, const system_type& sys) override
+    void reduce_margin(const real_type dmargin, const system_type& sys) override
     {
         this->current_margin_ -= dmargin;
         if(this->current_margin_ < 0)
@@ -90,6 +90,17 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
         }
         return;
     }
+    void scale_margin(const real_type scale, const system_type& sys) override
+    {
+        this->current_margin_ = (cutoff_ + current_margin_) * scale - cutoff_;
+        if(this->current_margin_ < 0)
+        {
+            this->make_list(sys);
+        }
+        return;
+    }
+
+
 
     std::string name() const override
     {

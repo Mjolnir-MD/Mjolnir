@@ -32,8 +32,12 @@ inline bool check_keys_available(const toml::value& table,
             std::ostringstream oss;
             oss << "unknown value \"" << kv.first << "\" found. this "
                 << kv.second.type() << " will never be used.";
-            MJOLNIR_LOG_WARN(toml::format_error(oss.str(),
-                        kv.second, "this will be ignored"));
+            const auto err_msg = toml::format_error(
+                    oss.str(), kv.second, "this will be ignored");
+            // workaround to skip auto-added [error].
+            // Normally this function is called only when the input file
+            // contains an invalid key. So it should not be a hotspot.
+            MJOLNIR_LOG_WARN(err_msg.substr(err_msg.find(oss.str())));
             all_available = false;
         }
     }

@@ -5,14 +5,17 @@
 
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/potential/local/GoContactPotential.hpp>
+#include <mjolnir/potential/local/GoContactAttractivePotential.hpp>
+#include <mjolnir/potential/local/GoContactRepulsivePotential.hpp>
 #include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
 #include <mjolnir/potential/local/GaussianPotential.hpp>
 #include <mjolnir/potential/local/PeriodicGaussianPotential.hpp>
-#include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
-#include <mjolnir/potential/local/FlexibleLocalDihedralPotential.hpp>
 #include <mjolnir/potential/local/CosinePotential.hpp>
 #include <mjolnir/potential/local/SumLocalPotential.hpp>
 #include <mjolnir/potential/local/UniformPotential.hpp>
+#include <mjolnir/potential/local/WormLikeChainPotential.hpp>
+#include <mjolnir/forcefield/FLP/FlexibleLocalAnglePotential.hpp>
+#include <mjolnir/forcefield/FLP/FlexibleLocalDihedralPotential.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BondPotential.hpp>
 
 #include <mjolnir/core/Topology.hpp>
@@ -55,6 +58,38 @@ read_go_contact_potential(const toml::value& param, const toml::value& env)
 
     MJOLNIR_LOG_INFO("GoContactPotential = {v0 = ", v0, ", k = ", k, '}');
     return GoContactPotential<realT>(k, v0);
+}
+
+template<typename realT>
+GoContactAttractivePotential<realT>
+read_go_contact_attractive_potential(
+        const toml::value& param, const toml::value& env)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    using real_type = realT;
+    check_keys_available(param, {"indices", "k", "v0"});
+
+    const auto k  = find_parameter<real_type>(param, env, "k");
+    const auto v0 = find_parameter<real_type>(param, env, "v0");
+
+    MJOLNIR_LOG_INFO("GoContactAttractivePotential = {v0 = ", v0, ", k = ", k, '}');
+    return GoContactAttractivePotential<realT>(k, v0);
+}
+
+template<typename realT>
+GoContactRepulsivePotential<realT>
+read_go_contact_repulsive_potential(
+        const toml::value& param, const toml::value& env)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    using real_type = realT;
+    check_keys_available(param, {"indices", "k", "v0"});
+
+    const auto k  = find_parameter<real_type>(param, env, "k");
+    const auto v0 = find_parameter<real_type>(param, env, "v0");
+
+    MJOLNIR_LOG_INFO("GoContactRepulsivePotential = {v0 = ", v0, ", k = ", k, '}');
+    return GoContactRepulsivePotential<realT>(k, v0);
 }
 
 template<typename realT>
@@ -191,6 +226,21 @@ read_uniform_potential(const toml::value& param, const toml::value& env)
 }
 
 template<typename realT>
+WormLikeChainPotential<realT>
+read_worm_like_chain_potential(const toml::value& param, const toml::value& env)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    using real_type = realT;
+    check_keys_available(param, {"indices", "p", "lc"});
+
+    auto p  = find_parameter<real_type>(param, env, "p");
+    auto lc = find_parameter<real_type>(param, env, "lc");
+
+    MJOLNIR_LOG_INFO("WormLikeChainPotential = {p = ", p, ", lc = ", lc,"}");
+    return WormLikeChainPotential<realT>(p, lc);
+}
+
+template<typename realT>
 ThreeSPN2BondPotential<realT>
 read_3spn2_bond_potential(const toml::value& param, const toml::value& env)
 {
@@ -234,6 +284,24 @@ struct read_local_potential_impl<GoContactPotential<realT>>
     invoke(const toml::value& param, const toml::value& env)
     {
         return read_go_contact_potential<realT>(param, env);
+    }
+};
+template<typename realT>
+struct read_local_potential_impl<GoContactAttractivePotential<realT>>
+{
+    static GoContactAttractivePotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
+    {
+        return read_go_contact_attractive_potential<realT>(param, env);
+    }
+};
+template<typename realT>
+struct read_local_potential_impl<GoContactRepulsivePotential<realT>>
+{
+    static GoContactRepulsivePotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
+    {
+        return read_go_contact_repulsive_potential<realT>(param, env);
     }
 };
 template<typename realT>
@@ -297,6 +365,15 @@ struct read_local_potential_impl<UniformPotential<realT>>
     invoke(const toml::value& param, const toml::value& env)
     {
         return read_uniform_potential<realT>(param, env);
+    }
+};
+template<typename realT>
+struct read_local_potential_impl<WormLikeChainPotential<realT>>
+{
+    static WormLikeChainPotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
+    {
+        return read_worm_like_chain_potential<realT>(param, env);
     }
 };
 template<typename realT>
@@ -397,6 +474,10 @@ extern template std::vector<std::pair<std::array<std::size_t, 4>, HarmonicPotent
 
 extern template std::vector<std::pair<std::array<std::size_t, 2>, GoContactPotential<double>>> read_local_potential(const toml::value& local);
 extern template std::vector<std::pair<std::array<std::size_t, 2>, GoContactPotential<float >>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 2>, GoContactAttractivePotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 2>, GoContactAttractivePotential<float >>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 2>, GoContactRepulsivePotential<double>>> read_local_potential(const toml::value& local);
+extern template std::vector<std::pair<std::array<std::size_t, 2>, GoContactRepulsivePotential<float >>> read_local_potential(const toml::value& local);
 
 extern template std::vector<std::pair<std::array<std::size_t, 4>, ClementiDihedralPotential<double>>> read_local_potential(const toml::value& local);
 extern template std::vector<std::pair<std::array<std::size_t, 4>, ClementiDihedralPotential<float >>> read_local_potential(const toml::value& local);

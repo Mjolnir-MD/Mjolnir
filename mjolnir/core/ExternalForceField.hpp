@@ -41,6 +41,7 @@ class ExternalForceField
     }
     ExternalForceField& operator=(ExternalForceField const& other)
     {
+        this->interactions_.clear();
         this->interactions_.reserve(other.size());
         for(const auto& interaction : other)
         {
@@ -78,11 +79,19 @@ class ExternalForceField
     }
 
     // to reduce margin of neighbor list, and re-construct the list if needed
-    void update_margin(const real_type dmargin, const system_type& sys)
+    void reduce_margin(const real_type dmargin, const system_type& sys)
     {
         for(auto& item : this->interactions_)
         {
-            item->update_margin(dmargin, sys);
+            item->reduce_margin(dmargin, sys);
+        }
+        return;
+    }
+    void scale_margin(const real_type scale, const system_type& sys)
+    {
+        for(auto& item : this->interactions_)
+        {
+            item->scale_margin(scale, sys);
         }
         return;
     }

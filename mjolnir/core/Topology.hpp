@@ -68,9 +68,13 @@ class Topology
           names_(N, "uninitialized"), groups_(N, "uninitialized")
     {}
 
-    void        clear()                {return nodes_.clear();}
     bool        empty() const noexcept {return nodes_.empty();}
     std::size_t size()  const noexcept {return nodes_.size();}
+    void clear()
+    {
+        std::fill(nodes_.begin(), nodes_.end(), node{uninitialized(), {}});
+        return ;
+    }
 
     name_type&       name_of(const std::size_t i)       {return this->names_.at(i);}
     name_type const& name_of(const std::size_t i) const {return this->names_.at(i);}

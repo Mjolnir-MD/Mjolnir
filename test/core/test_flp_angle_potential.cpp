@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
+#include <mjolnir/forcefield/FLP/FlexibleLocalAnglePotential.hpp>
 #include <mjolnir/math/constants.hpp>
 
 BOOST_AUTO_TEST_CASE(FlexibleLocalAngle_double)

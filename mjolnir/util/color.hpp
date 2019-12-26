@@ -10,7 +10,15 @@ namespace mjolnir
 {
 namespace io
 {
-
+template<typename charT, typename traits>
+std::basic_ostream<charT, traits>& bold(std::basic_ostream<charT, traits>& os)
+{
+    if(detail::isatty(os))
+    {
+        os << "\x1b[01m";
+    }
+    return os;
+}
 template<typename charT, typename traits>
 std::basic_ostream<charT, traits>& red(std::basic_ostream<charT, traits>& os)
 {

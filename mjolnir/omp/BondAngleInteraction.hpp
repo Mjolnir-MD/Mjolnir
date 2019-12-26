@@ -139,7 +139,8 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 
     // do nothing. this is used to reduce margin of neighbor list, and added
     // to this class for the consistency.
-    void update_margin(const real_type, const system_type&) override {return;}
+    void reduce_margin(const real_type, const system_type&) override {return;}
+    void  scale_margin(const real_type, const system_type&) override {return;}
 
     std::string name() const override
     {return "BondAngle:"_s + potential_type::name();}
@@ -176,7 +177,7 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/potential/local/HarmonicPotential.hpp>
 #include <mjolnir/potential/local/GaussianPotential.hpp>
-#include <mjolnir/potential/local/FlexibleLocalAnglePotential.hpp>
+#include <mjolnir/forcefield/FLP/FlexibleLocalAnglePotential.hpp>
 
 namespace mjolnir
 {
