@@ -119,7 +119,8 @@ foreach(TEST_NAME ${TEST_NAMES})
     add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
     # here we use less-aggressive optimization flag to turn on NaN checking.
     # -Ofast sometimes skips NaN check by replacing isnan always false.
-    set_target_properties(${TEST_NAME} PROPERTIES COMPILE_FLAGS "-O2")
+    set_target_properties(${TEST_NAME} PROPERTIES
+        COMPILE_FLAGS "${MJOLNIR_WARNING_FLAGS} -O2")
 
     if(SEPARATE_BUILD)
         target_link_libraries(${TEST_NAME} mjolnir_core)

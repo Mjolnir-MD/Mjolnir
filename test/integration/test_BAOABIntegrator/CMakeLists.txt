@@ -16,7 +16,7 @@ if(OpenMP_FOUND AND USE_OPENMP)
 
     # here use the same options as src/mjolnir because it is an integration test.
     set_target_properties(test_BAOABIntegrator PROPERTIES
-        COMPILE_FLAGS "${MJOLNIR_OPTIMIZATON_FLAGS}")
+        COMPILE_FLAGS "${MJOLNIR_WARNING_FLAGS} ${MJOLNIR_OPTIMIZATON_FLAGS}")
 
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
         # After CMake 3.13, we can use target_link_options

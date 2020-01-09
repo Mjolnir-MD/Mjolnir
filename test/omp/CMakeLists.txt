@@ -32,8 +32,10 @@ endif()
 
 foreach(TEST_NAME ${TEST_NAMES})
     add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
+
     # here we use less-aggressive optimization flag to turn on NaN checking.
-    set_target_properties(${TEST_NAME} PROPERTIES COMPILE_FLAGS "-O2")
+    set_target_properties(${TEST_NAME} PROPERTIES
+        COMPILE_FLAGS "${MJOLNIR_WARNING_FLAGS} -O2 ${OpenMP_CXX_FLAGS}")
 
     if(SEPARATE_BUILD)
         target_link_libraries(${TEST_NAME} mjolnir_core)
