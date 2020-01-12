@@ -451,6 +451,12 @@ read_integrator_type(const toml::value& root, const toml::value& simulator)
         using integratorT = BAOABLangevinIntegrator<traitsT>;
         return read_simulator<traitsT, integratorT>(root, simulator);
     }
+    else if(integ == "GFWNpTLangevin")
+    {
+        MJOLNIR_LOG_NOTICE("Integrator is GFWNpTLangevin.");
+        using integratorT = GFWNpTLangevinIntegrator<traitsT>;
+        return read_simulator<traitsT, integratorT>(root, simulator);
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -460,7 +466,8 @@ read_integrator_type(const toml::value& root, const toml::value& simulator)
             "- \"VelocityVerlet\"     : simple and standard Velocity Verlet integrator.",
             "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
                                       " based on the Velocity Verlet",
-            "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator"
+            "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator",
+            "- \"GFWNpTLangevin\"     : BAOAB based NpT Langevin Integrator"
             }));
     }
 }
@@ -491,6 +498,11 @@ extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator
 extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>, BAOABLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
 extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>, BAOABLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
 
+extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<double, UnlimitedBoundary>       , GFWNpTLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>       >>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<float,  UnlimitedBoundary>       , GFWNpTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       >>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>, GFWNpTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_molecular_dynamics_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GFWNpTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
+
 // ----------------------------------------------------------------------------
 // read_simulated_annealing_simulator
 
@@ -508,6 +520,11 @@ extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulato
 extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<float,  UnlimitedBoundary>       , BAOABLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       >>(const toml::value&, const toml::value&);
 extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>, BAOABLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
 extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>, BAOABLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
+
+extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<double, UnlimitedBoundary>       , GFWNpTLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>       >>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<float,  UnlimitedBoundary>       , GFWNpTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       >>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>, GFWNpTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulated_annealing_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GFWNpTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
 
 // ----------------------------------------------------------------------------
 // read_steepest_descent_simulator
@@ -535,6 +552,11 @@ extern template std::unique_ptr<SimulatorBase> read_switching_forcefield_simulat
 extern template std::unique_ptr<SimulatorBase> read_switching_forcefield_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>, BAOABLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
 extern template std::unique_ptr<SimulatorBase> read_switching_forcefield_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>, BAOABLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
 
+extern template std::unique_ptr<SimulatorBase> read_switching_forcefield_simulator<SimulatorTraits<double, UnlimitedBoundary>       , GFWNpTLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>       >>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_switching_forcefield_simulator<SimulatorTraits<float,  UnlimitedBoundary>       , GFWNpTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       >>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_switching_forcefield_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>, GFWNpTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_switching_forcefield_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GFWNpTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
+
 // ----------------------------------------------------------------------------
 // read_simulator
 extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<double, UnlimitedBoundary>       , VelocityVerletIntegrator<SimulatorTraits<double, UnlimitedBoundary>       >>(const toml::value&, const toml::value&);
@@ -551,6 +573,11 @@ extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<do
 extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<float,  UnlimitedBoundary>       , BAOABLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       >>(const toml::value&, const toml::value&);
 extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>, BAOABLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
 extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>, BAOABLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
+
+extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<double, UnlimitedBoundary>       , GFWNpTLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>       >>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<float,  UnlimitedBoundary>       , GFWNpTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       >>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<double, CuboidalPeriodicBoundary>, GFWNpTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
+extern template std::unique_ptr<SimulatorBase> read_simulator<SimulatorTraits<float,  CuboidalPeriodicBoundary>, GFWNpTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>(const toml::value&, const toml::value&);
 
 // ----------------------------------------------------------------------------
 // read_integrator_type

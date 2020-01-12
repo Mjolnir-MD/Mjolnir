@@ -20,4 +20,9 @@ template BAOABLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>     
 template BAOABLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       > read_BAOAB_langevin_integrator(const toml::value& simulator);
 template BAOABLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_BAOAB_langevin_integrator(const toml::value& simulator);
 template BAOABLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_BAOAB_langevin_integrator(const toml::value& simulator);
+
+template GFWNpTLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>       > read_GFW_NpT_langevin_integrator(const toml::value& simulator);
+template GFWNpTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       > read_GFW_NpT_langevin_integrator(const toml::value& simulator);
+template GFWNpTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_GFW_NpT_langevin_integrator(const toml::value& simulator);
+template GFWNpTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_GFW_NpT_langevin_integrator(const toml::value& simulator);
 } // mjolnir
