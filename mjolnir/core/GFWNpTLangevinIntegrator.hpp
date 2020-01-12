@@ -32,8 +32,7 @@ class GFWNpTLangevinIntegrator
 
     GFWNpTLangevinIntegrator(const real_type, const real_type,
         const coordinate_type&, const coordinate_type&,
-        const coordinate_type&, const coordinate_type&,
-        const std::vector<real_type>&)
+        const coordinate_type&, const std::vector<real_type>&)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -94,11 +93,11 @@ class GFWNpTLangevinIntegrator<SimulatorTraits<realT, CuboidalPeriodicBoundary>>
   public:
 
     GFWNpTLangevinIntegrator(const real_type dt, const real_type chi,
-            const coordinate_type& press,      const coordinate_type& m_cell,
-            const coordinate_type& gamma_cell, const coordinate_type& v_cell_ini,
-            const std::vector<real_type>& gammas)
+            const coordinate_type& m_cell,     const coordinate_type& gamma_cell,
+            const coordinate_type& v_cell_ini, const std::vector<real_type>& gammas)
         : dt_(dt), halfdt_(dt / 2), temperature_(/* dummy = */ -1), chi_(chi),
-          P_ins_(math::make_coordinate<coordinate_type>(0, 0, 0)), P_ref_(press),
+          P_ins_(math::make_coordinate<coordinate_type>(0, 0, 0)),
+          P_ref_(math::make_coordinate<coordinate_type>(0, 0, 0)),
           m_cell_(m_cell), v_cell_(v_cell_ini), gamma_cell_(gamma_cell),
           gammas_(gammas), exp_gamma_dt_(gammas.size()), noise_coeff_(gammas.size())
     {}
@@ -122,6 +121,11 @@ class GFWNpTLangevinIntegrator<SimulatorTraits<realT, CuboidalPeriodicBoundary>>
         // calculate the current pressure using the force calculated here
         this->P_ins_ = this->calc_pressure(sys,
                 sys.boundary().upper_bound() - sys.boundary().lower_bound());
+
+        sys.attribute("P_instantaneous_x") = X(P_ins_);
+        sys.attribute("P_instantaneous_y") = Y(P_ins_);
+        sys.attribute("P_instantaneous_z") = Z(P_ins_);
+
         return;
     }
 
