@@ -73,6 +73,13 @@ cross_product(const Vector<realT, 3>& lhs, const Vector<realT, 3>& rhs) noexcept
 }
 
 template<typename realT>
+inline Vector<realT, 3>
+hadamard_product(const Vector<realT, 3>& lhs, const Vector<realT, 3>& rhs) noexcept
+{
+    return Vector<realT, 3>(X(lhs) * X(rhs), Y(lhs) * Y(rhs), Z(lhs) * Z(rhs));
+}
+
+template<typename realT>
 inline realT length_sq(const Vector<realT, 3>& lhs) noexcept
 {
     return X(lhs) * X(lhs) + Y(lhs) * Y(lhs) + Z(lhs) * Z(lhs);
