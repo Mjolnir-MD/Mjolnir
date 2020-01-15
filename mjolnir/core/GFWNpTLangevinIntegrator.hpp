@@ -145,7 +145,6 @@ class GFWNpTLangevinIntegrator<SimulatorTraits<realT, CuboidalPeriodicBoundary>>
         auto det_h  = X(h_cell) * Y(h_cell) * Z(h_cell);
         auto inv_h  = make_coordinate<coordinate_type>(
                         1 / X(h_cell), 1 / Y(h_cell), 1 / Z(h_cell));
-
         auto P_diff = P_ins_ - P_ref_;
 
         // --------------------------------------------------------------------
@@ -157,18 +156,28 @@ class GFWNpTLangevinIntegrator<SimulatorTraits<realT, CuboidalPeriodicBoundary>>
         // --------------------------------------------------------------------
         // update particle velocities
 
-        for(std::size_t i=0; i<sys.size(); ++i)
         {
-            sys.velocity(i) = this->S(sys.velocity(i), sys.force(i) * sys.rmass(i),
-                                      hadamard_product(-v_cell_, inv_h));
+            const auto v_over_h = hadamard_product(-v_cell_, inv_h);
+            const auto coef_S = make_coordinate<coordinate_type>(
+                    std::exp(halfdt_ * X(v_over_h)),
+                    std::exp(halfdt_ * Y(v_over_h)),
+                    std::exp(halfdt_ * Z(v_over_h)));
+
+            for(std::size_t i=0; i<sys.size(); ++i)
+            {
+                sys.velocity(i) = this->S(sys.velocity(i),
+                                          sys.force(i) * sys.rmass(i),
+                                          v_over_h, coef_S);
+                sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
+            }
         }
 
         // --------------------------------------------------------------------
         // update cell size, volume and inverse cell matrix
 
-        h_cell += halfdt_ * v_cell_;
-        det_h   = X(h_cell) * Y(h_cell) * Z(h_cell);
-        inv_h   = make_coordinate<coordinate_type>(
+        h_cell  += halfdt_ * v_cell_;
+        det_h    = X(h_cell) * Y(h_cell) * Z(h_cell);
+        inv_h    = make_coordinate<coordinate_type>(
                     1 / X(h_cell), 1 / Y(h_cell), 1 / Z(h_cell));
 
         sys.boundary().set_boundary(cell_origin, cell_origin + h_cell);
@@ -177,15 +186,23 @@ class GFWNpTLangevinIntegrator<SimulatorTraits<realT, CuboidalPeriodicBoundary>>
         // update particle positions
 
         real_type max_displacement_sq_1 = 0;
-        for(std::size_t i=0; i<sys.size(); ++i)
         {
-            const auto new_pos = this->S(sys.position(i), sys.velocity(i),
-                                         hadamard_product(v_cell_, inv_h));
+            const auto v_over_h = hadamard_product(v_cell_, inv_h);
+            const auto coef_S = make_coordinate<coordinate_type>(
+                    std::exp(halfdt_ * X(v_over_h)),
+                    std::exp(halfdt_ * Y(v_over_h)),
+                    std::exp(halfdt_ * Z(v_over_h)));
 
-            max_displacement_sq_1 = std::max(max_displacement_sq_1,
-                    math::length_sq(sys.position(i) - new_pos));
+            for(std::size_t i=0; i<sys.size(); ++i)
+            {
+                const auto new_pos = this->S(sys.position(i), sys.velocity(i),
+                                             v_over_h, coef_S);
 
-            sys.position(i) = sys.boundary().adjust_position(new_pos);
+                max_displacement_sq_1 = std::max(max_displacement_sq_1,
+                        math::length_sq(sys.position(i) - new_pos));
+
+                sys.position(i) = sys.boundary().adjust_position(new_pos);
+            }
         }
 
         // --------------------------------------------------------------------
@@ -214,16 +231,25 @@ class GFWNpTLangevinIntegrator<SimulatorTraits<realT, CuboidalPeriodicBoundary>>
         // --------------------------------------------------------------------
         // update particle positions
 
+
         real_type max_displacement_sq_2 = 0;
-        for(std::size_t i=0; i<sys.size(); ++i)
         {
-            const auto new_pos = this->S(sys.position(i), sys.velocity(i),
-                                         hadamard_product(v_cell_, inv_h));
+            const auto v_over_h = hadamard_product(v_cell_, inv_h);
+            const auto coef_S = make_coordinate<coordinate_type>(
+                    std::exp(halfdt_ * X(v_over_h)),
+                    std::exp(halfdt_ * Y(v_over_h)),
+                    std::exp(halfdt_ * Z(v_over_h)));
 
-            max_displacement_sq_2 = std::max(max_displacement_sq_2,
-                    math::length_sq(sys.position(i) - new_pos));
+            for(std::size_t i=0; i<sys.size(); ++i)
+            {
+                const auto new_pos = this->S(sys.position(i), sys.velocity(i),
+                                             v_over_h, coef_S);
 
-            sys.position(i) = sys.boundary().adjust_position(new_pos);
+                max_displacement_sq_2 = std::max(max_displacement_sq_2,
+                        math::length_sq(sys.position(i) - new_pos));
+
+                sys.position(i) = sys.boundary().adjust_position(new_pos);
+            }
         }
 
         // --------------------------------------------------------------------
@@ -249,10 +275,19 @@ class GFWNpTLangevinIntegrator<SimulatorTraits<realT, CuboidalPeriodicBoundary>>
         // --------------------------------------------------------------------
         // update particle velocities
 
-        for(std::size_t i=0; i<sys.size(); ++i)
         {
-            sys.velocity(i) = this->S(sys.velocity(i), sys.force(i) * sys.rmass(i),
-                                      hadamard_product(-v_cell_, inv_h));
+            const auto v_over_h = hadamard_product(-v_cell_, inv_h);
+            const auto coef_S = make_coordinate<coordinate_type>(
+                    std::exp(halfdt_ * X(v_over_h)),
+                    std::exp(halfdt_ * Y(v_over_h)),
+                    std::exp(halfdt_ * Z(v_over_h)));
+
+            for(std::size_t i=0; i<sys.size(); ++i)
+            {
+                sys.velocity(i) = this->S(sys.velocity(i),
+                                          sys.force(i) * sys.rmass(i),
+                                          v_over_h, coef_S);
+            }
         }
 
         // --------------------------------------------------------------------
@@ -276,11 +311,17 @@ class GFWNpTLangevinIntegrator<SimulatorTraits<realT, CuboidalPeriodicBoundary>>
 
     void update(const system_type& sys)
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
         // update reference temperature and reference pressure
         this->temperature_    = check_attribute_exists(sys, "temperature");
         math::X(this->P_ref_) = check_attribute_exists(sys, "pressure_x");
         math::Y(this->P_ref_) = check_attribute_exists(sys, "pressure_y");
         math::Z(this->P_ref_) = check_attribute_exists(sys, "pressure_z");
+
+        MJOLNIR_LOG_NOTICE("system temperature is ", this->temperature_);
+        MJOLNIR_LOG_NOTICE("system pressure is ", this->P_ref_);
 
         this->reset_parameters(sys);
         return ;
@@ -305,25 +346,28 @@ class GFWNpTLangevinIntegrator<SimulatorTraits<realT, CuboidalPeriodicBoundary>>
     // reset all the cached parameters.
     void reset_parameters(const system_type& sys) noexcept
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
         using math::X; using math::Y; using math::Z;
 
         const auto kBT = physics::constants<real_type>::kB() * this->temperature_;
 
         this->chi_kBT_ = this->chi_ * kBT;
+        MJOLNIR_LOG_INFO("chi = ", this->chi_, ", chi_kBT = ", chi_kBT_);
 
         X(rm_cell_) = real_type(1) / X(m_cell_);
         Y(rm_cell_) = real_type(1) / Y(m_cell_);
         Z(rm_cell_) = real_type(1) / Z(m_cell_);
 
         // exp(-gamma dt)
-        const auto exp_gamma_dt_x = std::exp(-dt_ * X(gamma_cell_));
-        const auto exp_gamma_dt_y = std::exp(-dt_ * Y(gamma_cell_));
-        const auto exp_gamma_dt_z = std::exp(-dt_ * Z(gamma_cell_));
+        const real_type exp_gamma_dt_x = std::exp(-dt_ * X(gamma_cell_));
+        const real_type exp_gamma_dt_y = std::exp(-dt_ * Y(gamma_cell_));
+        const real_type exp_gamma_dt_z = std::exp(-dt_ * Z(gamma_cell_));
 
         // exp(-2gamma dt)
-        const auto exp_2gamma_dt_x = exp_gamma_dt_x * exp_gamma_dt_x;
-        const auto exp_2gamma_dt_y = exp_gamma_dt_y * exp_gamma_dt_y;
-        const auto exp_2gamma_dt_z = exp_gamma_dt_z * exp_gamma_dt_z;
+        const real_type exp_2gamma_dt_x = exp_gamma_dt_x * exp_gamma_dt_x;
+        const real_type exp_2gamma_dt_y = exp_gamma_dt_y * exp_gamma_dt_y;
+        const real_type exp_2gamma_dt_z = exp_gamma_dt_z * exp_gamma_dt_z;
 
         X(exp_gamma_dt_cell_) = exp_gamma_dt_x;
         Y(exp_gamma_dt_cell_) = exp_gamma_dt_y;
@@ -371,22 +415,18 @@ class GFWNpTLangevinIntegrator<SimulatorTraits<realT, CuboidalPeriodicBoundary>>
     // When the off-diagonal terms vanish, the Su and the Sl functions become
     // the same with each other and are drastically simplified.
     // Here it implements diagonal version of Su and Sl.
-    coordinate_type S(coordinate_type x0, const coordinate_type b,
-                      const coordinate_type A)
+    coordinate_type S(coordinate_type x0,      const coordinate_type b,
+                      const coordinate_type A, const coordinate_type coef_S)
     {
         using math::X; using math::Y; using math::Z;
 
-        const auto coef_x = std::exp(halfdt_ * X(A));
-        const auto coef_y = std::exp(halfdt_ * Y(A));
-        const auto coef_z = std::exp(halfdt_ * Z(A));
+        X(x0) *= X(coef_S);
+        Y(x0) *= Y(coef_S);
+        Z(x0) *= Z(coef_S);
 
-        X(x0) *= coef_x;
-        Y(x0) *= coef_y;
-        Z(x0) *= coef_z;
-
-        X(x0) -= X(A) * X(b) * (1 - coef_x);
-        Y(x0) -= Y(A) * Y(b) * (1 - coef_y);
-        Z(x0) -= Z(A) * Z(b) * (1 - coef_z);
+        X(x0) -= (real_type(1) - X(coef_S)) * X(b) / X(A);
+        Y(x0) -= (real_type(1) - Y(coef_S)) * Y(b) / Y(A);
+        Z(x0) -= (real_type(1) - Z(coef_S)) * Z(b) / Z(A);
 
         return x0;
     }
