@@ -8,9 +8,9 @@ namespace mjolnir
 
 // When we compile a simulator, we often turn optimization flags on.
 // Some flags that allow relatively agressive optimizations, e.g. -Ofast and
-// -ffast-math, NaN-cheking will be elimited. It is because those flags
-// implicitly turns a flag `-ffinite-math-only`, at least on GCC, that assumes
-// that all the floating point value will never be NaN. Under that condition,
+// -ffast-math, will eliminate NaN-cheking. It is because those flags implicitly
+// turns a flag `-ffinite-math-only` on, at least on GCC, that assumes
+// all the floating point value will never be NaN. Under that condition,
 // naive NaN-checking, such as calling std::isnan, will be eliminated as a
 // dead code. But sometimes we want to check it anyway.
 //     To avoid that optimization, those `mjolnir::is_finite` functions directly
