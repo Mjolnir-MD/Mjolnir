@@ -71,7 +71,7 @@ class ObserverContainer
         // is larger than the benefit on the runtime efficiency.
         if(this->output_progress_)
         {
-            std::cerr << this->progress_bar_.format(step);
+            this->progress_bar_.format(step, std::cerr);
         }
     }
     // update header, or something that required to be finalized

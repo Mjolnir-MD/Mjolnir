@@ -11,25 +11,14 @@ namespace mjolnir
 template<std::size_t Width>
 class progress_bar
 {
-    //  .---8--.             .--------21---------.
-    //  12345678             123456789012345678901
-    // \r100.0%| ... W*3 ... |XX.X sec remaining \0
-    using buffer_type = std::array<char, 30 + Width * 3>;
-
   public:
 
     progress_bar() noexcept
         : total_(1), r_total_(1.0)
-    {
-        buffer_.fill('\0');
-        buffer_.front() = '\r';
-    }
+    {}
     explicit progress_bar(std::size_t tot) noexcept
         : total_(tot), r_total_(1.0 / tot)
-    {
-        buffer_.fill('\0');
-        buffer_.front() = '\r';
-    }
+    {}
     ~progress_bar() = default;
     progress_bar(progress_bar const&) = default;
     progress_bar(progress_bar &&)     = default;
@@ -43,7 +32,7 @@ class progress_bar
         return;
     }
 
-    const char* format(std::size_t count)
+    void format(std::size_t count, std::ostream& os)
     {
         //XXX: requires UTF-8. TODO: consider setting locale
         constexpr auto full  = u8"█"; // U+2588 Full block
@@ -55,44 +44,38 @@ class progress_bar
         constexpr auto l2    = u8"▎"; // U+258E Left one quarter block
         constexpr auto l1    = u8"▏"; // U+258F Left one eighth block
 
-        const double ratio = (count == total_) ? 1.0 : count * this->r_total_;
-        assert(ratio <= 1.0);
+        const double ratio = (count == total_) ? 1.0 :
+            std::max(0.0, std::min(1.0, count * this->r_total_));
 
-        char* iter = buffer_.data();
-        iter++; // the first character is always \r
-        iter += std::snprintf(iter, 6, "%5.1f", ratio * 100.0);
-        *iter++ = '%';
-        *iter++ = '|';
+        std::array<char, 8> buf1;
+        std::snprintf(buf1.data(), 8, "%5.1f%%|", ratio * 100.0);
+        os << '\r' << buf1.data();
 
         const std::size_t filled = std::floor(ratio*Width);
         for(std::size_t i=0; i<filled; ++i)
         {
-            *iter++ = full[0];
-            *iter++ = full[1];
-            *iter++ = full[2];
+            os << full;
         }
         if(Width > filled)
         {
             switch(static_cast<std::size_t>(ratio * Width * 8) % 8)
             {
-                case 0:{*iter++ = ' '; break;}
-                case 1:{*iter++ = l1[0]; *iter++ = l1[1]; *iter++ = l1[2]; break;}
-                case 2:{*iter++ = l2[0]; *iter++ = l2[1]; *iter++ = l2[2]; break;}
-                case 3:{*iter++ = l3[0]; *iter++ = l3[1]; *iter++ = l3[2]; break;}
-                case 4:{*iter++ = l4[0]; *iter++ = l4[1]; *iter++ = l4[2]; break;}
-                case 5:{*iter++ = l5[0]; *iter++ = l5[1]; *iter++ = l5[2]; break;}
-                case 6:{*iter++ = l6[0]; *iter++ = l6[1]; *iter++ = l6[2]; break;}
-                case 7:{*iter++ = l7[0]; *iter++ = l7[1]; *iter++ = l7[2]; break;}
+                case 0:{os << ' '; break;}
+                case 1:{os << l1;  break;}
+                case 2:{os << l2;  break;}
+                case 3:{os << l3;  break;}
+                case 4:{os << l4;  break;}
+                case 5:{os << l5;  break;}
+                case 6:{os << l6;  break;}
+                case 7:{os << l7;  break;}
             }
             for(std::size_t i=1; i<Width - filled; ++i)
             {
-                *iter++ = ' ';
+                os << ' ';
             }
         }
-        *iter++ = '|';
-        *iter++ = '\0';
-        assert(iter <= buffer_.end());
-        return buffer_.data();
+        os << '|' << std::flush;
+        return ;
     }
 
     std::size_t total() const noexcept {return total_;}
@@ -101,7 +84,6 @@ class progress_bar
 
     std::size_t total_;
     double      r_total_;
-    buffer_type buffer_;
 };
 
 } // mjolnir
