@@ -119,12 +119,13 @@ class GFWNpTLangevinIntegrator<SimulatorTraits<realT, CuboidalPeriodicBoundary>>
         ff.calc_force(sys);
 
         // calculate the current pressure using the force calculated here
-        this->P_ins_ = this->calc_pressure(sys,
-                sys.boundary().upper_bound() - sys.boundary().lower_bound());
+        const auto h_cell = sys.boundary().upper_bound() - sys.boundary().lower_bound();
+        this->P_ins_ = this->calc_pressure(sys, h_cell);
 
         sys.attribute("P_instantaneous_x") = X(P_ins_);
         sys.attribute("P_instantaneous_y") = Y(P_ins_);
         sys.attribute("P_instantaneous_z") = Z(P_ins_);
+        sys.attribute("volume")            = X(h_cell) * Y(h_cell) * Z(h_cell);
 
         return;
     }
@@ -297,6 +298,7 @@ class GFWNpTLangevinIntegrator<SimulatorTraits<realT, CuboidalPeriodicBoundary>>
         sys.attribute("P_instantaneous_x") = X(P_ins_);
         sys.attribute("P_instantaneous_y") = Y(P_ins_);
         sys.attribute("P_instantaneous_z") = Z(P_ins_);
+        sys.attribute("volume")            = det_h;
 
         P_diff = P_ins_ - P_ref_;
 
