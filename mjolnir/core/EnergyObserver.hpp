@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_CORE_ENERGY_OBSERVER_HPP
 #define MJOLNIR_CORE_ENERGY_OBSERVER_HPP
+#include <mjolnir/util/is_finite.hpp>
 #include <mjolnir/core/ObserverBase.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <iostream>
@@ -80,6 +81,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
     void output(const std::size_t step, const real_type,
                 const system_type& sys, const forcefield_type& ff) override
     {
+        bool is_ok = true;
         std::ofstream ofs(this->file_name_, std::ios::app);
 
         // if the width exceeds, operator<<(std::ostream, std::string) ignores
@@ -89,16 +91,43 @@ class EnergyObserver final : public ObserverBase<traitsT>
         const auto energies = ff.dump_energy(sys);
         for(std::size_t i=0; i<energies.size(); ++i)
         {
+            const real_type ene = energies.at(i);
+            if(!is_finite(ene))
+            {
+                MJOLNIR_GET_DEFAULT_LOGGER();
+                MJOLNIR_LOG_ERROR("energy becomes NaN.");
+                is_ok = false;
+            }
             ofs << std::setw(this->widths_.at(i)) << std::fixed
-                << std::right << energies.at(i) << ' ';
+                << std::right << ene << ' ';
         }
-        ofs << std::setw(14) << std::right << this->calc_kinetic_energy(sys);
+
+        const auto Ek = this->calc_kinetic_energy(sys);
+        ofs << std::setw(14) << std::right << Ek;
+        if(!is_finite(Ek))
+        {
+            MJOLNIR_GET_DEFAULT_LOGGER();
+            MJOLNIR_LOG_ERROR("kinetic energy becomes NaN.");
+            is_ok = false;
+        }
+
         for(const auto& attr : sys.attributes())
         {
+            if(!is_finite(attr.second))
+            {
+                MJOLNIR_GET_DEFAULT_LOGGER();
+                MJOLNIR_LOG_ERROR(attr.first, " becomes NaN.");
+                is_ok = false;
+            }
             ofs << ' ' << std::setw(10 + attr.first.size()) << std::right
                 << attr.second;
         }
-        ofs << '\n';
+        ofs << std::endl; // flush before throwing an exception
+
+        if(!is_ok)
+        {
+            throw std::runtime_error("Energy value becomes NaN");
+        }
         return;
     }
 
