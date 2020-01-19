@@ -53,6 +53,7 @@ class progress_bar
             std::max(0.0, std::min(1.0, count * this->r_total_));
 
         std::array<char, 8> buf;
+        buf.fill('\0');
         std::snprintf(buf.data(), 8, "%5.1f%%|", ratio * 100.0);
         os << '\r' << buf.data();
 
@@ -85,6 +86,7 @@ class progress_bar
         const auto residual = std::chrono::duration_cast<std::chrono::milliseconds>(
             (current - start_) * (1.0 - ratio) / ratio).count() * 0.001;
 
+        buf.fill('\0');
         if(residual < 60.0)
         {
             std::snprintf(buf.data(), 6, "%5.1f", residual);
