@@ -83,9 +83,6 @@ read_observer(const toml::value& root)
 
     ObserverContainer<traitsT> observers(progress_bar_enabled);
 
-    // Energy is always written to "prefix.ene".
-    observers.push_back(make_unique<EnergyObserver<traitsT>>(file_prefix));
-
     const auto& format = toml::find(output, "format");
 
     if(format.is_string())
@@ -100,6 +97,9 @@ read_observer(const toml::value& root)
             add_observer(observers, fmt, file_prefix);
         }
     }
+
+    // Energy is always written to "prefix.ene".
+    observers.push_back(make_unique<EnergyObserver<traitsT>>(file_prefix));
     return observers;
 }
 
