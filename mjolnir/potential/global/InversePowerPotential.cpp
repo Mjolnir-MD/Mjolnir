@@ -1,6 +1,6 @@
 #include <mjolnir/potential/global/InversePowerPotential.hpp>
 
-#ifdef MJOLNIR_SEPARATE_BUILD
+#ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"
 #endif
 
