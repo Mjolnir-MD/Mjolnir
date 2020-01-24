@@ -6,6 +6,8 @@
 
 namespace mjolnir
 {
-    template class InversePowerPotential<double>;
-    template class InversePowerPotential<float>;
+template class InversePowerPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+template class InversePowerPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+template class InversePowerPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+template class InversePowerPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 }// mjolnir
