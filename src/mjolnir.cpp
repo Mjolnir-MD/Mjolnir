@@ -24,9 +24,30 @@ int main(int argc, char** argv)
     simulator->finalize();
 
     const auto stop = std::chrono::system_clock::now();
-    std::cout << "elapsed time: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(
-                      stop - start).count() << " [msec]" << std::endl;
+    const auto total = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
+    std::cerr << "elapsed time: ";
+    std::cerr << std::fixed << std::setprecision(1);
+    if(total < 1000.0)
+    {
+        std::cerr << total << " [msec]";
+    }
+    else if(total < 1000.0 * 60.0)
+    {
+        std::cerr << total * 0.001 << " [sec]";
+    }
+    else if(total < 1000.0 * 60.0 * 60.0)
+    {
+        std::cerr << total * 0.001 * 0.0167 << " [min]";
+    }
+    else if(total < 1000.0 * 60.0 * 60.0 * 24.0)
+    {
+        std::cerr << total * 0.001 * 0.0167 * 0.0167 << " [hr]";
+    }
+    else
+    {
+        std::cerr << total * 0.001 * 0.0167 * 0.0167 * 0.0417 << " [day]";
+    }
+    std::cerr << std::endl;
 
     return 0;
 }
