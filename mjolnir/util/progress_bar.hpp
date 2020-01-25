@@ -82,6 +82,12 @@ class progress_bar
         }
         os << '|';
 
+        if(ratio == 0.0)
+        {
+            os << std::flush;
+            return;
+        }
+
         const auto current  = std::chrono::system_clock::now();
         const auto residual = std::chrono::duration_cast<std::chrono::milliseconds>(
             (current - start_) * (1.0 - ratio) / ratio).count() * 0.001;
