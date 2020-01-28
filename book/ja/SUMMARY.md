@@ -54,6 +54,7 @@
         - [LennardJones](refs/LennardJonesPotential.md)
         - [UniformLennardJones](refs/UniformLennardJonesPotential.md)
         - [ExcludedVolume](refs/ExcludedVolumePotential.md)
+        - [InversePower](refs/InversePowerPotential.md)
         - [DebyeHuckel](refs/DebyeHuckelPotential.md)
         - [3SPN2ExcludedVolume](refs/3SPN2ExcludedVolumePotential.md)
       - [3SPN2BaseBaseInteraction](refs/3SPN2BaseBaseInteraction.md)
