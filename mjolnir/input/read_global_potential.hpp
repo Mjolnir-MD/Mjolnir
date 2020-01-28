@@ -276,7 +276,7 @@ read_inverse_power_potential(const toml::value& global)
     const real_type eps = toml::find<real_type>(global, "epsilon");
     MJOLNIR_LOG_INFO("epsilon = ", eps);
 
-    const integer_type n   = toml::find<integer_type>(global, "n");
+    const integer_type n = toml::find<integer_type>(global, "n");
     MJOLNIR_LOG_INFO("n = ", n);
 
     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
@@ -533,6 +533,11 @@ extern template ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundar
 extern template ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_excluded_volume_potential(const toml::value& global);
 extern template ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_excluded_volume_potential(const toml::value& global);
 extern template ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_excluded_volume_potential(const toml::value& global);
+
+extern template InversePowerPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_inverse_power_potential(const toml::value&);
+extern template InversePowerPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_inverse_power_potential(const toml::value&);
+extern template InversePowerPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_inverse_power_potential(const toml::value&);
+extern template InversePowerPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_inverse_power_potential(const toml::value&);
 
 extern template HardCoreExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_hard_core_excluded_volume_potential(const toml::value& global);
 extern template HardCoreExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_hard_core_excluded_volume_potential(const toml::value& global);
