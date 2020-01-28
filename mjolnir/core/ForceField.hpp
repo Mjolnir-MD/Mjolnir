@@ -48,7 +48,7 @@ class ForceField
 
         MJOLNIR_LOG_INFO("initializing forcefields");
         local_   .initialize(sys);
-        global_  .initialize(sys);
+        global_  .initialize(sys, sys.topology());
         external_.initialize(sys);
 
         return;
@@ -58,7 +58,7 @@ class ForceField
     void update(const system_type& sys)
     {
         local_   .update(sys);
-        global_  .update(sys);
+        global_  .update(sys, sys.topology());
         external_.update(sys);
         return;
     }
