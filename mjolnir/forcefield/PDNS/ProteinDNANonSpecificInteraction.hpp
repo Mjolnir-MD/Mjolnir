@@ -34,6 +34,7 @@ class ProteinDNANonSpecificInteraction final : public GlobalInteractionBase<trai
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
+    using topology_type   = typename base_type::topology_type;
     using boundary_type   = typename base_type::boundary_type;
     using potential_type  = ProteinDNANonSpecificPotential<traits_type>;
     using partition_type  = SpatialPartition<traitsT, potential_type>;
@@ -44,24 +45,24 @@ class ProteinDNANonSpecificInteraction final : public GlobalInteractionBase<trai
     {}
     ~ProteinDNANonSpecificInteraction() {}
 
-    void initialize(const system_type& sys) override
+    void initialize(const system_type& sys, const topology_type& topol) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is PDNS");
 
-        this->potential_.initialize(sys);
+        this->potential_.initialize(sys, topol);
         this->partition_.initialize(sys, this->potential_);
         return;
     }
 
-    void update(const system_type& sys) override
+    void update(const system_type& sys, const topology_type& topol) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is PDNS");
 
-        this->potential_.update(sys);
+        this->potential_.update(sys, topol);
         this->partition_.initialize(sys, this->potential_);
         return;
     }

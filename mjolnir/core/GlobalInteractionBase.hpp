@@ -15,12 +15,13 @@ class GlobalInteractionBase
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
     using boundary_type   = typename traits_type::boundary_type;
+    using topology_type   = Topology;
 
   public:
     virtual ~GlobalInteractionBase() {}
 
-    virtual void initialize(const system_type&) = 0;
-    virtual void update    (const system_type&) = 0;
+    virtual void initialize(const system_type&, const topology_type&) = 0;
+    virtual void update    (const system_type&, const topology_type&) = 0;
     virtual void reduce_margin(const real_type, const system_type&) = 0;
     virtual void  scale_margin(const real_type, const system_type&) = 0;
 
