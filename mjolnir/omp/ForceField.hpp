@@ -46,7 +46,7 @@ class ForceField<OpenMPSimulatorTraits<realT, boundaryT>>
 
         // based on the topology, make exclusion list
         local_   .initialize(sys);
-        global_  .initialize(sys);
+        global_  .initialize(sys, sys.topology());
         external_.initialize(sys);
     }
 
@@ -54,7 +54,7 @@ class ForceField<OpenMPSimulatorTraits<realT, boundaryT>>
     void update(const system_type& sys)
     {
         local_   .update(sys);
-        global_  .update(sys);
+        global_  .update(sys, sys.topology());
         external_.update(sys);
     }
 
