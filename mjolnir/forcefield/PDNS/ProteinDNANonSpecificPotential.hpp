@@ -255,6 +255,10 @@ class ProteinDNANonSpecificPotential
     // to check bases has base-pairing interaction.
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
+        if(exclusion_list_.is_excluded(i, j))
+        {
+            return false;
+        }
         const bool i_is_dna = (parameters_[i].S3 != invalid());
         const bool j_is_dna = (parameters_[j].S3 != invalid());
         // {protein, dna} pair has interaction, others not.
