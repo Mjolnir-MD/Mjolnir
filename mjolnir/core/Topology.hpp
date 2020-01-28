@@ -64,8 +64,7 @@ class Topology
     Topology& operator=(Topology&&)      = default;
 
     explicit Topology(const std::size_t N)
-        : num_molecules_(1), nodes_(N, node{uninitialized(), {}}),
-          names_(N, "uninitialized"), groups_(N, "uninitialized")
+        : num_molecules_(1), nodes_(N, node{uninitialized(), {}})
     {}
 
     bool        empty() const noexcept {return nodes_.empty();}
@@ -76,11 +75,6 @@ class Topology
         return ;
     }
 
-    name_type&       name_of(const std::size_t i)       {return this->names_.at(i);}
-    name_type const& name_of(const std::size_t i) const {return this->names_.at(i);}
-    name_type&       name_of(const std::size_t i, const std::nothrow_t&)       noexcept {return this->names_[i];}
-    name_type const& name_of(const std::size_t i, const std::nothrow_t&) const noexcept {return this->names_[i];}
-
     molecule_id_type  molecule_of(const std::size_t i) const
     {return nodes_.at(i).molecule_id;}
     molecule_id_type& molecule_of(const std::size_t i)
@@ -90,11 +84,6 @@ class Topology
     {return nodes_[i].molecule_id;}
     molecule_id_type& molecule_of(const std::size_t i, const std::nothrow_t&)
     {return nodes_[i].molecule_id;}
-
-    group_id_type&       group_of(const std::size_t i)       {return this->groups_.at(i);}
-    group_id_type const& group_of(const std::size_t i) const {return this->groups_.at(i);}
-    group_id_type&       group_of(const std::size_t i, const std::nothrow_t&)       noexcept {return this->groups_[i];}
-    group_id_type const& group_of(const std::size_t i, const std::nothrow_t&) const noexcept {return this->groups_[i];}
 
     void add_connection  (const std::size_t i, const std::size_t j,
                           const connection_kind_type& kind);
@@ -144,10 +133,8 @@ class Topology
 
   private:
     // each node corresponds to the particle having the same idx in a system.
-    std::size_t                num_molecules_;
-    std::vector<node>          nodes_;
-    std::vector<name_type>     names_;
-    std::vector<group_id_type> groups_;
+    std::size_t       num_molecules_;
+    std::vector<node> nodes_;
 };
 
 inline void Topology::add_connection(

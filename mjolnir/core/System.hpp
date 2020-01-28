@@ -33,6 +33,7 @@ class System
 
     using real_container_type          = std::vector<real_type>;
     using coordinate_container_type    = std::vector<coordinate_type>;
+    using string_container_type        = std::vector<std::string>;
 
   public:
 
@@ -41,7 +42,8 @@ class System
           topology_(num_particles),  attributes_(),
           num_particles_(num_particles), masses_   (num_particles),
           rmasses_      (num_particles), positions_(num_particles),
-          velocities_   (num_particles), forces_   (num_particles)
+          velocities_   (num_particles), forces_   (num_particles),
+          names_        (num_particles), groups_   (num_particles)
     {}
     ~System() = default;
     System(const System&) = default;
@@ -96,8 +98,7 @@ class System
         return particle_view_type{
             masses_[i],    rmasses_[i],
             positions_[i], velocities_[i], forces_[i],
-            this->topology_.name_of (i, std::nothrow),
-            this->topology_.group_of(i, std::nothrow)
+            names_[i],     groups_[i]
         };
     }
     particle_const_view_type operator[](std::size_t i) const noexcept
@@ -105,8 +106,7 @@ class System
         return particle_const_view_type{
             masses_[i],    rmasses_[i],
             positions_[i], velocities_[i], forces_[i],
-            this->topology_.name_of (i, std::nothrow),
-            this->topology_.group_of(i, std::nothrow)
+            names_[i],     groups_[i]
         };
     }
     particle_view_type at(std::size_t i)
@@ -114,7 +114,7 @@ class System
         return particle_view_type{
             masses_.at(i),    rmasses_.at(i),
             positions_.at(i), velocities_.at(i), forces_.at(i),
-            topology_.name_of(i), topology_.group_of(i)
+            names_.at(i),     groups_.at(i)
         };
     }
     particle_const_view_type at(std::size_t i) const
@@ -122,7 +122,7 @@ class System
         return particle_const_view_type{
             masses_.at(i),    rmasses_.at(i),
             positions_.at(i), velocities_.at(i), forces_.at(i),
-            topology_.name_of(i), topology_.group_of(i)
+            names_.at(i),     groups_.at(i)
         };
     }
 
@@ -138,10 +138,10 @@ class System
     coordinate_type const& force   (std::size_t i) const noexcept {return forces_[i];}
     coordinate_type&       force   (std::size_t i)       noexcept {return forces_[i];}
 
-    string_type const& name (std::size_t i) const noexcept {return topology_.name_of(i, std::nothrow);}
-    string_type&       name (std::size_t i)       noexcept {return topology_.name_of(i, std::nothrow);}
-    string_type const& group(std::size_t i) const noexcept {return topology_.group_of(i, std::nothrow);}
-    string_type&       group(std::size_t i)       noexcept {return topology_.group_of(i, std::nothrow);}
+    string_type const& name (std::size_t i) const noexcept {return names_[i];}
+    string_type&       name (std::size_t i)       noexcept {return names_[i];}
+    string_type const& group(std::size_t i) const noexcept {return groups_[i];}
+    string_type&       group(std::size_t i)       noexcept {return groups_[i];}
 
     boundary_type&       boundary()       noexcept {return boundary_;}
     boundary_type const& boundary() const noexcept {return boundary_;}
@@ -171,7 +171,8 @@ class System
     coordinate_container_type    positions_;
     coordinate_container_type    velocities_;
     coordinate_container_type    forces_;
-    // names and groups are in Topology class
+    string_container_type        names_;
+    string_container_type        groups_;
 
 #ifdef MJOLNIR_WITH_OPENMP
     // OpenMP implementation uses its own System<OpenMP> to avoid data race.
