@@ -34,7 +34,8 @@ class InversePowerPotential
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
     using exclusion_list_type  = ExclusionList <traits_type>;
 
-    static constexpr real_type default_cutoff(const integer_type n) noexcept
+    // std::pow is not marked constexpr
+    static real_type default_cutoff(const integer_type n) noexcept
     {
         return std::pow(2.0, 12.0 / n);
     }
@@ -45,7 +46,8 @@ class InversePowerPotential
 
   public:
 
-    InversePowerPotential(const real_type eps, const integer_type n, const real_type cutoff_ratio,
+    InversePowerPotential(const real_type eps, const integer_type n,
+        const real_type cutoff_ratio,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
@@ -97,8 +99,7 @@ class InversePowerPotential
 
         if(d * this->cutoff_ratio_ < r){return 0.0;}
 
-        const real_type rinv = 1.0 / r;
-        const real_type d_r = d * rinv;
+        const real_type d_r = d / r;
         const real_type drn = std::pow(d_r, n_);
         return this->epsilon_ * (drn - this->coef_at_cutoff_);
     }
@@ -216,10 +217,10 @@ class InversePowerPotential
 
 namespace mjolnir
 {
-    extern template class InversePowerPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
-    extern template class InversePowerPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
-    extern template class InversePowerPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-    extern template class InversePowerPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+extern template class InversePowerPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class InversePowerPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class InversePowerPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class InversePowerPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
