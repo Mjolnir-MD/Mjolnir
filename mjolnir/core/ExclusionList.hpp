@@ -83,14 +83,12 @@ class ExclusionList
         return false;
     }
 
-    void make(const system_type& sys)
+    void make(const system_type& sys, const topology_type& topol)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        const auto& topol = sys.topology();
         const std::size_t N = sys.size();
-
         {
             // all groups defined in `ignore.group` table. check mistakes
             auto groups_defined = this->ignore_group_.all_groups();

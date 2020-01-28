@@ -197,7 +197,7 @@ class ThreeSPN2ExcludedVolumePotential
         MJOLNIR_LOG_FUNCTION();
 
         // make exclusion list based on the topology
-        exclusion_list_.make(sys);
+        exclusion_list_.make(sys, sys.topology());
 
         // --------------------------------------------------------------------
         // list up beads that are within 3 nucleotides

@@ -473,7 +473,7 @@ class ThreeSPN2BaseBaseInteractionPotential
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        exclusion_list_.make(sys);
+        exclusion_list_.make(sys, sys.topology());
         return;
     }
 

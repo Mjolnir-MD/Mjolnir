@@ -148,7 +148,7 @@ class ExcludedVolumePotential
         MJOLNIR_LOG_FUNCTION();
 
         // update exclusion list based on sys.topology()
-        exclusion_list_.make(sys);
+        exclusion_list_.make(sys, sys.topology());
         return;
     }
 
