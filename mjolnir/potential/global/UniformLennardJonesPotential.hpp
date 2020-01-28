@@ -22,6 +22,7 @@ class UniformLennardJonesPotential
   public:
     using traits_type         = traitsT;
     using real_type           = typename traits_type::real_type;
+    using system_type         = System<traits_type>;
     using parameter_type      = empty_t; // no particle-specific parameter
     using container_type      = empty_t; // no parameter, so no container there.
     using pair_parameter_type = empty_t; // no particle-pair-specific parameter
@@ -114,7 +115,7 @@ class UniformLennardJonesPotential
         return sigma_ * cutoff_ratio_;
     }
 
-    void initialize(const System<traits_type>& sys) noexcept
+    void initialize(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -131,17 +132,17 @@ class UniformLennardJonesPotential
             std::iota(this->participants_.begin(), this->participants_.end(), 0u);
         }
 
-        this->update(sys);
+        this->update(sys, topol);
         return;
     }
 
-    void update(const System<traits_type>& sys) noexcept
+    void update(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
         // update exclusion list based on sys.topology()
-        exclusion_list_.make(sys, sys.topology());
+        exclusion_list_.make(sys, topol);
         return;
     }
 

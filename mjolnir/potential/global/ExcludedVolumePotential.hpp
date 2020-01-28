@@ -29,6 +29,7 @@ class ExcludedVolumePotential
 
     using traits_type          = traitsT;
     using real_type            = typename traits_type::real_type;
+    using system_type          = System<traits_type>;
     using parameter_type       = real_type;
     using container_type       = std::vector<parameter_type>;
 
@@ -132,23 +133,23 @@ class ExcludedVolumePotential
         return -12.0 * this->epsilon_ * dr12 * rinv;
     }
 
-    void initialize(const System<traits_type>& sys) noexcept
+    void initialize(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        this->update(sys);
+        this->update(sys, topol);
         return;
     }
 
     // nothing to be done if system parameter (e.g. temperature) do not changes
-    void update(const System<traits_type>& sys) noexcept
+    void update(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
         // update exclusion list based on sys.topology()
-        exclusion_list_.make(sys, sys.topology());
+        exclusion_list_.make(sys, topol);
         return;
     }
 

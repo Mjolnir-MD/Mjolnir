@@ -38,6 +38,7 @@ class ThreeSPN2BaseBaseInteractionPotential
   public:
     using traits_type      = traitsT;
     using real_type        = typename traits_type::real_type;
+    using system_type      = System<traits_type>;
     using self_type        = ThreeSPN2BaseBaseInteractionPotential<traits_type>;
     using base_kind        = parameter_3SPN2::base_kind;
     using base_pair_kind   = parameter_3SPN2::base_pair_kind;
@@ -402,7 +403,7 @@ class ThreeSPN2BaseBaseInteractionPotential
         return this->cutoff_;
     }
 
-    void initialize(const System<traits_type>& sys) noexcept
+    void initialize(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -463,17 +464,17 @@ class ThreeSPN2BaseBaseInteractionPotential
             unit_converted = true;
         }
         // construct a exclusion list
-        this->update(sys);
+        this->update(sys, topol);
         return;
     }
 
     // nothing to do when system parameters change.
-    void update(const System<traits_type>& sys) noexcept
+    void update(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        exclusion_list_.make(sys, sys.topology());
+        exclusion_list_.make(sys, topol);
         return;
     }
 

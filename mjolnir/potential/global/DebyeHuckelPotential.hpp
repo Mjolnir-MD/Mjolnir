@@ -26,6 +26,7 @@ class DebyeHuckelPotential
   public:
     using traits_type          = traitsT;
     using real_type            = typename traits_type::real_type;
+    using system_type          = System<traits_type>;
     using parameter_type       = real_type;
     using container_type       = std::vector<parameter_type>;
 
@@ -116,7 +117,7 @@ class DebyeHuckelPotential
         return this->debye_length_ * this->cutoff_ratio_;
     }
 
-    void initialize(const System<traits_type>& sys) noexcept
+    void initialize(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -129,12 +130,12 @@ class DebyeHuckelPotential
         {
             MJOLNIR_LOG_ERROR("DebyeHuckel requires `ionic_strength` attribute");
         }
-        this->update(sys); // calc parameters
+        this->update(sys, topol); // calc parameters
         return;
     }
 
     // for temperature/ionic concentration changes...
-    void update(const System<traits_type>& sys) noexcept
+    void update(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -151,7 +152,7 @@ class DebyeHuckelPotential
         this->calc_parameters();
 
         // update exclusion list based on sys.topology()
-        exclusion_list_.make(sys, sys.topology());
+        exclusion_list_.make(sys, topol);
         return;
     }
 

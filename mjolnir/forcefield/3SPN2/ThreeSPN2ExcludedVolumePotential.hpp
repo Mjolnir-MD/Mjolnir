@@ -27,6 +27,7 @@ class ThreeSPN2ExcludedVolumePotential
   public:
     using traits_type = traitsT;
     using real_type   = typename traits_type::real_type;
+    using system_type = System<traits_type>;
     using bead_kind   = parameter_3SPN2::bead_kind;
 
     using parameter_type      = bead_kind;
@@ -139,7 +140,7 @@ class ThreeSPN2ExcludedVolumePotential
         return this->cutoff_;
     }
 
-    void initialize(const System<traits_type>& sys) noexcept
+    void initialize(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -186,22 +187,21 @@ class ThreeSPN2ExcludedVolumePotential
             unit_converted_ = true;
         }
         // construct a exclusion list
-        this->update(sys);
+        this->update(sys, topol);
         return;
     }
 
     // nothing to do when system parameters change.
-    void update(const System<traits_type>& sys) noexcept
+    void update(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
         // make exclusion list based on the topology
-        exclusion_list_.make(sys, sys.topology());
+        exclusion_list_.make(sys, topol);
 
         // --------------------------------------------------------------------
         // list up beads that are within 3 nucleotides
-        const auto& topol = sys.topology();
         this->within_3_nucl_.reserve(this->participants_.size() * 2);
 
         const auto is_base = [this](const std::size_t i) noexcept -> bool {
