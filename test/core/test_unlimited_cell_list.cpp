@@ -105,6 +105,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary)
     dummy_potential<real_type> pot(cutoff, participants);
 
     mjolnir::System<traits_type> sys(N, boundary_type{});
+    mjolnir::Topology topol(N);
 
     std::mt19937 mt(123456789);
     for(std::size_t i=0; i < N; ++i)
@@ -112,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary)
         sys.at(i).mass     = 1.0;
         sys.at(i).position = distribute_particle(mt, L);
     }
-    sys.topology().construct_molecules();
+    topol.construct_molecules();
 
 
     mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
@@ -183,6 +184,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial)
     dummy_potential<real_type> pot(cutoff, participants);
 
     mjolnir::System<traits_type> sys(N, boundary_type{});
+    mjolnir::Topology topol(N);
 
     std::mt19937 mt(123456789);
     for(std::size_t i=0; i < N; ++i)
@@ -190,7 +192,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial)
         sys.at(i).mass     = 1.0;
         sys.at(i).position = distribute_particle(mt, L);
     }
-    sys.topology().construct_molecules();
+    topol.construct_molecules();
 
     mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
         mjolnir::UnlimitedGridCellList<traits_type, potential_type>>(margin));
@@ -284,6 +286,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial_2)
     dummy_potential<real_type> pot(cutoff, participants);
 
     mjolnir::System<traits_type> sys(N, boundary_type{});
+    mjolnir::Topology topol(N);
 
     std::mt19937 mt(123456789);
     for(std::size_t i=0; i < N; ++i)
@@ -291,7 +294,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial_2)
         sys.at(i).mass     = 1.0;
         sys.at(i).position = distribute_particle(mt, L);
     }
-    sys.topology().construct_molecules();
+    topol.construct_molecules();
 
     mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
         mjolnir::UnlimitedGridCellList<traits_type, potential_type>>(margin));

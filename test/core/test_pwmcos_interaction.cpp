@@ -20,6 +20,7 @@ BOOST_AUTO_TEST_CASE(PWMcos_Interaction)
     using coord_type        = traits_type::coordinate_type;
     using boundary_type     = traits_type::boundary_type;
     using system_type       = mjolnir::System<traits_type>;
+    using topology_type     = mjolnir::Topology;
 
     using real_type              = double;
     using potential_type         = mjolnir::PWMcosPotential<traits_type>;
@@ -64,13 +65,14 @@ BOOST_AUTO_TEST_CASE(PWMcos_Interaction)
             mjolnir::make_unique<partition_type>()));
 
     system_type sys(7, boundary_type{});
+    topology_type topol(7);
 
-    sys.topology().add_connection(0, 1, "bond");
-    sys.topology().add_connection(1, 2, "bond");
-    sys.topology().add_connection(3, 4, "bond");
-    sys.topology().add_connection(4, 5, "bond");
-    sys.topology().add_connection(4, 6, "bond");
-    sys.topology().construct_molecules();
+    topol.add_connection(0, 1, "bond");
+    topol.add_connection(1, 2, "bond");
+    topol.add_connection(3, 4, "bond");
+    topol.add_connection(4, 5, "bond");
+    topol.add_connection(4, 6, "bond");
+    topol.construct_molecules();
 
     for(std::size_t i=0; i<sys.size(); ++i)
     {
@@ -82,8 +84,8 @@ BOOST_AUTO_TEST_CASE(PWMcos_Interaction)
         sys.name(i)  = "A";
         sys.group(i) = "A";
     }
-    potential  .initialize(sys, sys.topology());
-    interaction.initialize(sys, sys.topology());
+    potential  .initialize(sys, topol);
+    interaction.initialize(sys, topol);
 
     for(const auto r     : {r0 - 0.2, r0 + 0.5})
     {
@@ -183,7 +185,7 @@ BOOST_AUTO_TEST_CASE(PWMcos_Interaction)
             sys.force(idx)     = coord_type(0.0, 0.0, 0.0);
         }
         const system_type init = sys;
-        interaction.initialize(init, init.topology());
+        interaction.initialize(init, topol);
 
         constexpr real_type tol = 1e-4;
         constexpr real_type dr  = 1e-5;

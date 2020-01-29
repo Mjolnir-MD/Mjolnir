@@ -31,6 +31,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_numerical_diff,
     using coord_type        = traits_type::coordinate_type;
     using boundary_type     = traits_type::boundary_type;
     using system_type       = mjolnir::System<traits_type>;
+    using topology_type     = mjolnir::Topology;
 
     using potential_type      = mjolnir::ThreeSPN2BaseBaseInteractionPotential<traits_type>;
     using base_kind           = typename potential_type::base_kind;
@@ -119,10 +120,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_numerical_diff,
                 mjolnir::make_unique<partition_type>()));
 
         system_type sys(4, boundary_type{});
+        topology_type topol(4);
 
-        sys.topology().add_connection(0, 1, "bond");
-        sys.topology().add_connection(2, 3, "bond");
-        sys.topology().construct_molecules();
+        topol.add_connection(0, 1, "bond");
+        topol.add_connection(2, 3, "bond");
+        topol.construct_molecules();
 
         for(std::size_t i=0; i<4; ++i)
         {
@@ -134,8 +136,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_numerical_diff,
             sys.name(i)  = "DNA";
             sys.group(i) = "DNA";
         }
-        potential  .initialize(sys, sys.topology());
-        interaction.initialize(sys, sys.topology());
+        potential  .initialize(sys, topol);
+        interaction.initialize(sys, topol);
 
         const auto bp_kind      = potential.bp_kind (bases.at(0), bases.at(1));
         const auto rbp_0        = potential.r0(bp_kind);
@@ -433,31 +435,31 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
 
         system_type sys(10, boundary_type{});
 
-        sys.topology().add_connection(0, 1, "bond");
-        sys.topology().add_connection(0, 2, "bond");
-        sys.topology().add_connection(2, 3, "bond");
-        sys.topology().add_connection(3, 4, "bond");
+        topol.add_connection(0, 1, "bond");
+        topol.add_connection(0, 2, "bond");
+        topol.add_connection(2, 3, "bond");
+        topol.add_connection(3, 4, "bond");
 
-        sys.topology().add_connection(5, 6, "bond");
-        sys.topology().add_connection(5, 7, "bond");
-        sys.topology().add_connection(7, 8, "bond");
-        sys.topology().add_connection(8, 9, "bond");
+        topol.add_connection(5, 6, "bond");
+        topol.add_connection(5, 7, "bond");
+        topol.add_connection(7, 8, "bond");
+        topol.add_connection(8, 9, "bond");
 
-        sys.topology().add_connection(0, 2, "next_nucl");
-        sys.topology().add_connection(1, 2, "next_nucl");
-        sys.topology().add_connection(0, 3, "next_nucl");
-        sys.topology().add_connection(1, 3, "next_nucl");
-        sys.topology().add_connection(0, 4, "next_nucl");
-        sys.topology().add_connection(1, 4, "next_nucl");
+        topol.add_connection(0, 2, "next_nucl");
+        topol.add_connection(1, 2, "next_nucl");
+        topol.add_connection(0, 3, "next_nucl");
+        topol.add_connection(1, 3, "next_nucl");
+        topol.add_connection(0, 4, "next_nucl");
+        topol.add_connection(1, 4, "next_nucl");
 
-        sys.topology().add_connection(5, 7, "next_nucl");
-        sys.topology().add_connection(6, 7, "next_nucl");
-        sys.topology().add_connection(5, 8, "next_nucl");
-        sys.topology().add_connection(6, 8, "next_nucl");
-        sys.topology().add_connection(5, 9, "next_nucl");
-        sys.topology().add_connection(6, 9, "next_nucl");
+        topol.add_connection(5, 7, "next_nucl");
+        topol.add_connection(6, 7, "next_nucl");
+        topol.add_connection(5, 8, "next_nucl");
+        topol.add_connection(6, 8, "next_nucl");
+        topol.add_connection(5, 9, "next_nucl");
+        topol.add_connection(6, 9, "next_nucl");
 
-        sys.topology().construct_molecules();
+        topol.construct_molecules();
 
         for(std::size_t i=0; i<10; ++i)
         {
@@ -469,8 +471,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
             sys.name(i)  = "DNA";
             sys.group(i) = "DNA";
         }
-        potential  .initialize(sys, sys.topology());
-        interaction.initialize(sys, sys.topology());
+        potential  .initialize(sys, topol);
+        interaction.initialize(sys, topol);
 
         const auto bp_kind      = potential.bp_kind (bases.at(0), bases.at(1));
         const auto cs_i_kind    = potential.cs5_kind(bases.at(0), bases.at(3));

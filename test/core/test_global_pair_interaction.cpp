@@ -24,6 +24,7 @@ BOOST_AUTO_TEST_CASE(GlobalPairInteraction_double)
     using coordinate_type  = traits::coordinate_type;
     using boundary_type    = traits::boundary_type;
     using system_type      = mjolnir::System<traits>;
+    using topology_type    = mjolnir::Topology;
     using potential_type   = mjolnir::LennardJonesPotential<traits>;
     using parameter_type   = typename potential_type::parameter_type;
     using partition_type   = mjolnir::NaivePairCalculation<traits, potential_type>;
@@ -46,6 +47,7 @@ BOOST_AUTO_TEST_CASE(GlobalPairInteraction_double)
     const real_type eq_dist = 1.0 * std::pow(2.0, 1.0 / 6.0);
 
     system_type sys(2, boundary_type{});
+    topology_type topol(2);
 
     sys.mass(0)  = 1.0;
     sys.mass(1)  = 1.0;
@@ -59,14 +61,14 @@ BOOST_AUTO_TEST_CASE(GlobalPairInteraction_double)
     sys.force(0)    = coordinate_type(0.0, 0.0, 0.0);
     sys.force(1)    = coordinate_type(0.0, 0.0, 0.0);
 
-    sys.topology().construct_molecules();
+    topol.construct_molecules();
 
     sys.name(0)  = "X";
     sys.name(1)  = "X";
     sys.group(0) = "NONE";
     sys.group(1) = "NONE";
 
-    interaction.initialize(sys, sys.topology());
+    interaction.initialize(sys, topol);
 
     std::mt19937 rng(123456789);
     std::normal_distribution<real_type> gauss(0.0, 1.0);
