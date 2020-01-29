@@ -437,4 +437,21 @@ AFMFitInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
 }
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+// explicitly specialize major use-cases
+#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/core/SimulatorTraits.hpp>
+
+namespace mjolnir
+{
+
+extern template class AFMFitInteraction<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class AFMFitInteraction<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class AFMFitInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class AFMFitInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif//MJOLNIR_AFM_INTEARACTION_BASE
