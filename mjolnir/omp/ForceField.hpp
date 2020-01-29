@@ -15,15 +15,13 @@ class ForceField<OpenMPSimulatorTraits<realT, boundaryT>>
     using real_type                = typename traits_type::real_type;
     using coordinate_type          = typename traits_type::coordinate_type;
     using system_type              = System<traits_type>;
+    using topology_type            = Topology;
     using local_forcefield_type    = LocalForceField<traits_type>;
     using global_forcefield_type   = GlobalForceField<traits_type>;
     using external_forcefield_type = ExternalForceField<traits_type>;
 
   public:
 
-    ForceField(local_forcefield_type&& local, global_forcefield_type&& global)
-        : local_(std::move(local)), global_(std::move(global))
-    {}
     ForceField(local_forcefield_type&&    local,
                global_forcefield_type&&   global,
                external_forcefield_type&& external)
@@ -40,13 +38,17 @@ class ForceField<OpenMPSimulatorTraits<realT, boundaryT>>
     // this modify system::topology by using local interaction info.
     void initialize(system_type& sys)
     {
-        // first, fetch current topology
-        local_.write_topology(sys.topology());
-        sys.topology().construct_molecules();
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        MJOLNIR_LOG_INFO("writing current topology");
+        local_.write_topology(this->topology_);
+        topology_.construct_molecules();
 
         // based on the topology, make exclusion list
+        MJOLNIR_LOG_INFO("initializing forcefields");
         local_   .initialize(sys);
-        global_  .initialize(sys, sys.topology());
+        global_  .initialize(sys, this->topology_);
         external_.initialize(sys);
     }
 
@@ -54,7 +56,7 @@ class ForceField<OpenMPSimulatorTraits<realT, boundaryT>>
     void update(const system_type& sys)
     {
         local_   .update(sys);
-        global_  .update(sys, sys.topology());
+        global_  .update(sys, this->topology_);
         external_.update(sys);
     }
 
@@ -124,6 +126,8 @@ class ForceField<OpenMPSimulatorTraits<realT, boundaryT>>
         return retval;
     }
 
+    topology_type            const& topology() const noexcept {return topology_;}
+    topology_type            &      topology()       noexcept {return topology_;}
     local_forcefield_type    const& local()    const noexcept {return local_;}
     local_forcefield_type    &      local()          noexcept {return local_;}
     global_forcefield_type   const& global()   const noexcept {return global_;}
@@ -133,6 +137,7 @@ class ForceField<OpenMPSimulatorTraits<realT, boundaryT>>
 
   private:
 
+    topology_type            topology_;
     local_forcefield_type    local_;
     global_forcefield_type   global_;
     external_forcefield_type external_;

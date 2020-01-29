@@ -38,8 +38,7 @@ class System
   public:
 
     System(const std::size_t num_particles, const boundary_type& bound)
-        : velocity_initialized_(false), boundary_(bound),
-          topology_(num_particles),  attributes_(),
+        : velocity_initialized_(false), boundary_(bound), attributes_(),
           num_particles_(num_particles), masses_   (num_particles),
           rmasses_      (num_particles), positions_(num_particles),
           velocities_   (num_particles), forces_   (num_particles),
@@ -145,8 +144,6 @@ class System
 
     boundary_type&       boundary()       noexcept {return boundary_;}
     boundary_type const& boundary() const noexcept {return boundary_;}
-    topology_type&       topology()       noexcept {return topology_;}
-    topology_type const& topology() const noexcept {return topology_;}
 
     // system attributes like `reference temperature`, `ionic strength`, ...
     // assuming it will not be called so often.
@@ -162,7 +159,6 @@ class System
 
     bool           velocity_initialized_;
     boundary_type  boundary_;
-    topology_type  topology_;
     attribute_type attributes_;
 
     std::size_t                  num_particles_;
