@@ -24,6 +24,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_UniformLennardJones_calc_force)
     using coordinate_type  = typename traits_type::coordinate_type;
     using boundary_type    = typename traits_type::boundary_type;
     using system_type      = mjolnir::System<traits_type>;
+    using topology_type    = mjolnir::Topology;
     using potential_type   = mjolnir::ExcludedVolumePotential<traits_type>;
     using parameter_type   = typename potential_type::parameter_type;
     using partition_type   = mjolnir::UnlimitedGridCellList<traits_type, potential_type>;
@@ -65,6 +66,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_UniformLennardJones_calc_force)
 
         rng_type    rng(123456789);
         system_type sys(N_particle, boundary_type{});
+        topology_type topol(N_particle);
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             const auto i_x = i % 4;
@@ -102,8 +104,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_UniformLennardJones_calc_force)
             seq_sys.group(i)    = sys.group(i);
         }
 
-        sys    .topology().construct_molecules();
-        seq_sys.topology().construct_molecules();
+        topol.construct_molecules();
 
         interaction_type interaction(std::move(potential),
             mjolnir::SpatialPartition<traits_type, potential_type>(
@@ -112,8 +113,8 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_UniformLennardJones_calc_force)
             mjolnir::SpatialPartition<sequencial_traits_type, sequencial_potential_type>(
                 mjolnir::make_unique<sequencial_partition_type>()));
 
-        interaction    .initialize(sys);
-        seq_interaction.initialize(seq_sys);
+        interaction    .initialize(sys, topol);
+        seq_interaction.initialize(seq_sys, topol);
 
 #pragma omp parallel
         {

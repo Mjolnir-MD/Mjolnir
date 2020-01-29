@@ -24,6 +24,7 @@ BOOST_AUTO_TEST_CASE(omp_PDNS_calc_force)
     using coordinate_type  = typename traits_type::coordinate_type;
     using boundary_type    = typename traits_type::boundary_type;
     using system_type      = mjolnir::System<traits_type>;
+    using topology_type    = mjolnir::Topology;
     using potential_type   = mjolnir::ProteinDNANonSpecificPotential<traits_type>;
     using partition_type   = mjolnir::UnlimitedGridCellList<traits_type, potential_type>;
     using interaction_type = mjolnir::ProteinDNANonSpecificInteraction<traits_type>;
@@ -133,8 +134,7 @@ BOOST_AUTO_TEST_CASE(omp_PDNS_calc_force)
         partition_type            celllist;
         sequencial_partition_type seq_celllist;
 
-        sys    .topology().construct_molecules();
-        seq_sys.topology().construct_molecules();
+        topol.construct_molecules();
 
         interaction_type interaction(std::move(potential),
             mjolnir::SpatialPartition<traits_type, potential_type>(
@@ -143,8 +143,8 @@ BOOST_AUTO_TEST_CASE(omp_PDNS_calc_force)
             mjolnir::SpatialPartition<sequencial_traits_type, sequencial_potential_type>(
                 mjolnir::make_unique<sequencial_partition_type>()));
 
-        interaction    .initialize(sys);
-        seq_interaction.initialize(seq_sys);
+        interaction    .initialize(sys, topol);
+        seq_interaction.initialize(seq_sys, topol);
 
 #pragma omp parallel
         {
