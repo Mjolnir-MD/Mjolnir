@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_noignore)
 
         mjolnir::ExclusionList<traits_type> exl({},
                 ignore_molecule_type("Nothing"), ignore_group_type({}));
-        exl.make(sys);
+        exl.make(sys, sys.topology());
 
         for(std::size_t i=0; i<10; ++i)
         {
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_noignore)
 
         mjolnir::ExclusionList<traits_type> exl({},
                 ignore_molecule_type("Nothing"), ignore_group_type({}));
-        exl.make(sys);
+        exl.make(sys, sys.topology());
 
         for(std::size_t i=0; i<10; ++i)
         {
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_topology_dependent)
         mjolnir::ExclusionList<traits_type> exl({{"bond", 3}, {"contact", 1}},
                                    ignore_molecule_type("Nothing"),
                                    ignore_group_type({}));
-        exl.make(sys);
+        exl.make(sys, sys.topology());
 
         for(std::size_t i=0; i<10; ++i)
         {
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_topology_dependent)
         mjolnir::ExclusionList<traits_type> exl({{"bond", 3}, {"contact", 1}},
                                    ignore_molecule_type("Nothing"),
                                    ignore_group_type({}));
-        exl.make(sys);
+        exl.make(sys, sys.topology());
 
         for(std::int32_t i=0; i<10; ++i)
         {
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_topology_dependent)
         mjolnir::ExclusionList<traits_type> exl({{"bond", 3}, {"contact", 1}},
                                    ignore_molecule_type("Nothing"),
                                    ignore_group_type({}));
-        exl.make(sys);
+        exl.make(sys, sys.topology());
 
         BOOST_TEST( exl.is_excluded(0, 0));
         BOOST_TEST( exl.is_excluded(0, 1));
@@ -370,7 +370,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
             mjolnir::ExclusionList<traits_type> exl({{"bond", 1}},
                 ignore_molecule_type("Self"),
                 ignore_group_type({}));
-            exl.make(sys);
+            exl.make(sys, sys.topology());
 
             for(std::int32_t i=0; i<10; ++i)
             {
@@ -399,7 +399,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
             mjolnir::ExclusionList<traits_type> exl({{"bond", 1}},
                 ignore_molecule_type("Self"),
                 ignore_group_type({}));
-            exl.make(sys);
+            exl.make(sys, sys.topology());
 
             for(std::int32_t i=0; i<10; ++i)
             {
@@ -437,7 +437,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
             mjolnir::ExclusionList<traits_type> exl({{"bond", 1}},
                 ignore_molecule_type("Others"),
                 ignore_group_type({}));
-            exl.make(sys);
+            exl.make(sys, sys.topology());
 
             for(std::int32_t i=0; i<10; ++i)
             {
@@ -475,7 +475,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_molecule_dependent)
             mjolnir::ExclusionList<traits_type> exl({{"bond", 1}},
                 ignore_molecule_type("Others"),
                 ignore_group_type({}));
-            exl.make(sys);
+            exl.make(sys, sys.topology());
 
             for(std::int32_t i=0; i<10; ++i)
             {
@@ -541,7 +541,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_gruop_dependent)
                     {"protein1", {"protein1"}},
                     {"protein2", {"protein2"}}
                 }));
-            exl.make(sys);
+            exl.make(sys, sys.topology());
 
             for(std::int32_t i=0; i<10; ++i)
             {
@@ -588,7 +588,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_gruop_dependent)
                     {"protein1", {"protein2"}},
                     {"protein2", {"protein1"}}
                 }));
-            exl.make(sys);
+            exl.make(sys, sys.topology());
 
             for(std::int32_t i=0; i<10; ++i)
             {
@@ -642,7 +642,7 @@ BOOST_AUTO_TEST_CASE(ExclusionList_gruop_dependent)
                     {"protein1", {"protein1", "protein2"}},
                     {"protein2", {"protein1", "protein2"}}
                 }));
-            exl.make(sys);
+            exl.make(sys, sys.topology());
 
             for(std::int32_t i=0; i<10; ++i)
             {

@@ -134,8 +134,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_numerical_diff,
             sys.name(i)  = "DNA";
             sys.group(i) = "DNA";
         }
-        potential  .initialize(sys);
-        interaction.initialize(sys);
+        potential  .initialize(sys, sys.topology());
+        interaction.initialize(sys, sys.topology());
 
         const auto bp_kind      = potential.bp_kind (bases.at(0), bases.at(1));
         const auto rbp_0        = potential.r0(bp_kind);
@@ -469,8 +469,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
             sys.name(i)  = "DNA";
             sys.group(i) = "DNA";
         }
-        potential  .initialize(sys);
-        interaction.initialize(sys);
+        potential  .initialize(sys, sys.topology());
+        interaction.initialize(sys, sys.topology());
 
         const auto bp_kind      = potential.bp_kind (bases.at(0), bases.at(1));
         const auto cs_i_kind    = potential.cs5_kind(bases.at(0), bases.at(3));

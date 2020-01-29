@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(GlobalPairInteraction_double)
     sys.group(0) = "NONE";
     sys.group(1) = "NONE";
 
-    interaction.initialize(sys);
+    interaction.initialize(sys, sys.topology());
 
     std::mt19937 rng(123456789);
     std::normal_distribution<real_type> gauss(0.0, 1.0);

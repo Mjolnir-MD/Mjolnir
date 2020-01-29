@@ -82,8 +82,8 @@ BOOST_AUTO_TEST_CASE(PWMcos_Interaction)
         sys.name(i)  = "A";
         sys.group(i) = "A";
     }
-    potential  .initialize(sys);
-    interaction.initialize(sys);
+    potential  .initialize(sys, sys.topology());
+    interaction.initialize(sys, sys.topology());
 
     for(const auto r     : {r0 - 0.2, r0 + 0.5})
     {
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(PWMcos_Interaction)
             sys.force(idx)     = coord_type(0.0, 0.0, 0.0);
         }
         const system_type init = sys;
-        interaction.initialize(init);
+        interaction.initialize(init, init.topology());
 
         constexpr real_type tol = 1e-4;
         constexpr real_type dr  = 1e-5;
