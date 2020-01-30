@@ -24,6 +24,7 @@ set(TEST_NAMES
     test_lennard_jones_potential
     test_uniform_lennard_jones_potential
     test_excluded_volume_potential
+    test_inverse_power_potential
     test_hard_core_excluded_volume_potential
     test_debye_huckel_potential
     test_pdns_potential
@@ -46,6 +47,7 @@ set(TEST_NAMES
     test_pdns_interaction
     test_pwmcos_interaction
     test_position_restraint_interaction
+    test_afm_fitting_interaction
 
     test_neighbor_list
     test_unlimited_verlet_list
@@ -66,6 +68,7 @@ set(TEST_NAMES
     test_read_cosine_potential
     test_read_3spn2_bond_potential
     test_read_excluded_volume_potential
+    test_read_inverse_power_potential
     test_read_hard_core_excluded_volume_potential
     test_read_3spn2_excluded_volume_potential
     test_read_debye_huckel_potential
@@ -90,6 +93,7 @@ set(TEST_NAMES
     test_read_pdns_interaction
     test_read_pwmcos_interaction
     test_read_position_restraint_interaction
+    test_read_afm_fitting_interaction
 
     test_read_local_forcefield
     test_read_global_forcefield
@@ -119,7 +123,8 @@ foreach(TEST_NAME ${TEST_NAMES})
     add_executable(${TEST_NAME} ${TEST_NAME}.cpp)
     # here we use less-aggressive optimization flag to turn on NaN checking.
     # -Ofast sometimes skips NaN check by replacing isnan always false.
-    set_target_properties(${TEST_NAME} PROPERTIES COMPILE_FLAGS "-O2")
+    set_target_properties(${TEST_NAME} PROPERTIES
+        COMPILE_FLAGS "${MJOLNIR_WARNING_FLAGS} -O2")
 
     if(SEPARATE_BUILD)
         target_link_libraries(${TEST_NAME} mjolnir_core)

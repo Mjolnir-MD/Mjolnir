@@ -90,6 +90,15 @@ inline realT rlength(const Vector<realT, 3>& lhs) noexcept
     return ::mjolnir::math::rsqrt(length_sq(lhs));
 }
 
+template<typename realT>
+inline Matrix<realT, 3, 3> tensor_product(
+        const Vector<realT, 3>& lhs, const Vector<realT, 3>& rhs) noexcept
+{
+    return Matrix<realT, 3, 3>(
+            X(lhs) * X(rhs), X(lhs) * Y(rhs), X(lhs) * Z(rhs),
+            Y(lhs) * X(rhs), Y(lhs) * Y(rhs), Y(lhs) * Z(rhs),
+            Z(lhs) * X(rhs), Z(lhs) * Y(rhs), Z(lhs) * Z(rhs));
+}
 
 } // math
 } // mjolnir

@@ -11,6 +11,11 @@ template ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>     
 template ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_excluded_volume_potential(const toml::value& global);
 template ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_excluded_volume_potential(const toml::value& global);
 
+template InversePowerPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_inverse_power_potential(const toml::value&);
+template InversePowerPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_inverse_power_potential(const toml::value&);
+template InversePowerPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_inverse_power_potential(const toml::value&);
+template InversePowerPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_inverse_power_potential(const toml::value&);
+
 template HardCoreExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_hard_core_excluded_volume_potential(const toml::value& global);
 template HardCoreExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_hard_core_excluded_volume_potential(const toml::value& global);
 template HardCoreExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_hard_core_excluded_volume_potential(const toml::value& global);

@@ -12,19 +12,21 @@ add_definitions(-DTOML11_COLORIZE_ERROR_MESSAGE)
 
 # -----------------------------------------------------------------------------
 # add compilation flags (for general)
-
 include(CheckCXXCompilerFlag)
+
+set(MJOLNIR_WARNING_FLAGS "")
+
 check_cxx_compiler_flag("-Wall"      MJOLNIR_COMPILER_HAS_WALL)
 if(MJOLNIR_COMPILER_HAS_WALL)
-    add_definitions(-Wall)
+    set(MJOLNIR_WARNING_FLAGS "${MJOLNIR_WARNING_FLAGS} -Wall")
 endif()
 check_cxx_compiler_flag("-Wextra"    MJOLNIR_COMPILER_HAS_WEXTRA)
 if(MJOLNIR_COMPILER_HAS_WEXTRA)
-    add_definitions(-Wextra)
+    set(MJOLNIR_WARNING_FLAGS "${MJOLNIR_WARNING_FLAGS} -Wextra")
 endif()
 check_cxx_compiler_flag("-Wpedantic" MJOLNIR_COMPILER_HAS_WPEDANTIC)
 if(MJOLNIR_COMPILER_HAS_WPEDANTIC)
-    add_definitions(-Wpedantic)
+    set(MJOLNIR_WARNING_FLAGS "${MJOLNIR_WARNING_FLAGS} -Wpedantic")
 endif()
 
 # ----------------------------------------------------------------------------
@@ -85,7 +87,7 @@ if(USE_OPENMP)
     if(OpenMP_CXX_FOUND)
         message(STATUS "OpenMP ${OpenMP_CXX_VERSION} found")
         add_definitions(-DMJOLNIR_WITH_OPENMP)
-        add_definitions(${OpenMP_CXX_FLAGS})
+        set(MJOLNIR_OPTIMIZATON_FLAGS "${MJOLNIR_OPTIMIZATON_FLAGS} ${OpenMP_CXX_FLAGS}")
     else()
         message(WARNING "OpenMP not found. OpenMP support is disabled.")
     endif()

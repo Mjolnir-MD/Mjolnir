@@ -30,13 +30,13 @@ BOOST_AUTO_TEST_CASE(read_observer)
         BOOST_TEST(obs.observers().at(0)->prefix() == "./test");
         BOOST_TEST(obs.observers().at(1)->prefix() == "./test");
 
-        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
-                             obs.observers().at(0).get());
-        BOOST_TEST(static_cast<bool>(ene));
-
         const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(
-                             obs.observers().at(1).get());
+                             obs.observers().at(0).get());
         BOOST_TEST(static_cast<bool>(xyz));
+
+        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
+                             obs.observers().at(1).get());
+        BOOST_TEST(static_cast<bool>(ene));
     }
     {
         using namespace toml::literals;
@@ -51,13 +51,13 @@ BOOST_AUTO_TEST_CASE(read_observer)
         BOOST_TEST(obs.observers().at(0)->prefix() == "./test");
         BOOST_TEST(obs.observers().at(1)->prefix() == "./test");
 
-        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
-                             obs.observers().at(0).get());
-        BOOST_TEST(static_cast<bool>(ene));
-
         const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(
-                             obs.observers().at(1).get());
+                             obs.observers().at(0).get());
         BOOST_TEST(static_cast<bool>(xyz));
+
+        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
+                             obs.observers().at(1).get());
+        BOOST_TEST(static_cast<bool>(ene));
     }
 
     // XXX
@@ -80,13 +80,13 @@ BOOST_AUTO_TEST_CASE(read_observer)
         BOOST_TEST(obs.observers().at(0)->prefix() == "./test/test");
         BOOST_TEST(obs.observers().at(1)->prefix() == "./test/test");
 
-        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
-                             obs.observers().at(0).get());
-        BOOST_TEST(static_cast<bool>(ene));
-
         const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(
-                             obs.observers().at(1).get());
+                             obs.observers().at(0).get());
         BOOST_TEST(static_cast<bool>(xyz));
+
+        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
+                             obs.observers().at(1).get());
+        BOOST_TEST(static_cast<bool>(ene));
     }
 }
 
@@ -109,13 +109,13 @@ BOOST_AUTO_TEST_CASE(read_xyz_observer)
         const auto obs = mjolnir::read_observer<traits_type>(v);
         BOOST_TEST(obs.observers().size() == 2u);
 
-        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
-                             obs.observers().at(0).get());
-        BOOST_TEST(static_cast<bool>(ene));
-
         const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(
-                             obs.observers().at(1).get());
+                             obs.observers().at(0).get());
         BOOST_TEST(static_cast<bool>(xyz));
+
+        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
+                             obs.observers().at(1).get());
+        BOOST_TEST(static_cast<bool>(ene));
     }
 }
 
@@ -138,13 +138,13 @@ BOOST_AUTO_TEST_CASE(read_dcd_observer)
         const auto obs = mjolnir::read_observer<traits_type>(v);
         BOOST_TEST(obs.observers().size() == 2u);
 
-        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
-                             obs.observers().at(0).get());
-        BOOST_TEST(static_cast<bool>(ene));
-
         const auto dcd = dynamic_cast<mjolnir::DCDObserver<traits_type>*>(
-                             obs.observers().at(1).get());
+                             obs.observers().at(0).get());
         BOOST_TEST(static_cast<bool>(dcd));
+
+        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
+                             obs.observers().at(1).get());
+        BOOST_TEST(static_cast<bool>(ene));
     }
 }
 
@@ -167,12 +167,12 @@ BOOST_AUTO_TEST_CASE(read_trr_observer)
         const auto obs = mjolnir::read_observer<traits_type>(v);
         BOOST_TEST(obs.observers().size() == 2u);
 
-        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
-                             obs.observers().at(0).get());
-        BOOST_TEST(static_cast<bool>(ene));
-
         const auto trr = dynamic_cast<mjolnir::TRRObserver<traits_type>*>(
-                             obs.observers().at(1).get());
+                             obs.observers().at(0).get());
         BOOST_TEST(static_cast<bool>(trr));
+
+        const auto ene = dynamic_cast<mjolnir::EnergyObserver<traits_type>*>(
+                             obs.observers().at(1).get());
+        BOOST_TEST(static_cast<bool>(ene));
     }
 }

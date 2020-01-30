@@ -241,3 +241,56 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_cross_product, Real, test_targets)
         BOOST_TEST(lenc == lenl * lenr * sint, test::tolerance<Real>());
     }
 }
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_vector_tensor_product, Real, test_targets)
+{
+    using namespace mjolnir;
+    using mjolnir::math::X;
+    using mjolnir::math::Y;
+    using mjolnir::math::Z;
+
+    std::mt19937 mt(seed);
+    std::uniform_real_distribution<Real> uni(0, 1);
+
+    for(std::size_t test_times=0; test_times<N; ++test_times)
+    {
+        const math::Vector<Real, 3> v1(uni(mt), uni(mt), uni(mt));
+        const math::Vector<Real, 3> v2(uni(mt), uni(mt), uni(mt));
+        const math::Vector<Real, 3> v3(uni(mt), uni(mt), uni(mt));
+        const auto t1 = math::tensor_product(v1, v3);
+        const auto t2 = math::tensor_product(v2, v3);
+        const auto t3 = math::tensor_product(v1 + v2, v3);
+
+        static_assert(std::is_same<math::Matrix<Real, 3, 3>,
+                typename std::remove_const<decltype(t1)>::type>::value, "");
+
+        for(std::size_t i=0; i<9; ++i)
+        {
+            BOOST_TEST(t1.at(i) + t2.at(i) == t3.at(i), test::tolerance<Real>());
+        }
+        const auto t4 = math::tensor_product(v1, v2);
+        const auto t5 = math::tensor_product(v1, v3);
+        const auto t6 = math::tensor_product(v1, v2 + v3);
+        for(std::size_t i=0; i<9; ++i)
+        {
+            BOOST_TEST(t4.at(i) + t5.at(i) == t6.at(i), test::tolerance<Real>());
+        }
+        const auto t7 = math::tensor_product(2 * v1, v2);
+        for(std::size_t i=0; i<9; ++i)
+        {
+            BOOST_TEST(2 * t4.at(i) == t7.at(i), test::tolerance<Real>());
+        }
+    }
+
+    for(std::size_t test_times=0; test_times<N; ++test_times)
+    {
+        const math::Vector<Real, 3> v1(uni(mt), uni(mt), uni(mt));
+        const math::Vector<Real, 3> v2(uni(mt), uni(mt), uni(mt));
+        const auto t1 = math::tensor_product(v1, v2);
+        const auto t2 = v1 * math::transpose(v2);
+        for(std::size_t i=0; i<9; ++i)
+        {
+            BOOST_TEST(t1.at(i) == t2.at(i), test::tolerance<Real>());
+        }
+    }
+}

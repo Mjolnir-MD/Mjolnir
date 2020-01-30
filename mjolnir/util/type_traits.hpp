@@ -34,8 +34,5 @@ struct disjunction<T, Ts...> :
 template<typename T>
 struct negation : std::integral_constant<bool, !static_cast<bool>(T::value)>{};
 
-template<template<typename> class F, typename ... Ts>
-struct is_all : conjunction<F<Ts>...>::type {};
-
 } // mjolnir
 #endif// MJOLNIR_UTIL_TYPE_TRAITS_HPP
