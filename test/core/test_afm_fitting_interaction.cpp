@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(AFMFitting_calc_force)
     const std::size_t length_x = 10u;
     const std::size_t length_y = 10u;
     const std::vector<std::pair<std::size_t, real_type>> radii = {
-        {1, 1.0}, {2, 2.0}, {3, 3.0}, {4, 4.0}, {5, 5.0}
+        {0, 1.0}, {1, 2.0}, {2, 3.0}, {3, 4.0}, {4, 5.0}
     };
 
     std::vector<coord_type> initial_coordinates = {
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(AFMFitting_calc_force)
             radii, image);
 
     std::mt19937 mt(123456789);
-    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
+    std::uniform_real_distribution<real_type> uni(-0.01, 0.01);
 
     for(std::size_t trial = 0; trial < 1000; ++trial)
     {
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(AFMFitting_calc_force)
             sys.rmass(i) = 1.0;
 
             sys.position(i)  = initial_coordinates.at(i);
-            sys.position(i) += coord_type(0.01 * uni(mt), 0.01 * uni(mt), 0.01 * uni(mt));
+            sys.position(i) += coord_type(uni(mt), uni(mt), uni(mt));
             sys.velocity(i)  = coord_type(0.0, 0.0, 0.0);
             sys.force(i)     = coord_type(0.0, 0.0, 0.0);
             sys.name(i)      = "X";
