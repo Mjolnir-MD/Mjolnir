@@ -434,6 +434,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
                 mjolnir::make_unique<partition_type>()));
 
         system_type sys(10, boundary_type{});
+        topology_type topol(10);
 
         topol.add_connection(0, 1, "bond");
         topol.add_connection(0, 2, "bond");
