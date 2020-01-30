@@ -324,6 +324,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
     using coord_type        = traits_type::coordinate_type;
     using boundary_type     = traits_type::boundary_type;
     using system_type       = mjolnir::System<traits_type>;
+    using topology_type     = mjolnir::Topology;
 
     using potential_type    = mjolnir::ThreeSPN2BaseBaseInteractionPotential<traits_type>;
     using base_kind         = typename potential_type::base_kind;
