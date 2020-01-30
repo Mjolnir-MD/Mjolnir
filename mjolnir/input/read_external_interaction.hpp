@@ -249,7 +249,8 @@ read_afm_flexible_fitting_interaction(const toml::value& external)
         image.push_back(img);
     }
     return make_unique<interaction_t>(k, gamma, z0, cutoff, margin,
-        sigma_x, sigma_y, pixel_x, pixel_y, length_x, length_y, radii, image);
+            sigma_x, sigma_y, pixel_x, pixel_y, length_x, length_y,
+            std::move(radii), std::move(image));
 }
 
 // ----------------------------------------------------------------------------

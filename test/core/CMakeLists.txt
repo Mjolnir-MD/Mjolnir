@@ -93,6 +93,7 @@ set(TEST_NAMES
     test_read_pdns_interaction
     test_read_pwmcos_interaction
     test_read_position_restraint_interaction
+    test_read_afm_fitting_interaction
 
     test_read_local_forcefield
     test_read_global_forcefield

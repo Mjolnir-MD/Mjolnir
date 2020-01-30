@@ -109,7 +109,7 @@ class AFMFitInteraction final : public ExternalForceInteractionBase<traitsT>
             for(std::size_t xi=0; xi < len_x_; ++xi)
             {
                 const real_type x0 = (xi + 0.5) * pxl_x_;
-                this->pixel_positions_[offset + xi] = std::make_pair(x0, y0);
+                this->pixel_positions_.at(offset + xi) = std::make_pair(x0, y0);
                 MJOLNIR_LOG_INFO("position of (", xi, ", ", yi, ") th pixel is "
                                  "(", x0, ", ", y0, ")");
             }
@@ -176,6 +176,24 @@ class AFMFitInteraction final : public ExternalForceInteractionBase<traitsT>
         return new AFMFitInteraction(k_, gamma_, z0_, cutoff_, margin_,
             sgm_x_, sgm_y_, pxl_x_, pxl_y_, len_x_, len_y_, params, H_ref_);
     }
+
+    // accessor for testing.
+
+    real_type   k()        const noexcept {return k_;}
+    real_type   gamma()    const noexcept {return gamma_;}
+    real_type   z0()       const noexcept {return z0_;}
+    real_type   cutoff()   const noexcept {return cutoff_;}
+    real_type   margin()   const noexcept {return margin_;}
+    real_type   sigma_x()  const noexcept {return sgm_x_;}
+    real_type   sigma_y()  const noexcept {return sgm_y_;}
+    real_type   pixel_x()  const noexcept {return pxl_x_;}
+    real_type   pixel_y()  const noexcept {return pxl_y_;}
+    std::size_t length_x() const noexcept {return len_x_;}
+    std::size_t length_y() const noexcept {return len_y_;}
+
+    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+    std::vector<real_type>   const& parameters()   const noexcept {return parameters_;}
+    std::vector<real_type>   const& image()        const noexcept {return H_ref_;}
 
   private:
 
