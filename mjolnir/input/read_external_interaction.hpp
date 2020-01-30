@@ -235,7 +235,7 @@ read_afm_flexible_fitting_interaction(const toml::value& external)
 
     std::vector<std::pair<std::size_t, real_type>> radii;
     radii.reserve(parameters.size());
-    for(auto para : parameters)
+    for(const auto& para : parameters)
     {
         const auto idx = find_parameter<std::size_t>(para, env, "index");
         const auto rad = find_parameter<real_type  >(para, env, "radius");
@@ -286,8 +286,8 @@ read_external_interaction(const toml::value& external)
             toml::find(external, "interaction"), "here", {
             "expected value is one of the following.",
             "- \"Distance\":           interaction depending on the distance between a particle and a structure",
-            "- \"PositionRestraint\":  interaction depending on the distance between a particle and a fixed point"
-            "- \"AFMFlexibleFitting\": interaction depending on the distance between a particle and a fixed point"
+            "- \"PositionRestraint\":  interaction depending on the distance between a particle and a fixed point",
+            "- \"AFMFlexibleFitting\": interaction that fits molecule to an AFM image"
             }));
     }
 }
