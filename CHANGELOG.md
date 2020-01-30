@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.10.0
+
+### Added
+- Add Inverse power potential (@yutakasi634 )
+- Add AFMFlexibleFitting
+
+### Changed
+
+- check energy values are finite when outputting a snapshot
+- estimate the remaining time in the progress bar
+- upgrade toml11 to v3.3.0
+
 ## 1.9.0
 
 ### Added
