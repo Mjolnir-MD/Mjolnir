@@ -92,9 +92,6 @@ BOOST_AUTO_TEST_CASE(AFMFitting_calc_force)
             {1.0, 2.0, 3.0, 4.0, 5.0}, initial_coordinates,
             pixel_x, sigma_x, gamma, length_x, length_y);
 
-    auto& l_o_g_g_e_r_ = mjolnir::LoggerManager::get_default_logger();
-    l_o_g_g_e_r_.log(mjolnir::Logger::Level::Notice, image);
-
     interaction_type interaction(k, gamma, z0, cutoff, margin,
             sigma_x, sigma_y, pixel_x, pixel_y, length_x, length_y,
             radii, image);
