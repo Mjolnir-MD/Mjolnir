@@ -190,16 +190,14 @@ class ThreeSPN2BaseBaseInteraction<
                     const auto df1 = potential_.df(bp_kind, theta1, theta1_0);
                     const auto df2 = potential_.df(bp_kind, theta2, theta2_0);
 
-                    const auto rlBij_sq = rlBij * rlBij; // 1 / |Bij|^2
-                    const auto R = -SBi + (-dot_SBiBj * rlBij_sq) * Bij;
-                    const auto S = -SBj + ( dot_SBjBi * rlBij_sq) * Bij;
-
-                    const auto dot_phi = math::dot_product(R, S) *
-                            math::rsqrt(math::length_sq(R) * math::length_sq(S));
-                    const auto cos_phi = math::clamp<real_type>(dot_phi, -1, 1);
-
                     const auto m = math::cross_product(-SBi, Bij);
                     const auto n = math::cross_product( Bij, SBj);
+                    const auto m_lsq = math::length_sq(m);
+                    const auto n_lsq = math::length_sq(n);
+
+                    const auto dot_phi = math::dot_product(m, n) *
+                                         math::rsqrt(m_lsq * n_lsq);
+                    const auto cos_phi = math::clamp<real_type>(dot_phi, -1, 1);
 
                     const auto phi = std::copysign(std::acos(cos_phi),
                                                    -math::dot_product(SBi, n));
@@ -232,9 +230,10 @@ class ThreeSPN2BaseBaseInteraction<
                             const auto coef = real_type(0.5) * sin_dphi *
                                               f1 * f2 * U_dU_attr.first;
 
-                            const auto fSi = ( coef * lBij / math::length_sq(m)) * m;
-                            const auto fSj = (-coef * lBij / math::length_sq(n)) * n;
+                            const auto fSi = ( coef * lBij / m_lsq) * m;
+                            const auto fSj = (-coef * lBij / n_lsq) * n;
 
+                            const auto rlBij_sq = rlBij * rlBij; // 1 / |Bij|^2
                             const auto coef_Bi = dot_SBiBj * rlBij_sq;
                             const auto coef_Bj = dot_SBjBi * rlBij_sq;
 
