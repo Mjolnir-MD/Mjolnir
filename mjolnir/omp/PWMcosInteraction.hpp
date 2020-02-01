@@ -102,7 +102,7 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         const auto energy_unit  = potential_.energy_unit();  // overall coefficient
         const auto energy_shift = potential_.energy_shift(); // overall energy shift
 
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t i=0; i < this->potential_.contacts().size(); ++i)
         {
             const auto thread_id = omp_get_thread_num();

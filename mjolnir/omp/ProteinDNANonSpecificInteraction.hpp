@@ -85,7 +85,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         // But this interaction is named as P-D ns, so here it uses `P` for protein
         // and `D` for DNA.
 
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t i=0; i < this->potential_.contacts().size(); ++i)
         {
             const auto& para = potential_.contacts()[i];

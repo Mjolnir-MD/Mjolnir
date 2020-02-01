@@ -75,15 +75,9 @@ class ForceField<OpenMPSimulatorTraits<realT, boundaryT>>
 
     void calc_force(system_type& sys) const noexcept
     {
-#pragma omp parallel
-        {
-            // calc_force uses `nowait` to speedup. To do that, it needs to be
-            // inside a parallel region. So here, we need to wrap `calc_force`
-            // by a `parallel` region.
-            local_   .calc_force(sys);
-            global_  .calc_force(sys);
-            external_.calc_force(sys);
-        }
+        local_   .calc_force(sys);
+        global_  .calc_force(sys);
+        external_.calc_force(sys);
         // merge thread-local forces into master
         sys.merge_forces();
     }

@@ -43,7 +43,7 @@ class BondLengthInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 
     void      calc_force (system_type& sys)       const noexcept override
     {
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t i=0; i<this->potentials.size(); ++i)
         {
             const auto& idxp = this->potentials[i];

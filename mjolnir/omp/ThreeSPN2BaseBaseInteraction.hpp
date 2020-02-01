@@ -84,7 +84,7 @@ class ThreeSPN2BaseBaseInteraction<
         constexpr auto tolerance = math::abs_tolerance<real_type>();
 
         const auto leading_participants = this->potential_.leading_participants();
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
         {
             const std::size_t thread_id = omp_get_thread_num();

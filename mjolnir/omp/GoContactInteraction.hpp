@@ -50,7 +50,7 @@ class ContactInteraction<
 
     void calc_force(system_type& sys) const noexcept override
     {
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t i=0; i<this->active_contacts_.size(); ++i)
         {
             const std::size_t active_contact = active_contacts_[i];
