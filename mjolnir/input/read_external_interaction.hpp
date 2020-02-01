@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_INPUT_READ_EXTERNAL_INTERACTION_HPP
 #define MJOLNIR_INPUT_READ_EXTERNAL_INTERACTION_HPP
 #include <extlib/toml/toml.hpp>
+#include <mjolnir/forcefield/AFMFit/AFMFitInteraction.hpp>
 #include <mjolnir/interaction/external/ExternalDistanceInteraction.hpp>
 #include <mjolnir/interaction/external/PositionRestraintInteraction.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>
@@ -172,7 +173,7 @@ read_external_position_restraint_interaction(const toml::value& external)
         using potential_t   = HarmonicPotential<real_type>;
         using interaction_t = PositionRestraintInteraction<traitsT, potential_t>;
 
-        // container to put parameterjskl:w
+        // container to put parameters
         typename interaction_t::potential_container_type potentials;
 
         const auto& parameters = toml::find<toml::array>(external, "parameters");
@@ -204,6 +205,54 @@ read_external_position_restraint_interaction(const toml::value& external)
     }
 }
 
+template<typename traitsT>
+std::unique_ptr<ExternalForceInteractionBase<traitsT>>
+read_afm_flexible_fitting_interaction(const toml::value& external)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type     = typename traitsT::real_type;
+    using interaction_t = AFMFitInteraction<traitsT>;
+
+    const auto k        = toml::find<real_type  >(external, "k");
+    const auto gamma    = toml::find<real_type  >(external, "gamma");
+    const auto z0       = toml::find<real_type  >(external, "z0");
+    const auto cutoff   = toml::find<real_type  >(external, "cutoff");
+    const auto margin   = toml::find<real_type  >(external, "margin");
+    const auto sigma_x  = toml::find<real_type  >(external, "sigma_x");
+    const auto sigma_y  = toml::find<real_type  >(external, "sigma_y");
+    const auto pixel_x  = toml::find<real_type  >(external, "pixel_x");
+    const auto pixel_y  = toml::find<real_type  >(external, "pixel_y");
+    const auto length_x = toml::find<std::size_t>(external, "length_x");
+    const auto length_y = toml::find<std::size_t>(external, "length_y");
+
+    const auto& env = external.as_table().count("env") != 0 ?
+                      external.at("env") : toml::value{};
+
+    // read radius and participants
+
+    const auto& parameters = toml::find<toml::array>(external, "parameters");
+
+    std::vector<std::pair<std::size_t, real_type>> radii;
+    radii.reserve(parameters.size());
+    for(const auto& para : parameters)
+    {
+        const auto idx = find_parameter<std::size_t>(para, env, "index");
+        const auto rad = find_parameter<real_type  >(para, env, "radius");
+        radii.emplace_back(idx, rad);
+    }
+
+    std::vector<real_type> image;
+    image.reserve(length_x * length_y);
+    for(real_type img : toml::find<std::vector<real_type>>(external, "image"))
+    {
+        image.push_back(img);
+    }
+    return make_unique<interaction_t>(k, gamma, z0, cutoff, margin,
+            sigma_x, sigma_y, pixel_x, pixel_y, length_x, length_y,
+            std::move(radii), std::move(image));
+}
+
 // ----------------------------------------------------------------------------
 // general read_external_interaction function
 // ----------------------------------------------------------------------------
@@ -226,14 +275,20 @@ read_external_interaction(const toml::value& external)
         MJOLNIR_LOG_NOTICE("PositionRestraint interaction found.");
         return read_external_position_restraint_interaction<traitsT>(external);
     }
+    else if(interaction == "AFMFlexibleFitting")
+    {
+        MJOLNIR_LOG_NOTICE("AFMFlexibleFitting interaction found.");
+        return read_afm_flexible_fitting_interaction<traitsT>(external);
+    }
     else
     {
         throw std::runtime_error(toml::format_error("[error] "
             "mjolnir::read_external_interaction: invalid interaction",
             toml::find(external, "interaction"), "here", {
             "expected value is one of the following.",
-            "- \"Distance\":          interaction depending on the distance between a particle and a structure",
-            "- \"PositionRestraint\": interaction depending on the distance between a particle and a fixed point"
+            "- \"Distance\":           interaction depending on the distance between a particle and a structure",
+            "- \"PositionRestraint\":  interaction depending on the distance between a particle and a fixed point",
+            "- \"AFMFlexibleFitting\": interaction that fits molecule to an AFM image"
             }));
     }
 }
