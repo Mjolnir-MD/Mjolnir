@@ -6,7 +6,21 @@ matrix:
   - os: linux
     language: cpp
     compiler: gcc
-    env: COMPILER="g++-9" SEPARATE="ON"
+    env: COMPILER="g++-9" MJOLNIR_BUILD_SEPARATE="ON"
+    addons:
+      apt:
+        update: true
+        sources:
+        - sourceline: 'ppa:mhier/libboost-latest'
+        - sourceline: 'ppa:ubuntu-toolchain-r/test'
+        packages:
+        - g++-9
+        - boost1.70
+        - cmake
+  - os: linux
+    language: cpp
+    compiler: gcc
+    env: COMPILER="g++-9" MJOLNIR_BUILD_SEPARATE="ON" MJOLNIR_USE_OPENMP="ON"
     addons:
       apt:
         update: true
@@ -33,36 +47,23 @@ matrix:
         - cmake
   - os: linux
     language: cpp
-    compiler: gcc
-    env: COMPILER="g++-8"
+    compiler: clang
+    env: COMPILER="clang++-8" MJOLNIR_BUILD_SEPARATE="ON"
     addons:
       apt:
         update: true
         sources:
         - sourceline: 'ppa:mhier/libboost-latest'
         - sourceline: 'ppa:ubuntu-toolchain-r/test'
+        - llvm-toolchain-xenial-8
         packages:
-        - g++-8
-        - boost1.70
-        - cmake
-  - os: linux
-    language: cpp
-    compiler: gcc
-    env: COMPILER="g++-7"
-    addons:
-      apt:
-        update: true
-        sources:
-        - sourceline: 'ppa:mhier/libboost-latest'
-        - sourceline: 'ppa:ubuntu-toolchain-r/test'
-        packages:
-        - g++-7
+        - clang-8
         - boost1.70
         - cmake
   - os: linux
     language: cpp
     compiler: clang
-    env: COMPILER="clang++-8" SEPARATE="ON"
+    env: COMPILER="clang++-8" MJOLNIR_BUILD_SEPARATE="ON" MJOLNIR_USE_OPENMP="ON"
     addons:
       apt:
         update: true
@@ -89,21 +90,6 @@ matrix:
         - clang-8
         - boost1.70
         - cmake
-  - os: linux
-    language: cpp
-    compiler: clang
-    env: COMPILER="clang++-7"
-    addons:
-      apt:
-        update: true
-        sources:
-        - sourceline: 'ppa:mhier/libboost-latest'
-        - sourceline: 'ppa:ubuntu-toolchain-r/test'
-        - llvm-toolchain-xenial-7
-        packages:
-        - clang-7
-        - boost1.70
-        - cmake
   - os: osx
     language: cpp
     compiler: clang
@@ -120,8 +106,14 @@ before_install:
     tar xf cmake-3.15.4-Darwin-x86_64.tar.gz -C cmake --strip-components=1
   fi
 - |
-  if [[ "${SEPARATE}" != "ON" ]]; then
-    export SEPARATE="OFF"
+  if [[ "${MJOLNIR_BUILD_SEPARATE}" != "ON" ]]; then
+    export MJOLNIR_BUILD_SEPARATE="OFF"
+  fi
+- |
+  if [[ "${MJOLNIR_USE_OPENMP}" != "ON" ]]; then
+    export MJOLNIR_USE_OPENMP="OFF"
+  else
+    export OMP_NUM_THREADS=4
   fi
 - export PATH=${TRAVIS_BUILD_DIR}/cmake/bin:${PATH}
 - cmake --version
@@ -129,6 +121,6 @@ before_install:
 script:
 - mkdir build
 - cd build
-- cmake -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON -DUSE_OPENMP=OFF -DBUILD_INTEGRATION_TEST=OFF -DSEPARATE_BUILD="${SEPARATE}" ..
+- cmake -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON -DUSE_OPENMP="${MJOLNIR_USE_OPENMP}" -DBUILD_INTEGRATION_TEST=OFF -DSEPARATE_BUILD="${MJOLNIR_BUILD_SEPARATE}" ..
 - make VERBOSE=1
 - ctest --output-on-failure
