@@ -44,7 +44,8 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
           forces_master_(num_particles),
           forces_threads_(omp_get_max_threads(),
               coordinate_container_type(num_particles),
-              cache_aligned_allocator<coordinate_container_type>{})
+              cache_aligned_allocator<coordinate_container_type>{}),
+          names_    (num_particles), groups_    (num_particles)
     {}
     ~System() = default;
 
