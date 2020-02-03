@@ -88,8 +88,11 @@ BOOST_AUTO_TEST_CASE(omp_PWMcos_calc_force)
             typename sequencial_potential_type::ignore_molecule_type("Nothing"),
             typename sequencial_potential_type::ignore_group_type({}));
 
-        rng_type    rng(123456789);
-        system_type sys(16, boundary_type{});
+        rng_type      rng(123456789);
+        system_type   sys(16, boundary_type{});
+        topology_type topol(16);
+        topol.construct_molecules();
+
         sys.position( 0) = mjolnir::math::make_coordinate<coordinate_type>( 0.0,  3.3, 0.0);
         sys.position( 1) = mjolnir::math::make_coordinate<coordinate_type>( 1.9,  1.6, 0.0);
         sys.position( 2) = mjolnir::math::make_coordinate<coordinate_type>( 0.0,  0.0, 0.0);
@@ -124,7 +127,7 @@ BOOST_AUTO_TEST_CASE(omp_PWMcos_calc_force)
             mjolnir::math::Y(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
             mjolnir::math::Z(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
         }
-        potential.update(sys);
+        potential.update(sys, topol);
 
         // init sequential one with the same coordinates
         sequencial_system_type seq_sys(16, boundary_type{});
@@ -138,12 +141,10 @@ BOOST_AUTO_TEST_CASE(omp_PWMcos_calc_force)
             seq_sys.name(i)     = sys.name(i);
             seq_sys.group(i)    = sys.group(i);
         }
-        seq_potential.update(seq_sys);
+        seq_potential.update(seq_sys, topol);
 
         partition_type            celllist;
         sequencial_partition_type seq_celllist;
-
-        topol.construct_molecules();
 
         interaction_type interaction(std::move(potential),
             mjolnir::SpatialPartition<traits_type, potential_type>(

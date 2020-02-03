@@ -66,10 +66,11 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_DebyeHuckel_calc_force)
         rng_type    rng(123456789);
         system_type sys(N_particle, boundary_type{});
         topology_type topol(N_particle);
+        topol.construct_molecules();
 
         sys.attribute("temperature")    = 300.0;
         sys.attribute("ionic_strength") =   0.2;
-        potential.update(sys);
+        potential.update(sys, topol);
 
         for(std::size_t i=0; i<sys.size(); ++i)
         {
@@ -97,7 +98,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_DebyeHuckel_calc_force)
         sequencial_system_type seq_sys(N_particle, boundary_type{});
         seq_sys.attribute("temperature")    = 300.0;
         seq_sys.attribute("ionic_strength") =   0.2;
-        seq_potential.update(seq_sys);
+        seq_potential.update(seq_sys, topol);
 
         assert(sys.size() == seq_sys.size());
         for(std::size_t i=0; i<sys.size(); ++i)
@@ -109,9 +110,6 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_DebyeHuckel_calc_force)
             seq_sys.name(i)     = sys.name(i);
             seq_sys.group(i)    = sys.group(i);
         }
-
-        topol.construct_molecules();
-        topol.construct_molecules();
 
         interaction_type interaction(std::move(potential),
             mjolnir::SpatialPartition<traits_type, potential_type>(

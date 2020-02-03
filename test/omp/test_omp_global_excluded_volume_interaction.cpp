@@ -67,6 +67,8 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_UniformLennardJones_calc_force)
         rng_type    rng(123456789);
         system_type sys(N_particle, boundary_type{});
         topology_type topol(N_particle);
+        topol.construct_molecules();
+
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             const auto i_x = i % 4;
@@ -91,7 +93,8 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_UniformLennardJones_calc_force)
 
         // init sequential one with the same coordinates
         sequencial_system_type seq_sys(N_particle, boundary_type{});
-        seq_potential.update(seq_sys);
+        seq_potential.update(seq_sys, topol);
+        potential    .update(sys,     topol);
 
         assert(sys.size() == seq_sys.size());
         for(std::size_t i=0; i<sys.size(); ++i)
@@ -103,8 +106,6 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_UniformLennardJones_calc_force)
             seq_sys.name(i)     = sys.name(i);
             seq_sys.group(i)    = sys.group(i);
         }
-
-        topol.construct_molecules();
 
         interaction_type interaction(std::move(potential),
             mjolnir::SpatialPartition<traits_type, potential_type>(
