@@ -10,6 +10,7 @@
 
 namespace mjolnir
 {
+
 // Serialize System into MsgPack format that is equivalent to the following JSON
 // {
 //     "num_particles": integer,
@@ -52,6 +53,7 @@ class MsgPackObserver final : public ObserverBase<traitsT>
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
+        MJOLNIR_LOG_NOTICE("checkpoint file is ", filename_);
 
         // check the specified file can be opened.
         // Here, it does not clear the content.
