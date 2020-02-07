@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(read_observer)
         bool has_xyz = false;
         bool has_ene = false;
         bool has_msg = false;
-        for(const auto ptr : obs.observers())
+        for(const auto& ptr : obs.observers())
         {
             const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(ptr.get());
             if(static_cast<bool>(xyz))
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(read_observer)
         bool has_xyz = false;
         bool has_ene = false;
         bool has_msg = false;
-        for(const auto ptr : obs.observers())
+        for(const auto& ptr : obs.observers())
         {
             const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(ptr.get());
             if(static_cast<bool>(xyz))
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(read_observer)
         bool has_xyz = false;
         bool has_ene = false;
         bool has_msg = false;
-        for(const auto ptr : obs.observers())
+        for(const auto& ptr : obs.observers())
         {
             const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(ptr.get());
             if(static_cast<bool>(xyz))
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(read_xyz_observer)
         bool has_xyz = false;
         bool has_ene = false;
         bool has_msg = false;
-        for(const auto ptr : obs.observers())
+        for(const auto& ptr : obs.observers())
         {
             const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(ptr.get());
             if(static_cast<bool>(xyz))
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE(read_dcd_observer)
         bool has_dcd = false;
         bool has_ene = false;
         bool has_msg = false;
-        for(const auto ptr : obs.observers())
+        for(const auto& ptr : obs.observers())
         {
             const auto dcd = dynamic_cast<mjolnir::DCDObserver<traits_type>*>(ptr.get());
             if(static_cast<bool>(dcd))
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(read_trr_observer)
         bool has_trr = false;
         bool has_ene = false;
         bool has_msg = false;
-        for(const auto ptr : obs.observers())
+        for(const auto& ptr : obs.observers())
         {
             const auto trr = dynamic_cast<mjolnir::TRRObserver<traits_type>*>(ptr.get());
             if(static_cast<bool>(trr))
