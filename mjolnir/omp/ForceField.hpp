@@ -42,6 +42,7 @@ class ForceField<OpenMPSimulatorTraits<realT, boundaryT>>
         MJOLNIR_LOG_FUNCTION();
 
         MJOLNIR_LOG_INFO("writing current topology");
+        topology_.resize(sys.size());
         local_.write_topology(this->topology_);
         topology_.construct_molecules();
 
