@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(omp_BondLength_calc_force)
 
     const int max_number_of_threads = omp_get_max_threads();
     BOOST_TEST_WARN(max_number_of_threads > 2);
-    BOOST_TEST_MESSAGE("maximum number of threads = " << omp_get_max_threads());
+    BOOST_TEST_MESSAGE("maximum number of threads = " << max_number_of_threads);
 
     for(int num_thread=1; num_thread<=max_number_of_threads; ++num_thread)
     {

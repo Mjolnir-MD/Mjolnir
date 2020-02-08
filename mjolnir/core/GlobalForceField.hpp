@@ -18,6 +18,7 @@ class GlobalForceField
     using coordinate_type  = typename traits_type::coordinate_type;
     using boundary_type    = typename traits_type::boundary_type;
     using system_type      = System<traits_type>;
+    using topology_type    = Topology;
     using interaction_base = GlobalInteractionBase<traitsT>;
     using interaction_ptr  = std::unique_ptr<interaction_base>;
     using container_type   = std::vector<interaction_ptr>;
@@ -55,24 +56,24 @@ class GlobalForceField
         return;
     }
 
-    void initialize(const system_type& sys)
+    void initialize(const system_type& sys, const topology_type& topol)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         for(auto& item : this->interactions_)
         {
             MJOLNIR_LOG_INFO("initializing ", item->name());
-            item->initialize(sys);
+            item->initialize(sys, topol);
         }
         return;
     }
 
     // to re-calculate parameters like temperature, ionic concentration, etc...
-    void update(const system_type& sys)
+    void update(const system_type& sys, const topology_type& topol)
     {
         for(auto& item : this->interactions_)
         {
-            item->update(sys);
+            item->update(sys, topol);
         }
         return;
     }

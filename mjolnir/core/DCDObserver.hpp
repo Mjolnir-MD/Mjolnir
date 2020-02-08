@@ -117,7 +117,7 @@ class DCDObserver final : public ObserverBase<traitsT>
 
     void write_header(const std::string& fname,
                       const std::size_t  total_step_sz, const real_type dt,
-                      const system_type& sys, const forcefield_type&) const
+                      const system_type& sys, const forcefield_type& ff) const
     {
         std::ofstream ofs(fname, std::ios::binary | std::ios::app);
         if(not ofs.good())
@@ -144,7 +144,7 @@ class DCDObserver final : public ObserverBase<traitsT>
             const std::int32_t total_step(total_step_sz);
             detail::write_as_bytes(ofs, total_step);
 
-            const std::int32_t total_chains(sys.topology().number_of_molecules());
+            const std::int32_t total_chains(ff.topology().number_of_molecules());
             detail::write_as_bytes(ofs, total_chains);
 
             const std::int32_t zero(0);
