@@ -41,6 +41,7 @@ class ProteinDNANonSpecificPotential
   public:
     using traits_type = traitsT;
     using real_type   = typename traits_type::real_type;
+    using system_type = System<traits_type>;
     using self_type   = ProteinDNANonSpecificPotential<traits_type>;
 
     struct contact_parameter_type
@@ -137,7 +138,7 @@ class ProteinDNANonSpecificPotential
     }
     ~ProteinDNANonSpecificPotential() = default;
 
-    void initialize(const System<traits_type>& sys) noexcept
+    void initialize(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -153,12 +154,13 @@ class ProteinDNANonSpecificPotential
             this->max_cutoff_length_ = std::max(max_cutoff_length_, para.r_cut);
         }
 
-        this->update(sys);
+        this->update(sys, topol);
         return;
     }
 
-    void update(const System<traits_type>&) noexcept
+    void update(const system_type& sys, const topology_type& topol) noexcept
     {
+        exclusion_list_.make(sys, topol);
         return;
     }
 
@@ -253,6 +255,10 @@ class ProteinDNANonSpecificPotential
     // to check bases has base-pairing interaction.
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
+        if(exclusion_list_.is_excluded(i, j))
+        {
+            return false;
+        }
         const bool i_is_dna = (parameters_[i].S3 != invalid());
         const bool j_is_dna = (parameters_[j].S3 != invalid());
         // {protein, dna} pair has interaction, others not.

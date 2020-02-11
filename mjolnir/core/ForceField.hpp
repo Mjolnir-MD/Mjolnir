@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_CORE_FORCE_FIELD_HPP
 #define MJOLNIR_CORE_FORCE_FIELD_HPP
 #include <mjolnir/core/SimulatorTraits.hpp>
+#include <mjolnir/core/Topology.hpp>
 #include <mjolnir/core/LocalForceField.hpp>
 #include <mjolnir/core/GlobalForceField.hpp>
 #include <mjolnir/core/ExternalForceField.hpp>
@@ -16,6 +17,7 @@ class ForceField
     using real_type                = typename traits_type::real_type;
     using coordinate_type          = typename traits_type::coordinate_type;
     using system_type              = System<traits_type>;
+    using topology_type            = Topology;
     using local_forcefield_type    = LocalForceField<traits_type>;
     using global_forcefield_type   = GlobalForceField<traits_type>;
     using external_forcefield_type = ExternalForceField<traits_type>;
@@ -43,14 +45,14 @@ class ForceField
         MJOLNIR_LOG_FUNCTION();
 
         MJOLNIR_LOG_INFO("writing current topology");
-        local_.write_topology(sys.topology());
-        sys.topology().construct_molecules();
+        topology_.resize(sys.size());
+        local_.write_topology(topology_);
+        topology_.construct_molecules();
 
         MJOLNIR_LOG_INFO("initializing forcefields");
         local_   .initialize(sys);
-        global_  .initialize(sys);
+        global_  .initialize(sys, topology_);
         external_.initialize(sys);
-
         return;
     }
 
@@ -58,7 +60,7 @@ class ForceField
     void update(const system_type& sys)
     {
         local_   .update(sys);
-        global_  .update(sys);
+        global_  .update(sys, this->topology_);
         external_.update(sys);
         return;
     }
@@ -134,6 +136,8 @@ class ForceField
         return retval;
     }
 
+    topology_type            const& topology() const noexcept {return topology_;}
+    topology_type            &      topology()       noexcept {return topology_;}
     local_forcefield_type    const& local()    const noexcept {return local_;}
     local_forcefield_type    &      local()          noexcept {return local_;}
     global_forcefield_type   const& global()   const noexcept {return global_;}
@@ -143,6 +147,7 @@ class ForceField
 
   private:
 
+    topology_type            topology_;
     local_forcefield_type    local_;
     global_forcefield_type   global_;
     external_forcefield_type external_;
