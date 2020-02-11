@@ -13,11 +13,9 @@ namespace mjolnir
 
 // Serialize System into MsgPack format that is equivalent to the following JSON
 // In the current implementation, the order should be preserved.
-// fixmap<4> {
-//     "num_particles": integer,
+// fixmap<3> {
 //     "boundary"     : {"lower": [float, float, float],
 //                       "upper": [float, float, float]} or nil,
-//     "attributres"  : {"temperature": float, ...},
 //     "particles"    : [fixmap<7>{
 //          "mass"    : float,
 //          "rmass"   : float,
@@ -28,6 +26,7 @@ namespace mjolnir
 //          "group"   : string,
 //          }, ...
 //     ]
+//     "attributres"  : {"temperature": float, ...},
 // }
 
 template<typename traitsT>
@@ -80,40 +79,29 @@ class MsgPackObserver final : public ObserverBase<traitsT>
     void output(const std::size_t, const real_type,
                 const system_type& sys, const forcefield_type&) override
     {
-        // 0b'1000'0100
-        // 0x    8    4
-        constexpr std::uint8_t fixmap4_code = 0x84;
+        // 0b'1000'0011
+        // 0x    8    3
+        constexpr std::uint8_t fixmap3_code = 0x83;
 
         // ---------------------------------------------------------------------
         // clear buffer before writing to it.
         this->buffer_.clear();
-
-        // ---------------------------------------------------------------------
-        // System is represented as a map with 10 elements.
-        // See the top of this file.
-        this->buffer_.push_back(fixmap4_code);
+        this->buffer_.push_back(fixmap3_code);
 
         auto buffer_iterator = std::back_inserter(buffer_);
 
         // ---------------------------------------------------------------------
-        // append boundary and attributes, that are independent from particles
-
-        const std::size_t num_particles = sys.size();
-
-        to_msgpack("num_particles", buffer_iterator);
-        to_msgpack(num_particles,   buffer_iterator);
+        // write boundary condition.
 
         to_msgpack("boundary",     buffer_iterator);
         to_msgpack(sys.boundary(), buffer_iterator);
-
-        to_msgpack("attributes",     buffer_iterator);
-        to_msgpack(sys.attributes(), buffer_iterator);
 
         // ---------------------------------------------------------------------
         // append particles
 
         to_msgpack("particles", buffer_iterator);
 
+        const auto num_particles = sys.size();
         if(num_particles < 16)
         {
             // 0b'1001'0000
@@ -135,14 +123,12 @@ class MsgPackObserver final : public ObserverBase<traitsT>
             to_big_endian(size, buffer_iterator);
         }
 
-        constexpr std::uint8_t fixmap7_code = 0x87;
+        constexpr std::uint8_t fixmap6_code = 0x86;
         for(std::size_t i=0; i<sys.size(); ++i)
         {
-            buffer_.push_back(fixmap7_code);
+            buffer_.push_back(fixmap6_code);
             to_msgpack("mass",          buffer_iterator);
             to_msgpack(sys.mass(i),     buffer_iterator);
-            to_msgpack("rmass",         buffer_iterator);
-            to_msgpack(sys.rmass(i),    buffer_iterator);
             to_msgpack("position",      buffer_iterator);
             to_msgpack(sys.position(i), buffer_iterator);
             to_msgpack("velocity",      buffer_iterator);
@@ -154,6 +140,12 @@ class MsgPackObserver final : public ObserverBase<traitsT>
             to_msgpack("group",         buffer_iterator);
             to_msgpack(sys.group(i),    buffer_iterator);
         }
+
+        // ---------------------------------------------------------------------
+        // write attributes list
+
+        to_msgpack("attributes",     buffer_iterator);
+        to_msgpack(sys.attributes(), buffer_iterator);
 
         // -------------------------------------------------------------------
         // overwrite .msg file by the current status
@@ -307,45 +299,6 @@ class MsgPackObserver final : public ObserverBase<traitsT>
             // string -> real
             to_msgpack(keyval.first,  out);
             to_msgpack(keyval.second, out);
-        }
-        return ;
-    }
-
-    template<typename OutputIterator>
-    void to_msgpack(const std::size_t num, OutputIterator& out)
-    {
-        constexpr std::uint8_t uint8_code  = 0xcc;
-        constexpr std::uint8_t uint16_code = 0xcd;
-        constexpr std::uint8_t uint32_code = 0xce;
-        constexpr std::uint8_t uint64_code = 0xcf;
-        if(num < 128)
-        {
-            const std::uint8_t n = num;
-            *out = n; ++out;
-        }
-        else if(num < 256)
-        {
-            const std::uint8_t n = num;
-            *out = uint8_code; ++out;
-            *out = n;          ++out;
-        }
-        else if(num < 65536)
-        {
-            const std::uint16_t n = num;
-            *out = uint16_code; ++out;
-            to_big_endian(n, out);
-        }
-        else if(num < 0xFFFFFFFF)
-        {
-            const std::uint32_t n = num;
-            *out = uint32_code; ++out;
-            to_big_endian(n, out);
-        }
-        else
-        {
-            const std::uint64_t n = num;
-            *out = uint64_code; ++out;
-            to_big_endian(n, out);
         }
         return ;
     }
