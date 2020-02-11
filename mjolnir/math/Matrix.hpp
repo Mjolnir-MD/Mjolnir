@@ -1,6 +1,5 @@
 #ifndef MJOLNIR_MATH_MATRIX_HPP
 #define MJOLNIR_MATH_MATRIX_HPP
-#include <extlib/toml/toml.hpp>
 #include <mjolnir/util/type_traits.hpp>
 #include <algorithm>
 #include <array>
@@ -59,13 +58,6 @@ class Matrix
         static_assert(sizeof...(Ts) == total_size, "");
         static_assert(conjunction<
                 std::is_convertible<Ts, value_type> ...>::value, "");
-    }
-
-    template<typename Com, template<typename ...> class Tab,
-                           template<typename ...> class Arr>
-    Matrix(const toml::basic_value<Com, Tab, Arr>& tml)
-    {
-        values_ = toml::get<storage_type>(tml);
     }
 
     template<typename T>

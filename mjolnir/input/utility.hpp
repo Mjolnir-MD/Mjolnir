@@ -4,6 +4,7 @@
 #include <mjolnir/util/type_traits.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <mjolnir/math/Matrix.hpp>
 
 namespace mjolnir
 {
@@ -140,4 +141,36 @@ find_parameter(const toml::value& params, const toml::value& env,
 }
 
 } // mjolnir
+
+namespace toml
+{
+
+// enable to get mjolnir::Vector as the following.
+// ```cpp
+// const auto v = toml::find<mjolnir::Vector<double, 3>>(table, "position");
+// ```
+
+template<>
+struct from<mjolnir::math::Matrix<double, 3, 1>>
+{
+    template<typename C, template<typename ...> class M,
+             template<typename ...> class A>
+    static mjolnir::math::Matrix<double, 3, 1> from_toml(const basic_value<C, M, A>& v)
+    {
+        return mjolnir::math::Matrix<double, 3, 1>(get<std::array<double, 3>>(v));
+    }
+};
+
+template<>
+struct from<mjolnir::math::Matrix<float, 3, 1>>
+{
+    template<typename C, template<typename ...> class M,
+             template<typename ...> class A>
+    static mjolnir::math::Matrix<float, 3, 1> from_toml(const basic_value<C, M, A>& v)
+    {
+        return mjolnir::math::Matrix<float, 3, 1>(get<std::array<float, 3>>(v));
+    }
+};
+
+} // toml
 #endif// MJOLNIR_INPUT_UTILITY_HPP
