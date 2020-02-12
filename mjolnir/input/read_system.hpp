@@ -45,9 +45,11 @@ struct read_boundary_impl<CuboidalPeriodicBoundary<realT, coordT>>
         MJOLNIR_LOG_INFO("shape of periodic boundary is cuboid");
         check_keys_available(boundary, {"upper"_s, "lower"_s});
 
-        const auto upper = toml::find<std::array<realT, 3>>(boundary, "upper");
-        const auto lower = toml::find<std::array<realT, 3>>(boundary, "lower");
-        if(upper[0] <= lower[0] || upper[1] <= lower[1] || upper[2] <= lower[2])
+        const auto upper = toml::find<coordT>(boundary, "upper");
+        const auto lower = toml::find<coordT>(boundary, "lower");
+
+        if(math::X(upper) <= math::X(lower) ||
+           math::Y(upper) <= math::Y(lower) || math::Z(upper) <= math::Z(lower))
         {
             throw_exception<std::runtime_error>(toml::format_error("[error] "
                 "mjolnir::read_boundary: upper should be larger than lower",
@@ -56,9 +58,8 @@ struct read_boundary_impl<CuboidalPeriodicBoundary<realT, coordT>>
         }
         MJOLNIR_LOG_INFO("upper limit of the boundary = ", upper);
         MJOLNIR_LOG_INFO("lower limit of the boundary = ", lower);
-        return CuboidalPeriodicBoundary<realT, coordT>(
-            math::make_coordinate<coordT>(lower[0], lower[1], lower[2]),
-            math::make_coordinate<coordT>(upper[0], upper[1], upper[2]));
+
+        return CuboidalPeriodicBoundary<realT, coordT>(lower, upper);
     }
 };
 
@@ -87,6 +88,7 @@ read_system(const toml::value& root, const std::size_t N)
     using coordinate_type = typename traitsT::coordinate_type;
 
     const auto& systems = toml::find(root, "systems");
+
     MJOLNIR_LOG_NOTICE("reading ", format_nth(N), " system ...");
 
     const auto input_path = read_input_path(root);
@@ -120,58 +122,63 @@ read_system(const toml::value& root, const std::size_t N)
 
     System<traitsT> sys(particles.size(), read_boundary<traitsT>(boundary));
 
-    if(not particles.empty())
+    for(const auto& attr : toml::find<toml::table>(system, "attributes"))
     {
-        const auto& p = particles.front().as_table();
+        const real_type attribute = toml::get<real_type>(attr.second);
+        sys.attribute(attr.first) = attribute;
+        MJOLNIR_LOG_INFO("attribute.", attr.first, " = ", attribute);
+    }
+
+    if(particles.empty())
+    {
+        return sys;
+    }
+
+    {
         // if the first particle has velocity, mjolnir assumes that velocity is
         // already initialized (velocity generation not required).
+        const auto& p = particles.front().as_table();
         sys.velocity_initialized() = (p.count("vel")      != 0) ||
                                      (p.count("velocity") != 0);
     }
 
-    const auto find_either = [](const toml::value& v,
-        const std::string& key1, const std::string& key2) -> const toml::value&
+    const auto find_either = [](const toml::value& v, const std::string& key1,
+                                const std::string& key2) -> const toml::value&
         {
-            const auto& table = v.as_table();
-            if(table.count(key1) != 0 && table.count(key2) != 0)
+            if(v.contains(key1) && v.contains(key2) != 0)
             {
                 throw_exception<std::runtime_error>(toml::format_error("[error]"
-                    " key duplicates.", table.at(key1), "here", table.at(key2),
+                    " key duplicates.", v.at(key1), "here", v.at(key2),
                     "this conflicts with the above value definition"));
             }
-            if(table.count(key1) != 0) {return table.at(key1);}
-            if(table.count(key2) != 0) {return table.at(key2);}
+            if(v.contains(key1)) {return v.at(key1);}
+            if(v.contains(key2)) {return v.at(key2);}
 
-            std::ostringstream oss;
-            oss << "[error] both keys \"" << key1 << "\" and \"" << key2
-                << "\" not found.";
-            throw_exception<std::out_of_range>(
-                    toml::format_error(oss.str(), v, "in this table"));
+            throw_exception<std::out_of_range>(toml::format_error(
+                "both keys, \""_s + key1 + "\" and \""_s + key2 +
+                "\", are not found."_s, v, "in this table"_s));
         };
 
     MJOLNIR_LOG_NOTICE(particles.size(), " particles are found.");
     for(std::size_t i=0; i<particles.size(); ++i)
     {
-        using vec_type = std::array<real_type, 3>;
+        using coord_type = coordinate_type;
         const auto& p = particles.at(i);
 
         check_keys_available(p, {"mass"_s, "m"_s, "position"_s, "pos"_s,
                 "velocity"_s, "vel"_s, "name"_s, "group"_s});
 
-        sys.mass(i) = toml::get<real_type>(find_either(p, "m", "mass"));
-
-        const auto pos = toml::get<vec_type>(find_either(p, "pos", "position"));
-        sys.position(i) = math::make_coordinate<coordinate_type>(pos[0], pos[1], pos[2]);
+        sys.mass(i)     = toml::get<real_type >(find_either(p, "m", "mass"));
+        sys.position(i) = toml::get<coord_type>(find_either(p, "pos", "position"));
         sys.velocity(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
 
         if(sys.velocity_initialized()) // it requires `velocity`.
         {
-            const auto vel = toml::get<vec_type>(find_either(p, "vel", "velocity"));
-            sys.velocity(i) = math::make_coordinate<coordinate_type>(vel[0], vel[1], vel[2]);
+            sys.velocity(i) = toml::get<coord_type>(find_either(p, "vel", "velocity"));
         }
-        else // velocity should not be there. check it.
+        else // if velocity_initialized is false, velocity should not be there.
         {
-            if(p.as_table().count("vel") != 0 || p.as_table().count("velocity") != 0)
+            if(p.contains("vel") || p.contains("velocity"))
             {
                 throw_exception<std::runtime_error>(toml::format_error("[error]"
                     "read_system(): missing (or extraneous) velocity input",
@@ -196,12 +203,6 @@ read_system(const toml::value& root, const std::size_t N)
                           ", force = ",    sys.force(i),
                           ", name = ",     sys.name(i),
                           ", group = ",    sys.group(i));
-    }
-    for(const auto& attr : toml::find<toml::table>(system, "attributes"))
-    {
-        const real_type attribute = toml::get<real_type>(attr.second);
-        sys.attribute(attr.first) = attribute;
-        MJOLNIR_LOG_INFO("attribute.", attr.first, " = ", attribute);
     }
     return sys;
 }
