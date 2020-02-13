@@ -376,22 +376,46 @@ void load_boundary_from_msgpack(CuboidalPeriodicBoundary<realT, coordT>& bdry,
     //   "upper": [float, float, float]
     // }
     {
+        constexpr std::uint8_t fixmap2_code = 0x82;
         const std::uint8_t tag = read_a_byte(iter, sentinel);
-        MJOLNIR_LOG_ERROR("invalid format in system .msg file. "
-                          "expected ", 0x82, ", got ", tag);
-        throw_exception<std::runtime_error>("failed to load .msg file");
+        if(tag != fixmap2_code)
+        {
+            MJOLNIR_LOG_ERROR("invalid format in system .msg file. "
+                              "expected 0x82, got ", std::uint32_t(tag));
+            throw_exception<std::runtime_error>("failed to load .msg file");
+        }
     }
 
     coordT lower, upper;
     check_msgpack_key("lower", iter, sentinel);
+    {
+        constexpr std::uint8_t fixarray3_code = 0x93;
+        const std::uint8_t tag = read_a_byte(iter, sentinel);
+        if(tag != fixarray3_code)
+        {
+            MJOLNIR_LOG_ERROR("invalid format in system .msg file. "
+                              "expected 0x93, got ", std::uint32_t(tag));
+            throw_exception<std::runtime_error>("failed to load .msg file");
+        }
+    }
     math::X(lower) = from_msgpack<realT>(iter, sentinel);
     math::Y(lower) = from_msgpack<realT>(iter, sentinel);
     math::Z(lower) = from_msgpack<realT>(iter, sentinel);
 
     check_msgpack_key("upper", iter, sentinel);
-    math::X(lower) = from_msgpack<realT>(iter, sentinel);
-    math::Y(lower) = from_msgpack<realT>(iter, sentinel);
-    math::Z(lower) = from_msgpack<realT>(iter, sentinel);
+    {
+        constexpr std::uint8_t fixarray3_code = 0x93;
+        const std::uint8_t tag = read_a_byte(iter, sentinel);
+        if(tag != fixarray3_code)
+        {
+            MJOLNIR_LOG_ERROR("invalid format in system .msg file. "
+                              "expected 0x93, got ", std::uint32_t(tag));
+            throw_exception<std::runtime_error>("failed to load .msg file");
+        }
+    }
+    math::X(upper) = from_msgpack<realT>(iter, sentinel);
+    math::Y(upper) = from_msgpack<realT>(iter, sentinel);
+    math::Z(upper) = from_msgpack<realT>(iter, sentinel);
 
     bdry.set_boundary(lower, upper);
     return ;
