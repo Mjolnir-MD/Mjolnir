@@ -111,6 +111,8 @@ set(TEST_NAMES
     test_read_system
     test_read_unit
     test_read_path
+
+    test_save_load_msgpack
     )
 
 if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
