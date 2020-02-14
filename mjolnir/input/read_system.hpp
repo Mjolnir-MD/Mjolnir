@@ -423,18 +423,20 @@ void load_boundary_from_msgpack(CuboidalPeriodicBoundary<realT, coordT>& bdry,
 
 // The order should be preserved.
 // fixmap<3> {
-//     "boundary"     : {"lower": [float, float, float],
-//                       "upper": [float, float, float]} or nil,
-//     "particles"    : [fixmap<6>{
-//          "mass"    : float,
-//          "position": [float, float, float],
-//          "velocity": [float, float, float],
-//          "force"   : [float, float, float],
-//          "name"    : string,
-//          "group"   : string,
-//          }, ...
+//     "boundary"     : fixmap<2>{"lower": [real, real, real],
+//                                "upper": [real, real, real]}
+//                   or nil,
+//     "particles"    : array<N>[
+//         fixmap<6>{
+//             "mass"    : real,
+//             "position": [real, real, real],
+//             "velocity": [real, real, real],
+//             "force"   : [real, real, real],
+//             "name"    : string,
+//             "group"   : string,
+//         }, ...
 //     ]
-//     "attributres"  : {"temperature": float, ...},
+//     "attributres"  : map<N>{"temperature": real, ...},
 // }
 template<typename traitsT>
 System<traitsT> load_system_from_msgpack(const std::string& msg_file)
