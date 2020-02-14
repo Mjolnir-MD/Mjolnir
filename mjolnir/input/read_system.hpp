@@ -336,7 +336,8 @@ void check_msgpack_key(const std::string& expected,
                        InputIterator& iter, InputIterator sentinel)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
+    // It's called so many times, thus it does not make a log-scope.
+
     // check key before reading body
     const auto key = from_msgpack<std::string>(iter, sentinel);
     if(key != expected)
