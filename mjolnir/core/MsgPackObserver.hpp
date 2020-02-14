@@ -107,9 +107,7 @@ class MsgPackObserver final : public ObserverBase<traitsT>
         {
             // 0b'1001'0000
             // 0x    9    0
-            std::uint8_t fixarray_code = num_particles;
-            fixarray_code |= std::uint8_t(0x90);
-            buffer_.push_back(fixarray_code);
+            buffer_.push_back(std::uint8_t(num_particles) + std::uint8_t(0x90));
         }
         else if(num_particles < 65536)
         {
@@ -184,9 +182,7 @@ class MsgPackObserver final : public ObserverBase<traitsT>
         {
             // 0b'1010'0000
             // 0x    a    0
-            std::uint8_t fixstr_code = str.size();
-            fixstr_code |= std::uint8_t(0xa0);
-            *out = fixstr_code; ++out;
+            *out = (std::uint8_t(str.size()) + std::uint8_t(0xa0)); ++out;
         }
         else if(str.size() <= 0xFF)
         {
@@ -278,9 +274,7 @@ class MsgPackObserver final : public ObserverBase<traitsT>
 
         if(attr.size() < 16)
         {
-            std::uint8_t fixmap_code = attr.size();
-            fixmap_code |= std::uint8_t(0x80);
-            *out = fixmap_code; ++out;
+            *out = (std::uint8_t(attr.size()) + std::uint8_t(0x80)); ++out;
         }
         else if(attr.size() < 65536)
         {
