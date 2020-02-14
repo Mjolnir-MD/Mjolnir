@@ -89,18 +89,16 @@ class MsgPackObserver final : public ObserverBase<traitsT>
         this->buffer_.clear();
         this->buffer_.push_back(fixmap3_code);
 
-        auto buffer_iterator = std::back_inserter(buffer_);
-
         // ---------------------------------------------------------------------
         // write boundary condition.
 
-        to_msgpack("boundary",     buffer_iterator);
-        to_msgpack(sys.boundary(), buffer_iterator);
+        to_msgpack("boundary");
+        to_msgpack(sys.boundary());
 
         // ---------------------------------------------------------------------
         // append particles
 
-        to_msgpack("particles", buffer_iterator);
+        to_msgpack("particles");
 
         const auto num_particles = sys.size();
         if(num_particles < 16)
@@ -113,38 +111,38 @@ class MsgPackObserver final : public ObserverBase<traitsT>
         {
             const std::uint16_t size = num_particles;
             buffer_.push_back(std::uint8_t(0xdc));
-            to_big_endian(size, buffer_iterator);
+            to_big_endian(size);
         }
         else
         {
             const std::uint32_t size = num_particles;
             buffer_.push_back(std::uint8_t(0xdd));
-            to_big_endian(size, buffer_iterator);
+            to_big_endian(size);
         }
 
         constexpr std::uint8_t fixmap6_code = 0x86;
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             buffer_.push_back(fixmap6_code);
-            to_msgpack("mass",          buffer_iterator);
-            to_msgpack(sys.mass(i),     buffer_iterator);
-            to_msgpack("position",      buffer_iterator);
-            to_msgpack(sys.position(i), buffer_iterator);
-            to_msgpack("velocity",      buffer_iterator);
-            to_msgpack(sys.velocity(i), buffer_iterator);
-            to_msgpack("force",         buffer_iterator);
-            to_msgpack(sys.force(i),    buffer_iterator);
-            to_msgpack("name",          buffer_iterator);
-            to_msgpack(sys.name(i),     buffer_iterator);
-            to_msgpack("group",         buffer_iterator);
-            to_msgpack(sys.group(i),    buffer_iterator);
+            to_msgpack("mass"         );
+            to_msgpack(sys.mass(i)    );
+            to_msgpack("position"     );
+            to_msgpack(sys.position(i));
+            to_msgpack("velocity"     );
+            to_msgpack(sys.velocity(i));
+            to_msgpack("force"        );
+            to_msgpack(sys.force(i)   );
+            to_msgpack("name"         );
+            to_msgpack(sys.name(i)    );
+            to_msgpack("group"        );
+            to_msgpack(sys.group(i)   );
         }
 
         // ---------------------------------------------------------------------
         // write attributes list
 
-        to_msgpack("attributes",     buffer_iterator);
-        to_msgpack(sys.attributes(), buffer_iterator);
+        to_msgpack("attributes");
+        to_msgpack(sys.attributes());
 
         // -------------------------------------------------------------------
         // overwrite .msg file by the current status
@@ -170,8 +168,7 @@ class MsgPackObserver final : public ObserverBase<traitsT>
 
   private:
 
-    template<typename OutputIterator>
-    void to_msgpack(const std::string& str, OutputIterator& out)
+    void to_msgpack(const std::string& str)
     {
         constexpr std::uint8_t str8_code  = 0xd9;
         constexpr std::uint8_t str16_code = 0xda;
@@ -182,133 +179,126 @@ class MsgPackObserver final : public ObserverBase<traitsT>
         {
             // 0b'1010'0000
             // 0x    a    0
-            *out = (std::uint8_t(str.size()) + std::uint8_t(0xa0)); ++out;
+            buffer_.push_back(std::uint8_t(str.size()) + std::uint8_t(0xa0));
         }
         else if(str.size() <= 0xFF)
         {
             const std::uint8_t size = str.size();
-            *out = str8_code; ++out;
-            *out = size;      ++out;
+            buffer_.push_back(str8_code);
+            buffer_.push_back(size);
         }
         else if(str.size() <= 0xFFFF)
         {
+            buffer_.push_back(str16_code);
             const std::uint16_t size = str.size();
-            *out = str16_code; ++out;
-            to_big_endian(size, out);
+            to_big_endian(size);
         }
         else
         {
+            buffer_.push_back(str32_code);
             const std::uint32_t size = str.size();
-            *out = str32_code; ++out;
-            to_big_endian(size, out);
+            to_big_endian(size);
         }
 
         // write string body
-        for(const std::uint8_t c : str)
+        for(const char c : str)
         {
-            *out = c; ++out;
+            buffer_.push_back(// write a char as a std::uint8_t
+                    *reinterpret_cast<const std::uint8_t*>(std::addressof(c)));
         }
         return ;
     }
 
-    template<typename OutputIterator>
-    void to_msgpack(const float& x, OutputIterator& out)
+    void to_msgpack(const float& x)
     {
         constexpr std::uint8_t f32_code = 0xca;
-        *out = f32_code; ++out;
-        to_big_endian(x, out);
+        buffer_.push_back(f32_code);
+        to_big_endian(x);
         return ;
     }
-    template<typename OutputIterator>
-    void to_msgpack(const double& x, OutputIterator& out)
+    void to_msgpack(const double& x)
     {
         constexpr std::uint8_t f64_code = 0xcb;
-        *out = f64_code; ++out;
-        to_big_endian(x, out);
+        buffer_.push_back(f64_code);
+        to_big_endian(x);
         return ;
     }
 
-    template<typename OutputIterator>
-    void to_msgpack(const coordinate_type& v, OutputIterator& out)
+    void to_msgpack(const coordinate_type& v)
     {
         // [float, float, float]
         // fixmap (3)
         // 0b'1001'0011
         // 0x    9    3
         constexpr std::uint8_t fixarray3_code = 0x93;
-        *out = fixarray3_code; ++out;
-        to_msgpack(math::X(v), out);
-        to_msgpack(math::Y(v), out);
-        to_msgpack(math::Z(v), out);
+        buffer_.push_back(fixarray3_code);
+        to_msgpack(math::X(v));
+        to_msgpack(math::Y(v));
+        to_msgpack(math::Z(v));
         return ;
     }
 
-    template<typename OutputIterator>
-    void to_msgpack(const UnlimitedBoundary<real_type, coordinate_type>&,
-                    OutputIterator& out)
+    void to_msgpack(const UnlimitedBoundary<real_type, coordinate_type>&)
     {
         // UnlimitedBoundary is represented as nil
-        *out = std::uint8_t(0xc0); ++out;
+        buffer_.push_back(std::uint8_t(0xc0));
         return ;
     }
 
-    template<typename OutputIterator>
     void to_msgpack(
-        const CuboidalPeriodicBoundary<real_type, coordinate_type>& boundary,
-        OutputIterator& out)
+        const CuboidalPeriodicBoundary<real_type, coordinate_type>& boundary)
     {
         constexpr std::uint8_t fixmap2_t = 0x82;
-        *out = fixmap2_t; ++out;
-        to_msgpack("lower", out);
-        to_msgpack(boundary.lower_bound(), out);
-        to_msgpack("upper", out);
-        to_msgpack(boundary.upper_bound(), out);
+        buffer_.push_back(fixmap2_t);
+        to_msgpack("lower");
+        to_msgpack(boundary.lower_bound());
+        to_msgpack("upper");
+        to_msgpack(boundary.upper_bound());
         return ;
     }
 
-    template<typename OutputIterator>
-    void to_msgpack(const attribute_type& attr, OutputIterator& out)
+    void to_msgpack(const attribute_type& attr)
     {
         constexpr std::uint8_t map16_code = 0xde;
         constexpr std::uint8_t map32_code = 0xdf;
 
         if(attr.size() < 16)
         {
-            *out = (std::uint8_t(attr.size()) + std::uint8_t(0x80)); ++out;
+            buffer_.push_back(std::uint8_t(attr.size()) + std::uint8_t(0x80));
         }
         else if(attr.size() < 65536)
         {
+            buffer_.push_back(map16_code);
             const std::uint16_t size = attr.size();
-            *out = map16_code; ++out;
-            to_big_endian(size, out);
+            to_big_endian(size);
         }
         else
         {
+            buffer_.push_back(map32_code);
             const std::uint32_t size = attr.size();
-            *out = map32_code; ++out;
-            to_big_endian(size, out);
+            to_big_endian(size);
         }
 
         for(const auto& keyval : attr)
         {
             // string -> real
-            to_msgpack(keyval.first,  out);
-            to_msgpack(keyval.second, out);
+            to_msgpack(keyval.first);
+            to_msgpack(keyval.second);
         }
         return ;
     }
 
-    template<typename T, typename OutputIterator>
-    void to_big_endian(const T& val, OutputIterator& dst)
+    template<typename T>
+    void to_big_endian(const T& val)
     {
         const char* src = reinterpret_cast<const char*>(std::addressof(val));
 
 #if defined(MJOLNIR_WITH_LITTLE_ENDIAN)
         // If the architecture uses little endian, we need to reverse bytes.
-        std::reverse_copy(src, src + sizeof(T), dst);
+        std::reverse_copy(src, src + sizeof(T), std::back_inserter(buffer_));
 #elif defined(MJOLNIR_WITH_BIG_ENDIAN)
         // If the architecture uses big endian, we don't need to do anything.
-        std::copy(src, src + sizeof(T), dst);
+        std::copy(src, src + sizeof(T), std::back_inserter(buffer_));
 #else
 #  error "Unknown platform."
 #endif
