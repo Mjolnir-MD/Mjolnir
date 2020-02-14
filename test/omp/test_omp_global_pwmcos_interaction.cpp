@@ -155,11 +155,8 @@ BOOST_AUTO_TEST_CASE(omp_PWMcos_calc_force)
         interaction    .initialize(sys);
         seq_interaction.initialize(seq_sys);
 
-#pragma omp parallel
-        {
-            // calculate forces with openmp
-            interaction.calc_force(sys);
-        }
+        // calculate forces with openmp
+        interaction.calc_force(sys);
         sys.merge_forces();
 
         // calculate forces without openmp

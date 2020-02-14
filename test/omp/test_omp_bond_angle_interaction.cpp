@@ -108,11 +108,8 @@ BOOST_AUTO_TEST_CASE(omp_BondAngle)
             seq_sys.group(i)    = sys.group(i);
         }
 
-#pragma omp parallel
-        {
-            // calculate forces with openmp
-            interaction.calc_force(sys);
-        }
+        // calculate forces with openmp
+        interaction.calc_force(sys);
         sys.merge_forces();
 
         // calculate forces without openmp
