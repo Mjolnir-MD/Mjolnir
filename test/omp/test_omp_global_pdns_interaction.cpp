@@ -149,11 +149,8 @@ BOOST_AUTO_TEST_CASE(omp_PDNS_calc_force)
         interaction    .initialize(sys, topol);
         seq_interaction.initialize(seq_sys, topol);
 
-#pragma omp parallel
-        {
-            // calculate forces with openmp
-            interaction.calc_force(sys);
-        }
+        // calculate forces with openmp
+        interaction.calc_force(sys);
         sys.merge_forces();
 
         // calculate forces without openmp

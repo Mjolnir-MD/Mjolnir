@@ -79,7 +79,7 @@ class GlobalPairInteraction<
         const auto epsilon12       = 12 * potential_.epsilon();
 
         const auto leading_participants = this->potential_.leading_participants();
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
         {
             const auto i = leading_participants[idx];

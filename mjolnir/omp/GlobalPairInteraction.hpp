@@ -71,7 +71,7 @@ class GlobalPairInteraction<
     void calc_force (system_type& sys) const noexcept override
     {
         const auto leading_participants = this->potential_.leading_participants();
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
         {
             const auto i = leading_participants[idx];

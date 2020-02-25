@@ -41,7 +41,7 @@ class PositionRestraintInteraction<
 
     void calc_force (system_type& sys) const noexcept override
     {
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t i=0; i<this->potentials_.size(); ++i)
         {
             const auto& pots = this->potentials_[i];

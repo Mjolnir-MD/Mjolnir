@@ -37,7 +37,7 @@ class ExternalDistanceInteraction<
     void calc_force (system_type& sys) const noexcept override
     {
         const auto& neighbors = this->shape_.neighbors();
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t idx=0; idx < neighbors.size(); ++idx)
         {
             const std::size_t i = neighbors[idx];

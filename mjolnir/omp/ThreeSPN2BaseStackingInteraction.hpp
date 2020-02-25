@@ -83,7 +83,7 @@ class ThreeSPN2BaseStackingInteraction<
     {
         constexpr auto tolerance = math::abs_tolerance<real_type>();
 
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t idx=0; idx<this->parameters_.size(); ++idx)
         {
             const std::size_t thread_id = omp_get_thread_num();

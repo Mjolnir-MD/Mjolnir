@@ -76,7 +76,7 @@ class GlobalPairInteraction<
         const auto  cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
 
         const auto leading_participants = this->potential_.leading_participants();
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
         {
             const auto i = leading_participants[idx];
