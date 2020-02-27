@@ -1,5 +1,18 @@
 # Change Log
 
+## 1.11.0
+
+### Added
+
+- enable to save the last snapshot to msgpack and load it as the initial snapshot
+
+### Changed
+- simplify OpenMP implementation
+- make dihedral calculation slightly efficient
+
+### Refactoring
+- move Topology from System to Forcefield
+
 ## 1.10.0
 
 ### Added
