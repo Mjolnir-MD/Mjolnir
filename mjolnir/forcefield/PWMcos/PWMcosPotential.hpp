@@ -69,6 +69,7 @@ class PWMcosPotential
   public:
     using traits_type = traitsT;
     using real_type   = typename traits_type::real_type;
+    using system_type = System<traitsT>;
     using self_type   = PWMcosPotential<traits_type>;
     using base_kind   = parameter_PWMcos::base_kind;
 
@@ -199,7 +200,7 @@ class PWMcosPotential
     }
     ~PWMcosPotential() = default;
 
-    void initialize(const System<traits_type>& sys) noexcept
+    void initialize(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -214,12 +215,14 @@ class PWMcosPotential
             this->max_cutoff_length_ = std::max(max_cutoff_length_, r_cut);
         }
 
-        this->update(sys);
+        this->update(sys, topol);
         return;
     }
 
-    void update(const System<traits_type>&) noexcept
+    void update(const system_type& sys, const topology_type& topol) noexcept
     {
+        // update exclusion list based on sys.topology()
+        exclusion_list_.make(sys, topol);
         return;
     }
 
@@ -324,6 +327,10 @@ class PWMcosPotential
     // to check bases has base-pairing interaction.
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
+        if(exclusion_list_.is_excluded(i, j))
+        {
+            return false;
+        }
         const bool i_is_dna = (parameters_[i].dna_index != invalid());
         const bool j_is_dna = (parameters_[j].dna_index != invalid());
         // {protein, dna} pair has interaction, others not.

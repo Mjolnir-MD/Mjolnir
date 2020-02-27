@@ -30,6 +30,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
+    using topology_type   = typename base_type::topology_type;
     using boundary_type   = typename base_type::boundary_type;
     using potential_type  = ProteinDNANonSpecificPotential<traits_type>;
     using partition_type  = SpatialPartition<traits_type, potential_type>;
@@ -41,24 +42,24 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
     {}
     ~ProteinDNANonSpecificInteraction() {}
 
-    void initialize(const system_type& sys) override
+    void initialize(const system_type& sys, const topology_type& topol) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is PDNS");
 
-        this->potential_.initialize(sys);
+        this->potential_.initialize(sys, topol);
         this->partition_.initialize(sys, this->potential_);
         return;
     }
 
-    void update(const system_type& sys) override
+    void update(const system_type& sys, const topology_type& topol) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is PDNS");
 
-        this->potential_.update(sys);
+        this->potential_.update(sys, topol);
         this->partition_.initialize(sys, this->potential_);
         return;
     }
@@ -85,7 +86,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         // But this interaction is named as P-D ns, so here it uses `P` for protein
         // and `D` for DNA.
 
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t i=0; i < this->potential_.contacts().size(); ++i)
         {
             const auto& para = potential_.contacts()[i];

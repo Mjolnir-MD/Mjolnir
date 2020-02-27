@@ -45,7 +45,7 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
 
     void      calc_force (system_type& sys)       const noexcept override
     {
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t i=0; i<this->potentials.size(); ++i)
         {
             const auto& idxp = this->potentials[i];
@@ -54,12 +54,14 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
             const std::size_t idx2 = idxp.first[2];
             const std::size_t idx3 = idxp.first[3];
 
-            const coordinate_type r_ij =
-                sys.adjust_direction(sys.position(idx0) - sys.position(idx1));
-            const coordinate_type r_kj =
-                sys.adjust_direction(sys.position(idx2) - sys.position(idx1));
-            const coordinate_type r_lk =
-                sys.adjust_direction(sys.position(idx3) - sys.position(idx2));
+            const auto& r_i = sys.position(idx0);
+            const auto& r_j = sys.position(idx1);
+            const auto& r_k = sys.position(idx2);
+            const auto& r_l = sys.position(idx3);
+
+            const coordinate_type r_ij = sys.adjust_direction(r_i - r_j);
+            const coordinate_type r_kj = sys.adjust_direction(r_k - r_j);
+            const coordinate_type r_lk = sys.adjust_direction(r_l - r_k);
             const coordinate_type r_kl = real_type(-1.0) * r_lk;
 
             const real_type r_kj_lensq  = math::length_sq(r_kj);
@@ -72,16 +74,9 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
             const real_type m_lensq = math::length_sq(m);
             const real_type n_lensq = math::length_sq(n);
 
-            const coordinate_type R =
-                r_ij - (math::dot_product(r_ij, r_kj) * r_kj_rlensq) * r_kj;
-            const coordinate_type S =
-                r_lk - (math::dot_product(r_lk, r_kj) * r_kj_rlensq) * r_kj;
-
-            const real_type R_lensq = math::length_sq(R);
-            const real_type S_lensq = math::length_sq(S);
-
-            const real_type dot_RS  = math::dot_product(R, S) * math::rsqrt(R_lensq * S_lensq);
-            const real_type cos_phi = math::clamp(dot_RS, real_type(-1.0), real_type(1.0));
+            const real_type dot_mn  = math::dot_product(m, n) *
+                                      math::rsqrt(m_lensq * n_lensq);
+            const real_type cos_phi = math::clamp<real_type>(dot_mn, -1, 1);
             const real_type phi     =
                 std::copysign(std::acos(cos_phi), math::dot_product(r_ij, n));
 
@@ -94,10 +89,12 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
             const real_type coef_ijk = math::dot_product(r_ij, r_kj) * r_kj_rlensq;
             const real_type coef_jkl = math::dot_product(r_kl, r_kj) * r_kj_rlensq;
 
-            sys.force_thread(omp_get_thread_num(), idx0) += Fi;
-            sys.force_thread(omp_get_thread_num(), idx1) += (coef_ijk - real_type(1.0)) * Fi - coef_jkl * Fl;
-            sys.force_thread(omp_get_thread_num(), idx2) += (coef_jkl - real_type(1.0)) * Fl - coef_ijk * Fi;
-            sys.force_thread(omp_get_thread_num(), idx3) += Fl;
+            const auto thread_id = omp_get_thread_num();
+
+            sys.force_thread(thread_id, idx0) += Fi;
+            sys.force_thread(thread_id, idx1) += (coef_ijk - real_type(1.0)) * Fi - coef_jkl * Fl;
+            sys.force_thread(thread_id, idx2) += (coef_jkl - real_type(1.0)) * Fl - coef_ijk * Fi;
+            sys.force_thread(thread_id, idx3) += Fl;
         }
         return;
     }

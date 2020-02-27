@@ -27,6 +27,7 @@ BOOST_AUTO_TEST_CASE(omp_ExternalDistacne_calc_force)
     using coordinate_type  = typename traits_type::coordinate_type;
     using boundary_type    = typename traits_type::boundary_type;
     using system_type      = mjolnir::System<traits_type>;
+    using topology_type    = mjolnir::Topology;
     using potential_type   = mjolnir::LennardJonesWallPotential<real_type>;
     using parameter_type   = typename potential_type::parameter_type;
     using shape_type       = mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveZDirection<traits_type>>;
@@ -77,6 +78,8 @@ BOOST_AUTO_TEST_CASE(omp_ExternalDistacne_calc_force)
             sys.group(i)    = "TEST";
         }
 
+        topology_type topol(N_particle);
+
         // add perturbation
         for(std::size_t i=0; i<sys.size(); ++i)
         {
@@ -101,8 +104,7 @@ BOOST_AUTO_TEST_CASE(omp_ExternalDistacne_calc_force)
         shape_type            xyplane    (0.0);
         sequencial_shape_type seq_xyplane(0.0);
 
-        sys    .topology().construct_molecules();
-        seq_sys.topology().construct_molecules();
+        topol.construct_molecules();
 
         xyplane    .initialize(sys,     potential);
         seq_xyplane.initialize(seq_sys, potential);
@@ -115,11 +117,8 @@ BOOST_AUTO_TEST_CASE(omp_ExternalDistacne_calc_force)
         interaction    .initialize(sys);
         seq_interaction.initialize(seq_sys);
 
-#pragma omp parallel
-        {
-            // calculate forces with openmp
-            interaction.calc_force(sys);
-        }
+        // calculate forces with openmp
+        interaction.calc_force(sys);
         sys.merge_forces();
 
         // calculate forces without openmp

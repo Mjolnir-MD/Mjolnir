@@ -29,6 +29,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_noenv, T, test_types)
     using traits_type   = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     using boundary_type = typename traits_type::boundary_type;
     mjolnir::System<traits_type> sys(10, boundary_type{});
+    mjolnir::Topology          topol(10);
     {
         using namespace toml::literals;
         const auto v = u8R"(
@@ -55,7 +56,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_noenv, T, test_types)
         BOOST_TEST(pot.epsilon() == real_type(1.5), tolerance<real_type>());
         BOOST_TEST(pot.participants().empty());
 
-        pot.initialize(sys);
+        pot.initialize(sys, topol);
         BOOST_TEST(pot.participants().size() == 10u);
         BOOST_TEST(pot.participants().at(0) == 0u);
         BOOST_TEST(pot.participants().at(1) == 1u);
@@ -94,7 +95,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_noenv, T, test_types)
         BOOST_TEST(pot.epsilon() == real_type(1.5), tolerance<real_type>());
         BOOST_TEST(pot.participants().empty());
 
-        pot.initialize(sys);
+        pot.initialize(sys, topol);
         BOOST_TEST(pot.participants().size() == 10u);
         BOOST_TEST(pot.participants().at(0) == 0u);
         BOOST_TEST(pot.participants().at(1) == 1u);
@@ -140,7 +141,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_noenv, T, test_types)
         BOOST_TEST(pot.epsilon() == real_type(1.5), tolerance<real_type>());
         BOOST_TEST(pot.participants().size() == 5u);
 
-        pot.initialize(sys);
+        pot.initialize(sys, topol);
         BOOST_TEST(pot.participants().size() == 5u);
         BOOST_TEST(pot.participants().at(0)  == 1u);
         BOOST_TEST(pot.participants().at(1)  == 2u);
@@ -159,6 +160,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_env, T, test_types)
     using traits_type   = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
     using boundary_type = typename traits_type::boundary_type;
     mjolnir::System<traits_type> sys(10, boundary_type{});
+    mjolnir::Topology          topol(10);
 
     {
         using namespace toml::literals;
@@ -194,7 +196,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_lennard_jones_env, T, test_types)
         BOOST_TEST(pot.epsilon() == real_type(1.5), tolerance<real_type>());
         BOOST_TEST(pot.participants().size() == 5u);
 
-        pot.initialize(sys);
+        pot.initialize(sys, topol);
         BOOST_TEST(pot.participants().size() == 5u);
         BOOST_TEST(pot.participants().at(0)  == 1u);
         BOOST_TEST(pot.participants().at(1)  == 2u);

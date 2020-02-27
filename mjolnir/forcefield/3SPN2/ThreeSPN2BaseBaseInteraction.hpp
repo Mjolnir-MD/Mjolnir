@@ -32,6 +32,7 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
+    using topology_type   = typename base_type::topology_type;
     using boundary_type   = typename base_type::boundary_type;
     using potential_type  = ThreeSPN2BaseBaseInteractionPotential<traits_type>;
     using partition_type  = SpatialPartition<traitsT, potential_type>;
@@ -46,21 +47,21 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
     {}
     ~ThreeSPN2BaseBaseInteraction() {}
 
-    void initialize(const system_type& sys) override
+    void initialize(const system_type& sys, const topology_type& topol) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
-        this->potential_.initialize(sys);
+        this->potential_.initialize(sys, topol);
         this->partition_.initialize(sys, this->potential_);
     }
 
-    void update(const system_type& sys) override
+    void update(const system_type& sys, const topology_type& topol) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
-        this->potential_.update(sys);
+        this->potential_.update(sys, topol);
         this->partition_.initialize(sys, this->potential_);
     }
 
@@ -214,16 +215,14 @@ void ThreeSPN2BaseBaseInteraction<traitsT>::calc_force(
                 const auto df1 = potential_.df(bp_kind, theta1, theta1_0);
                 const auto df2 = potential_.df(bp_kind, theta2, theta2_0);
 
-                const auto rlBij_sq = rlBij * rlBij; // 1 / |Bij|^2
-                const auto R = -SBi + (-dot_SBiBj * rlBij_sq) * Bij;
-                const auto S = -SBj + ( dot_SBjBi * rlBij_sq) * Bij;
-
-                const auto dot_phi = math::dot_product(R, S) *
-                        math::rsqrt(math::length_sq(R) * math::length_sq(S));
-                const auto cos_phi = math::clamp<real_type>(dot_phi, -1, 1);
-
                 const auto m = math::cross_product(-SBi, Bij);
                 const auto n = math::cross_product( Bij, SBj);
+                const auto m_lsq = math::length_sq(m);
+                const auto n_lsq = math::length_sq(n);
+
+                const auto dot_phi = math::dot_product(m, n) *
+                                     math::rsqrt(m_lsq * n_lsq);
+                const auto cos_phi = math::clamp<real_type>(dot_phi, -1, 1);
 
                 const auto phi = std::copysign(std::acos(cos_phi),
                                                -math::dot_product(SBi, n));
@@ -256,8 +255,9 @@ void ThreeSPN2BaseBaseInteraction<traitsT>::calc_force(
                         const auto coef = real_type(0.5) * sin_dphi *
                                           f1 * f2 * U_dU_attr.first;
 
-                        const auto fSi = ( coef * lBij / math::length_sq(m)) * m;
-                        const auto fSj = (-coef * lBij / math::length_sq(n)) * n;
+                        const auto rlBij_sq = rlBij * rlBij; // 1 / |Bij|^2
+                        const auto fSi = ( coef * lBij / m_lsq) * m;
+                        const auto fSj = (-coef * lBij / n_lsq) * n;
 
                         const auto coef_Bi = dot_SBiBj * rlBij_sq;
                         const auto coef_Bj = dot_SBjBi * rlBij_sq;

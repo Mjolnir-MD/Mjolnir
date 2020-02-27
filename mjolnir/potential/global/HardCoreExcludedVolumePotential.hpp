@@ -21,6 +21,7 @@ class HardCoreExcludedVolumePotential
   public:
     using traits_type    = traitsT;
     using real_type      = typename traits_type::real_type;
+    using system_type    = System<traits_type>;
     using parameter_type = std::pair<real_type, real_type>; // {sigma, hardcore_radius}
     using container_type = std::vector<parameter_type>;
     // `pair_parameter_type` is a parameter for a interacting pair.
@@ -128,22 +129,22 @@ class HardCoreExcludedVolumePotential
         return -12.0 * this->epsilon_ * sigma12gap12 * gapinv;
     }
 
-    void initialize(const System<traits_type>& sys) noexcept
+    void initialize(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        this->update(sys);
+        this->update(sys, topol);
         return;
     }
 
-    void update(const System<traits_type>& sys) noexcept
+    void update(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
         // update exclusion list based on sys.topology()
-        exclusion_list_.make(sys);
+        exclusion_list_.make(sys, topol);
     }
 
     real_type cutoff_ratio() const noexcept {return this->cutoff_ratio_;}

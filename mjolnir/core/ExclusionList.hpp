@@ -83,14 +83,12 @@ class ExclusionList
         return false;
     }
 
-    void make(const system_type& sys)
+    void make(const system_type& sys, const topology_type& topol)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        const auto& topol = sys.topology();
         const std::size_t N = sys.size();
-
         {
             // all groups defined in `ignore.group` table. check mistakes
             auto groups_defined = this->ignore_group_.all_groups();
@@ -100,17 +98,17 @@ class ExclusionList
             for(std::size_t i=0; i<N; ++i)
             {
                 if(std::find(this->grp_list_.begin(), this->grp_list_.end(),
-                             topol.group_of(i)) == this->grp_list_.end())
+                             sys.group(i)) == this->grp_list_.end())
                 {
                     // if not found, push it to the list
-                    this->grp_list_.push_back(topol.group_of(i));
-                    MJOLNIR_LOG_INFO("group ", topol.group_of(i), " found. ",
+                    this->grp_list_.push_back(sys.group(i));
+                    MJOLNIR_LOG_INFO("group ", sys.group(i), " found. ",
                                      this->grp_list_.size(), "-th group is ",
-                                     topol.group_of(i));
+                                     sys.group(i));
                 }
 
                 const auto found = std::find(groups_defined.begin(),
-                        groups_defined.end(), topol.group_of(i));
+                        groups_defined.end(), sys.group(i));
                 if(found != groups_defined.end())
                 {
                     groups_defined.erase(found);
@@ -133,7 +131,7 @@ class ExclusionList
         for(std::size_t i=0; i<N; ++i)
         {
             const auto found = std::find(grp_list_.begin(), grp_list_.end(),
-                                         topol.group_of(i));
+                                         sys.group(i));
             assert(found != grp_list_.end()); // should be found.
             this->grp_ids_.at(i) = std::distance(grp_list_.begin(), found);
             MJOLNIR_LOG_DEBUG("particle ", i, " belongs to ", *found, " and "

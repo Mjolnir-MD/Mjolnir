@@ -51,7 +51,7 @@ class ContactInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 
     void      calc_force (system_type& sys)       const noexcept override
     {
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t i=0; i<active_contacts_.size(); ++i)
         {
             const auto& idxp = this->potentials[active_contacts_[i]];

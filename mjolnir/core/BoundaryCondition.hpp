@@ -30,6 +30,11 @@ struct CuboidalPeriodicBoundary
 
   public:
 
+    CuboidalPeriodicBoundary() noexcept: CuboidalPeriodicBoundary(
+            math::make_coordinate<coordinate_type>(0, 0, 0),
+            math::make_coordinate<coordinate_type>(0, 0, 0))
+    {}
+
     CuboidalPeriodicBoundary(
             const coordinate_type& lw, const coordinate_type& up) noexcept
         : lower_(lw), upper_(up), width_(up - lw), halfw_((up - lw) / 2)

@@ -21,6 +21,7 @@ class GlobalPairInteraction<
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
+    using topology_type   = typename base_type::topology_type;
     using boundary_type   = typename base_type::boundary_type;
     using potential_type  = UniformLennardJonesPotential<traits_type>;
     using partition_type  = SpatialPartition<traits_type, potential_type>;
@@ -35,12 +36,12 @@ class GlobalPairInteraction<
 
     /*! @brief initialize spatial partition (e.g. CellList)                   *
      *  @details before calling `calc_(force|energy)`, this should be called. */
-    void initialize(const system_type& sys) override
+    void initialize(const system_type& sys, const topology_type& topol) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
-        this->potential_.initialize(sys);
+        this->potential_.initialize(sys, topol);
         this->partition_.initialize(sys, this->potential_);
     }
 
@@ -48,12 +49,12 @@ class GlobalPairInteraction<
      *  @details A method that change system parameters (e.g. Annealing), *
      *           the method is bound to call this function after changing *
      *           parameters.                                              */
-    void update(const system_type& sys) override
+    void update(const system_type& sys, const topology_type& topol) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
-        this->potential_.update(sys);
+        this->potential_.update(sys, topol);
         // potential update may change the cutoff length!
         this->partition_.initialize(sys, this->potential_);
     }
@@ -79,7 +80,7 @@ class GlobalPairInteraction<
         const auto epsilon         = this->potential_.epsilon();
 
         const auto leading_participants = this->potential_.leading_participants();
-#pragma omp for nowait
+#pragma omp parallel for
         for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
         {
             const auto i = leading_participants[idx];
