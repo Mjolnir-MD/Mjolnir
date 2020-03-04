@@ -2,7 +2,7 @@
 #define MJOLNIR_OMP_DIHEDRAL_ANGLE_INTERACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/interaction/local/DihedralAngleInteraction.hpp>
+#include <mjolnir/forcefield/local/DihedralAngleInteraction.hpp>
 
 namespace mjolnir
 {
@@ -194,9 +194,9 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
 #ifdef MJOLNIR_SEPARATE_BUILD
 // explicitly specialize BondLengthInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
-#include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
-#include <mjolnir/potential/local/PeriodicGaussianPotential.hpp>
-#include <mjolnir/potential/local/CosinePotential.hpp>
+#include <mjolnir/forcefield/local/ClementiDihedralPotential.hpp>
+#include <mjolnir/forcefield/local/PeriodicGaussianPotential.hpp>
+#include <mjolnir/forcefield/local/CosinePotential.hpp>
 #include <mjolnir/forcefield/FLP/FlexibleLocalDihedralPotential.hpp>
 
 namespace mjolnir

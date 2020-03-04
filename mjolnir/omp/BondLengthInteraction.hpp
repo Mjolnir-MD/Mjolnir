@@ -2,7 +2,7 @@
 #define MJOLNIR_OMP_BOND_LENGTH_INTERACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/interaction/local/BondLengthInteraction.hpp>
+#include <mjolnir/forcefield/local/BondLengthInteraction.hpp>
 
 namespace mjolnir
 {
@@ -138,9 +138,9 @@ class BondLengthInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 #ifdef MJOLNIR_SEPARATE_BUILD
 // explicitly specialize BondLengthInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
-#include <mjolnir/potential/local/HarmonicPotential.hpp>
-#include <mjolnir/potential/local/GoContactPotential.hpp>
-#include <mjolnir/potential/local/GaussianPotential.hpp>
+#include <mjolnir/forcefield/local/HarmonicPotential.hpp>
+#include <mjolnir/forcefield/local/GoContactPotential.hpp>
+#include <mjolnir/forcefield/local/GaussianPotential.hpp>
 
 namespace mjolnir
 {

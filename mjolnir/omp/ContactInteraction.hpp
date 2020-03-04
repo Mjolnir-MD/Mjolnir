@@ -2,7 +2,7 @@
 #define MJOLNIR_OMP_CONTACT_INTERACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/interaction/local/ContactInteraction.hpp>
+#include <mjolnir/forcefield/local/ContactInteraction.hpp>
 
 namespace mjolnir
 {
@@ -205,8 +205,8 @@ class ContactInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 #ifdef MJOLNIR_SEPARATE_BUILD
 // explicitly specialize ContactInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
-#include <mjolnir/potential/local/GoContactPotential.hpp>
-#include <mjolnir/potential/local/GaussianPotential.hpp>
+#include <mjolnir/forcefield/local/GoContactPotential.hpp>
+#include <mjolnir/forcefield/local/GaussianPotential.hpp>
 
 namespace mjolnir
 {
