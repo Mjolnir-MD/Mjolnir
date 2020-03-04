@@ -1,4 +1,4 @@
-#include <mjolnir/interaction/local/DummyInteraction.hpp>
+#include <mjolnir/forcefield/local/DummyInteraction.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

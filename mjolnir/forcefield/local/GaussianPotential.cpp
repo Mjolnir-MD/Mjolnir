@@ -1,4 +1,4 @@
-#include <mjolnir/potential/local/GaussianPotential.hpp>
+#include <mjolnir/forcefield/local/GaussianPotential.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

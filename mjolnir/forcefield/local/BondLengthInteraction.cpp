@@ -1,4 +1,4 @@
-#include <mjolnir/interaction/local/BondLengthInteraction.hpp>
+#include <mjolnir/forcefield/local/BondLengthInteraction.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

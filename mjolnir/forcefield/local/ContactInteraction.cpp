@@ -1,4 +1,4 @@
-#include <mjolnir/interaction/local/ContactInteraction.hpp>
+#include <mjolnir/forcefield/local/ContactInteraction.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

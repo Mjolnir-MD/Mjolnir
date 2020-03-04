@@ -1,4 +1,4 @@
-#include <mjolnir/potential/local/ClementiDihedralPotential.hpp>
+#include <mjolnir/forcefield/local/ClementiDihedralPotential.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

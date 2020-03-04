@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_INTERACTION_GO_CONTACT_INTERACTION_HPP
 #define MJOLNIR_INTERACTION_GO_CONTACT_INTERACTION_HPP
-#include <mjolnir/interaction/local/ContactInteraction.hpp>
-#include <mjolnir/potential/local/GoContactPotential.hpp>
+#include <mjolnir/forcefield/local/ContactInteraction.hpp>
+#include <mjolnir/forcefield/local/GoContactPotential.hpp>
 
 namespace mjolnir
 {

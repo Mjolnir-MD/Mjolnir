@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_INTERACTION_BOND_LENGTH_GO_CONTACT_INTERACTION_HPP
 #define MJOLNIR_INTERACTION_BOND_LENGTH_GO_CONTACT_INTERACTION_HPP
-#include <mjolnir/interaction/local/BondLengthInteraction.hpp>
-#include <mjolnir/potential/local/GoContactPotential.hpp>
+#include <mjolnir/forcefield/local/BondLengthInteraction.hpp>
+#include <mjolnir/forcefield/local/GoContactPotential.hpp>
 
 namespace mjolnir
 {

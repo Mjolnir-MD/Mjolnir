@@ -1,4 +1,4 @@
-#include <mjolnir/potential/local/GoContactRepulsivePotential.hpp>
+#include <mjolnir/forcefield/local/GoContactRepulsivePotential.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

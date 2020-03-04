@@ -1,4 +1,4 @@
-#include <mjolnir/potential/local/WormLikeChainPotential.hpp>
+#include <mjolnir/forcefield/local/WormLikeChainPotential.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

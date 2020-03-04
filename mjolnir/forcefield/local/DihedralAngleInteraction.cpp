@@ -1,4 +1,4 @@
-#include <mjolnir/interaction/local/DihedralAngleInteraction.hpp>
+#include <mjolnir/forcefield/local/DihedralAngleInteraction.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"
