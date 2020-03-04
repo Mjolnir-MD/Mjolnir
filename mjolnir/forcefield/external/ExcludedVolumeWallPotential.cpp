@@ -1,4 +1,4 @@
-#include <mjolnir/potential/external/ExcludedVolumeWallPotential.hpp>
+#include <mjolnir/forcefield/external/ExcludedVolumeWallPotential.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

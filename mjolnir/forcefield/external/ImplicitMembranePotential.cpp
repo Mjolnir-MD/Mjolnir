@@ -1,4 +1,4 @@
-#include <mjolnir/potential/external/ImplicitMembranePotential.hpp>
+#include <mjolnir/forcefield/external/ImplicitMembranePotential.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"
