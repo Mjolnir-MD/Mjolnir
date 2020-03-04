@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/local/WormLikeChainPotential.hpp>
+#include <mjolnir/forcefield/local/WormLikeChainPotential.hpp>
 
 BOOST_AUTO_TEST_CASE(WormLikeChain_double)
 {

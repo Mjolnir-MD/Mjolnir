@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/local/PeriodicGaussianPotential.hpp>
+#include <mjolnir/forcefield/local/PeriodicGaussianPotential.hpp>
 #include <mjolnir/math/constants.hpp>
 
 BOOST_AUTO_TEST_CASE(PeriodicGaussian_double)

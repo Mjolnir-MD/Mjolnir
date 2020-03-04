@@ -13,7 +13,7 @@
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/UnlimitedGridCellList.hpp>
 #include <mjolnir/omp/GlobalPairInteraction.hpp>
-#include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
+#include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 BOOST_AUTO_TEST_CASE(omp_GlobalPair_DebyeHuckel_calc_force)

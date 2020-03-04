@@ -9,7 +9,7 @@
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/potential/local/PeriodicGaussianPotential.hpp>
+#include <mjolnir/forcefield/local/PeriodicGaussianPotential.hpp>
 #include <mjolnir/omp/System.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/DihedralAngleInteraction.hpp>

@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/global/LennardJonesPotential.hpp>
+#include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 

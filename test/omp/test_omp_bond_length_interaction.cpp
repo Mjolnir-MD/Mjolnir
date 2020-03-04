@@ -9,7 +9,7 @@
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/potential/local/HarmonicPotential.hpp>
+#include <mjolnir/forcefield/local/HarmonicPotential.hpp>
 #include <mjolnir/omp/System.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/BondLengthInteraction.hpp>

@@ -8,8 +8,8 @@
 
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/interaction/local/BondLengthInteraction.hpp>
-#include <mjolnir/potential/local/HarmonicPotential.hpp>
+#include <mjolnir/forcefield/local/BondLengthInteraction.hpp>
+#include <mjolnir/forcefield/local/HarmonicPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 #include <random>

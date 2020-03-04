@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
+#include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/input/read_spatial_partition.hpp>
 
 BOOST_AUTO_TEST_CASE(read_spatial_partition_naive)

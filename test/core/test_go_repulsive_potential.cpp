@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/local/GoContactRepulsivePotential.hpp>
+#include <mjolnir/forcefield/local/GoContactRepulsivePotential.hpp>
 #include <iomanip>
 
 BOOST_AUTO_TEST_CASE(GoContactRepulsive_double)

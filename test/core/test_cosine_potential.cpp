@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/local/CosinePotential.hpp>
+#include <mjolnir/forcefield/local/CosinePotential.hpp>
 #include <mjolnir/math/constants.hpp>
 
 BOOST_AUTO_TEST_CASE(CosinePotential_double)

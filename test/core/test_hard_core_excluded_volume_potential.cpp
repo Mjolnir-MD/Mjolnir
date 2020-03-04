@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/global/HardCoreExcludedVolumePotential.hpp>
+#include <mjolnir/forcefield/global/HardCoreExcludedVolumePotential.hpp>
 
 BOOST_AUTO_TEST_CASE(HCEXV_double)
 {

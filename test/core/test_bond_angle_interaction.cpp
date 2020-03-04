@@ -8,8 +8,8 @@
 
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/interaction/local/BondAngleInteraction.hpp>
-#include <mjolnir/potential/local/HarmonicPotential.hpp>
+#include <mjolnir/forcefield/local/BondAngleInteraction.hpp>
+#include <mjolnir/forcefield/local/HarmonicPotential.hpp>
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/util/make_unique.hpp>
 

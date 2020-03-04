@@ -9,8 +9,8 @@
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/NaivePairCalculation.hpp>
-#include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
-#include <mjolnir/potential/global/LennardJonesPotential.hpp>
+#include <mjolnir/forcefield/global/GlobalPairInteraction.hpp>
+#include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <random>
 
