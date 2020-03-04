@@ -393,10 +393,10 @@ DirectionalContactInteraction<
 #ifdef MJOLNIR_SEPARATE_BUILD
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/potential/local/CosinePotential.hpp>
-#include <mjolnir/potential/local/UniformPotential.hpp>
-#include <mjolnir/potential/local/GoContactPotential.hpp>
-#include <mjolnir/potential/local/GaussianPotential.hpp>
+#include <mjolnir/forcefield/local/CosinePotential.hpp>
+#include <mjolnir/forcefield/local/UniformPotential.hpp>
+#include <mjolnir/forcefield/local/GoContactPotential.hpp>
+#include <mjolnir/forcefield/local/GaussianPotential.hpp>
 
 namespace mjolnir
 {

@@ -12,7 +12,7 @@ namespace mjolnir
 // Interaction between particles and fixed points.
 //
 // XXX
-// It re-uses local potentials that can be found in mjolnir/potential/local/*,
+// It re-uses local potentials that can be found in mjolnir/forcefield/local/*,
 // e.g. HarmonicPotential, GaussianPotential, and so on.
 //
 template<typename traitsT, typename local_potentialT>

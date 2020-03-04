@@ -21,7 +21,7 @@ namespace mjolnir
 // Note: When ExcludedVolume is used with GlobalPairInteraction, `calc_force`
 //       and `calc_energy` implemented here will not be used because we can
 //       optimize the runtime efficiency by specializing GlobalPairInteraction.
-//       See mjolnir/interaction/GlobalExcludedVolumeInteraction.hpp for detail.
+//       See mjolnir/forcefield/GlobalExcludedVolumeInteraction.hpp for detail.
 template<typename traitsT>
 class ExcludedVolumePotential
 {

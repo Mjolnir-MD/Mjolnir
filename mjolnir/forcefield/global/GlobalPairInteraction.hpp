@@ -167,15 +167,15 @@ GlobalPairInteraction<traitsT, potT>::calc_energy(
 
 } // mjolnir
 
-#include <mjolnir/interaction/global/GlobalPairExcludedVolumeInteraction.hpp>
-#include <mjolnir/interaction/global/GlobalPairLennardJonesInteraction.hpp>
-#include <mjolnir/interaction/global/GlobalPairUniformLennardJonesInteraction.hpp>
+#include <mjolnir/forcefield/global/GlobalPairExcludedVolumeInteraction.hpp>
+#include <mjolnir/forcefield/global/GlobalPairLennardJonesInteraction.hpp>
+#include <mjolnir/forcefield/global/GlobalPairUniformLennardJonesInteraction.hpp>
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 // explicitly specialize BondAngleInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
+#include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 
 namespace mjolnir
 {

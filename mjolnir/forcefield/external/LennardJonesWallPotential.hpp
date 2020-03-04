@@ -8,7 +8,7 @@ namespace mjolnir
 
 /*! @brief Lennard-Jones form wall potential                               *
  * designed for external force field. For particle-particle L-J potential, *
- * see mjolnir/potential/global/LennardJonesPotential.hpp.                 */
+ * see mjolnir/forcefield/global/LennardJonesPotential.hpp.                 */
 template<typename realT>
 class LennardJonesWallPotential
 {

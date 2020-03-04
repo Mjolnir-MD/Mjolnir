@@ -160,14 +160,14 @@ void BondLengthInteraction<traitsT, potentialT>::write_topology(
 
 } // mjolnir
 
-#include <mjolnir/interaction/local/BondLengthGoContactInteraction.hpp>
+#include <mjolnir/forcefield/local/BondLengthGoContactInteraction.hpp>
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/potential/local/HarmonicPotential.hpp>
-#include <mjolnir/potential/local/GoContactPotential.hpp>
-#include <mjolnir/potential/local/GaussianPotential.hpp>
+#include <mjolnir/forcefield/local/HarmonicPotential.hpp>
+#include <mjolnir/forcefield/local/GoContactPotential.hpp>
+#include <mjolnir/forcefield/local/GaussianPotential.hpp>
 
 namespace mjolnir
 {

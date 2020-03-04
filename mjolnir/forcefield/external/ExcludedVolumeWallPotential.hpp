@@ -8,7 +8,7 @@ namespace mjolnir
 
 /*! @brief excluded volume potential                                       *
  * designed for external force field. For particle-particle EXV potential, *
- * see mjolnir/potential/global/ExcludedVolumePotential.hpp.               */
+ * see mjolnir/forcefield/global/ExcludedVolumePotential.hpp.               */
 template<typename realT>
 class ExcludedVolumeWallPotential
 {
