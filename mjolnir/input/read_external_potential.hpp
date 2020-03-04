@@ -2,9 +2,9 @@
 #define MJOLNIR_INPUT_READ_EXTERNAL_POTENTIAL_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/input/utility.hpp>
-#include <mjolnir/potential/external/ImplicitMembranePotential.hpp>
-#include <mjolnir/potential/external/LennardJonesWallPotential.hpp>
-#include <mjolnir/potential/external/ExcludedVolumeWallPotential.hpp>
+#include <mjolnir/forcefield/external/ImplicitMembranePotential.hpp>
+#include <mjolnir/forcefield/external/LennardJonesWallPotential.hpp>
+#include <mjolnir/forcefield/external/ExcludedVolumeWallPotential.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/make_unique.hpp>

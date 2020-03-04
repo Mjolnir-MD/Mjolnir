@@ -110,10 +110,10 @@ read_spatial_partition(const toml::value& global)
 
 #include <mjolnir/core/SimulatorTraits.hpp>
 
-#include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
-#include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
-#include <mjolnir/potential/global/LennardJonesPotential.hpp>
-#include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
+#include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
+#include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
+#include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
+#include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
 
 namespace mjolnir
 {

@@ -1,12 +1,12 @@
 #ifndef MJOLNIR_INPUT_READ_LOCAL_INTERACTION_HPP
 #define MJOLNIR_INPUT_READ_LOCAL_INTERACTION_HPP
 #include <extlib/toml/toml.hpp>
-#include <mjolnir/interaction/local/BondLengthInteraction.hpp>
-#include <mjolnir/interaction/local/ContactInteraction.hpp>
-#include <mjolnir/interaction/local/DirectionalContactInteraction.hpp>
-#include <mjolnir/interaction/local/BondAngleInteraction.hpp>
-#include <mjolnir/interaction/local/DihedralAngleInteraction.hpp>
-#include <mjolnir/interaction/local/DummyInteraction.hpp>
+#include <mjolnir/forcefield/local/BondLengthInteraction.hpp>
+#include <mjolnir/forcefield/local/ContactInteraction.hpp>
+#include <mjolnir/forcefield/local/DirectionalContactInteraction.hpp>
+#include <mjolnir/forcefield/local/BondAngleInteraction.hpp>
+#include <mjolnir/forcefield/local/DihedralAngleInteraction.hpp>
+#include <mjolnir/forcefield/local/DummyInteraction.hpp>
 
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingPotential.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingInteraction.hpp>
