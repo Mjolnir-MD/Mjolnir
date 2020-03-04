@@ -1,4 +1,4 @@
-#include <mjolnir/potential/global/LennardJonesPotential.hpp>
+#include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

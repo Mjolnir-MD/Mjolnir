@@ -1,4 +1,4 @@
-#include <mjolnir/interaction/global/GlobalPairExcludedVolumeInteraction.hpp>
+#include <mjolnir/forcefield/global/GlobalPairExcludedVolumeInteraction.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

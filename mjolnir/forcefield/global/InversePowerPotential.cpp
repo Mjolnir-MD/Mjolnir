@@ -1,4 +1,4 @@
-#include <mjolnir/potential/global/InversePowerPotential.hpp>
+#include <mjolnir/forcefield/global/InversePowerPotential.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

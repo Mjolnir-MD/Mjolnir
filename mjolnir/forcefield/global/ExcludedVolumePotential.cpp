@@ -1,4 +1,4 @@
-#include <mjolnir/potential/global/ExcludedVolumePotential.hpp>
+#include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

@@ -1,4 +1,4 @@
-#include <mjolnir/interaction/global/GlobalPairLennardJonesInteraction.hpp>
+#include <mjolnir/forcefield/global/GlobalPairLennardJonesInteraction.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

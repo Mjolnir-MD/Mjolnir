@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_INTEARACTION_GLOBAL_PAIR_LENNARD_JONES_INTEARACTION_HPP
 #define MJOLNIR_INTEARACTION_GLOBAL_PAIR_LENNARD_JONES_INTEARACTION_HPP
-#include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
-#include <mjolnir/potential/global/LennardJonesPotential.hpp>
+#include <mjolnir/forcefield/global/GlobalPairInteraction.hpp>
+#include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <memory>
 
