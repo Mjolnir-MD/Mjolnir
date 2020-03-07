@@ -5,7 +5,7 @@
 #else
 #include <boost/test/included/unit_test.hpp>
 #endif
-#include <mjolnir/potential/global/UniformLennardJonesPotential.hpp>
+#include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 BOOST_AUTO_TEST_CASE(UniformLennardJones_double)

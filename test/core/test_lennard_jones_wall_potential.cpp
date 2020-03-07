@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/external/LennardJonesWallPotential.hpp>
+#include <mjolnir/forcefield/external/LennardJonesWallPotential.hpp>
 
 BOOST_AUTO_TEST_CASE(LennardJonesWallPotential_double)
 {

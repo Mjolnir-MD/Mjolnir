@@ -2,7 +2,7 @@
 #define MJOLNIR_OMP_GLOBAL_PAIR_INTEARACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/interaction/global/GlobalPairInteraction.hpp>
+#include <mjolnir/forcefield/global/GlobalPairInteraction.hpp>
 
 namespace mjolnir
 {
@@ -145,7 +145,7 @@ class GlobalPairInteraction<
 #ifdef MJOLNIR_SEPARATE_BUILD
 // explicitly specialize BondAngleInteraction with LocalPotentials
 #include <mjolnir/core/BoundaryCondition.hpp>
-#include <mjolnir/potential/global/DebyeHuckelPotential.hpp>
+#include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 
 namespace mjolnir
 {

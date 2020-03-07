@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/local/GaussianPotential.hpp>
+#include <mjolnir/forcefield/local/GaussianPotential.hpp>
 
 BOOST_AUTO_TEST_CASE(Gaussian_double)
 {

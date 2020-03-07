@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/local/GoContactPotential.hpp>
+#include <mjolnir/forcefield/local/GoContactPotential.hpp>
 
 BOOST_AUTO_TEST_CASE(GoContact_double)
 {
