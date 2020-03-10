@@ -153,9 +153,9 @@ T find_parameter_or(const toml::value& params, const toml::value& env,
     const toml::value& p = params.at(name);
     if(p.is_string())
     {
-        return toml::find_or<T>(env, p.as_string(), opt);
+        return toml::find_or(env, p.as_string(), opt);
     }
-    return toml::get_or<T>(p, opt);
+    return toml::get_or(p, opt);
 }
 } // mjolnir
 
