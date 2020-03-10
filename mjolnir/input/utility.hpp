@@ -137,6 +137,26 @@ find_parameter(const toml::value& params, const toml::value& env,
     return toml::get<T>(p);
 }
 
+// find_parameter with an optional value, opt.
+template<typename T>
+T find_parameter_or(const toml::value& params, const toml::value& env,
+                    const std::string& name, const T& opt) noexcept
+{
+    static_assert(!std::is_same<T, std::string>::value,
+                  "string value cannot be aliased");
+
+    using ::mjolnir::literals::string_literals::operator"" _s;
+    if(!params.is_table() || !params.contains(name))
+    {
+        return opt;
+    }
+    const toml::value& p = params.at(name);
+    if(p.is_string())
+    {
+        return toml::find_or<T>(env, p.as_string(), opt);
+    }
+    return toml::get_or<T>(p, opt);
+}
 } // mjolnir
 
 namespace toml
