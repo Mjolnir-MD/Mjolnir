@@ -495,8 +495,8 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
     for(const auto& param : ps)
     {
         const auto idx  = find_parameter<std::size_t>(param, env, "index");
-        const auto kind = find_parameter<std::string>(param, env, "kind");
 
+        const auto kind = toml::find<std::string>(param, "kind");
         if(kind != "S" && kind != "P" &&
            kind != "A" && kind != "T" && kind != "G" && kind != "C")
         {

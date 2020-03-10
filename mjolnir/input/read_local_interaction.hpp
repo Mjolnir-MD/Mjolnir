@@ -571,7 +571,7 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
         nuc_idx.strand     = find_parameter<std::size_t>(item, env, "strand");
         nuc_idx.nucleotide = find_parameter<std::size_t>(item, env, "nucleotide");
 
-        const auto bk      = find_parameter<std::string>(item, env, "Base");
+        const auto bk      = toml::find<std::string>(item, "Base");
         if     (bk == "A") {nuc_idx.base = base_kind::A;}
         else if(bk == "T") {nuc_idx.base = base_kind::T;}
         else if(bk == "G") {nuc_idx.base = base_kind::G;}

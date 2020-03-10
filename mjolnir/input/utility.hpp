@@ -45,18 +45,34 @@ inline bool check_keys_available(const toml::value& table,
     return all_available;
 }
 
+// find_parameter is a utility function to support the following functionality.
+//
+// ```toml
+// [[forcefields.global]]
+// env.sigma = 1.0
+// parameters = [
+//     {index = 1, sigma = "sigma"},
+//     {index = 2, sigma = 2.0},
+//     # ...
+// ]
+// ```
+//
+// First, it searches `params` with the `name`. If the corresponding value is a
+// string, it searches `env` with the string.
 template<typename T>
-typename std::enable_if<negation<std::is_same<T, std::string>>::value, T>::type
-find_parameter(const toml::value& params, const toml::value& env,
-               const std::string& name)
+T find_parameter(const toml::value& params, const toml::value& env,
+                 const std::string& name)
 {
+    static_assert(!std::is_same<T, std::string>::value,
+                  "string value cannot be aliased");
+
     using ::mjolnir::literals::string_literals::operator"" _s;
-    if(!params.is_table() || params.as_table().count(name) != 1)
+    if(!params.is_table() || !params.contains(name))
     {
         throw std::out_of_range(toml::format_error("[error] value "_s + name +
             " does not exists"_s, params, "in this table"_s));
     }
-    const toml::value& p = params.as_table().at(name);
+    const toml::value& p = params.at(name);
     if(p.is_string())
     {
         // search inside of `env`
@@ -66,29 +82,13 @@ find_parameter(const toml::value& params, const toml::value& env,
             throw std::out_of_range(toml::format_error("[error] named variable \""_s +
                 var + "\" used but no env is defined"_s, params, "used here"_s));
         }
-        if(!env.is_table() || env.as_table().count(var) != 1)
+        if(!env.is_table() || !env.contains(var))
         {
             throw std::out_of_range(toml::format_error("[error] named variable \""_s +
                 var + "\" does not exists"_s, env, "in this table"_s));
         }
-        return toml::get<T>(env.as_table().at(var));
+        return toml::find<T>(env, var);
     }
-    return toml::get<T>(p);
-}
-
-// If the expected value is std::string, it is difficult to distinguish
-// variable name and the value itself. In that case, env would just be ignored.
-template<typename T>
-typename std::enable_if<std::is_same<T, std::string>::value, std::string>::type
-find_parameter(const toml::value& params, const toml::value& /* env */,
-               const std::string& name)
-{
-    if(!params.is_table() || params.as_table().count(name) != 1)
-    {
-        throw std::out_of_range(toml::format_error("[error] value \""_s + name +
-            "\" does not exists"_s, params, "in this table"_s));
-    }
-    const toml::value& p = params.as_table().at(name);
     return toml::get<T>(p);
 }
 
@@ -111,16 +111,13 @@ typename std::enable_if<negation<std::is_same<T, std::string>>::value, T>::type
 find_parameter(const toml::value& params, const toml::value& env,
                const std::string& name1,  const std::string& name2)
 {
-    if(!params.is_table() || (params.as_table().count(name1) == 0 &&
-                              params.as_table().count(name2) == 0))
+    if(!params.is_table() || (!params.contains(name1) && !params.contains(name2)))
     {
         throw std::out_of_range(toml::format_error("[error] value \""_s + name1 +
             "\" or \""_s + name2 + "\" does not exists"_s, params, "in this table"_s));
     }
     // name1 has priority.
-    const toml::value& p = (params.as_table().count(name1) == 1) ?
-                            params.as_table().at(name1)          :
-                            params.as_table().at(name2)          ;
+    const toml::value& p = params.contains(name1) ? params.at(name1) : params.at(name2);
     if(p.is_string())
     {
         // search inside of `env`
@@ -130,12 +127,12 @@ find_parameter(const toml::value& params, const toml::value& env,
             throw std::out_of_range(toml::format_error("[error] named variable \""_s +
                 var + "\" used but no env is defined"_s, params, "used here"_s));
         }
-        if(!env.is_table() || env.as_table().count(var) != 1)
+        if(!env.is_table() || !env.contains(var))
         {
             throw std::out_of_range(toml::format_error("[error] named variable \""_s +
                 var + "\" does not exists"_s, env, "in this table"_s));
         }
-        return toml::get<T>(env.as_table().at(var));
+        return toml::find<T>(env, var);
     }
     return toml::get<T>(p);
 }
