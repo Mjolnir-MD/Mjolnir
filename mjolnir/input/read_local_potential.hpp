@@ -410,8 +410,12 @@ read_local_potential(const toml::value& local)
     retval.reserve(params.size());
     for(const auto& item : params)
     {
-        const auto indices = find_parameter<indices_t>(item, env, "indices");
-        MJOLNIR_LOG_INFO_NO_LF("idxs = ", indices, ", ");
+        const auto prefix = find_parameter_or<std::size_t>(item, env, "offset", 0);
+
+        auto indices = find_parameter<indices_t>(item, env, "indices");
+        for(auto& i : indices) {i += prefix;}
+
+        MJOLNIR_LOG_INFO_NO_LF("prefix = ", prefix, "idxs = ", indices, ", ");
 
         retval.emplace_back(indices,
             detail::read_local_potential_impl<potentialT>::invoke(item, env));
@@ -450,8 +454,11 @@ read_local_potentials(const toml::value& local,
         using potential_1_type = potential1T<real_type>;
         using potential_2_type = potential2T<real_type>;
 
-        const auto indices = find_parameter<indices_type>(item, env, "indices");
-        MJOLNIR_LOG_INFO("idxs = ", indices);
+        const auto prefix = find_parameter_or<std::size_t>(item, env, "offset", 0);
+
+        auto indices = find_parameter<indices_type>(item, env, "indices");
+        for(auto& i : indices) {i += prefix;}
+        MJOLNIR_LOG_INFO("prefix = ", prefix, "idxs = ", indices);
 
         const auto& pot1 = find_parameter<toml::value>(item, env, pot1_name);
         const auto& pot2 = find_parameter<toml::value>(item, env, pot2_name);

@@ -157,14 +157,15 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
     for(const auto& item : ps)
     {
         nucleotide_index_type nuc_idx;
+        const auto ofs = find_parameter_or<std::size_t>(item, env, "offset", 0);
 
         // at the edge of the DNA, Phosphate may not exist.
         if(item.as_table().count("P") != 0)
         {
-            nuc_idx.P = find_parameter<std::size_t>(item, env, "P");
+            nuc_idx.P = find_parameter<std::size_t>(item, env, "P") + ofs;
         }
-        nuc_idx.S          = find_parameter<std::size_t>(item, env, "S");
-        nuc_idx.B          = find_parameter<std::size_t>(item, env, "B");
+        nuc_idx.S          = find_parameter<std::size_t>(item, env, "S") + ofs;
+        nuc_idx.B          = find_parameter<std::size_t>(item, env, "B") + ofs;
         nuc_idx.strand     = find_parameter<std::size_t>(item, env, "strand");
         nuc_idx.nucleotide = find_parameter<std::size_t>(item, env, "nucleotide");
 
