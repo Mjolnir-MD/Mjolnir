@@ -246,12 +246,12 @@ read_excluded_volume_potential(const toml::value& global)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx    = find_parameter<std::size_t>(param, env, "index");
-        const auto offset = find_parameter_or<std::size_t>(param, env, "offset", 0);
+        const auto idx    = find_parameter<std::size_t>(param, env, "index") +
+                            find_parameter_or<std::size_t>(param, env, "offset", 0);
         const auto radius = find_parameter<real_type  >(param, env, "radius");
 
-        params.emplace_back(idx + offset, radius);
-        MJOLNIR_LOG_INFO("idx = ", idx + offset, ", radius = ", radius);
+        params.emplace_back(idx, radius);
+        MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
     }
     check_parameter_overlap(env, ps, params);
 
@@ -291,12 +291,12 @@ read_inverse_power_potential(const toml::value& global)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx    = find_parameter<std::size_t>(param, env, "index");
-        const auto offset = find_parameter_or<std::size_t>(param, env, "offset", 0);
+        const auto idx    = find_parameter<std::size_t>(param, env, "index") +
+                            find_parameter_or<std::size_t>(param, env, "offset", 0);
         const auto radius = find_parameter<real_type  >(param, env, "radius");
 
-        params.emplace_back(idx + offset, radius);
-        MJOLNIR_LOG_INFO("idx = ", idx + offset, ", radius = ", radius);
+        params.emplace_back(idx, radius);
+        MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
     }
     check_parameter_overlap(env, ps, params);
 
@@ -332,16 +332,16 @@ read_hard_core_excluded_volume_potential(const toml::value& global)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx    = find_parameter<std::size_t>(param, env, "index");
-        const auto offset = find_parameter_or<std::size_t>(param, env, "offset", 0);
+        const auto idx = find_parameter<std::size_t>(param, env, "index") +
+                         find_parameter_or<std::size_t>(param, env, "offset", 0);
 
         const auto core_radius          =
             find_parameter<real_type>(param, env, "core_radius");
         const auto soft_shell_thickness =
             find_parameter<real_type>(param, env, "soft_shell_thickness");
 
-        params.emplace_back(idx + offset, parameter_type{soft_shell_thickness, core_radius});
-        MJOLNIR_LOG_INFO("idx = ", idx + offset, ", core_radius = ", core_radius,
+        params.emplace_back(idx, parameter_type{soft_shell_thickness, core_radius});
+        MJOLNIR_LOG_INFO("idx = ", idx, ", core_radius = ", core_radius,
                          ", soft_shell_thickness = ", soft_shell_thickness);
     }
 
@@ -376,13 +376,13 @@ read_lennard_jones_potential(const toml::value& global)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx     = find_parameter<std::size_t>(param, env, "index");
-        const auto offset  = find_parameter_or<std::size_t>(param, env, "offset", 0);
+        const auto idx     = find_parameter<std::size_t>(param, env, "index") +
+                             find_parameter_or<std::size_t>(param, env, "offset", 0);
         const auto sigma   = find_parameter<real_type>(param, env, "sigma",   u8"σ");
         const auto epsilon = find_parameter<real_type>(param, env, "epsilon", u8"ε");
 
-        params.emplace_back(idx + offset, parameter_type{sigma, epsilon});
-        MJOLNIR_LOG_INFO("idx = ", idx + offset, ", sigma = ", sigma, ", epsilon = ", epsilon);
+        params.emplace_back(idx, parameter_type{sigma, epsilon});
+        MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma, ", epsilon = ", epsilon);
     }
 
     check_parameter_overlap(env, ps, params);
@@ -422,9 +422,9 @@ read_uniform_lennard_jones_potential(const toml::value& global)
         const auto& parameters = toml::find<toml::array>(global, "parameters");
         for(const auto& param : parameters)
         {
-            const auto idx = find_parameter<std::size_t>(param, env, "index");
-            const auto offset = find_parameter_or<std::size_t>(param, env, "offset", 0);
-            params.emplace_back(idx+offset, parameter_type{});
+            const auto idx = find_parameter<std::size_t>(param, env, "index") +
+                             find_parameter_or<std::size_t>(param, env, "offset", 0);
+            params.emplace_back(idx, parameter_type{});
         }
         check_parameter_overlap(env, parameters, params);
     }
@@ -464,12 +464,12 @@ read_debye_huckel_potential(const toml::value& global)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx    = find_parameter<std::size_t>(param, env, "index");
-        const auto offset = find_parameter_or<std::size_t>(param, env, "offset", 0);
+        const auto idx = find_parameter<std::size_t>(param, env, "index") +
+                         find_parameter_or<std::size_t>(param, env, "offset", 0);
         const auto charge = find_parameter<real_type  >(param, env, "charge");
 
-        params.emplace_back(idx + offset, parameter_type{charge});
-        MJOLNIR_LOG_INFO("idx = ", idx + offset, ", charge = ", charge);
+        params.emplace_back(idx, parameter_type{charge});
+        MJOLNIR_LOG_INFO("idx = ", idx, ", charge = ", charge);
     }
 
     check_parameter_overlap(env, ps, params);
@@ -500,8 +500,8 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx    = find_parameter<std::size_t>(param, env, "index");
-        const auto offset = find_parameter_or<std::size_t>(param, env, "offset", 0);
+        const auto idx = find_parameter<std::size_t>(param, env, "index") +
+                         find_parameter_or<std::size_t>(param, env, "offset", 0);
 
         const auto kind = toml::find<std::string>(param, "kind");
         if(kind != "S" && kind != "P" &&
@@ -523,7 +523,7 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
             case 'C': {bead = bead_kind::BaseC;     break;}
             default:  {assert(false);}
         }
-        params.emplace_back(idx+offset, bead);
+        params.emplace_back(idx, bead);
         MJOLNIR_LOG_INFO("idx = ", idx, ", kind = ", bead);
     }
 
