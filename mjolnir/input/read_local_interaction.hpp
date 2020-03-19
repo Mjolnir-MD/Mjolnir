@@ -561,7 +561,7 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
     {
         nucleotide_index_type nuc_idx;
 
-        const auto ofs = find_parameter_or<std::size_t>(item, env, "offset", 0);
+        const auto ofs = find_parameter_or<std::int64_t>(item, env, "offset", 0);
 
         // at the edge of the DNA, Phosphate may not exist.
         if(item.as_table().count("P") != 0)

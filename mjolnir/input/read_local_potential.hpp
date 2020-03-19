@@ -410,7 +410,7 @@ read_local_potential(const toml::value& local)
     retval.reserve(params.size());
     for(const auto& item : params)
     {
-        const auto offset = find_parameter_or<std::size_t>(item, env, "offset", 0);
+        const auto offset = find_parameter_or<std::int64_t>(item, env, "offset", 0);
 
         auto indices = find_parameter<indices_t>(item, env, "indices");
         for(auto& i : indices) {i += offset;}
@@ -454,7 +454,7 @@ read_local_potentials(const toml::value& local,
         using potential_1_type = potential1T<real_type>;
         using potential_2_type = potential2T<real_type>;
 
-        const auto offset = find_parameter_or<std::size_t>(item, env, "offset", 0);
+        const auto offset = find_parameter_or<std::int64_t>(item, env, "offset", 0);
 
         auto indices = find_parameter<indices_type>(item, env, "indices");
         for(auto& i : indices) {i += offset;}

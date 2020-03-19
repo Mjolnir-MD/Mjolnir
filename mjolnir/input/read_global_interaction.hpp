@@ -157,7 +157,7 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
     for(const auto& item : ps)
     {
         nucleotide_index_type nuc_idx;
-        const auto ofs = find_parameter_or<std::size_t>(item, env, "offset", 0);
+        const auto ofs = find_parameter_or<std::int64_t>(item, env, "offset", 0);
 
         // at the edge of the DNA, Phosphate may not exist.
         if(item.as_table().count("P") != 0)
@@ -312,7 +312,7 @@ read_pdns_interaction(const toml::value& global)
     for(const auto& item : ps)
     {
         const auto idx  = toml::find<std::size_t>(item, "index");
-        const auto ofs  = toml::find_or<std::size_t>(item, "offset", 0);
+        const auto ofs  = toml::find_or<std::int64_t>(item, "offset", 0);
         const auto kind = toml::find<std::string>(item, "kind");
         if(kind == "Protein")
         {
@@ -423,7 +423,7 @@ read_pwmcos_interaction(const toml::value& global)
     for(const auto& item : ps)
     {
         const auto idx  = toml::find<std::size_t>(item, "index");
-        const auto ofs  = toml::find_or<std::size_t>(item, "offset", 0);
+        const auto ofs  = toml::find_or<std::int64_t>(item, "offset", 0);
         const auto kind = toml::find<std::string>(item, "kind");
         if(kind == "Protein")
         {
