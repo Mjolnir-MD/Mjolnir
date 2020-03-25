@@ -95,6 +95,8 @@ set(TEST_NAMES
     test_read_position_restraint_interaction
     test_read_afm_fitting_interaction
 
+    test_read_index_offset
+
     test_read_local_forcefield
     test_read_global_forcefield
     test_read_external_forcefield

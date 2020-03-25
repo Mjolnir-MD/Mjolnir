@@ -561,17 +561,19 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
     {
         nucleotide_index_type nuc_idx;
 
+        const auto ofs = find_parameter_or<std::int64_t>(item, env, "offset", 0);
+
         // at the edge of the DNA, Phosphate may not exist.
         if(item.as_table().count("P") != 0)
         {
-            nuc_idx.P = find_parameter<std::size_t>(item, env, "P");
+            nuc_idx.P = find_parameter<std::size_t>(item, env, "P") + ofs;
         }
-        nuc_idx.S          = find_parameter<std::size_t>(item, env, "S");
-        nuc_idx.B          = find_parameter<std::size_t>(item, env, "B");
+        nuc_idx.S          = find_parameter<std::size_t>(item, env, "S") + ofs;
+        nuc_idx.B          = find_parameter<std::size_t>(item, env, "B") + ofs;
         nuc_idx.strand     = find_parameter<std::size_t>(item, env, "strand");
         nuc_idx.nucleotide = find_parameter<std::size_t>(item, env, "nucleotide");
 
-        const auto bk      = find_parameter<std::string>(item, env, "Base");
+        const auto bk      = toml::find<std::string>(item, "Base");
         if     (bk == "A") {nuc_idx.base = base_kind::A;}
         else if(bk == "T") {nuc_idx.base = base_kind::T;}
         else if(bk == "G") {nuc_idx.base = base_kind::G;}

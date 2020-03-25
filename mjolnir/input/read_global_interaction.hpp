@@ -157,18 +157,19 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
     for(const auto& item : ps)
     {
         nucleotide_index_type nuc_idx;
+        const auto ofs = find_parameter_or<std::int64_t>(item, env, "offset", 0);
 
         // at the edge of the DNA, Phosphate may not exist.
         if(item.as_table().count("P") != 0)
         {
-            nuc_idx.P = find_parameter<std::size_t>(item, env, "P");
+            nuc_idx.P = find_parameter<std::size_t>(item, env, "P") + ofs;
         }
-        nuc_idx.S          = find_parameter<std::size_t>(item, env, "S");
-        nuc_idx.B          = find_parameter<std::size_t>(item, env, "B");
+        nuc_idx.S          = find_parameter<std::size_t>(item, env, "S") + ofs;
+        nuc_idx.B          = find_parameter<std::size_t>(item, env, "B") + ofs;
         nuc_idx.strand     = find_parameter<std::size_t>(item, env, "strand");
         nuc_idx.nucleotide = find_parameter<std::size_t>(item, env, "nucleotide");
 
-        const auto bk      = find_parameter<std::string>(item, env, "Base");
+        const auto bk      = toml::find<std::string>(item, "Base");
         if     (bk == "A") {nuc_idx.base = base_kind::A;}
         else if(bk == "T") {nuc_idx.base = base_kind::T;}
         else if(bk == "G") {nuc_idx.base = base_kind::G;}
@@ -311,28 +312,29 @@ read_pdns_interaction(const toml::value& global)
     for(const auto& item : ps)
     {
         const auto idx  = toml::find<std::size_t>(item, "index");
+        const auto ofs  = toml::find_or<std::int64_t>(item, "offset", 0);
         const auto kind = toml::find<std::string>(item, "kind");
         if(kind == "Protein")
         {
             contact_parameter_type para;
-            para.P      = idx;
-            para.PN     = find_parameter<std::uint32_t>(item, env, "PN");
-            para.PC     = find_parameter<std::uint32_t>(item, env, "PC");
+            para.P      = idx + ofs;
+            para.PN     = find_parameter<std::uint32_t>(item, env, "PN") + ofs;
+            para.PC     = find_parameter<std::uint32_t>(item, env, "PC") + ofs;
             para.k      = find_parameter<real_type>(item, env, "k");
             para.r0     = find_parameter<real_type>(item, env, "r0");
             para.theta0 = find_parameter<real_type>(item, env, "theta0");
             para.phi0   = find_parameter<real_type>(item, env, "phi0");
             contacts.push_back(para);
 
-            MJOLNIR_LOG_INFO("Protein: idx = ", idx, ", PN = ", para.PN,
+            MJOLNIR_LOG_INFO("Protein: idx = ", para.P, ", PN = ", para.PN,
                 ", PC = ", para.PC, ", k = ", para.k, ", r0 = ", para.r0,
                 ", theta0 = ", para.theta0, ", phi0 = ", para.phi0);
         }
         else if (kind == "DNA")
         {
             dna_index_type di;
-            di.D = idx;
-            di.S3 = find_parameter<std::uint32_t>(item, env, "S3");
+            di.D  = idx + ofs;
+            di.S3 = find_parameter<std::uint32_t>(item, env, "S3") + ofs;
             dnas.push_back(di);
             MJOLNIR_LOG_INFO("DNA: idx = ", di.D, ", S3 = ", di.S3);
         }
@@ -421,13 +423,14 @@ read_pwmcos_interaction(const toml::value& global)
     for(const auto& item : ps)
     {
         const auto idx  = toml::find<std::size_t>(item, "index");
+        const auto ofs  = toml::find_or<std::int64_t>(item, "offset", 0);
         const auto kind = toml::find<std::string>(item, "kind");
         if(kind == "Protein")
         {
             contact_parameter_type para;
-            para.Ca       = idx;
-            para.CaN      = find_parameter<std::uint32_t>(item, env, "CaN");
-            para.CaC      = find_parameter<std::uint32_t>(item, env, "CaC");
+            para.Ca       = idx + ofs;
+            para.CaN      = find_parameter<std::uint32_t>(item, env, "CaN") + ofs;
+            para.CaC      = find_parameter<std::uint32_t>(item, env, "CaC") + ofs;
             para.gamma    = find_parameter<real_type>(item, env, "gamma");
             para.epsilon  = find_parameter<real_type>(item, env, "epsilon");
             para.r0       = find_parameter<real_type>(item, env, "r0");
@@ -441,7 +444,7 @@ read_pwmcos_interaction(const toml::value& global)
 
             contacts.push_back(para);
 
-            MJOLNIR_LOG_INFO("Protein: idx = ", idx, ", CaN = ", para.CaN,
+            MJOLNIR_LOG_INFO("Protein: idx = ", idx + ofs, ", CaN = ", para.CaN,
                 ", CaC = ", para.CaC, ", gamma = ", para.gamma, ", epsilon = ", para.epsilon,
                 ", r0 = ", para.r0, ", theta1_0 = ", para.theta1_0,
                 ", tehta2_0 = ", para.theta2_0, ", theta3_0 = ", para.theta3_0,
@@ -451,12 +454,12 @@ read_pwmcos_interaction(const toml::value& global)
         else if (kind == "DNA")
         {
             dna_parameter_type dp;
-            dp.B  = idx;
-            dp.S  = find_parameter<std::uint32_t>(item, env, "S");
+            dp.B  = idx + ofs;
+            dp.S  = find_parameter<std::uint32_t>(item, env, "S") + ofs;
 
             // it seems that 3' and 5' bases are required.
-            dp.B5 = find_parameter<std::uint32_t>(item, env, "B5");
-            dp.B3 = find_parameter<std::uint32_t>(item, env, "B3");
+            dp.B5 = find_parameter<std::uint32_t>(item, env, "B5") + ofs;
+            dp.B3 = find_parameter<std::uint32_t>(item, env, "B3") + ofs;
 
             const auto& bk = toml::find<std::string>(item, "base");
             if     (bk == "A") {dp.base = base_kind::A;}
