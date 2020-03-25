@@ -4,6 +4,7 @@
 #include <mjolnir/omp/System.hpp>
 #include <mjolnir/omp/ForceField.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
+#include <mjolnir/omp/SystemMotionRemover.hpp>
 #include <mjolnir/core/BAOABLangevinIntegrator.hpp>
 
 namespace mjolnir
@@ -21,16 +22,17 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     using system_type     = System<traits_type>;
     using forcefield_type = ForceField<traits_type>;
     using rng_type        = RandomNumberGenerator<traits_type>;
+    using remover_type    = SystemMotionRemover<traits_type>;
 
   public:
 
     BAOABLangevinIntegrator(const real_type dt,
-            std::vector<real_type>&& gamma)
+            std::vector<real_type>&& gamma, remover_type&& remover)
         : dt_(dt), halfdt_(dt / 2),
           gammas_(std::move(gamma)),
           exp_gamma_dt_(gammas_.size()),
           noise_coeff_ (gammas_.size()),
-          acceleration_(gammas_.size())
+          remover_(std::move(remover))
     {}
     ~BAOABLangevinIntegrator() = default;
 
@@ -97,6 +99,9 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             auto&       v = sys.velocity(i);
             v += this->halfdt_ * rm * f;
         }
+
+        remover_.remove(sys);
+
         return time + dt_;
     }
 
@@ -146,10 +151,11 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     real_type halfdt_;
     real_type temperature_;
 
-    std::vector<real_type>       gammas_;
-    std::vector<real_type>       exp_gamma_dt_;
-    std::vector<real_type>       noise_coeff_;
-    std::vector<coordinate_type> acceleration_;
+    std::vector<real_type> gammas_;
+    std::vector<real_type> exp_gamma_dt_;
+    std::vector<real_type> noise_coeff_;
+
+    remover_type remover_;
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD
