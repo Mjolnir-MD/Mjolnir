@@ -60,7 +60,7 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
 
     const auto& integrator = toml::find(simulator, "integrator");
 
-    check_keys_available(integrator, {"type"_s, "seed"_s, "parameters"_s});
+    check_keys_available(integrator, {"type"_s, "seed"_s, "parameters"_s, "remove"_s});
 
     const auto parameters = toml::find<toml::array  >(integrator, "parameters");
 
@@ -92,7 +92,7 @@ read_BAOAB_langevin_integrator(const toml::value& simulator)
 
     const auto& integrator = toml::find(simulator, "integrator");
 
-    check_keys_available(integrator, {"type"_s, "seed"_s, "parameters"_s});
+    check_keys_available(integrator, {"type"_s, "seed"_s, "parameters"_s, "remove"_s});
 
     const auto parameters = toml::find<toml::array  >(integrator, "parameters");
 
