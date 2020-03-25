@@ -147,12 +147,12 @@ inline void SystemMotionRemover<traitsT>::remove(system_type& sys) const noexcep
     return;
 }
 
-// #ifdef MJOLNIR_SEPARATE_BUILD
-// extern template class SystemMotionRemover<SimulatorTraits<double, UnlimitedBoundary>       >;
-// extern template class SystemMotionRemover<SimulatorTraits<float,  UnlimitedBoundary>       >;
-// extern template class SystemMotionRemover<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-// extern template class SystemMotionRemover<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
-// #endif // SEPARATE_BUILD
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class SystemMotionRemover<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class SystemMotionRemover<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class SystemMotionRemover<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class SystemMotionRemover<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif // SEPARATE_BUILD
 
 } // mjolnir
 #endif /* MJOLNIR_MOLECULAR_DYNAMICS_SIMULATOR */
