@@ -16,17 +16,17 @@ template<typename traitsT>
 SystemMotionRemover<traitsT>
 read_system_motion_remover(const toml::value& simulator)
 {
-    const auto& integrator = toml::find(simulator, "integrator");
-
-    if(!integrator.contains("remove"))
+    if(!simulator.contains("integrator") ||
+       !simulator.at("integrator").contains("remove"))
     {
         return SystemMotionRemover<traitsT>(false, false, false);
     }
-    const auto& remove = toml::find(integrator.at("remove"));
 
-    const bool translation = toml::find_or(remove, "translation");
-    const bool rotation    = toml::find_or(remove, "rotation");
-    const bool rescale     = toml::find_or(remove, "rescale");
+    const auto& remove = toml::find(simulator, "integrator", "remove");
+
+    const bool translation = toml::find_or(remove, "translation", false);
+    const bool rotation    = toml::find_or(remove, "rotation",    false);
+    const bool rescale     = toml::find_or(remove, "rescale",     false);
 
     return SystemMotionRemover<traitsT>(translation, rotation, rescale);
 }
