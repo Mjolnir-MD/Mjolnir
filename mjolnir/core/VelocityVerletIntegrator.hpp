@@ -3,6 +3,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
+#include <mjolnir/core/SystemMotionRemover.hpp>
 #include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
@@ -19,11 +20,13 @@ class VelocityVerletIntegrator
     using system_type     = System<traitsT>;
     using forcefield_type = ForceField<traitsT>;
     using rng_type        = RandomNumberGenerator<traitsT>;
+    using remover_type    = SystemMotionRemover<traits_type>;
 
   public:
 
-    explicit VelocityVerletIntegrator(const real_type dt) noexcept
-        : dt_(dt), halfdt_(dt / 2)
+    explicit VelocityVerletIntegrator(
+            const real_type dt, remover_type&& remover) noexcept
+        : dt_(dt), halfdt_(dt / 2), remover_(std::move(remover))
     {}
     ~VelocityVerletIntegrator() = default;
 
@@ -43,6 +46,8 @@ class VelocityVerletIntegrator
   private:
     real_type dt_;      //!< dt
     real_type halfdt_;  //!< dt/2
+
+    remover_type remover_;
 };
 
 template<typename traitsT>
@@ -90,6 +95,10 @@ VelocityVerletIntegrator<traitsT>::step(
     {
         sys.velocity(i) += (halfdt_ * sys.rmass(i)) * sys.force(i);
     }
+
+    // remove net rotation/translation
+    remover_.remove(sys);
+
     return time + dt_;
 }
 
