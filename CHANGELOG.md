@@ -1,5 +1,20 @@
 # Change Log
 
+## 1.12.0
+
+### Added
+
+- enable to use index offset in the `[[forcefields]]`
+- enable to remove net translation/rotation while time integration
+
+### Changed
+
+- update toml11 to v3.4.0
+
+### Misc
+
+- move interaction and potential codes to forcefield/ directory
+
 ## 1.11.0
 
 ### Added
