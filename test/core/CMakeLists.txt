@@ -6,6 +6,7 @@ set(TEST_NAMES
     test_throw_exception
     test_topology
     test_exclusion_list
+    test_system_motion_remover
 
     test_harmonic_potential
     test_gaussian_potential

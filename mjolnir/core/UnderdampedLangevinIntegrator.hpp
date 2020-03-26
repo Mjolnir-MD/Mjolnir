@@ -4,6 +4,7 @@
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/SystemMotionRemover.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/util/logger.hpp>
 
@@ -26,14 +27,17 @@ class UnderdampedLangevinIntegrator
     using system_type     = System<traitsT>;
     using forcefield_type = ForceField<traitsT>;
     using rng_type        = RandomNumberGenerator<traits_type>;
+    using remover_type    = SystemMotionRemover<traits_type>;
 
   public:
 
-    UnderdampedLangevinIntegrator(const real_type dt,
-            std::vector<real_type>&& gamma)
+    UnderdampedLangevinIntegrator(
+            const real_type dt, std::vector<real_type>&& gamma,
+            remover_type&& remover)
         : dt_(dt), halfdt_(dt / 2), halfdt2_(dt * dt / 2),
           sqrt_gamma_over_mass_(gamma.size()),
-          acceleration_(gamma.size())
+          acceleration_(gamma.size()),
+          remover_(std::move(remover))
     {
         gammas_ = std::move(gamma);
     }
@@ -85,6 +89,8 @@ class UnderdampedLangevinIntegrator
     std::vector<real_type>       gammas_;
     std::vector<real_type>       sqrt_gamma_over_mass_;
     std::vector<coordinate_type> acceleration_;
+
+    remover_type remover_;
 
 #ifdef MJOLNIR_WITH_OPENMP
     // OpenMP implementation uses its own specialization to run it in parallel.
@@ -171,6 +177,9 @@ UnderdampedLangevinIntegrator<traitsT>::step(
         a  = f * rm + gen_gaussian_vec(rng, noise_coef_ * sqrt_gamma_over_mass_[i]);
         v += halfdt_ * (1 - gammas_[i] * halfdt_) * a;
     }
+
+    // remove net rotation/translation
+    remover_.remove(sys);
 
     return time + dt_;
 }
