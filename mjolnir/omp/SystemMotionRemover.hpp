@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_CORE_SYSTEM_MOTION_REMOVER_HPP
-#define MJOLNIR_CORE_SYSTEM_MOTION_REMOVER_HPP
+#ifndef MJOLNIR_OMP_SYSTEM_MOTION_REMOVER_HPP
+#define MJOLNIR_OMP_SYSTEM_MOTION_REMOVER_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
 #include <mjolnir/core/SystemMotionRemover.hpp>
@@ -7,8 +7,8 @@
 namespace mjolnir
 {
 
-template<typename traitsT>
-class SystemMotionRemover
+template<typename realT, template<typename, typename> class boundaryT>
+class SystemMotionRemover<OpenMPSimulatorTraits<realT, boundaryT>>
 {
   public:
     using traits_type     = traitsT;
