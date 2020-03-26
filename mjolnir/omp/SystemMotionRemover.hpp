@@ -11,7 +11,7 @@ template<typename realT, template<typename, typename> class boundaryT>
 class SystemMotionRemover<OpenMPSimulatorTraits<realT, boundaryT>>
 {
   public:
-    using traits_type     = traitsT;
+    using traits_type     = OpenMPSimulatorTraits<realT, boundaryT>;
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
     using matrix33_type   = typename traits_type::matrix33_type;
@@ -40,8 +40,8 @@ class SystemMotionRemover<OpenMPSimulatorTraits<realT, boundaryT>>
             {
                 E_kinetic_pre += sys.mass(i) * math::length_sq(sys.velocity(i));
             }
+            E_kinetic_pre *= 0.5;
         }
-        E_kinetic_pre *= 0.5;
 
         if(translation_)
         {
@@ -51,7 +51,7 @@ class SystemMotionRemover<OpenMPSimulatorTraits<realT, boundaryT>>
             real_type trans_z(0);
             // TODO OpenMP user-defined reduction operator
 
-#pragma omp parallel for reduction(+:E_kinetic_pre) \
+#pragma omp parallel for reduction(+:m_tot) \
                          reduction(+:trans_x) reduction(+:trans_y) reduction(+:trans_z)
             for(std::size_t i=0; i<sys.size(); ++i)
             {
@@ -131,9 +131,9 @@ class SystemMotionRemover<OpenMPSimulatorTraits<realT, boundaryT>>
                 I22 += Ixx + Iyy;
 
                 // off-diagonal
-                I01 -= Ixy;
-                I02 -= Izx;
-                I12 -= Iyz;
+                I01 += -Ixy;
+                I02 += -Izx;
+                I12 += -Iyz;
             }
 
             // total angular momentum
@@ -144,11 +144,10 @@ class SystemMotionRemover<OpenMPSimulatorTraits<realT, boundaryT>>
                                   I01, I11, I12,
                                   I02, I12, I22);
 
-
             const real_type detI = math::determinant(I);
             if(detI != real_type(0))
             {
-                const auto invI = math::inverse(I);
+                const auto invI = math::inverse(I, detI);
                 const auto omega = invI * L; // angular velocity
 #pragma omp parallel for
                 for(std::size_t i=0; i<sys.size(); ++i)
