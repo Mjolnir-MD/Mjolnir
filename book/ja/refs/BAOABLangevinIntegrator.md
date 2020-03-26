@@ -16,6 +16,9 @@ m_i\boldsymbol{a}_i = \boldsymbol{f}_i - m_i\gamma_i\boldsymbol{v}_i + m_i\xi_i
 ```toml
 [simulator]
 integrator.type = "BAOABLangevin"
+integrator.remove.translation = true
+integrator.remove.rotation    = true
+integrator.remove.rescale     = true
 integrator.parameters = [
     {index = 0, gamma = 1.0},
     {index = 1, gamma = 1.0},
@@ -29,6 +32,10 @@ integrator.parameters = [
 
 - `type`: 文字列型
   - [Integrator](Integrator.md)の種類を指定します。`"BAOABLangevin"`です。
+- `remove`: テーブル型 (optional)
+  - 系全体の並進・回転速度成分を取り除くことができます。`true`にすると取り除かれます。
+  - `rescale`が`true`になっていた場合、全体の速度ベクトルをリスケールすることで速度を減算した分の運動エネルギーを補填します。
+  - 省略した場合、全て`false`になります。
 - `parameters`: テーブルの配列型
   - それぞれの粒子について、摩擦係数$$\gamma_i$$を指定します。
 

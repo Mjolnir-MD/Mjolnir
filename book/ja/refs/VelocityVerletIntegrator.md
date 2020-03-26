@@ -7,6 +7,9 @@
 ```toml
 [simulator]
 integrator.type = "VelocityVerlet"
+integrator.remove.translation = true
+integrator.remove.rotation    = true
+integrator.remove.rescale     = true
 ```
 
 ## 入力
@@ -15,3 +18,7 @@ integrator.type = "VelocityVerlet"
 
 - `type`: 文字列型
   - [Integrator](Integrator.md)の種類を指定します。`"VelocityVerlet"`です。
+- `remove`: テーブル型 (optional)
+  - 系全体の並進・回転速度成分を取り除くことができます。`true`にすると取り除かれます。
+  - `rescale`が`true`になっていた場合、全体の速度ベクトルをリスケールすることで速度を減算した分の運動エネルギーを補填します。
+  - 省略した場合、全て`false`になります。
