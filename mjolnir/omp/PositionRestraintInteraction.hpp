@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_OMP_EXTERNAL_POSITION_RESTRAINT_INTERACTION_HPP
 #define MJOLNIR_OMP_EXTERNAL_POSITION_RESTRAINT_INTERACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
-#include <mjolnir/interaction/external/PositionRestraintInteraction.hpp>
+#include <mjolnir/forcefield/external/PositionRestraintInteraction.hpp>
 
 namespace mjolnir
 {
@@ -9,7 +9,7 @@ namespace mjolnir
 // Interaction between particles and fixed points.
 //
 // XXX
-// It re-uses local potentials that can be found in mjolnir/potential/local/*,
+// It re-uses local potentials that can be found in mjolnir/forcefield/local/*,
 // e.g. HarmonicPotential, GaussianPotential, and so on.
 //
 template<typename realT, template<typename, typename> class boundaryT,

@@ -2,9 +2,9 @@
 #define MJOLNIR_INPUT_READ_EXTERNAL_POTENTIAL_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/input/utility.hpp>
-#include <mjolnir/potential/external/ImplicitMembranePotential.hpp>
-#include <mjolnir/potential/external/LennardJonesWallPotential.hpp>
-#include <mjolnir/potential/external/ExcludedVolumeWallPotential.hpp>
+#include <mjolnir/forcefield/external/ImplicitMembranePotential.hpp>
+#include <mjolnir/forcefield/external/LennardJonesWallPotential.hpp>
+#include <mjolnir/forcefield/external/ExcludedVolumeWallPotential.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/make_unique.hpp>
@@ -43,7 +43,8 @@ read_lennard_jones_wall_potential(const toml::value& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx = find_parameter<std::size_t>(param, env, "index");
+        const auto idx = find_parameter<std::size_t>(param, env, "index") +
+                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
         const auto s   = find_parameter<real_type>(param, env, "sigma", u8"σ");
         const auto e   = find_parameter<real_type>(param, env, "epsilon", u8"ε");
         params.emplace_back(idx, std::make_pair(s, e));
@@ -82,8 +83,9 @@ read_excluded_volume_wall_potential(const toml::value& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx = find_parameter<std::size_t>(param, env, "index");
-        const auto rad = find_parameter<real_type  >(param, env, "radius");
+        const auto idx = find_parameter<std::size_t>(param, env, "index") +
+                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
+        const auto rad = find_parameter<real_type>(param, env, "radius");
         params.emplace_back(idx, rad);
         MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", rad);
     }
@@ -124,7 +126,8 @@ read_implicit_membrane_potential(const toml::value& external)
     params.reserve(ps.size());
     for(const auto& param : ps)
     {
-        const auto idx = find_parameter<std::size_t>(param, env, "index");
+        const auto idx = find_parameter<std::size_t>(param, env, "index") +
+                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
         const auto h   = find_parameter<real_type  >(param, env, "hydrophobicity");
         params.emplace_back(idx, h);
         MJOLNIR_LOG_INFO("idx = ", idx, ", hydrophobicity = ", h);

@@ -2,7 +2,7 @@
 #define MJOLNIR_OMP_GO_CONTACT_INTERACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/interaction/local/GoContactInteraction.hpp>
+#include <mjolnir/forcefield/local/GoContactInteraction.hpp>
 
 namespace mjolnir
 {

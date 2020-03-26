@@ -17,7 +17,7 @@ interaction = "BondAngle"
 potential   = "Harmonic"
 topology    = "none"
 parameters  = [
-    {indices = [0, 1, 2], ... }, # ポテンシャルによって要求されるパラメータは変化します。
+    {indices = [0, 1, 2], offset = 100, ... }, # ポテンシャルによって要求されるパラメータは変化します。
     # 必要に応じて続きます...
 ]
 ```
@@ -37,4 +37,6 @@ parameters  = [
 - `parameters`: テーブルの配列型
   - `indices`: 整数の配列型
     - どの粒子の間の距離に適用するかを指定します。最初の粒子は0番目です。
+  - `offset`: 整数型(optional)
+    - `indices`に加算する値です。省略可能です。グループ内番号を使いたい場合に便利です。
   - 他のパラメータは、ポテンシャルによって異なります。

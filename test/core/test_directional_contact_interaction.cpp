@@ -8,9 +8,9 @@
 
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/interaction/local/DirectionalContactInteraction.hpp>
-#include <mjolnir/potential/local/CosinePotential.hpp>
-#include <mjolnir/potential/local/GoContactPotential.hpp>
+#include <mjolnir/forcefield/local/DirectionalContactInteraction.hpp>
+#include <mjolnir/forcefield/local/CosinePotential.hpp>
+#include <mjolnir/forcefield/local/GoContactPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/math/Matrix.hpp>

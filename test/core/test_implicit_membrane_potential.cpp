@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/external/ImplicitMembranePotential.hpp>
+#include <mjolnir/forcefield/external/ImplicitMembranePotential.hpp>
 
 BOOST_AUTO_TEST_CASE(ImplicitMembranePotential_double)
 {

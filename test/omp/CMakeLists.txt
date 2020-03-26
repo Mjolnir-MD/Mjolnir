@@ -2,6 +2,7 @@ set(TEST_NAMES
     test_omp_sort
     test_omp_random_number_generator
     test_omp_save_load_msgpack
+    test_omp_system_motion_remover
 
     test_omp_bond_length_interaction
     test_omp_bond_length_gocontact_interaction

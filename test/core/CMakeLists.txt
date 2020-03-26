@@ -6,6 +6,7 @@ set(TEST_NAMES
     test_throw_exception
     test_topology
     test_exclusion_list
+    test_system_motion_remover
 
     test_harmonic_potential
     test_gaussian_potential
@@ -94,6 +95,8 @@ set(TEST_NAMES
     test_read_pwmcos_interaction
     test_read_position_restraint_interaction
     test_read_afm_fitting_interaction
+
+    test_read_index_offset
 
     test_read_local_forcefield
     test_read_global_forcefield

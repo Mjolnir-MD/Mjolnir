@@ -2,8 +2,8 @@
 #define MJOLNIR_INPUT_READ_EXTERNAL_INTERACTION_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/forcefield/AFMFit/AFMFitInteraction.hpp>
-#include <mjolnir/interaction/external/ExternalDistanceInteraction.hpp>
-#include <mjolnir/interaction/external/PositionRestraintInteraction.hpp>
+#include <mjolnir/forcefield/external/ExternalDistanceInteraction.hpp>
+#include <mjolnir/forcefield/external/PositionRestraintInteraction.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
@@ -181,7 +181,8 @@ read_external_position_restraint_interaction(const toml::value& external)
 
         for(auto para : parameters)
         {
-            const auto idx = find_parameter<std::size_t>(para, env, "index");
+            const auto idx = find_parameter<std::size_t>(para, env, "index") +
+                             find_parameter_or<std::int64_t>(para, env, "offset", 0);
             const auto pos = find_parameter<std::array<real_type, 3>>(para, env, "position");
             const auto crd = math::make_coordinate<coordinate_type>(pos[0], pos[1], pos[2]);
 

@@ -10,7 +10,7 @@
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>
-#include <mjolnir/potential/external/LennardJonesWallPotential.hpp>
+#include <mjolnir/forcefield/external/LennardJonesWallPotential.hpp>
 #include <mjolnir/omp/System.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/UnlimitedGridCellList.hpp>

@@ -4,6 +4,7 @@
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/SystemMotionRemover.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/util/logger.hpp>
 
@@ -24,13 +25,15 @@ class BAOABLangevinIntegrator
     using system_type     = System<traitsT>;
     using forcefield_type = ForceField<traitsT>;
     using rng_type        = RandomNumberGenerator<traits_type>;
+    using remover_type    = SystemMotionRemover<traits_type>;
 
   public:
 
-    BAOABLangevinIntegrator(const real_type dt,
-            std::vector<real_type>&& gamma)
+    BAOABLangevinIntegrator(const real_type dt, std::vector<real_type>&& gamma,
+                            remover_type&& remover)
         : dt_(dt), halfdt_(dt / 2), gammas_(std::move(gamma)),
-          exp_gamma_dt_(gammas_.size()), noise_coeff_ (gammas_.size())
+          exp_gamma_dt_(gammas_.size()), noise_coeff_ (gammas_.size()),
+          remover_(std::move(remover))
     {}
     ~BAOABLangevinIntegrator() = default;
 
@@ -87,6 +90,8 @@ class BAOABLangevinIntegrator
     std::vector<real_type> gammas_;
     std::vector<real_type> exp_gamma_dt_;
     std::vector<real_type> noise_coeff_;
+
+    remover_type remover_;
 
 #ifdef MJOLNIR_WITH_OPENMP
     // OpenMP implementation uses its own specialization to run it in parallel.
@@ -161,6 +166,10 @@ BAOABLangevinIntegrator<traitsT>::step(
         auto&       v = sys.velocity(i);
         v += this->halfdt_ * rm * f;
     }
+
+    // remove net rotation/translation
+    remover_.remove(sys);
+
     return time + dt_;
 }
 

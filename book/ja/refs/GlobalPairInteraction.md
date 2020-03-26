@@ -22,6 +22,7 @@ ignore.particles_within.bond    = 3
 ignore.particles_within.contact = 1
 spatial_partition = {type = "CellList", margin = 0.2}
 parameters = [
+    {index = 0, offset = 100, ...}, # パラメータはポテンシャルの種類に依存します
     # ...
 ]
 ```
@@ -42,6 +43,12 @@ parameters = [
   - 相互作用を無視する条件を記述します。
 - `spatial_partition`: テーブル型
   - 計算速度の向上のための空間分割の方法を指定します。
+- `parameters`: テーブルの配列型
+  - `indices`: 整数の配列型
+    - どの粒子の間の距離に適用するかを指定します。最初の粒子は0番目です。
+  - `offset`: 整数型(optional)
+    - 各粒子の粒子番号に加算する値です。省略可能です。グループ内番号を使いたい場合に便利です。
+  - 他のパラメータは、ポテンシャルによって異なります。
 
 ### `ignore`
 

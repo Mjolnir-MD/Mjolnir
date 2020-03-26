@@ -2,7 +2,7 @@
 #define MJOLNIR_OMP_GLOBAL_PAIR_LENNARD_JONES_INTEARACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/interaction/global/GlobalPairLennardJonesInteraction.hpp>
+#include <mjolnir/forcefield/global/GlobalPairLennardJonesInteraction.hpp>
 
 namespace mjolnir
 {

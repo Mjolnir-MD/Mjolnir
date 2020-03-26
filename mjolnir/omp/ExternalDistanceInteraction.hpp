@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_OMP_EXTERNAL_DISTANCE_INTERACTION_HPP
 #define MJOLNIR_OMP_EXTERNAL_DISTANCE_INTERACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
-#include <mjolnir/interaction/external/ExternalDistanceInteraction.hpp>
+#include <mjolnir/forcefield/external/ExternalDistanceInteraction.hpp>
 
 namespace mjolnir
 {

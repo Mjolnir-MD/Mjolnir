@@ -6,7 +6,7 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/potential/local/HarmonicPotential.hpp>
+#include <mjolnir/forcefield/local/HarmonicPotential.hpp>
 
 BOOST_AUTO_TEST_CASE(Harmonic_double)
 {

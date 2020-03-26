@@ -2,7 +2,7 @@
 #define MJOLNIR_OMP_GLOBAL_PAIR_EXCLUDED_VOLUME_INTEARACTION_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/interaction/global/GlobalPairExcludedVolumeInteraction.hpp>
+#include <mjolnir/forcefield/global/GlobalPairExcludedVolumeInteraction.hpp>
 
 namespace mjolnir
 {

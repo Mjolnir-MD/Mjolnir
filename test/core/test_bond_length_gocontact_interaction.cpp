@@ -8,7 +8,7 @@
 
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/interaction/local/BondLengthGoContactInteraction.hpp>
+#include <mjolnir/forcefield/local/BondLengthGoContactInteraction.hpp>
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <random>
