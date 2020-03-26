@@ -48,8 +48,8 @@ inline void SystemMotionRemover<traitsT>::remove(system_type& sys) const noexcep
         {
             E_kinetic_pre += sys.mass(i) * math::length_sq(sys.velocity(i));
         }
+        E_kinetic_pre *= 0.5;
     }
-    E_kinetic_pre *= 0.5;
 
     if(translation_)
     {
@@ -119,7 +119,7 @@ inline void SystemMotionRemover<traitsT>::remove(system_type& sys) const noexcep
         const real_type detI = math::determinant(I);
         if(detI != real_type(0))
         {
-            const auto invI = math::inverse(I);
+            const auto invI = math::inverse(I, detI);
             const auto omega = invI * L; // angular velocity
             for(std::size_t i=0; i<sys.size(); ++i)
             {
