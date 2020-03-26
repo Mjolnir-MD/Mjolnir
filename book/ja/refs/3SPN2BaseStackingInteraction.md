@@ -17,14 +17,14 @@ potential   = "3SPN2"
 topology    = "nucleotide"
 parameters  = [
 # `nucleotide` index starts from 5' and ends at 3'.
-{strand = 0, nucleotide =  0,          S =   0, B =   1, Base = "A"},
-{strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
-{strand = 0, nucleotide =  2, P =   5, S =   6, B =   7, Base = "C"},
-{strand = 0, nucleotide =  3, P =   8, S =   9, B =  10, Base = "G"},
-{strand = 1, nucleotide =  4,          S =  11, B =  12, Base = "C"},
-{strand = 1, nucleotide =  5, P =  13, S =  14, B =  15, Base = "G"},
-{strand = 1, nucleotide =  6, P =  16, S =  17, B =  18, Base = "A"},
-{strand = 1, nucleotide =  7, P =  19, S =  20, B =  21, Base = "T"},
+{strand = 0, nucleotide =  0,          S =   0, B =   1, offset = 100, Base = "A"},
+{strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, offset = 100, Base = "T"},
+{strand = 0, nucleotide =  2, P =   5, S =   6, B =   7, offset = 100, Base = "C"},
+{strand = 0, nucleotide =  3, P =   8, S =   9, B =  10, offset = 100, Base = "G"},
+{strand = 1, nucleotide =  4,          S =  11, B =  12, offset = 100, Base = "C"},
+{strand = 1, nucleotide =  5, P =  13, S =  14, B =  15, offset = 100, Base = "G"},
+{strand = 1, nucleotide =  6, P =  16, S =  17, B =  18, offset = 100, Base = "A"},
+{strand = 1, nucleotide =  7, P =  19, S =  20, B =  21, offset = 100, Base = "T"},
 ]
 ```
 
@@ -50,3 +50,5 @@ parameters  = [
     - 塩基の種類
   - を指定します。
   - 端のヌクレオチドには、多くの場合リン酸がありません。
+  - `offset`: 整数型(optional)
+    - 各粒子の粒子番号に加算する値です。省略可能です。グループ内番号を使いたい場合に便利です。

@@ -31,7 +31,7 @@ topology           = "none"
 margin             = 0.5 # relative length to longest cutoff
 parameters         = [
     # 各ポテンシャルそれぞれについて、要求されるパラメータを設定します。
-    {indices = [0, 1, 2, 3], angle1 = { v0 = ... }, angle2 = { v0 = ... }, contact = { v0 = ... }},
+    {indices = [0, 1, 2, 3], offset = 100, angle1 = { v0 = ... }, angle2 = { v0 = ... }, contact = { v0 = ... }},
     # 必要に応じて続きます...
 ]
 ```
@@ -54,3 +54,9 @@ parameters         = [
 - `margin`: 浮動小数点型
   - `contact`で指定したポテンシャルのカットオフ距離に対する倍率としてマージンの長さを指定します。
     `contact`で定義されているポテンシャルの中で最も長いカットオフ距離に対する長さで統一されます。
+- `parameters`: テーブルの配列型
+  - `indices`: 整数の配列型
+    - どの粒子の間の距離に適用するかを指定します。最初の粒子は0番目です。
+  - `offset`: 整数型(optional)
+    - `indices`に加算する値です。省略可能です。グループ内番号を使いたい場合に便利です。
+  - 他のパラメータは、ポテンシャルによって異なります。

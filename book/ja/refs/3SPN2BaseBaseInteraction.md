@@ -20,9 +20,9 @@ ignore.particles_within.nucleotide = 3
 spatial_partition = {type = "CellList", margin = 0.2}
 parameters  = [
 # `nucleotide` index starts from 5' and ends at 3'.
-{strand = 0, nucleotide =  0,          S =   0, B =   1, Base = "A"},
-{strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
-{strand = 0, nucleotide =  2, P =   5, S =   6, B =   7, Base = "C"},
+{strand = 0, nucleotide =  0,          S =   0, B =   1, offset = 100, Base = "A"},
+{strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, offset = 100, Base = "T"},
+{strand = 0, nucleotide =  2, P =   5, S =   6, B =   7, offset = 100, Base = "C"},
 # ...
 ]
 ```
@@ -48,6 +48,10 @@ parameters  = [
     - リン酸、糖、塩基に対応する粒子の番号、
     - 塩基の種類
   - を指定します。
+  - `index`: 整数型
+    - どの粒子に適用するかを指定します。最初の粒子は0番目です。
+  - `offset`: 整数型(optional)
+    - 各粒子の粒子番号に加算する値です。省略可能です。グループ内番号を使いたい場合に便利です。
 
 ### `ignore`
 

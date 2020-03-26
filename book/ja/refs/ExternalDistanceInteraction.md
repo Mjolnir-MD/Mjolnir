@@ -13,7 +13,7 @@ shape.axis     = "+X"
 shape.position = 0.0
 shape.margin   = 0.5
 parameters     = [
-    # ...
+# ...
 ]
 ```
 

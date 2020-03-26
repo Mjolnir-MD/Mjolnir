@@ -20,8 +20,8 @@ parameters  = [
 {index =    2, kind = "DNA", S3 = 1},
 {index =    5, kind = "DNA", S3 = 4},
 # ...
-{index = 1000, kind = "Protein", PN =  999, PC = 1001, k = 1.2, r0 = 5.0, theta0 = 1.57, phi0 = 1.73},
-{index = 1023, kind = "Protein", PN = 1022, PC = 1024, k = 1.2, r0 = 6.0, theta0 = 1.57, phi0 = 1.73},
+{index = 1000, offset = 100, kind = "Protein", PN =  999, PC = 1001, k = 1.2, r0 = 5.0, theta0 = 1.57, phi0 = 1.73},
+{index = 1023, offset = 100, kind = "Protein", PN = 1022, PC = 1024, k = 1.2, r0 = 6.0, theta0 = 1.57, phi0 = 1.73},
 # ...
 ]
 ```
@@ -39,3 +39,7 @@ parameters  = [
 - `parameters`: テーブルの配列型
   - `kind="DNA"`の場合、対応する3'方向の糖のインデックスが必要です。
   - `kind="Protein"`の場合、N, C末端方向の隣の粒子と、コンタクトの強さと方向のパラメータが必要です。
+  - `index`: 整数型
+    - どの粒子に適用するかを指定します。最初の粒子は0番目です。
+  - `offset`: 整数型(optional)
+    - 各粒子の粒子番号に加算する値です。省略可能です。グループ内番号を使いたい場合に便利です。
