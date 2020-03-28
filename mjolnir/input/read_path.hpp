@@ -6,7 +6,7 @@
 namespace mjolnir
 {
 
-// this function may be callen from other read_* functions.
+// this function may be called from other read_* functions.
 template<typename C, template<typename...> class T, template<typename...> class A>
 std::string read_input_path(const toml::basic_value<C, T, A>& root)
 {
@@ -16,10 +16,10 @@ std::string read_input_path(const toml::basic_value<C, T, A>& root)
     const auto& files = toml::find(root, "files");
 
     std::string input_path("./");
-    if(files.as_table().count("input") == 1)
+    if(files.contains("input"))
     {
         const auto& input = toml::find(files, "input");
-        if(input.as_table().count("path") == 1)
+        if(input.contains("path"))
         {
             input_path = toml::find<std::string>(input, "path");
             if(input_path.back() != '/') {input_path += '/';}
@@ -38,10 +38,10 @@ std::string read_output_path(const toml::basic_value<C, T, A>& root)
     const auto& files = toml::find(root, "files");
 
     std::string output_path("./");
-    if(files.as_table().count("output") == 1)
+    if(files.contains("output"))
     {
         const auto& output = toml::find(files, "output");
-        if(output.as_table().count("path") == 1)
+        if(output.contains("path"))
         {
             output_path = toml::find<std::string>(output, "path");
             if(output_path.back() != '/') {output_path += '/';}

@@ -71,18 +71,16 @@ read_observer(const toml::value& root)
 
     const auto& output = toml::find(root, "files", "output");
 
-    const auto progress_bar_enabled = toml::expect<bool>(output, "progress_bar")
-                                                        .unwrap_or(true);
-
     const auto output_path   = read_output_path(root);
     const auto output_prefix = toml::find<std::string>(output, "prefix");
     MJOLNIR_LOG_NOTICE("output file prefix is `", output_path, output_prefix, '`');
 
     const std::string file_prefix = output_path + output_prefix;
 
-    // ------------------------------------------------------------------------
+    const auto progress_bar_activated =
+        toml::find_or<bool>(output, "progress_bar", true);
 
-    ObserverContainer<traitsT> observers(progress_bar_enabled);
+    ObserverContainer<traitsT> observers(progress_bar_activated);
 
     const auto& format = toml::find(output, "format");
 
@@ -92,8 +90,7 @@ read_observer(const toml::value& root)
     }
     else if(format.is_array())
     {
-        const auto fmts = toml::get<toml::array>(format);
-        for(const auto& fmt : fmts)
+        for(const auto& fmt : format.as_array())
         {
             add_observer(observers, fmt, file_prefix);
         }
