@@ -31,7 +31,6 @@ read_system_motion_remover(const toml::value& simulator)
     return SystemMotionRemover<traitsT>(translation, rotation, rescale);
 }
 
-
 template<typename traitsT>
 VelocityVerletIntegrator<traitsT>
 read_velocity_verlet_integrator(const toml::value& simulator)
@@ -62,7 +61,7 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
 
     check_keys_available(integrator, {"type"_s, "seed"_s, "parameters"_s, "remove"_s});
 
-    const auto parameters = toml::find<toml::array  >(integrator, "parameters");
+    const auto parameters = toml::find<toml::array>(integrator, "parameters");
 
     std::vector<real_type> gamma(parameters.size());
     for(const auto& params : parameters)
@@ -94,7 +93,7 @@ read_BAOAB_langevin_integrator(const toml::value& simulator)
 
     check_keys_available(integrator, {"type"_s, "seed"_s, "parameters"_s, "remove"_s});
 
-    const auto parameters = toml::find<toml::array  >(integrator, "parameters");
+    const auto parameters = toml::find<toml::array>(integrator, "parameters");
 
     std::vector<real_type> gamma(parameters.size());
     for(const auto& params : parameters)
@@ -146,7 +145,7 @@ struct read_integrator_impl<BAOABLangevinIntegrator<traitsT>>
 template<typename integratorT>
 integratorT read_integrator(const toml::value& sim)
 {
-    if(sim.as_table().count("integrator") == 0)
+    if(!sim.contains("integrator"))
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
             "mjolnir::read_integrator: No integrator defined: ", sim, "here", {
