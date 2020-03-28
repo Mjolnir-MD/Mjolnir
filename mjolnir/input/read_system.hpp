@@ -105,7 +105,7 @@ read_system(const toml::value& root, const std::size_t N)
         }
 
         const auto& fname = toml::find<std::string>(systems, N, "file_name");
-        if(fname.size() > 3 && fname.substr(fname.size() - 3, 3) == "msg")
+        if(file_extension_is(fname, ".msg"))
         {
             MJOLNIR_LOG_NOTICE("msgpack file specified. "
                                "load system status from .msg file.");
@@ -129,6 +129,7 @@ read_system(const toml::value& root, const std::size_t N)
         MJOLNIR_LOG_INFO("attribute.", attr.first, " = ", attribute);
     }
 
+    // if there is no particle, return.
     if(particles.empty())
     {
         return sys;
@@ -137,11 +138,12 @@ read_system(const toml::value& root, const std::size_t N)
     {
         // if the first particle has velocity, mjolnir assumes that velocity is
         // already initialized (velocity generation not required).
-        const auto& p = particles.front().as_table();
-        sys.velocity_initialized() = (p.count("vel")      != 0) ||
-                                     (p.count("velocity") != 0);
+        const auto& p = particles.front();
+        sys.velocity_initialized() = (p.contains("vel") || p.contains("velocity"));
     }
 
+    // A functor to find a value that corresponds to either of the key.
+    // If both key exists, throw an error.
     const auto find_either = [](const toml::value& v, const std::string& key1,
                                 const std::string& key2) -> const toml::value&
         {

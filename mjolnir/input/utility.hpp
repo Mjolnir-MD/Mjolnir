@@ -157,6 +157,26 @@ T find_parameter_or(const toml::value& params, const toml::value& env,
     }
     return toml::get_or(p, opt);
 }
+
+//
+// if the file extension is the same as expected, return true.
+// `expected` should contain the dot. e.g. expected = ".xyz"
+//
+inline bool file_extension_is(const std::string& filename,
+                              const std::string& expected)
+{
+    if(filename.size() < expected.size())
+    {
+        return false;
+    }
+    const last_dot = filename.find_last_of('.');
+    if(last_dot == std::string::npos)
+    {
+        return false;
+    }
+    return filename.substr(last_dot) == expected;
+}
+
 } // mjolnir
 
 namespace toml
