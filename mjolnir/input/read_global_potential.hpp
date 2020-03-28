@@ -226,11 +226,11 @@ void check_parameter_overlap(const toml::value& env, const toml::array& setting,
             };
 
         const auto overlapped1 = std::find_if(
-                setting.begin(), setting.end(), find_by_idx);
+                setting.begin(), setting.end(), find_by_index);
         assert(overlapped1 != setting.end());
 
         const auto overlapped2 = std::find_if(
-                std::next(overlapped1), setting.end(), find_by_idx);
+                std::next(overlapped1), setting.end(), find_by_index);
         assert(overlapped2 != setting.end());
 
         throw_exception<std::runtime_error>(toml::format_error(

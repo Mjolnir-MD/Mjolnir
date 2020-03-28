@@ -26,7 +26,7 @@ read_lennard_jones_wall_potential(const toml::value& external)
     using real_type = realT;
     using potential_type = LennardJonesWallPotential<realT>;
 
-    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+    const auto& env = external.contains("env") ? external.at("env") : toml::value{};
 
     real_type cutoff = potential_type::default_cutoff();
     if(external.as_table().count("cutoff") != 0)
@@ -65,7 +65,7 @@ read_excluded_volume_wall_potential(const toml::value& external)
                      toml::expect<real_type>(external, "epsilon")).unwrap();
     MJOLNIR_LOG_INFO("epsilon = ", eps);
 
-    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+    const auto& env = external.contains("env") ? external.at("env") : toml::value{};
 
     real_type cutoff = potential_type::default_cutoff();
     if(external.as_table().count("cutoff") != 0)
@@ -107,7 +107,7 @@ read_implicit_membrane_potential(const toml::value& external)
     MJOLNIR_LOG_INFO("magnitude = ", magnitude);
     MJOLNIR_LOG_INFO("bend      = ", bend     );
 
-    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+    const auto& env = external.contains("env") ? external.at("env") : toml::value{};
 
     real_type cutoff = potential_type::default_cutoff();
     if(external.as_table().count("cutoff") != 0)

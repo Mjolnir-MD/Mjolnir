@@ -169,7 +169,7 @@ inline bool file_extension_is(const std::string& filename,
     {
         return false;
     }
-    const last_dot = filename.find_last_of('.');
+    const auto last_dot = filename.find_last_of('.');
     if(last_dot == std::string::npos)
     {
         return false;
