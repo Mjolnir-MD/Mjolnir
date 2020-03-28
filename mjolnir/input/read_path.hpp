@@ -6,6 +6,20 @@
 namespace mjolnir
 {
 
+// input path is used everywhere.
+// It would be useful to be able to retrieve the input path at anytime, anywhere.
+//
+// Using global variable is generally not a good idea, but passing input_path to
+// all the functions is also complicated. Passing the root object of the file
+// can be another option, but it makes reader functions longer.
+//
+// So, here, we make only input_path global.
+inline std::string& get_input_path()
+{
+    static std::string input("./");
+    return input;
+}
+
 // this function may be called from other read_* functions.
 template<typename C, template<typename...> class T, template<typename...> class A>
 std::string read_input_path(const toml::basic_value<C, T, A>& root)
@@ -13,9 +27,11 @@ std::string read_input_path(const toml::basic_value<C, T, A>& root)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
+
     const auto& files = toml::find(root, "files");
 
-    std::string input_path("./");
+    auto& input_path = get_input_path();
+    input_path = "./";
     if(files.contains("input"))
     {
         const auto& input = toml::find(files, "input");
