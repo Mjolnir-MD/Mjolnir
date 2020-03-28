@@ -394,8 +394,7 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
     const auto& params = toml::find<toml::array>(local, "parameters");
     MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
 
-    const auto& env = local.as_table().count("env") == 1 ?
-                      local.as_table().at("env") : toml::value{};
+    const auto& env = local.contains("env") ? local.at("env") : toml::value{};
     // parameters = [
     //     {strand = 0, nucleotide =  0,          S =   0, B =   1, Base = "A"},
     //     {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
@@ -487,8 +486,7 @@ read_directional_contact_potentials(const toml::value& local)
     const auto& params = toml::find(local, "parameters").as_array();
     MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
 
-    const auto& env = local.as_table().count("env") == 1 ?
-                      local.as_table().at("env") : toml::value{};
+    const auto& env = local.contains("env") ? local.at("env") : toml::value{};
 
     std::vector<indices_potentials_tuple_type> retval;
     retval.reserve(params.size());
@@ -623,8 +621,6 @@ read_directional_contact_interaction(const std::string& kind,
     }
 }
 
-
-
 // ----------------------------------------------------------------------------
 // general read_local_interaction function
 // ----------------------------------------------------------------------------
@@ -729,7 +725,6 @@ extern template std::unique_ptr<LocalInteractionBase<SimulatorTraits<float,  Unl
 extern template std::unique_ptr<LocalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value& local);
 extern template std::unique_ptr<LocalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value& local);
 #endif
-
 
 } // mjolnir
 #endif// MJOLNIR_READ_LOCAL_INTERACTION

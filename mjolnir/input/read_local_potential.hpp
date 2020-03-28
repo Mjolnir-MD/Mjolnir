@@ -403,8 +403,7 @@ read_local_potential(const toml::value& local)
     const auto& params = toml::find<toml::array>(local, "parameters");
     MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
 
-    const auto& env = local.as_table().count("env") == 1 ?
-                      local.as_table().at("env") : toml::value{};
+    const auto& env = local.contains("env") ? local.at("env") : toml::value{};
 
     std::vector<indices_potential_pair_t> retval;
     retval.reserve(params.size());
@@ -443,8 +442,7 @@ read_local_potentials(const toml::value& local,
     const auto& params = toml::find<toml::array>(local, "parameters");
     MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
 
-    const auto& env = local.as_table().count("env") == 1 ?
-                      local.as_table().at("env") : toml::value{};
+    const auto& env = local.contains("env") ? local.at("env") : toml::value{};
 
     std::vector<indices_potential_pair_type> retval;
     retval.reserve(params.size());

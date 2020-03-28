@@ -21,6 +21,9 @@ namespace mjolnir
 // global potential
 // ============================================================================
 
+//
+// reads `ignore.molecule`. If not provided, return the default value.
+//
 inline IgnoreMolecule<typename Topology::molecule_id_type>
 read_ignored_molecule(const toml::value& global)
 {
@@ -82,6 +85,9 @@ read_ignored_molecule(const toml::value& global)
     }
 }
 
+//
+// reads `ignore.group`. If not provided, return the default value.
+//
 inline IgnoreGroup<typename Topology::group_id_type>
 read_ignored_group(const toml::value& global)
 {
@@ -150,6 +156,9 @@ read_ignored_group(const toml::value& global)
     return IgnoreGroup<group_id_type>(ignores);
 }
 
+//
+// reads `ignore.particles_within`. If not provided, return the default value.
+//
 inline std::map<std::string, std::size_t>
 read_ignore_particles_within(const toml::value& global)
 {
@@ -173,6 +182,15 @@ read_ignore_particles_within(const toml::value& global)
     return ignore_particle_within;
 }
 
+//
+// checks index overlap in the `parameters` array. If any, show the warning.
+// After reading the parameters, call this.
+// ```toml
+// parameters = [
+//     {index = 10, radius = 2.0},
+//     {index = 10, radius = 2.0}, # <- overlap! parameter value is ambiguous.
+// ]
+// ```
 template<typename parameterT>
 void check_parameter_overlap(const toml::value& env, const toml::array& setting,
         std::vector<std::pair<std::size_t, parameterT>>& parameters)
@@ -185,8 +203,9 @@ void check_parameter_overlap(const toml::value& env, const toml::array& setting,
 
     std::sort(parameters.begin(), parameters.end(),
             [](const value_type& lhs, const value_type& rhs) noexcept -> bool {
-                return lhs.first < rhs.first;
+                return lhs.first < rhs.first; // check only its index.
             });
+
     const auto overlap = std::adjacent_find(parameters.begin(), parameters.end(),
             [](const value_type& lhs, const value_type& rhs) noexcept -> bool {
                 return lhs.first == rhs.first;
@@ -197,23 +216,25 @@ void check_parameter_overlap(const toml::value& env, const toml::array& setting,
         const std::size_t overlapped_idx = overlap->first;
         MJOLNIR_LOG_ERROR("parameter for ", overlapped_idx, " defined twice");
 
-        // find overlapped one
-        const auto overlapped1 = std::find_if(setting.begin(), setting.end(),
+        // define a functor to find the toml::value by its index.
+        // read the index in parameter and compare it with the `overlapped_idx`.
+        const auto find_by_index =
             [overlapped_idx, &env](const toml::value& v) -> bool {
-                return find_parameter<std::size_t>(v, env, "index") == overlapped_idx;
-            });
+                return find_parameter<std::size_t>(v, env, "index") +
+                    find_parameter_or<std::size_t>(v, env, "offset", 0) ==
+                    overlapped_idx;
+            };
 
+        const auto overlapped1 = std::find_if(
+                setting.begin(), setting.end(), find_by_idx);
         assert(overlapped1 != setting.end());
 
-        const auto overlapped2 = std::find_if(std::next(overlapped1), setting.end(),
-            [overlapped_idx, &env](const toml::value& v) -> bool {
-                return find_parameter<std::size_t>(v, env, "index") == overlapped_idx;
-            });
-
+        const auto overlapped2 = std::find_if(
+                std::next(overlapped1), setting.end(), find_by_idx);
         assert(overlapped2 != setting.end());
 
         throw_exception<std::runtime_error>(toml::format_error(
-            "[error] duplicate parameter definitions",
+            "check_parameter_overlap: duplicate parameter definitions",
             *overlapped1, "this defined twice", *overlapped2, "here"));
     }
     return ;
@@ -229,8 +250,7 @@ read_excluded_volume_potential(const toml::value& global)
     using real_type      = typename potential_type::real_type;
     using parameter_type = typename potential_type::parameter_type;
 
-    const auto& env = global.as_table().count("env") == 1 ?
-                      global.as_table().at("env") : toml::value{};
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
 
     const real_type eps = toml::find<real_type>(global, "epsilon");
     MJOLNIR_LOG_INFO("epsilon = ", eps);
@@ -271,8 +291,7 @@ read_inverse_power_potential(const toml::value& global)
     using integer_type   = typename potential_type::integer_type;
     using parameter_type = typename potential_type::parameter_type;
 
-    const auto& env = global.as_table().count("env") == 1?
-                      global.as_table().at("env") : toml::value{};
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
 
     const real_type eps = toml::find<real_type>(global, "epsilon");
     MJOLNIR_LOG_INFO("epsilon = ", eps);
@@ -315,8 +334,7 @@ read_hard_core_excluded_volume_potential(const toml::value& global)
     using real_type      = typename potential_type::real_type;
     using parameter_type = typename potential_type::parameter_type;
 
-    const auto& env = global.as_table().count("env") == 1 ?
-                      global.as_table().at("env") : toml::value{};
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
 
     const real_type eps = toml::find<real_type>(global, "epsilon");
     MJOLNIR_LOG_INFO("epsilon = ", eps);
@@ -362,8 +380,7 @@ read_lennard_jones_potential(const toml::value& global)
     using real_type      = typename potential_type::real_type;
     using parameter_type = typename potential_type::parameter_type;
 
-    const auto& env = global.as_table().count("env") == 1 ?
-                      global.as_table().at("env") : toml::value{};
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
 
     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
             potential_type::default_cutoff());
@@ -402,8 +419,7 @@ read_uniform_lennard_jones_potential(const toml::value& global)
     using real_type      = typename potential_type::real_type;
     using parameter_type = typename potential_type::parameter_type;
 
-    const auto& env = global.as_table().count("env") == 1 ?
-                      global.as_table().at("env") : toml::value{};
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
 
     const auto sigma   = toml::expect<real_type>(global, u8"σ").or_other(
                          toml::expect<real_type>(global, "sigma")).unwrap();
@@ -450,8 +466,7 @@ read_debye_huckel_potential(const toml::value& global)
     using real_type      = typename potential_type::real_type;
     using parameter_type = typename potential_type::parameter_type;
 
-    const auto& env = global.as_table().count("env") == 1 ?
-                      global.as_table().at("env") : toml::value{};
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
 
     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
             potential_type::default_cutoff());
@@ -490,8 +505,7 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
     using parameter_type = typename potential_type::parameter_type;
     using bead_kind      = parameter_3SPN2::bead_kind;
 
-    const auto& env = global.as_table().count("env") == 1 ?
-                      global.as_table().at("env") : toml::value{};
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
 
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");

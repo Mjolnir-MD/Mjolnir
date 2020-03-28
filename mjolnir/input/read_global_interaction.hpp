@@ -144,8 +144,7 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
     // ------------------------------------------------------------------------
     // read parameters
 
-    const auto& env    = global.as_table().count("env") == 1 ?
-                         global.as_table().at("env") : toml::value{};
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
 
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
@@ -298,8 +297,7 @@ read_pdns_interaction(const toml::value& global)
     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
             potential_type::default_cutoff());
 
-    const auto& env = global.as_table().count("env") == 1 ?
-                      global.as_table().at("env") : toml::value{};
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
 
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
@@ -403,8 +401,7 @@ read_pwmcos_interaction(const toml::value& global)
     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
             potential_type::default_cutoff());
 
-    const auto& env = global.as_table().count("env") == 1 ?
-                      global.as_table().at("env") : toml::value{};
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
 
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
