@@ -16,7 +16,7 @@ namespace mjolnir
 // So, here, we make only input_path global.
 inline std::string& get_input_path()
 {
-    static std::string input("./");
+    static std::string input = "";
     return input;
 }
 
@@ -27,10 +27,14 @@ std::string read_input_path(const toml::basic_value<C, T, A>& root)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
-
     const auto& files = toml::find(root, "files");
 
     auto& input_path = get_input_path();
+    if(!input_path.empty())
+    {
+        MJOLNIR_LOG_WARN("input_path (", input_path, ") is overwritten!");
+    }
+
     input_path = "./";
     if(files.contains("input"))
     {
@@ -38,9 +42,13 @@ std::string read_input_path(const toml::basic_value<C, T, A>& root)
         if(input.contains("path"))
         {
             input_path = toml::find<std::string>(input, "path");
-            if(input_path.back() != '/') {input_path += '/';}
+            if(input_path.back() != '/')
+            {
+                input_path += '/';
+            }
         }
     }
+    MJOLNIR_LOG_NOTICE("input_path is ", input_path);
     return input_path;
 }
 
