@@ -21,6 +21,9 @@ BOOST_AUTO_TEST_CASE(DH_double)
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
     using group_id_type    = mjolnir::Topology::group_id_type;
 
+    using boundary_type = traits_type::boundary_type;
+    using system_type   = mjolnir::System<traits_type>;
+
     // to make the value realistic, we need to modify the unit system.
     using phys_type = mjolnir::physics::constants<real_type>;
     using unit_type = mjolnir::unit::constants<real_type>;
@@ -41,6 +44,13 @@ BOOST_AUTO_TEST_CASE(DH_double)
     constexpr std::size_t N = 10000;
     constexpr real_type   h = 1e-6;
 
+    system_type sys(0, boundary_type{});
+    sys.attribute("temperature")    = 300.0; // [K]
+    sys.attribute("ionic_strength") =   0.1; // [M]
+
+    mjolnir::Topology top(0);
+    top.construct_molecules();
+
     const real_type charge = 1.0;
     mjolnir::DebyeHuckelPotential<traits_type> dh(
         mjolnir::DebyeHuckelPotential<traits_type>::default_cutoff(),
@@ -48,6 +58,8 @@ BOOST_AUTO_TEST_CASE(DH_double)
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
         );
+
+    dh.initialize(sys, top);
 
     const real_type x_min = 0.5 * dh.debye_length();
     const real_type x_max = dh.max_cutoff_length();
@@ -72,6 +84,9 @@ BOOST_AUTO_TEST_CASE(DH_float)
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
     using group_id_type    = mjolnir::Topology::group_id_type;
 
+    using boundary_type = traits_type::boundary_type;
+    using system_type   = mjolnir::System<traits_type>;
+
     using phys_type = mjolnir::physics::constants<real_type>;
     using unit_type = mjolnir::unit::constants<real_type>;
 
@@ -91,6 +106,13 @@ BOOST_AUTO_TEST_CASE(DH_float)
     constexpr static std::size_t N = 1000;
     constexpr static real_type   h = 1e-2;
 
+    system_type sys(0, boundary_type{});
+    sys.attribute("temperature")    = 300.0; // [K]
+    sys.attribute("ionic_strength") =   0.1; // [M]
+
+    mjolnir::Topology top(0);
+    top.construct_molecules();
+
     const real_type charge = 1.0;
     mjolnir::DebyeHuckelPotential<traits_type> dh(
         mjolnir::DebyeHuckelPotential<traits_type>::default_cutoff(),
@@ -98,6 +120,8 @@ BOOST_AUTO_TEST_CASE(DH_float)
         mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
         mjolnir::IgnoreGroup   <group_id_type   >({})
         );
+
+    dh.initialize(sys, top);
 
     const real_type x_min = 0.5 * dh.debye_length();
     const real_type x_max = dh.max_cutoff_length();
