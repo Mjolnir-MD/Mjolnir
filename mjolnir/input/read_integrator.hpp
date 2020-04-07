@@ -66,17 +66,32 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
     const auto& env = simulator.as_table().count("env") == 1 ?
                       simulator.as_table().at("env") : toml::value{};
 
-    std::vector<real_type> gamma(parameters.size());
+    // Temporarily make the vector of idx gamma pair for check duplicated definition
+    // of gamma to index.
+    std::vector<std::pair<std::size_t, real_type>> idx_gammas;
+    idx_gammas.reserve(parameters.size());
     for(const auto& params : parameters)
     {
         const auto offset = find_parameter_or<std::int64_t>(params, env, "offset", 0);
         const auto idx = toml::find<std::size_t>(params, "index") + offset;
         const auto  gm = find_parameter<real_type>(params, env, "gamma", u8"γ");
+
+        idx_gammas.emplace_back(idx, gm);
+    }
+    check_parameter_overlap(env, parameters, idx_gammas);
+
+    std::vector<real_type> gamma(parameters.size());
+    gamma.reserve(parameters.size());
+    for(const auto& idx_gamma : idx_gammas)
+    {
+        const auto idx   = idx_gamma.first;
+        const auto gm = idx_gamma.second;
         if(gamma.size() <= idx){gamma.resize(idx+1);}
         gamma.at(idx) = gm;
 
         MJOLNIR_LOG_INFO("idx = ", idx, ", gamma = ", gm);
     }
+
     return UnderdampedLangevinIntegrator<traitsT>(delta_t, std::move(gamma),
             read_system_motion_remover<traitsT>(simulator));
 }
