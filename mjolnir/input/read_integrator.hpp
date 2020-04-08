@@ -64,8 +64,8 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
             {"type"_s, "seed"_s, "parameters"_s, "remove"_s, "env"_s});
 
     const auto parameters = toml::find<toml::array>(integrator, "parameters");
-    const auto& env = simulator.contains("env") ?
-                      simulator.at("env") : toml::value{};
+    const auto& env = integrator.contains("env") ?
+                      integrator.at("env") : toml::value{};
 
     // Temporarily make a vector of idx gamma pair to check index duplication.
     std::vector<std::pair<std::size_t, real_type>> idx_gammas;
@@ -115,8 +115,8 @@ read_BAOAB_langevin_integrator(const toml::value& simulator)
             {"type"_s, "seed"_s, "parameters"_s, "remove"_s, "env"_s});
 
     const auto parameters = toml::find<toml::array>(integrator, "parameters");
-    const auto& env = simulator.contains("env") ?
-                      simulator.count("env") : toml::value{};
+    const auto& env = integrator.contains("env") ?
+                      integrator.count("env") : toml::value{};
 
     // Temporarily make a vector of idx gamma pair to check index duplication.
     std::vector<std::pair<std::size_t, real_type>> idx_gammas;
