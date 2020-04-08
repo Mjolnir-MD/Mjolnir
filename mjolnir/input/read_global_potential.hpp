@@ -173,52 +173,6 @@ read_ignore_particles_within(const toml::value& global)
     return ignore_particle_within;
 }
 
-template<typename parameterT>
-void check_parameter_overlap(const toml::value& env, const toml::array& setting,
-        std::vector<std::pair<std::size_t, parameterT>>& parameters)
-{
-    if(parameters.empty()) {return ;}
-
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    using value_type = std::pair<std::size_t, parameterT>;
-
-    std::sort(parameters.begin(), parameters.end(),
-            [](const value_type& lhs, const value_type& rhs) noexcept -> bool {
-                return lhs.first < rhs.first;
-            });
-    const auto overlap = std::adjacent_find(parameters.begin(), parameters.end(),
-            [](const value_type& lhs, const value_type& rhs) noexcept -> bool {
-                return lhs.first == rhs.first;
-            });
-
-    if(overlap != parameters.end())
-    {
-        const std::size_t overlapped_idx = overlap->first;
-        MJOLNIR_LOG_ERROR("parameter for ", overlapped_idx, " defined twice");
-
-        // find overlapped one
-        const auto overlapped1 = std::find_if(setting.begin(), setting.end(),
-            [overlapped_idx, &env](const toml::value& v) -> bool {
-                return find_parameter<std::size_t>(v, env, "index") == overlapped_idx;
-            });
-
-        assert(overlapped1 != setting.end());
-
-        const auto overlapped2 = std::find_if(std::next(overlapped1), setting.end(),
-            [overlapped_idx, &env](const toml::value& v) -> bool {
-                return find_parameter<std::size_t>(v, env, "index") == overlapped_idx;
-            });
-
-        assert(overlapped2 != setting.end());
-
-        throw_exception<std::runtime_error>(toml::format_error(
-            "[error] duplicate parameter definitions",
-            *overlapped1, "this defined twice", *overlapped2, "here"));
-    }
-    return ;
-}
-
 template<typename traitsT>
 ExcludedVolumePotential<traitsT>
 read_excluded_volume_potential(const toml::value& global)
