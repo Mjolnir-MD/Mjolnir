@@ -29,6 +29,7 @@ inline bool check_keys_available(const toml::value& table,
     bool all_available = true;
     for(const auto& kv : table.as_table())
     {
+        if(kv.first == "include") {continue;}
         if(list.end() == std::find(list.begin(), list.end(), kv.first))
         {
             std::ostringstream oss;
