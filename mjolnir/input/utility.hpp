@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_INPUT_UTILITY_HPP
 #define MJOLNIR_INPUT_UTILITY_HPP
 #include <extlib/toml/toml.hpp>
+#include <mjolnir/input/read_path.hpp>
 #include <mjolnir/util/type_traits.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -175,6 +176,71 @@ T find_parameter_or(const toml::value& params, const toml::value& env,
         return toml::find_or(env, p.as_string(), opt);
     }
     return toml::get_or(p, opt);
+}
+
+void merge_toml_tables(toml::value& table, const toml::value& other)
+{
+    using ::mjolnir::literals::string_literals::operator"" _s;
+    assert(table.is_table());
+    assert(other.is_table());
+
+    for(const auto& kv : other.as_table())
+    {
+        if(table.contains(kv.first))
+        {
+            if(table.at(kv.first).is_table())
+            {
+                merge_toml_tables(table.at(kv.first), kv.second);
+            }
+            else
+            {
+                throw std::runtime_error(toml::format_error("value \""_s +
+                    kv.first + "\" duplicates."_s, table, "first defined here"_s,
+                    kv.second, "and also defined here"_s));
+            }
+        }
+        else
+        {
+            table.as_table().emplace(kv.first, kv.second);
+        }
+    }
+    return;
+}
+
+inline toml::value expand_include(toml::value v)
+{
+    if(!v.is_table())
+    {
+        return v;
+    }
+
+    // expand include in this table
+    if(v.contains("include"))
+    {
+        const auto& input_path = get_input_path();
+        if(v.at("include").is_array())
+        {
+            for(auto fname : toml::find<std::vector<std::string>>(v, "include"))
+            {
+                merge_toml_tables(v, toml::parse(input_path + fname));
+            }
+        }
+        else
+        {
+            merge_toml_tables(v, toml::parse(
+                        input_path + toml::find<std::string>(v, "include")));
+        }
+    }
+
+    for(auto& kv : v.as_table())
+    {
+        if(kv.second.is_table())
+        {
+            kv.second = expand_include(kv.second);
+        }
+    }
+
+    return v;
 }
 
 } // mjolnir
