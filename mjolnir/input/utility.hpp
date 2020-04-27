@@ -179,7 +179,7 @@ T find_parameter_or(const toml::value& params, const toml::value& env,
     return toml::get_or(p, opt);
 }
 
-void merge_toml_tables(toml::value& table, const toml::value& other)
+inline void merge_toml_tables(toml::value& table, const toml::value& other)
 {
     using ::mjolnir::literals::string_literals::operator"" _s;
     assert(table.is_table());
