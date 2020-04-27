@@ -8,5 +8,5 @@ namespace mjolnir
 {
 template toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
 read_table_from_file(const toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>& root,
-                     const std::string& name, const std::string& input_path);
+                     const std::string& name);
 } // mjolnir

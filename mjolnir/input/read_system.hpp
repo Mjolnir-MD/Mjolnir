@@ -91,8 +91,6 @@ read_system(const toml::value& root, const std::size_t N)
 
     MJOLNIR_LOG_NOTICE("reading ", format_nth(N), " system ...");
 
-    const auto input_path = read_input_path(root);
-
     // check [[systems]] has `file_name = "checkpoint.msg"`.
     // If `file_name` has `.msg` file, load system status from the file.
     if(systems.at(N).contains("file_name"))
@@ -107,13 +105,16 @@ read_system(const toml::value& root, const std::size_t N)
         const auto& fname = toml::find<std::string>(systems, N, "file_name");
         if(file_extension_is(fname, ".msg"))
         {
-            MJOLNIR_LOG_NOTICE("msgpack file specified. "
-                               "load system status from .msg file.");
+            const auto& input_path = get_input_path();
+
+            MJOLNIR_LOG_NOTICE("msgpack file specified. load system status from ",
+                               input_path, fname);
+
             return load_system_from_msgpack<traitsT>(input_path + fname);
         }
     }
 
-    const auto system = read_table_from_file(systems.at(N), "systems", input_path);
+    const auto system = read_table_from_file(systems.at(N), "systems");
 
     check_keys_available(system, {"boundary_shape"_s, "attributes"_s, "particles"_s});
 

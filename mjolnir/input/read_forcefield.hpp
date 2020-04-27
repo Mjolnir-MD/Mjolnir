@@ -21,9 +21,8 @@ read_forcefield(const toml::value& root, const std::size_t N)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
-    const auto input_path = read_input_path(root);
     const auto ff = read_table_from_file(toml::find(root, "forcefields").at(N),
-                                         "forcefields", input_path);
+                                         "forcefields");
     check_keys_available(ff, {"local"_s, "global"_s, "external"_s, "name"_s});
 
     if(ff.as_table().count("name") == 1)
@@ -45,7 +44,7 @@ read_forcefield(const toml::value& root, const std::size_t N)
         {
             MJOLNIR_LOG_NOTICE("reading ", format_nth(i), " [[forcefields.local]]");
             loc.emplace(read_local_interaction<traitsT>(
-                read_table_from_file(locals.at(i), "local", input_path)));
+                read_table_from_file(locals.at(i), "local")));
         }
     }
     if(ff.as_table().count("global") != 0)
@@ -56,7 +55,7 @@ read_forcefield(const toml::value& root, const std::size_t N)
         {
             MJOLNIR_LOG_NOTICE("reading ", format_nth(i), " [[forcefields.global]]");
             glo.emplace(read_global_interaction<traitsT>(
-                read_table_from_file(globals.at(i), "global", input_path)));
+                read_table_from_file(globals.at(i), "global")));
         }
     }
     if(ff.as_table().count("external") != 0)
@@ -67,7 +66,7 @@ read_forcefield(const toml::value& root, const std::size_t N)
         {
             MJOLNIR_LOG_NOTICE("reading ", format_nth(i), " [[forcefields.external]]");
             ext.emplace(read_external_interaction<traitsT>(
-                read_table_from_file(externals.at(i), "external", input_path)));
+                read_table_from_file(externals.at(i), "external")));
         }
     }
     return ForceField<traitsT>(std::move(loc), std::move(glo), std::move(ext));
