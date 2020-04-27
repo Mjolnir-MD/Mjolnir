@@ -132,7 +132,7 @@ read_input_file(const std::string& filename)
 {
     // here, logger name is not given yet. output status directory on console.
     std::cerr << "-- reading and parsing toml file `" << filename << "` ... ";
-    const auto root = toml::parse(filename);
+    auto root = toml::parse(filename);
     std::cerr << " successfully parsed." << std::endl;
 
     // initializing logger by using output_path and output_prefix ...
@@ -158,6 +158,10 @@ read_input_file(const std::string& filename)
 
     // load the input path in the [files] table and set it globally
     read_input_path(root);
+
+    MJOLNIR_LOG_NOTICE("expanding include files ...");
+    root = expand_include(root);
+    MJOLNIR_LOG_NOTICE("done.");
 
     // the most of important flags are defined in [simulator], like
     // `precision = "float"`, `boundary_type = "Unlimited"`.
