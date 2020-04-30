@@ -1,5 +1,21 @@
 # Change Log
 
+## 1.13.0
+
+### Added
+
+- enable to use offset and env in `[simulator]` table (@yutakasi634)
+- check parameter duplication in `[simulator]` table (@yutakasi634)
+- enable to include toml files in a input file
+
+The included files will be expanded only once. Recursive inclusion does not work.
+
+```toml
+include = "some_table.toml"
+[another_table]
+include = ["parameter1.toml", "parameter2.toml"]
+```
+
 ## 1.12.0
 
 ### Added
