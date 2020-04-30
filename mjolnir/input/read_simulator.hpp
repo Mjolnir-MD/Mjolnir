@@ -29,7 +29,7 @@ read_molecular_dynamics_simulator(
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
         "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s, "delta_t"_s,
-        "integrator"_s});
+        "integrator"_s, "env"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
@@ -86,8 +86,8 @@ read_simulated_annealing_simulator(
     using real_type   = typename traitsT::real_type;
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
-            "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s,
-            "delta_t"_s, "integrator"_s, "schedule"_s, "each_step"_s});
+            "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s, "delta_t"_s,
+            "integrator"_s, "schedule"_s, "each_step"_s, "env"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
@@ -163,7 +163,7 @@ read_switching_forcefield_simulator(
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
             "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s,
-            "delta_t"_s, "integrator"_s, "schedule"_s});
+            "delta_t"_s, "integrator"_s, "schedule"_s, "env"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
@@ -234,7 +234,7 @@ read_energy_calculation_simulator(
     using coordinate_type = typename traitsT::coordinate_type;
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
-            "file"_s, "parallelism"_s});
+            "file"_s, "parallelism"_s, "env"_s});
 
     // ------------------------------------------------------------------------
     // construct observers manually ...

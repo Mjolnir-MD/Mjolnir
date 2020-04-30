@@ -182,64 +182,6 @@ read_ignore_particles_within(const toml::value& global)
     return ignore_particle_within;
 }
 
-//
-// checks index overlap in the `parameters` array. If any, show the warning.
-// After reading the parameters, call this.
-// ```toml
-// parameters = [
-//     {index = 10, radius = 2.0},
-//     {index = 10, radius = 2.0}, # <- overlap! parameter value is ambiguous.
-// ]
-// ```
-template<typename parameterT>
-void check_parameter_overlap(const toml::value& env, const toml::array& setting,
-        std::vector<std::pair<std::size_t, parameterT>>& parameters)
-{
-    if(parameters.empty()) {return ;}
-
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    using value_type = std::pair<std::size_t, parameterT>;
-
-    std::sort(parameters.begin(), parameters.end(),
-            [](const value_type& lhs, const value_type& rhs) noexcept -> bool {
-                return lhs.first < rhs.first; // check only its index.
-            });
-
-    const auto overlap = std::adjacent_find(parameters.begin(), parameters.end(),
-            [](const value_type& lhs, const value_type& rhs) noexcept -> bool {
-                return lhs.first == rhs.first;
-            });
-
-    if(overlap != parameters.end())
-    {
-        const std::size_t overlapped_idx = overlap->first;
-        MJOLNIR_LOG_ERROR("parameter for ", overlapped_idx, " defined twice");
-
-        // define a functor to find the toml::value by its index.
-        // read the index in parameter and compare it with the `overlapped_idx`.
-        const auto find_by_index =
-            [overlapped_idx, &env](const toml::value& v) -> bool {
-                return find_parameter<std::size_t>(v, env, "index") +
-                    find_parameter_or<std::size_t>(v, env, "offset", 0) ==
-                    overlapped_idx;
-            };
-
-        const auto overlapped1 = std::find_if(
-                setting.begin(), setting.end(), find_by_index);
-        assert(overlapped1 != setting.end());
-
-        const auto overlapped2 = std::find_if(
-                std::next(overlapped1), setting.end(), find_by_index);
-        assert(overlapped2 != setting.end());
-
-        throw_exception<std::runtime_error>(toml::format_error(
-            "check_parameter_overlap: duplicate parameter definitions",
-            *overlapped1, "this defined twice", *overlapped2, "here"));
-    }
-    return ;
-}
-
 template<typename traitsT>
 ExcludedVolumePotential<traitsT>
 read_excluded_volume_potential(const toml::value& global)

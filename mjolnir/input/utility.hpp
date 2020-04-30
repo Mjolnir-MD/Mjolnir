@@ -10,62 +10,6 @@
 namespace mjolnir
 {
 
-// This check all the keys in a table are found in a list.
-//     If there is a key that is not found in the range, it warns about the
-// corresponding value will be ignored.
-//     In order to allow optional keys, it only checks all the keys are found
-// in the specified container.
-//
-// Use it as the following.
-// ```cpp
-// check_keys_available(table, {"foo"_s, "bar"_s, "baz"_s});
-// ```
-inline bool check_keys_available(const toml::value& table,
-                                 std::initializer_list<std::string> list)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    // no logger scope here. use the parent scope.
-
-    bool all_available = true;
-    for(const auto& kv : table.as_table())
-    {
-        if(kv.first == "include") {continue;}
-        if(list.end() == std::find(list.begin(), list.end(), kv.first))
-        {
-            std::ostringstream oss;
-            oss << "unknown value \"" << kv.first << "\" found. this "
-                << kv.second.type() << " will never be used.";
-            const auto err_msg = toml::format_error(
-                    oss.str(), kv.second, "this will be ignored");
-            // workaround to skip auto-added [error].
-            // Normally this function is called only when the input file
-            // contains an invalid key. So it should not be a hotspot.
-            MJOLNIR_LOG_WARN(err_msg.substr(err_msg.find(oss.str())));
-            all_available = false;
-        }
-    }
-    return all_available;
-}
-
-//
-// if the file extension is the same as expected, return true.
-// `expected` should contain the dot. e.g. expected = ".xyz"
-//
-inline bool file_extension_is(const std::string& filename,
-                              const std::string& expected)
-{
-    if(filename.size() < expected.size())
-    {
-        return false;
-    }
-    const auto last_dot = filename.find_last_of('.');
-    if(last_dot == std::string::npos)
-    {
-        return false;
-    }
-    return filename.substr(last_dot) == expected;
-}
-
 // find_parameter is a utility function to support the following functionality.
 //
 // ```toml
@@ -177,6 +121,123 @@ T find_parameter_or(const toml::value& params, const toml::value& env,
         return toml::find_or(env, p.as_string(), opt);
     }
     return toml::get_or(p, opt);
+}
+
+// This check all the keys in a table are found in a list.
+//     If there is a key that is not found in the range, it warns about the
+// corresponding value will be ignored.
+//     In order to allow optional keys, it only checks all the keys are found
+// in the specified container.
+//
+// Use it as the following.
+// ```cpp
+// check_keys_available(table, {"foo"_s, "bar"_s, "baz"_s});
+// ```
+inline bool check_keys_available(const toml::value& table,
+                                 std::initializer_list<std::string> list)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    // no logger scope here. use the parent scope.
+
+    bool all_available = true;
+    for(const auto& kv : table.as_table())
+    {
+        if(kv.first == "include") {continue;}
+        if(list.end() == std::find(list.begin(), list.end(), kv.first))
+        {
+            std::ostringstream oss;
+            oss << "unknown value \"" << kv.first << "\" found. this "
+                << kv.second.type() << " will never be used.";
+            const auto err_msg = toml::format_error(
+                    oss.str(), kv.second, "this will be ignored");
+            // workaround to skip auto-added [error].
+            // Normally this function is called only when the input file
+            // contains an invalid key. So it should not be a hotspot.
+            MJOLNIR_LOG_WARN(err_msg.substr(err_msg.find(oss.str())));
+            all_available = false;
+        }
+    }
+    return all_available;
+}
+
+// It checks that the index in the parameters does not appear more than once.
+//     If the index appear twice, it raise the error represent the line of
+// input file define the index.
+// ```toml
+// parameters = [
+//     {index =  0, offset = 10, radius = 2.0},
+//     {index = 10, radius = 3.0}, # <- overlap! parameter value is ambiguous.
+// ]
+// ```
+template<typename parameterT>
+void check_parameter_overlap(const toml::value& env, const toml::array& setting,
+        std::vector<std::pair<std::size_t, parameterT>>& parameters)
+{
+    if(parameters.empty()) {return ;}
+
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using value_type = std::pair<std::size_t, parameterT>;
+
+    // sort the parameters by its index.
+    std::sort(parameters.begin(), parameters.end(),
+            [](const value_type& lhs, const value_type& rhs) noexcept -> bool {
+                return lhs.first < rhs.first;
+            });
+    // Since the parameters are already sorted, all the overlapping parameters
+    // should be next to each other. We can find it by adjacent_find.
+    const auto overlap = std::adjacent_find(parameters.begin(), parameters.end(),
+            [](const value_type& lhs, const value_type& rhs) noexcept -> bool {
+                return lhs.first == rhs.first;
+            });
+
+    // If overlap is found, generate the error message and throw an error.
+    if(overlap != parameters.end())
+    {
+        const std::size_t overlapped_idx = overlap->first;
+        MJOLNIR_LOG_ERROR("parameter for ", overlapped_idx, " defined twice");
+
+        // define a comparator to find the overlapping two parameters from
+        // the toml array.
+        const auto overlap_finder =
+            [overlapped_idx, &env](const toml::value& v) -> bool {
+                const auto ofs = find_parameter_or<std::int64_t>(v, env, "offset", 0);
+                const auto idx = find_parameter   <std::size_t >(v, env, "index") + ofs;
+                return idx == overlapped_idx;
+            };
+
+        const auto overlapped1 =
+            std::find_if(setting.begin(), setting.end(), overlap_finder);
+        assert(overlapped1 != setting.end());
+
+        const auto overlapped2 =
+            std::find_if(std::next(overlapped1), setting.end(), overlap_finder);
+        assert(overlapped2 != setting.end());
+
+        throw_exception<std::runtime_error>(toml::format_error(
+            "duplicate parameter definitions",
+            *overlapped1, "this defined twice", *overlapped2, "here"));
+    }
+    return ;
+}
+
+//
+// if the file extension is the same as expected, return true.
+// `expected` should contain the dot. e.g. expected = ".xyz"
+//
+inline bool file_extension_is(const std::string& filename,
+                              const std::string& expected)
+{
+    if(filename.size() < expected.size())
+    {
+        return false;
+    }
+    const auto last_dot = filename.find_last_of('.');
+    if(last_dot == std::string::npos)
+    {
+        return false;
+    }
+    return filename.substr(last_dot) == expected;
 }
 
 inline void merge_toml_tables(toml::value& table, const toml::value& other)
