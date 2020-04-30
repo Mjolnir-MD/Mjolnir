@@ -61,7 +61,10 @@ class DebyeHuckelPotential
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-    : cutoff_ratio_(cutoff_ratio), temperature_(300.0), ion_strength_(0.1),
+    : cutoff_ratio_(cutoff_ratio),
+        // XXX should be updated in the `initialize(sys)` method
+      temperature_ (std::numeric_limits<real_type>::quiet_NaN()),
+      ion_strength_(std::numeric_limits<real_type>::quiet_NaN()),
       exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
@@ -76,8 +79,6 @@ class DebyeHuckelPotential
             }
             this->parameters_.at(idx) = idxp.second;
         }
-        // XXX should be updated before use because T and ion conc are default!
-        this->calc_parameters();
     }
     ~DebyeHuckelPotential() = default;
 

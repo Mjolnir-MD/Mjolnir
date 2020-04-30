@@ -132,7 +132,7 @@ read_input_file(const std::string& filename)
 {
     // here, logger name is not given yet. output status directory on console.
     std::cerr << "-- reading and parsing toml file `" << filename << "` ... ";
-    const auto root = toml::parse(filename);
+    auto root = toml::parse(filename);
     std::cerr << " successfully parsed." << std::endl;
 
     // initializing logger by using output_path and output_prefix ...
@@ -156,14 +156,20 @@ read_input_file(const std::string& filename)
     check_keys_available(root, {"files"_s, "units"_s, "simulator"_s,
                                 "systems"_s, "forcefields"_s});
 
+    // load the input path in the [files] table and set it globally
+    read_input_path(root);
+
+    MJOLNIR_LOG_NOTICE("expanding include files ...");
+    root = expand_include(root);
+    MJOLNIR_LOG_NOTICE("done.");
+
     // the most of important flags are defined in [simulator], like
     // `precision = "float"`, `boundary_type = "Unlimited"`.
     // Those values should be read before others.
-    // Thus first read [simulator] here and pass it to the latter functions.
+    const auto simulator = read_table_from_file(
+            toml::find(root, "simulator"), "simulator");
 
-    const auto& simulator = toml::find(root, "simulator");
-    return read_precision(root, read_table_from_file(
-                simulator, "simulator", read_input_path(root)));
+    return read_precision(root, simulator);
 }
 
 #ifdef MJOLNIR_SEPARATE_BUILD

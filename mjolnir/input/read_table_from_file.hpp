@@ -34,7 +34,7 @@ namespace mjolnir
 template<typename C, template<typename...> class T, template<typename...> class A>
 toml::basic_value<C, T, A>
 read_table_from_file(const toml::basic_value<C, T, A>& target,
-                     const std::string& table_name, const std::string& input_path)
+                     const std::string& table_name)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -50,6 +50,8 @@ read_table_from_file(const toml::basic_value<C, T, A>& target,
                          "ignored.");
         check_keys_available(target, {"file_name"_s});
     }
+
+    const std::string& input_path = get_input_path();
 
     // file_name is provided. we need to read it.
     const auto file_name = input_path + toml::find<std::string>(target, "file_name");
@@ -91,7 +93,7 @@ read_table_from_file(const toml::basic_value<C, T, A>& target,
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>
 read_table_from_file(const toml::basic_value<toml::discard_comments, std::unordered_map, std::vector>& root,
-                     const std::string& table_name, const std::string& input_path);
+                     const std::string& table_name);
 #endif
 
 } // mjolnir

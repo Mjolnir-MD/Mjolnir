@@ -163,8 +163,7 @@ read_external_position_restraint_interaction(const toml::value& external)
     using real_type       = typename traitsT::real_type;
     using coordinate_type = typename traitsT::coordinate_type;
 
-    const auto& env = external.as_table().count("env") == 1 ?
-                      external.as_table().at("env") : toml::value{};
+    const auto& env = external.contains("env") ? external.at("env") : toml::value{};
 
     const auto potential = toml::find<std::string>(external, "potential");
     if(potential == "Harmonic")
@@ -227,8 +226,7 @@ read_afm_flexible_fitting_interaction(const toml::value& external)
     const auto length_x = toml::find<std::size_t>(external, "length_x");
     const auto length_y = toml::find<std::size_t>(external, "length_y");
 
-    const auto& env = external.as_table().count("env") != 0 ?
-                      external.at("env") : toml::value{};
+    const auto& env = external.contains("env") ? external.at("env") : toml::value{};
 
     // read radius and participants
 

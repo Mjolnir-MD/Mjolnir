@@ -6,7 +6,21 @@
 namespace mjolnir
 {
 
-// this function may be callen from other read_* functions.
+// input path is used everywhere.
+// It would be useful to be able to retrieve the input path at anytime, anywhere.
+//
+// Using global variable is generally not a good idea, but passing input_path to
+// all the functions is also complicated. Passing the root object of the file
+// can be another option, but it makes reader functions longer.
+//
+// So, here, we make only input_path global.
+inline std::string& get_input_path()
+{
+    static std::string input = "";
+    return input;
+}
+
+// this function may be called from other read_* functions.
 template<typename C, template<typename...> class T, template<typename...> class A>
 std::string read_input_path(const toml::basic_value<C, T, A>& root)
 {
@@ -15,16 +29,26 @@ std::string read_input_path(const toml::basic_value<C, T, A>& root)
 
     const auto& files = toml::find(root, "files");
 
-    std::string input_path("./");
-    if(files.as_table().count("input") == 1)
+    auto& input_path = get_input_path();
+    if(!input_path.empty())
+    {
+        MJOLNIR_LOG_WARN("input_path (", input_path, ") is overwritten!");
+    }
+
+    input_path = "./";
+    if(files.contains("input"))
     {
         const auto& input = toml::find(files, "input");
-        if(input.as_table().count("path") == 1)
+        if(input.contains("path"))
         {
             input_path = toml::find<std::string>(input, "path");
-            if(input_path.back() != '/') {input_path += '/';}
+            if(input_path.back() != '/')
+            {
+                input_path += '/';
+            }
         }
     }
+    MJOLNIR_LOG_NOTICE("input_path is ", input_path);
     return input_path;
 }
 
@@ -38,10 +62,10 @@ std::string read_output_path(const toml::basic_value<C, T, A>& root)
     const auto& files = toml::find(root, "files");
 
     std::string output_path("./");
-    if(files.as_table().count("output") == 1)
+    if(files.contains("output"))
     {
         const auto& output = toml::find(files, "output");
-        if(output.as_table().count("path") == 1)
+        if(output.contains("path"))
         {
             output_path = toml::find<std::string>(output, "path");
             if(output_path.back() != '/') {output_path += '/';}
