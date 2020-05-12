@@ -4,7 +4,7 @@
 #include <mjolnir/core/VelocityVerletIntegrator.hpp>
 #include <mjolnir/core/UnderdampedLangevinIntegrator.hpp>
 #include <mjolnir/core/BAOABLangevinIntegrator.hpp>
-#include <mjolnir/core/gBAOABLangevinIntegrator.hpp>
+#include <mjolnir/core/GBAOABLangevinIntegrator.hpp>
 #include <mjolnir/core/SystemMotionRemover.hpp>
 #include <mjolnir/input/utility.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -178,7 +178,7 @@ read_gBAOAB_langevin_integrator(const toml::value& simulator)
     // Read idx gamma pair part in parameters
     // Temporarily make a vector of idx gamma pair to check index duplication.
     std::vector<std::pair<std::size_t, real_type>> idx_gammas;
-    idx_gammas.reserve(parameters.size());
+    idx_gammas.reserve(gammas.size());
     for(const auto& params : gammas)
     {
         const auto offset = find_parameter_or<std::int64_t>(params, env, "offset", 0);
@@ -187,7 +187,7 @@ read_gBAOAB_langevin_integrator(const toml::value& simulator)
 
         idx_gammas.emplace_back(idx, gm);
     }
-    check_parameter_overlap(env, parameters, idx_gammas);
+    check_parameter_overlap(env, gammas, idx_gammas);
 
     std::vector<real_type> gamma(gammas.size());
     for(const auto& idx_gamma : idx_gammas)
@@ -254,6 +254,15 @@ struct read_integrator_impl<BAOABLangevinIntegrator<traitsT>>
     }
 };
 
+template<typename traitsT>
+struct read_integrator_impl<GBAOABLangevinIntegrator<traitsT>>
+{
+    static GBAOABLangevinIntegrator<traitsT> invoke(const toml::value& sim)
+    {
+        return read_gBAOAB_langevin_integrator<traitsT>(sim);
+    }
+};
+
 template<typename integratorT>
 integratorT read_integrator(const toml::value& sim)
 {
@@ -265,7 +274,8 @@ integratorT read_integrator(const toml::value& sim)
             "- \"VelocityVerlet\"     : simple and standard Velocity Verlet integrator.",
             "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
                                       " based on the Velocity Verlet",
-            "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator"
+            "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator",
+            "- \"g-BAOABLangevin\"     : geodesic BAOAB Langevin Integrator"
             }));
     }
     return read_integrator_impl<integratorT>::invoke(sim);
