@@ -117,7 +117,7 @@ read_BAOAB_langevin_integrator(const toml::value& simulator)
     const auto parameters = toml::find<toml::array>(integrator, "parameters");
 
     const auto& env = integrator.contains("env") ?
-                      integrator.count("env") : toml::value{};
+                      integrator.at("env") : toml::value{};
 
     // Temporarily make a vector of idx gamma pair to check index duplication.
     std::vector<std::pair<std::size_t, real_type>> idx_gammas;
