@@ -117,3 +117,14 @@ file_name = "system.toml"
 [[systems]]
 # ...
 ```
+
+## 他のシミュレーションの最終構造をインポートする
+
+Mjolnirは、ファイル出力時に[MsgPack](https://msgpack.org/)で`System`の全状態をエンコードして出力します。
+このファイルを指定することで、前回のシミュレーションの続きからの再開や、途中で計算が止まってしまった時にすぐにやり直すことができます。
+
+```toml
+[[systems]]
+file_name = "restart.msg"
+```
+
