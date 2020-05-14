@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.13.1
+
+### Fixed
+
+- read `env` correctly while reading `BAOABLangevin` (@yutakasi634).
+- add document about restarting via msgpack
+
 ## 1.13.0
 
 ### Added
