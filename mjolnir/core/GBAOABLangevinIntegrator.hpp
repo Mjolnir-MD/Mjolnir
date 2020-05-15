@@ -27,7 +27,8 @@ class GBAOABLangevinIntegrator
       GBAOABLangevinIntegrator(const real_type dt, std::vector<real_type>&& gamma,
                                constraints_type&& constraint, remover_type&& remover)
           : dt_(dt), halfdt_(dt / 2), gammas_(std::move(gamma)),
-            noise_coeff_ (gammas_.size()), remover_(std::move(remover))
+            exp_gamma_dt_(gammas_.size()), noise_coeff_ (gammas_.size()), 
+            remover_(std::move(remover))
       {}
       ~GBAOABLangevinIntegrator() = default;
 
@@ -106,11 +107,11 @@ void GBAOABLangevinIntegrator<traitsT>::initialize(
     }
     ff.calc_force(system);
 
-    // buffering old posiiton
-    old_position_.resize(system.size());
+    // buffering old position
+    old_position_.reserve(system.size());
     for(std::size_t i=0; i<system.size(); ++i)
     {
-        old_position_[i] = system.position(i);
+        old_position_.push_back(system.position(i));
     }
 
     return;
@@ -121,23 +122,21 @@ typename GBAOABLangevinIntegrator<traitsT>::real_type
 GBAOABLangevinIntegrator<traitsT>::step(
         const real_type time, system_type& sys, forcefield_type& ff, rng_type& rng)
 {
-    coordinate_type dp = math::make_coordinate<coordinate_type>(0, 0, 0);
     // B step
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        auto& rm = sys.rmass(i); // reciprocal mass
         sys.velocity(i)  += this->halfdt_ * sys.rmass(i) * sys.force(i);
     }
-    // velocity collection step
+    // velocity correction step
     // TODO
     // A step
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         sys.position(i) += this->halfdt_ * sys.velocity(i);
     }
-    // coordinate collection step
+    // coordinate correction step
     // TODO
-    // velocity collection step
+    // velocity correction step
     // TODO
     // O step
     for(std::size_t i=0; i<sys.size(); ++i)
@@ -145,23 +144,27 @@ GBAOABLangevinIntegrator<traitsT>::step(
         sys.velocity(i) *= this->exp_gamma_dt_[i]; // *= exp(- gamma dt)
         sys.velocity(i) += this->noise_coeff_[i] * this->gen_R(rng);
     }
-    // velocity collection step
+    // velocity correction step
     // TODO
     // A step
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         sys.position(i) += this->halfdt_ * sys.velocity(i);
     }
-    // coordinate collection step
+    // coordinate correction step
     // TODO
-    // velocity collection step
+    // velocity correction step
     // TODO
     // update neighbor list; reduce margin, reconstruct the list if needed;
     real_type largest_disp2(0.0);
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        coordinate_type displacement = this->old_position_[i] - sys.position(i);
+        coordinate_type displacement = sys.position(i) - this->old_position_[i];
         largest_disp2 = std::max(largest_disp2, math::length_sq(displacement));
+        sys.position(i) = sys.adjust_position(sys.position(i));
+
+        // reset force
+        sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
     }
 
     ff.reduce_margin(2 * std::sqrt(largest_disp2), sys);
@@ -172,10 +175,15 @@ GBAOABLangevinIntegrator<traitsT>::step(
     {
         sys.velocity(i) += this->halfdt_ * sys.rmass(i) * sys.force(i);
     }
-    // velocity collection step
+    // velocity correction step
     // TODO
 
     remover_.remove(sys);
+
+    for(std::size_t i=0; i<sys.size(); ++i)
+    {
+        this->old_position_[i] = sys.position(i);
+    }
 
     return time + dt_;
 }
