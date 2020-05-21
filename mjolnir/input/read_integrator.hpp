@@ -61,7 +61,7 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
     const auto& integrator = toml::find(simulator, "integrator");
 
     check_keys_available(integrator,
-            {"type"_s, "seed"_s, "parameters"_s, "remove"_s, "env"_s});
+            {"type"_s, "seed"_s, "parameters"_s, "remove"_s, "env"_s,});
 
     const auto parameters = toml::find<toml::array>(integrator, "parameters");
 
@@ -164,16 +164,21 @@ read_gBAOAB_langevin_integrator(const toml::value& simulator)
 
     const auto& integrator = toml::find(simulator, "integrator");
     check_keys_available(integrator,
-            {"type"_s, "seed"_s, "parameters"_s, "remove"_s, "env"_s});
+            {"type"_s, "seed"_s, "gammas"_s, "remove"_s,
+             "correction_iteration_num"_s, "max_iteration_in_correction"_s,
+             "correction_tolerance"_s, "constraints"_s,
+             "env"_s});
 
     const auto& env = integrator.contains("env") ?
                       integrator.at("env") : toml::value{};
 
-    const auto& parameters = toml::find(integrator, "parameters");
-    check_keys_available(parameters, {"gammas"_s, "constraints"_s});
-
-    const auto gammas      = toml::find<toml::array>(parameters, "gammas");
-    const auto constraints = toml::find<toml::array>(parameters, "constraints");
+    const auto gammas               = toml::find<toml::array>(integrator, "gammas");
+    const auto constraints          = toml::find<toml::array>(integrator, "constraints");
+    const auto correction_iter_num  =
+        toml::find<std::size_t>(integrator, "correction_iteration_num");
+    const auto max_iter_correction  =
+        toml::find<std::size_t>(integrator, "max_iteration_in_correction");
+    const auto correction_tolerance = toml::find<real_type>(integrator, "correction_tolerance");
 
     // Read idx gamma pair part in parameters
     // Temporarily make a vector of idx gamma pair to check index duplication.
@@ -219,7 +224,8 @@ read_gBAOAB_langevin_integrator(const toml::value& simulator)
     // TODO : check parameter overlap in indices_v0s.
 
     return GBAOABLangevinIntegrator<traitsT>(delta_t, std::move(gamma), std::move(indices_v0s),
-            read_system_motion_remover<traitsT>(simulator));
+            read_system_motion_remover<traitsT>(simulator), correction_iter_num,
+            max_iter_correction, correction_tolerance);
 }
 
 // A mapping object from type information (template parameter) to the actual
