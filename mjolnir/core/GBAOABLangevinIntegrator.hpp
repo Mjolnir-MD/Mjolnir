@@ -16,148 +16,209 @@ namespace mjolnir
 template<typename traitsT>
 class GBAOABLangevinIntegrator
 {
-    public:
-      using traits_type      = traitsT;
-      using real_type        = typename traits_type::real_type;
-      using coordinate_type  = typename traits_type::coordinate_type;
-      using indices_type     = std::array<std::size_t, 2>;
-      using constraints_type = std::vector<std::pair<indices_type, real_type>>;
-      using system_type      = System<traitsT>;
-      using forcefield_type  = ForceField<traitsT>;
-      using rng_type         = RandomNumberGenerator<traits_type>;
-      using remover_type     = SystemMotionRemover<traits_type>;
+  public:
+    using traits_type      = traitsT;
+    using real_type        = typename traits_type::real_type;
+    using coordinate_type  = typename traits_type::coordinate_type;
+    using indices_type     = std::array<std::size_t, 2>;
+    using constraints_type = std::vector<std::pair<indices_type, real_type>>;
+    using system_type      = System<traitsT>;
+    using forcefield_type  = ForceField<traitsT>;
+    using rng_type         = RandomNumberGenerator<traits_type>;
+    using remover_type     = SystemMotionRemover<traits_type>;
 
-    public:
+  public:
 
-      GBAOABLangevinIntegrator(const real_type dt, std::vector<real_type>&& gamma,
-                               constraints_type&& constraint, remover_type&& remover,
-                               std::size_t correction_iter_num, std::size_t max_iter_correction,
-                               real_type correction_tolerance)
-          : dt_(dt), halfdt_(dt / 2), gammas_(std::move(gamma)),
-            exp_gamma_dt_(gammas_.size()), noise_coeff_ (gammas_.size()),
-            constraints_(constraint), square_v0s_(constraint.size()),
-            r_reduced_mass_(constraint.size()), remover_(std::move(remover)),
-            correction_iter_num_(correction_iter_num), correction_max_iter_(max_iter_correction),
-            correction_tolerance_dt_(correction_tolerance/ dt),
-            correction_tolerance_dt_itr_(correction_tolerance/ dt * correction_iter_num),
-            old_position_(gammas_.size())
-      {}
-      ~GBAOABLangevinIntegrator() = default;
+    GBAOABLangevinIntegrator(const real_type dt, std::vector<real_type>&& gamma,
+                             constraints_type&& constraint, remover_type&& remover,
+                             std::size_t correction_iter_num, std::size_t max_iter_correction,
+                             real_type correction_tolerance)
+        : dt_(dt), halfdt_(dt / 2), gammas_(std::move(gamma)),
+          exp_gamma_dt_(gammas_.size()), noise_coeff_ (gammas_.size()),
+          constraints_(constraint),
+          square_v0s_(constraint.size()),
+          r_reduced_mass_(constraint.size()),
+          remover_(std::move(remover)),
+          correction_iter_num_(correction_iter_num),
+          correction_max_iter_(max_iter_correction),
+          correction_tolerance_dt_(correction_tolerance/ dt),
+          correction_tolerance_dt_itr_(correction_tolerance/ dt * correction_iter_num),
+          dt_in_correction_(dt * 0.5 / correction_iter_num_),
+          r_dt_in_correction_(1 / dt_in_correction_),
+          old_position_(gammas_.size()),
+          old_pos_rattle_(gammas_.size())
+    {}
+    ~GBAOABLangevinIntegrator() = default;
 
-      void initialize(system_type& sys, forcefield_type& ff, rng_type& rng);
+    void initialize(system_type& sys, forcefield_type& ff, rng_type& rng);
 
-      real_type step(const real_type time, system_type& sys, forcefield_type& ff,
-                     rng_type& rng);
+    real_type step(const real_type time, system_type& sys, forcefield_type& ff,
+                   rng_type& rng);
 
-      void update(const system_type& sys)
-      {
-          if(!sys.has_attribute("temperature"))
-          {
-              throw std::out_of_range("mjolnir::g-BAOABLangevinIntegrator: "
-                  "Langevin Integrator requires reference temperature, but "
-                  "`temperature` is not found in `system.attribute`.");
-          }
-          this->temperature_ = sys.attribute("temperature");
-          this->reset_parameter(sys);
-          return;
-      }
+    void update(const system_type& sys)
+    {
+        if(!sys.has_attribute("temperature"))
+        {
+            throw std::out_of_range("mjolnir::g-BAOABLangevinIntegrator: "
+                "Langevin Integrator requires reference temperature, but "
+                "`temperature` is not found in `system.attribute`.");
+        }
+        this->temperature_ = sys.attribute("temperature");
+        this->reset_parameter(sys);
+        return;
+    }
 
-      real_type delta_t() const noexcept {return dt_;}
-      std::vector<real_type> const& parameters() const noexcept {return gammas_;}
+    real_type delta_t() const noexcept {return dt_;}
+    std::vector<real_type> const& parameters() const noexcept {return gammas_;}
 
-    private:
+  private:
 
-      void reset_parameter(const system_type& sys) noexcept
-      {
-          const auto kBT = physics::constants<real_type>::kB() * this->temperature_;
-          for(std::size_t i=0; i<sys.size(); ++i)
-          {
-              const auto gamma     = this->gammas_.at(i);
-              const auto gamma_dt  = -1 * gamma * this->dt_;
-              this->exp_gamma_dt_.at(i) = std::exp(gamma_dt);
-              this->noise_coeff_ .at(i) = std::sqrt(
-                      kBT * (1 - std::exp(2 * gamma_dt)) * sys.rmass(i));
-          }
-          return;
-      };
+    void reset_parameter(const system_type& sys) noexcept
+    {
+        const auto kBT = physics::constants<real_type>::kB() * this->temperature_;
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            const auto gamma     = this->gammas_.at(i);
+            const auto gamma_dt  = -1 * gamma * this->dt_;
+            this->exp_gamma_dt_.at(i) = std::exp(gamma_dt);
+            this->noise_coeff_ .at(i) = std::sqrt(
+                    kBT * (1 - std::exp(2 * gamma_dt)) * sys.rmass(i));
+        }
+        return;
+    };
 
-      coordinate_type gen_R(rng_type& rng) noexcept
-      {
-          const auto x = rng.gaussian();
-          const auto y = rng.gaussian();
-          const auto z = rng.gaussian();
-          return math::make_coordinate<coordinate_type>(x, y, z);
-      }
+    coordinate_type gen_R(rng_type& rng) noexcept
+    {
+        const auto x = rng.gaussian();
+        const auto y = rng.gaussian();
+        const auto z = rng.gaussian();
+        return math::make_coordinate<coordinate_type>(x, y, z);
+    }
 
-      void correct_coordinate(coordinate_type& positions, coordinate_type& velocities)
-      {
-          return;
-      }
+    void correct_coordinate(system_type& sys, const real_type tolerance)
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
 
-      void correct_velocity(system_type sys, const real_type tolerance)
-      {
-          MJOLNIR_GET_DEFAULT_LOGGER();
-          MJOLNIR_LOG_FUNCTION();
+        std::size_t rattle_step = 0;
+        while(rattle_step<correction_max_iter_)
+        {
+            bool corrected = false;
+            for(std::size_t i=0; i<this->constraints_.size(); ++i)
+            {
+                const auto& constraint = constraints_[i];
+                const auto& indices    = constraint.first;
+                auto& p1  = sys.position(indices[0]);
+                auto& p2  = sys.position(indices[1]);
+                auto& v1  = sys.velocity(indices[0]);
+                auto& v2  = sys.velocity(indices[1]);
+                auto& op1 = this->old_pos_rattle_[indices[0]];
+                auto& op2 = this->old_pos_rattle_[indices[1]];
+                auto& rm1 = sys.rmass(indices[0]);
+                auto& rm2 = sys.rmass(indices[1]);
 
-          std::size_t rattle_step = 0;
-          while(rattle_step<correction_max_iter_)
-          {
-              bool corrected = false;
-              for(std::size_t i=0; i<this->constraints_.size(); ++i)
-              {
-                  const auto& constraint       = constraints_[i];
-                  const auto& indices          = constraint.first;
-                  auto& p1  = sys.position(indices[0]);
-                  auto& p2  = sys.position(indices[1]);
-                  auto& v1  = sys.velocity(indices[0]);
-                  auto& v2  = sys.velocity(indices[1]);
-                  auto& rm1 = sys.rmass(indices[0]);
-                  auto& rm2 = sys.rmass(indices[1]);
+                const auto      dp = p2 - p1;
+                const real_type dp2 = math::length_sq(dp);
+                const real_type missmatch = square_v0s_[i] - dp2;
 
-                  const auto pos_diff      = p2 - p1;
-                  const auto vel_diff      = v2 - v1;
-                  const real_type dot_pdvd = math::dot_product(pos_diff, vel_diff);
-                  const real_type lambda   = dot_pdvd * r_reduced_mass_[i] * square_v0s_[i];
+                if(abs(missmatch) > tolerance)
+                {
+                    corrected = true;
+                    const auto old_dp = op2 - op1;
+                    const real_type dot_old_new_dp = math::dot_product(old_dp, dp);
+                    const real_type lambda =
+                        0.5 * missmatch * r_reduced_mass_[i] * dot_old_new_dp;
+                    const coordinate_type correction_force = lambda * old_dp;
+                    const coordinate_type correction_vec1  = correction_force * rm1;
+                    const coordinate_type correction_vec2  = correction_force * rm2;
+                    p1 -= correction_vec1;
+                    p2 += correction_vec2;
+                    v1 -= correction_vec1 * r_dt_in_correction_;
+                    v2 += correction_vec2 * r_dt_in_correction_;
+                    op1 = p1;
+                    op2 = p2;
+                }
+            }
 
-                  if(abs(lambda) > tolerance)
-                  {
-                      const auto correction_vec = lambda * pos_diff;
-                      v1 += correction_vec * rm1;
-                      v2 -= correction_vec * rm2;
-                      corrected = true;
-                  }
-              }
+            if(!corrected) break;
 
-              if(!corrected) break;
+            ++rattle_step;
+        }
 
-              ++rattle_step;
-          }
+        if(rattle_step >= correction_max_iter_)
+        {
+            MJOLNIR_LOG_WARN("rattle iteration number exceeds rattle max iteration");
+        }
 
-          if(rattle_step >= correction_max_iter_)
-          {
-              throw std::runtime_error("rattle iteration number exceeds rattle max iteration.");
-          }
-          return;
-     }
+        return;
+    }
 
-    private:
-      real_type   dt_;
-      real_type   halfdt_;
-      std::vector<real_type>       gammas_;
-      std::vector<real_type>       exp_gamma_dt_;
-      std::vector<real_type>       noise_coeff_;
-      constraints_type             constraints_; // pair of index pair and v0.
-      std::vector<real_type>       square_v0s_;
-      std::vector<real_type>       r_reduced_mass_;
-      remover_type remover_;
+    void correct_velocity(system_type& sys, const real_type tolerance)
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
 
-      real_type   temperature_;
-      std::size_t correction_iter_num_;
-      std::size_t correction_max_iter_;
-      real_type   correction_tolerance_dt_;
-      real_type   correction_tolerance_dt_itr_;
+        std::size_t rattle_step = 0;
+        while(rattle_step<correction_max_iter_)
+        {
+            bool corrected = false;
+            for(std::size_t i=0; i<this->constraints_.size(); ++i)
+            {
+                const auto& constraint       = constraints_[i];
+                const auto& indices          = constraint.first;
+                auto& p1  = sys.position(indices[0]);
+                auto& p2  = sys.position(indices[1]);
+                auto& v1  = sys.velocity(indices[0]);
+                auto& v2  = sys.velocity(indices[1]);
+                auto& rm1 = sys.rmass(indices[0]);
+                auto& rm2 = sys.rmass(indices[1]);
 
-      std::vector<coordinate_type> old_position_;
+                const auto pos_diff      = p2 - p1;
+                const auto vel_diff      = v2 - v1;
+                const real_type dot_pdvd = math::dot_product(pos_diff, vel_diff);
+                const real_type lambda   = dot_pdvd * r_reduced_mass_[i] * square_v0s_[i];
+
+                if(std::abs(lambda) > tolerance)
+                {
+                    const auto correction_vec = lambda * pos_diff;
+                    v1 += correction_vec * rm1;
+                    v2 -= correction_vec * rm2;
+                    corrected = true;
+                }
+            }
+
+            if(!corrected) break;
+
+            ++rattle_step;
+        }
+
+        if(rattle_step >= correction_max_iter_)
+        {
+            MJOLNIR_LOG_WARN("rattle iteration number exceeds rattle max iteration.");
+        }
+        return;
+   }
+
+  private:
+    real_type   dt_;
+    real_type   halfdt_;
+    std::vector<real_type>       gammas_;
+    std::vector<real_type>       exp_gamma_dt_;
+    std::vector<real_type>       noise_coeff_;
+    constraints_type             constraints_; // pair of index pair and v0.
+    std::vector<real_type>       square_v0s_;
+    std::vector<real_type>       r_reduced_mass_;
+    remover_type remover_;
+
+    real_type   temperature_;
+    std::size_t correction_iter_num_;
+    std::size_t correction_max_iter_;
+    real_type   correction_tolerance_dt_;
+    real_type   correction_tolerance_dt_itr_;
+    real_type   dt_in_correction_;
+    real_type   r_dt_in_correction_;
+
+    std::vector<coordinate_type> old_position_;
+    std::vector<coordinate_type> old_pos_rattle_;
+
 };
 
 template<typename traitsT>
@@ -192,7 +253,7 @@ void GBAOABLangevinIntegrator<traitsT>::initialize(
         const auto& constraint = constraints_[i];
         std::size_t first_idx  = constraint.first[0];
         std::size_t second_idx = constraint.first[1];
-        r_reduced_mass_[i] = 1.0 / (system.rmass(first_idx) + system.rmass(second_idx));
+        r_reduced_mass_[i] = system.rmass(first_idx) + system.rmass(second_idx);
     }
 
     return;
@@ -211,14 +272,18 @@ GBAOABLangevinIntegrator<traitsT>::step(
     // velocity correction step
     correct_velocity(sys, correction_tolerance_dt_);
     // A step
-    for(std::size_t i=0; i<sys.size(); ++i)
+    for(std::size_t correction_step=0; correction_step<correction_iter_num_; ++correction_step)
     {
-        sys.position(i) += this->halfdt_ * sys.velocity(i);
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            this->old_pos_rattle_[i] = sys.position(i);
+            sys.position(i) += this->dt_in_correction_ * sys.velocity(i);
+        }
+        // coordinate correction step
+        // TODO
+        // velocity correction step
+        correct_velocity(sys, correction_tolerance_dt_itr_);
     }
-    // coordinate correction step
-    // TODO
-    // velocity correction step
-    // TODO
     // O step
     for(std::size_t i=0; i<sys.size(); ++i)
     {
@@ -228,14 +293,18 @@ GBAOABLangevinIntegrator<traitsT>::step(
     // velocity correction step
     // TODO
     // A step
-    for(std::size_t i=0; i<sys.size(); ++i)
+    for(std::size_t correction_step=0; correction_step<correction_iter_num_; ++correction_step)
     {
-        sys.position(i) += this->halfdt_ * sys.velocity(i);
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            this->old_pos_rattle_[i] = sys.position(i);
+            sys.position(i) += this->dt_in_correction_ * sys.velocity(i);
+        }
+        // coordinate correction step
+        // TODO
+        // velocity correction step
+        correct_velocity(sys, correction_tolerance_dt_itr_);
     }
-    // coordinate correction step
-    // TODO
-    // velocity correction step
-    // TODO
     // update neighbor list; reduce margin, reconstruct the list if needed;
     real_type largest_disp2(0.0);
     for(std::size_t i=0; i<sys.size(); ++i)
@@ -257,7 +326,7 @@ GBAOABLangevinIntegrator<traitsT>::step(
         sys.velocity(i) += this->halfdt_ * sys.rmass(i) * sys.force(i);
     }
     // velocity correction step
-    // TODO
+    correct_velocity(sys, correction_tolerance_dt_);
 
     remover_.remove(sys);
 
