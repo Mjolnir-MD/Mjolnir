@@ -269,8 +269,8 @@ GBAOABLangevinIntegrator<traitsT>::step(
     {
         sys.velocity(i)  += this->halfdt_ * sys.rmass(i) * sys.force(i);
     }
-    // velocity correction step
     correct_velocity(sys, correction_tolerance_dt_);
+
     // A step
     for(std::size_t correction_step=0; correction_step<correction_iter_num_; ++correction_step)
     {
@@ -279,19 +279,18 @@ GBAOABLangevinIntegrator<traitsT>::step(
             this->old_pos_rattle_[i] = sys.position(i);
             sys.position(i) += this->dt_in_correction_ * sys.velocity(i);
         }
-        // coordinate correction step
-        // TODO
-        // velocity correction step
+        correct_coordinate(sys, correction_tolerance_dt_itr_);
         correct_velocity(sys, correction_tolerance_dt_itr_);
     }
+
     // O step
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         sys.velocity(i) *= this->exp_gamma_dt_[i]; // *= exp(- gamma dt)
         sys.velocity(i) += this->noise_coeff_[i] * this->gen_R(rng);
     }
-    // velocity correction step
-    // TODO
+    correct_velocity(sys, correction_tolerance_dt_);
+
     // A step
     for(std::size_t correction_step=0; correction_step<correction_iter_num_; ++correction_step)
     {
@@ -300,9 +299,7 @@ GBAOABLangevinIntegrator<traitsT>::step(
             this->old_pos_rattle_[i] = sys.position(i);
             sys.position(i) += this->dt_in_correction_ * sys.velocity(i);
         }
-        // coordinate correction step
-        // TODO
-        // velocity correction step
+        correct_coordinate(sys, correction_tolerance_dt_itr_);
         correct_velocity(sys, correction_tolerance_dt_itr_);
     }
     // update neighbor list; reduce margin, reconstruct the list if needed;
@@ -325,7 +322,6 @@ GBAOABLangevinIntegrator<traitsT>::step(
     {
         sys.velocity(i) += this->halfdt_ * sys.rmass(i) * sys.force(i);
     }
-    // velocity correction step
     correct_velocity(sys, correction_tolerance_dt_);
 
     remover_.remove(sys);
