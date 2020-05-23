@@ -16,8 +16,8 @@ delta_t       = 0.3
 seed          = 12345
 total_step    = 50000
 save_step     =   100
-integrator.type = "BAOABLangevin"
-integrator.parameters = [ # {{{
+integrator.type   = "BAOABLangevin"
+integrator.gammas = [ # {{{
 {index =   0, gamma = 0.0101492 },# "S"
 {index =   1, gamma = 0.00629008},# "A"
 {index =   2, gamma = 0.00888175},# "P"

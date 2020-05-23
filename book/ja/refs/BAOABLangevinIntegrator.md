@@ -19,7 +19,7 @@ integrator.type = "BAOABLangevin"
 integrator.remove.translation = true
 integrator.remove.rotation    = true
 integrator.remove.rescale     = true
-integrator.parameters = [
+integrator.gammas = [
     {index = 0, gamma = 1.0},
     {index = 1, gamma = 1.0},
     # ... 必要に応じて続きます
@@ -36,11 +36,10 @@ integrator.parameters = [
   - 系全体の並進・回転速度成分を取り除くことができます。`true`にすると取り除かれます。
   - `rescale`が`true`になっていた場合、全体の速度ベクトルをリスケールすることで速度を減算した分の運動エネルギーを補填します。
   - 省略した場合、全て`false`になります。
-- `parameters`: テーブルの配列型
+- `gammas`: テーブルの配列型
   - それぞれの粒子について、摩擦係数$$\gamma_i$$を指定します。
 
 {% hint style='danger' %}
-バージョン1.5.xまではここで乱数シードを設定していましたが、1.6.x以降から各
-`[simulator]`で設定するようになりました。`simulator.integrator.seed`は
-1.7.x以降削除予定です。
+バージョン1.13までは`parameters`という名称が使われていましたが、1.14で`gammas`に変更されました。
+1.14では`parameters`を使用すると警告が表示されます。1.15以降、`parameters`のサポートは終了します。
 {% endhint %}
