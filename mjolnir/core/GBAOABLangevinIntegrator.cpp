@@ -6,8 +6,8 @@
 
 namespace mjolnir
 {
-template class GBAOABLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>>;
-template class GBAOABLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>>;
-template class GBAOABLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-template class GBAOABLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+template class gBAOABLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>>;
+template class gBAOABLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>>;
+template class gBAOABLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+template class gBAOABLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir

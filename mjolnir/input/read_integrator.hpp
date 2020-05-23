@@ -61,7 +61,7 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
     const auto& integrator = toml::find(simulator, "integrator");
 
     check_keys_available(integrator,
-            {"type"_s, "seed"_s, "parameters"_s, "remove"_s, "env"_s,});
+            {"type"_s, "seed"_s, "parameters"_s, "remove"_s, "env"_s});
 
     const auto parameters = toml::find<toml::array>(integrator, "parameters");
 
@@ -151,7 +151,7 @@ read_BAOAB_langevin_integrator(const toml::value& simulator)
 }
 
 template<typename traitsT>
-GBAOABLangevinIntegrator<traitsT>
+gBAOABLangevinIntegrator<traitsT>
 read_gBAOAB_langevin_integrator(const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -223,7 +223,7 @@ read_gBAOAB_langevin_integrator(const toml::value& simulator)
     }
     // TODO : check parameter overlap in indices_v0s.
 
-    return GBAOABLangevinIntegrator<traitsT>(delta_t, std::move(gamma), std::move(indices_v0s),
+    return gBAOABLangevinIntegrator<traitsT>(delta_t, std::move(gamma), std::move(indices_v0s),
             read_system_motion_remover<traitsT>(simulator), correction_iter_num,
             max_iter_correction, correction_tolerance);
 }
@@ -261,9 +261,9 @@ struct read_integrator_impl<BAOABLangevinIntegrator<traitsT>>
 };
 
 template<typename traitsT>
-struct read_integrator_impl<GBAOABLangevinIntegrator<traitsT>>
+struct read_integrator_impl<gBAOABLangevinIntegrator<traitsT>>
 {
-    static GBAOABLangevinIntegrator<traitsT> invoke(const toml::value& sim)
+    static gBAOABLangevinIntegrator<traitsT> invoke(const toml::value& sim)
     {
         return read_gBAOAB_langevin_integrator<traitsT>(sim);
     }

@@ -14,7 +14,7 @@ namespace mjolnir
 // g-BAOAB Langevin integrator developed by the following papers
 // Leimkuhler B., Matthews C., Proc. R. Soc. A Math. Phys. Eng. Sci. (2016)
 template<typename traitsT>
-class GBAOABLangevinIntegrator
+class gBAOABLangevinIntegrator
 {
   public:
     using traits_type      = traitsT;
@@ -29,7 +29,7 @@ class GBAOABLangevinIntegrator
 
   public:
 
-    GBAOABLangevinIntegrator(const real_type dt, std::vector<real_type>&& gamma,
+    gBAOABLangevinIntegrator(const real_type dt, std::vector<real_type>&& gamma,
                              constraints_type&& constraint, remover_type&& remover,
                              std::size_t correction_iter_num, std::size_t max_iter_correction,
                              real_type correction_tolerance)
@@ -48,7 +48,7 @@ class GBAOABLangevinIntegrator
           old_position_(gammas_.size()),
           old_pos_rattle_(gammas_.size())
     {}
-    ~GBAOABLangevinIntegrator() = default;
+    ~gBAOABLangevinIntegrator() = default;
 
     void initialize(system_type& sys, forcefield_type& ff, rng_type& rng);
 
@@ -111,23 +111,23 @@ class GBAOABLangevinIntegrator
                 auto& p2  = sys.position(indices[1]);
                 auto& v1  = sys.velocity(indices[0]);
                 auto& v2  = sys.velocity(indices[1]);
-                auto& op1 = this->old_pos_rattle_[indices[0]];
-                auto& op2 = this->old_pos_rattle_[indices[1]];
-                auto& rm1 = sys.rmass(indices[0]);
-                auto& rm2 = sys.rmass(indices[1]);
 
                 const auto      dp = p2 - p1;
                 const real_type dp2 = math::length_sq(dp);
                 const real_type missmatch = square_v0s_[i] - dp2;
 
-                if(abs(missmatch) > tolerance)
+                if(tolerance < std::abs(missmatch))
                 {
-                    corrected = true;
+                    auto& op1 = this->old_pos_rattle_[indices[0]];
+                    auto& op2 = this->old_pos_rattle_[indices[1]];
+
                     const auto old_dp = op2 - op1;
                     const real_type dot_old_new_dp = math::dot_product(old_dp, dp);
                     const real_type lambda =
                         0.5 * missmatch * r_reduced_mass_[i] * dot_old_new_dp;
                     const coordinate_type correction_force = lambda * old_dp;
+                    const auto& rm1 = sys.rmass(indices[0]);
+                    const auto& rm2 = sys.rmass(indices[1]);
                     const coordinate_type correction_vec1  = correction_force * rm1;
                     const coordinate_type correction_vec2  = correction_force * rm2;
                     p1 -= correction_vec1;
@@ -136,10 +136,12 @@ class GBAOABLangevinIntegrator
                     v2 += correction_vec2 * r_dt_in_correction_;
                     op1 = p1;
                     op2 = p2;
+
+                    corrected = true;
                 }
             }
 
-            if(!corrected) break;
+            if(!corrected) {break;}
 
             ++rattle_step;
         }
@@ -168,16 +170,17 @@ class GBAOABLangevinIntegrator
                 auto& p2  = sys.position(indices[1]);
                 auto& v1  = sys.velocity(indices[0]);
                 auto& v2  = sys.velocity(indices[1]);
-                auto& rm1 = sys.rmass(indices[0]);
-                auto& rm2 = sys.rmass(indices[1]);
 
                 const auto pos_diff      = p2 - p1;
                 const auto vel_diff      = v2 - v1;
                 const real_type dot_pdvd = math::dot_product(pos_diff, vel_diff);
                 const real_type lambda   = dot_pdvd * r_reduced_mass_[i] * square_v0s_[i];
 
-                if(std::abs(lambda) > tolerance)
+                if(tolerance < std::abs(lambda))
                 {
+                    const auto& rm1 = sys.rmass(indices[0]);
+                    const auto& rm2 = sys.rmass(indices[1]);
+
                     const auto correction_vec = lambda * pos_diff;
                     v1 += correction_vec * rm1;
                     v2 -= correction_vec * rm2;
@@ -185,12 +188,12 @@ class GBAOABLangevinIntegrator
                 }
             }
 
-            if(!corrected) break;
+            if(!corrected) {break;}
 
             ++rattle_step;
         }
 
-        if(rattle_step >= correction_max_iter_)
+        if(correction_max_iter_ <= rattle_step)
         {
             MJOLNIR_LOG_WARN("rattle iteration number exceeds rattle max iteration.");
         }
@@ -222,7 +225,7 @@ class GBAOABLangevinIntegrator
 };
 
 template<typename traitsT>
-void GBAOABLangevinIntegrator<traitsT>::initialize(
+void gBAOABLangevinIntegrator<traitsT>::initialize(
         system_type& system, forcefield_type& ff, rng_type&)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -260,8 +263,8 @@ void GBAOABLangevinIntegrator<traitsT>::initialize(
 }
 
 template<typename traitsT>
-typename GBAOABLangevinIntegrator<traitsT>::real_type
-GBAOABLangevinIntegrator<traitsT>::step(
+typename gBAOABLangevinIntegrator<traitsT>::real_type
+gBAOABLangevinIntegrator<traitsT>::step(
         const real_type time, system_type& sys, forcefield_type& ff, rng_type& rng)
 {
     // B step

@@ -453,7 +453,7 @@ read_integrator_type(const toml::value& root, const toml::value& simulator)
     else if(integ == "g-BAOABLangevin")
     {
         MJOLNIR_LOG_NOTICE("Integrator is g-BAOABLangevin.");
-        using integratorT = GBAOABLangevinIntegrator<traitsT>;
+        using integratorT = gBAOABLangevinIntegrator<traitsT>;
         return read_simulator<traitsT, integratorT>(root, simulator);
     }
     else
