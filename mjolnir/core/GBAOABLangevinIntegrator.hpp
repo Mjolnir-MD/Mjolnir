@@ -41,6 +41,7 @@ class gBAOABLangevinIntegrator
           remover_(std::move(remover)),
           correction_iter_num_(correction_iter_num),
           correction_max_iter_(max_iter_correction),
+          correction_tolerance_(correction_tolerance),
           correction_tolerance_dt_(correction_tolerance/ dt),
           correction_tolerance_dt_itr_(correction_tolerance/ dt * correction_iter_num),
           dt_in_correction_(dt * 0.5 / correction_iter_num_),
@@ -95,7 +96,7 @@ class gBAOABLangevinIntegrator
         return math::make_coordinate<coordinate_type>(x, y, z);
     }
 
-    void correct_coordinate(system_type& sys, const real_type tolerance)
+    void correct_coordinate(system_type& sys)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
 
@@ -116,7 +117,7 @@ class gBAOABLangevinIntegrator
                 const real_type dp2 = math::length_sq(dp);
                 const real_type missmatch = square_v0s_[i] - dp2;
 
-                if(tolerance < std::abs(missmatch))
+                if(correction_tolerance_ < std::abs(missmatch))
                 {
                     auto& op1 = this->old_pos_rattle_[indices[0]];
                     auto& op2 = this->old_pos_rattle_[indices[1]];
@@ -134,8 +135,6 @@ class gBAOABLangevinIntegrator
                     p2 += correction_vec2;
                     v1 -= correction_vec1 * r_dt_in_correction_;
                     v2 += correction_vec2 * r_dt_in_correction_;
-                    op1 = p1;
-                    op2 = p2;
 
                     corrected = true;
                 }
@@ -214,6 +213,7 @@ class gBAOABLangevinIntegrator
     real_type   temperature_;
     std::size_t correction_iter_num_;
     std::size_t correction_max_iter_;
+    real_type   correction_tolerance_;
     real_type   correction_tolerance_dt_;
     real_type   correction_tolerance_dt_itr_;
     real_type   dt_in_correction_;
