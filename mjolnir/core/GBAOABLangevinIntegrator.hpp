@@ -37,13 +37,14 @@ class gBAOABLangevinIntegrator
           exp_gamma_dt_(gammas_.size()), noise_coeff_ (gammas_.size()),
           constraints_(constraint),
           square_v0s_(constraint.size()),
-          r_reduced_mass_(constraint.size()),
+          r_square_v0s_(constraint.size()),
+          reduced_mass_(constraint.size()),
           remover_(std::move(remover)),
           correction_iter_num_(correction_iter_num),
           correction_max_iter_(max_iter_correction),
           correction_tolerance_(correction_tolerance),
           correction_tolerance_dt_(correction_tolerance/ dt),
-          correction_tolerance_dt_itr_(correction_tolerance/ dt * correction_iter_num),
+          correction_tolerance_dt_itr_(correction_tolerance * 2.0 * correction_iter_num / dt),
           dt_in_correction_(dt * 0.5 / correction_iter_num_),
           r_dt_in_correction_(1 / dt_in_correction_),
           old_position_(gammas_.size()),
@@ -99,6 +100,7 @@ class gBAOABLangevinIntegrator
     void correct_coordinate(system_type& sys)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
 
         std::size_t rattle_step = 0;
         while(rattle_step<correction_max_iter_)
@@ -115,9 +117,9 @@ class gBAOABLangevinIntegrator
 
                 const auto      dp = p2 - p1;
                 const real_type dp2 = math::length_sq(dp);
-                const real_type missmatch = square_v0s_[i] - dp2;
+                const real_type missmatch2 = square_v0s_[i] - dp2;
 
-                if(correction_tolerance_ < std::abs(missmatch))
+                if(correction_tolerance_ < std::abs(missmatch2))
                 {
                     auto& op1 = this->old_pos_rattle_[indices[0]];
                     auto& op2 = this->old_pos_rattle_[indices[1]];
@@ -125,7 +127,7 @@ class gBAOABLangevinIntegrator
                     const auto old_dp = op2 - op1;
                     const real_type dot_old_new_dp = math::dot_product(old_dp, dp);
                     const real_type lambda =
-                        0.5 * missmatch * r_reduced_mass_[i] * dot_old_new_dp;
+                        0.5 * missmatch2 * reduced_mass_[i] / dot_old_new_dp;
                     const coordinate_type correction_force = lambda * old_dp;
                     const auto& rm1 = sys.rmass(indices[0]);
                     const auto& rm2 = sys.rmass(indices[1]);
@@ -156,6 +158,7 @@ class gBAOABLangevinIntegrator
     void correct_velocity(system_type& sys, const real_type tolerance)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
 
         std::size_t rattle_step = 0;
         while(rattle_step<correction_max_iter_)
@@ -173,7 +176,7 @@ class gBAOABLangevinIntegrator
                 const auto pos_diff      = p2 - p1;
                 const auto vel_diff      = v2 - v1;
                 const real_type dot_pdvd = math::dot_product(pos_diff, vel_diff);
-                const real_type lambda   = dot_pdvd * r_reduced_mass_[i] * square_v0s_[i];
+                const real_type lambda   = dot_pdvd * reduced_mass_[i] * r_square_v0s_[i];
 
                 if(tolerance < std::abs(lambda))
                 {
@@ -207,7 +210,8 @@ class gBAOABLangevinIntegrator
     std::vector<real_type>       noise_coeff_;
     constraints_type             constraints_; // pair of index pair and v0.
     std::vector<real_type>       square_v0s_;
-    std::vector<real_type>       r_reduced_mass_;
+    std::vector<real_type>       r_square_v0s_;
+    std::vector<real_type>       reduced_mass_;
     remover_type remover_;
 
     real_type   temperature_;
@@ -251,12 +255,13 @@ void gBAOABLangevinIntegrator<traitsT>::initialize(
     {
         // calculate square v0
         square_v0s_[i] = std::pow(constraints_[i].second, 2);
+        r_square_v0s_[i] = 1.0 / square_v0s_[i];
 
         // calculate inverse reduced mass
         const auto& constraint = constraints_[i];
         std::size_t first_idx  = constraint.first[0];
         std::size_t second_idx = constraint.first[1];
-        r_reduced_mass_[i] = system.rmass(first_idx) + system.rmass(second_idx);
+        reduced_mass_[i] = 1.0 / (system.rmass(first_idx) + system.rmass(second_idx));
     }
 
     return;
@@ -282,7 +287,7 @@ gBAOABLangevinIntegrator<traitsT>::step(
             this->old_pos_rattle_[i] = sys.position(i);
             sys.position(i) += this->dt_in_correction_ * sys.velocity(i);
         }
-        correct_coordinate(sys, correction_tolerance_dt_itr_);
+        correct_coordinate(sys);
         correct_velocity(sys, correction_tolerance_dt_itr_);
     }
 
@@ -302,7 +307,7 @@ gBAOABLangevinIntegrator<traitsT>::step(
             this->old_pos_rattle_[i] = sys.position(i);
             sys.position(i) += this->dt_in_correction_ * sys.velocity(i);
         }
-        correct_coordinate(sys, correction_tolerance_dt_itr_);
+        correct_coordinate(sys);
         correct_velocity(sys, correction_tolerance_dt_itr_);
     }
     // update neighbor list; reduce margin, reconstruct the list if needed;
