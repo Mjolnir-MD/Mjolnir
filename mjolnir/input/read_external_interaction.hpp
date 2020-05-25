@@ -265,15 +265,6 @@ read_external_recutangular_box_interaction(const toml::value& external)
         return make_unique<interaction_t>(lower, upper, margin,
              read_lennard_jones_wall_potential<real_type>(external));
     }
-    else if(potential == "ImplicitMembrane")
-    {
-        MJOLNIR_LOG_NOTICE("-- potential function is Implicit Membrane.");
-        using potential_t   = ImplicitMembranePotential<real_type>;
-        using interaction_t = RectangularBoxInteraction<traitsT, potential_t>;
-
-        return make_unique<interaction_t>(lower, upper, margin,
-             read_implicit_membrane_potential<real_type>(external));
-    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -282,7 +273,6 @@ read_external_recutangular_box_interaction(const toml::value& external)
             "expected value is one of the following.",
             "- \"ExcludedVolumeWall\": repulsive r^12 potential",
             "- \"LennardJonesWall\"  : famous r^12 - r^6 potential",
-            "- \"ImplicitMembrane\"  : single-well interaction that models a membrane"
             }));
     }
 
