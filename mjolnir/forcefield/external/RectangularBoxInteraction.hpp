@@ -97,6 +97,11 @@ class RectangularBoxInteraction final
                                              potential_type(potential_));
     }
 
+    // for tests
+    coordinate_type const& upper() const noexcept {return upper_;}
+    coordinate_type const& lower() const noexcept {return lower_;}
+    potential_type  const& potential() const noexcept {return potential_;}
+
   private:
 
     // construct a neighbor-list.
