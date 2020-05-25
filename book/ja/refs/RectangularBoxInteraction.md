@@ -32,7 +32,6 @@ parameters  = [
 - `potential`: 文字列型
   - [`"LennardJonesWall"`](LennardJonesWallPotential.md): L-J(6,12)型のポテンシャルを用います。
   - [`"ExcludedVolumeWall"`](ExcludedVolumeWallPotential.md): 逆12乗型の斥力ポテンシャルを用います。
-  - [`"ImplicitMembrane"`](ImplicitMembranePotential.md): 平面付近のエネルギーを下げるポテンシャルを用います。
 - `box`: テーブル型
   - `box.lower`: 浮動小数点数の配列型
     - 箱の下限の座標を決めます。

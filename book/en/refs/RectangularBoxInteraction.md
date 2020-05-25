@@ -36,7 +36,6 @@ parameters  = [
 - `potential`: String
   - [`"LennardJonesWall"`](LennardJonesWallPotential.md)
   - [`"ExcludedVolumeWall"`](ExcludedVolumeWallPotential.md)
-  - [`"ImplicitMembrane"`](ImplicitMembranePotential.md)
 - `box`: Table
   - `box.lower`: Array of Floats
     - lower boundary of the box.
