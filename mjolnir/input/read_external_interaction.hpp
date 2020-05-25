@@ -4,6 +4,7 @@
 #include <mjolnir/forcefield/AFMFit/AFMFitInteraction.hpp>
 #include <mjolnir/forcefield/external/ExternalDistanceInteraction.hpp>
 #include <mjolnir/forcefield/external/PositionRestraintInteraction.hpp>
+#include <mjolnir/forcefield/external/RectangularBoxInteraction.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
@@ -207,6 +208,78 @@ read_external_position_restraint_interaction(const toml::value& external)
 
 template<typename traitsT>
 std::unique_ptr<ExternalForceInteractionBase<traitsT>>
+read_external_recutangular_box_interaction(const toml::value& external)
+{
+    // [[forcefields.external]]
+    // interaction = "RectangularBox"
+    // potential   = "ExcludedVolumeWall"
+    //
+    // box.lower   = [  0.0,   0.0,   0.0]
+    // box.upper   = [100.0, 100.0, 100.0]
+    // box.margin  = 0.4
+    //
+    // # potential related
+    // epsilon     = 0.1
+    // parameters  = [
+    //     {index = 0, radius = 1.0},
+    // ]
+
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type       = typename traitsT::real_type;
+    using coordinate_type = typename traitsT::coordinate_type;
+
+    const auto& box   = external.at("box");
+    const auto lower  = toml::find<coordinate_type>(box, "lower");
+    const auto upper  = toml::find<coordinate_type>(box, "upper");
+    const auto margin = toml::find<real_type      >(box, "margin");
+
+    if(math::X(upper) <= math::X(lower) || math::Y(upper) <= math::Y(lower) ||
+       math::Z(upper) <= math::Z(lower))
+    {
+        const auto msg = toml::format_error(
+            "mjolnir::read_external_recutangular_box_interaction: "
+            "upper should be larger than lower",
+            toml::find(box, "upper"), "upper boundary here",
+            toml::find(box, "lower"), "lower boundary here");
+        MJOLNIR_LOG_ERROR(msg);
+        throw std::runtime_error(msg);
+    }
+
+    const auto potential = toml::find<std::string>(external, "potential");
+    if(potential == "ExcludedVolumeWall")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Excluded-Volume.");
+        using potential_t   = ExcludedVolumeWallPotential<real_type>;
+        using interaction_t = RectangularBoxInteraction<traitsT, potential_t>;
+
+        return make_unique<interaction_t>(lower, upper, margin,
+             read_excluded_volume_wall_potential<real_type>(external));
+    }
+    else if(potential == "LennardJonesWall")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Lennard-Jones.");
+        using potential_t   = LennardJonesWallPotential<real_type>;
+        using interaction_t = RectangularBoxInteraction<traitsT, potential_t>;
+
+        return make_unique<interaction_t>(lower, upper, margin,
+             read_lennard_jones_wall_potential<real_type>(external));
+    }
+    else
+    {
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_external_recutangular_box_interaction: invalid potential",
+            toml::find(external, "potential"), "here", {
+            "expected value is one of the following.",
+            "- \"ExcludedVolumeWall\": repulsive r^12 potential",
+            "- \"LennardJonesWall\"  : famous r^12 - r^6 potential",
+            }));
+    }
+
+}
+
+template<typename traitsT>
+std::unique_ptr<ExternalForceInteractionBase<traitsT>>
 read_afm_flexible_fitting_interaction(const toml::value& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -274,6 +347,11 @@ read_external_interaction(const toml::value& external)
         MJOLNIR_LOG_NOTICE("PositionRestraint interaction found.");
         return read_external_position_restraint_interaction<traitsT>(external);
     }
+    else if(interaction == "RectangularBox")
+    {
+        MJOLNIR_LOG_NOTICE("RectangularBox interaction found.");
+        return read_external_recutangular_box_interaction<traitsT>(external);
+    }
     else if(interaction == "AFMFlexibleFitting")
     {
         MJOLNIR_LOG_NOTICE("AFMFlexibleFitting interaction found.");
@@ -302,6 +380,16 @@ extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<dou
 extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_external_position_restraint_interaction(const toml::value& external);
 extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_external_position_restraint_interaction(const toml::value& external);
 extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_external_position_restraint_interaction(const toml::value& external);
+
+extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_external_recutangular_box_interaction(const toml::value&);
+extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_external_recutangular_box_interaction(const toml::value&);
+extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_external_recutangular_box_interaction(const toml::value&);
+extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_external_recutangular_box_interaction(const toml::value&);
+
+extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_afm_flexible_fitting_interaction(const toml::value&);
+extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_afm_flexible_fitting_interaction(const toml::value&);
+extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_afm_flexible_fitting_interaction(const toml::value&);
+extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_afm_flexible_fitting_interaction(const toml::value&);
 
 extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_external_distance_interaction_shape(const toml::value& external);
 extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_external_distance_interaction_shape(const toml::value& external);

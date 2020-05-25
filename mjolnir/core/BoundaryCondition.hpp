@@ -100,5 +100,15 @@ struct CuboidalPeriodicBoundary
     coordinate_type halfw_;
 };
 
+template<typename T>
+struct is_unlimited_boundary: std::false_type{};
+template<typename realT, typename coordT>
+struct is_unlimited_boundary<UnlimitedBoundary<realT, coordT>>: std::true_type{};
+
+template<typename T>
+struct is_cuboidal_periodic_boundary: public std::false_type{};
+template<typename realT, typename coordT>
+struct is_cuboidal_periodic_boundary<CuboidalPeriodicBoundary<realT, coordT>>: std::true_type{};
+
 }//mjolnir
 #endif /* MJOLNIR_BOUNDARY_CONDITION */
