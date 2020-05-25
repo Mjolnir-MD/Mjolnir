@@ -18,7 +18,7 @@ shape.axis     = "+X"
 shape.position = 0.0
 shape.margin   = 0.5
 
-potential   = "ExcludedVolume"
+potential   = "ExcludedVolumeWall"
 epsilon     = 0.1
 parameters  = [
     {index = 0, radius = 1.0},
