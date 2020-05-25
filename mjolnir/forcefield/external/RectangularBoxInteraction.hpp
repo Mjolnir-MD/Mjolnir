@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_INTERACTION_EXTERNAL_RECTANGULAR_BOX_INTERACTION_HPP
 #define MJOLNIR_INTERACTION_EXTERNAL_RECTANGULAR_BOX_INTERACTION_HPP
 #include <mjolnir/core/ExternalForceInteractionBase.hpp>
+#include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/format_nth.hpp>
@@ -211,4 +212,25 @@ RectangularBoxInteraction<traitsT, potT>::calc_energy(
 }
 
 } // mjolnir
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+#include <mjolnir/forcefield/external/ExcludedVolumeWallPotential.hpp>
+#include <mjolnir/forcefield/external/LennardJonesWallPotential.hpp>
+
+namespace mjolnir
+{
+
+extern template class RectangularBoxInteraction<SimulatorTraits<double, UnlimitedBoundary>,        ExcludedVolumeWallPotential<double>>;
+extern template class RectangularBoxInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        ExcludedVolumeWallPotential<float >>;
+extern template class RectangularBoxInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumeWallPotential<double>>;
+extern template class RectangularBoxInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumeWallPotential<float >>;
+
+extern template class RectangularBoxInteraction<SimulatorTraits<double, UnlimitedBoundary>,        LennardJonesWallPotential<double>>;
+extern template class RectangularBoxInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        LennardJonesWallPotential<float >>;
+extern template class RectangularBoxInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesWallPotential<double>>;
+extern template class RectangularBoxInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesWallPotential<float >>;
+
+} // mjolnir
+#endif // MJOLNIR_SEPARATE_BUILD
+
 #endif//MJOLNIR_BOX_INTEARACTION_BASE
