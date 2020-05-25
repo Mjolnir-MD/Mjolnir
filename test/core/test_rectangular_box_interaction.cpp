@@ -26,8 +26,6 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_Harmonic)
     using potential_type   = mjolnir::ExcludedVolumeWallPotential<real_type>;
     using interaction_type = mjolnir::RectangularBoxInteraction<traits_type, potential_type>;
 
-    auto normalize = [](const coordinate_type& v){return v / mjolnir::math::length(v);};
-
     coordinate_type lower( 0.0,  0.0,  0.0);
     coordinate_type upper(10.0, 10.0, 10.0);
 
