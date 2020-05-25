@@ -229,8 +229,6 @@ read_external_recutangular_box_interaction(const toml::value& external)
     using real_type       = typename traitsT::real_type;
     using coordinate_type = typename traitsT::coordinate_type;
 
-    const auto env = external.contains("env") ? external.at("env") : toml::value{};
-
     const auto& box   = external.at("box");
     const auto lower  = toml::find<coordinate_type>(box, "lower");
     const auto upper  = toml::find<coordinate_type>(box, "upper");
