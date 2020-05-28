@@ -24,8 +24,8 @@ schedule      = [
     {until = 600_000, forcefield = "open"},
 ]
 
-integrator.type       = "BAOABLangevin"
-integrator.parameters = [ # {{{
+integrator.type   = "BAOABLangevin"
+integrator.gammas = [ # {{{
 {index =   0, gamma = 0.00745405},
 {index =   1, gamma = 0.00850817},
 {index =   2, gamma = 0.00850817},

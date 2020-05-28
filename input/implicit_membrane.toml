@@ -16,7 +16,7 @@ total_step = 100_000
 save_step  = 1000
 integrator.seed = 2374
 integrator.type = "UnderdampedLangevin"
-integrator.parameters = [ # {{{
+integrator.gammas = [ # {{{
 {index =     0, gamma = 0.1},
 {index =     1, gamma = 0.1},
 {index =     2, gamma = 0.1},

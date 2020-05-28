@@ -59,18 +59,35 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
 
     const auto& integrator = toml::find(simulator, "integrator");
 
-    check_keys_available(integrator,
-            {"type"_s, "seed"_s, "parameters"_s, "remove"_s, "env"_s});
+    check_keys_available(integrator, {"type"_s, "seed"_s, "remove"_s, "env"_s,
+                                      "parameters"_s, "gammas"_s});
 
-    const auto parameters = toml::find<toml::array>(integrator, "parameters");
+    toml::array gammas;
+    if(integrator.contains("parameters"))
+    {
+        if(integrator.contains("gammas"))
+        {
+            throw std::runtime_error(toml::format_error("duplicated keys: both "
+                "\"parameters\" and \"gammas\" are provided"_s,
+                integrator.at("gammas"), "\"gammas\" is defined here"_s,
+                integrator.at("parameters"), "\"parameters\" is defined here"_s));
+        }
+        MJOLNIR_LOG_WARN("deprecated: key \"parameters\" in an integrator is "
+                         "depricated. use \"gammas\" instead.");
+        gammas = toml::find<toml::array>(integrator, "parameters");
+    }
+    else
+    {
+        gammas = toml::find<toml::array>(integrator, "gammas");
+    }
 
     const auto& env = integrator.contains("env") ?
                       integrator.at("env") : toml::value{};
 
     // Temporarily make a vector of idx gamma pair to check index duplication.
     std::vector<std::pair<std::size_t, real_type>> idx_gammas;
-    idx_gammas.reserve(parameters.size());
-    for(const auto& params : parameters)
+    idx_gammas.reserve(gammas.size());
+    for(const auto& params : gammas)
     {
         const auto offset = find_parameter_or<std::int64_t>(params, env, "offset", 0);
         const auto idx    = toml::find<std::size_t>(params, "index") + offset;
@@ -78,9 +95,9 @@ read_underdamped_langevin_integrator(const toml::value& simulator)
 
         idx_gammas.emplace_back(idx, gm);
     }
-    check_parameter_overlap(env, parameters, idx_gammas);
+    check_parameter_overlap(env, gammas, idx_gammas);
 
-    std::vector<real_type> gamma(parameters.size());
+    std::vector<real_type> gamma(gammas.size());
     for(const auto& idx_gamma : idx_gammas)
     {
         const auto idx = idx_gamma.first;
@@ -111,18 +128,35 @@ read_BAOAB_langevin_integrator(const toml::value& simulator)
 
     const auto& integrator = toml::find(simulator, "integrator");
 
-    check_keys_available(integrator,
-            {"type"_s, "seed"_s, "parameters"_s, "remove"_s, "env"_s});
+    check_keys_available(integrator, {"type"_s, "seed"_s, "remove"_s, "env"_s,
+                                      "parameters"_s, "gammas"_s});
 
-    const auto parameters = toml::find<toml::array>(integrator, "parameters");
+    toml::array gammas;
+    if(integrator.contains("parameters"))
+    {
+        if(integrator.contains("gammas"))
+        {
+            throw std::runtime_error(toml::format_error("duplicated keys: both "
+                "\"parameters\" and \"gammas\" are provided"_s,
+                integrator.at("gammas"), "\"gammas\" is defined here"_s,
+                integrator.at("parameters"), "\"parameters\" is defined here"_s));
+        }
+        MJOLNIR_LOG_WARN("deprecated: key \"parameters\" in an integrator is "
+                         "depricated. use \"gammas\" instead.");
+        gammas = toml::find<toml::array>(integrator, "parameters");
+    }
+    else
+    {
+        gammas = toml::find<toml::array>(integrator, "gammas");
+    }
 
     const auto& env = integrator.contains("env") ?
                       integrator.at("env") : toml::value{};
 
     // Temporarily make a vector of idx gamma pair to check index duplication.
     std::vector<std::pair<std::size_t, real_type>> idx_gammas;
-    idx_gammas.reserve(parameters.size());
-    for(const auto& params : parameters)
+    idx_gammas.reserve(gammas.size());
+    for(const auto& params : gammas)
     {
         const auto offset = find_parameter_or<std::int64_t>(params, env, "offset", 0);
         const auto idx    = toml::find<std::size_t>(params, "index") + offset;
@@ -130,9 +164,9 @@ read_BAOAB_langevin_integrator(const toml::value& simulator)
 
         idx_gammas.emplace_back(idx, gm);
     }
-    check_parameter_overlap(env, parameters, idx_gammas);
+    check_parameter_overlap(env, gammas, idx_gammas);
 
-    std::vector<real_type> gamma(parameters.size());
+    std::vector<real_type> gamma(gammas.size());
     for(const auto& idx_gamma : idx_gammas)
     {
         const auto idx = idx_gamma.first;

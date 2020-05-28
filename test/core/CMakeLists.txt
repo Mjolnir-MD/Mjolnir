@@ -49,6 +49,7 @@ set(TEST_NAMES
     test_pwmcos_interaction
     test_position_restraint_interaction
     test_afm_fitting_interaction
+    test_rectangular_box_interaction
 
     test_neighbor_list
     test_unlimited_verlet_list
@@ -95,6 +96,7 @@ set(TEST_NAMES
     test_read_pwmcos_interaction
     test_read_position_restraint_interaction
     test_read_afm_fitting_interaction
+    test_read_rectangular_box_interaction
 
     test_read_index_offset
 

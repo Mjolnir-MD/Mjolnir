@@ -1,8 +1,8 @@
 # vim:set foldmethod=marker
 [files]
-output.prefix = "sh3_unlim" # output file prefix
-output.path   = "./"        # output path
-output.format = "xyz"       # output format
+output.prefix = "sh3_box" # output file prefix
+output.path   = "./"           # output path
+output.format = "xyz"          # output format
 
 [units]
 length = "angstrom" # "angstorm" or "Å" or "nm"
@@ -12,9 +12,9 @@ energy = "kcal/mol" # "kcal/mol" or "kJ/mol"
 type          = "MolecularDynamics"
 boundary_type = "Unlimited"
 precision     = "double"
-delta_t       = 0.4
-total_step    = 100_000
-save_step     = 100
+delta_t       = 0.1
+total_step    = 1000_000
+save_step     = 1000
 seed          = 2374
 integrator.type = "UnderdampedLangevin"
 integrator.gammas = [ # {{{
@@ -78,8 +78,8 @@ integrator.gammas = [ # {{{
 
 [[systems]]
 attributes.temperature = 300.0
-boundary_shape = {} # Unlimited
-particles = [ # {{{
+boundary_shape = {}
+particles = [ #{{{
 {m=101.11, pos=[15.308,   14.18,  -2.955], vel=[  0.1225, -0.0424, -0.1671], name="CA", group="PRO"},
 {m=147.18, pos=[13.365,   10.96,  -3.638], vel=[  0.0659, -0.0029, -0.0215], name="CA", group="PRO"},
 {m= 99.14, pos=[11.955,   8.304,  -1.278], vel=[ -0.0285, -0.0671,  0.0485], name="CA", group="PRO"},
@@ -136,7 +136,7 @@ particles = [ # {{{
 {m= 71.09, pos=[ 9.200,   8.091,  -5.691], vel=[  0.0128, -0.0996, -0.1313], name="CA", group="PRO"},
 {m= 97.12, pos=[10.073,  11.790,  -6.056], vel=[  0.0500, -0.0141,  0.0502], name="CA", group="PRO"},
 {m= 87.08, pos=[ 9.020,  12.876,  -2.544], vel=[  0.0616, -0.0354,  0.0443], name="CA", group="PRO"},
-] # }}}
+] #}}}
 
 [[forcefields]]
 [[forcefields.local]]
@@ -770,3 +770,73 @@ parameters = [ # {{{
 {index = 54, radius = 2.0230},
 {index = 55, radius = 1.9635},
 ] # }}}
+
+[[forcefields.external]]
+interaction = "RectangularBox"
+potential   = "ExcludedVolumeWall"
+
+box.lower = [31.0,  16.0,  11.0]
+box.upper = [-1.0, -16.0, -21.0]
+box.margin  = 0.4
+
+# potential related
+epsilon     = 0.1
+parameters  = [
+    {index =  0, radius = 2.0},
+    {index =  1, radius = 2.0},
+    {index =  2, radius = 2.0},
+    {index =  3, radius = 2.0},
+    {index =  4, radius = 2.0},
+    {index =  5, radius = 2.0},
+    {index =  6, radius = 2.0},
+    {index =  7, radius = 2.0},
+    {index =  8, radius = 2.0},
+    {index =  9, radius = 2.0},
+    {index = 10, radius = 2.0},
+    {index = 11, radius = 2.0},
+    {index = 12, radius = 2.0},
+    {index = 13, radius = 2.0},
+    {index = 14, radius = 2.0},
+    {index = 15, radius = 2.0},
+    {index = 16, radius = 2.0},
+    {index = 17, radius = 2.0},
+    {index = 18, radius = 2.0},
+    {index = 19, radius = 2.0},
+    {index = 20, radius = 2.0},
+    {index = 21, radius = 2.0},
+    {index = 22, radius = 2.0},
+    {index = 23, radius = 2.0},
+    {index = 24, radius = 2.0},
+    {index = 25, radius = 2.0},
+    {index = 26, radius = 2.0},
+    {index = 27, radius = 2.0},
+    {index = 28, radius = 2.0},
+    {index = 29, radius = 2.0},
+    {index = 30, radius = 2.0},
+    {index = 31, radius = 2.0},
+    {index = 32, radius = 2.0},
+    {index = 33, radius = 2.0},
+    {index = 34, radius = 2.0},
+    {index = 35, radius = 2.0},
+    {index = 36, radius = 2.0},
+    {index = 37, radius = 2.0},
+    {index = 38, radius = 2.0},
+    {index = 39, radius = 2.0},
+    {index = 40, radius = 2.0},
+    {index = 41, radius = 2.0},
+    {index = 42, radius = 2.0},
+    {index = 43, radius = 2.0},
+    {index = 44, radius = 2.0},
+    {index = 45, radius = 2.0},
+    {index = 46, radius = 2.0},
+    {index = 47, radius = 2.0},
+    {index = 48, radius = 2.0},
+    {index = 49, radius = 2.0},
+    {index = 50, radius = 2.0},
+    {index = 51, radius = 2.0},
+    {index = 52, radius = 2.0},
+    {index = 53, radius = 2.0},
+    {index = 54, radius = 2.0},
+    {index = 55, radius = 2.0},
+]
+

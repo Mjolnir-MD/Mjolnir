@@ -11,15 +11,15 @@ energy = "kcal/mol"
 length = "angstrom"
 
 [simulator]
-type                  = "MolecularDynamics"
-boundary_type         = "Unlimited"
-precision             = "double"
-delta_t               = 0.4
-total_step            = 100_000
-save_step             =     100
-seed                  = 123456789
-integrator.type       = "UnderdampedLangevin"
-integrator.parameters = [
+type              = "MolecularDynamics"
+boundary_type     = "Unlimited"
+precision         = "double"
+delta_t           = 0.4
+total_step        = 100_000
+save_step         =     100
+seed              = 123456789
+integrator.type   = "UnderdampedLangevin"
+integrator.gammas = [
 {index =  0, gamma = 0.00642961 },
 {index =  1, gamma = 0.0083424  },
 {index =  2, gamma = 0.00868513 },
