@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.14.0
+
+### Added
+
+- RectangularBoxInteraction
+  - with `LennardJonesWallPotential` and `ExcludedVolumeWallPotential`
+
+### Changed
+
+- rename `integrator.parameter` to `integrator.gamma` in an input file
+
 ## 1.13.1
 
 ### Fixed
