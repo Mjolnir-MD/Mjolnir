@@ -115,7 +115,7 @@ class gBAOABLangevinIntegrator
                 auto& v1  = sys.velocity(indices[0]);
                 auto& v2  = sys.velocity(indices[1]);
 
-                const auto      dp = p2 - p1;
+                const auto      dp = sys.adjust_direction(p2 - p1);
                 const real_type dp2 = math::length_sq(dp);
                 const real_type missmatch2 = square_v0s_[i] - dp2;
 
@@ -124,7 +124,7 @@ class gBAOABLangevinIntegrator
                     auto& op1 = this->old_pos_rattle_[indices[0]];
                     auto& op2 = this->old_pos_rattle_[indices[1]];
 
-                    const auto old_dp = op2 - op1;
+                    const auto old_dp = sys.adjust_direction(op2 - op1);
                     const real_type dot_old_new_dp = math::dot_product(old_dp, dp);
                     const real_type lambda =
                         0.5 * missmatch2 * reduced_mass_[i] / dot_old_new_dp;
@@ -173,7 +173,7 @@ class gBAOABLangevinIntegrator
                 auto& v1  = sys.velocity(indices[0]);
                 auto& v2  = sys.velocity(indices[1]);
 
-                const auto pos_diff      = p2 - p1;
+                const auto pos_diff      = sys.adjust_direction(p2 - p1);
                 const auto vel_diff      = v2 - v1;
                 const real_type dot_pdvd = math::dot_product(pos_diff, vel_diff);
                 const real_type lambda   = dot_pdvd * reduced_mass_[i] * r_square_v0s_[i];
