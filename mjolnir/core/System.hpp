@@ -55,6 +55,12 @@ class System
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
+        // make all the particles inside the boundary
+        for(auto& p : this->positions_)
+        {
+            p = this->boundary_.adjust_position(p);
+        }
+
         if(this->velocity_initialized_)
         {
             MJOLNIR_LOG_NOTICE(
