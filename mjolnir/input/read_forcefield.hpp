@@ -7,6 +7,7 @@
 #include <mjolnir/input/read_local_interaction.hpp>
 #include <mjolnir/input/read_global_interaction.hpp>
 #include <mjolnir/input/read_external_interaction.hpp>
+#include <mjolnir/input/read_constraint_interaction.hpp>
 #include <mjolnir/input/read_table_from_file.hpp>
 #include <mjolnir/input/read_path.hpp>
 #include <mjolnir/input/utility.hpp>
@@ -31,9 +32,10 @@ read_forcefield(const toml::value& root, const std::size_t N)
                            "\" found");
     }
 
-    LocalForceField<traitsT>    loc;
-    GlobalForceField<traitsT>   glo;
-    ExternalForceField<traitsT> ext;
+    LocalForceField<traitsT>      loc;
+    GlobalForceField<traitsT>     glo;
+    ExternalForceField<traitsT>   ext;
+    ConstraintForceField<traitsT> con;
 
     if(ff.as_table().count("local") != 0)
     {
@@ -69,7 +71,18 @@ read_forcefield(const toml::value& root, const std::size_t N)
                 read_table_from_file(externals.at(i), "external")));
         }
     }
-    return ForceField<traitsT>(std::move(loc), std::move(glo), std::move(ext));
+    if(ff.as_table().count("constraint") != 0)
+    {
+        const auto& constraints = toml::find(ff, "constraint").as_array();
+        MJOLNIR_LOG_NOTICE("Constraint (x", constraints.size(), ") found");
+        for(std::size_t i=0; i<constraints.size(); ++i)
+        {
+            MJOLNIR_LOG_NOTICE("reading ", format_nth(i), " [[forcefields.constraint]]");
+            con = std::move(read_constraint_interaction<traitsT>(
+                read_table_from_file(constraints.at(i), "constraint")));
+        }
+    }
+    return ForceField<traitsT>(std::move(loc), std::move(glo), std::move(ext), std::move(con));
 }
 
 #ifdef MJOLNIR_SEPARATE_BUILD

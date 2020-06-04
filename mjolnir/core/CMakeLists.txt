@@ -33,6 +33,7 @@ set(mjolnir_core_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/LocalForceField.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/GlobalForceField.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ExternalForceField.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ConstraintForceField.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/LocalInteractionBase.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/GlobalInteractionBase.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ExternalForceInteractionBase.cpp"

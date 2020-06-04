@@ -8,6 +8,7 @@ set(mjolnir_input_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/read_integrator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_local_interaction.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_local_potential.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/read_constraint_interaction.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_observer.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_random_number_generator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_simulator.cpp"

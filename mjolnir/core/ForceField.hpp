@@ -5,6 +5,7 @@
 #include <mjolnir/core/LocalForceField.hpp>
 #include <mjolnir/core/GlobalForceField.hpp>
 #include <mjolnir/core/ExternalForceField.hpp>
+#include <mjolnir/core/ConstraintForceField.hpp>
 
 namespace mjolnir
 {
@@ -13,22 +14,24 @@ template<typename traitsT>
 class ForceField
 {
   public:
-    using traits_type              = traitsT;
-    using real_type                = typename traits_type::real_type;
-    using coordinate_type          = typename traits_type::coordinate_type;
-    using system_type              = System<traits_type>;
-    using topology_type            = Topology;
-    using local_forcefield_type    = LocalForceField<traits_type>;
-    using global_forcefield_type   = GlobalForceField<traits_type>;
-    using external_forcefield_type = ExternalForceField<traits_type>;
+    using traits_type                 = traitsT;
+    using real_type                   = typename traits_type::real_type;
+    using coordinate_type             = typename traits_type::coordinate_type;
+    using system_type                 = System<traits_type>;
+    using topology_type               = Topology;
+    using local_forcefield_type       = LocalForceField<traits_type>;
+    using global_forcefield_type      = GlobalForceField<traits_type>;
+    using external_forcefield_type    = ExternalForceField<traits_type>;
+    using constraint_forcefield_type  = ConstraintForceField<traits_type>;
 
   public:
 
     ForceField(local_forcefield_type&&    local,
                global_forcefield_type&&   global,
-               external_forcefield_type&& external)
+               external_forcefield_type&& external,
+               constraint_forcefield_type&& constraint)
         : local_(std::move(local)), global_(std::move(global)),
-          external_(std::move(external))
+          external_(std::move(external)), constraint_(std::move(constraint))
     {}
 
     ForceField()  = default;
@@ -47,12 +50,14 @@ class ForceField
         MJOLNIR_LOG_INFO("writing current topology");
         topology_.resize(sys.size());
         local_.write_topology(topology_);
+        constraint_.write_topology(topology_);
         topology_.construct_molecules();
 
         MJOLNIR_LOG_INFO("initializing forcefields");
-        local_   .initialize(sys);
-        global_  .initialize(sys, topology_);
-        external_.initialize(sys);
+        local_     .initialize(sys);
+        global_    .initialize(sys, topology_);
+        external_  .initialize(sys);
+        constraint_.initialize(sys);
         return;
     }
 
@@ -147,10 +152,11 @@ class ForceField
 
   private:
 
-    topology_type            topology_;
-    local_forcefield_type    local_;
-    global_forcefield_type   global_;
-    external_forcefield_type external_;
+    topology_type               topology_;
+    local_forcefield_type       local_;
+    global_forcefield_type      global_;
+    external_forcefield_type    external_;
+    constraint_forcefield_type  constraint_;
 
 #ifdef MJOLNIR_WITH_OPENMP
     // OpenMP implementation uses its own specialization to avoid data race.
