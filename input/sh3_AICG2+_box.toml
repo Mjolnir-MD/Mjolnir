@@ -775,8 +775,8 @@ parameters = [ # {{{
 interaction = "RectangularBox"
 potential   = "ExcludedVolumeWall"
 
-box.lower = [31.0,  16.0,  11.0]
-box.upper = [-1.0, -16.0, -21.0]
+box.upper = [31.0,  16.0,  11.0]
+box.lower = [-1.0, -16.0, -21.0]
 box.margin  = 0.4
 
 # potential related
