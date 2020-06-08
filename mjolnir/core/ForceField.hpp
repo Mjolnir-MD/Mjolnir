@@ -57,7 +57,6 @@ class ForceField
         local_     .initialize(sys);
         global_    .initialize(sys, topology_);
         external_  .initialize(sys);
-        constraint_.initialize(sys);
         return;
     }
 
@@ -141,14 +140,16 @@ class ForceField
         return retval;
     }
 
-    topology_type            const& topology() const noexcept {return topology_;}
-    topology_type            &      topology()       noexcept {return topology_;}
-    local_forcefield_type    const& local()    const noexcept {return local_;}
-    local_forcefield_type    &      local()          noexcept {return local_;}
-    global_forcefield_type   const& global()   const noexcept {return global_;}
-    global_forcefield_type   &      global()         noexcept {return global_;}
-    external_forcefield_type const& external() const noexcept {return external_;}
-    external_forcefield_type &      external()       noexcept {return external_;}
+    topology_type              const& topology()   const noexcept {return topology_;}
+    topology_type              &      topology()         noexcept {return topology_;}
+    local_forcefield_type      const& local()      const noexcept {return local_;}
+    local_forcefield_type      &      local()            noexcept {return local_;}
+    global_forcefield_type     const& global()     const noexcept {return global_;}
+    global_forcefield_type     &      global()           noexcept {return global_;}
+    external_forcefield_type   const& external()   const noexcept {return external_;}
+    external_forcefield_type   &      external()         noexcept {return external_;}
+    constraint_forcefield_type const& constraint() const noexcept {return constraint_;}
+    constraint_forcefield_type &      constraint()       noexcept {return constraint_;}
 
   private:
 
