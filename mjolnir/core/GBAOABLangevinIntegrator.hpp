@@ -234,7 +234,18 @@ void gBAOABLangevinIntegrator<traitsT>::initialize(
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    
+  
+    const constraint_forcefield_type& constraint_ff = ff.constraint();
+    const constraints_type&           constraints   = constraint_ff.constraints();
+    const real_type                   tolerance     = constraint_ff.tolerance();
+    // calculate parameters for constraint
+    this->correction_tolerance_        = tolerance;
+    this->correction_tolerance_dt_     = tolerance / dt_;
+    this->correction_tolerance_dt_itr_ = tolerance * 2. * correction_iter_num_ / dt_;
+    this->dt_in_correction_            = dt_ * 0.5 / correction_iter_num_;
+    this->r_dt_in_correction_          = 1. / dt_in_correction_;
+
+
     // calculate parameters for each particles
     this->update(system);
 

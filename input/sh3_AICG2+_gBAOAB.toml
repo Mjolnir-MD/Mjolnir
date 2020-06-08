@@ -711,10 +711,11 @@ parameters = [ # {{{
 {index = 55, radius = 1.9635},
 ] # }}}
 
-[forcefields.constraint]
+[[forcefields.constraint]]
 # in the iteration above, there is rattle projection step, and this step do another iteration until corrected position suffice to tolerance. If this iteration reach to max iteration number, simulator raise error and stop.
-max_iteration_in_correction = 500
-correction_tolerance        = 1.0e-6
+topology      = "bond"
+max_iteration = 500
+tolerance     = 1.0e-6
 v0s = [ # {{{
 {indices = [ 0,  1], v0 = 3.822321},
 {indices = [ 1,  2], v0 = 3.822569},
