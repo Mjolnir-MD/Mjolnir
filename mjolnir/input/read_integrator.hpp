@@ -157,28 +157,18 @@ read_gBAOAB_langevin_integrator(const toml::value& simulator)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
     using real_type                = typename traitsT::real_type;
-    using indices_t                = std::array<std::size_t, 2>;
 
     const real_type delta_t = toml::find<real_type>(simulator, "delta_t");
     MJOLNIR_LOG_INFO("delta_t = ", delta_t);
 
     const auto& integrator = toml::find(simulator, "integrator");
     check_keys_available(integrator,
-            {"type"_s, "seed"_s, "gammas"_s, "remove"_s,
-             "correction_iteration_num"_s, "max_iteration_in_correction"_s,
-             "correction_tolerance"_s, "constraints"_s,
-             "env"_s});
+            {"type"_s, "seed"_s, "gammas"_s, "remove"_s, "env"_s});
 
     const auto& env = integrator.contains("env") ?
                       integrator.at("env") : toml::value{};
 
     const auto gammas               = toml::find<toml::array>(integrator, "gammas");
-    const auto constraints          = toml::find<toml::array>(integrator, "constraints");
-    const auto correction_iter_num  =
-        toml::find<std::size_t>(integrator, "correction_iteration_num");
-    const auto max_iter_correction  =
-        toml::find<std::size_t>(integrator, "max_iteration_in_correction");
-    const auto correction_tolerance = toml::find<real_type>(integrator, "correction_tolerance");
 
     // Read idx gamma pair part in parameters
     // Temporarily make a vector of idx gamma pair to check index duplication.
@@ -208,24 +198,8 @@ read_gBAOAB_langevin_integrator(const toml::value& simulator)
         MJOLNIR_LOG_INFO("idx = ", idx, ", gamma = ", gm);
     }
 
-    std::vector<std::pair<indices_t, real_type>> indices_v0s;
-    indices_v0s.reserve(constraints.size());
-    for(const auto& params : constraints)
-    {
-        const auto offset  = find_parameter_or<std::int64_t>(params, env, "offset", 0);
-        auto indices = find_parameter<indices_t>(params, env, "indices");
-        for(auto& i : indices) { i += offset;}
-        const auto v0      = find_parameter<real_type>(params, env, "v0");
-
-        MJOLNIR_LOG_INFO_NO_LF("idxs = ", indices, ", ");
-        indices_v0s.emplace_back(indices, v0);
-
-    }
-    // TODO : check parameter overlap in indices_v0s.
-
-    return gBAOABLangevinIntegrator<traitsT>(delta_t, std::move(gamma), std::move(indices_v0s),
-            read_system_motion_remover<traitsT>(simulator), correction_iter_num,
-            max_iter_correction, correction_tolerance);
+    return gBAOABLangevinIntegrator<traitsT>(delta_t, std::move(gamma),
+            read_system_motion_remover<traitsT>(simulator));
 }
 
 // A mapping object from type information (template parameter) to the actual
