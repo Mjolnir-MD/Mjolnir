@@ -24,7 +24,7 @@ read_forcefield(const toml::value& root, const std::size_t N)
 
     const auto ff = read_table_from_file(toml::find(root, "forcefields").at(N),
                                          "forcefields");
-    check_keys_available(ff, {"local"_s, "global"_s, "external"_s, "name"_s});
+    check_keys_available(ff, {"local"_s, "global"_s, "external"_s, "constraint"_s, "name"_s});
 
     if(ff.as_table().count("name") == 1)
     {
@@ -78,6 +78,9 @@ read_forcefield(const toml::value& root, const std::size_t N)
         if(1 < constraints.size())
         {
             MJOLNIR_LOG_ERROR("Now, ConstraintForcefield only support one constraint case.");
+            throw_exception<std::runtime_error>("[error] ",
+                "mjolnir::read_forcefield: invalid forcefield: ",
+                constraints.size(), " forcefields were detected.");
         }
         for(std::size_t i=0; i<constraints.size(); ++i)
         {
