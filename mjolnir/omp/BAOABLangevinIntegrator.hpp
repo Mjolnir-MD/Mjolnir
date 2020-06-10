@@ -20,7 +20,7 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
     using system_type     = System<traits_type>;
-    using forcefield_type = ForceField<traits_type>;
+    using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using rng_type        = RandomNumberGenerator<traits_type>;
     using remover_type    = SystemMotionRemover<traits_type>;
 
@@ -46,7 +46,7 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         {
             sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
-        ff.calc_force(sys);
+        ff->calc_force(sys);
         return;
     }
 
@@ -84,10 +84,10 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
         // ------------------------------------------------------------------
         // update neighbor list; reduce margin, reconstruct the list if needed
-        ff.reduce_margin(2 * std::sqrt(largest_disp2), sys);
+        ff->reduce_margin(2 * std::sqrt(largest_disp2), sys);
 
         // calc f(p(n+1))
-        ff.calc_force(sys);
+        ff->calc_force(sys);
 
         // ------------------------------------------------------------------
         // calc v(n+2/3) -> v(n+1)

@@ -20,7 +20,7 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
     using system_type     = System<traits_type>;
-    using forcefield_type = ForceField<traits_type>;
+    using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using rng_type        = RandomNumberGenerator<traits_type>;
     using remover_type    = SystemMotionRemover<traits_type>;
 
@@ -50,7 +50,7 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
 
-        ff.calc_force(sys);
+        ff->calc_force(sys);
 
 #pragma omp parallel for
         for(std::size_t i=0; i<sys.size(); ++i)
@@ -99,8 +99,8 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
         // This function parallelize itself inside. `parallel` block is not
         // needed here to parallelize it.
-        ff.reduce_margin(2 * std::sqrt(largest_disp2), sys);
-        ff.calc_force(sys);
+        ff->reduce_margin(2 * std::sqrt(largest_disp2), sys);
+        ff->calc_force(sys);
 
         // calc a(t+dt) and v(t+dt), generate noise
 #pragma omp parallel for
