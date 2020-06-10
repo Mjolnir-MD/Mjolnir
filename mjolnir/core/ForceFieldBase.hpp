@@ -35,7 +35,6 @@ class ForceFieldBase
     virtual std::vector<real_type> dump_energy(const system_type& sys) const = 0;
 
     virtual topology_type const& topology() const noexcept = 0;
-    virtual topology_type &      topology()       noexcept = 0;
 };
 
 } // mjolnir
