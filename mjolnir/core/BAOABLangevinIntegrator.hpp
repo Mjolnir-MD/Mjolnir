@@ -3,7 +3,7 @@
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/ForceFieldBase.hpp>
 #include <mjolnir/core/SystemMotionRemover.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -23,7 +23,7 @@ class BAOABLangevinIntegrator
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
     using system_type     = System<traitsT>;
-    using forcefield_type = ForceField<traitsT>;
+    using forcefield_type = std::unique_ptr<ForceFieldBase<traitsT>>;
     using rng_type        = RandomNumberGenerator<traits_type>;
     using remover_type    = SystemMotionRemover<traits_type>;
 
@@ -116,7 +116,7 @@ void BAOABLangevinIntegrator<traitsT>::initialize(
     {
         system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
     }
-    ff.calc_force(system);
+    ff->calc_force(system);
     return;
 }
 
@@ -153,10 +153,10 @@ BAOABLangevinIntegrator<traitsT>::step(
     }
 
     // update neighbor list; reduce margin, reconstruct the list if needed
-    ff.reduce_margin(2 * std::sqrt(largest_disp2), sys);
+    ff->reduce_margin(2 * std::sqrt(largest_disp2), sys);
 
     // calc f(p(n+1))
-    ff.calc_force(sys);
+    ff->calc_force(sys);
 
     // calc v(n+2/3) -> v(n+1)
     for(std::size_t i=0; i<sys.size(); ++i)
