@@ -137,8 +137,9 @@ class ForceField final : public ForceFieldBase<traitsT>
         return retval;
     }
 
-    topology_type            const& topology() const noexcept {return topology_;}
-    topology_type            &      topology()       noexcept {return topology_;}
+    topology_type            const& topology() const noexcept override {return topology_;}
+    topology_type            &      topology()       noexcept override {return topology_;}
+
     local_forcefield_type    const& local()    const noexcept {return local_;}
     local_forcefield_type    &      local()          noexcept {return local_;}
     global_forcefield_type   const& global()   const noexcept {return global_;}

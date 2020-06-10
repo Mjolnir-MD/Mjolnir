@@ -2,6 +2,7 @@
 #define MJOLNIR_CORE_FORCE_FIELD_BASE_HPP
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/System.hpp>
+#include <mjolnir/core/Topology.hpp>
 
 namespace mjolnir
 {
@@ -15,6 +16,7 @@ class ForceFieldBase
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
     using system_type     = System<traits_type>;
+    using topology_type   = Topology;
 
   public:
 
@@ -31,6 +33,9 @@ class ForceFieldBase
 
     virtual std::vector<std::string> list_energy_name() const = 0;
     virtual std::vector<real_type> dump_energy(const system_type& sys) const = 0;
+
+    virtual topology_type const& topology() const noexcept = 0;
+    virtual topology_type &      topology()       noexcept = 0;
 };
 
 } // mjolnir
