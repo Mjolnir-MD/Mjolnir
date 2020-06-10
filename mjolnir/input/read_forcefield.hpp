@@ -15,7 +15,7 @@ namespace mjolnir
 {
 
 template<typename traitsT>
-ForceField<traitsT>
+std::unique_ptr<ForceFieldBase<traitsT>>
 read_forcefield(const toml::value& root, const std::size_t N)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -69,14 +69,14 @@ read_forcefield(const toml::value& root, const std::size_t N)
                 read_table_from_file(externals.at(i), "external")));
         }
     }
-    return ForceField<traitsT>(std::move(loc), std::move(glo), std::move(ext));
+    return make_unique<ForceField<traitsT>>(std::move(loc), std::move(glo), std::move(ext));
 }
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template ForceField<SimulatorTraits<double, UnlimitedBoundary>       > read_forcefield(const toml::value& root, const std::size_t N);
-extern template ForceField<SimulatorTraits<float,  UnlimitedBoundary>       > read_forcefield(const toml::value& root, const std::size_t N);
-extern template ForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_forcefield(const toml::value& root, const std::size_t N);
-extern template ForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_forcefield(const toml::value& root, const std::size_t N);
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_forcefield(const toml::value&, const std::size_t);
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_forcefield(const toml::value&, const std::size_t);
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_forcefield(const toml::value&, const std::size_t);
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_forcefield(const toml::value&, const std::size_t);
 #endif
 
 } // mjolnir

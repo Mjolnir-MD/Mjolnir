@@ -188,7 +188,7 @@ read_switching_forcefield_simulator(
 
     // ------------------------------------------------------------------------
     // read all forcefields and its names
-    using forcefield_type = ForceField<traitsT>;
+    using forcefield_type = std::unique_ptr<ForceFieldBase<traitsT>>;
 
     const auto forcefields = toml::find<toml::array>(root, "forcefields");
     std::vector<forcefield_type> ffs; ffs.reserve(forcefields.size());
