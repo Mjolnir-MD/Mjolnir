@@ -26,7 +26,11 @@ BOOST_AUTO_TEST_CASE(read_empty_local_forcefield)
         [[forcefields]]
         )"_toml;
 
-        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
+        const auto ffb = mjolnir::read_forcefield<traits_type>(v, 0);
+        const auto ffp = dynamic_cast<mjolnir::ForceField<traits_type>*>(ffb.get());
+        BOOST_REQUIRE(ffp);
+        const auto ff = *ffp;
+
         BOOST_TEST(ff.local().empty());
         BOOST_TEST(ff.local().size() == 0u);
     }
@@ -51,7 +55,11 @@ BOOST_AUTO_TEST_CASE(read_local_forcefield)
         parameters  = []
         )"_toml;
 
-        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
+        const auto ffb = mjolnir::read_forcefield<traits_type>(v, 0);
+        const auto ffp = dynamic_cast<mjolnir::ForceField<traits_type>*>(ffb.get());
+        BOOST_REQUIRE(ffp);
+        const auto ff = *ffp;
+
         BOOST_TEST(!ff.local().empty());
         BOOST_TEST(ff.local().size() == 1u);
 
@@ -89,7 +97,11 @@ BOOST_AUTO_TEST_CASE(read_several_local_forcefield)
         parameters  = []
         )"_toml;
 
-        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
+        const auto ffb = mjolnir::read_forcefield<traits_type>(v, 0);
+        const auto ffp = dynamic_cast<mjolnir::ForceField<traits_type>*>(ffb.get());
+        BOOST_REQUIRE(ffp);
+        const auto ff = *ffp;
+
         BOOST_TEST(!ff.local().empty());
         BOOST_TEST( ff.local().size() == 2u);
 
