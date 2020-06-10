@@ -3,7 +3,7 @@
 #include <mjolnir/core/SimulatorBase.hpp>
 #include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/ForceFieldBase.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 
 namespace mjolnir
@@ -37,7 +37,7 @@ class SwitchingForceFieldSimulator final : public SimulatorBase
     using coordinate_type = typename traits_type::coordinate_type;
     using integrator_type = integratorT;
     using system_type     = System<traits_type>;
-    using forcefield_type = ForceField<traits_type>;
+    using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using observer_type   = ObserverContainer<traits_type>;
     using rng_type        = RandomNumberGenerator<traits_type>;
 
@@ -127,7 +127,7 @@ inline void SwitchingForceFieldSimulator<traitsT, integratorT>::initialize()
     auto& ff = this->forcefields_[this->current_forcefield_];
 
     this->system_.initialize(this->rng_);
-    ff.initialize(this->system_);
+    ff->initialize(this->system_);
     this->integrator_.initialize(this->system_, ff, this->rng_);
 
     observers_.initialize(this->total_step_, this->integrator_.delta_t(),
@@ -163,7 +163,7 @@ inline bool SwitchingForceFieldSimulator<traitsT, integratorT>::step()
         this->current_forcefield_ = forcefield_index_.at(sch.second);
 
         // initialize spatial partition (e.g. cell lists) and system.topology
-        forcefields_[current_forcefield_].initialize(this->system_);
+        forcefields_[current_forcefield_]->initialize(this->system_);
         // initialize forces with the current forcefield. the previous forces
         // will be zero-cleared. but velocities are kept.
         integrator_.initialize(this->system_, forcefields_[current_forcefield_],

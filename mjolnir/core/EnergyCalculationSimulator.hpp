@@ -3,7 +3,7 @@
 #include <mjolnir/core/SimulatorBase.hpp>
 #include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/ForceFieldBase.hpp>
 #include <mjolnir/core/LoaderBase.hpp>
 #include <mjolnir/core/XYZLoader.hpp>
 #include <mjolnir/core/DCDLoader.hpp>
@@ -20,7 +20,7 @@ class EnergyCalculationSimulator final : public SimulatorBase
     using real_type        = typename traits_type::real_type;
     using coordinate_type  = typename traits_type::coordinate_type;
     using system_type      = System<traits_type>;
-    using forcefield_type  = ForceField<traits_type>;
+    using forcefield_type  = std::unique_ptr<ForceFieldBase<traits_type>>;
     using observer_type    = ObserverContainer<traits_type>;
     using loader_base_type = LoaderBase<traits_type>;
     using loader_type      = std::unique_ptr<loader_base_type>;
@@ -69,7 +69,7 @@ inline void EnergyCalculationSimulator<traitsT>::initialize()
 
     // sys.initialize() generates the initial velocity, so here it is not needed
 
-    this->ff_.initialize(this->sys_);
+    this->ff_->initialize(this->sys_);
 
     this->obs_.initialize(this->total_step_, 0.0, this->sys_, this->ff_);
     return;
@@ -87,7 +87,7 @@ inline bool EnergyCalculationSimulator<traitsT>::step()
         return false;
     }
 
-    ff_.update(sys_); // force update the neighboring lists
+    ff_->update(sys_); // force update the neighboring lists
 
     ++step_count_;
 
