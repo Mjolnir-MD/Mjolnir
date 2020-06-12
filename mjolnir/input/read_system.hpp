@@ -48,7 +48,7 @@ struct read_boundary_impl<CuboidalPeriodicBoundary<realT, coordT>>
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("shape of periodic boundary is cuboid");
 
-        const auto& boundary = system.at("boundary");
+        const auto& boundary = system.at("boundary_shape");
         check_keys_available(boundary, {"upper"_s, "lower"_s});
 
         const auto upper = toml::find<coordT>(boundary, "upper");
