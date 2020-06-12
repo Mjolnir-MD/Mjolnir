@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(read_empty_external_forcefield)
             output.prefix = "test"
             [[forcefields]]
         )"_toml;
-        const auto ffb = mjolnir::read_forcefield<traits_type>(v, 0, toml::table{});
+        const auto ffb = mjolnir::read_forcefield<traits_type>(v, toml::table{});
         const auto ffp = dynamic_cast<mjolnir::ForceField<traits_type>*>(ffb.get());
         BOOST_REQUIRE(ffp);
         const auto ff = *ffp;
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(read_external_forcefield)
             ]
         )"_toml;
 
-        const auto ffb = mjolnir::read_forcefield<traits_type>(v, 0, toml::table{});
+        const auto ffb = mjolnir::read_forcefield<traits_type>(v, toml::table{});
         const auto ffp = dynamic_cast<mjolnir::ForceField<traits_type>*>(ffb.get());
         BOOST_REQUIRE(ffp);
         const auto ff = *ffp;
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(read_several_external_forcefield)
             ]
         )"_toml;
 
-        const auto ffb = mjolnir::read_forcefield<traits_type>(v, 0, toml::table{});
+        const auto ffb = mjolnir::read_forcefield<traits_type>(v, toml::table{});
         const auto ffp = dynamic_cast<mjolnir::ForceField<traits_type>*>(ffb.get());
         BOOST_REQUIRE(ffp);
         const auto ff = *ffp;
