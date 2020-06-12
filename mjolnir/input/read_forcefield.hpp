@@ -16,7 +16,7 @@ namespace mjolnir
 
 template<typename traitsT>
 std::unique_ptr<ForceFieldBase<traitsT>>
-read_forcefield(const toml::value& root, const std::size_t N)
+read_default_forcefield(const toml::value& root, const std::size_t N)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -72,11 +72,62 @@ read_forcefield(const toml::value& root, const std::size_t N)
     return make_unique<ForceField<traitsT>>(std::move(loc), std::move(glo), std::move(ext));
 }
 
+template<typename traitsT>
+std::unique_ptr<ForceFieldBase<traitsT>>
+read_multiple_basin_forcefield(const toml::value& root, const std::size_t N,
+                               const toml::value& simulator)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+
+    throw std::logic_error("TODO");
+
+    return nullptr;
+}
+
+
+template<typename traitsT>
+std::unique_ptr<ForceFieldBase<traitsT>>
+read_forcefield(const toml::value& root, const std::size_t N,
+                const toml::value& simulator)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+
+    if(!simulator.contains("forcefield"))
+    {
+        return read_default_forcefield<traitsT>(root, N);
+    }
+    else if(simulator.at("forcefield").at("type").as_string() == "MultipleBasin")
+    {
+        return read_multiple_basin_forcefield<traitsT>(root, N, simulator);
+    }
+    else
+    {
+        throw std::runtime_error(toml::format_error("mjolnir::read_forcefield: "
+            "unknown forcefield type", simulator.at("forcefield").at("type"),
+            "here", {"expected one of the following: ",
+                "- \"MultipleBasin\": Multiple Basin forcefield.",
+                "- (nothing)      : In case of normal forcefield, you don't need this field."
+            }));
+    }
+}
+
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_forcefield(const toml::value&, const std::size_t);
-extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_forcefield(const toml::value&, const std::size_t);
-extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_forcefield(const toml::value&, const std::size_t);
-extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_forcefield(const toml::value&, const std::size_t);
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_default_forcefield(const toml::value&, const std::size_t);
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_default_forcefield(const toml::value&, const std::size_t);
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_default_forcefield(const toml::value&, const std::size_t);
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_default_forcefield(const toml::value&, const std::size_t);
+
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_multiple_basin_forcefield(const toml::value&, const std::size_t, const toml::value&);
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_multiple_basin_forcefield(const toml::value&, const std::size_t, const toml::value&);
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_multiple_basin_forcefield(const toml::value&, const std::size_t, const toml::value&);
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_multiple_basin_forcefield(const toml::value&, const std::size_t, const toml::value&);
+
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_forcefield(const toml::value&, const std::size_t, const toml::value&);
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_forcefield(const toml::value&, const std::size_t, const toml::value&);
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_forcefield(const toml::value&, const std::size_t, const toml::value&);
+extern template std::unique_ptr<ForceFieldBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_forcefield(const toml::value&, const std::size_t, const toml::value&);
 #endif
 
 } // mjolnir

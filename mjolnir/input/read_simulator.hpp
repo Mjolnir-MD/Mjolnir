@@ -39,7 +39,7 @@ read_molecular_dynamics_simulator(
     // later move them, so non-const
     auto sys  = read_system    <traitsT>(root, 0);
     auto obs  = read_observer  <traitsT>(root);
-    auto ff   = read_forcefield<traitsT>(root, 0);
+    auto ff   = read_forcefield<traitsT>(root, 0, simulator);
     auto rng  = read_rng       <traitsT>(simulator);
     auto intg = read_integrator<integratorT>(simulator);
 
@@ -72,7 +72,8 @@ read_steepest_descent_simulator(
     MJOLNIR_LOG_NOTICE("threshold  is ", threshold);
 
     return make_unique<simulator_type>(delta, threshold, step_lim, save_step,
-            read_system<traitsT>(root, 0), read_forcefield<traitsT>(root, 0),
+            read_system<traitsT>(root, 0),
+            read_forcefield<traitsT>(root, 0, simulator),
             read_observer<traitsT>(root));
 }
 
@@ -127,7 +128,7 @@ read_simulated_annealing_simulator(
     }
 
     auto sys  = read_system    <traitsT>(root, 0);
-    auto ff   = read_forcefield<traitsT>(root, 0);
+    auto ff   = read_forcefield<traitsT>(root, 0, simulator);
     auto obs  = read_observer  <traitsT>(root);
     auto rng  = read_rng       <traitsT>(simulator);
     auto intg = read_integrator<integratorT>(simulator);
@@ -198,7 +199,7 @@ read_switching_forcefield_simulator(
     {
         const auto name = toml::find<std::string>(forcefields.at(i), "name");
         ffidx[name] = i;
-        ffs.push_back(read_forcefield<traitsT>(root, i));
+        ffs.push_back(read_forcefield<traitsT>(root, i, simulator));
 
         MJOLNIR_LOG_NOTICE(i, "-th forcefield \"", name, "\" found.");
     }
@@ -347,7 +348,7 @@ read_energy_calculation_simulator(
         MJOLNIR_LOG_INFO("attribute.", attr.first, " = ", attribute);
     }
 
-    auto ff = read_forcefield<traitsT>(root, 0);
+    auto ff = read_forcefield<traitsT>(root, 0, simulator);
 
     return make_unique<EnergyCalculationSimulator<traitsT>>(loader->num_frames(),
             std::move(loader), std::move(sys), std::move(ff), std::move(obs));
