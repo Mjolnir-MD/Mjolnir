@@ -188,6 +188,9 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     bool  velocity_initialized() const noexcept {return velocity_initialized_;}
     bool& velocity_initialized()       noexcept {return velocity_initialized_;}
 
+    coordinate_container_type const& forces() const noexcept {return forces_master_;}
+    coordinate_container_type&       forces()       noexcept {return forces_master_;}
+
   private:
 
     bool           velocity_initialized_;

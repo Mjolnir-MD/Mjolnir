@@ -161,6 +161,9 @@ class System
     bool  velocity_initialized() const noexcept {return velocity_initialized_;}
     bool& velocity_initialized()       noexcept {return velocity_initialized_;}
 
+    coordinate_container_type const& forces() const noexcept {return forces_;}
+    coordinate_container_type&       forces()       noexcept {return forces_;}
+
   private:
 
     bool           velocity_initialized_;
