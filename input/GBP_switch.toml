@@ -249,7 +249,6 @@ integrator.gammas = [ # {{{
 ] # }}}
 
 [[systems]]
-boundary_shape = {} # unlimited
 attributes.temperature =  300.0000
 particles = [ #{{{
 # chain A in group "proteins"

@@ -24,12 +24,16 @@ template<typename realT, typename coordT>
 struct read_boundary_impl<UnlimitedBoundary<realT, coordT>>
 {
     static UnlimitedBoundary<realT, coordT>
-    invoke(const toml::value& v)
+    invoke(const toml::value& system)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("no boundary is set. unlimited");
-        check_keys_available(v, {}); // no available keys
+
+        if(system.contains("boundary_shape"))
+        {
+            check_keys_available(system.at("boundary_shape"), {/*no keys*/});
+        }
         return UnlimitedBoundary<realT, coordT>{};
     }
 };
@@ -38,11 +42,13 @@ template<typename realT, typename coordT>
 struct read_boundary_impl<CuboidalPeriodicBoundary<realT, coordT>>
 {
     static CuboidalPeriodicBoundary<realT, coordT>
-    invoke(const toml::value& boundary)
+    invoke(const toml::value& system)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("shape of periodic boundary is cuboid");
+
+        const auto& boundary = system.at("boundary_shape");
         check_keys_available(boundary, {"upper"_s, "lower"_s});
 
         const auto upper = toml::find<coordT>(boundary, "upper");
@@ -67,10 +73,10 @@ struct read_boundary_impl<CuboidalPeriodicBoundary<realT, coordT>>
 
 template<typename traitsT>
 typename traitsT::boundary_type
-read_boundary(const toml::value& boundary)
+read_boundary(const toml::value& system)
 {
     using boundary_t = typename traitsT::boundary_type;
-    return detail::read_boundary_impl<boundary_t>::invoke(boundary);
+    return detail::read_boundary_impl<boundary_t>::invoke(system);
 }
 
 // forward declaration.
@@ -118,10 +124,9 @@ read_system(const toml::value& root, const std::size_t N)
 
     check_keys_available(system, {"boundary_shape"_s, "attributes"_s, "particles"_s});
 
-    const auto& boundary  = toml::find<toml::value>(system, "boundary_shape");
     const auto& particles = toml::find<toml::array>(system, "particles");
 
-    System<traitsT> sys(particles.size(), read_boundary<traitsT>(boundary));
+    System<traitsT> sys(particles.size(), read_boundary<traitsT>(system));
 
     for(const auto& attr : toml::find<toml::table>(system, "attributes"))
     {
@@ -161,6 +166,9 @@ read_system(const toml::value& root, const std::size_t N)
                 "both keys, \""_s + key1 + "\" and \""_s + key2 +
                 "\", are not found."_s, v, "in this table"_s));
         };
+
+    // -----------------------------------------------------------------------
+    // read all the particles ...
 
     MJOLNIR_LOG_NOTICE(particles.size(), " particles are found.");
     for(std::size_t i=0; i<particles.size(); ++i)
