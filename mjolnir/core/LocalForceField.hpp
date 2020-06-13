@@ -96,7 +96,7 @@ class LocalForceField
     }
 
     // Topology is defined based on LocalForceField.
-    void write_topology(typename system_type::topology_type& topol)
+    void write_topology(typename system_type::topology_type& topol) const
     {
         for(auto& item : this->interactions_)
         {
