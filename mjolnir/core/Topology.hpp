@@ -52,6 +52,16 @@ class Topology
     {
         std::size_t molecule_id;
         std::vector<edge_type> adjacents;
+
+        bool operator==(const node& other) const
+        {
+            return molecule_id == other.molecule_id &&
+                   adjacents   == other.adjacents;
+        }
+        bool operator!=(const node& other) const
+        {
+            return !(*this == other);
+        }
     };
 
   public:
