@@ -106,6 +106,16 @@ class Topology
 
     std::size_t number_of_molecules() const noexcept {return this->num_molecules_;}
 
+    bool operator==(const Topology& other) const
+    {
+        return this->nodes_ == other.nodes_ &&
+               this->num_molecules_ == other.num_molecules_;
+    }
+    bool operator!=(const Topology& other) const
+    {
+        return !(*this == other);
+    }
+
 
   private:
 
