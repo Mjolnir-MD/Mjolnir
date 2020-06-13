@@ -40,7 +40,7 @@ class ForceField final : public ForceFieldBase<traitsT>
     ForceField& operator=(const ForceField&) = default;
     ForceField& operator=(ForceField&&)      = default;
 
-    void initialize(system_type& sys) override
+    void initialize(const system_type& sys) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();

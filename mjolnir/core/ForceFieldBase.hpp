@@ -22,7 +22,7 @@ class ForceFieldBase
 
     virtual ~ForceFieldBase() = default;
 
-    virtual void initialize(system_type& sys) = 0;
+    virtual void initialize(const system_type& sys) = 0;
     virtual void update(const system_type& sys) = 0;
 
     virtual void reduce_margin(const real_type dmargin, const system_type& sys) = 0;
