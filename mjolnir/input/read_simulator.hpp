@@ -29,7 +29,7 @@ read_molecular_dynamics_simulator(
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
         "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s, "delta_t"_s,
-        "integrator"_s, "env"_s});
+        "integrator"_s, "forcefields"_s, "env"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
@@ -88,7 +88,7 @@ read_simulated_annealing_simulator(
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
             "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s, "delta_t"_s,
-            "integrator"_s, "schedule"_s, "each_step"_s, "env"_s});
+            "integrator"_s, "forcefields"_s, "schedule"_s, "each_step"_s, "env"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
@@ -164,7 +164,7 @@ read_switching_forcefield_simulator(
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
             "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s,
-            "delta_t"_s, "integrator"_s, "schedule"_s, "env"_s});
+            "delta_t"_s, "integrator"_s, "forcefields"_s, "schedule"_s, "env"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
