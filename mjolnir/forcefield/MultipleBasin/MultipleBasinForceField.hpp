@@ -193,6 +193,9 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
             common.front() = "Common{"_s + common.front();
             common.back() += "}"_s;
         }
+        std::copy(std::make_move_iterator(common.begin()),
+                  std::make_move_iterator(common.end()),
+                  std::back_inserter(retval));
         return retval;
     }
 
