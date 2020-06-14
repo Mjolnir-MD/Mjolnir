@@ -122,6 +122,7 @@ read_multiple_basin_forcefield(const toml::value& root, const toml::value& simul
     // # ...
     // ```
 
+    // read all the [[forcefields]] tables and make a map name -> [[forcefields]]
     std::map<std::string, std::pair<bool, toml::value const*>> ffs;
     for(const auto& ff : root.at("forcefields").as_array())
     {
@@ -135,6 +136,7 @@ read_multiple_basin_forcefield(const toml::value& root, const toml::value& simul
         ffs[name] = std::make_pair(false, std::addressof(ff));
     }
 
+    // a helper function to read (loc, glo, ext) forcefields
     const auto read_forcefield_elements = [&](const toml::value* ffptr)
     {
         LocalForceField<traitsT>    loc;
@@ -184,7 +186,7 @@ read_multiple_basin_forcefield(const toml::value& root, const toml::value& simul
     };
 
     std::vector<std::unique_ptr<MultipleBasinUnitBase<traitsT>>> units;
-    for(const auto& unit : simulator.at("units").as_array())
+    for(const auto& unit : simulator.at("forcefields").at("units").as_array())
     {
         const auto& names = toml::find<std::vector<std::string>>(unit, "basins");
         if(names.size() == 2)
@@ -199,7 +201,9 @@ read_multiple_basin_forcefield(const toml::value& root, const toml::value& simul
                     "and basins.", unit.at("basins"), "2 basins are defined.",
                     unit.at("dVs"), "2 dVs expected."));
             }
+            MJOLNIR_LOG_NOTICE("dV    = ", dVs);
             const auto delta = toml::find<real_type>(unit, "delta");
+            MJOLNIR_LOG_NOTICE("delta = ", delta);
 
             if(ffs.at(names.at(0)).first)
             {
@@ -233,11 +237,15 @@ read_multiple_basin_forcefield(const toml::value& root, const toml::value& simul
                     "and basins.", unit.at("basins"), "3 basins are defined.",
                     unit.at("dVs"), "3 dVs expected."));
             }
+            MJOLNIR_LOG_NOTICE("dV    = ", dVs);
 
             const auto& delta = unit.at("delta");
             const auto delta12 = toml::find<real_type>(delta, names.at(0) + "-"_s + names.at(1));
             const auto delta23 = toml::find<real_type>(delta, names.at(1) + "-"_s + names.at(2));
             const auto delta31 = toml::find<real_type>(delta, names.at(2) + "-"_s + names.at(0));
+            MJOLNIR_LOG_NOTICE("delta12 = ", delta12);
+            MJOLNIR_LOG_NOTICE("delta23 = ", delta23);
+            MJOLNIR_LOG_NOTICE("delta31 = ", delta31);
 
             if(ffs.at(names.at(0)).first)
             {
@@ -308,18 +316,18 @@ read_forcefield(const toml::value& root, const toml::value& simulator)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
-    if(!simulator.contains("forcefield"))
+    if(!simulator.contains("forcefields"))
     {
         return read_default_forcefield<traitsT>(root, 0);
     }
-    else if(simulator.at("forcefield").at("type").as_string() == "MultipleBasin")
+    else if(simulator.at("forcefields").at("type").as_string() == "MultipleBasin")
     {
         return read_multiple_basin_forcefield<traitsT>(root, simulator);
     }
     else
     {
         throw std::runtime_error(toml::format_error("mjolnir::read_forcefield: "
-            "unknown forcefield type", simulator.at("forcefield").at("type"),
+            "unknown forcefield type", simulator.at("forcefields").at("type"),
             "here", {"expected one of the following: ",
                 "- \"MultipleBasin\": Multiple Basin forcefield.",
                 "- (nothing)      : In case of normal forcefield, you don't need this field."
