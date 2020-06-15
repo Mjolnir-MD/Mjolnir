@@ -15,7 +15,7 @@ if(SEPARATE_BUILD)
     target_link_libraries(mjolnir mjolnir_core)
 endif()
 
-if(OpenMP_FOUND AND USE_OPENMP)
+if(OpenMP_CXX_FOUND AND USE_OPENMP)
     message(STATUS "adding OpenMP flags ${OpenMP_CXX_FLAGS} to mjolnir ...")
     target_link_libraries(mjolnir ${OpenMP_CXX_LIBRARIES})
 
