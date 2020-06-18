@@ -1,1 +1,2 @@
 add_subdirectory(test_BAOABIntegrator)
+add_subdirectory(test_g-BAOABIntegrator)
