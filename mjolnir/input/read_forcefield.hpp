@@ -202,7 +202,7 @@ read_multiple_basin_forcefield(const toml::value& root, const toml::value& simul
                     unit.at("dVs"), "2 dVs expected."));
             }
             MJOLNIR_LOG_NOTICE("dV    = ", dVs);
-            const auto delta = toml::find<real_type>(unit, "delta");
+            const auto delta = -std::abs(toml::find<real_type>(unit, "delta"));
             MJOLNIR_LOG_NOTICE("delta = ", delta);
 
             if(ffs.at(names.at(0)).first)
