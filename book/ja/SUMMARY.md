@@ -66,6 +66,7 @@
         - [ImplicitMembrane](refs/ImplicitMembranePotential.md)
       - [PositionRestraintInteraction](refs/PositionRestraintInteraction.md)
         - [HarmonicRestraint](refs/HarmonicRestraintPotential.md)
+    - [MultipleBasinForceField](refs/MultipleBasinForceField.md)
   - [Observer](refs/Observer.md)
     - [XYZObserver](refs/XYZObserver.md)
     - [DCDObserver](refs/DCDObserver.md)
