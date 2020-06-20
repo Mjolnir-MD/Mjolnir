@@ -209,7 +209,6 @@ class gBAOABLangevinIntegrator
     remover_type remover_;
 
     real_type   temperature_;
-    std::size_t correction_max_iter_;
     real_type   correction_tolerance_;
     real_type   correction_tolerance_dt_;
     real_type   correction_tolerance_dt_itr_;
