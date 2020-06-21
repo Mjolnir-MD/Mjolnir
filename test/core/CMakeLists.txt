@@ -104,6 +104,7 @@ set(TEST_NAMES
     test_read_global_forcefield
     test_read_external_forcefield
     test_read_forcefield
+    test_read_multiple_basin_forcefield
 
     test_read_molecular_dynamics_simulator
     test_read_simulated_annealing_simulator
