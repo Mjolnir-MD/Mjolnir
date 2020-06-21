@@ -201,19 +201,20 @@ read_multiple_basin_forcefield(const toml::value& root, const toml::value& simul
                     "and basins.", unit.at("basins"), "2 basins are defined.",
                     unit.at("dVs"), "2 dVs expected."));
             }
-            MJOLNIR_LOG_NOTICE("dV    = ", dVs);
+            MJOLNIR_LOG_INFO("dV         = ", dVs);
+            MJOLNIR_LOG_INFO("delta(raw) = ", toml::find<real_type>(unit, "delta"));
             const auto delta = -std::abs(toml::find<real_type>(unit, "delta"));
-            MJOLNIR_LOG_NOTICE("delta = ", delta);
+            MJOLNIR_LOG_INFO("delta(set) = ", delta);
 
             if(ffs.at(names.at(0)).first)
             {
                 MJOLNIR_LOG_WARN("forcefield ", names.at(0), " is used more "
-                                 "than twice in MultipleBasin.");
+                                 "than once in MultipleBasin.");
             }
             if(ffs.at(names.at(1)).first)
             {
                 MJOLNIR_LOG_WARN("forcefield ", names.at(1), " is used more "
-                                 "than twice in MultipleBasin.");
+                                 "than once in MultipleBasin.");
             }
             ffs.at(names.at(0)).first = true;
             ffs.at(names.at(1)).first = true;
@@ -240,28 +241,36 @@ read_multiple_basin_forcefield(const toml::value& root, const toml::value& simul
             MJOLNIR_LOG_NOTICE("dV    = ", dVs);
 
             const auto& delta = unit.at("delta");
-            const auto delta12 = toml::find<real_type>(delta, names.at(0) + "-"_s + names.at(1));
-            const auto delta23 = toml::find<real_type>(delta, names.at(1) + "-"_s + names.at(2));
-            const auto delta31 = toml::find<real_type>(delta, names.at(2) + "-"_s + names.at(0));
-            MJOLNIR_LOG_NOTICE("delta12 = ", delta12);
-            MJOLNIR_LOG_NOTICE("delta23 = ", delta23);
-            MJOLNIR_LOG_NOTICE("delta31 = ", delta31);
+            MJOLNIR_LOG_NOTICE("delta12(raw) = ", toml::find<real_type>(delta, names.at(0) + "-"_s + names.at(1)));
+            MJOLNIR_LOG_NOTICE("delta23(raw) = ", toml::find<real_type>(delta, names.at(1) + "-"_s + names.at(2)));
+            MJOLNIR_LOG_NOTICE("delta31(raw) = ", toml::find<real_type>(delta, names.at(2) + "-"_s + names.at(0)));
+
+            const auto delta12 = -std::abs(toml::find<real_type>(delta, names.at(0) + "-"_s + names.at(1)));
+            const auto delta23 = -std::abs(toml::find<real_type>(delta, names.at(1) + "-"_s + names.at(2)));
+            const auto delta31 = -std::abs(toml::find<real_type>(delta, names.at(2) + "-"_s + names.at(0)));
+            MJOLNIR_LOG_NOTICE("delta12(set) = ", delta12);
+            MJOLNIR_LOG_NOTICE("delta23(set) = ", delta23);
+            MJOLNIR_LOG_NOTICE("delta31(set) = ", delta31);
 
             if(ffs.at(names.at(0)).first)
             {
                 MJOLNIR_LOG_WARN("forcefield ", names.at(0), " is used more "
-                                 "than twice in MultipleBasin.");
+                                 "than once in MultipleBasin.");
             }
             if(ffs.at(names.at(1)).first)
             {
                 MJOLNIR_LOG_WARN("forcefield ", names.at(1), " is used more "
-                                 "than twice in MultipleBasin.");
+                                 "than once in MultipleBasin.");
             }
             if(ffs.at(names.at(2)).first)
             {
                 MJOLNIR_LOG_WARN("forcefield ", names.at(2), " is used more "
-                                 "than twice in MultipleBasin.");
+                                 "than once in MultipleBasin.");
             }
+            ffs.at(names.at(0)).first = true;
+            ffs.at(names.at(1)).first = true;
+            ffs.at(names.at(2)).first = true;
+
             auto ff1 = read_forcefield_elements(ffs.at(names.at(0)).second);
             auto ff2 = read_forcefield_elements(ffs.at(names.at(1)).second);
             auto ff3 = read_forcefield_elements(ffs.at(names.at(2)).second);
