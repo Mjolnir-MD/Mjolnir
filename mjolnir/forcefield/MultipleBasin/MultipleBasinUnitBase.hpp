@@ -1,6 +1,5 @@
 #ifndef MJOLNIR_CORE_MULTIPLE_BASIN_UNIT_BASE_HPP
 #define MJOLNIR_CORE_MULTIPLE_BASIN_UNIT_BASE_HPP
-#include <mjolnir/core/ForceFieldBase.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/util/string.hpp>
 #include <algorithm>
@@ -54,6 +53,7 @@ class MultipleBasinUnitBase
     virtual void reduce_margin(const real_type dmargin, const system_type&) = 0;
     virtual void scale_margin (const real_type scale,   const system_type&) = 0;
 
+    // energy output
     virtual std::vector<std::string> list_energy_name() const = 0;
     virtual std::vector<real_type>   dump_energy(const system_type&) const = 0;
 };

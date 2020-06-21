@@ -2,6 +2,7 @@
 #define MJOLNIR_CORE_MULTIPLE_BASIN_FORCE_FIELD_HPP
 #include <mjolnir/forcefield/MultipleBasin/MultipleBasinUnitBase.hpp>
 #include <mjolnir/core/Topology.hpp>
+#include <mjolnir/core/ForceFieldBase.hpp>
 #include <mjolnir/core/LocalForceField.hpp>
 #include <mjolnir/core/GlobalForceField.hpp>
 #include <mjolnir/core/ExternalForceField.hpp>
