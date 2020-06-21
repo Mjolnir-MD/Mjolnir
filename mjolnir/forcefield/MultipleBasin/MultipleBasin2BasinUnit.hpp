@@ -264,9 +264,20 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         return retval;
     }
 
+    // for tests
     real_type delta() const noexcept {return delta_;}
     real_type dV1()   const noexcept {return dV1_;}
     real_type dV2()   const noexcept {return dV2_;}
+
+    std::string const& name1() const noexcept {return name1_;}
+    std::string const& name2() const noexcept {return name2_;}
+
+    local_forcefield_type    const& local1()    const noexcept {return loc1_;}
+    local_forcefield_type    const& local2()    const noexcept {return loc2_;}
+    global_forcefield_type   const& global1()   const noexcept {return glo1_;}
+    global_forcefield_type   const& global2()   const noexcept {return glo2_;}
+    external_forcefield_type const& external1() const noexcept {return ext1_;}
+    external_forcefield_type const& external2() const noexcept {return ext2_;}
 
     // -----------------------------------------------------------------------
     // calc_force/energy, dump/list_energy for each basin

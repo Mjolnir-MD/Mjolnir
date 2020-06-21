@@ -159,7 +159,7 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
 
         const auto b = V_1 + V_2 + V_3;
         const auto c = 0.5 * (V_1*V_1 + V_2*V_2 + V_3*V_3) +
-                      delta12_sq_ + delta23_sq_ + delta31_sq_;
+                       delta12_sq_ + delta23_sq_ + delta31_sq_;
         const auto d = V_1 * V_2 * V_3 + 2 * delta12_ * delta23_ * delta31_ -
                        V_1 * delta23_sq_ - V_2 * delta31_sq_ - V_3 * delta12_sq_;
 
@@ -348,6 +348,20 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
     real_type dV1()     const noexcept {return dV1_;}
     real_type dV2()     const noexcept {return dV2_;}
     real_type dV3()     const noexcept {return dV3_;}
+
+    std::string const& name1() const noexcept {return name1_;}
+    std::string const& name2() const noexcept {return name2_;}
+    std::string const& name3() const noexcept {return name3_;}
+
+    local_forcefield_type    const& local1()    const noexcept {return std::get<0>(basin1_);}
+    local_forcefield_type    const& local2()    const noexcept {return std::get<0>(basin2_);}
+    local_forcefield_type    const& local3()    const noexcept {return std::get<0>(basin3_);}
+    global_forcefield_type   const& global1()   const noexcept {return std::get<1>(basin1_);}
+    global_forcefield_type   const& global2()   const noexcept {return std::get<1>(basin2_);}
+    global_forcefield_type   const& global3()   const noexcept {return std::get<1>(basin3_);}
+    external_forcefield_type const& external1() const noexcept {return std::get<2>(basin1_);}
+    external_forcefield_type const& external2() const noexcept {return std::get<2>(basin2_);}
+    external_forcefield_type const& external3() const noexcept {return std::get<2>(basin3_);}
 
     // -----------------------------------------------------------------------
     // calc_force/energy, dump/list_energy for each basin

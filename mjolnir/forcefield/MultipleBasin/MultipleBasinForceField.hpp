@@ -220,6 +220,12 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
     }
     topology_type const& topology() const noexcept override {return topol_;}
 
+    local_forcefield_type    const& common_local()    const noexcept {return loc_common_;}
+    global_forcefield_type   const& common_global()   const noexcept {return glo_common_;}
+    external_forcefield_type const& common_external() const noexcept {return ext_common_;}
+
+    std::vector<multiple_basin_unit_type> const& units() const noexcept {return units_;}
+
   private:
 
     topology_type            topol_;
