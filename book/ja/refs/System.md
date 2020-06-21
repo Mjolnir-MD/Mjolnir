@@ -10,7 +10,8 @@
 ```toml
 [[systems]]
 attributes.temperature = 300.0
-boundary_shape = {} # Unlimited
+boundary_shape.lower = [  0.0,   0.0,   0.0] # lower limit of the boundary
+boundary_shape.upper = [100.0, 100.0, 100.0] # upper limit of the boundary
 particles = [
     {m= 1.0, pos=[ 1.000, 2.000, -1.000], vel=[ 0.100,-0.200, 0.300], name="CA", group="A"},
     # ...
@@ -21,6 +22,7 @@ particles = [
 
 - `boundary_shape`: テーブル型
   - 境界の具体的な大きさを設定します。
+  - `Unlimited`な境界条件の場合、省略可能です。
 - `attributes`: テーブル型
   - 系全体に適用されるパラメータを設定します。
 - `particles`: テーブルの配列型
@@ -32,11 +34,11 @@ particles = [
 
 #### 境界条件が`Unlimited`の場合
 
-境界条件が`"Unlimited"`の場合、このテーブルは空です。
+境界条件が`"Unlimited"`の場合、このテーブルは空です。省略可能です。
 
 ```toml
 [[systems]]
-boundary_shape = {}
+# boundary_shape = {} # 省略可
 ```
 
 #### 境界条件が`PeriodicCuboid`の場合

@@ -10,7 +10,7 @@ if(SEPARATE_BUILD)
     target_link_libraries(test_BAOABIntegrator mjolnir_core)
 endif()
 
-if(OpenMP_FOUND AND USE_OPENMP)
+if(OpenMP_CXX_FOUND AND USE_OPENMP)
     message(STATUS "adding OpenMP flags ${OpenMP_CXX_FLAGS} to test_BAOABIntegrator ...")
     target_link_libraries(test_BAOABIntegrator ${OpenMP_CXX_LIBRARIES})
 
