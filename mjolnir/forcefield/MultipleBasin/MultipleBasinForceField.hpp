@@ -107,11 +107,11 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
         {
             unit->calc_force(sys);
         }
-        sys.preprocess_force();
+        sys.preprocess_forces();
         loc_common_.calc_force(sys);
         glo_common_.calc_force(sys);
         ext_common_.calc_force(sys);
-        sys.postprocess_force();
+        sys.postprocess_forces();
         return ;
     }
 
