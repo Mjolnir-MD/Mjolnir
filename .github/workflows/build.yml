@@ -1,0 +1,25 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  build-linux:
+    runs-on: Ubuntu-18.04
+    strategy:
+      matrix:
+        compiler: ['g++-9', 'g++-8']
+        separate: ['ON', 'OFF']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Configure
+        run: |
+            mkdir build && cd build && cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DSEPARATE_BUILD=${{ matrix.separate }} -DFIND_BOOST=ON -DUSE_OPENMP=ON -DBUILD_INTEGRATION_TEST=OFF
+      - name: Build
+        run: |
+            cmake --build .
+      - name: Test
+        run: |
+            ctest --output-on-failure
