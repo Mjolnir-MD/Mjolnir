@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_INTERACTION_CONSTRAINT_INTERACTION_HPP
-#define MJOLNIR_INTERACTION_CONSTRAINT_INTERACTION_HPP
+#ifndef MJOLNIR_CORE_CONSTRAINT_FORCE_FIELD_HPP
+#define MJOLNIR_CORE_CONSTRAINT_FORCE_FIELD_HPP
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/util/logger.hpp>
