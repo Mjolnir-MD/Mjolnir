@@ -157,13 +157,7 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
         const auto V_2 = this->calc_energy_basin2(sys) + this->dV2_;
         const auto V_3 = this->calc_energy_basin3(sys) + this->dV3_;
 
-        const auto b = V_1 + V_2 + V_3;
-        const auto c = 0.5 * (V_1*V_1 + V_2*V_2 + V_3*V_3) +
-                       delta12_sq_ + delta23_sq_ + delta31_sq_;
-        const auto d = V_1 * V_2 * V_3 + 2 * delta12_ * delta23_ * delta31_ -
-                       V_1 * delta23_sq_ - V_2 * delta31_sq_ - V_3 * delta12_sq_;
-
-        const auto V_MB = min_solution_of_cubic_equation(b, c, d);
+        const auto V_MB = this->calc_V_MB(V_1, V_2, V_3);
 
         const auto V_diff_1 = V_1 - V_MB;
         const auto V_diff_2 = V_2 - V_MB;
@@ -191,17 +185,10 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
     {
         // -------------------------------------------------------------------
         // calc energy of V_MB
-        const auto V_1    = this->calc_energy_basin1(sys) + this->dV1_;
-        const auto V_2    = this->calc_energy_basin2(sys) + this->dV2_;
-        const auto V_3    = this->calc_energy_basin3(sys) + this->dV3_;
-
-        const auto b = V_1 + V_2 + V_3;
-        const auto c = 0.5 * (V_1*V_1 + V_2*V_2 + V_3*V_3) +
-                      delta12_sq_ + delta23_sq_ + delta31_sq_;
-        const auto d = V_1 * V_2 * V_3 + 2 * delta12_ * delta23_ * delta31_ -
-                       V_1 * delta23_sq_ - V_2 * delta31_sq_ - V_3 * delta12_sq_;
-
-        const auto V_MB = this->min_solution_of_cubic_equation(b, c, d);
+        const auto V_1  = this->calc_energy_basin1(sys) + this->dV1_;
+        const auto V_2  = this->calc_energy_basin2(sys) + this->dV2_;
+        const auto V_3  = this->calc_energy_basin3(sys) + this->dV3_;
+        const auto V_MB = this->calc_V_MB(V_1, V_2, V_3);
 
         this->c1_ = 1; // always 1, baseline.
         this->c2_ = (delta12_ * (V_MB - V_3) + delta23_ * delta31_) /
@@ -313,13 +300,7 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
         const auto V_2 = std::accumulate(es_2.begin(), es_2.end(), real_type(0)) + this->dV2_;
         const auto V_3 = std::accumulate(es_3.begin(), es_3.end(), real_type(0)) + this->dV3_;
 
-        const auto b = V_1 + V_2 + V_3;
-        const auto c = 0.5 * (V_1*V_1 + V_2*V_2 + V_3*V_3) +
-                      delta12_sq_ + delta23_sq_ + delta31_sq_;
-        const auto d = V_1 * V_2 * V_3 + 2 * delta12_ * delta23_ * delta31_ -
-                       V_1 * delta23_sq_ - V_2 * delta31_sq_ - V_3 * delta12_sq_;
-
-        const auto V_MB = this->min_solution_of_cubic_equation(b, c, d);
+        const auto V_MB = this->calc_V_MB(V_1, V_2, V_3);
 
         this->c1_ = 1; // always 1, baseline.
         this->c2_ = (delta12_ * (V_MB - V_3) + delta23_ * delta31_) /
@@ -495,12 +476,23 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
 
   private:
 
+    real_type calc_V_MB(const real_type V_1, const real_type V_2,
+                        const real_type V_3) const noexcept
+    {
+        const auto b = V_1 + V_2 + V_3;
+        const auto c = 0.5 * (V_1*V_1 + V_2*V_2 + V_3*V_3 - b * b) +
+                      delta12_sq_ + delta23_sq_ + delta31_sq_;
+        const auto d = V_1 * V_2 * V_3 + 2 * delta12_ * delta23_ * delta31_ -
+                       V_1 * delta23_sq_ - V_2 * delta31_sq_ - V_3 * delta12_sq_;
+
+        return this->min_solution_of_cubic_equation(-b, -c, -d); // a == -1
+    }
+
     // minimum solution of 0 = x^3 + bx^2 + cx + d.
-    static real_type min_solution_of_cubic_equation(// assuming a == 0
-            const real_type b, const real_type c, const real_type d)
+    static real_type min_solution_of_cubic_equation(// assuming a == 1
+            const real_type b, const real_type c, const real_type d) noexcept
     {
         constexpr real_type one_over_3  = real_type(1) / real_type(3);
-        constexpr real_type one_over_9  = real_type(1) / real_type(9);
         constexpr real_type one_over_27 = real_type(1) / real_type(27);
 
         constexpr real_type one_over_2  = real_type(1) / real_type(2);
@@ -512,7 +504,7 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
         const real_type bsq = b * b;
 
         const real_type p = c - bsq * one_over_3;
-        const real_type q = d + b * (2 * bsq - c * one_over_9) * one_over_27;
+        const real_type q = d + b * (2 * bsq - 9 * c) * one_over_27;
 
         const real_type discriminant = one_over_4  * q * q +
                                        one_over_27 * p * p * p;
