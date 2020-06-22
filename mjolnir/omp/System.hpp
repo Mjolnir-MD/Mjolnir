@@ -150,6 +150,10 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
         return forces_threads_[thread_num][particle_id];
     }
 
+    // Here, since we already allocate forces_threads_, we don't need anything
+    // in preprocess_forces() function. On the contrary, since all the forces
+    // will be calculated in different cores, we need to merge those
+    // thread-local forces by summing up those for each particle.
     void preprocess_forces() noexcept { /*do nothing*/ }
     void postprocess_forces() noexcept
     {
