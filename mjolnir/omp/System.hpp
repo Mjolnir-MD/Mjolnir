@@ -150,7 +150,8 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
         return forces_threads_[thread_num][particle_id];
     }
 
-    void merge_forces() noexcept
+    void preprocess_forces() noexcept { /*do nothing*/ }
+    void postprocess_forces() noexcept
     {
 #pragma omp parallel for
         for(std::size_t i=0; i<this->size(); ++i)

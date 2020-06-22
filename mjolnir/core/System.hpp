@@ -131,6 +131,14 @@ class System
         };
     }
 
+    // When parallelizing a code, forces are often calculated separately in
+    // several computational units, like cores, nodes, gpu devices, etc. To
+    // make it consistent, we may need to do something with forces calculated
+    // separately. Those functions are provided for such an specialized
+    // situation. Here, for the normal case, we do not need to do anything.
+    void preprocess_force()  noexcept {/* do nothing */}
+    void postprocess_force() noexcept {/* do nothing */}
+
     real_type  mass (std::size_t i) const noexcept {return masses_[i];}
     real_type& mass (std::size_t i)       noexcept {return masses_[i];}
     real_type  rmass(std::size_t i) const noexcept {return rmasses_[i];}
