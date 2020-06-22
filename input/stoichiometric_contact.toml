@@ -1,0 +1,93 @@
+[files]
+output.prefix = "stoichiometric"
+output.path   = "./"
+output.format = "xyz"
+
+[units]
+length        = "angstrom"
+energy        = "kcal/mol"
+
+[simulator]
+type          = "MolecularDynamics"
+boundary_type = "Periodic"
+precision     = "double"
+delta_t       = 0.3
+seed          = 12345
+total_step    = 50000
+save_step     =   100
+integrator_type = "BAOABLangevin"
+integrator.parameters = [
+{index = 0, gamma = 0.01},
+{index = 1, gamma = 0.01},
+{index = 2, gamma = 0.01},
+{index = 3, gamma = 0.01},
+{index = 4, gamma = 0.01},
+{index = 5, gamma = 0.01},
+{index = 6, gamma = 0.01},
+{index = 7, gamma = 0.01},
+{index = 8, gamma = 0.01},
+{index = 9, gamma = 0.01},
+]
+
+[[systems]]
+attributes.temperature = 300.0
+boundary_shape.upper = [100.0, 100.0, 100.0]
+boundary_shape.lower = [  0.0,   0.0,   0.0]
+particles = [
+{m =  100.00, pos = [ 20.000,  20.000,  20.000], name="A"},
+{m =  100.00, pos = [ 20.000,  20.000,  20.000], name="A"},
+{m =  100.00, pos = [ 20.000,  20.000,  20.000], name="A"},
+{m =  100.00, pos = [ 20.000,  20.000,  20.000], name="A"},
+{m =  100.00, pos = [ 20.000,  20.000,  20.000], name="A"},
+{m =  100.00, pos = [ 20.000,  20.000,  20.000], name="A"},
+{m =  100.00, pos = [ 20.000,  20.000,  20.000], name="B"},
+{m =  100.00, pos = [ 20.000,  20.000,  20.000], name="B"},
+{m =  100.00, pos = [ 20.000,  20.000,  20.000], name="B"},
+{m =  100.00, pos = [ 20.000,  20.000,  20.000], name="B"},
+]
+
+[[forcefields]]
+[[forcefields.global]]
+interaction                   = "Pair"
+potential                     = "ExcludedVolume"
+ignore.molecule               = "Nothing"
+ignore.particles_within_bond  = 1
+spatial_partition.type        = "Nothing"
+spatial_partition.margin      = 1.0
+epsilon                       = 0.6
+parameters = [
+{index = 0, radius = 2.0},
+{index = 1, radius = 2.0},
+{index = 2, radius = 2.0},
+{index = 3, radius = 2.0},
+{index = 4, radius = 2.0},
+{index = 5, radius = 2.0},
+{index = 6, radius = 2.0},
+{index = 7, radius = 2.0},
+{index = 8, radius = 2.0},
+{index = 9, radius = 2.0},
+]
+
+[[forcefields]]
+[[forcefields.global]]
+interaction                  = "Stoichiometric"
+potential                    = "StoichiometricContact"
+ignore.molecule              = "Nothing"
+ignore.particles_within_bond = 1
+spatial_partition.type       = "Nothing"
+spatial_partition.margin     = 1.0
+parameters = [
+{kinds = ["A", "B"], coef1 = 3, coef2 = 1, v0 = 4.0, k = 1.0},
+]
+kinds = [
+{index = 0, kind = "A"},
+{index = 0, kind = "A"},
+{index = 0, kind = "A"},
+{index = 0, kind = "A"},
+{index = 0, kind = "A"},
+{index = 0, kind = "A"},
+{index = 0, kind = "B"},
+{index = 0, kind = "B"},
+{index = 0, kind = "B"},
+{index = 0, kind = "B"},
+]
