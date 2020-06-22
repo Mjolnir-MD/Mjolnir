@@ -154,14 +154,6 @@ class ForceField final : public ForceFieldBase<traitsT>
     local_forcefield_type    local_;
     global_forcefield_type   global_;
     external_forcefield_type external_;
-
-#ifdef MJOLNIR_WITH_OPENMP
-    // OpenMP implementation uses its own specialization to avoid data race.
-    // So this implementation should not be instanciated with the OpenMP traits.
-    static_assert(!is_openmp_simulator_traits<traits_type>::value,
-                  "this is the default implementation, not for OpenMP");
-#endif
-
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD
