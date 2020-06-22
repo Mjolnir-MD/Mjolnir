@@ -271,7 +271,6 @@ void gBAOABLangevinIntegrator<traitsT>::initialize(
         std::size_t second_idx = constraint.first[1];
         reduced_mass_[i] = 1.0 / (system.rmass(first_idx) + system.rmass(second_idx));
     }
-    MJOLNIR_LOG_INFO("huga");
 
     return;
 }
