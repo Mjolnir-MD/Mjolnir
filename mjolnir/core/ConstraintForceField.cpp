@@ -1,7 +1,7 @@
 #include <mjolnir/core/ConstraintForceField.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
-#error "MJOLNIR_SEPARATE_BUIL flag is required"
+#error "MJOLNIR_SEPARATE_BUILD flag is required"
 #endif
 
 namespace mjolnir
