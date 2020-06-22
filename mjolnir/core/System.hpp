@@ -136,6 +136,10 @@ class System
     // make it consistent, we may need to do something with forces calculated
     // separately. Those functions are provided for such an specialized
     // situation. Here, for the normal case, we do not need to do anything.
+    //     After calling `postprocess_forces()`, the result of `force(i)` always
+    // represents the "force" of a particle at that time point. I mean, we can
+    // consider the "force" is equivalent to the force that is calculated by
+    // single core.
     void preprocess_forces()  noexcept {/* do nothing */}
     void postprocess_forces() noexcept {/* do nothing */}
 
