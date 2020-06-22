@@ -51,6 +51,8 @@ set(TEST_NAMES
     test_afm_fitting_interaction
     test_rectangular_box_interaction
 
+    test_multiple_basin_forcefield
+
     test_neighbor_list
     test_unlimited_verlet_list
     test_periodic_verlet_list
