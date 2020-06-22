@@ -256,7 +256,6 @@ void gBAOABLangevinIntegrator<traitsT>::initialize(
         old_position_[i] = system.position(i);
     }
 
-    MJOLNIR_LOG_INFO("hoge");
     square_v0s_.resize(constraints.size());
     r_square_v0s_.resize(constraints.size());
     reduced_mass_.resize(constraints.size());
