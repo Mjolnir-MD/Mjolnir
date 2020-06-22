@@ -16,7 +16,7 @@ jobs:
           submodules: true
       - name: Configure
         run: |
-            mkdir build && cd build && cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DSEPARATE_BUILD=${{ matrix.separate }} -DFIND_BOOST=ON -DUSE_OPENMP=ON -DBUILD_INTEGRATION_TEST=OFF
+            mkdir build && cd build && cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DSEPARATE_BUILD=${{ matrix.separate }} -DFIND_BOOST=ON -DBOOST_ROOT=/usr/local/share/boost/1.72.0 -DUSE_OPENMP=ON -DBUILD_INTEGRATION_TEST=OFF
       - name: Build
         run: |
             cmake --build .
