@@ -95,9 +95,11 @@ class ForceField final : public ForceFieldBase<traitsT>
 
     void calc_force(system_type& sys) const noexcept override
     {
+        sys.preprocess_forces();
         local_   .calc_force(sys);
         global_  .calc_force(sys);
         external_.calc_force(sys);
+        sys.postprocess_forces();
         return;
     }
     real_type calc_energy(const system_type& sys) const noexcept override
