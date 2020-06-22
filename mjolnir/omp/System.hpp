@@ -41,7 +41,7 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
           attributes_(), num_particles_(num_particles),
           masses_   (num_particles), rmasses_   (num_particles),
           positions_(num_particles), velocities_(num_particles),
-          forces_master_(num_particles),
+          forces_main_(num_particles),
           forces_threads_(omp_get_max_threads(),
               coordinate_container_type(num_particles),
               cache_aligned_allocator<coordinate_container_type>{}),
@@ -98,7 +98,7 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     {
         return particle_view_type{
             masses_[i],    rmasses_[i],
-            positions_[i], velocities_[i], forces_master_[i],
+            positions_[i], velocities_[i], forces_main_[i],
             names_[i],     groups_[i]
         };
     }
@@ -106,7 +106,7 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     {
         return particle_const_view_type{
             masses_[i],    rmasses_[i],
-            positions_[i], velocities_[i], forces_master_[i],
+            positions_[i], velocities_[i], forces_main_[i],
             names_[i],     groups_[i]
         };
     }
@@ -114,7 +114,7 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     {
         return particle_view_type{
             masses_.at(i),    rmasses_.at(i),
-            positions_.at(i), velocities_.at(i), forces_master_.at(i),
+            positions_.at(i), velocities_.at(i), forces_main_.at(i),
             names_.at(i),     groups_.at(i)
         };
     }
@@ -122,7 +122,7 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     {
         return particle_const_view_type{
             masses_.at(i),    rmasses_.at(i),
-            positions_.at(i), velocities_.at(i), forces_master_.at(i),
+            positions_.at(i), velocities_.at(i), forces_main_.at(i),
             names_.at(i),     groups_.at(i)
         };
     }
@@ -136,8 +136,8 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     coordinate_type&       position(std::size_t i)       noexcept {return positions_[i];}
     coordinate_type const& velocity(std::size_t i) const noexcept {return velocities_[i];}
     coordinate_type&       velocity(std::size_t i)       noexcept {return velocities_[i];}
-    coordinate_type const& force   (std::size_t i) const noexcept {return forces_master_[i];}
-    coordinate_type&       force   (std::size_t i)       noexcept {return forces_master_[i];}
+    coordinate_type const& force   (std::size_t i) const noexcept {return forces_main_[i];}
+    coordinate_type&       force   (std::size_t i)       noexcept {return forces_main_[i];}
 
     coordinate_type const&
     force_thread(std::size_t thread_num, std::size_t particle_id) const noexcept
@@ -189,8 +189,8 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     bool  velocity_initialized() const noexcept {return velocity_initialized_;}
     bool& velocity_initialized()       noexcept {return velocity_initialized_;}
 
-    coordinate_container_type const& forces() const noexcept {return forces_master_;}
-    coordinate_container_type&       forces()       noexcept {return forces_master_;}
+    coordinate_container_type const& forces() const noexcept {return forces_main_;}
+    coordinate_container_type&       forces()       noexcept {return forces_main_;}
 
   private:
 
@@ -203,7 +203,7 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     real_container_type          rmasses_; // r for reciprocal
     coordinate_container_type    positions_;
     coordinate_container_type    velocities_;
-    coordinate_container_type    forces_master_;
+    coordinate_container_type    forces_main_;
     // thread-local forces
     std::vector<coordinate_container_type,
                 cache_aligned_allocator<coordinate_container_type>
