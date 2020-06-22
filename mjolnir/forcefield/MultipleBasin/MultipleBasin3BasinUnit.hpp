@@ -144,13 +144,21 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
         // save the current forces to force_buffer_.
         // force_buffer is zero-cleared (at the end of this function),
         // so the forces in the system will be zero-cleared after this.
+        sys.preprocess_forces();
         this->calc_force_basin1(sys);
+        sys.postprocess_forces();
+
         swap(this->force_buffer1_, sys.forces());
 
+        sys.preprocess_forces();
         this->calc_force_basin2(sys);
+        sys.postprocess_forces();
+
         swap(this->force_buffer2_, sys.forces());
 
+        sys.preprocess_forces();
         this->calc_force_basin3(sys);
+        sys.postprocess_forces();
 
         // TODO add calc_force_and_energy() to `Interaction`s.
         const auto V_1 = this->calc_energy_basin1(sys) + this->dV1_;

@@ -116,7 +116,9 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         // -------------------------------------------------------------------
         // calc force of V_MB first.
 
+        sys.preprocess_forces();
         this->calc_force_basin1(sys);
+        sys.postprocess_forces();
         {
             // save the current forces to force_buffer_.
             // force_buffer is zero-cleared (at the end of this function),
@@ -124,7 +126,9 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
             using std::swap;
             swap(this->force_buffer_, sys.forces());
         }
+        sys.preprocess_forces();
         this->calc_force_basin2(sys);
+        sys.postprocess_forces();
 
         // TODO add calc_force_and_energy() to `Interaction`s.
         const auto V_1    = this->calc_energy_basin1(sys) + this->dV1_;

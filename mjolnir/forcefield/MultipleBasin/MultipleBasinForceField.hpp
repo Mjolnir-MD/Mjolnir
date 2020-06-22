@@ -74,16 +74,6 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        // TODO
-        if( ! is_simulator_traits<traits_type>::value)
-        {
-            MJOLNIR_LOG_ERROR("Currently, parallelization of MultipleBasin is "
-                              "not supported.");
-            throw std::runtime_error("mjolnir::MultipleBasinForceField: "
-                                     "parallel execution is not supported");
-        }
-
-
         // -------------------------------------------------------------------
         // write topologies. Here we assume topologies are the same
 
@@ -117,9 +107,11 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
         {
             unit->calc_force(sys);
         }
+        sys.preprocess_force();
         loc_common_.calc_force(sys);
         glo_common_.calc_force(sys);
         ext_common_.calc_force(sys);
+        sys.postprocess_force();
         return ;
     }
 
