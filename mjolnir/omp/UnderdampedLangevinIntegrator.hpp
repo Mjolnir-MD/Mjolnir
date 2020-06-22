@@ -2,7 +2,6 @@
 #define MJOLNIR_OMP_UNDERDAMPED_LANGEVIN_INTEGRATOR
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/omp/ForceField.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/SystemMotionRemover.hpp>
 #include <mjolnir/core/UnderdampedLangevinIntegrator.hpp>

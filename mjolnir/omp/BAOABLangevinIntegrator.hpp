@@ -2,7 +2,6 @@
 #define MJOLNIR_OMP_BAOAB_LANGEVIN_INTEGRATOR_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/omp/ForceField.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/SystemMotionRemover.hpp>
 #include <mjolnir/core/BAOABLangevinIntegrator.hpp>

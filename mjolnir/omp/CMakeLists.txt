@@ -1,6 +1,5 @@
 set(mjolnir_omp_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/System.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/ForceField.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/RandomNumberGenerator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/SystemMotionRemover.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/BAOABLangevinIntegrator.cpp"
