@@ -110,9 +110,8 @@ void BAOABLangevinIntegrator<traitsT>::initialize(
 
     if(!ff.constraint().empty())
     {
-        MJOLNIR_LOG_WARN(
-            "BAOAB langevin integrator do not support constraint forcefield.",
-            " [[forcefields.constraint]] will be ignored.");
+        MJOLNIR_LOG_WARN("BAOAB langevin integrator does not support constraint"
+            " forcefield. [[forcefields.constraint]] will be ignored.");
     }
 
     // calculate parameters for each particles

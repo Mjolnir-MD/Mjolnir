@@ -38,6 +38,15 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
     void initialize(system_type& sys, forcefield_type& ff, rng_type&)
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+        if(!ff.constraint().empty())
+        {
+            MJOLNIR_LOG_WARN("BAOABLangevin integrator does not support "
+                "constraint forcefield. [[forcefields.constraint]] will be ignored.");
+        }
+
+
         // calculate parameters for each particles
         this->update(sys);
 

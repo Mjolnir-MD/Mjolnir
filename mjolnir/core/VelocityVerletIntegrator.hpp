@@ -60,7 +60,7 @@ void VelocityVerletIntegrator<traitsT>::initialize(
     if(!ff.constraint().empty())
     {
         MJOLNIR_LOG_WARN(
-            "Velocity verlet integrator do not support constraint forcefield.",
+            "Velocity verlet integrator does not support constraint forcefield."
             " [[forcefields.constraint]] will be ignored.");
     }
 
