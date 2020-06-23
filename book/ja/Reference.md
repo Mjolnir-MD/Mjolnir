@@ -53,3 +53,48 @@ TOMLファイルについては公式レポジトリを参照して下さい。
 通常のシミュレーションでは、一つしか定義されません。
 
 メインの入力ファイルとは別のファイルとして設定可能です。
+
+## ファイルのインクルード
+
+入力ファイルの全ての箇所で、`include`という変数は特別な意味を持ちます。
+
+`include`は文字列型もしくは文字列の配列型を持つことができ、ファイルを指定することができます。
+このファイルのパスは`[files]`テーブルで指定される`files.input.path`の影響を受けます。
+
+```toml
+# main.toml
+[[forcefields]]
+include = [
+    "bond-length.toml",
+    "bond-angle.toml"
+    "lennard-jones.toml",
+]
+```
+
+このようにファイルを指定すると、そのファイル内に定義されている値が`include`を指定したテーブルの下にマージされます。
+
+以下のようなファイルを用意した場合、
+
+```toml
+# bond-length.toml
+[[local]]
+interaction = "BondLength"
+potential   = "Harmonic"
+parameters  = [
+    # ...
+]
+```
+
+内部的なファイルの内容は以下の形になります。
+
+```toml
+[[forcefields]]
+[[forcefields.local]]
+interaction = "BondLength"
+potential   = "Harmonic"
+parameters  = [
+    # ...
+]
+```
+
+ここで、展開は最初の一回だけ行われ、再帰的な展開はなされないことに注意してください。

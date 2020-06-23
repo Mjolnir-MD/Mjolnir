@@ -43,10 +43,11 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
     using system_type     = typename base_type::system_type;
     using topology_type   = Topology;
 
-    using local_forcefield_type    = LocalForceField<traits_type>;
-    using global_forcefield_type   = GlobalForceField<traits_type>;
-    using external_forcefield_type = ExternalForceField<traits_type>;
-    using forcefield_type          = std::tuple<
+    using local_forcefield_type      = LocalForceField<traits_type>;
+    using global_forcefield_type     = GlobalForceField<traits_type>;
+    using external_forcefield_type   = ExternalForceField<traits_type>;
+    using constraint_forcefield_type = ConstraintForceField<traits_type>;
+    using forcefield_type            = std::tuple<
         local_forcefield_type, global_forcefield_type, external_forcefield_type>;
 
     // a set of potentials that are correlated in the way of MultipleBasin.
@@ -56,6 +57,15 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
   public:
 
     MultipleBasinForceField(forcefield_type&& common,
+                            constraint_forcefield_type&& constraint,
+                            std::vector<multiple_basin_unit_type>&& units)
+        : loc_common_(std::move(std::get<0>(common))),
+          glo_common_(std::move(std::get<1>(common))),
+          ext_common_(std::move(std::get<2>(common))),
+          constraint_(std::move(constraint)),
+          units_(std::move(units))
+    {}
+    MultipleBasinForceField(forcefield_type&& common, // no constraint
                             std::vector<multiple_basin_unit_type>&& units)
         : loc_common_(std::move(std::get<0>(common))),
           glo_common_(std::move(std::get<1>(common))),
@@ -221,7 +231,8 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
 
         return retval;
     }
-    topology_type const& topology() const noexcept override {return topol_;}
+    topology_type const&              topology()   const noexcept override {return topol_;}
+    constraint_forcefield_type const& constraint() const noexcept override {return constraint_;}
 
     local_forcefield_type    const& common_local()    const noexcept {return loc_common_;}
     global_forcefield_type   const& common_global()   const noexcept {return glo_common_;}
@@ -235,6 +246,8 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
     local_forcefield_type    loc_common_;
     global_forcefield_type   glo_common_;
     external_forcefield_type ext_common_;
+
+    constraint_forcefield_type constraint_;
 
     std::vector<multiple_basin_unit_type> units_;
 };

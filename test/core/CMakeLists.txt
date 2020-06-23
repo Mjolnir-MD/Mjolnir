@@ -143,7 +143,7 @@ foreach(TEST_NAME ${TEST_NAMES})
         target_link_libraries(${TEST_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
     endif()
 
-    if(OpenMP_FOUND AND USE_OPENMP)
+    if(OpenMP_CXX_FOUND AND USE_OPENMP)
         if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
             # After CMake 3.13, we can use target_link_options
             set_target_properties(${TEST_NAME} PROPERTIES LINK_FLAGS "-parallel")

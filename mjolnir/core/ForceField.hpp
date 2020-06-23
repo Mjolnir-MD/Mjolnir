@@ -6,6 +6,7 @@
 #include <mjolnir/core/LocalForceField.hpp>
 #include <mjolnir/core/GlobalForceField.hpp>
 #include <mjolnir/core/ExternalForceField.hpp>
+#include <mjolnir/core/ConstraintForceField.hpp>
 
 namespace mjolnir
 {
@@ -14,23 +15,26 @@ template<typename traitsT>
 class ForceField final : public ForceFieldBase<traitsT>
 {
   public:
-    using base_type                = ForceFieldBase<traitsT>;
-    using traits_type              = traitsT;
-    using real_type                = typename traits_type::real_type;
-    using coordinate_type          = typename traits_type::coordinate_type;
-    using system_type              = System<traits_type>;
-    using topology_type            = Topology;
-    using local_forcefield_type    = LocalForceField<traits_type>;
-    using global_forcefield_type   = GlobalForceField<traits_type>;
-    using external_forcefield_type = ExternalForceField<traits_type>;
+
+    using base_type                   = ForceFieldBase<traitsT>;
+    using traits_type                 = traitsT;
+    using real_type                   = typename traits_type::real_type;
+    using coordinate_type             = typename traits_type::coordinate_type;
+    using system_type                 = System<traits_type>;
+    using topology_type               = Topology;
+    using local_forcefield_type       = LocalForceField<traits_type>;
+    using global_forcefield_type      = GlobalForceField<traits_type>;
+    using external_forcefield_type    = ExternalForceField<traits_type>;
+    using constraint_forcefield_type  = ConstraintForceField<traits_type>;
 
   public:
 
-    ForceField(local_forcefield_type&&    local,
-               global_forcefield_type&&   global,
-               external_forcefield_type&& external)
+    ForceField(local_forcefield_type&&      local,
+               global_forcefield_type&&     global,
+               external_forcefield_type&&   external,
+               constraint_forcefield_type&& constraint)
         : local_(std::move(local)), global_(std::move(global)),
-          external_(std::move(external))
+          external_(std::move(external)), constraint_(std::move(constraint))
     {}
 
     ForceField()  = default;
@@ -47,13 +51,14 @@ class ForceField final : public ForceFieldBase<traitsT>
 
         MJOLNIR_LOG_INFO("writing current topology");
         topology_.resize(sys.size());
-        local_.write_topology(topology_);
+        local_     .write_topology(topology_);
+        constraint_.write_topology(topology_);
         topology_.construct_molecules();
 
         MJOLNIR_LOG_INFO("initializing forcefields");
-        local_   .initialize(sys);
-        global_  .initialize(sys, topology_);
-        external_.initialize(sys);
+        local_     .initialize(sys);
+        global_    .initialize(sys, topology_);
+        external_  .initialize(sys);
         return;
     }
 
@@ -139,21 +144,24 @@ class ForceField final : public ForceFieldBase<traitsT>
         return retval;
     }
 
-    topology_type const& topology() const noexcept override {return topology_;}
+    topology_type              const& topology()   const noexcept {return topology_;}
 
-    local_forcefield_type    const& local()    const noexcept {return local_;}
-    local_forcefield_type    &      local()          noexcept {return local_;}
-    global_forcefield_type   const& global()   const noexcept {return global_;}
-    global_forcefield_type   &      global()         noexcept {return global_;}
-    external_forcefield_type const& external() const noexcept {return external_;}
-    external_forcefield_type &      external()       noexcept {return external_;}
+    local_forcefield_type      const& local()      const noexcept {return local_;}
+    local_forcefield_type      &      local()            noexcept {return local_;}
+    global_forcefield_type     const& global()     const noexcept {return global_;}
+    global_forcefield_type     &      global()           noexcept {return global_;}
+    external_forcefield_type   const& external()   const noexcept {return external_;}
+    external_forcefield_type   &      external()         noexcept {return external_;}
+    constraint_forcefield_type const& constraint() const noexcept override {return constraint_;}
+    constraint_forcefield_type &      constraint()       noexcept {return constraint_;}
 
   private:
 
-    topology_type            topology_;
-    local_forcefield_type    local_;
-    global_forcefield_type   global_;
-    external_forcefield_type external_;
+    topology_type               topology_;
+    local_forcefield_type       local_;
+    global_forcefield_type      global_;
+    external_forcefield_type    external_;
+    constraint_forcefield_type  constraint_;
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD

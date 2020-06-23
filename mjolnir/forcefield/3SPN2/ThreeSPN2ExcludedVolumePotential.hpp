@@ -186,7 +186,6 @@ class ThreeSPN2ExcludedVolumePotential
             }
             unit_converted_ = true;
         }
-        // construct a exclusion list
         this->update(sys, topol);
         return;
     }
@@ -229,7 +228,7 @@ class ThreeSPN2ExcludedVolumePotential
             within3.erase(std::unique(within3.begin(), within3.end()),
                           within3.end());
 
-            // push the list to the master list
+            // append it to the internal cache
             for(const auto j : within3)
             {
                 this->within_3_nucl_.push_back(j);

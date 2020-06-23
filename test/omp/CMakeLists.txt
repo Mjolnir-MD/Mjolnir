@@ -23,7 +23,7 @@ set(TEST_NAMES
     test_omp_position_restraint_interaction
     )
 
-if(NOT (OpenMP_FOUND AND USE_OPENMP))
+if(NOT (OpenMP_CXX_FOUND AND USE_OPENMP))
     message(FATAL_ERROR "Test codes for OpenMP implementation requires OpenMP library.")
 endif()
 

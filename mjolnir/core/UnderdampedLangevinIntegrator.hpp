@@ -107,6 +107,12 @@ void UnderdampedLangevinIntegrator<traitsT>::initialize(
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
+    if(!ff->constraint().empty())
+    {
+        MJOLNIR_LOG_WARN("Underdamped langevin integrator does not support "
+            "constraint forcefield. [[forcefields.constraint]] will be ignored.");
+    }
+
     // initialize temperature and noise intensity
     this->update(system);
     for(std::size_t i=0; i<system.size(); ++i)

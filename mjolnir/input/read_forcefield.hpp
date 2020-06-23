@@ -10,6 +10,7 @@
 #include <mjolnir/input/read_local_interaction.hpp>
 #include <mjolnir/input/read_global_interaction.hpp>
 #include <mjolnir/input/read_external_interaction.hpp>
+#include <mjolnir/input/read_constraint.hpp>
 #include <mjolnir/input/read_table_from_file.hpp>
 #include <mjolnir/input/read_path.hpp>
 #include <mjolnir/input/utility.hpp>
@@ -26,7 +27,7 @@ read_default_forcefield(const toml::value& root, const std::size_t N)
 
     const auto ff = read_table_from_file(toml::find(root, "forcefields").at(N),
                                          "forcefields");
-    check_keys_available(ff, {"local"_s, "global"_s, "external"_s, "name"_s});
+    check_keys_available(ff, {"local"_s, "global"_s, "external"_s, "constraint"_s, "name"_s});
 
     if(ff.as_table().count("name") == 1)
     {
@@ -34,9 +35,10 @@ read_default_forcefield(const toml::value& root, const std::size_t N)
                            "\" found");
     }
 
-    LocalForceField<traitsT>    loc;
-    GlobalForceField<traitsT>   glo;
-    ExternalForceField<traitsT> ext;
+    LocalForceField<traitsT>      loc;
+    GlobalForceField<traitsT>     glo;
+    ExternalForceField<traitsT>   ext;
+    ConstraintForceField<traitsT> con;
 
     if(ff.as_table().count("local") != 0)
     {
@@ -72,7 +74,27 @@ read_default_forcefield(const toml::value& root, const std::size_t N)
                 read_table_from_file(externals.at(i), "external")));
         }
     }
-    return make_unique<ForceField<traitsT>>(std::move(loc), std::move(glo), std::move(ext));
+    if(ff.as_table().count("constraint") != 0)
+    {
+        const auto& constraints = toml::find(ff, "constraint").as_array();
+        MJOLNIR_LOG_NOTICE("ConstraintForceField (x", constraints.size(), ") found");
+        if(1 < constraints.size())
+        {
+            MJOLNIR_LOG_ERROR("Currently, ConstraintForcefield does not support"
+                              " more than one constrtaint.");
+            throw_exception<std::runtime_error>("[error] ",
+                "mjolnir::read_forcefield: invalid forcefield: ",
+                constraints.size(), " forcefields were detected.");
+        }
+        for(std::size_t i=0; i<constraints.size(); ++i)
+        {
+            MJOLNIR_LOG_NOTICE("reading ", format_nth(i), " [[forcefields.constraint]]");
+            con = read_constraint<traitsT>(
+                read_table_from_file(constraints.at(i), "constraint"));
+        }
+    }
+    return make_unique<ForceField<traitsT>>(std::move(loc), std::move(glo),
+                                            std::move(ext), std::move(con));
 }
 
 template<typename traitsT>
@@ -181,6 +203,14 @@ read_multiple_basin_forcefield(const toml::value& root, const toml::value& simul
                 ext.emplace(read_external_interaction<traitsT>(
                     read_table_from_file(externals.at(i), "external")));
             }
+        }
+        if(ff.contains("constraint"))
+        {
+            MJOLNIR_LOG_ERROR("MultipleBasin does not support Constraint"
+                "ForceField in basins. Move [[forcefields.constraint]] to "
+                "\"common\" forcefield.");
+            throw std::runtime_error("mjolnir::read_multiple_basin_forcefield: "
+                    "MultipleBasin does not support ConstraintForceField.");
         }
         return std::make_tuple(std::move(loc), std::move(glo), std::move(ext));
     };
@@ -313,8 +343,30 @@ read_multiple_basin_forcefield(const toml::value& root, const toml::value& simul
                 "from any MultipleBasin unit. Did you forget to use this?");
         }
     }
+
+    // constraint should always be in the common part.
+    ConstraintForceField<traitsT> con;
+    if(common && common->contains("constraint"))
+    {
+        const auto& constraints = toml::find(*common, "constraint").as_array();
+        MJOLNIR_LOG_NOTICE("ConstraintForceField (x", constraints.size(), ") found");
+        if(1 < constraints.size())
+        {
+            MJOLNIR_LOG_ERROR("Currently, ConstraintForcefield does not support"
+                              " more than one constrtaint.");
+            throw_exception<std::runtime_error>("[error] ",
+                "mjolnir::read_forcefield: invalid forcefield: ",
+                constraints.size(), " forcefields were detected.");
+        }
+        for(std::size_t i=0; i<constraints.size(); ++i)
+        {
+            MJOLNIR_LOG_NOTICE("reading ", format_nth(i), " [[forcefields.constraint]]");
+            con = read_constraint<traitsT>(
+                read_table_from_file(constraints.at(i), "constraint"));
+        }
+    }
     return make_unique<MultipleBasinForceField<traitsT>>(
-            read_forcefield_elements(common), std::move(units));
+            read_forcefield_elements(common), std::move(con), std::move(units));
 }
 
 

@@ -40,6 +40,14 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
     void initialize(system_type& sys, forcefield_type& ff, rng_type& rng)
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+        if(!ff->constraint().empty())
+        {
+            MJOLNIR_LOG_WARN("UnderdampedLangevin integrator does not support "
+                "constraints. [[forcefields.constraint]] will be ignored.");
+        }
+
         // initialize temperature and noise intensity
         this->update(sys);
 
