@@ -22,14 +22,14 @@ read_constraint(const toml::value& constraint)
     const auto kind          = toml::find<std::string>(constraint, "topology");
     const auto max_iteration = toml::find<std::size_t>(constraint, "max_iteration");
     const auto tolerance     = toml::find<real_type>  (constraint, "tolerance");
-    const auto v0s           = toml::find<toml::array>(constraint, "v0s");
-    MJOLNIR_LOG_NOTICE("-- ", v0s.size(), " constraints are found.");
+    const auto parameters    = toml::find<toml::array>(constraint, "parameters");
+    MJOLNIR_LOG_NOTICE("-- ", parameters.size(), " constraints are found.");
 
     const auto& env = constraint.contains("env") ? constraint.at("env") : toml::value{};
 
     std::vector<indices_v0_pair_type> constraints;
-    constraints.reserve(v0s.size());
-    for(const auto& item : v0s)
+    constraints.reserve(parameters.size());
+    for(const auto& item : parameters)
     {
         const auto offset = find_parameter_or<std::int64_t>(item, env, "offset", 0);
         auto indices = find_parameter<indices_type>(item, env, "indices");
