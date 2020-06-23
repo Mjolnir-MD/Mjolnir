@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_INPUT_READ_CONSTRAINT_INTERACTION_HPP
-#define MJOLNIR_INPUT_READ_CONSTRAINT_INTERACTION_HPP
+#ifndef MJOLNIR_INPUT_READ_CONSTRAINT_HPP
+#define MJOLNIR_INPUT_READ_CONSTRAINT_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/input/utility.hpp>
 #include <mjolnir/core/ConstraintForceField.hpp>
@@ -22,7 +22,7 @@ read_constraint(const toml::value& constraint)
     const auto kind          = toml::find<std::string>(constraint, "topology");
     const auto max_iteration = toml::find<std::size_t>(constraint, "max_iteration");
     const auto tolerance     = toml::find<real_type>  (constraint, "tolerance");
-    const auto v0s  = toml::find<toml::array>(constraint, "v0s");
+    const auto v0s           = toml::find<toml::array>(constraint, "v0s");
     MJOLNIR_LOG_NOTICE("-- ", v0s.size(), " constraints are found.");
 
     const auto& env = constraint.contains("env") ? constraint.at("env") : toml::value{};
@@ -40,6 +40,7 @@ read_constraint(const toml::value& constraint)
 
         constraints.emplace_back(indices, v0);
     }
+
     // TODO : check parameter overlap in indices_v0s.
     return ConstraintForceField<traitsT>(kind, std::move(constraints),
             max_iteration, tolerance);

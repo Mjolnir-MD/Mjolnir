@@ -77,7 +77,8 @@ read_forcefield(const toml::value& root, const std::size_t N)
         MJOLNIR_LOG_NOTICE("ConstraintForceField (x", constraints.size(), ") found");
         if(1 < constraints.size())
         {
-            MJOLNIR_LOG_ERROR("Now, ConstraintForcefield only support one constraint case.");
+            MJOLNIR_LOG_ERROR("Currently, ConstraintForcefield does not support"
+                              " more than one constrtaint.");
             throw_exception<std::runtime_error>("[error] ",
                 "mjolnir::read_forcefield: invalid forcefield: ",
                 constraints.size(), " forcefields were detected.");

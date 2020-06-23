@@ -26,9 +26,9 @@ class ForceField
 
   public:
 
-    ForceField(local_forcefield_type&&    local,
-               global_forcefield_type&&   global,
-               external_forcefield_type&& external,
+    ForceField(local_forcefield_type&&      local,
+               global_forcefield_type&&     global,
+               external_forcefield_type&&   external,
                constraint_forcefield_type&& constraint)
         : local_(std::move(local)), global_(std::move(global)),
           external_(std::move(external)), constraint_(std::move(constraint))
@@ -49,7 +49,7 @@ class ForceField
 
         MJOLNIR_LOG_INFO("writing current topology");
         topology_.resize(sys.size());
-        local_.write_topology(topology_);
+        local_     .write_topology(topology_);
         constraint_.write_topology(topology_);
         topology_.construct_molecules();
 
