@@ -190,7 +190,7 @@ read_gBAOAB_langevin_integrator(const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type                = typename traitsT::real_type;
+    using real_type = typename traitsT::real_type;
 
     const real_type delta_t = toml::find<real_type>(simulator, "delta_t");
     MJOLNIR_LOG_INFO("delta_t = ", delta_t);
@@ -202,7 +202,7 @@ read_gBAOAB_langevin_integrator(const toml::value& simulator)
     const auto& env = integrator.contains("env") ?
                       integrator.at("env") : toml::value{};
 
-    const auto gammas               = toml::find<toml::array>(integrator, "gammas");
+    const auto gammas = toml::find<toml::array>(integrator, "gammas");
 
     // Read idx gamma pair part in parameters
     // Temporarily make a vector of idx gamma pair to check index duplication.
