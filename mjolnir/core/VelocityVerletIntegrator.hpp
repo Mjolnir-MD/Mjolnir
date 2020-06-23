@@ -56,6 +56,14 @@ void VelocityVerletIntegrator<traitsT>::initialize(
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
+
+    if(!ff.constraint().empty())
+    {
+        MJOLNIR_LOG_WARN(
+            "Velocity verlet integrator do not support constraint forcefield.",
+            " [[forcefields.constraint]] will be ignored.");
+    }
+
     this->update(system);
 
     for(std::size_t i=0; i<system.size(); ++i)

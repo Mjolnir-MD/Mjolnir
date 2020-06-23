@@ -450,6 +450,12 @@ read_integrator_type(const toml::value& root, const toml::value& simulator)
         using integratorT = BAOABLangevinIntegrator<traitsT>;
         return read_simulator<traitsT, integratorT>(root, simulator);
     }
+    else if(integ == "g-BAOABLangevin")
+    {
+        MJOLNIR_LOG_NOTICE("Integrator is g-BAOABLangevin.");
+        using integratorT = gBAOABLangevinIntegrator<traitsT>;
+        return read_simulator<traitsT, integratorT>(root, simulator);
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -459,7 +465,8 @@ read_integrator_type(const toml::value& root, const toml::value& simulator)
             "- \"VelocityVerlet\"     : simple and standard Velocity Verlet integrator.",
             "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
                                       " based on the Velocity Verlet",
-            "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator"
+            "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator",
+            "- \"g-BAOABLangevin\"    : geodesic BAOAB Langevin Integrator"
             }));
     }
 }
