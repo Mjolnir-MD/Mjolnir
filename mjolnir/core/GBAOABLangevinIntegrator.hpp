@@ -4,6 +4,7 @@
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/ConstraintForceField.hpp>
 #include <mjolnir/core/SystemMotionRemover.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -17,17 +18,14 @@ template<typename traitsT>
 class gBAOABLangevinIntegrator
 {
   public:
-    using traits_type                = traitsT;
-    using real_type                  = typename traits_type::real_type;
-    using coordinate_type            = typename traits_type::coordinate_type;
-    using indices_type               = std::array<std::size_t, 2>;
-    using system_type                = System<traitsT>;
-    using forcefield_type            = ForceField<traitsT>;
-    using constraint_forcefield_type = typename forcefield_type::constraint_forcefield_type;
-    using constraint_type            = std::pair<indices_type, real_type>;
-    using constraints_type           = std::vector<constraint_type>;
-    using rng_type                   = RandomNumberGenerator<traits_type>;
-    using remover_type               = SystemMotionRemover<traits_type>;
+    using traits_type      = traitsT;
+    using real_type        = typename traits_type::real_type;
+    using coordinate_type  = typename traits_type::coordinate_type;
+    using indices_type     = std::array<std::size_t, 2>;
+    using system_type      = System<traitsT>;
+    using forcefield_type  = ForceField<traitsT>;
+    using rng_type         = RandomNumberGenerator<traits_type>;
+    using remover_type     = SystemMotionRemover<traits_type>;
 
   public:
 
@@ -35,8 +33,7 @@ class gBAOABLangevinIntegrator
                              remover_type&& remover)
         : dt_(dt), halfdt_(dt / 2), gammas_(std::move(gamma)),
           exp_gamma_dt_(gammas_.size()), noise_coeff_ (gammas_.size()),
-          remover_(std::move(remover)),
-          old_position_(gammas_.size()),
+          remover_(std::move(remover)),  old_position_(gammas_.size()),
           old_pos_rattle_(gammas_.size())
     {}
     ~gBAOABLangevinIntegrator() = default;
@@ -88,43 +85,39 @@ class gBAOABLangevinIntegrator
 
     void correct_coordinate(system_type& sys, const forcefield_type& ff)
     {
-        MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_LOG_FUNCTION();
+        const auto& constraint_ff = ff.constraint();
+        const auto& constraints   = constraint_ff.constraints();
 
         std::size_t rattle_step = 0;
-        const constraint_forcefield_type& constraint_ff = ff.constraint();
-        const constraints_type&           constraints = constraint_ff.constraints();
-
-        while(rattle_step<constraint_ff.max_iteration())
+        while(rattle_step < constraint_ff.max_iteration())
         {
             bool corrected = false;
             for(std::size_t i=0; i<constraints.size(); ++i)
             {
-                const auto& indices_v0 = constraints[i];
-                const auto& indices    = indices_v0.first;
+                const auto& indices = constraints[i].first;
                 auto& p1 = sys.position(indices[0]);
                 auto& p2 = sys.position(indices[1]);
                 auto& v1 = sys.velocity(indices[0]);
                 auto& v2 = sys.velocity(indices[1]);
 
-                const auto      dp = sys.adjust_direction(p2 - p1);
+                const auto      dp  = sys.adjust_direction(p2 - p1);
                 const real_type dp2 = math::length_sq(dp);
                 const real_type missmatch2 = square_v0s_[i] - dp2;
 
                 if(correction_tolerance_ < std::abs(missmatch2))
                 {
-                    auto& op1 = this->old_pos_rattle_[indices[0]];
-                    auto& op2 = this->old_pos_rattle_[indices[1]];
+                    const auto& op1 = this->old_pos_rattle_[indices[0]];
+                    const auto& op2 = this->old_pos_rattle_[indices[1]];
 
                     const auto old_dp = sys.adjust_direction(op2 - op1);
-                    const real_type dot_old_new_dp = math::dot_product(old_dp, dp);
-                    const real_type lambda =
+                    const auto dot_old_new_dp = math::dot_product(old_dp, dp);
+                    const auto lambda =
                         0.5 * missmatch2 * reduced_mass_[i] / dot_old_new_dp;
                     const coordinate_type correction_force = lambda * old_dp;
                     const auto& rm1 = sys.rmass(indices[0]);
                     const auto& rm2 = sys.rmass(indices[1]);
-                    const coordinate_type correction_vec1  = correction_force * rm1;
-                    const coordinate_type correction_vec2  = correction_force * rm2;
+                    const coordinate_type correction_vec1 = correction_force * rm1;
+                    const coordinate_type correction_vec2 = correction_force * rm2;
                     p1 -= correction_vec1;
                     p2 += correction_vec2;
                     v1 -= correction_vec1 * r_dt_in_correction_;
@@ -139,8 +132,10 @@ class gBAOABLangevinIntegrator
             ++rattle_step;
         }
 
-        if(rattle_step >= constraint_ff.max_iteration())
+        if(constraint_ff.max_iteration() <= rattle_step)
         {
+            MJOLNIR_GET_DEFAULT_LOGGER();
+            MJOLNIR_LOG_FUNCTION();
             MJOLNIR_LOG_WARN("coordinate rattle iteration number exceeds rattle max iteration");
         }
 
@@ -149,29 +144,25 @@ class gBAOABLangevinIntegrator
 
     void correct_velocity(system_type& sys, const forcefield_type& ff)
     {
-        MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_LOG_FUNCTION();
-
-        const constraint_forcefield_type& constraint_ff = ff.constraint();
-        const constraints_type&           constraints   = constraint_ff.constraints();
+        const auto& constraint_ff = ff.constraint();
+        const auto& constraints   = constraint_ff.constraints();
 
         std::size_t rattle_step = 0;
-        while(rattle_step<constraint_ff.max_iteration())
+        while(rattle_step < constraint_ff.max_iteration())
         {
             bool corrected = false;
             for(std::size_t i=0; i<constraints.size(); ++i)
             {
-                const auto& constraint       = constraints[i];
-                const auto& indices          = constraint.first;
+                const auto& indices = constraints[i].first;
                 auto& p1  = sys.position(indices[0]);
                 auto& p2  = sys.position(indices[1]);
                 auto& v1  = sys.velocity(indices[0]);
                 auto& v2  = sys.velocity(indices[1]);
 
-                const auto pos_diff      = sys.adjust_direction(p2 - p1);
-                const auto vel_diff      = v2 - v1;
-                const real_type dot_pdvd = math::dot_product(pos_diff, vel_diff);
-                const real_type lambda   = dot_pdvd * reduced_mass_[i] * r_square_v0s_[i];
+                const auto pos_diff = sys.adjust_direction(p2 - p1);
+                const auto vel_diff = v2 - v1;
+                const auto dot_pdvd = math::dot_product(pos_diff, vel_diff);
+                const auto lambda   = dot_pdvd * reduced_mass_[i] * r_square_v0s_[i];
 
                 if(correction_tolerance_ < std::abs(lambda))
                 {
@@ -192,6 +183,8 @@ class gBAOABLangevinIntegrator
 
         if(constraint_ff.max_iteration() <= rattle_step)
         {
+            MJOLNIR_GET_DEFAULT_LOGGER();
+            MJOLNIR_LOG_FUNCTION();
             MJOLNIR_LOG_WARN("velocity rattle iteration number exceeds rattle max iteration.");
         }
         return;
@@ -200,20 +193,20 @@ class gBAOABLangevinIntegrator
   private:
     real_type   dt_;
     real_type   halfdt_;
-    std::vector<real_type>       gammas_;
-    std::vector<real_type>       exp_gamma_dt_;
-    std::vector<real_type>       noise_coeff_;
-    std::vector<real_type>       square_v0s_;
-    std::vector<real_type>       r_square_v0s_;
-    std::vector<real_type>       reduced_mass_;
+    std::vector<real_type> gammas_;
+    std::vector<real_type> exp_gamma_dt_;
+    std::vector<real_type> noise_coeff_;
+    std::vector<real_type> square_v0s_;
+    std::vector<real_type> r_square_v0s_;
+    std::vector<real_type> reduced_mass_;
     remover_type remover_;
 
-    real_type   temperature_;
-    real_type   correction_tolerance_;
-    real_type   correction_tolerance_dt_;
-    real_type   correction_tolerance_dt_itr_;
-    real_type   dt_in_correction_;
-    real_type   r_dt_in_correction_;
+    real_type temperature_;
+    real_type correction_tolerance_;
+    real_type correction_tolerance_dt_;
+    real_type correction_tolerance_dt_itr_;
+    real_type dt_in_correction_;
+    real_type r_dt_in_correction_;
 
     static constexpr std::size_t correction_iter_num_ = 1;
 
@@ -228,17 +221,17 @@ void gBAOABLangevinIntegrator<traitsT>::initialize(
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-  
-    const constraint_forcefield_type& constraint_ff = ff.constraint();
-    const constraints_type&           constraints   = constraint_ff.constraints();
-    const real_type                   tolerance     = constraint_ff.tolerance();
+
+    const auto& constraint_ff = ff.constraint();
+    const auto& constraints   = constraint_ff.constraints();
+    const auto  tolerance     = constraint_ff.tolerance();
+
     // calculate parameters for constraint
     this->correction_tolerance_        = tolerance;
     this->correction_tolerance_dt_     = tolerance / dt_;
     this->correction_tolerance_dt_itr_ = tolerance * 2. * correction_iter_num_ / dt_;
     this->dt_in_correction_            = dt_ * 0.5 / correction_iter_num_;
     this->r_dt_in_correction_          = 1. / dt_in_correction_;
-
 
     // calculate parameters for each particles
     this->update(system);
@@ -256,7 +249,7 @@ void gBAOABLangevinIntegrator<traitsT>::initialize(
         old_position_[i] = system.position(i);
     }
 
-    square_v0s_.resize(constraints.size());
+    square_v0s_  .resize(constraints.size());
     r_square_v0s_.resize(constraints.size());
     reduced_mass_.resize(constraints.size());
     for(std::size_t i=0; i<constraints.size(); ++i)
@@ -283,7 +276,7 @@ gBAOABLangevinIntegrator<traitsT>::step(
     // B step
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        sys.velocity(i)  += this->halfdt_ * sys.rmass(i) * sys.force(i);
+        sys.velocity(i) += this->halfdt_ * sys.rmass(i) * sys.force(i);
     }
     correct_velocity(sys, ff);
 
