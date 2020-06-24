@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_unlimited, realT, real_type
     using traits_type     = SimulatorTraits<realT, UnlimitedBoundary>;
     using coordinate_type = typename traits_type::coordinate_type;
     using system_type     = System<traits_type>;
-    using forcefield_type = ForceField<traits_type>;
+    using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using msgpackobs_type = MsgPackObserver<traits_type>;
     using boundary_type   = typename system_type::boundary_type;
 
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_periodic, realT, real_types
     using traits_type   = SimulatorTraits<realT, CuboidalPeriodicBoundary>;
     using coordinate_type = typename traits_type::coordinate_type;
     using system_type   = System<traits_type>;
-    using forcefield_type = ForceField<traits_type>;
+    using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using msgpackobs_type = MsgPackObserver<traits_type>;
     using boundary_type = typename system_type::boundary_type;
 

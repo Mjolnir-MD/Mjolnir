@@ -2,7 +2,6 @@
 #define MJOLNIR_OMP_UNDERDAMPED_LANGEVIN_INTEGRATOR
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/omp/ForceField.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/SystemMotionRemover.hpp>
 #include <mjolnir/core/UnderdampedLangevinIntegrator.hpp>
@@ -20,7 +19,7 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
     using system_type     = System<traits_type>;
-    using forcefield_type = ForceField<traits_type>;
+    using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using rng_type        = RandomNumberGenerator<traits_type>;
     using remover_type    = SystemMotionRemover<traits_type>;
 
@@ -41,6 +40,14 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
     void initialize(system_type& sys, forcefield_type& ff, rng_type& rng)
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+        if(!ff->constraint().empty())
+        {
+            MJOLNIR_LOG_WARN("UnderdampedLangevin integrator does not support "
+                "constraints. [[forcefields.constraint]] will be ignored.");
+        }
+
         // initialize temperature and noise intensity
         this->update(sys);
 
@@ -50,7 +57,7 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
 
-        ff.calc_force(sys);
+        ff->calc_force(sys);
 
 #pragma omp parallel for
         for(std::size_t i=0; i<sys.size(); ++i)
@@ -99,8 +106,8 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
         // This function parallelize itself inside. `parallel` block is not
         // needed here to parallelize it.
-        ff.reduce_margin(2 * std::sqrt(largest_disp2), sys);
-        ff.calc_force(sys);
+        ff->reduce_margin(2 * std::sqrt(largest_disp2), sys);
+        ff->calc_force(sys);
 
         // calc a(t+dt) and v(t+dt), generate noise
 #pragma omp parallel for

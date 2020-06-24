@@ -58,3 +58,47 @@ several different forcefields. But in the normal case, only one `[[forcefields]]
 are required.
 
 You can provide this table as another toml file by specifying only a filename.
+
+## Including different files
+
+Everywhere in the input file, a value corresponding to the key, `include`, has a special meaning.
+
+A value corresponds to `include` is a string or an array of strings, specifying filenames.
+The path would be specified via `input.path` value in the `[files]` table.
+
+If `include` is specified, the values defined in those specified toml files will be merged under the table that has `include`.
+
+In the following case,
+
+```toml
+# main.toml
+[[forcefields]]
+include = [
+    "bond-length.toml",
+    # other forcefields ...
+]
+```
+
+```toml
+# bond-length.toml
+[[local]]
+interaction = "BondLength"
+potential   = "Harmonic"
+parameters  = [
+    # ...
+]
+```
+
+The file internally becomes to the following.
+
+```toml
+[[forcefields]]
+[[forcefields.local]]
+interaction = "BondLength"
+potential   = "Harmonic"
+parameters  = [
+    # ...
+]
+```
+
+Note that Mjolnir expands those include files only once.

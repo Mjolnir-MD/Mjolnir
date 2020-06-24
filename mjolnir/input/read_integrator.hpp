@@ -4,6 +4,7 @@
 #include <mjolnir/core/VelocityVerletIntegrator.hpp>
 #include <mjolnir/core/UnderdampedLangevinIntegrator.hpp>
 #include <mjolnir/core/BAOABLangevinIntegrator.hpp>
+#include <mjolnir/core/GBAOABLangevinIntegrator.hpp>
 #include <mjolnir/core/SystemMotionRemover.hpp>
 #include <mjolnir/input/utility.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -183,6 +184,58 @@ read_BAOAB_langevin_integrator(const toml::value& simulator)
             read_system_motion_remover<traitsT>(simulator));
 }
 
+template<typename traitsT>
+gBAOABLangevinIntegrator<traitsT>
+read_gBAOAB_langevin_integrator(const toml::value& simulator)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type = typename traitsT::real_type;
+
+    const real_type delta_t = toml::find<real_type>(simulator, "delta_t");
+    MJOLNIR_LOG_INFO("delta_t = ", delta_t);
+
+    const auto& integrator = toml::find(simulator, "integrator");
+    check_keys_available(integrator,
+            {"type"_s, "seed"_s, "gammas"_s, "remove"_s, "env"_s});
+
+    const auto& env = integrator.contains("env") ?
+                      integrator.at("env") : toml::value{};
+
+    const auto gammas = toml::find<toml::array>(integrator, "gammas");
+
+    // Read idx gamma pair part in parameters
+    // Temporarily make a vector of idx gamma pair to check index duplication.
+    std::vector<std::pair<std::size_t, real_type>> idx_gammas;
+    idx_gammas.reserve(gammas.size());
+    for(const auto& params : gammas)
+    {
+        const auto offset = find_parameter_or<std::int64_t>(params, env, "offset", 0);
+        const auto idx    = toml::find<std::size_t>(params, "index") + offset;
+        const auto gm     = find_parameter<real_type>(params, env, "gamma", u8"γ");
+
+        idx_gammas.emplace_back(idx, gm);
+    }
+    check_parameter_overlap(env, gammas, idx_gammas);
+
+    std::vector<real_type> gamma(gammas.size());
+    for(const auto& idx_gamma : idx_gammas)
+    {
+        const auto idx = idx_gamma.first;
+        const auto  gm = idx_gamma.second;
+        if(gamma.size() <= idx)
+        {
+            gamma.resize(idx+1, real_type(0.0));
+        }
+        gamma.at(idx) = gm;
+
+        MJOLNIR_LOG_INFO("idx = ", idx, ", gamma = ", gm);
+    }
+
+    return gBAOABLangevinIntegrator<traitsT>(delta_t, std::move(gamma),
+            read_system_motion_remover<traitsT>(simulator));
+}
+
 // A mapping object from type information (template parameter) to the actual
 // read_xxx_integrator function
 template<typename T>
@@ -215,6 +268,15 @@ struct read_integrator_impl<BAOABLangevinIntegrator<traitsT>>
     }
 };
 
+template<typename traitsT>
+struct read_integrator_impl<gBAOABLangevinIntegrator<traitsT>>
+{
+    static gBAOABLangevinIntegrator<traitsT> invoke(const toml::value& sim)
+    {
+        return read_gBAOAB_langevin_integrator<traitsT>(sim);
+    }
+};
+
 template<typename integratorT>
 integratorT read_integrator(const toml::value& sim)
 {
@@ -226,7 +288,8 @@ integratorT read_integrator(const toml::value& sim)
             "- \"VelocityVerlet\"     : simple and standard Velocity Verlet integrator.",
             "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
                                       " based on the Velocity Verlet",
-            "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator"
+            "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator",
+            "- \"g-BAOABLangevin\"     : geodesic BAOAB Langevin Integrator"
             }));
     }
     return read_integrator_impl<integratorT>::invoke(sim);

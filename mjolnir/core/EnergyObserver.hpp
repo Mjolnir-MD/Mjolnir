@@ -40,7 +40,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
             << ", unit of energy : " << phys_constants::energy_unit() << '\n';
         ofs << "# timestep  ";
 
-        const auto names = ff.list_energy_name();
+        const auto names = ff->list_energy_name();
         this->widths_.reserve(names.size());
         for(std::size_t i=0; i<names.size(); ++i)
         {
@@ -62,7 +62,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
     {
         std::ofstream ofs(this->file_name_, std::ios::app);
         ofs << "# timestep  ";
-        const auto names = ff.list_energy_name();
+        const auto names = ff->list_energy_name();
         this->widths_.reserve(names.size());
         for(std::size_t i=0; i<names.size(); ++i)
         {
@@ -88,7 +88,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
         // ostream::width and outputs whole string.
         ofs << std::setw(11) << std::left << std::to_string(step) << ' ';
 
-        const auto energies = ff.dump_energy(sys);
+        const auto energies = ff->dump_energy(sys);
         for(std::size_t i=0; i<energies.size(); ++i)
         {
             const real_type ene = energies.at(i);

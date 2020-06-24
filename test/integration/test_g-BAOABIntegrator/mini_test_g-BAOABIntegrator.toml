@@ -1,0 +1,44 @@
+[units]
+length = "angstrom"
+energy = "kcal/mol"
+
+[files]
+output.prefix = "test_g-BAOABIntegrator"
+output.path   = "./data/"
+output.format = "xyz"
+
+[simulator]
+type          = "MolecularDynamics"
+boundary_type = "Unlimited" #"PeriodicCuboid"
+precision     = "double"
+parallelism   = "sequencial" # or "OpenMP"
+delta_t       = 0.01
+total_step    = 1_000_00
+save_step     =      1_000
+integrator.type = "g-BAOABLangevin"
+integrator.seed = 123456789
+integrator.gammas = [
+# Particles affected from external potential for test.
+    {index =   0, gamma = 10.0},
+# Particles not affected from external potential for test.
+# These are bind to the previous partiles.
+    {index =   1, gamma = 10.0},
+]
+[[systems]]
+attributes.temperature = 300.0
+boundary_shape = {upper = [5.0, 1.0, 1.0], lower = [-5.0, -1.0, -1.0]}
+particles = [
+# Particles affected from external potential for test.
+    {m = 1.0, pos=[0.0, 0.0, 0.0], vel=[0.0, 0.0, 0.0], name="CORE"},
+# Particles not affected from external potential for test.
+    {m = 1.0, pos=[1.0, 0.0, 0.0], vel=[0.0, 0.0, 0.0], name="PATCH"},
+]
+
+[[forcefields]]
+[[forcefields.constraint]]
+topology      = "bond"
+max_iteration = 500
+tolerance     = 1.0e-6
+v0s = [ # {{{
+{indices = [  0, 1], v0 = 1.0},
+] # }}}
