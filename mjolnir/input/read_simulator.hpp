@@ -29,7 +29,7 @@ read_molecular_dynamics_simulator(
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
         "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s, "delta_t"_s,
-        "integrator"_s, "env"_s});
+        "integrator"_s, "forcefields"_s, "env"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
@@ -39,7 +39,7 @@ read_molecular_dynamics_simulator(
     // later move them, so non-const
     auto sys  = read_system    <traitsT>(root, 0);
     auto obs  = read_observer  <traitsT>(root);
-    auto ff   = read_forcefield<traitsT>(root, 0);
+    auto ff   = read_forcefield<traitsT>(root, simulator);
     auto rng  = read_rng       <traitsT>(simulator);
     auto intg = read_integrator<integratorT>(simulator);
 
@@ -72,7 +72,8 @@ read_steepest_descent_simulator(
     MJOLNIR_LOG_NOTICE("threshold  is ", threshold);
 
     return make_unique<simulator_type>(delta, threshold, step_lim, save_step,
-            read_system<traitsT>(root, 0), read_forcefield<traitsT>(root, 0),
+            read_system<traitsT>(root, 0),
+            read_forcefield<traitsT>(root, simulator),
             read_observer<traitsT>(root));
 }
 
@@ -87,7 +88,7 @@ read_simulated_annealing_simulator(
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
             "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s, "delta_t"_s,
-            "integrator"_s, "schedule"_s, "each_step"_s, "env"_s});
+            "integrator"_s, "forcefields"_s, "schedule"_s, "each_step"_s, "env"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
@@ -127,7 +128,7 @@ read_simulated_annealing_simulator(
     }
 
     auto sys  = read_system    <traitsT>(root, 0);
-    auto ff   = read_forcefield<traitsT>(root, 0);
+    auto ff   = read_forcefield<traitsT>(root, simulator);
     auto obs  = read_observer  <traitsT>(root);
     auto rng  = read_rng       <traitsT>(simulator);
     auto intg = read_integrator<integratorT>(simulator);
@@ -163,7 +164,7 @@ read_switching_forcefield_simulator(
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
             "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s,
-            "delta_t"_s, "integrator"_s, "schedule"_s, "env"_s});
+            "delta_t"_s, "integrator"_s, "forcefields"_s, "schedule"_s, "env"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
@@ -188,7 +189,20 @@ read_switching_forcefield_simulator(
 
     // ------------------------------------------------------------------------
     // read all forcefields and its names
-    using forcefield_type = ForceField<traitsT>;
+    using forcefield_type = std::unique_ptr<ForceFieldBase<traitsT>>;
+
+    // multiple basin cannot be used with this for now
+
+    if(simulator.contains("forcefield") &&
+       simulator.at("forcefield").at("type").as_string() == "MultipleBasin")
+    {
+        throw std::runtime_error(toml::format_error(
+            "mjolnir::read_switching_forcefield_simulator: Currently, "
+            "MultipleBasin forcefield cannot be used in Switching simulator.",
+            simulator.at("type"), "simulator is specified here",
+            simulator.at("forcefield").at("type"), "MultipleBasin cannot be used",
+            {}));
+    }
 
     const auto forcefields = toml::find<toml::array>(root, "forcefields");
     std::vector<forcefield_type> ffs; ffs.reserve(forcefields.size());
@@ -198,7 +212,7 @@ read_switching_forcefield_simulator(
     {
         const auto name = toml::find<std::string>(forcefields.at(i), "name");
         ffidx[name] = i;
-        ffs.push_back(read_forcefield<traitsT>(root, i));
+        ffs.push_back(read_default_forcefield<traitsT>(root, i));
 
         MJOLNIR_LOG_NOTICE(i, "-th forcefield \"", name, "\" found.");
     }
@@ -347,7 +361,7 @@ read_energy_calculation_simulator(
         MJOLNIR_LOG_INFO("attribute.", attr.first, " = ", attribute);
     }
 
-    auto ff = read_forcefield<traitsT>(root, 0);
+    auto ff = read_forcefield<traitsT>(root, simulator);
 
     return make_unique<EnergyCalculationSimulator<traitsT>>(loader->num_frames(),
             std::move(loader), std::move(sys), std::move(ff), std::move(obs));

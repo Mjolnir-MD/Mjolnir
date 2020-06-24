@@ -1,7 +1,7 @@
 #ifndef MJOLNIR_CORE_VELOCITY_VERLET_INTEGRATOR_HPP
 #define MJOLNIR_CORE_VELOCITY_VERLET_INTEGRATOR_HPP
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/ForceFieldBase.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <mjolnir/core/SystemMotionRemover.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -18,7 +18,7 @@ class VelocityVerletIntegrator
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
     using system_type     = System<traitsT>;
-    using forcefield_type = ForceField<traitsT>;
+    using forcefield_type = std::unique_ptr<ForceFieldBase<traitsT>>;
     using rng_type        = RandomNumberGenerator<traitsT>;
     using remover_type    = SystemMotionRemover<traits_type>;
 
@@ -57,7 +57,7 @@ void VelocityVerletIntegrator<traitsT>::initialize(
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
-    if(!ff.constraint().empty())
+    if(!ff->constraint().empty())
     {
         MJOLNIR_LOG_WARN(
             "Velocity verlet integrator does not support constraint forcefield."
@@ -70,7 +70,7 @@ void VelocityVerletIntegrator<traitsT>::initialize(
     {
         system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
     }
-    ff.calc_force(system);
+    ff->calc_force(system);
     return;
 }
 
@@ -93,10 +93,10 @@ VelocityVerletIntegrator<traitsT>::step(
     }
 
     // update neighbor list; reduce margin, reconstruct the list if needed
-    ff.reduce_margin(2 * std::sqrt(largest_disp2), sys);
+    ff->reduce_margin(2 * std::sqrt(largest_disp2), sys);
 
     // calc f(t+dt)
-    ff.calc_force(sys);
+    ff->calc_force(sys);
 
     // calc v(t+dt)
     for(std::size_t i=0; i<sys.size(); ++i)

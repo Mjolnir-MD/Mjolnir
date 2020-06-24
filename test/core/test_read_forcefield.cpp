@@ -22,7 +22,10 @@ BOOST_AUTO_TEST_CASE(read_empty_forcefield)
         # empty
         )"_toml;
 
-        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
+        const auto ffb = mjolnir::read_forcefield<traits_type>(v, toml::table{});
+        const auto ffp = dynamic_cast<mjolnir::ForceField<traits_type>*>(ffb.get());
+        BOOST_REQUIRE(ffp);
+        const auto ff = *ffp;
 
         BOOST_TEST(ff.local().size()    == 0u);
         BOOST_TEST(ff.global().size()   == 0u);
@@ -80,7 +83,11 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield)
                 shape = {name = "AxisAlignedPlane", axis="+X", position=1.0, margin=0.5}
         )"_toml;
 
-        const auto ff = mjolnir::read_forcefield<traits_type>(v, 0);
+        const auto ffb = mjolnir::read_forcefield<traits_type>(v, toml::table{});
+        const auto ffp = dynamic_cast<mjolnir::ForceField<traits_type>*>(ffb.get());
+        BOOST_REQUIRE(ffp);
+        const auto ff = *ffp;
+
         BOOST_TEST(ff.local().size()    == 2u);
         BOOST_TEST(ff.global().size()   == 2u);
         BOOST_TEST(ff.external().size() == 2u);

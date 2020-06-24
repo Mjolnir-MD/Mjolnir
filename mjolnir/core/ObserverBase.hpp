@@ -15,7 +15,7 @@ class ObserverBase
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
     using system_type     = System<traits_type>;
-    using forcefield_type = ForceField<traits_type>;
+    using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
 
   public:
     ObserverBase() = default;

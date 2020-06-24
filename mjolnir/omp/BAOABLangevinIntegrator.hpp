@@ -2,7 +2,6 @@
 #define MJOLNIR_OMP_BAOAB_LANGEVIN_INTEGRATOR_HPP
 #include <mjolnir/omp/OpenMPSimulatorTraits.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/omp/ForceField.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/SystemMotionRemover.hpp>
 #include <mjolnir/core/BAOABLangevinIntegrator.hpp>
@@ -20,7 +19,7 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
     using system_type     = System<traits_type>;
-    using forcefield_type = ForceField<traits_type>;
+    using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using rng_type        = RandomNumberGenerator<traits_type>;
     using remover_type    = SystemMotionRemover<traits_type>;
 
@@ -40,7 +39,7 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
-        if(!ff.constraint().empty())
+        if(!ff->constraint().empty())
         {
             MJOLNIR_LOG_WARN("BAOABLangevin integrator does not support "
                 "constraint forcefield. [[forcefields.constraint]] will be ignored.");
@@ -55,7 +54,7 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         {
             sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
-        ff.calc_force(sys);
+        ff->calc_force(sys);
         return;
     }
 
@@ -93,10 +92,10 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
         // ------------------------------------------------------------------
         // update neighbor list; reduce margin, reconstruct the list if needed
-        ff.reduce_margin(2 * std::sqrt(largest_disp2), sys);
+        ff->reduce_margin(2 * std::sqrt(largest_disp2), sys);
 
         // calc f(p(n+1))
-        ff.calc_force(sys);
+        ff->calc_force(sys);
 
         // ------------------------------------------------------------------
         // calc v(n+2/3) -> v(n+1)

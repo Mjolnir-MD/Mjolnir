@@ -3,8 +3,7 @@
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/core/ForceField.hpp>
-#include <mjolnir/core/ConstraintForceField.hpp>
+#include <mjolnir/core/ForceFieldBase.hpp>
 #include <mjolnir/core/SystemMotionRemover.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -23,7 +22,7 @@ class gBAOABLangevinIntegrator
     using coordinate_type  = typename traits_type::coordinate_type;
     using indices_type     = std::array<std::size_t, 2>;
     using system_type      = System<traitsT>;
-    using forcefield_type  = ForceField<traitsT>;
+    using forcefield_type = std::unique_ptr<ForceFieldBase<traitsT>>;
     using rng_type         = RandomNumberGenerator<traits_type>;
     using remover_type     = SystemMotionRemover<traits_type>;
 
@@ -85,7 +84,7 @@ class gBAOABLangevinIntegrator
 
     void correct_coordinate(system_type& sys, const forcefield_type& ff)
     {
-        const auto& constraint_ff = ff.constraint();
+        const auto& constraint_ff = ff->constraint();
         const auto& constraints   = constraint_ff.constraints();
 
         std::size_t rattle_step = 0;
@@ -144,7 +143,7 @@ class gBAOABLangevinIntegrator
 
     void correct_velocity(system_type& sys, const forcefield_type& ff)
     {
-        const auto& constraint_ff = ff.constraint();
+        const auto& constraint_ff = ff->constraint();
         const auto& constraints   = constraint_ff.constraints();
 
         std::size_t rattle_step = 0;
@@ -222,7 +221,7 @@ void gBAOABLangevinIntegrator<traitsT>::initialize(
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
-    const auto& constraint_ff = ff.constraint();
+    const auto& constraint_ff = ff->constraint();
     const auto& constraints   = constraint_ff.constraints();
     const auto  tolerance     = constraint_ff.tolerance();
 
@@ -241,7 +240,7 @@ void gBAOABLangevinIntegrator<traitsT>::initialize(
     {
         system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
     }
-    ff.calc_force(system);
+    ff->calc_force(system);
 
     // buffering old position
     for(std::size_t i=0; i<system.size(); ++i)
@@ -323,10 +322,10 @@ gBAOABLangevinIntegrator<traitsT>::step(
         sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
     }
 
-    ff.reduce_margin(2 * std::sqrt(largest_disp2), sys);
+    ff->reduce_margin(2 * std::sqrt(largest_disp2), sys);
 
     // B step
-    ff.calc_force(sys);
+    ff->calc_force(sys);
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         sys.velocity(i) += this->halfdt_ * sys.rmass(i) * sys.force(i);

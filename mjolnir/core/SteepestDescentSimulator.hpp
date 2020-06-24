@@ -3,7 +3,7 @@
 #include <mjolnir/core/SimulatorBase.hpp>
 #include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/ForceFieldBase.hpp>
 #include <mjolnir/math/math.hpp>
 #include <limits>
 
@@ -18,7 +18,7 @@ class SteepestDescentSimulator final : public SimulatorBase
     using real_type          = typename traits_type::real_type;
     using coordinate_type    = typename traits_type::coordinate_type;
     using system_type        = System<traits_type>;
-    using forcefield_type    = ForceField<traits_type>;
+    using forcefield_type    = std::unique_ptr<ForceFieldBase<traits_type>>;
     using observer_type      = ObserverContainer<traits_type>;
 
     SteepestDescentSimulator(const real_type h, const real_type threshold,
@@ -34,8 +34,6 @@ class SteepestDescentSimulator final : public SimulatorBase
     bool step()       override;
     void run()        override;
     void finalize()   override;
-
-    real_type calc_energy() const {return this->ff_.calc_energy(this->system_);}
 
     system_type&       system()       noexcept {return system_;}
     system_type const& system() const noexcept {return system_;}
@@ -59,7 +57,7 @@ inline void SteepestDescentSimulator<traitsT>::initialize()
 {
     // XXX: Because this simulator does not use velocity,
     //      it does not initialize System.
-    this->ff_.initialize(this->system_);
+    this->ff_->initialize(this->system_);
 
     // here, steepest_descent method has no physical `time`.
     // There is nothing we can except filling it with zero or something
@@ -79,7 +77,7 @@ inline bool SteepestDescentSimulator<traitsT>::step()
     }
 
     // calculate negative derivatives (-dV/dr)
-    this->ff_.calc_force(this->system_);
+    this->ff_->calc_force(this->system_);
 
     real_type max_disp2 = 0.0; // to update cell list and check the convergence
     real_type max_diff  = 0.0; // to check the convergence
@@ -102,7 +100,7 @@ inline bool SteepestDescentSimulator<traitsT>::step()
     }
 
     // update neighbor list; reduce margin, reconstruct the list if needed
-    this->ff_.reduce_margin(2 * std::sqrt(max_disp2), this->system_);
+    this->ff_->reduce_margin(2 * std::sqrt(max_disp2), this->system_);
 
     ++step_count_;
     return this->step_count_ < this->step_limit_;

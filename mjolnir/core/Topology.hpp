@@ -52,6 +52,16 @@ class Topology
     {
         std::size_t molecule_id;
         std::vector<edge_type> adjacents;
+
+        bool operator==(const node& other) const
+        {
+            return molecule_id == other.molecule_id &&
+                   adjacents   == other.adjacents;
+        }
+        bool operator!=(const node& other) const
+        {
+            return !(*this == other);
+        }
     };
 
   public:
@@ -105,6 +115,16 @@ class Topology
     void resize(const std::size_t N) {nodes_.resize(N); return;}
 
     std::size_t number_of_molecules() const noexcept {return this->num_molecules_;}
+
+    bool operator==(const Topology& other) const
+    {
+        return this->nodes_ == other.nodes_ &&
+               this->num_molecules_ == other.num_molecules_;
+    }
+    bool operator!=(const Topology& other) const
+    {
+        return !(*this == other);
+    }
 
 
   private:

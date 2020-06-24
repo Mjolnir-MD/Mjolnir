@@ -3,7 +3,7 @@
 #include <mjolnir/core/SimulatorBase.hpp>
 #include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/core/ForceFieldBase.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 
 namespace mjolnir
@@ -18,7 +18,7 @@ class MolecularDynamicsSimulator final : public SimulatorBase
     using coordinate_type = typename traits_type::coordinate_type;
     using integrator_type = integratorT;
     using system_type     = System<traits_type>;
-    using forcefield_type = ForceField<traits_type>;
+    using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using observer_type   = ObserverContainer<traits_type>;
     using rng_type        = RandomNumberGenerator<traits_type>;
 
@@ -38,8 +38,6 @@ class MolecularDynamicsSimulator final : public SimulatorBase
     bool step()       override;
     void run()        override;
     void finalize()   override;
-
-    real_type calc_energy() const {return this->ff_.calc_energy(this->system_);}
 
     system_type&       system()       noexcept {return system_;}
     system_type const& system() const noexcept {return system_;}
@@ -69,7 +67,7 @@ template<typename traitsT, typename integratorT>
 inline void MolecularDynamicsSimulator<traitsT, integratorT>::initialize()
 {
     this->system_.initialize(this->rng_);
-    this->ff_.initialize(this->system_);
+    this->ff_->initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_, this->rng_);
 
     observers_.initialize(this->total_step_, this->integrator_.delta_t(),

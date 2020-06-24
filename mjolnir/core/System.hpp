@@ -131,6 +131,21 @@ class System
         };
     }
 
+    // When parallelizing a code, forces are often calculated separately in
+    // several computational units, like cores, nodes, gpu devices, etc. To
+    // make it consistent, we may need to do something with forces calculated
+    // separately. Those functions are provided for such an specialized
+    // situation. Here, for the normal case, we do not need to do anything.
+    //     Before calling `preprocess_forces()`, (a part of) forces may already
+    // be calculated. So this function should NOT break the forces that is
+    // already written in the `force(i)`.
+    //     After calling `postprocess_forces()`, the result of `force(i)` always
+    // represents the "force" of a particle at that time point. I mean, we can
+    // consider the "force" is equivalent to the force that is calculated by
+    // single core.
+    void preprocess_forces()  noexcept {/* do nothing */}
+    void postprocess_forces() noexcept {/* do nothing */}
+
     real_type  mass (std::size_t i) const noexcept {return masses_[i];}
     real_type& mass (std::size_t i)       noexcept {return masses_[i];}
     real_type  rmass(std::size_t i) const noexcept {return rmasses_[i];}
@@ -160,6 +175,9 @@ class System
 
     bool  velocity_initialized() const noexcept {return velocity_initialized_;}
     bool& velocity_initialized()       noexcept {return velocity_initialized_;}
+
+    coordinate_container_type const& forces() const noexcept {return forces_;}
+    coordinate_container_type&       forces()       noexcept {return forces_;}
 
   private:
 
