@@ -1,5 +1,21 @@
 # Change Log
 
+## 1.15.0
+
+### Added
+
+- g-BAOABIntegrator (@yutakasi634)
+- generalized MultipleBasinModel
+
+### Changed
+
+- check initial condition is in the boundary
+- make systems.boundary_shape omittable if there is no boundary
+
+### Fixed
+
+- fix CMakeList for the case when only C++ implementation of OpenMP is found
+
 ## 1.14.0
 
 ### Added
