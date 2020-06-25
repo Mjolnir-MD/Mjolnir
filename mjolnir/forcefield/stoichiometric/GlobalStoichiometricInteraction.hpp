@@ -17,6 +17,7 @@ template<typename traitsT>
 class GlobalStoichiometricInteraction final : public GlobalInteractionBase<traitsT>
 {
   public:
+
     using traits_type    = traitsT;
     using base_type      = GlobalInteractionBase<traits_type>;
     using real_type      = typename base_type::real_type;
@@ -29,6 +30,7 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
     GlobalStoichiometricInteraction(potential_type&& pot, partition_type&& part)
         : potential_(std::move(pot)), partition_(std::move(part))
     {}
+    ~GlobalStoichiometricInteraction() {}
 
     void initialize(const system_type& sys, const topology_type& topol) override
     {
@@ -93,6 +95,7 @@ extern template class GlobalStoichiometricInteraction<SimulatorTraits<double, Un
 extern template class GlobalStoichiometricInteraction<SimulatorTraits<float,  UnlimitedBoundary>       >;
 extern template class GlobalStoichiometricInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
 extern template class GlobalStoichiometricInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
 

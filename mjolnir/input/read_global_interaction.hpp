@@ -8,6 +8,7 @@
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseBaseInteraction.hpp>
 #include <mjolnir/forcefield/PDNS/ProteinDNANonSpecificInteraction.hpp>
 #include <mjolnir/forcefield/PWMcos/PWMcosInteraction.hpp>
+#include <mjolnir/forcefield/stoichiometric/GlobalStoichiometricInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -514,6 +515,25 @@ read_pwmcos_interaction(const toml::value& global)
         read_spatial_partition<traitsT, potential_type>(global));
 }
 
+// ----------------------------------------------------------------------------
+// Stoichiometric Interaction
+
+template<typename traitsT>
+std::unique_ptr<GlobalInteractionBase<traitsT>>
+read_global_stoichiometric_interaction(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using potential_type = GlobalStoichiometricInteractionPotential<traitsT>;
+
+    const auto pot = toml::find<std::string>(global, "potential");
+    potential_type potential(read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
+
+    return make_unique<GlobalStoichiometricInteraction<traitsT>>(
+            std::move(potential),
+            read_spatial_partition<traitsT, potential_type>(global));
+}
 
 // ----------------------------------------------------------------------------
 // general read_global_interaction function
@@ -547,6 +567,11 @@ read_global_interaction(const toml::value& global)
         MJOLNIR_LOG_NOTICE("PWMcos Interaction found.");
         return read_pwmcos_interaction<traitsT>(global);
     }
+    else if(interaction == "Stoichiometric")
+    {
+        MJOLNIR_LOG_NOTICE("Stoichiometric Interaction found.");
+        return read_global_stoichiometric_interaction<traitsT>(global);
+    }
     else
     {
         throw std::runtime_error(toml::format_error("[error] "
@@ -574,6 +599,11 @@ extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, Un
 extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_global_pair_interaction(const toml::value& global);
 extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_pair_interaction(const toml::value& global);
 extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_global_pair_interaction(const toml::value& global);
+
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_global_stoichiometric_interaction(const toml::value& global);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float , UnlimitedBoundary>       >> read_global_stoichiometric_interaction(const toml::value& global);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_stoichiometric_interaction(const toml::value& global);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float , CuboidalPeriodicBoundary>>> read_global_stoichiometric_interaction(const toml::value& global);
 #endif
 
 } // mjolnir
