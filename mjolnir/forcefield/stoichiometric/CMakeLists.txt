@@ -4,5 +4,4 @@ set(mjolnir_forcefield_stoichiometric_cpp_files
     )
 set(mjolnir_forcefield_cpp_files
     ${mjolnir_forcefield_cpp_files}
-    ${mjolnir_forcefield_stoichiometric_cpp_files} PARENT_SCOPE
-    )
+    ${mjolnir_forcefield_stoichiometric_cpp_files} PARENT_SCOPE)
