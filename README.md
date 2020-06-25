@@ -1,5 +1,6 @@
 # Mjolnir
 
+[![build](https://github.com/Mjolnir-MD/Mjolnir/workflows/build/badge.svg)](https://github.com/Mjolnir-MD/Mjolnir/actions)
 [![Build Status](https://travis-ci.org/Mjolnir-MD/Mjolnir.svg?branch=master)](https://travis-ci.org/Mjolnir-MD/Mjolnir)
 [![CircleCI Status](https://circleci.com/gh/Mjolnir-MD/Mjolnir/tree/master.svg?style=svg)](https://circleci.com/gh/Mjolnir-MD/Mjolnir/tree/master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b55282103ca74dd5b9b0022a3af99f3b)](https://www.codacy.com/app/ToruNiina/Mjolnir?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Mjolnir-MD/Mjolnir&amp;utm_campaign=Badge_Grade)
