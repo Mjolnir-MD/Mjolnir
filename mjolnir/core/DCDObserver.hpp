@@ -144,7 +144,7 @@ class DCDObserver final : public ObserverBase<traitsT>
             const std::int32_t total_step(total_step_sz);
             detail::write_as_bytes(ofs, total_step);
 
-            const std::int32_t total_chains(ff.topology().number_of_molecules());
+            const std::int32_t total_chains(ff->topology().number_of_molecules());
             detail::write_as_bytes(ofs, total_chains);
 
             const std::int32_t zero(0);

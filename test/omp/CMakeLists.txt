@@ -3,6 +3,7 @@ set(TEST_NAMES
     test_omp_random_number_generator
     test_omp_save_load_msgpack
     test_omp_system_motion_remover
+    test_omp_multiple_basin_forcefield
 
     test_omp_bond_length_interaction
     test_omp_bond_length_gocontact_interaction
@@ -22,7 +23,7 @@ set(TEST_NAMES
     test_omp_position_restraint_interaction
     )
 
-if(NOT (OpenMP_FOUND AND USE_OPENMP))
+if(NOT (OpenMP_CXX_FOUND AND USE_OPENMP))
     message(FATAL_ERROR "Test codes for OpenMP implementation requires OpenMP library.")
 endif()
 

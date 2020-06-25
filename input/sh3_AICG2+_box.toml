@@ -78,7 +78,6 @@ integrator.gammas = [ # {{{
 
 [[systems]]
 attributes.temperature = 300.0
-boundary_shape = {}
 particles = [ #{{{
 {m=101.11, pos=[15.308,   14.18,  -2.955], vel=[  0.1225, -0.0424, -0.1671], name="CA", group="PRO"},
 {m=147.18, pos=[13.365,   10.96,  -3.638], vel=[  0.0659, -0.0029, -0.0215], name="CA", group="PRO"},
@@ -775,8 +774,8 @@ parameters = [ # {{{
 interaction = "RectangularBox"
 potential   = "ExcludedVolumeWall"
 
-box.lower = [31.0,  16.0,  11.0]
-box.upper = [-1.0, -16.0, -21.0]
+box.upper = [31.0,  16.0,  11.0]
+box.lower = [-1.0, -16.0, -21.0]
 box.margin  = 0.4
 
 # potential related

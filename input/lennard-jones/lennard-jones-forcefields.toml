@@ -5,7 +5,7 @@ ignore.molecule = "Nothing"
 ignore.particles_within.bond = 3
 ignore.particles_within.contact = 1
 spatial_partition.type   = "CellList"
-spatial_partition.margin = 0.5
+spatial_partition.margin = 0.25
 parameters = [
 {index =     0, sigma = 2.0, epsilon = 1.0},
 {index =     1, sigma = 2.0, epsilon = 1.0},

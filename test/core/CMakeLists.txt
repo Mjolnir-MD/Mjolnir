@@ -51,6 +51,8 @@ set(TEST_NAMES
     test_afm_fitting_interaction
     test_rectangular_box_interaction
 
+    test_multiple_basin_forcefield
+
     test_neighbor_list
     test_unlimited_verlet_list
     test_periodic_verlet_list
@@ -104,6 +106,7 @@ set(TEST_NAMES
     test_read_global_forcefield
     test_read_external_forcefield
     test_read_forcefield
+    test_read_multiple_basin_forcefield
 
     test_read_molecular_dynamics_simulator
     test_read_simulated_annealing_simulator
@@ -140,7 +143,7 @@ foreach(TEST_NAME ${TEST_NAMES})
         target_link_libraries(${TEST_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
     endif()
 
-    if(OpenMP_FOUND AND USE_OPENMP)
+    if(OpenMP_CXX_FOUND AND USE_OPENMP)
         if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
             # After CMake 3.13, we can use target_link_options
             set_target_properties(${TEST_NAME} PROPERTIES LINK_FLAGS "-parallel")

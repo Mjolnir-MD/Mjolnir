@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_UniformLennardJones_calc_force)
 
         // calculate forces with openmp
         interaction.calc_force(sys);
-        sys.merge_forces();
+        sys.postprocess_forces();
 
         // calculate forces without openmp
         seq_interaction.calc_force(seq_sys);

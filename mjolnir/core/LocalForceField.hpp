@@ -95,8 +95,8 @@ class LocalForceField
         return;
     }
 
-    // Topology is defined based on LocalForceField.
-    void write_topology(typename system_type::topology_type& topol)
+    // Topology is defined based on LocalForceField and ConstraintForceField.
+    void write_topology(typename system_type::topology_type& topol) const
     {
         for(auto& item : this->interactions_)
         {
@@ -176,4 +176,4 @@ extern template class LocalForceField<SimulatorTraits<float,  CuboidalPeriodicBo
 #endif
 
 } // mjolnir
-#endif /* MJOLNIR_LOCAL_FORCE_FIELD */
+#endif /* MJOLNIR_CORE_LOCAL_FORCE_FIELD_HPP */
