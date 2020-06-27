@@ -113,6 +113,17 @@ class ExternalForceField
         }
         return energy;
     }
+    real_type calc_force_and_energy(system_type& sys) const noexcept
+    {
+        // TODO speedup
+        real_type energy = 0.0;
+        for(const auto& item : this->interactions_)
+        {
+            item->calc_force(sys);
+            energy += item->calc_energy(sys);
+        }
+        return energy;
+    }
 
     // basically, it is called only once at the begenning of a simulation.
     // this function do a lot of stuff, such as memory allocation, but it does
