@@ -281,3 +281,67 @@ BOOST_AUTO_TEST_CASE(BondAngleInteraction_numerical_diff)
         }
     }
 }
+
+BOOST_AUTO_TEST_CASE(BondAngleInteraction_calc_force_and_energy)
+{
+    using traits_type     = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type       = traits_type::real_type;
+    using coord_type      = traits_type::coordinate_type;
+    using boundary_type   = traits_type::boundary_type;
+    using system_type     = mjolnir::System<traits_type>;
+    using harmonic_type   = mjolnir::HarmonicPotential<real_type>;
+    using bond_angle_type = mjolnir::BondAngleInteraction<traits_type, harmonic_type>;
+
+    const real_type k(10.0);
+    const real_type native(mjolnir::math::constants<real_type>::pi() / 3.0);
+
+    std::mt19937 mt(123456789);
+    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
+
+    harmonic_type potential{k, native};
+    bond_angle_type interaction("none", {{ {{0,1,2}}, potential}});
+
+    for(int i = 0; i < 1000; ++i)
+    {
+        system_type sys(3, boundary_type{});
+
+        sys.mass (0)= 1.0;
+        sys.mass (1)= 1.0;
+        sys.mass (2)= 1.0;
+        sys.rmass(0) = 1.0;
+        sys.rmass(1) = 1.0;
+        sys.rmass(2) = 1.0;
+
+        sys.position(0) = coord_type(1.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
+        sys.position(1) = coord_type(0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
+        sys.position(2) = coord_type(1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
+        sys.velocity(0) = coord_type(0.0, 0.0, 0.0);
+        sys.velocity(1) = coord_type(0.0, 0.0, 0.0);
+        sys.velocity(2) = coord_type(0.0, 0.0, 0.0);
+        sys.force   (0) = coord_type(0.0, 0.0, 0.0);
+        sys.force   (1) = coord_type(0.0, 0.0, 0.0);
+        sys.force   (2) = coord_type(0.0, 0.0, 0.0);
+
+        sys.name (0) = "X";
+        sys.name (1) = "X";
+        sys.name (2) = "X";
+        sys.group(0) = "NONE";
+        sys.group(1) = "NONE";
+        sys.group(2) = "NONE";
+
+        constexpr real_type tol = 1e-4;
+        auto ref_sys = sys;
+
+        const auto energy = interaction.calc_force_and_energy(sys);
+        const auto ref_energy = interaction.calc_energy(ref_sys);
+        interaction.calc_force(ref_sys);
+        BOOST_TEST(ref_energy == energy, boost::test_tools::tolerance(tol));
+
+        for(std::size_t idx=0; idx<sys.size(); ++idx)
+        {
+            BOOST_TEST(mjolnir::math::X(sys.force(idx)) == mjolnir::math::X(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+            BOOST_TEST(mjolnir::math::Y(sys.force(idx)) == mjolnir::math::Y(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+            BOOST_TEST(mjolnir::math::Z(sys.force(idx)) == mjolnir::math::Z(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+        }
+    }
+}

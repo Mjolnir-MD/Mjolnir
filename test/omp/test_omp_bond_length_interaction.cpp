@@ -121,3 +121,81 @@ BOOST_AUTO_TEST_CASE(omp_BondLength_calc_force)
                    boost::test_tools::tolerance(tol));
     }
 }
+
+BOOST_AUTO_TEST_CASE(omp_BondLength_calc_force_and_energy)
+{
+    constexpr double tol = 1e-8;
+    mjolnir::LoggerManager::set_default_logger("test_omp_bond_length_interaction.log");
+
+    using traits_type      = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type        = typename traits_type::real_type;
+    using coordinate_type  = typename traits_type::coordinate_type;
+    using boundary_type    = typename traits_type::boundary_type;
+    using system_type      = mjolnir::System<traits_type>;
+    using potential_type   = mjolnir::HarmonicPotential<real_type>;
+    using interaction_type = mjolnir::BondLengthInteraction<traits_type, potential_type>;
+    using rng_type         = mjolnir::RandomNumberGenerator<traits_type>;
+
+    const int max_number_of_threads = omp_get_max_threads();
+    BOOST_TEST_WARN(max_number_of_threads > 2);
+    BOOST_TEST_MESSAGE("maximum number of threads = " << max_number_of_threads);
+
+    for(int num_thread=1; num_thread<=max_number_of_threads; ++num_thread)
+    {
+        omp_set_num_threads(num_thread);
+        BOOST_TEST_MESSAGE("maximum number of threads = " << omp_get_max_threads());
+
+        potential_type   potential(/* k = */100.0, /* native length = */ 5.0);
+        interaction_type interaction(/*topol = */"none", {
+                {std::array<std::size_t, 2>{{0, 1}}, potential},
+                {std::array<std::size_t, 2>{{1, 2}}, potential},
+                {std::array<std::size_t, 2>{{2, 3}}, potential},
+                {std::array<std::size_t, 2>{{3, 4}}, potential},
+                {std::array<std::size_t, 2>{{4, 5}}, potential},
+                {std::array<std::size_t, 2>{{5, 6}}, potential},
+                {std::array<std::size_t, 2>{{6, 7}}, potential},
+                {std::array<std::size_t, 2>{{7, 8}}, potential},
+                {std::array<std::size_t, 2>{{8, 9}}, potential}
+            });
+
+        rng_type    rng(123456789);
+        system_type sys(10, boundary_type{});
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            sys.mass(i)     = 1.0;
+            sys.position(i) = mjolnir::math::make_coordinate<coordinate_type>(i*5.0, 0.0, 0.0);
+            sys.velocity(i) = mjolnir::math::make_coordinate<coordinate_type>(0, 0, 0);
+            sys.force(i)    = mjolnir::math::make_coordinate<coordinate_type>(0, 0, 0);
+            sys.name(i)     = "X";
+            sys.group(i)    = "TEST";
+        }
+        // add perturbation
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            mjolnir::math::X(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
+            mjolnir::math::Y(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
+            mjolnir::math::Z(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
+        }
+
+        interaction.initialize(sys);
+
+        auto ref_sys = sys;
+
+        // calculate forces with openmp
+        const auto ref_ene = interaction.calc_energy(ref_sys);
+        interaction.calc_force(ref_sys);
+        ref_sys.postprocess_forces();
+
+        const auto ene = interaction.calc_force_and_energy(sys);
+        sys.postprocess_forces();
+
+        BOOST_TEST(ene == ref_ene, boost::test_tools::tolerance(tol));
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            BOOST_TEST(mjolnir::math::X(ref_sys.force(i)) == mjolnir::math::X(sys.force(i)), boost::test_tools::tolerance(tol));
+            BOOST_TEST(mjolnir::math::Y(ref_sys.force(i)) == mjolnir::math::Y(sys.force(i)), boost::test_tools::tolerance(tol));
+            BOOST_TEST(mjolnir::math::Z(ref_sys.force(i)) == mjolnir::math::Z(sys.force(i)), boost::test_tools::tolerance(tol));
+        }
+
+    }
+}
