@@ -44,8 +44,9 @@ class DihedralAngleInteraction final : public LocalInteractionBase<traitsT>
     {}
     ~DihedralAngleInteraction() {}
 
-    void      calc_force (system_type&)       const noexcept override;
-    real_type calc_energy(const system_type&) const noexcept override;
+    void      calc_force (system_type&)           const noexcept override;
+    real_type calc_energy(const system_type&)     const noexcept override;
+    real_type calc_force_and_energy(system_type&) const noexcept override;
 
     void initialize(const system_type& sys) override
     {
@@ -187,6 +188,62 @@ DihedralAngleInteraction<traitsT, potentialT>::calc_energy(
         E += idxp.second.potential(phi);
     }
     return E;
+}
+
+template<typename traitsT, typename pT>
+typename DihedralAngleInteraction<traitsT, pT>::real_type
+DihedralAngleInteraction<traitsT, pT>::calc_force_and_energy(system_type& sys) const noexcept
+{
+    real_type energy = 0;
+    for(const auto& idxp : this->potentials_)
+    {
+        const std::size_t idx0 = idxp.first[0];
+        const std::size_t idx1 = idxp.first[1];
+        const std::size_t idx2 = idxp.first[2];
+        const std::size_t idx3 = idxp.first[3];
+
+        const auto& r_i = sys.position(idx0);
+        const auto& r_j = sys.position(idx1);
+        const auto& r_k = sys.position(idx2);
+        const auto& r_l = sys.position(idx3);
+
+        const coordinate_type r_ij = sys.adjust_direction(r_i - r_j);
+        const coordinate_type r_kj = sys.adjust_direction(r_k - r_j);
+        const coordinate_type r_lk = sys.adjust_direction(r_l - r_k);
+        const coordinate_type r_kl = real_type(-1.0) * r_lk;
+
+        const real_type r_kj_lensq  = math::length_sq(r_kj);
+        const real_type r_kj_rlen   = math::rsqrt(r_kj_lensq);
+        const real_type r_kj_rlensq = r_kj_rlen * r_kj_rlen;
+        const real_type r_kj_len    = r_kj_rlen * r_kj_lensq;
+
+        const coordinate_type m = math::cross_product(r_ij, r_kj);
+        const coordinate_type n = math::cross_product(r_kj, r_kl);
+        const real_type m_lensq = math::length_sq(m);
+        const real_type n_lensq = math::length_sq(n);
+
+        const real_type dot_mn  = math::dot_product(m, n) *
+                                  math::rsqrt(m_lensq * n_lensq);
+        const real_type cos_phi = math::clamp<real_type>(dot_mn, -1, 1);
+        const real_type phi     =
+            std::copysign(std::acos(cos_phi), math::dot_product(r_ij, n));
+
+        // -dV / dphi
+        const real_type coef = -(idxp.second.derivative(phi));
+        energy += idxp.second.potential(phi);
+
+        const coordinate_type Fi = ( coef * r_kj_len / m_lensq) * m;
+        const coordinate_type Fl = (-coef * r_kj_len / n_lensq) * n;
+
+        const real_type coef_ijk = math::dot_product(r_ij, r_kj) * r_kj_rlensq;
+        const real_type coef_jkl = math::dot_product(r_kl, r_kj) * r_kj_rlensq;
+
+        sys.force(idx0) += Fi;
+        sys.force(idx1) += (coef_ijk - real_type(1.0)) * Fi - coef_jkl * Fl;
+        sys.force(idx2) += (coef_jkl - real_type(1.0)) * Fl - coef_ijk * Fi;
+        sys.force(idx3) += Fl;
+    }
+    return energy;
 }
 
 template<typename traitsT, typename potentialT>
