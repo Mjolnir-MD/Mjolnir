@@ -84,6 +84,33 @@ class PositionRestraintInteraction<
         return E;
     }
 
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        real_type E = 0.0;
+#pragma omp parallel for reduction(+:E)
+        for(std::size_t i=0; i<this->potentials_.size(); ++i)
+        {
+            const auto& pots = this->potentials_[i];
+
+            const auto  pid = std::get<0>(pots); // particle index
+            const auto& pos = std::get<1>(pots); // restrained position
+            const auto& pot = std::get<2>(pots); // potential form
+
+            const auto& r_i = sys.position(pid);
+            const auto  dr  = sys.adjust_direction(pos - r_i);
+
+            const auto rlen = math::rlength(dr); // 1 / |dr|
+            const auto dist = math::length_sq(dr) * rlen;
+            const auto dV   = pot.derivative(dist);
+            if(dV == 0.0){continue;}
+
+            E += pot.potential(dist);
+            sys.force_thread(omp_get_thread_num(), pid) += (dV * rlen) * dr;
+        }
+        return E;
+    }
+
+
     void initialize(const system_type& sys) override
     {
         // update system parameters such as temperature, ionic-strength, etc.,
