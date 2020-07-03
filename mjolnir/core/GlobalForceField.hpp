@@ -120,12 +120,10 @@ class GlobalForceField
     }
     real_type calc_force_and_energy(system_type& sys) const noexcept
     {
-        // TODO speedup
         real_type energy = 0.;
         for(const auto& item : this->interactions_)
         {
-            item->calc_force(sys);
-            energy += item->calc_energy(sys);
+            energy += item->calc_force_and_energy(sys);
         }
         return energy;
     }
