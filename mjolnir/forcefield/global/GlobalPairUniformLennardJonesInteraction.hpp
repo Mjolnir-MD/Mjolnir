@@ -146,6 +146,49 @@ class GlobalPairInteraction<
         return E;
     }
 
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        const auto coef_at_cutoff  = potential_.coef_at_cutoff();
+        const auto cutoff_ratio    = potential_.cutoff_ratio();
+        const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
+        const auto sigma           = this->potential_.sigma();
+        const auto sigma_sq        = sigma * sigma;
+        const auto r_cutoff_sq     = cutoff_ratio_sq * sigma_sq;
+        const auto epsilon         = this->potential_.epsilon();
+
+        real_type energy = 0;
+
+        const auto leading_participants = this->potential_.leading_participants();
+        for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
+        {
+            const auto i = leading_participants[idx];
+
+            for(const auto& ptnr : this->partition_.partners(i))
+            {
+                const auto j = ptnr.index;
+
+                const coordinate_type rij =
+                    sys.adjust_direction(sys.position(j) - sys.position(i));
+                const real_type l_sq = math::length_sq(rij);
+
+                if(r_cutoff_sq < l_sq) {continue;}
+
+                const real_type rcp_l_sq = 1 / l_sq;
+                const real_type s2l2 = sigma_sq * rcp_l_sq;
+                const real_type s6l6 = s2l2 * s2l2 * s2l2;
+
+                energy += 4 * epsilon * (s6l6 * s6l6 - s6l6 - coef_at_cutoff);
+
+                const coordinate_type f = rij *
+                    (24 * epsilon * (s6l6 - 2 * s6l6 * s6l6) * rcp_l_sq);
+
+                sys.force(i) += f;
+                sys.force(j) -= f;
+            }
+        }
+        return energy;
+    }
+
     std::string name() const override {return "GlobalPairUniformLennardJones";}
 
     base_type* clone() const override

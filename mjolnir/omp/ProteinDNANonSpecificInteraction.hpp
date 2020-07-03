@@ -310,6 +310,161 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         return E;
     }
 
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+        MJOLNIR_LOG_FUNCTION_DEBUG();
+
+        constexpr auto tolerance = math::abs_tolerance<real_type>();
+        // XXX Note: P is ambiguous because both Protein and Phosphate has `P`.
+        // But this interaction is named as P-D ns, so here it uses `P` for protein
+        // and `D` for DNA.
+
+        real_type energy = 0;
+#pragma omp parallel for reduction(+:energy)
+        for(std::size_t i=0; i < this->potential_.contacts().size(); ++i)
+        {
+            const auto& para = potential_.contacts()[i];
+
+            const auto  P  = para.P;
+            const auto& rP = sys.position(P);
+            for(const auto& ptnr : this->partition_.partners(P))
+            {
+                const auto  D  = ptnr.index;  // DNA phosphate
+                const auto  S3 = ptnr.parameter().S3; // 3' Sugar
+                const auto& rD = sys.position(D);
+
+                MJOLNIR_LOG_DEBUG("protein = ", P, ", DNA = ", D, ", r0 = ", para.r0);
+
+                //  PC          S5'    |
+                //    o         o--o B | theta is an angle formed by the vector
+                //    A\ P   D /       | from the neighboring amino acid residue at
+                // vP | o --> o        | the N-term side to the amino acid residue
+                //    |/     `-\       | at the C-term side (vP in the figure) and
+                //    o    phi  o--o B | the vector from Protein to DNA (phosphate).
+                //  PN           S3'   |
+
+                // ----------------------------------------------------------------
+                // calculates the distance part
+
+                const auto rPD    = sys.adjust_direction(rD - rP); // PRO -> DNA
+                const auto lPD_sq = math::length_sq(rPD);
+                if(para.r_cut_sq < lPD_sq)
+                {
+                    continue;
+                }
+                const auto rlPD   = math::rsqrt(lPD_sq);
+                const auto  lPD   = lPD_sq * rlPD;
+                const auto f_df   = potential_.f_df(para.r0, lPD);
+
+                MJOLNIR_LOG_DEBUG("f = ", f_df.first, ", df = ", f_df.second);
+
+                // ----------------------------------------------------------------
+                // calculates the angle part (theta)
+
+                const auto& rPC   = sys.position(para.PC);
+                const auto& rPN   = sys.position(para.PN);
+                const auto rPNC   = sys.adjust_direction(rPC - rPN); // PN -> PC
+                const auto rlPNC  = math::rlength(rPNC);
+                const auto dotPNC = math::dot_product(rPNC, rPD);
+                const auto cosPNC = dotPNC * rlPD * rlPNC;
+                const auto theta  = std::acos(math::clamp<real_type>(cosPNC,-1,1));
+
+                const auto g_dg_theta = potential_.g_dg(para.theta0, theta);
+
+                MJOLNIR_LOG_DEBUG("g(theta) = ", g_dg_theta.first,
+                                 ", dg(theta) = ", g_dg_theta.second);
+
+                // ----------------------------------------------------------------
+                // calculates the angle part (phi)
+
+                const auto& rS3   = sys.position(S3);
+                const auto rS3D   = sys.adjust_direction(rD - rS3); // S3' -> D
+                const auto rlS3D  = math::rlength(rS3D);
+                const auto dotS3D = math::dot_product(rPD, rS3D);
+                const auto cosS3D = dotS3D * rlS3D * rlPD;
+                const auto phi    = std::acos(math::clamp<real_type>(cosS3D,-1,1));
+
+                const auto g_dg_phi = potential_.g_dg(para.phi0, phi);
+
+                MJOLNIR_LOG_DEBUG("g(phi) = ", g_dg_phi.first,
+                                 ", dg(phi) = ", g_dg_phi.second);
+
+                // ----------------------------------------------------------------
+                // calculate force
+                //
+                //   d/dr [kf(r)  g(theta)  g(phi)]
+                // =    k [df(r)  g(theta)  g(phi) dr/dr     +
+                //          f(r) dg(theta)  g(phi) dtheta/dr +
+                //          f(r)  g(theta) dg(phi) dphi/dr   ]
+                const auto k = para.k;
+                const auto thread_id = omp_get_thread_num();
+
+                energy += k * f_df.first * g_dg_theta.first * g_dg_phi.first;
+
+                // df(r) g(theta) g(phi)
+                if(g_dg_theta.first  != 0 && g_dg_phi.first  != 0)
+                {
+                    MJOLNIR_LOG_DEBUG("calculating distance force");
+
+                    const auto coef = rlPD * k *
+                        f_df.second * g_dg_theta.first * g_dg_phi.first;
+                    const auto F = -coef * rPD;
+
+                    sys.force_thread(thread_id, P) -= F;
+                    sys.force_thread(thread_id, D) += F;
+                }
+
+                // f(r) dg(theta) g(phi)
+                if(g_dg_theta.second != 0 && g_dg_phi.first  != 0)
+                {
+                    MJOLNIR_LOG_DEBUG("calculating theta force");
+
+                    const auto deriv =
+                        k * f_df.first * g_dg_theta.second * g_dg_phi.first;
+
+                    const auto sin_theta = std::sin(theta);
+                    const auto coef_sin  = deriv / std::max(sin_theta, tolerance);
+
+                    const auto rPD_reg  = rlPD  * rPD;
+                    const auto rPNC_reg = rlPNC * rPNC;
+
+                    const auto F_P  = -coef_sin * rlPD  * (rPNC_reg - cosPNC * rPD_reg );
+                    const auto F_PN = -coef_sin * rlPNC * (rPD_reg  - cosPNC * rPNC_reg);
+
+                    sys.force_thread(thread_id, D)       -= F_P;
+                    sys.force_thread(thread_id, P)       += F_P;
+                    sys.force_thread(thread_id, para.PN) += F_PN;
+                    sys.force_thread(thread_id, para.PC) -= F_PN;
+                }
+
+                // f(r) dg(theta) g(phi)
+                if(g_dg_theta.first  != 0 && g_dg_phi.second != 0)
+                {
+                    MJOLNIR_LOG_DEBUG("calculating phi force");
+
+                    const auto deriv =
+                        k * f_df.first * g_dg_theta.first * g_dg_phi.second;
+
+                    const auto sin_phi  = std::sin(phi);
+                    const auto coef_sin = deriv / std::max(sin_phi, tolerance);
+
+                    const auto rPD_reg  = rlPD  * rPD;
+                    const auto rS3D_reg = rlS3D * rS3D;
+
+                    const auto F_P = -coef_sin * rlPD  * (rS3D_reg - cosS3D * rPD_reg);
+                    const auto F_S = -coef_sin * rlS3D * (rPD_reg  - cosS3D * rS3D_reg);
+
+                    sys.force_thread(thread_id, P)  += F_P;
+                    sys.force_thread(thread_id, D)  -= F_P + F_S;
+                    sys.force_thread(thread_id, S3) += F_S;
+                }
+            }
+        }
+        return energy;
+    }
+
+
     std::string name() const override {return "PDNSInteraction";}
 
     potential_type const& potential() const noexcept {return potential_;}
