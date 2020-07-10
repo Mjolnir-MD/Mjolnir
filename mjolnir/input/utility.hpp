@@ -242,6 +242,7 @@ inline bool file_extension_is(const std::string& filename,
 
 inline void merge_toml_tables(toml::value& table, const toml::value& other)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER();
     using ::mjolnir::literals::string_literals::operator"" _s;
     assert(table.is_table());
     assert(other.is_table());
@@ -252,6 +253,7 @@ inline void merge_toml_tables(toml::value& table, const toml::value& other)
         {
             if(table.at(kv.first).is_table())
             {
+                MJOLNIR_LOG_INFO("merging table, ", kv.first);
                 merge_toml_tables(table.at(kv.first), kv.second);
             }
             else
@@ -263,46 +265,55 @@ inline void merge_toml_tables(toml::value& table, const toml::value& other)
         }
         else
         {
+            MJOLNIR_LOG_INFO("inserting new value, ", kv.first);
             table.as_table().emplace(kv.first, kv.second);
         }
     }
     return;
 }
 
-inline toml::value expand_include(toml::value v)
+inline void expand_include(toml::value& v)
 {
-    if(!v.is_table())
-    {
-        return v;
-    }
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    if(!v.is_table() && !v.is_array()) {return;}
 
-    // expand include in this table
-    if(v.contains("include"))
+    if(v.is_table())
     {
-        const auto& input_path = get_input_path();
-        if(v.at("include").is_array())
+        for(auto& kv : v.as_table())
         {
-            for(auto fname : toml::find<std::vector<std::string>>(v, "include"))
+            if(kv.first == "include") {continue;}
+            expand_include(kv.second);
+        }
+
+        // expand include in this table
+        if(v.contains("include"))
+        {
+            MJOLNIR_LOG_INFO("\"include\" found.");
+            const auto& input_path = get_input_path();
+            if(v.at("include").is_array())
             {
+                for(auto fname : toml::find<std::vector<std::string>>(v, "include"))
+                {
+                    MJOLNIR_LOG_INFO("expanding file ", input_path, fname);
+                    merge_toml_tables(v, toml::parse(input_path + fname));
+                }
+            }
+            else
+            {
+                const auto& fname = toml::find<std::string>(v, "include");
+                MJOLNIR_LOG_INFO("expanding file ", input_path, fname);
                 merge_toml_tables(v, toml::parse(input_path + fname));
             }
         }
-        else
-        {
-            merge_toml_tables(v, toml::parse(
-                        input_path + toml::find<std::string>(v, "include")));
-        }
     }
-
-    for(auto& kv : v.as_table())
+    else if(v.is_array()) // handle an array of tables
     {
-        if(kv.second.is_table())
+        for(auto& elem : v.as_array())
         {
-            kv.second = expand_include(kv.second);
+            expand_include(elem);
         }
     }
-
-    return v;
+    return;
 }
 
 } // mjolnir
