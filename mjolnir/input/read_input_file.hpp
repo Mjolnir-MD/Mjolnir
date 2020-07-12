@@ -160,7 +160,7 @@ read_input_file(const std::string& filename)
     read_input_path(root);
 
     MJOLNIR_LOG_NOTICE("expanding include files ...");
-    root = expand_include(root);
+    expand_include(root);
     MJOLNIR_LOG_NOTICE("done.");
 
     // the most of important flags are defined in [simulator], like
