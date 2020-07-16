@@ -16,7 +16,7 @@ seed          = 12345
 total_step    = 50000
 save_step     =   100
 integrator.type = "BAOABLangevin"
-integrator.parameters = [
+integrator.gammas = [
 {index = 0, gamma = 0.01},
 {index = 1, gamma = 0.01},
 {index = 2, gamma = 0.01},
