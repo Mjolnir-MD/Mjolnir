@@ -553,16 +553,42 @@ read_global_stoichiometric_interaction(const toml::value& global)
     // ]
     // ```
 
-    const auto      pot     = toml::find<std::string>(global, "potential");
-    const real_type epsilon = toml::find<real_type>  (global, "epsilon");
+    const auto        pot         = toml::find<std::string>(global, "potential");
+    const real_type   epsilon     = toml::find<real_type>  (global, "epsilon");
     const std::size_t first_coef  = toml::find<std::size_t>(global, "coef1");
     const std::size_t second_coef = toml::find<std::size_t>(global, "coef2");
-    const real_type   v0          = toml::find<std::size_t>(global, "v0");
+    const real_type   v0          = toml::find<real_type>  (global, "v0");
+    const auto&       ps          = toml::find<toml::array>(global, "parameters");
 
-    const auto& kinds = toml::find<toml::array>(global, "parameters");
+    const auto        kinds       =
+        toml::get<std::array<std::string, 2>>(toml::find(global, "kinds"));
+
     // TODO make each kind particles vector
     std::vector<std::size_t> first_kind_particles;
     std::vector<std::size_t> second_kind_particles;
+
+    for(const auto& item : ps)
+    {
+        const auto idx  = toml::find<std::size_t>(item, "index");
+        const auto kind = toml::find<std::string>(item, "kind");
+
+        if(kind == kinds[0])
+        {
+            first_kind_particles.push_back(idx);
+        }
+        else if(kind == kinds[1])
+        {
+            second_kind_particles.push_back(idx);
+        }
+        else
+        {
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "mjolnir::read_stoichiometric_interaction: unknown particle kind ",
+                toml::find<toml::value>(global, "kinds"), "here", {
+                "expected value is " + kinds[0] + " or " + kinds[1]
+                }));
+        }
+    }
 
     potential_type potential(v0,
             std::move(first_kind_particles),
