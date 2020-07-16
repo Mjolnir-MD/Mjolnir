@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.15.1
+
+### Fixed
+
+- enable to include a file in an array of tables
+- avoid infinit recursive file inclusion
+
 ## 1.15.0
 
 ### Added
