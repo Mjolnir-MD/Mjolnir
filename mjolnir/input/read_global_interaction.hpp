@@ -525,14 +525,46 @@ read_global_stoichiometric_interaction(const toml::value& global)
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
     using potential_type = GlobalStoichiometricInteractionPotential<traitsT>;
+    using real_type      = typename potential_type::real_type;
 
-    const auto pot = toml::find<std::string>(global, "potential");
-    potential_type potential(read_ignore_particles_within(global),
+    // ```toml
+    // [[forcefields.global]]
+    // interaction = "Stoichiometric"
+    // potential   = "Stoichiometric"
+    // epsilon     = 1.0 # the depth of potential valley
+    // kinds = ["A", "B"]
+    // coef1 = 3
+    // coef2 = 1
+    // v0 = 4.0
+    // parameters = [
+    // {index = 0, kind = "A"},
+    // {index = 1, kind = "B"},
+    // # ...
+    // ]
+    // ```
+
+    const auto      pot     = toml::find<std::string>(global, "potential");
+    const real_type epsilon = toml::find<real_type>  (global, "epsilon");
+    const std::size_t first_coef  = toml::find<std::size_t>(global, "coef1");
+    const std::size_t second_coef = toml::find<std::size_t>(global, "coef2");
+    const real_type   v0          = toml::find<std::size_t>(global, "v0");
+
+    const auto& kinds = toml::find<toml::array>(global, "parameters");
+    // TODO make each kind particles vector
+    std::vector<std::size_t> first_kind_particles;
+    std::vector<std::size_t> second_kind_particles;
+
+    potential_type potential(v0,
+            std::move(first_kind_particles),
+            std::move(second_kind_particles),
+            read_ignore_particles_within(global),
             read_ignored_molecule(global), read_ignored_group(global));
 
     return make_unique<GlobalStoichiometricInteraction<traitsT>>(
             std::move(potential),
-            read_spatial_partition<traitsT, potential_type>(global));
+            read_spatial_partition<traitsT, potential_type>(global),
+            epsilon, first_coef, second_coef,
+            first_kind_particles, second_kind_particles);
 }
 
 // ----------------------------------------------------------------------------
