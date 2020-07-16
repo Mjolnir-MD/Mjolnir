@@ -15,7 +15,7 @@ delta_t       = 0.3
 seed          = 12345
 total_step    = 50000
 save_step     =   100
-integrator_type = "BAOABLangevin"
+integrator.type = "BAOABLangevin"
 integrator.parameters = [
 {index = 0, gamma = 0.01},
 {index = 1, gamma = 0.01},
@@ -51,8 +51,8 @@ particles = [
 interaction                   = "Pair"
 potential                     = "ExcludedVolume"
 ignore.molecule               = "Nothing"
-ignore.particles_within_bond  = 1
-spatial_partition.type        = "Nothing"
+ignore.particles_within.bond  = 1
+spatial_partition.type        = "Naive"
 spatial_partition.margin      = 1.0
 epsilon                       = 0.6
 parameters = [
@@ -68,18 +68,18 @@ parameters = [
 {index = 9, radius = 2.0},
 ]
 
-[[forcefields]]
 [[forcefields.global]]
 interaction                  = "Stoichiometric"
 potential                    = "Stoichiometric"
 ignore.molecule              = "Nothing"
-ignore.particles_within_bond = 1
-spatial_partition.type       = "Nothing"
+ignore.particles_within.bond = 1
+spatial_partition.type       = "Naive"
 spatial_partition.margin     = 1.0
 kinds = ["A", "B"]
-coef1 = 3
-coef2 = 1
-v0 = 4.0
+epsilon = 1.0
+coef1   = 3
+coef2   = 1
+v0      = 4.0
 parameters = [
 {index = 0, kind = "A"},
 {index = 1, kind = "A"},
