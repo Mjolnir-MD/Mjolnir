@@ -573,8 +573,7 @@ read_global_stoichiometric_interaction(const toml::value& global)
     return make_unique<GlobalStoichiometricInteraction<traitsT>>(
             std::move(potential),
             read_spatial_partition<traitsT, potential_type>(global),
-            epsilon, first_coef, second_coef,
-            first_kind_particles, second_kind_particles);
+            epsilon, first_coef, second_coef);
 }
 
 // ----------------------------------------------------------------------------

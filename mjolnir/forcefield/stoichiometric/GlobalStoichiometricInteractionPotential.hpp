@@ -72,6 +72,9 @@ class GlobalStoichiometricInteractionPotential
         return 6.0 * (r_inv_v0_2 - r_inv_v0);
     }
 
+    std::size_t first_kind_participants_num()  const noexcept {return first_kind_participants_num_;}
+    std::size_t second_kind_participants_num() const noexcept {return second_kind_participants_num_;}
+
     real_type max_cutoff_length() const noexcept
     {
         return 2.0 * v0_;
@@ -112,6 +115,11 @@ class GlobalStoichiometricInteractionPotential
     {
         return make_range(participants_.begin() + first_kind_participants_num_ + 1,
                           std::prev(participants_.end()));
+    }
+    range<typename std::vector<std::size_t>::const_iterator>
+    following_participants() const noexcept
+    {
+        return possible_partners_of(/*dummy param*/0, /*dummy param*/0);
     }
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
