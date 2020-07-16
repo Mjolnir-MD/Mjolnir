@@ -71,23 +71,24 @@ parameters = [
 [[forcefields]]
 [[forcefields.global]]
 interaction                  = "Stoichiometric"
-potential                    = "StoichiometricContact"
+potential                    = "Stoichiometric"
 ignore.molecule              = "Nothing"
 ignore.particles_within_bond = 1
 spatial_partition.type       = "Nothing"
 spatial_partition.margin     = 1.0
+kinds = ["A", "B"]
+coef1 = 3
+coef2 = 1
+v0 = 4.0
 parameters = [
-{kinds = ["A", "B"], coef1 = 3, coef2 = 1, v0 = 4.0, k = 1.0},
-]
-kinds = [
 {index = 0, kind = "A"},
-{index = 0, kind = "A"},
-{index = 0, kind = "A"},
-{index = 0, kind = "A"},
-{index = 0, kind = "A"},
-{index = 0, kind = "A"},
-{index = 0, kind = "B"},
-{index = 0, kind = "B"},
-{index = 0, kind = "B"},
-{index = 0, kind = "B"},
+{index = 1, kind = "A"},
+{index = 2, kind = "A"},
+{index = 3, kind = "A"},
+{index = 4, kind = "A"},
+{index = 5, kind = "A"},
+{index = 6, kind = "B"},
+{index = 7, kind = "B"},
+{index = 8, kind = "B"},
+{index = 9, kind = "B"},
 ]
