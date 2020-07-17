@@ -124,12 +124,14 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
 
   private:
 
+    potential_type                      potential_;
+    partition_type                      partition_;
+
     real_type                           epsilon_;
     real_type                           epsilon_2_;
     std::size_t                         first_coef_;
     std::size_t                         second_coef_;
-    potential_type                      potential_;
-    partition_type                      partition_;
+
 
     // -----------------------------------------------------------------------
     // Variables for buffering intermediate value.
