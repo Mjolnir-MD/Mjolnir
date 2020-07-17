@@ -263,17 +263,19 @@ GlobalStoichiometricInteraction<traitsT>::calc_energy(const system_type& sys) co
     for(std::size_t idx_first=0; idx_first<first_kind_participants_num; ++idx_first)
     {
         const index_type i = leading_participants[idx_first];
-        std::vector<real_type>& pots_buff_first = potentials_buff_[idx_first];
+        std::vector<real_type>& pots_buff_first   = potentials_buff_  [idx_first];
+        real_type&              pot_sum_for_first = pot_sum_for_first_[idx_first];
         for(std::size_t idx_second=0; idx_second<second_kind_participants_num; ++idx_second)
         {
             const index_type j = following_participants[idx_second];
             const coordinate_type rij =
                 sys.adjust_direction(sys.position(j) - sys.position(i));
-            const real_type l2  = math::length_sq(rij);
-            const real_type l   = math::rsqrt(l2);
+            const real_type l2  = math::length_sq(rij); // |rij|^2
+            const real_type rl  = math::rsqrt(l2);      // 1 / |rij|
+            const real_type l   = l2 * rl;              // |rij|
             const real_type pot = potential_.potential(l);
             pots_buff_first    [idx_second] =  pot;
-            pot_sum_for_first_ [idx_first ] += pot;
+            pot_sum_for_first               += pot;
             pot_sum_for_second_[idx_second] += pot;
         }
     }
