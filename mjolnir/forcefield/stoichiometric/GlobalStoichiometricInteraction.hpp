@@ -41,14 +41,19 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
         std::size_t second_kind_particles_num = potential_.second_kind_participants_num();
         pot_derivs_buff_.resize(first_kind_particles_num);
         potentials_buff_.resize(first_kind_particles_num);
-        for(auto iter=potentials_buff_.begin(); iter!=potentials_buff_.end(); ++iter)
+        for(std::size_t idx = 0; idx<first_kind_particles_num; ++idx)
         {
-            (*iter).resize(second_kind_particles_num, 0.0);
+            potentials_buff_[idx].resize(second_kind_particles_num);
+            pot_derivs_buff_[idx].resize(second_kind_particles_num);
         }
-        pot_sum_for_first_   .resize(first_kind_particles_num );
-        pot_sum_for_second_  .resize(second_kind_particles_num);
+        pot_sum_for_first_       .resize(first_kind_particles_num );
+        pot_sum_for_second_      .resize(second_kind_particles_num);
         pot_deriv_sum_for_first_ .resize(first_kind_particles_num );
         pot_deriv_sum_for_second_.resize(second_kind_particles_num);
+        activated_for_first_     .resize(first_kind_particles_num );
+        activated_for_second_    .resize(second_kind_particles_num);
+        act_deriv_for_first_     .resize(first_kind_particles_num );
+        act_deriv_for_second_    .resize(second_kind_particles_num);
     }
     ~GlobalStoichiometricInteraction() {}
 
