@@ -115,8 +115,8 @@ class GlobalStoichiometricInteractionPotential
     possible_partners_of(const std::size_t /*participant_idx*/,
                          const std::size_t /*particle_idx*/) const noexcept
     {
-        return make_range(participants_.begin() + first_kind_participants_num_ + 1,
-                          std::prev(participants_.end()));
+        return make_range(participants_.begin() + first_kind_participants_num_,
+                          participants_.end());
     }
     range<typename std::vector<std::size_t>::const_iterator>
     following_participants() const noexcept
