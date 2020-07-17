@@ -68,15 +68,22 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
         partition_.initialize(sys, this->potential_);
     }
 
-    void update(const system_type&, const topology_type&) override
+    void update(const system_type& sys, const topology_type& topol) override
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+        MJOLNIR_LOG_INFO("potential is ", this->name());
+        this->potential_.update(sys,topol);
+        this->partition_.initialize(sys, potential_);
     }
 
-    void reduce_margin(const real_type, const system_type&) override
+    void reduce_margin(const real_type dmargin, const system_type& sys) override
     {
+        partition_.reduce_margin(dmargin, sys, potential_);
     }
-    void scale_margin(const real_type, const system_type&) override
+    void scale_margin(const real_type scale, const system_type& sys) override
     {
+        partition_.scale_margin(scale, sys, potential_);
     }
 
     void      calc_force (system_type&)       const noexcept override;
