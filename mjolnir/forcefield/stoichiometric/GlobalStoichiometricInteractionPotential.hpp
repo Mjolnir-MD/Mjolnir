@@ -39,6 +39,8 @@ class GlobalStoichiometricInteractionPotential
           second_kind_participants_num_(second_kind_participants.size()),
           exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+        MJOLNIR_LOG_FUNCTION_DEBUG();
         participants_.insert(participants_.end(),
                              second_kind_participants.begin(), second_kind_participants.end());
     }
@@ -48,7 +50,7 @@ class GlobalStoichiometricInteractionPotential
     GlobalStoichiometricInteractionPotential& operator=(const GlobalStoichiometricInteractionPotential&) = default;
     GlobalStoichiometricInteractionPotential& operator=(GlobalStoichiometricInteractionPotential&&) = default;
 
-    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
+    pair_parameter_type prepare_params(std::size_t, std::size_t) const noexcept
     {
         return v0_;
     }
@@ -80,7 +82,7 @@ class GlobalStoichiometricInteractionPotential
         return 2.0 * v0_;
     }
 
-    void initalize(const system_type& sys, const topology_type& topol) noexcept
+    void initialize(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
