@@ -64,6 +64,7 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
+        potential_.initialize(sys, topol);
         partition_.initialize(sys, this->potential_);
     }
 
