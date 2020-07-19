@@ -1,0 +1,43 @@
+baseURL      = "http://mjolnir-md.github.io/Mjolnir"
+title        = "Mjolnir documentation"
+theme        = 'hugo-book'
+languageCode = "en-us"
+
+disablePathToLower = true
+
+# DefaultContentLanguage = "en"
+[languages]
+[languages.en]
+weight = 1
+languageName = "English"
+contentDir = "content.en"
+
+[languages.ja]
+weight = 2
+languageName = "日本語"
+contentDir = "content.ja"
+
+[menu]
+[[menu.after]]
+name   = "GitHub"
+url    = "https://github.com/Mjolnir-MD/Mjolnir"
+weight = 10
+
+[params]
+
+BookToC           = true
+BookSection       = 'docs'
+BookSearch        = true
+BookComments      = true
+BookRepo          = 'https://github.com/Mjolnir-MD/Mjolnir'
+
+# Needed for mermaid/katex shortcodes
+[markup]
+[markup.goldmark.renderer]
+unsafe = true
+
+[markup.tableOfContents]
+startLevel = 1
+
+[markup.highlight]
+style = "dracula"
