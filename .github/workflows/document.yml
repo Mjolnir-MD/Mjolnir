@@ -20,11 +20,11 @@ jobs:
           hugo-version: 'latest'
           extended: true
       - name: Build Webpage
+        working-directory: ./book/
         run: |
             hugo --minify
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
-        working-directory: ./book/
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
