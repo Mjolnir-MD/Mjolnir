@@ -14,19 +14,29 @@ precision     = "double"
 delta_t       = 0.3
 seed          = 12345
 total_step    = 50000
-save_step     =   100
+save_step     =    10
 integrator.type = "BAOABLangevin"
 integrator.gammas = [
-{index = 0, gamma = 0.01},
-{index = 1, gamma = 0.01},
-{index = 2, gamma = 0.01},
-{index = 3, gamma = 0.01},
-{index = 4, gamma = 0.01},
-{index = 5, gamma = 0.01},
-{index = 6, gamma = 0.01},
-{index = 7, gamma = 0.01},
-{index = 8, gamma = 0.01},
-{index = 9, gamma = 0.01},
+{index = 0, gamma = 0.1},
+{index = 1, gamma = 0.1},
+{index = 2, gamma = 0.1},
+{index = 3, gamma = 0.1},
+{index = 4, gamma = 0.1},
+{index = 5, gamma = 0.1},
+{index = 6, gamma = 0.1},
+{index = 7, gamma = 0.1},
+{index = 8, gamma = 0.1},
+{index = 9, gamma = 0.1},
+{index =10, gamma = 0.1},
+{index =11, gamma = 0.1},
+{index =12, gamma = 0.1},
+{index =13, gamma = 0.1},
+{index =14, gamma = 0.1},
+{index =15, gamma = 0.1},
+{index =16, gamma = 0.1},
+{index =17, gamma = 0.1},
+{index =18, gamma = 0.1},
+{index =19, gamma = 0.1},
 ]
 
 [[systems]]
@@ -34,16 +44,32 @@ attributes.temperature = 300.0
 boundary_shape.upper = [100.0, 100.0, 100.0]
 boundary_shape.lower = [  0.0,   0.0,   0.0]
 particles = [
-{m =  100.00, pos = [ 50.000,  50.000,  50.000], name="A"},
-{m =  100.00, pos = [ 60.000,  60.000,  60.000], name="A"},
-{m =  100.00, pos = [ 40.000,  40.000,  40.000], name="A"},
-{m =  100.00, pos = [ 50.000,  50.000,  60.000], name="A"},
-{m =  100.00, pos = [ 50.000,  60.000,  50.000], name="A"},
-{m =  100.00, pos = [ 60.000,  50.000,  50.000], name="A"},
-{m =  100.00, pos = [ 40.000,  40.000,  50.000], name="B"},
-{m =  100.00, pos = [ 40.000,  50.000,  40.000], name="B"},
-{m =  100.00, pos = [ 50.000,  40.000,  40.000], name="B"},
-{m =  100.00, pos = [ 60.000,  50.000,  40.000], name="B"},
+{m =  100.00, pos = [ 10.000,  10.000,  10.000], name="A"},
+{m =  100.00, pos = [ 10.000,  10.000,  20.000], name="A"},
+{m =  100.00, pos = [ 10.000,  10.000,  30.000], name="A"},
+
+{m =  100.00, pos = [ 10.000,  20.000,  10.000], name="A"},
+{m =  100.00, pos = [ 10.000,  20.000,  20.000], name="A"},
+{m =  100.00, pos = [ 10.000,  20.000,  30.000], name="A"},
+
+{m =  100.00, pos = [ 10.000,  30.000,  10.000], name="B"},
+{m =  100.00, pos = [ 10.000,  30.000,  20.000], name="B"},
+{m =  100.00, pos = [ 10.000,  30.000,  30.000], name="B"},
+
+{m =  100.00, pos = [ 20.000,  10.000,  10.000], name="B"},
+{m =  100.00, pos = [ 20.000,  10.000,  20.000], name="B"},
+{m =  100.00, pos = [ 20.000,  10.000,  30.000], name="B"},
+
+{m =  100.00, pos = [ 20.000,  20.000,  10.000], name="B"},
+{m =  100.00, pos = [ 20.000,  20.000,  20.000], name="B"},
+{m =  100.00, pos = [ 20.000,  20.000,  30.000], name="B"},
+
+{m =  100.00, pos = [ 20.000,  30.000,  10.000], name="B"},
+{m =  100.00, pos = [ 20.000,  30.000,  20.000], name="B"},
+{m =  100.00, pos = [ 20.000,  30.000,  30.000], name="B"},
+
+{m =  100.00, pos = [ 30.000,  10.000,  10.000], name="B"},
+{m =  100.00, pos = [ 30.000,  10.000,  20.000], name="B"},
 ]
 
 [[forcefields]]
@@ -66,6 +92,16 @@ parameters = [
 {index = 7, radius = 2.0},
 {index = 8, radius = 2.0},
 {index = 9, radius = 2.0},
+{index =10, radius = 2.0},
+{index =11, radius = 2.0},
+{index =12, radius = 2.0},
+{index =13, radius = 2.0},
+{index =14, radius = 2.0},
+{index =15, radius = 2.0},
+{index =16, radius = 2.0},
+{index =17, radius = 2.0},
+{index =18, radius = 2.0},
+{index =19, radius = 2.0},
 ]
 
 [[forcefields.global]]
@@ -76,10 +112,11 @@ ignore.particles_within.bond = 1
 spatial_partition.type       = "Naive"
 spatial_partition.margin     = 1.0
 kinds = ["A", "B"]
-epsilon = 1.0
+epsilon = 5.0
 coef1   = 3
-coef2   = 1
+coef2   = 2
 v0      = 4.0
+range   = 2.0
 parameters = [
 {index = 0, kind = "A"},
 {index = 1, kind = "A"},
@@ -91,4 +128,14 @@ parameters = [
 {index = 7, kind = "B"},
 {index = 8, kind = "B"},
 {index = 9, kind = "B"},
+{index =10, kind = "B"},
+{index =11, kind = "B"},
+{index =12, kind = "B"},
+{index =13, kind = "B"},
+{index =14, kind = "B"},
+{index =15, kind = "B"},
+{index =16, kind = "B"},
+{index =17, kind = "B"},
+{index =18, kind = "B"},
+{index =19, kind = "B"},
 ]
