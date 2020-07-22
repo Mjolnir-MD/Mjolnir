@@ -33,7 +33,7 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
         real_type epsilon,
         std::size_t first_coef, std::size_t second_coef)
         : potential_(std::move(pot)), partition_(std::move(part)),
-          epsilon_(epsilon), epsilon_2_(2.0 * epsilon),
+          epsilon_(epsilon),
           first_coef_(first_coef),
           second_coef_(second_coef)
     {
@@ -128,7 +128,6 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
     partition_type                      partition_;
 
     real_type                           epsilon_;
-    real_type                           epsilon_2_;
     std::size_t                         first_coef_;
     std::size_t                         second_coef_;
 
@@ -193,9 +192,9 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
             derivs_buff_first[idx_second]         =  deriv;
             pot_deriv_sum_for_first_[idx_first]   += deriv;
             pot_deriv_sum_for_second_[idx_second] -= deriv;
-            pots_buff_first[idx_second]       =  pot;
-            pot_sum_for_first_[idx_first]     += pot;
-            pot_sum_for_second_[idx_second]   += pot;
+            pots_buff_first[idx_second]     =  pot;
+            pot_sum_for_first_[idx_first]   += pot;
+            pot_sum_for_second_[idx_second] += pot;
         }
     }
 
@@ -225,21 +224,19 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
             const real_type activated_for_second   = activated_for_second_[idx_second];
             const coordinate_type& pot_derivs_buff_first_second = pot_derivs_buff_first[idx_second];
             const real_type term1_coef =
-                activated_for_second * pots_buff_first_second *
-                pot_sum_for_first_[idx_first] * act_deriv_for_first_[idx_first];
+                activated_for_second * pots_buff_first_second * act_deriv_for_first_[idx_first];
             const real_type term2_coef =
-                activated_for_first * pots_buff_first_second *
-                pot_sum_for_second_[idx_second] * act_deriv_for_second_[idx_second];
-             const real_type term3_coef = activated_for_first * activated_for_second;
+                activated_for_first  * pots_buff_first_second * act_deriv_for_second_[idx_second];
+            const real_type term3_coef = activated_for_first * activated_for_second;
 
             const index_type i = leading_participants[idx_first];
             const index_type j = following_participants[idx_second];
-            sys.force(i) += epsilon_2_ *
-                            (term1_coef * pot_deriv_sum_for_first_[idx_first] +
-                            (term2_coef + term3_coef) * pot_derivs_buff_first_second);
-            sys.force(j) -= epsilon_2_ *
-                            (term2_coef * pot_deriv_sum_for_second_[idx_second] +
-                            (term1_coef + term3_coef) * pot_derivs_buff_first_second);
+            sys.force(i) += epsilon_ *
+                            (2.0 * term1_coef * pot_deriv_sum_for_first_[idx_first] +
+                            (2.0 * term2_coef - term3_coef) * pot_derivs_buff_first_second);
+            sys.force(j) += epsilon_ *
+                            (2.0 * term2_coef * pot_deriv_sum_for_second_[idx_second] +
+                            (2.0 * term1_coef - term3_coef) * -pot_derivs_buff_first_second);
         }
     }
 
