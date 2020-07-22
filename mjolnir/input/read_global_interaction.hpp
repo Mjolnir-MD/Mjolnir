@@ -548,6 +548,7 @@ read_global_stoichiometric_interaction(const toml::value& global)
     const std::size_t first_coef  = toml::find<std::size_t>(global, "coef1");
     const std::size_t second_coef = toml::find<std::size_t>(global, "coef2");
     const real_type   v0          = toml::find<real_type>  (global, "v0");
+    const real_type   range       = toml::find<real_type>  (global, "range");
     const auto&       ps          = toml::find<toml::array>(global, "parameters");
 
     const auto        kinds       =
@@ -580,7 +581,7 @@ read_global_stoichiometric_interaction(const toml::value& global)
         }
     }
 
-    potential_type potential(v0,
+    potential_type potential(v0, range,
             std::move(first_kind_particles),
             std::move(second_kind_particles),
             read_ignore_particles_within(global),
