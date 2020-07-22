@@ -28,12 +28,13 @@ class GlobalStoichiometricInteractionPotential
     using exclusion_list_type  = ExclusionList <traits_type>;
 
   public:
-    GlobalStoichiometricInteractionPotential(real_type v0,
+    GlobalStoichiometricInteractionPotential(real_type v0, real_type range,
         std::vector<std::size_t>&& first_kind_participants,
         std::vector<std::size_t>&& second_kind_participants,
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-        : v0_(v0), inv_v0_(1.0 / v0),
+        : v0_(v0), v0_range_(v0 + range),
+          inv_range_(1.0 / range), inv_range_6_(6.0 / range),
           participants_(first_kind_participants),
           first_kind_participants_num_(first_kind_participants.size()),
           second_kind_participants_num_(second_kind_participants.size()),
@@ -57,21 +58,24 @@ class GlobalStoichiometricInteractionPotential
 
     real_type potential(const real_type r) const noexcept
     {
-        if(v0_ < r){return 0.0;}
+        if(r < v0_){return 1.0;}
+        else if(v0_range_ < r){return 0.0;}
 
-        const real_type r_inv_v0   = r * inv_v0_;
-        const real_type r_inv_v0_2 = r_inv_v0 * r_inv_v0;
-        const real_type r_inv_v0_3 = r_inv_v0_2 * r_inv_v0;
-        return 1.0 - 3.0 * r_inv_v0_2 + 2.0 * r_inv_v0_3;
+        const real_type r_v0           = r - v0_;
+        const real_type r_v0_inv_range = r_v0 * inv_range_;
+        const real_type r_v0_inv_range_2  = r_v0_inv_range * r_v0_inv_range;
+        const real_type r_v0_inv_range_3  = r_v0_inv_range_2 * r_v0_inv_range;
+        return 1.0 - 3.0 * r_v0_inv_range_2 + 2.0 * r_v0_inv_range_3;
     }
 
     real_type derivative(const real_type r) const noexcept
     {
-        if(v0_ < r){return 0.0;}
+        if(r < v0_ || v0_range_ < r){return 0.0;}
 
-        const real_type r_inv_v0   = r * inv_v0_;
-        const real_type r_inv_v0_2 = r_inv_v0 * r_inv_v0;
-        return 6.0 * (r_inv_v0_2 - r_inv_v0);
+        const real_type r_v0          = r - v0_;
+        const real_type r_v0_inv_range   = r_v0 * inv_range_;
+        const real_type r_v0_inv_range_2 = r_v0_inv_range * r_v0_inv_range;
+        return inv_range_6_ * (r_v0_inv_range_2 - r_v0_inv_range);
     }
 
     std::size_t first_kind_participants_num()  const noexcept {return first_kind_participants_num_;}
@@ -135,7 +139,9 @@ class GlobalStoichiometricInteractionPotential
   private:
 
     real_type                v0_;
-    real_type                inv_v0_;
+    real_type                v0_range_;
+    real_type                inv_range_;
+    real_type                inv_range_6_;
     std::vector<std::size_t> participants_;
     std::size_t              first_kind_participants_num_;
     std::size_t              second_kind_participants_num_;
