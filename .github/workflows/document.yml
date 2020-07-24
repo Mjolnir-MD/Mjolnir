@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - use-hugo-book # remove this later
 
 jobs:
   deploy:
