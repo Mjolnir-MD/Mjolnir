@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_double)
         interactions[system_idx].initialize(systems[system_idx], topologies[system_idx]);
     }
 
-    for(std::size_t system_idx; system_idx<systems.size(); ++system_idx)
+    for(std::size_t system_idx=0; system_idx<systems.size(); ++system_idx)
     {
         system_type&      sys         = systems[system_idx];
         const system_type init        = sys;
