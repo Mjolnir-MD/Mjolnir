@@ -542,9 +542,8 @@ read_global_stoichiometric_interaction(const toml::value& global)
     // interaction = "Stoichiometric"
     // potential   = "Stoichiometric"
     // epsilon     = 1.0 # the depth of potential valley
-    // kinds = ["A", "B"]
-    // coef1 = 3
-    // coef2 = 1
+    // coefA = 3
+    // coefB = 1
     // v0 = 4.0
     // parameters = [
     // {index = 0, kind = "A"},
@@ -553,54 +552,50 @@ read_global_stoichiometric_interaction(const toml::value& global)
     // ]
     // ```
 
-    const auto        pot         = toml::find<std::string>(global, "potential");
-    const real_type   epsilon     = toml::find<real_type>  (global, "epsilon");
-    const std::size_t first_coef  = toml::find<std::size_t>(global, "coef1");
-    const std::size_t second_coef = toml::find<std::size_t>(global, "coef2");
-    const real_type   v0          = toml::find<real_type>  (global, "v0");
-    const real_type   range       = toml::find<real_type>  (global, "range");
-    const auto&       ps          = toml::find<toml::array>(global, "parameters");
+    const auto        pot     = toml::find<std::string>(global, "potential");
+    const real_type   epsilon = toml::find<real_type>  (global, "epsilon");
+    const std::size_t coefa   = toml::find<std::size_t>(global, "coefA");
+    const std::size_t coefb   = toml::find<std::size_t>(global, "coefB");
+    const real_type   v0      = toml::find<real_type>  (global, "v0");
+    const real_type   range   = toml::find<real_type>  (global, "range");
+    const auto&       ps      = toml::find<toml::array>(global, "parameters");
 
-    const auto        kinds       =
-        toml::get<std::array<std::string, 2>>(toml::find(global, "kinds"));
-
-    // TODO make each kind particles vector
-    std::vector<std::size_t> first_kind_particles;
-    std::vector<std::size_t> second_kind_particles;
+    std::vector<std::size_t> a_indices;
+    std::vector<std::size_t> b_indices;
 
     for(const auto& item : ps)
     {
         const auto idx  = toml::find<std::size_t>(item, "index");
         const auto kind = toml::find<std::string>(item, "kind");
 
-        if(kind == kinds[0])
+        if(kind == "A")
         {
-            first_kind_particles.push_back(idx);
+            a_indices.push_back(idx);
         }
-        else if(kind == kinds[1])
+        else if(kind == "B")
         {
-            second_kind_particles.push_back(idx);
+            b_indices.push_back(idx);
         }
         else
         {
             throw_exception<std::runtime_error>(toml::format_error("[error] "
                 "mjolnir::read_stoichiometric_interaction: unknown particle kind ",
                 toml::find<toml::value>(global, "kinds"), "here", {
-                "expected value is " + kinds[0] + " or " + kinds[1]
+                "expected value is \"A\" or \"B\""
                 }));
         }
     }
 
     potential_type potential(v0, range,
-            std::move(first_kind_particles),
-            std::move(second_kind_particles),
+            std::move(a_indices),
+            std::move(b_indices),
             read_ignore_particles_within(global),
             read_ignored_molecule(global), read_ignored_group(global));
 
     return make_unique<GlobalStoichiometricInteraction<traitsT>>(
             std::move(potential),
             read_spatial_partition<traitsT, potential_type>(global),
-            epsilon, first_coef, second_coef);
+            epsilon, coefa, coefb);
 }
 
 // ----------------------------------------------------------------------------
