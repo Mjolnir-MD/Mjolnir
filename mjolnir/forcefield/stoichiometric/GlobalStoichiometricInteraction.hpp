@@ -31,29 +31,28 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
   public:
     GlobalStoichiometricInteraction(potential_type&& pot, partition_type&& part,
         real_type epsilon,
-        std::size_t first_coef, std::size_t second_coef)
+        std::size_t coefa, std::size_t coefb)
         : potential_(std::move(pot)), partition_(std::move(part)),
-          epsilon_(epsilon),
-          first_coef_(first_coef),
-          second_coef_(second_coef)
+          epsilon_(epsilon), coefa_(coefa), coefb_(coefb)
     {
-        std::size_t first_kind_particles_num  = potential_.first_kind_participants_num();
-        std::size_t second_kind_particles_num = potential_.second_kind_participants_num();
-        pot_derivs_buff_.resize(first_kind_particles_num);
-        potentials_buff_.resize(first_kind_particles_num);
-        for(std::size_t idx = 0; idx<first_kind_particles_num; ++idx)
+        std::size_t participants_a_num = potential_.participants_a_num();
+        std::size_t participants_b_num = potential_.participants_b_num();
+        pot_derivs_buff_.resize(participants_a_num);
+        potentials_buff_.resize(participants_a_num);
+
+        for(std::size_t idx=0; idx<participants_a_num; ++idx)
         {
-            potentials_buff_[idx].resize(second_kind_particles_num);
-            pot_derivs_buff_[idx].resize(second_kind_particles_num);
+            potentials_buff_[idx].resize(participants_b_num);
+            pot_derivs_buff_[idx].resize(participants_b_num);
         }
-        pot_sum_for_first_       .resize(first_kind_particles_num );
-        pot_sum_for_second_      .resize(second_kind_particles_num);
-        pot_deriv_sum_for_first_ .resize(first_kind_particles_num );
-        pot_deriv_sum_for_second_.resize(second_kind_particles_num);
-        activated_for_first_     .resize(first_kind_particles_num );
-        activated_for_second_    .resize(second_kind_particles_num);
-        act_deriv_for_first_     .resize(first_kind_particles_num );
-        act_deriv_for_second_    .resize(second_kind_particles_num);
+        pot_sum_a_      .resize(participants_a_num);
+        pot_sum_b_      .resize(participants_b_num);
+        pot_deriv_sum_a_.resize(participants_a_num);
+        pot_deriv_sum_b_.resize(participants_b_num);
+        activated_a_    .resize(participants_a_num);
+        activated_b_    .resize(participants_b_num);
+        act_deriv_a_    .resize(participants_a_num);
+        act_deriv_b_    .resize(participants_b_num);
     }
     ~GlobalStoichiometricInteraction() {}
 
@@ -66,6 +65,17 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
         MJOLNIR_LOG_INFO("potential is ", this->name());
         potential_.initialize(sys, topol);
         partition_.initialize(sys, this->potential_);
+
+        // When we calculate potential or derivative for specific idx, we buffering the
+        // value in intermediate value container. So, we have to know which index in
+        // the system correspond to which index of buffering container. These for loop
+        // is to make that container.
+        idx_buffer_map.resize(sys.size());
+        const auto following_participants = potential_.following_participants();
+        for(std::size_t idx=0; idx<following_participants.size(); ++idx)
+        {
+            idx_buffer_map[following_participants[idx]] = idx;
+        }
     }
 
     void update(const system_type& sys, const topology_type& topol) override
@@ -98,7 +108,7 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
     {
         return new GlobalStoichiometricInteraction(
                 potential_type(potential_), partition_type(partition_),
-                epsilon_, first_coef_, second_coef_);
+                epsilon_, coefa_, coefb_);
     }
 
   private:
@@ -124,35 +134,38 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
 
   private:
 
-    potential_type                      potential_;
-    partition_type                      partition_;
+    potential_type potential_;
+    partition_type partition_;
 
-    real_type                           epsilon_;
-    std::size_t                         first_coef_;
-    std::size_t                         second_coef_;
-
+    real_type      epsilon_;
+    std::size_t    coefa_;
+    std::size_t    coefb_;
 
     // -----------------------------------------------------------------------
+    // Variable for mapping system index to buffering index
+    std::vector<std::size_t> idx_buffer_map;
+
     // Variables for buffering intermediate value.
     // These value can change in calc_force and calc_energy function.
     mutable std::vector<std::vector<real_type>>       potentials_buff_;
     mutable std::vector<std::vector<coordinate_type>> pot_derivs_buff_;
-    mutable std::vector<real_type>                    pot_sum_for_first_;
-    mutable std::vector<real_type>                    pot_sum_for_second_;
+    mutable std::vector<real_type>                    pot_sum_a_;
+    mutable std::vector<real_type>                    pot_sum_b_;
+
     // sum of derivation of potential function for specific first particle.
-    mutable std::vector<coordinate_type>              pot_deriv_sum_for_first_;
+    mutable std::vector<coordinate_type>              pot_deriv_sum_a_;
+
     // sum of derivation of potential function for specific second particle.
-    mutable std::vector<coordinate_type>              pot_deriv_sum_for_second_;
+    mutable std::vector<coordinate_type>              pot_deriv_sum_b_;
+
     // buffer container for pre calculated value of activation function for each particle.
-    mutable std::vector<real_type>                    activated_for_first_;
-    mutable std::vector<real_type>                    activated_for_second_;
+    mutable std::vector<real_type>                    activated_a_;
+    mutable std::vector<real_type>                    activated_b_;
+
     // buffer container for pre calculated derivation value of activation function
     // for each particle.
-    mutable std::vector<real_type>                    act_deriv_for_first_;
-    mutable std::vector<real_type>                    act_deriv_for_second_;
-    // temporary force container for calc_force.
-    mutable coordinate_type                           tmp_coord_first_;
-    mutable coordinate_type                           tmp_coord_second_;
+    mutable std::vector<real_type>                    act_deriv_a_;
+    mutable std::vector<real_type>                    act_deriv_b_;
 };
 
 template<typename traitsT>
@@ -161,26 +174,37 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
 
-    std::fill(pot_sum_for_first_ .begin(), pot_sum_for_first_ .end(), 0.0);
-    std::fill(pot_sum_for_second_.begin(), pot_sum_for_second_.end(), 0.0);
-    std::fill(pot_deriv_sum_for_first_ .begin(), pot_deriv_sum_for_first_ .end(),
-              math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
-    std::fill(pot_deriv_sum_for_second_.begin(), pot_deriv_sum_for_second_.end(),
-              math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
-    const std::size_t first_kind_participants_num  = potential_.first_kind_participants_num();
-    const std::size_t second_kind_participants_num = potential_.second_kind_participants_num();
+    const std::size_t participants_a_num = potential_.participants_a_num();
+    const std::size_t participants_b_num = potential_.participants_b_num();
 
-    const auto leading_participants   = potential_.leading_participants();
-    const auto following_participants = potential_.following_participants();
-    // pre calculation for pot_sum and pot_deriv_sum for each particle.
-    for(std::size_t idx_first=0; idx_first<first_kind_participants_num; ++idx_first)
+    // initialization of each buffering container.
+    for(std::size_t idx=0; idx<participants_a_num; ++idx)
     {
-        const index_type i = leading_participants[idx_first];
-        std::vector<coordinate_type>& derivs_buff_first = pot_derivs_buff_[idx_first];
-        std::vector<real_type>&       pots_buff_first   = potentials_buff_[idx_first];
-        for(std::size_t idx_second=0; idx_second<second_kind_participants_num; ++idx_second)
+        std::vector<real_type>&       pots_buff_a   = potentials_buff_[idx];
+        std::vector<coordinate_type>& derivs_buff_a = pot_derivs_buff_[idx];
+        std::fill(pots_buff_a.begin(),   pots_buff_a.end(),   0.0);
+        std::fill(derivs_buff_a.begin(), derivs_buff_a.end(),
+                  math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
+    }
+    std::fill(pot_sum_a_.begin(), pot_sum_a_.end(), 0.0);
+    std::fill(pot_sum_b_.begin(), pot_sum_b_.end(), 0.0);
+    std::fill(pot_deriv_sum_a_.begin(), pot_deriv_sum_a_.end(),
+              math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
+    std::fill(pot_deriv_sum_b_.begin(), pot_deriv_sum_b_.end(),
+              math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
+
+    // pre calculation for pot_sum and pot_deriv_sumb for each particle.
+    const auto leading_participants   = potential_.leading_participants();
+    const auto followint_participants = potential_.following_participants();
+    for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
+    {
+        const index_type i = leading_participants[idx_a];
+        std::vector<real_type>&       pots_buff_a   = potentials_buff_[idx_a];
+        std::vector<coordinate_type>& derivs_buff_a = pot_derivs_buff_[idx_a];
+        for(const auto& ptnr : partition_.partners(i))
         {
-            const index_type j = following_participants[idx_second];
+            const index_type j     = ptnr.index;
+            const index_type idx_b = idx_buffer_map[j];
             const coordinate_type rij =
                sys.adjust_direction(sys.position(j) - sys.position(i));
             const real_type       l2    = math::length_sq(rij); // |rij|^2
@@ -189,54 +213,54 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
             const real_type       l     = l2 * rl;
             const coordinate_type deriv = potential_.derivative(l) * e;
             const real_type       pot   = potential_.potential(l);
-            derivs_buff_first[idx_second]         =  deriv;
-            pot_deriv_sum_for_first_[idx_first]   += deriv;
-            pot_deriv_sum_for_second_[idx_second] -= deriv;
-            pots_buff_first[idx_second]     =  pot;
-            pot_sum_for_first_[idx_first]   += pot;
-            pot_sum_for_second_[idx_second] += pot;
+            derivs_buff_a   [idx_b] =  deriv;
+            pot_deriv_sum_a_[idx_a] += deriv;
+            pot_deriv_sum_b_[idx_b] -= deriv;
+            pots_buff_a     [idx_b] =  pot;
+            pot_sum_a_      [idx_a] += pot;
+            pot_sum_b_      [idx_b] += pot;
         }
     }
 
     // pre calculation for the value of activated function for each particle.
-    for(std::size_t idx_first=0; idx_first<first_kind_participants_num; ++idx_first)
+    for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
-        const real_type  x = 2.0 * (first_coef_ + 0.5 - pot_sum_for_first_[idx_first]);
-        activated_for_first_[idx_first] = activation_func(x);
-        act_deriv_for_first_[idx_first] = deriv_activation_func(x);
+        const real_type x   = 2.0 * (coefb_ + 0.5 - pot_sum_a_[idx_a]);
+        activated_a_[idx_a] = activation_func(x);
+        act_deriv_a_[idx_a] = deriv_activation_func(x);
     }
-    for(std::size_t idx_second=0; idx_second<second_kind_participants_num; ++idx_second)
+    for(std::size_t idx_b=0; idx_b<participants_b_num; ++idx_b)
     {
-        const real_type  x = 2.0 * (second_coef_ + 0.5 - pot_sum_for_second_[idx_second]);
-        activated_for_second_[idx_second] = activation_func(x);
-        act_deriv_for_second_[idx_second] = deriv_activation_func(x);
+        const real_type x   = 2.0 * (coefa_ + 0.5 - pot_sum_b_[idx_b]);
+        activated_b_[idx_b] = activation_func(x);
+        act_deriv_b_[idx_b] = deriv_activation_func(x);
     }
 
     // force calculation
-    for(std::size_t idx_first=0; idx_first<first_kind_participants_num; ++idx_first)
+    for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
-        const std::vector<real_type>&       pots_buff_first       = potentials_buff_[idx_first];
-        const std::vector<coordinate_type>& pot_derivs_buff_first = pot_derivs_buff_[idx_first];
-        for(std::size_t idx_second=0; idx_second<second_kind_participants_num; ++idx_second)
+        const index_type i = leading_participants[idx_a];
+        const std::vector<real_type>&       pots_buff_a       = potentials_buff_[idx_a];
+        const std::vector<coordinate_type>& pot_derivs_buff_a = pot_derivs_buff_[idx_a];
+        for(const auto& ptnr : partition_.partners(i))
         {
-            const real_type pots_buff_first_second = pots_buff_first[idx_second];
-            const real_type activated_for_first    = activated_for_first_[idx_first];
-            const real_type activated_for_second   = activated_for_second_[idx_second];
-            const coordinate_type& pot_derivs_buff_first_second = pot_derivs_buff_first[idx_second];
-            const real_type term1_coef =
-                activated_for_second * pots_buff_first_second * act_deriv_for_first_[idx_first];
-            const real_type term2_coef =
-                activated_for_first  * pots_buff_first_second * act_deriv_for_second_[idx_second];
-            const real_type term3_coef = activated_for_first * activated_for_second;
+            const index_type j     = ptnr.index;
+            const index_type idx_b = idx_buffer_map[j];
+            const real_type pots_buff_ab = pots_buff_a[idx_b];
+            const real_type activated_a  = activated_a_[idx_a];
+            const real_type activated_b  = activated_b_[idx_b];
+            const coordinate_type& pot_derivs_buff_ab = pot_derivs_buff_a[idx_b];
+            const real_type term1_coef = activated_b * pots_buff_ab * act_deriv_a_[idx_a];
+            const real_type term2_coef = activated_a * pots_buff_ab * act_deriv_b_[idx_b];
+            const real_type term3_coef = activated_a * activated_b;
 
-            const index_type i = leading_participants[idx_first];
-            const index_type j = following_participants[idx_second];
+            const index_type i = leading_participants[idx_a];
             sys.force(i) += epsilon_ *
-                            (2.0 * term1_coef * pot_deriv_sum_for_first_[idx_first] +
-                            (2.0 * term2_coef - term3_coef) * pot_derivs_buff_first_second);
+                            (2.0 * term1_coef * pot_deriv_sum_a_[idx_a] +
+                            (2.0 * term2_coef - term3_coef) * pot_derivs_buff_ab);
             sys.force(j) += epsilon_ *
-                            (2.0 * term2_coef * pot_deriv_sum_for_second_[idx_second] +
-                            (2.0 * term1_coef - term3_coef) * -pot_derivs_buff_first_second);
+                            (2.0 * term2_coef * pot_deriv_sum_b_[idx_b] +
+                            (2.0 * term1_coef - term3_coef) * -pot_derivs_buff_ab);
         }
     }
 
@@ -250,44 +274,51 @@ GlobalStoichiometricInteraction<traitsT>::calc_energy(const system_type& sys) co
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
 
-    const std::size_t first_kind_participants_num  = potential_.first_kind_participants_num();
-    const std::size_t second_kind_participants_num = potential_.second_kind_participants_num();
+    const std::size_t participants_a_num = potential_.participants_a_num();
+    const std::size_t participants_b_num = potential_.participants_b_num();
     const auto leading_participants   = potential_.leading_participants();
     const auto following_participants = potential_.following_participants();
 
-    std::fill(pot_sum_for_first_ .begin(), pot_sum_for_first_ .end(), 0.0);
-    std::fill(pot_sum_for_second_.begin(), pot_sum_for_second_.end(), 0.0);
-    for(std::size_t idx_first=0; idx_first<first_kind_participants_num; ++idx_first)
+    // initialization of each buffering container.
+    for(std::size_t idx=0; idx<participants_a_num; ++idx)
     {
-        const index_type i = leading_participants[idx_first];
-        std::vector<real_type>& pots_buff_first   = potentials_buff_  [idx_first];
-        real_type&              pot_sum_for_first = pot_sum_for_first_[idx_first];
-        for(std::size_t idx_second=0; idx_second<second_kind_participants_num; ++idx_second)
+        std::vector<real_type>& pots_buff_a = potentials_buff_[idx];
+        std::fill(pots_buff_a.begin(), pots_buff_a.end(), 0.0);
+    }
+    std::fill(pot_sum_a_.begin(), pot_sum_a_.end(), 0.0);
+    std::fill(pot_sum_b_.begin(), pot_sum_b_.end(), 0.0);
+
+    // pre calculation for pot_sum and pot_deriv_sum for each particle.
+    for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
+    {
+        const index_type i = leading_participants[idx_a];
+        std::vector<real_type>& pots_buff_a = potentials_buff_[idx_a];
+        real_type&              pot_sum_a   = pot_sum_a_[idx_a];
+        for(const auto& ptnr : partition_.partners(i))
         {
-            const index_type j = following_participants[idx_second];
+            const index_type j     = ptnr.index;
+            const index_type idx_b = idx_buffer_map[j];
             const coordinate_type rij =
                 sys.adjust_direction(sys.position(j) - sys.position(i));
             const real_type l2  = math::length_sq(rij); // |rij|^2
             const real_type rl  = math::rsqrt(l2);      // 1 / |rij|
             const real_type l   = l2 * rl;              // |rij|
             const real_type pot = potential_.potential(l);
-            pots_buff_first    [idx_second] =  pot;
-            pot_sum_for_first               += pot;
-            pot_sum_for_second_[idx_second] += pot;
+            pots_buff_a[idx_b]  =  pot;
+            pot_sum_a           += pot;
+            pot_sum_b_[idx_b]   += pot;
         }
     }
 
+    // potential calculation
     real_type retval(0.0);
-    for(std::size_t idx_first=0; idx_first<first_kind_participants_num; ++idx_first) {
-        const std::vector<real_type>& pots_buff_first = potentials_buff_[idx_first];
-        for(std::size_t idx_second=0; idx_second<second_kind_participants_num; ++idx_second)
+    for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a) {
+        const std::vector<real_type>& pots_buff_a = potentials_buff_[idx_a];
+        for(std::size_t idx_b=0; idx_b<participants_b_num; ++idx_b)
         {
-            const real_type x_for_first  =
-                2.0 * (first_coef_  + 0.5 - pot_sum_for_first_[idx_first]);
-            const real_type x_for_second =
-                2.0 * (second_coef_ + 0.5 - pot_sum_for_second_[idx_second]);
-            retval += activation_func(x_for_first) * activation_func(x_for_second) *
-                      pots_buff_first[idx_second];
+            const real_type x_a = 2.0 * (coefb_ + 0.5 - pot_sum_a_[idx_a]);
+            const real_type x_b = 2.0 * (coefa_ + 0.5 - pot_sum_b_[idx_b]);
+            retval += activation_func(x_a) * activation_func(x_b) * pots_buff_a[idx_b];
         }
     }
     retval *= -epsilon_;

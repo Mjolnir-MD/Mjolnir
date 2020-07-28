@@ -29,21 +29,21 @@ class GlobalStoichiometricInteractionPotential
 
   public:
     GlobalStoichiometricInteractionPotential(real_type v0, real_type range,
-        std::vector<std::size_t>&& first_kind_participants,
-        std::vector<std::size_t>&& second_kind_participants,
+        std::vector<std::size_t>&& participants_a,
+        std::vector<std::size_t>&& participants_b,
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
         : v0_(v0), v0_range_(v0 + range),
           inv_range_(1.0 / range), inv_range_6_(6.0 / range),
-          participants_(first_kind_participants),
-          first_kind_participants_num_(first_kind_participants.size()),
-          second_kind_participants_num_(second_kind_participants.size()),
+          participants_(participants_a),
+          participants_a_num_(participants_a.size()),
+          participants_b_num_(participants_b.size()),
           exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
         MJOLNIR_LOG_FUNCTION_DEBUG();
         participants_.insert(participants_.end(),
-                             second_kind_participants.begin(), second_kind_participants.end());
+                             participants_b.begin(), participants_b.end());
     }
     ~GlobalStoichiometricInteractionPotential() = default;
     GlobalStoichiometricInteractionPotential(const GlobalStoichiometricInteractionPotential&) = default;
@@ -78,12 +78,12 @@ class GlobalStoichiometricInteractionPotential
         return inv_range_6_ * (r_v0_inv_range_2 - r_v0_inv_range);
     }
 
-    std::size_t first_kind_participants_num()  const noexcept {return first_kind_participants_num_;}
-    std::size_t second_kind_participants_num() const noexcept {return second_kind_participants_num_;}
+    std::size_t participants_a_num() const noexcept {return participants_a_num_;}
+    std::size_t participants_b_num() const noexcept {return participants_b_num_;}
 
     real_type max_cutoff_length() const noexcept
     {
-        return 2.0 * v0_;
+        return v0_range_;
     }
 
     void initialize(const system_type& sys, const topology_type& topol) noexcept
@@ -113,13 +113,13 @@ class GlobalStoichiometricInteractionPotential
     leading_participants() const noexcept
     {
         return make_range(participants_.begin(), 
-                          participants_.begin() + first_kind_participants_num_);
+                          participants_.begin() + participants_a_num_);
     }
     range<typename std::vector<std::size_t>::const_iterator>
     possible_partners_of(const std::size_t /*participant_idx*/,
                          const std::size_t /*particle_idx*/) const noexcept
     {
-        return make_range(participants_.begin() + first_kind_participants_num_,
+        return make_range(participants_.begin() + participants_a_num_,
                           participants_.end());
     }
     range<typename std::vector<std::size_t>::const_iterator>
@@ -143,8 +143,8 @@ class GlobalStoichiometricInteractionPotential
     real_type                inv_range_;
     real_type                inv_range_6_;
     std::vector<std::size_t> participants_;
-    std::size_t              first_kind_participants_num_;
-    std::size_t              second_kind_participants_num_;
+    std::size_t              participants_a_num_;
+    std::size_t              participants_b_num_;
 
     exclusion_list_type exclusion_list_;
 };
