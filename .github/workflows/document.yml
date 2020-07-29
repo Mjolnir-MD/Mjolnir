@@ -1,9 +1,9 @@
-name: deploy document
+name: document
 
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
