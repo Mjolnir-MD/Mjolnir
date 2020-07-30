@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.16.0
+
+### Added
+
+- documents in English
+
+### Changed
+
+- use Hugo instead of gitbook to host documents
+- make MultipleBasin faster
+
 ## 1.15.1
 
 ### Fixed
