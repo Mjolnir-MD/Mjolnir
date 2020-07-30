@@ -436,7 +436,7 @@ particles = [
 topology      = "bond"
 max_iteration = 500
 tolerance     = 1.0e-6
-v0s = [ # {{{
+parameters = [ # {{{
 {indices = [  0, 100], v0 = 1.0},
 {indices = [  1, 101], v0 = 1.0},
 {indices = [  2, 102], v0 = 1.0},
