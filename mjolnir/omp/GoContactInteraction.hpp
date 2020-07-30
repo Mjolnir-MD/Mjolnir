@@ -69,21 +69,13 @@ class ContactInteraction<
                 continue;
             }
 
-            const real_type rd2   = real_type(1) / len2;
-            const real_type rd6   = rd2 * rd2 * rd2;
-            const real_type rd12  = rd6 * rd6;
-            const real_type rd14  = rd12 * rd2;
+            const real_type r2     = real_type(1) / len2;
+            const real_type v0r_2  = pot.v0() * pot.v0() * r2;
+            const real_type v0r_6  = v0r_2 * v0r_2 * v0r_2;
+            const real_type v0r_10 = v0r_6 * v0r_2 * v0r_2;
+            const real_type v0r_12 = v0r_10 * v0r_2;
 
-            const real_type v0    = pot.v0();
-            const real_type v0_3  = v0   * v0   * v0;
-            const real_type v0_9  = v0_3 * v0_3 * v0_3;
-            const real_type v0_10 = v0_9 * v0;
-            const real_type v0_12 = v0_9 * v0_3;
-
-            //   60k * [(r0/r)^10  - (r0/r)^12] / r * (dr / r)
-            // = 60k * [r0^10/r^12 - r0^12/r^14]    *  dr
-
-            const auto coef = -60 * pot.k() * (v0_10 * rd12 - v0_12 * rd14);
+            const auto coef = -60 * pot.k() * r2 * (v0r_10 - v0r_12);
             const auto f    = coef * dpos;
             const std::size_t thread_id = omp_get_thread_num();
             sys.force_thread(thread_id, idx0) -= f;
@@ -102,6 +94,45 @@ class ContactInteraction<
             const auto& idxp = this->potentials_[active_contact];
             E += idxp.second.potential(math::length(sys.adjust_direction(
                     sys.position(idxp.first[1]) - sys.position(idxp.first[0]))));
+        }
+        return E;
+    }
+
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        real_type E = 0.0;
+#pragma omp parallel for reduction(+:E)
+        for(std::size_t i=0; i<this->active_contacts_.size(); ++i)
+        {
+            const std::size_t active_contact = active_contacts_[i];
+            const auto& idxp = this->potentials_[active_contact];
+
+            const std::size_t idx0 = idxp.first[0];
+            const std::size_t idx1 = idxp.first[1];
+            const auto&       pot  = idxp.second;
+
+            const auto dpos =
+                sys.adjust_direction(sys.position(idx1) - sys.position(idx0));
+
+            const real_type len2  = math::length_sq(dpos);
+            if(pot.cutoff() * pot.cutoff() <= len2)
+            {
+                continue;
+            }
+
+            const real_type r2     = real_type(1) / len2;
+            const real_type v0r_2  = pot.v0() * pot.v0() * r2;
+            const real_type v0r_6  = v0r_2 * v0r_2 * v0r_2;
+            const real_type v0r_10 = v0r_6 * v0r_2 * v0r_2;
+            const real_type v0r_12 = v0r_10 * v0r_2;
+
+            E += pot.k() * (5 * v0r_12 - 6 * v0r_10);
+
+            const auto coef = -60 * pot.k() * r2 * (v0r_10 - v0r_12);
+            const auto f    = coef * dpos;
+            const std::size_t thread_id = omp_get_thread_num();
+            sys.force_thread(thread_id, idx0) -= f;
+            sys.force_thread(thread_id, idx1) += f;
         }
         return E;
     }

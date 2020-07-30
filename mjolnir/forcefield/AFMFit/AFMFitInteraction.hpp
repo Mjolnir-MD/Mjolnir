@@ -160,8 +160,9 @@ class AFMFitInteraction final : public ExternalForceInteractionBase<traitsT>
         return;
     }
 
-    void      calc_force (system_type&)       const noexcept override;
-    real_type calc_energy(system_type const&) const noexcept override;
+    void      calc_force (system_type&)           const noexcept override;
+    real_type calc_energy(system_type const&)     const noexcept override;
+    real_type calc_force_and_energy(system_type&) const noexcept override;
 
     std::string name() const override {return "AFMFlexibleFitting";}
 
@@ -453,6 +454,68 @@ AFMFitInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
 {
     return this->k_ * (real_type(1) - this->calc_correlation(sys));
 }
+
+template<typename traitsT>
+typename AFMFitInteraction<traitsT>::real_type
+AFMFitInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexcept
+{
+    const real_type cc    = this->calc_correlation(sys);
+    const real_type coeff = this->k_ * cc;
+
+    const real_type cutoff_x = sgm_x_ * cutoff_;
+    const real_type cutoff_y = sgm_y_ * cutoff_;
+
+    std::size_t participants_idx = 0;
+    for(const std::size_t i : this->participants_)
+    {
+        const auto& pos = sys.position(i);
+        const auto  rad = parameters_[i];
+        auto f = math::make_coordinate<coordinate_type>(0, 0, 0);
+
+        const std::size_t offset = this->max_pixel_interact_ * participants_idx;
+        for(std::size_t j=0; j<this->max_pixel_interact_; ++j)
+        {
+            const std::size_t pxl = this->particle_to_pixel_[offset + j];
+
+            if(pxl == std::numeric_limits<std::size_t>::max())
+            {
+                break;
+            }
+            const real_type x0 = this->pixel_positions_[pxl].first;
+            const real_type y0 = this->pixel_positions_[pxl].second;
+
+            const real_type dx = math::X(pos) - x0;
+            const real_type dy = math::Y(pos) - y0;
+            const real_type dz = math::Z(pos) + rad - z0_;
+
+            if(cutoff_x < std::abs(dx) || cutoff_y < std::abs(dy))
+            {
+                continue;
+            }
+
+            const real_type gx = real_type(-0.5) * dx * dx * rsgm_x_sq_;
+            const real_type gy = real_type(-0.5) * dy * dy * rsgm_y_sq_;
+            const real_type hz = dz * this->rgamma_;
+
+            const real_type term = coeff * std::exp(gx + gy + hz) *
+                (this->H_ref_[pxl] * this->rH_ref_sim_sum_ -
+                 this->H_sim_[pxl] * this->rH_sim_sim_sum_) *
+                 this->gamma_ * this->rsumexp_[pxl];
+
+            math::X(f) += term * (-dx * this->rsgm_x_sq_);
+            math::Y(f) += term * (-dy * this->rsgm_y_sq_);
+            math::Z(f) += term * this->rgamma_;
+        }
+
+        sys.force(i) += f;
+        participants_idx += 1;
+    }
+    assert(participants_idx == participants_.size());
+    sys.attribute("correlation") = cc;
+
+    return this->k_ * (real_type(1) - cc);
+}
+
 
 } // mjolnir
 

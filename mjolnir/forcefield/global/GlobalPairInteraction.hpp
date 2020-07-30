@@ -82,8 +82,9 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
         return;
     }
 
-    void      calc_force (system_type&)       const noexcept override;
-    real_type calc_energy(const system_type&) const noexcept override;
+    void      calc_force (system_type&)           const noexcept override;
+    real_type calc_energy(const system_type&)     const noexcept override;
+    real_type calc_force_and_energy(system_type&) const noexcept override;
 
     std::string name() const override
     {return "Pair:"_s + potential_type::name();}
@@ -164,6 +165,41 @@ GlobalPairInteraction<traitsT, potT>::calc_energy(
     }
     return E;
 }
+
+template<typename traitsT, typename potT>
+typename GlobalPairInteraction<traitsT, potT>::real_type
+GlobalPairInteraction<traitsT, potT>::calc_force_and_energy(
+        system_type& sys) const noexcept
+{
+    real_type energy = 0.0;
+    const auto leading_participants = this->potential_.leading_participants();
+    for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
+    {
+        const auto i = leading_participants[idx];
+        for(const auto& ptnr : this->partition_.partners(i))
+        {
+            const auto  j     = ptnr.index;
+            const auto& param = ptnr.parameter();
+
+            const auto rij =
+                sys.adjust_direction(sys.position(j) - sys.position(i));
+            const real_type l2 = math::length_sq(rij); // |rij|^2
+            const real_type rl = math::rsqrt(l2);      // 1 / |rij|
+            const real_type l  = l2 * rl;              // |rij|^2 / |rij|
+            const real_type f_mag = potential_.derivative(l, param);
+
+            // if length exceeds cutoff, potential returns just 0.
+            if(f_mag == 0.0){continue;}
+
+            energy += potential_.potential(l, param);
+            const coordinate_type f = rij * (f_mag * rl);
+            sys.force(i) += f;
+            sys.force(j) -= f;
+        }
+    }
+    return energy;
+}
+
 
 } // mjolnir
 

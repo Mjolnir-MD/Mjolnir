@@ -15,10 +15,6 @@ namespace mjolnir
 
 // 3-basin MultipleBasin forcefield.
 //
-// TODO: to speedup this forcefield...
-// - add `calc_force_and_energy` member function to interactions
-//   - it is technically easy. but it requires a huge effort.
-//
 // V_MB is a solution of the following equation.
 //
 // (V1 + dV1  delta12  delta13 ) (c1)        (c1)
@@ -145,25 +141,20 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
         // force_buffer is zero-cleared (at the end of this function),
         // so the forces in the system will be zero-cleared after this.
         sys.preprocess_forces();
-        this->calc_force_basin1(sys);
+        const auto V_1 = this->calc_force_and_energy_basin1(sys) + dV1_;
         sys.postprocess_forces();
 
         swap(this->force_buffer1_, sys.forces());
 
         sys.preprocess_forces();
-        this->calc_force_basin2(sys);
+        const auto V_2 = this->calc_force_and_energy_basin2(sys) + dV2_;
         sys.postprocess_forces();
 
         swap(this->force_buffer2_, sys.forces());
 
         sys.preprocess_forces();
-        this->calc_force_basin3(sys);
+        const auto V_3 = this->calc_force_and_energy_basin3(sys) + dV3_;
         sys.postprocess_forces();
-
-        // TODO add calc_force_and_energy() to `Interaction`s.
-        const auto V_1 = this->calc_energy_basin1(sys) + this->dV1_;
-        const auto V_2 = this->calc_energy_basin2(sys) + this->dV2_;
-        const auto V_3 = this->calc_energy_basin3(sys) + this->dV3_;
 
         const auto V_MB = this->calc_V_MB(V_1, V_2, V_3);
 
@@ -355,26 +346,29 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
     // -----------------------------------------------------------------------
     // calc_force/energy, dump/list_energy for each basin
 
-    void calc_force_basin1(system_type& sys) const
+    real_type calc_force_and_energy_basin1(system_type& sys) const
     {
-        std::get<0>(basin1_).calc_force(sys);
-        std::get<1>(basin1_).calc_force(sys);
-        std::get<2>(basin1_).calc_force(sys);
-        return;
+        real_type energy = 0;
+        energy += std::get<0>(basin1_).calc_force_and_energy(sys);
+        energy += std::get<1>(basin1_).calc_force_and_energy(sys);
+        energy += std::get<2>(basin1_).calc_force_and_energy(sys);
+        return energy;
     }
-    void calc_force_basin2(system_type& sys) const
+    real_type calc_force_and_energy_basin2(system_type& sys) const
     {
-        std::get<0>(basin2_).calc_force(sys);
-        std::get<1>(basin2_).calc_force(sys);
-        std::get<2>(basin2_).calc_force(sys);
-        return;
+        real_type energy = 0;
+        energy += std::get<0>(basin2_).calc_force_and_energy(sys);
+        energy += std::get<1>(basin2_).calc_force_and_energy(sys);
+        energy += std::get<2>(basin2_).calc_force_and_energy(sys);
+        return energy;
     }
-    void calc_force_basin3(system_type& sys) const
+    real_type calc_force_and_energy_basin3(system_type& sys) const
     {
-        std::get<0>(basin3_).calc_force(sys);
-        std::get<1>(basin3_).calc_force(sys);
-        std::get<2>(basin3_).calc_force(sys);
-        return;
+        real_type energy = 0;
+        energy += std::get<0>(basin3_).calc_force_and_energy(sys);
+        energy += std::get<1>(basin3_).calc_force_and_energy(sys);
+        energy += std::get<2>(basin3_).calc_force_and_energy(sys);
+        return energy;
     }
 
     real_type calc_energy_basin1(const system_type& sys) const

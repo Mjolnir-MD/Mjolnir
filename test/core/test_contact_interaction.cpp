@@ -14,7 +14,7 @@
 
 BOOST_AUTO_TEST_CASE(Contact_calc_force)
 {
-    mjolnir::LoggerManager::set_default_logger("test_Contact_calc_force");
+    mjolnir::LoggerManager::set_default_logger("test_contact_calc_force");
 
     using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type        = traits_type::real_type;
@@ -106,3 +106,5 @@ BOOST_AUTO_TEST_CASE(Contact_calc_force)
         dist += dr;
     }
 }
+
+

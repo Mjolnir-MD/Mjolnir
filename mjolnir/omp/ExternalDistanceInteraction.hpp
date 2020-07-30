@@ -68,6 +68,29 @@ class ExternalDistanceInteraction<
         return E;
     }
 
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        real_type E = 0.0;
+        const auto& neighbors = this->shape_.neighbors();
+#pragma omp parallel for reduction(+:E)
+        for(std::size_t idx=0; idx < neighbors.size(); ++idx)
+        {
+            const std::size_t i = neighbors[idx];
+            const auto&     ri   = sys.position(i);
+            const real_type dist = this->shape_.calc_distance(ri, sys.boundary());
+            const real_type dV   = this->potential_.derivative(i, dist);
+
+            if(dV == 0.0){continue;}
+
+            E += this->potential_.potential(i, dist);
+
+            const auto f = shape_.calc_force_direction(ri, sys.boundary());
+            sys.force_thread(omp_get_thread_num(), i) += -dV * f;
+        }
+        return E;
+    }
+
+
     /*! @brief initialize spatial partition (e.g. CellList)                   *
      *  @details before calling `calc_(force|energy)`, this should be called. */
     void initialize(const system_type& sys) override

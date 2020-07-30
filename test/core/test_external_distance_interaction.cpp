@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "test_recutangular_box_interaction"
+#define BOOST_TEST_MODULE "test_external_distance_interaction"
 
 #ifdef BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -8,15 +8,16 @@
 
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/forcefield/external/RectangularBoxInteraction.hpp>
+#include <mjolnir/forcefield/external/ExternalDistanceInteraction.hpp>
 #include <mjolnir/forcefield/external/ExcludedVolumeWallPotential.hpp>
+#include <mjolnir/core/AxisAlignedPlane.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <random>
 
-BOOST_AUTO_TEST_CASE(PositionRestraint_Harmonic)
+BOOST_AUTO_TEST_CASE(ExternalDistanceInteraction_numerical_difference)
 {
     mjolnir::LoggerManager::set_default_logger(
-            "test_recutangular_box_interaction.log");
+            "test_external_distance_interaction.log");
 
     using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type        = traits_type::real_type;
@@ -24,12 +25,10 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_Harmonic)
     using boundary_type    = traits_type::boundary_type;
     using system_type      = mjolnir::System<traits_type>;
     using potential_type   = mjolnir::ExcludedVolumeWallPotential<real_type>;
-    using interaction_type = mjolnir::RectangularBoxInteraction<traits_type, potential_type>;
+    using shape_type       = mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveZDirection<traits_type>>;
+    using interaction_type = mjolnir::ExternalDistanceInteraction<traits_type, potential_type, shape_type>;
 
-    coordinate_type lower( 0.0,  0.0,  0.0);
-    coordinate_type upper(10.0, 10.0, 10.0);
-
-    interaction_type interaction(lower, upper, /*margin = */0.5,
+    interaction_type interaction(shape_type(0.0, 0.5),
         potential_type(/*epsilon = */1.0, /* cutoff = */2.0, {
             {0, 1.0}, {1, 1.0}
         }));
@@ -41,12 +40,12 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_Harmonic)
     sys.at(0).rmass = 1.0;
     sys.at(1).rmass = 1.0;
 
-    sys.at(0).position = coordinate_type( 1.0,  9.0,  1.0);
-    sys.at(1).position = coordinate_type( 9.0,  1.0,  9.0);
-    sys.at(0).velocity = coordinate_type( 0.0,  0.0,  0.0);
-    sys.at(1).velocity = coordinate_type( 0.0,  0.0,  0.0);
-    sys.at(0).force    = coordinate_type( 0.0,  0.0,  0.0);
-    sys.at(1).force    = coordinate_type( 0.0,  0.0,  0.0);
+    sys.at(0).position = coordinate_type( 0.0, 0.0, 1.0);
+    sys.at(1).position = coordinate_type( 0.0, 0.0, 1.0);
+    sys.at(0).velocity = coordinate_type( 0.0, 0.0, 0.0);
+    sys.at(1).velocity = coordinate_type( 0.0, 0.0, 0.0);
+    sys.at(0).force    = coordinate_type( 0.0, 0.0, 0.0);
+    sys.at(1).force    = coordinate_type( 0.0, 0.0, 0.0);
 
     sys.at(0).name  = "X";
     sys.at(1).name  = "X";
@@ -59,8 +58,8 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_Harmonic)
 
     for(int i = 0; i < 10000; ++i)
     {
-        sys.at(0).position = coordinate_type( 1.0,  9.0,  1.0);
-        sys.at(1).position = coordinate_type( 9.0,  1.0,  9.0);
+        sys.at(0).position = coordinate_type(0.0, 0.0, 1.0);
+        sys.at(1).position = coordinate_type(0.0, 0.0, 1.0);
 
         // move particles a bit, randomly. and reset forces.
         for(std::size_t idx=0; idx<sys.size(); ++idx)
@@ -152,10 +151,10 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_Harmonic)
     }
 }
 
-BOOST_AUTO_TEST_CASE(PositionRestraint_calc_force_and_energy)
+BOOST_AUTO_TEST_CASE(ExternalDistanceInteraction_calc_force_and_energy)
 {
     mjolnir::LoggerManager::set_default_logger(
-            "test_recutangular_box_interaction.log");
+            "test_external_distance_interaction.log");
 
     using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type        = traits_type::real_type;
@@ -163,15 +162,14 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_calc_force_and_energy)
     using boundary_type    = traits_type::boundary_type;
     using system_type      = mjolnir::System<traits_type>;
     using potential_type   = mjolnir::ExcludedVolumeWallPotential<real_type>;
-    using interaction_type = mjolnir::RectangularBoxInteraction<traits_type, potential_type>;
+    using shape_type       = mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveZDirection<traits_type>>;
+    using interaction_type = mjolnir::ExternalDistanceInteraction<traits_type, potential_type, shape_type>;
 
-    coordinate_type lower( 0.0,  0.0,  0.0);
-    coordinate_type upper(10.0, 10.0, 10.0);
-
-    interaction_type interaction(lower, upper, /*margin = */0.5,
+    interaction_type interaction(shape_type(0.0, 0.5),
         potential_type(/*epsilon = */1.0, /* cutoff = */2.0, {
             {0, 1.0}, {1, 1.0}
         }));
+
 
     system_type sys(2, boundary_type{});
 
@@ -180,12 +178,12 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_calc_force_and_energy)
     sys.at(0).rmass = 1.0;
     sys.at(1).rmass = 1.0;
 
-    sys.at(0).position = coordinate_type( 1.0,  9.0,  1.0);
-    sys.at(1).position = coordinate_type( 9.0,  1.0,  9.0);
-    sys.at(0).velocity = coordinate_type( 0.0,  0.0,  0.0);
-    sys.at(1).velocity = coordinate_type( 0.0,  0.0,  0.0);
-    sys.at(0).force    = coordinate_type( 0.0,  0.0,  0.0);
-    sys.at(1).force    = coordinate_type( 0.0,  0.0,  0.0);
+    sys.at(0).position = coordinate_type( 0.0, 0.0, 1.0);
+    sys.at(1).position = coordinate_type( 0.0, 0.0, 1.0);
+    sys.at(0).velocity = coordinate_type( 0.0, 0.0, 0.0);
+    sys.at(1).velocity = coordinate_type( 0.0, 0.0, 0.0);
+    sys.at(0).force    = coordinate_type( 0.0, 0.0, 0.0);
+    sys.at(1).force    = coordinate_type( 0.0, 0.0, 0.0);
 
     sys.at(0).name  = "X";
     sys.at(1).name  = "X";
@@ -198,8 +196,8 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_calc_force_and_energy)
 
     for(int i = 0; i < 10000; ++i)
     {
-        sys.at(0).position = coordinate_type( 1.0,  9.0,  1.0);
-        sys.at(1).position = coordinate_type( 9.0,  1.0,  9.0);
+        sys.at(0).position = coordinate_type(0.0, 0.0, 1.0);
+        sys.at(1).position = coordinate_type(0.0, 0.0, 1.0);
 
         // move particles a bit, randomly. and reset forces.
         for(std::size_t idx=0; idx<sys.size(); ++idx)
@@ -207,10 +205,10 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_calc_force_and_energy)
             sys.position(idx) += coordinate_type(0.01 * uni(mt), 0.01 * uni(mt), 0.01 * uni(mt));
             sys.force(idx)     = coordinate_type(0.0, 0.0, 0.0);
         }
-        interaction.initialize(sys);
 
         system_type ref_sys = sys;
-        constexpr real_type tol = 1e-3;
+
+        constexpr real_type tol = 1e-4;
 
         const auto energy = interaction.calc_force_and_energy(sys);
         const auto ref_energy = interaction.calc_energy(ref_sys);
