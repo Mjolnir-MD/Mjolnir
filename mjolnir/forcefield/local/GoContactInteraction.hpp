@@ -64,21 +64,13 @@ class ContactInteraction<
                 continue;
             }
 
-            const real_type rd2   = real_type(1) / len2;
-            const real_type rd6   = rd2 * rd2 * rd2;
-            const real_type rd12  = rd6 * rd6;
-            const real_type rd14  = rd12 * rd2;
+            const real_type r2     = real_type(1) / len2;
+            const real_type v0r_2  = pot.v0() * pot.v0() * r2;
+            const real_type v0r_6  = v0r_2 * v0r_2 * v0r_2;
+            const real_type v0r_10 = v0r_6 * v0r_2 * v0r_2;
+            const real_type v0r_12 = v0r_10 * v0r_2;
 
-            const real_type v0    = pot.v0();
-            const real_type v0_3  = v0   * v0   * v0;
-            const real_type v0_9  = v0_3 * v0_3 * v0_3;
-            const real_type v0_10 = v0_9 * v0;
-            const real_type v0_12 = v0_9 * v0_3;
-
-            //   60k * [(r0/r)^10  - (r0/r)^12] / r * (dr / r)
-            // = 60k * [r0^10/r^12 - r0^12/r^14]    *  dr
-
-            const auto coef = -60 * pot.k() * (v0_10 * rd12 - v0_12 * rd14);
+            const auto coef = -60 * pot.k() * r2 * (v0r_10 - v0r_12);
             const auto f    = coef * dpos;
             sys.force(idx0) -= f;
             sys.force(idx1) += f;
@@ -96,6 +88,42 @@ class ContactInteraction<
                     sys.position(idxp.first[1]) - sys.position(idxp.first[0]))));
         }
         return E;
+    }
+
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        real_type energy = 0;
+        for(const std::size_t active_contact : active_contacts_)
+        {
+            const auto& idxp = this->potentials_[active_contact];
+
+            const std::size_t idx0 = idxp.first[0];
+            const std::size_t idx1 = idxp.first[1];
+            const auto&       pot  = idxp.second;
+
+            const auto dpos =
+                sys.adjust_direction(sys.position(idx1) - sys.position(idx0));
+
+            const real_type len2  = math::length_sq(dpos);
+            if(pot.cutoff() * pot.cutoff() <= len2)
+            {
+                continue;
+            }
+
+            const real_type r2     = real_type(1) / len2;
+            const real_type v0r_2  = pot.v0() * pot.v0() * r2;
+            const real_type v0r_6  = v0r_2 * v0r_2 * v0r_2;
+            const real_type v0r_10 = v0r_6 * v0r_2 * v0r_2;
+            const real_type v0r_12 = v0r_10 * v0r_2;
+
+            energy += pot.k() * (5 * v0r_12 - 6 * v0r_10);
+
+            const auto coef = -60 * pot.k() * r2 * (v0r_10 - v0r_12);
+            const auto f    = coef * dpos;
+            sys.force(idx0) -= f;
+            sys.force(idx1) += f;
+        }
+        return energy;
     }
 
     void initialize(const system_type& sys) override

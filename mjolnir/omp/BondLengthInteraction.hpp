@@ -79,6 +79,33 @@ class BondLengthInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         return E;
     }
 
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        real_type E = 0.;
+#pragma omp parallel for reduction(+:E)
+        for(std::size_t i=0; i<this->potentials.size(); ++i)
+        {
+            const auto& idxp = this->potentials[i];
+
+            const std::size_t idx0 = idxp.first[0];
+            const std::size_t idx1 = idxp.first[1];
+
+            const auto dpos =
+                sys.adjust_direction(sys.position(idx1) - sys.position(idx0));
+
+            const real_type len2 = math::length_sq(dpos); // l^2
+            const real_type rlen = math::rsqrt(len2);     // 1/l
+            const real_type  len = len2 * rlen;
+            const real_type force = -1 * idxp.second.derivative(len);
+            E += idxp.second.potential(len);
+
+            const coordinate_type f = dpos * (force * rlen);
+            sys.force_thread(omp_get_thread_num(), idx0) -= f;
+            sys.force_thread(omp_get_thread_num(), idx1) += f;
+        }
+        return E;
+    }
+
     void initialize(const system_type& sys) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();

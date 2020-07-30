@@ -34,8 +34,9 @@ class ExternalDistanceInteraction final
     ~ExternalDistanceInteraction() override {}
 
     // calculate force, update spatial partition (reduce margin) inside.
-    void      calc_force (system_type&)       const noexcept override;
-    real_type calc_energy(system_type const&) const noexcept override;
+    void      calc_force (system_type&)           const noexcept override;
+    real_type calc_energy(system_type const&)     const noexcept override;
+    real_type calc_force_and_energy(system_type&) const noexcept override;
 
     /*! @brief initialize spatial partition (e.g. CellList)                   *
      *  @details before calling `calc_(force|energy)`, this should be called. */
@@ -115,6 +116,25 @@ ExternalDistanceInteraction<traitsT, potT, spaceT>::calc_energy(
         const auto&    ri = sys.position(i);
         const real_type d = this->shape_.calc_distance(ri, sys.boundary());
         E += this->potential_.potential(i, d);
+    }
+    return E;
+}
+
+template<typename traitsT, typename potT, typename spaceT>
+typename ExternalDistanceInteraction<traitsT, potT, spaceT>::real_type
+ExternalDistanceInteraction<traitsT, potT, spaceT>::calc_force_and_energy(
+        system_type& sys) const noexcept
+{
+    real_type E = 0.0;
+    for(std::size_t i : this->shape_.neighbors())
+    {
+        const auto&    ri = sys.position(i);
+        const real_type dist = this->shape_.calc_distance(ri, sys.boundary());
+        const real_type dV   = this->potential_.derivative(i, dist);
+
+        sys.force(i) += -dV * shape_.calc_force_direction(ri, sys.boundary());
+
+        E += this->potential_.potential(i, dist);
     }
     return E;
 }

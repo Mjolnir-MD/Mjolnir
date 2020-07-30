@@ -198,3 +198,86 @@ BOOST_AUTO_TEST_CASE(AFMFitting_calc_force)
         }
     }
 }
+
+BOOST_AUTO_TEST_CASE(AFMFitting_calc_force_and_energy)
+{
+    mjolnir::LoggerManager::set_default_logger("test_afm_fitting_interaction.log");
+
+    using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type        = traits_type::real_type;
+    using coord_type       = traits_type::coordinate_type;
+    using boundary_type    = traits_type::boundary_type;
+    using system_type      = mjolnir::System<traits_type>;
+    using interaction_type = mjolnir::AFMFitInteraction<traits_type>;
+
+    const std::size_t num_particles = 5;
+
+    const real_type   k        =  5.0;
+    const real_type   gamma    =  1.0;
+    const real_type   z0       =  0.0;
+    const real_type   cutoff   =  5.01;
+    const real_type   margin   =  0.5;
+    const real_type   sigma_x  =  2.0;
+    const real_type   sigma_y  = sigma_x;
+    const real_type   pixel_x  = 10.0;
+    const real_type   pixel_y  = pixel_x;
+    const std::size_t length_x = 10u;
+    const std::size_t length_y = 10u;
+    const std::vector<std::pair<std::size_t, real_type>> radii = {
+        {0, 1.0}, {1, 2.0}, {2, 3.0}, {3, 4.0}, {4, 5.0}
+    };
+
+    std::vector<coord_type> initial_coordinates = {
+        coord_type(20.0, 20.0, 10.0),
+        coord_type(50.0, 50.0, 15.0),
+        coord_type(80.0, 80.0,  5.0),
+        coord_type(20.0, 50.0, 20.0),
+        coord_type(50.0, 80.0, 10.0)
+    };
+
+    const std::vector<real_type> image = test::make_image(
+            {1.0, 2.0, 3.0, 4.0, 5.0}, initial_coordinates,
+            pixel_x, sigma_x, gamma, length_x, length_y);
+
+    interaction_type interaction(k, gamma, z0, cutoff, margin,
+            sigma_x, sigma_y, pixel_x, pixel_y, length_x, length_y,
+            radii, image);
+
+    std::mt19937 mt(123456789);
+    std::uniform_real_distribution<real_type> uni(-0.01, 0.01);
+
+    for(std::size_t trial = 0; trial < 1000; ++trial)
+    {
+        system_type sys(num_particles, boundary_type{});
+
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            sys.mass(i)  = 1.0;
+            sys.rmass(i) = 1.0;
+
+            sys.position(i)  = initial_coordinates.at(i);
+            sys.position(i) += coord_type(uni(mt), uni(mt), uni(mt));
+            sys.velocity(i)  = coord_type(0.0, 0.0, 0.0);
+            sys.force(i)     = coord_type(0.0, 0.0, 0.0);
+            sys.name(i)      = "X";
+            sys.group(i)     = "TEST";
+        }
+
+        interaction.initialize(sys);
+        system_type ref_sys = sys;
+
+        constexpr real_type tol = 1e-3;
+
+        const auto energy = interaction.calc_force_and_energy(sys);
+        const auto ref_energy = interaction.calc_energy(ref_sys);
+        interaction.calc_force(ref_sys);
+        BOOST_TEST(ref_energy == energy, boost::test_tools::tolerance(tol));
+
+        for(std::size_t idx=0; idx<sys.size(); ++idx)
+        {
+            BOOST_TEST(mjolnir::math::X(sys.force(idx)) == mjolnir::math::X(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+            BOOST_TEST(mjolnir::math::Y(sys.force(idx)) == mjolnir::math::Y(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+            BOOST_TEST(mjolnir::math::Z(sys.force(idx)) == mjolnir::math::Z(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+        }
+    }
+}
