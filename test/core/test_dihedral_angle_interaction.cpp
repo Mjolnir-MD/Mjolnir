@@ -328,8 +328,6 @@ BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_calc_force_and_energy)
         sys.force   (2) = coord_type(0.0, 0.0,  0.0);
         sys.force   (3) = coord_type(0.0, 0.0,  0.0);
 
-        const auto init = sys;
-
         sys.at(0).name  = "X";
         sys.at(1).name  = "X";
         sys.at(2).name  = "X";
