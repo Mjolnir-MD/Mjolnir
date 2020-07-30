@@ -132,16 +132,16 @@ if(BOOST_ROOT OR FIND_BOOST)
     find_package(Boost 1.67.0 REQUIRED COMPONENTS unit_test_framework)
     include_directories(${Boost_INCLUDE_DIRS})
 else()
-    if(EXISTS "${PROJECT_SOURCE_DIR}/extlib/boost_1_69_0/boost/version.hpp")
-        message(STATUS "boost 1.69.0 exists.")
-        include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_69_0)
+    if(EXISTS "${PROJECT_SOURCE_DIR}/extlib/boost_1_73_0/boost/version.hpp")
+        message(STATUS "boost 1.73.0 exists.")
+        include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_73_0)
     else()
         message(STATUS "Boost library not found. Donwloading...")
         message(STATUS "It can take minutes. hang tight!")
 
-        file(DOWNLOAD https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.bz2
-            ${PROJECT_SOURCE_DIR}/extlib/boost_1_69_0.tar.bz2
-            EXPECTED_HASH SHA256=8f32d4617390d1c2d16f26a27ab60d97807b35440d45891fa340fc2648b04406
+        file(DOWNLOAD https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.bz2
+            ${PROJECT_SOURCE_DIR}/extlib/boost_1_73_0.tar.bz2
+            EXPECTED_HASH SHA256=4eb3b8d442b426dc35346235c8733b5ae35ba431690e38c6a8263dce9fcbb402
             STATUS MJOLNIR_DOWNLOAD_BOOST_STATUS)
 
         # check status
@@ -154,11 +154,11 @@ else()
 
         message(STATUS "downloading completed. Unpacking...")
 
-        execute_process(COMMAND tar xf boost_1_69_0.tar.bz2
+        execute_process(COMMAND tar xf boost_1_73_0.tar.bz2
             WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
             OUTPUT_QUIET ERROR_QUIET)
 
-        include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_69_0)
+        include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_73_0)
         message(STATUS "done.")
     endif()
 endif()
