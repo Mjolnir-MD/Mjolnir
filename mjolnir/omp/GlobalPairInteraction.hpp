@@ -119,6 +119,40 @@ class GlobalPairInteraction<
         return E;
     }
 
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        real_type energy = 0.0;
+        const auto leading_participants = this->potential_.leading_participants();
+#pragma omp parallel for reduction(+:energy)
+        for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
+        {
+            const auto i = leading_participants[idx];
+            for(const auto& ptnr : this->partition_.partners(i))
+            {
+                const auto  j     = ptnr.index;
+                const auto& param = ptnr.parameter();
+
+                const coordinate_type rij =
+                    sys.adjust_direction(sys.position(j) - sys.position(i));
+                const real_type l2 = math::length_sq(rij); // |rij|^2
+                const real_type rl = math::rsqrt(l2);      // 1 / |rij|
+                const real_type l  = l2 * rl;              // |rij|^2 / |rij|
+                const real_type f_mag = potential_.derivative(l, param);
+
+                // if length exceeds cutoff, potential returns just 0.
+                if(f_mag == 0.0){continue;}
+
+                energy += potential_.potential(l, param);
+
+                const coordinate_type f = rij * (f_mag * rl);
+                const std::size_t thread_id = omp_get_thread_num();
+                sys.force_thread(thread_id, i) += f;
+                sys.force_thread(thread_id, j) -= f;
+            }
+        }
+        return energy;
+    }
+
     std::string name() const override
     {return "Pair:"_s + potential_type::name();}
 

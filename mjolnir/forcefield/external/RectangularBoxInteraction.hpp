@@ -47,8 +47,9 @@ class RectangularBoxInteraction final
     ~RectangularBoxInteraction() override {}
 
     // calculate force, update spatial partition (reduce margin) inside.
-    void      calc_force (system_type&)       const noexcept override;
-    real_type calc_energy(system_type const&) const noexcept override;
+    void      calc_force (system_type&)           const noexcept override;
+    real_type calc_energy(system_type const&)     const noexcept override;
+    real_type calc_force_and_energy(system_type&) const noexcept override;
 
     /*! @brief initialize spatial partition (e.g. CellList)                   *
      *  @details before calling `calc_(force|energy)`, this should be called. */
@@ -200,6 +201,38 @@ RectangularBoxInteraction<traitsT, potT>::calc_energy(
         const auto& pos = sys.position(i);
         const auto dr_u = this->upper_ - pos;
         const auto dr_l = pos - this->lower_;
+
+        E += this->potential_.potential(i, math::X(dr_u)) +
+             this->potential_.potential(i, math::X(dr_l)) +
+             this->potential_.potential(i, math::Y(dr_u)) +
+             this->potential_.potential(i, math::Y(dr_l)) +
+             this->potential_.potential(i, math::Z(dr_u)) +
+             this->potential_.potential(i, math::Z(dr_l));
+    }
+    return E;
+}
+
+template<typename traitsT, typename potT>
+typename RectangularBoxInteraction<traitsT, potT>::real_type
+RectangularBoxInteraction<traitsT, potT>::calc_force_and_energy(
+        system_type& sys) const noexcept
+{
+    real_type E = 0.0;
+    for(const std::size_t i : this->neighbors_)
+    {
+        const auto& pos = sys.position(i);
+        const auto dr_u = this->upper_ - pos;
+        const auto dr_l = pos - this->lower_;
+
+        const auto dx_u = this->potential_.derivative(i, math::X(dr_u));
+        const auto dx_l = this->potential_.derivative(i, math::X(dr_l));
+        const auto dy_u = this->potential_.derivative(i, math::Y(dr_u));
+        const auto dy_l = this->potential_.derivative(i, math::Y(dr_l));
+        const auto dz_u = this->potential_.derivative(i, math::Z(dr_u));
+        const auto dz_l = this->potential_.derivative(i, math::Z(dr_l));
+
+        sys.force(i) += math::make_coordinate<coordinate_type>(
+                dx_u - dx_l, dy_u - dy_l, dz_u - dz_l);
 
         E += this->potential_.potential(i, math::X(dr_u)) +
              this->potential_.potential(i, math::X(dr_l)) +

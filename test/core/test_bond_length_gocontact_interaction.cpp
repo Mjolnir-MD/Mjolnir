@@ -198,3 +198,60 @@ BOOST_AUTO_TEST_CASE(BondLengthGoContact_numerical_difference)
         }
     }
 }
+
+BOOST_AUTO_TEST_CASE(BondLengthGoContact_calc_force_and_energy)
+{
+    using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type        = traits_type::real_type;
+    using coord_type       = traits_type::coordinate_type;
+    using boundary_type    = traits_type::boundary_type;
+    using system_type      = mjolnir::System<traits_type>;
+    using potential_type   = mjolnir::GoContactPotential<real_type>;
+    using interaction_type = mjolnir::BondLengthInteraction<traits_type, potential_type>;
+
+    const real_type k(1.0);
+    const real_type native(std::sqrt(3.0));
+
+    potential_type   potential(k, native);
+    interaction_type interaction("none", {{ {{0,1}}, potential}});
+
+    std::mt19937 mt(123456789);
+    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
+
+    for(std::size_t i = 0; i < 1000; ++i)
+    {
+        system_type sys(2, boundary_type{});
+
+        sys.at(0).mass  = 1.0;
+        sys.at(1).mass  = 1.0;
+        sys.at(0).rmass = 1.0;
+        sys.at(1).rmass = 1.0;
+
+        sys.at(0).position = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
+        sys.at(1).position = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
+        sys.at(0).velocity = coord_type( 0.0, 0.0, 0.0);
+        sys.at(1).velocity = coord_type( 0.0, 0.0, 0.0);
+        sys.at(0).force    = coord_type( 0.0, 0.0, 0.0);
+        sys.at(1).force    = coord_type( 0.0, 0.0, 0.0);
+
+        sys.at(0).name  = "X";
+        sys.at(1).name  = "X";
+        sys.at(0).group = "TEST";
+        sys.at(1).group = "TEST";
+
+        auto ref_sys = sys;
+        constexpr real_type tol = 2e-4;
+
+        const auto energy = interaction.calc_force_and_energy(sys);
+        const auto ref_energy = interaction.calc_energy(ref_sys);
+        interaction.calc_force(ref_sys);
+        BOOST_TEST(ref_energy == energy, boost::test_tools::tolerance(tol));
+
+        for(std::size_t idx=0; idx<sys.size(); ++idx)
+        {
+            BOOST_TEST(mjolnir::math::X(sys.force(idx)) == mjolnir::math::X(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+            BOOST_TEST(mjolnir::math::Y(sys.force(idx)) == mjolnir::math::Y(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+            BOOST_TEST(mjolnir::math::Z(sys.force(idx)) == mjolnir::math::Z(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+        }
+    }
+}

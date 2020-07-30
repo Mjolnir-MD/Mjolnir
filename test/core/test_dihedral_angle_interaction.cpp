@@ -281,3 +281,75 @@ BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_numerical_diff)
         }
     }
 }
+
+BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_calc_force_and_energy)
+{
+    using traits_type         = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type           = traits_type::real_type;
+    using coord_type          = traits_type::coordinate_type;
+    using boundary_type       = traits_type::boundary_type;
+    using system_type         = mjolnir::System<traits_type>;
+    using potential_type       = mjolnir::ClementiDihedralPotential<real_type>;
+    using dihedral_angle_type = mjolnir::DihedralAngleInteraction<traits_type, potential_type>;
+
+    const real_type k1(1e0);
+    const real_type k3(1e0);
+    const real_type native(mjolnir::math::constants<real_type>::pi() / 2.0);
+
+    std::mt19937 mt(123456789);
+    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
+
+    potential_type potential{k1, k3, native};
+    dihedral_angle_type interaction("none", {{ {{0,1,2,3}}, potential}});
+
+    for(std::size_t i=0; i<100; ++i)
+    {
+        system_type sys(4, boundary_type{});
+
+        sys.mass (0) = 1.0;
+        sys.mass (1) = 1.0;
+        sys.mass (2) = 1.0;
+        sys.mass (3) = 1.0;
+        sys.rmass(0) = 1.0;
+        sys.rmass(1) = 1.0;
+        sys.rmass(2) = 1.0;
+        sys.rmass(3) = 1.0;
+
+        sys.position(0) = coord_type(2.0 + 1e-2 * uni(mt), 0.0 + 1e-2 * uni(mt),  1.0 + 1e-2 * uni(mt));
+        sys.position(1) = coord_type(1.0 + 1e-2 * uni(mt), 1.0 + 1e-2 * uni(mt),  0.0 + 1e-2 * uni(mt));
+        sys.position(2) = coord_type(0.0 + 1e-2 * uni(mt), 0.0 + 1e-2 * uni(mt),  0.0 + 1e-2 * uni(mt));
+        sys.position(3) = coord_type(1.0 + 1e-2 * uni(mt), 1.0 + 1e-2 * uni(mt), -1.0 + 1e-2 * uni(mt));
+        sys.velocity(0) = coord_type(0.0, 0.0,  0.0);
+        sys.velocity(1) = coord_type(0.0, 0.0,  0.0);
+        sys.velocity(2) = coord_type(0.0, 0.0,  0.0);
+        sys.velocity(3) = coord_type(0.0, 0.0,  0.0);
+        sys.force   (0) = coord_type(0.0, 0.0,  0.0);
+        sys.force   (1) = coord_type(0.0, 0.0,  0.0);
+        sys.force   (2) = coord_type(0.0, 0.0,  0.0);
+        sys.force   (3) = coord_type(0.0, 0.0,  0.0);
+
+        sys.at(0).name  = "X";
+        sys.at(1).name  = "X";
+        sys.at(2).name  = "X";
+        sys.at(3).name  = "X";
+        sys.at(0).group = "NONE";
+        sys.at(1).group = "NONE";
+        sys.at(2).group = "NONE";
+        sys.at(3).group = "NONE";
+
+        constexpr real_type tol = 1e-4;
+        auto ref_sys = sys;
+
+        const auto energy = interaction.calc_force_and_energy(sys);
+        const auto ref_energy = interaction.calc_energy(ref_sys);
+        interaction.calc_force(ref_sys);
+        BOOST_TEST(ref_energy == energy, boost::test_tools::tolerance(tol));
+
+        for(std::size_t idx=0; idx<sys.size(); ++idx)
+        {
+            BOOST_TEST(mjolnir::math::X(sys.force(idx)) == mjolnir::math::X(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+            BOOST_TEST(mjolnir::math::Y(sys.force(idx)) == mjolnir::math::Y(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+            BOOST_TEST(mjolnir::math::Z(sys.force(idx)) == mjolnir::math::Z(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+        }
+    }
+}

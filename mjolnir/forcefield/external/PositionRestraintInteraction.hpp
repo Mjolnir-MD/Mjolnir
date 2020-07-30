@@ -40,8 +40,9 @@ class PositionRestraintInteraction final
     {}
     ~PositionRestraintInteraction() override {}
 
-    void      calc_force (system_type&)       const noexcept override;
-    real_type calc_energy(system_type const&) const noexcept override;
+    void      calc_force (system_type&)           const noexcept override;
+    real_type calc_energy(system_type const&)     const noexcept override;
+    real_type calc_force_and_energy(system_type&) const noexcept override;
 
     /*! @brief initialize spatial partition (e.g. CellList)                   *
      *  @details before calling `calc_(force|energy)`, this should be called. */
@@ -136,6 +137,33 @@ PositionRestraintInteraction<traitsT, potT>::calc_energy(
     }
     return E;
 }
+
+template<typename traitsT, typename potT>
+typename PositionRestraintInteraction<traitsT, potT>::real_type
+PositionRestraintInteraction<traitsT, potT>::calc_force_and_energy(
+        system_type& sys) const noexcept
+{
+    real_type E = 0.0;
+    for(const auto& pots : this->potentials_)
+    {
+        const auto  pid = std::get<0>(pots); // particle index
+        const auto& pos = std::get<1>(pots); // restrained position
+        const auto& pot = std::get<2>(pots); // potential form
+
+        const auto& r_i = sys.position(pid);
+        const auto  dr  = sys.adjust_direction(pos - r_i);
+
+        const auto rlen = math::rlength(dr); // 1 / |dr|
+        const auto dist = math::length_sq(dr) * rlen;
+        const auto dV   = pot.derivative(dist);
+        if(dV == 0.0){continue;}
+
+        sys.force(pid) += (dV * rlen) * dr;
+        E += pot.potential(dist);
+    }
+    return E;
+}
+
 
 } // mjolnir
 #endif//MJOLNIR_BOX_INTEARACTION_BASE

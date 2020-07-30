@@ -116,6 +116,55 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         return E;
     }
 
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        real_type E = 0.0;
+#pragma omp parallel for reduction(+:E)
+        for(std::size_t i=0; i<this->potentials.size(); ++i)
+        {
+            const auto& idxp = this->potentials[i];
+            const std::size_t idx0 = idxp.first[0];
+            const std::size_t idx1 = idxp.first[1];
+            const std::size_t idx2 = idxp.first[2];
+
+            const coordinate_type r_ij =
+                sys.adjust_direction(sys.position(idx0) - sys.position(idx1));
+
+            const real_type       inv_len_r_ij = math::rlength(r_ij);
+            const coordinate_type r_ij_reg     = r_ij * inv_len_r_ij;
+
+            const coordinate_type r_kj =
+                sys.adjust_direction(sys.position(idx2) - sys.position(idx1));
+
+            const real_type       inv_len_r_kj = math::rlength(r_kj);
+            const coordinate_type r_kj_reg     = r_kj * inv_len_r_kj;
+
+            const real_type dot_ijk   = math::dot_product(r_ij_reg, r_kj_reg);
+            const real_type cos_theta = math::clamp(dot_ijk, real_type(-1.0), real_type(1.0));
+
+            const real_type theta = std::acos(cos_theta);
+            const real_type coef  = -(idxp.second.derivative(theta));
+            E += idxp.second.potential(theta);
+
+            const real_type sin_theta    = std::sin(theta);
+            const real_type coef_inv_sin = (sin_theta > math::abs_tolerance<real_type>()) ?
+                                 coef / sin_theta : coef / math::abs_tolerance<real_type>();
+
+            const coordinate_type Fi =
+                (coef_inv_sin * inv_len_r_ij) * (cos_theta * r_ij_reg - r_kj_reg);
+
+            const coordinate_type Fk =
+                (coef_inv_sin * inv_len_r_kj) * (cos_theta * r_kj_reg - r_ij_reg);
+
+            sys.force_thread(omp_get_thread_num(), idx0) += Fi;
+            sys.force_thread(omp_get_thread_num(), idx1) -= (Fi + Fk);
+            sys.force_thread(omp_get_thread_num(), idx2) += Fk;
+        }
+        return E;
+    }
+
+
+
     void initialize(const system_type& sys) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();

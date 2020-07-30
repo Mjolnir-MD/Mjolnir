@@ -15,10 +15,6 @@ namespace mjolnir
 
 // 2-basin MultipleBasin unit.
 //
-// TODO: to speedup this forcefield...
-// - add `calc_force_and_energy` member function to interactions
-//   - it is technically easy. but it requires a huge effort.
-//
 template<typename traitsT>
 class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
 {
@@ -117,7 +113,7 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         // calc force of V_MB first.
 
         sys.preprocess_forces();
-        this->calc_force_basin1(sys);
+        const auto V_1 = this->calc_force_and_energy_basin1(sys) + dV1_;
         sys.postprocess_forces();
         {
             // save the current forces to force_buffer_.
@@ -127,12 +123,9 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
             swap(this->force_buffer_, sys.forces());
         }
         sys.preprocess_forces();
-        this->calc_force_basin2(sys);
+        const auto V_2 = this->calc_force_and_energy_basin2(sys) + dV2_;
         sys.postprocess_forces();
 
-        // TODO add calc_force_and_energy() to `Interaction`s.
-        const auto V_1    = this->calc_energy_basin1(sys) + this->dV1_;
-        const auto V_2    = this->calc_energy_basin2(sys) + this->dV2_;
         const auto V_diff = V_1 - V_2;
         const auto coef   = V_diff / std::sqrt(V_diff * V_diff + 4 * delta_sq_);
 
@@ -205,7 +198,6 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         ext2_.scale_margin(scale, sys);
         return;
     }
-
 
     std::vector<std::string> list_energy_name() const override
     {
@@ -286,19 +278,21 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
     // -----------------------------------------------------------------------
     // calc_force/energy, dump/list_energy for each basin
 
-    void calc_force_basin1(system_type& sys) const
+    real_type calc_force_and_energy_basin1(system_type& sys) const
     {
-        loc1_.calc_force(sys);
-        glo1_.calc_force(sys);
-        ext1_.calc_force(sys);
-        return;
+        real_type energy = 0;
+        energy += loc1_.calc_force_and_energy(sys);
+        energy += glo1_.calc_force_and_energy(sys);
+        energy += ext1_.calc_force_and_energy(sys);
+        return energy;
     }
-    void calc_force_basin2(system_type& sys) const
+    real_type calc_force_and_energy_basin2(system_type& sys) const
     {
-        loc2_.calc_force(sys);
-        glo2_.calc_force(sys);
-        ext2_.calc_force(sys);
-        return;
+        real_type energy = 0;
+        energy += loc2_.calc_force_and_energy(sys);
+        energy += glo2_.calc_force_and_energy(sys);
+        energy += ext2_.calc_force_and_energy(sys);
+        return energy;
     }
 
     real_type calc_energy_basin1(const system_type& sys) const
