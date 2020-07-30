@@ -62,7 +62,7 @@ bool inject_test_potential(std::unique_ptr<mjolnir::SimulatorBase>& sim_base)
     using shape_type       = mjolnir::AxisAlignedPlane<traits_type, mjolnir::PositiveXDirection<traits_type>>;
     using potential_type   = mjolnir::TestPotential<typename traits_type::real_type>;
     using interaction_type = mjolnir::ExternalDistanceInteraction<traits_type, potential_type, shape_type>;
-    using forcefield_type = mjolnir::ForceField<traits_type>;
+    using forcefield_type  = mjolnir::ForceField<traits_type>;
 
     std::vector<std::size_t> ps(100);
     std::iota(ps.begin(), ps.end(), 0ul);
