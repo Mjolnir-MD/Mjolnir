@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(read_empty_forcefield_2basin)
         BOOST_TEST(ff.common_external().size() == 0u);
 
         const auto& units = ff.units();
-        BOOST_REQUIRE(units.size() == 1);
+        BOOST_REQUIRE(units.size() == 1u);
 
         const auto  unit1_ptr = dynamic_cast<mjolnir::MultipleBasin2BasinUnit<traits_type>*>(units.at(0).get());
         BOOST_REQUIRE(unit1_ptr);
@@ -54,12 +54,12 @@ BOOST_AUTO_TEST_CASE(read_empty_forcefield_2basin)
         BOOST_TEST(unit1.name1() == "open");
         BOOST_TEST(unit1.name2() == "close");
 
-        BOOST_TEST(unit1.local1().size()    == 0);
-        BOOST_TEST(unit1.local2().size()    == 0);
-        BOOST_TEST(unit1.global1().size()   == 0);
-        BOOST_TEST(unit1.global2().size()   == 0);
-        BOOST_TEST(unit1.external1().size() == 0);
-        BOOST_TEST(unit1.external2().size() == 0);
+        BOOST_TEST(unit1.local1().size()    == 0u);
+        BOOST_TEST(unit1.local2().size()    == 0u);
+        BOOST_TEST(unit1.global1().size()   == 0u);
+        BOOST_TEST(unit1.global2().size()   == 0u);
+        BOOST_TEST(unit1.external1().size() == 0u);
+        BOOST_TEST(unit1.external2().size() == 0u);
     }
 }
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(read_empty_forcefield_3basin)
         BOOST_TEST(ff.common_external().size() == 0u);
 
         const auto& units = ff.units();
-        BOOST_REQUIRE(units.size() == 1);
+        BOOST_REQUIRE(units.size() == 1u);
 
         const auto  unit1_ptr = dynamic_cast<mjolnir::MultipleBasin3BasinUnit<traits_type>*>(units.at(0).get());
         BOOST_REQUIRE(unit1_ptr);
@@ -120,15 +120,15 @@ BOOST_AUTO_TEST_CASE(read_empty_forcefield_3basin)
         BOOST_TEST(unit1.name2() == "mid");
         BOOST_TEST(unit1.name3() == "close");
 
-        BOOST_TEST(unit1.local1().size()    == 0);
-        BOOST_TEST(unit1.local2().size()    == 0);
-        BOOST_TEST(unit1.local3().size()    == 0);
-        BOOST_TEST(unit1.global1().size()   == 0);
-        BOOST_TEST(unit1.global2().size()   == 0);
-        BOOST_TEST(unit1.global3().size()   == 0);
-        BOOST_TEST(unit1.external1().size() == 0);
-        BOOST_TEST(unit1.external2().size() == 0);
-        BOOST_TEST(unit1.external3().size() == 0);
+        BOOST_TEST(unit1.local1().size()    == 0u);
+        BOOST_TEST(unit1.local2().size()    == 0u);
+        BOOST_TEST(unit1.local3().size()    == 0u);
+        BOOST_TEST(unit1.global1().size()   == 0u);
+        BOOST_TEST(unit1.global2().size()   == 0u);
+        BOOST_TEST(unit1.global3().size()   == 0u);
+        BOOST_TEST(unit1.external1().size() == 0u);
+        BOOST_TEST(unit1.external2().size() == 0u);
+        BOOST_TEST(unit1.external3().size() == 0u);
     }
 }
 
@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield_2basin)
         BOOST_TEST(ff.common_external().size() == 2u);
 
         const auto& units = ff.units();
-        BOOST_REQUIRE(units.size() == 1);
+        BOOST_REQUIRE(units.size() == 1u);
 
         const auto  unit1_ptr = dynamic_cast<mjolnir::MultipleBasin2BasinUnit<traits_type>*>(units.at(0).get());
         BOOST_REQUIRE(unit1_ptr);
@@ -275,13 +275,13 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield_2basin)
         BOOST_TEST(unit1.name1() == "open");
         BOOST_TEST(unit1.name2() == "close");
 
-        BOOST_TEST(unit1.local1().size()    == 1);
-        BOOST_TEST(unit1.global1().size()   == 1);
-        BOOST_TEST(unit1.external1().size() == 1);
+        BOOST_TEST(unit1.local1().size()    == 1u);
+        BOOST_TEST(unit1.global1().size()   == 1u);
+        BOOST_TEST(unit1.external1().size() == 1u);
 
-        BOOST_TEST(unit1.local2().size()    == 2);
-        BOOST_TEST(unit1.global2().size()   == 2);
-        BOOST_TEST(unit1.external2().size() == 0);
+        BOOST_TEST(unit1.local2().size()    == 2u);
+        BOOST_TEST(unit1.global2().size()   == 2u);
+        BOOST_TEST(unit1.external2().size() == 0u);
     }
 }
 
@@ -519,7 +519,7 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield_3basin)
         BOOST_TEST(ff.common_external().size() == 4u);
 
         const auto& units = ff.units();
-        BOOST_REQUIRE(units.size() == 1);
+        BOOST_REQUIRE(units.size() == 1u);
 
         const auto  unit1_ptr = dynamic_cast<mjolnir::MultipleBasin3BasinUnit<traits_type>*>(units.at(0).get());
         BOOST_REQUIRE(unit1_ptr);
@@ -536,17 +536,17 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield_3basin)
         BOOST_TEST(unit1.name2() == "mid");
         BOOST_TEST(unit1.name3() == "close");
 
-        BOOST_TEST(unit1.local1().size()    == 1);
-        BOOST_TEST(unit1.global1().size()   == 1);
-        BOOST_TEST(unit1.external1().size() == 1);
+        BOOST_TEST(unit1.local1().size()    == 1u);
+        BOOST_TEST(unit1.global1().size()   == 1u);
+        BOOST_TEST(unit1.external1().size() == 1u);
 
-        BOOST_TEST(unit1.local2().size()    == 2);
-        BOOST_TEST(unit1.global2().size()   == 2);
-        BOOST_TEST(unit1.external2().size() == 2);
+        BOOST_TEST(unit1.local2().size()    == 2u);
+        BOOST_TEST(unit1.global2().size()   == 2u);
+        BOOST_TEST(unit1.external2().size() == 2u);
 
-        BOOST_TEST(unit1.local3().size()    == 3);
-        BOOST_TEST(unit1.global3().size()   == 3);
-        BOOST_TEST(unit1.external3().size() == 3);
+        BOOST_TEST(unit1.local3().size()    == 3u);
+        BOOST_TEST(unit1.global3().size()   == 3u);
+        BOOST_TEST(unit1.external3().size() == 3u);
     }
 }
 
@@ -591,7 +591,7 @@ BOOST_AUTO_TEST_CASE(read_empty_forcefield_2basins_2units)
         BOOST_TEST(ff.common_external().size() == 0u);
 
         const auto& units = ff.units();
-        BOOST_REQUIRE(units.size() == 2);
+        BOOST_REQUIRE(units.size() == 2u);
 
         const auto  unit1_ptr = dynamic_cast<mjolnir::MultipleBasin2BasinUnit<traits_type>*>(units.at(0).get());
         BOOST_REQUIRE(unit1_ptr);
@@ -604,12 +604,12 @@ BOOST_AUTO_TEST_CASE(read_empty_forcefield_2basins_2units)
         BOOST_TEST(unit1.name1() == "domain1-open");
         BOOST_TEST(unit1.name2() == "domain1-close");
 
-        BOOST_TEST(unit1.local1().size()    == 0);
-        BOOST_TEST(unit1.local2().size()    == 0);
-        BOOST_TEST(unit1.global1().size()   == 0);
-        BOOST_TEST(unit1.global2().size()   == 0);
-        BOOST_TEST(unit1.external1().size() == 0);
-        BOOST_TEST(unit1.external2().size() == 0);
+        BOOST_TEST(unit1.local1().size()    == 0u);
+        BOOST_TEST(unit1.local2().size()    == 0u);
+        BOOST_TEST(unit1.global1().size()   == 0u);
+        BOOST_TEST(unit1.global2().size()   == 0u);
+        BOOST_TEST(unit1.external1().size() == 0u);
+        BOOST_TEST(unit1.external2().size() == 0u);
 
         const auto  unit2_ptr = dynamic_cast<mjolnir::MultipleBasin2BasinUnit<traits_type>*>(units.at(1).get());
         BOOST_REQUIRE(unit2_ptr);
@@ -622,12 +622,12 @@ BOOST_AUTO_TEST_CASE(read_empty_forcefield_2basins_2units)
         BOOST_TEST(unit2.name1() == "domain2-open");
         BOOST_TEST(unit2.name2() == "domain2-close");
 
-        BOOST_TEST(unit2.local1().size()    == 0);
-        BOOST_TEST(unit2.local2().size()    == 0);
-        BOOST_TEST(unit2.global1().size()   == 0);
-        BOOST_TEST(unit2.global2().size()   == 0);
-        BOOST_TEST(unit2.external1().size() == 0);
-        BOOST_TEST(unit2.external2().size() == 0);
+        BOOST_TEST(unit2.local1().size()    == 0u);
+        BOOST_TEST(unit2.local2().size()    == 0u);
+        BOOST_TEST(unit2.global1().size()   == 0u);
+        BOOST_TEST(unit2.global2().size()   == 0u);
+        BOOST_TEST(unit2.external1().size() == 0u);
+        BOOST_TEST(unit2.external2().size() == 0u);
 
     }
 }
