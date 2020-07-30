@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_double)
 
     // set parameters for system
     real_type particle_radius   = 1.0;
-    real_type interaction_range = 2.0;
+    real_type interaction_range = 1.0;
     real_type epsilon           = 1.0;
 
     // generate systems, interactions and potentials.
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_double)
     systems[0].group(1) = "NONE";
 
     systems[0].position(0) = coord_type(0.0, 0.0, 0.0);
-    systems[0].position(1) = coord_type(2.0, 0.0, 0.0);
+    systems[0].position(1) = coord_type(1.5, 0.0, 0.0);
     systems[0].velocity(0) = coord_type(0.0, 0.0, 0.0);
     systems[0].velocity(1) = coord_type(0.0, 0.0, 0.0);
     systems[0].force(0)    = coord_type(0.0, 0.0, 0.0);
@@ -97,8 +97,8 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_double)
     systems[1].group(2) = "NONE";
 
     systems[1].position(0) = coord_type(0.0, 0.0, 0.0);
-    systems[1].position(1) = coord_type(2.0, 0.0, 0.0);
-    systems[1].position(2) = coord_type(0.0, 2.0, 0.0);
+    systems[1].position(1) = coord_type(1.5, 0.0, 0.0);
+    systems[1].position(2) = coord_type(0.0, 1.5, 0.0);
     systems[1].velocity(0) = coord_type(0.0, 0.0, 0.0);
     systems[1].velocity(1) = coord_type(0.0, 0.0, 0.0);
     systems[1].velocity(2) = coord_type(0.0, 0.0, 0.0);
@@ -133,76 +133,90 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_double)
         for(std::size_t idx=0; idx<sys.size(); ++idx)
         {
             {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
+                for(std::size_t step=0; step<10; ++step)
+                {
+                    // ----------------------------------------------------------------
+                    // reset positions
+                    sys = init;
+                    // move particle for test
+                    mjolnir::math::X(sys.position(idx)) += 0.1 * step;
 
-                // calc U(x-dx)
-                const auto E0 = interaction.calc_energy(sys);
+                    // calc U(x-dx)
+                    const auto E0 = interaction.calc_energy(sys);
 
-                mjolnir::math::X(sys.position(idx)) += dr;
+                    mjolnir::math::X(sys.position(idx)) += dr;
 
-                // calc F(x)
-                interaction.calc_force(sys);
+                    // calc F(x)
+                    interaction.calc_force(sys);
 
-                mjolnir::math::X(sys.position(idx)) += dr;
+                    mjolnir::math::X(sys.position(idx)) += dr;
 
-                // calc U(x+dx)
-                const auto E1 = interaction.calc_energy(sys);
+                    // calc U(x+dx)
+                    const auto E1 = interaction.calc_energy(sys);
 
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
+                    // central difference
+                    const auto dE = (E1 - E0) * 0.5;
 
-                BOOST_TEST(-dE / dr == mjolnir::math::X(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
+                    BOOST_TEST(-dE / dr == mjolnir::math::X(sys.force(idx)),
+                               boost::test_tools::tolerance(tol));
+                }
             }
             {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
+                for(std::size_t step=0; step<10; ++step)
+                {
+                    // ----------------------------------------------------------------
+                    // reset positions
+                    sys = init;
+                    // move particle for test
+                    mjolnir::math::Y(sys.position(idx)) += 0.1 * step;
 
-                // calc U(x-dx)
-                const auto E0 = interaction.calc_energy(sys);
+                    // calc U(x-dx)
+                    const auto E0 = interaction.calc_energy(sys);
 
-                mjolnir::math::Y(sys.position(idx)) += dr;
+                    mjolnir::math::Y(sys.position(idx)) += dr;
 
-                // calc F(x)
-                interaction.calc_force(sys);
+                    // calc F(x)
+                    interaction.calc_force(sys);
+mjolnir::math::Y(sys.position(idx)) += dr;
 
-                mjolnir::math::Y(sys.position(idx)) += dr;
+                    // calc U(x+dx)
+                    const auto E1 = interaction.calc_energy(sys);
 
-                // calc U(x+dx)
-                const auto E1 = interaction.calc_energy(sys);
+                    // central difference
+                    const auto dE = (E1 - E0) * 0.5;
 
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
-
-                BOOST_TEST(-dE / dr == mjolnir::math::Y(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
+                    BOOST_TEST(-dE / dr == mjolnir::math::Y(sys.force(idx)),
+                               boost::test_tools::tolerance(tol));
+                }
             }
             {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
+                for(std::size_t step=0; step<10; ++step)
+                {
+                    // ----------------------------------------------------------------
+                    // reset positions
+                    sys = init;
+                    // move particle for test
+                    mjolnir::math::Z(sys.position(idx)) += 0.1 * step;
 
-                // calc U(x-dx)
-                const auto E0 = interaction.calc_energy(sys);
+                    // calc U(x-dx)
+                    const auto E0 = interaction.calc_energy(sys);
 
-                mjolnir::math::Z(sys.position(idx)) += dr;
+                    mjolnir::math::Z(sys.position(idx)) += dr;
 
-                // calc F(x)
-                interaction.calc_force(sys);
+                    // calc F(x)
+                    interaction.calc_force(sys);
 
-                mjolnir::math::Z(sys.position(idx)) += dr;
+                    mjolnir::math::Z(sys.position(idx)) += dr;
 
-                // calc U(x+dx)
-                const auto E1 = interaction.calc_energy(sys);
+                    // calc U(x+dx)
+                    const auto E1 = interaction.calc_energy(sys);
 
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
+                    // central difference
+                    const auto dE = (E1 - E0) * 0.5;
 
-                BOOST_TEST(-dE / dr == mjolnir::math::Z(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
+                    BOOST_TEST(-dE / dr == mjolnir::math::Z(sys.force(idx)),
+                               boost::test_tools::tolerance(tol));
+                }
             }
         }
     }
