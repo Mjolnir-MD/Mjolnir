@@ -74,6 +74,7 @@ bool inject_test_potential(std::unique_ptr<mjolnir::SimulatorBase>& sim_base)
     }
 
     forcefield_type* ff = dynamic_cast<forcefield_type*>(sim->forcefields().get());
+    assert(ff);
     ff->external().emplace(mjolnir::make_unique<interaction_type>(
             shape_type(0.0, 1.0), potential_type(std::move(ps))));
 
