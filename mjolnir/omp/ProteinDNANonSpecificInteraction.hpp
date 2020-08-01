@@ -229,8 +229,8 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
     real_type calc_energy(const system_type& sys) const noexcept override
     {
-        MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_LOG_FUNCTION();
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+        MJOLNIR_LOG_FUNCTION_DEBUG();
         // XXX Note: P is ambiguous because both Protein and Phosphate has `P`.
         // But this interaction is named as P-D ns, so here it uses `P` for protein
         // and `D` for DNA.
@@ -302,7 +302,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
                 const auto k = para.k;
 
-                MJOLNIR_LOG_INFO("protein = ", P, ", DNA = ", D, ", r0 = ", para.r0);
+                MJOLNIR_LOG_DEBUG("protein = ", P, ", DNA = ", D, ", r0 = ", para.r0);
 
                 E += k * f * g_theta * g_phi;
             }
