@@ -38,14 +38,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_index_offset_local_potential, T, test_types)
             mjolnir::HarmonicPotential<real_type>>(v);
 
         BOOST_TEST(g.size() == 3u);
-        BOOST_TEST(g.at(0).first[0] == 1);
-        BOOST_TEST(g.at(0).first[1] == 2);
+        BOOST_TEST(g.at(0).first[0] == 1u);
+        BOOST_TEST(g.at(0).first[1] == 2u);
 
-        BOOST_TEST(g.at(1).first[0] == 2);
-        BOOST_TEST(g.at(1).first[1] == 3);
+        BOOST_TEST(g.at(1).first[0] == 2u);
+        BOOST_TEST(g.at(1).first[1] == 3u);
 
-        BOOST_TEST(g.at(2).first[0] == 0);
-        BOOST_TEST(g.at(2).first[1] == 1);
+        BOOST_TEST(g.at(2).first[0] == 0u);
+        BOOST_TEST(g.at(2).first[1] == 1u);
 
         BOOST_TEST(g.at(0).second.k()  == real_type(3.14));
         BOOST_TEST(g.at(0).second.v0() == real_type(2.71));
