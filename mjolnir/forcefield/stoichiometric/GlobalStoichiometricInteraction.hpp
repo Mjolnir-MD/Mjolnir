@@ -96,8 +96,9 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
         partition_.scale_margin(scale, sys, potential_);
     }
 
-    void      calc_force (system_type&)       const noexcept override;
-    real_type calc_energy(const system_type&) const noexcept override;
+    void      calc_force (system_type&)           const noexcept override;
+    real_type calc_energy(const system_type&)     const noexcept override;
+    real_type calc_force_and_energy(system_type&) const noexcept override;
 
     std::string name() const override {return "Stoichiometric";}
 
@@ -307,6 +308,119 @@ GlobalStoichiometricInteraction<traitsT>::calc_energy(const system_type& sys) co
             pots_buff_a[idx_b]  =  pot;
             pot_sum_a           += pot;
             pot_sum_b_[idx_b]   += pot;
+        }
+    }
+
+    // potential calculation
+    real_type retval(0.0);
+    for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a) {
+        const std::vector<real_type>& pots_buff_a = potentials_buff_[idx_a];
+        for(std::size_t idx_b=0; idx_b<participants_b_num; ++idx_b)
+        {
+            const real_type x_a = 2.0 * (coefb_ + 0.5 - pot_sum_a_[idx_a]);
+            const real_type x_b = 2.0 * (coefa_ + 0.5 - pot_sum_b_[idx_b]);
+            retval += activation_func(x_a) * activation_func(x_b) * pots_buff_a[idx_b];
+        }
+    }
+    retval *= -epsilon_;
+
+    return retval;
+}
+
+template<typename traitsT>
+typename GlobalStoichiometricInteraction<traitsT>::real_type
+GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexcept
+{
+    MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+    MJOLNIR_LOG_FUNCTION_DEBUG();
+
+    const std::size_t participants_a_num = potential_.participants_a_num();
+    const std::size_t participants_b_num = potential_.participants_b_num();
+
+    // initialization of each buffering container.
+    for(std::size_t idx=0; idx<participants_a_num; ++idx)
+    {
+        std::vector<real_type>&       pots_buff_a   = potentials_buff_[idx];
+        std::vector<coordinate_type>& derivs_buff_a = pot_derivs_buff_[idx];
+        std::fill(pots_buff_a.begin(),   pots_buff_a.end(),   0.0);
+        std::fill(derivs_buff_a.begin(), derivs_buff_a.end(),
+                  math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
+    }
+    std::fill(pot_sum_a_.begin(), pot_sum_a_.end(), 0.0);
+    std::fill(pot_sum_b_.begin(), pot_sum_b_.end(), 0.0);
+    std::fill(pot_deriv_sum_a_.begin(), pot_deriv_sum_a_.end(),
+              math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
+    std::fill(pot_deriv_sum_b_.begin(), pot_deriv_sum_b_.end(),
+              math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
+
+    // pre calculation for pot_sum and pot_deriv_sumb for each particle.
+    const auto leading_participants   = potential_.leading_participants();
+    const auto followint_participants = potential_.following_participants();
+    for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
+    {
+        const index_type i = leading_participants[idx_a];
+        std::vector<real_type>&       pots_buff_a   = potentials_buff_[idx_a];
+        std::vector<coordinate_type>& derivs_buff_a = pot_derivs_buff_[idx_a];
+        for(const auto& ptnr : partition_.partners(i))
+        {
+            const index_type j     = ptnr.index;
+            const index_type idx_b = idx_buffer_map[j];
+            const coordinate_type rij =
+               sys.adjust_direction(sys.position(j) - sys.position(i));
+            const real_type       l2    = math::length_sq(rij); // |rij|^2
+            const real_type       rl    = math::rsqrt(l2);      // 1 / |rij|
+            const coordinate_type e     = rij * rl;             // rij / |rij|
+            const real_type       l     = l2 * rl;
+            const coordinate_type deriv = potential_.derivative(l) * e;
+            const real_type       pot   = potential_.potential(l);
+            derivs_buff_a   [idx_b] =  deriv;
+            pot_deriv_sum_a_[idx_a] += deriv;
+            pot_deriv_sum_b_[idx_b] -= deriv;
+            pots_buff_a     [idx_b] =  pot;
+            pot_sum_a_      [idx_a] += pot;
+            pot_sum_b_      [idx_b] += pot;
+        }
+    }
+
+    // pre calculation for the value of activated function for each particle.
+    for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
+    {
+        const real_type x   = 2.0 * (coefb_ + 0.5 - pot_sum_a_[idx_a]);
+        activated_a_[idx_a] = activation_func(x);
+        act_deriv_a_[idx_a] = deriv_activation_func(x);
+    }
+    for(std::size_t idx_b=0; idx_b<participants_b_num; ++idx_b)
+    {
+        const real_type x   = 2.0 * (coefa_ + 0.5 - pot_sum_b_[idx_b]);
+        activated_b_[idx_b] = activation_func(x);
+        act_deriv_b_[idx_b] = deriv_activation_func(x);
+    }
+
+    // force calculation
+    for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
+    {
+        const index_type i = leading_participants[idx_a];
+        const std::vector<real_type>&       pots_buff_a       = potentials_buff_[idx_a];
+        const std::vector<coordinate_type>& pot_derivs_buff_a = pot_derivs_buff_[idx_a];
+        for(const auto& ptnr : partition_.partners(i))
+        {
+            const index_type j     = ptnr.index;
+            const index_type idx_b = idx_buffer_map[j];
+            const real_type pots_buff_ab = pots_buff_a[idx_b];
+            const real_type activated_a  = activated_a_[idx_a];
+            const real_type activated_b  = activated_b_[idx_b];
+            const coordinate_type& pot_derivs_buff_ab = pot_derivs_buff_a[idx_b];
+            const real_type term1_coef = activated_b * pots_buff_ab * act_deriv_a_[idx_a];
+            const real_type term2_coef = activated_a * pots_buff_ab * act_deriv_b_[idx_b];
+            const real_type term3_coef = activated_a * activated_b;
+
+            const index_type i = leading_participants[idx_a];
+            sys.force(i) += epsilon_ *
+                            (2.0 * term1_coef * pot_deriv_sum_a_[idx_a] +
+                            (2.0 * term2_coef - term3_coef) * pot_derivs_buff_ab);
+            sys.force(j) += epsilon_ *
+                            (2.0 * term2_coef * pot_deriv_sum_b_[idx_b] +
+                            (2.0 * term1_coef - term3_coef) * -pot_derivs_buff_ab);
         }
     }
 
