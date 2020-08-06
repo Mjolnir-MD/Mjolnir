@@ -14,7 +14,8 @@
 #include <mjolnir/util/make_unique.hpp>
 
 BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_double)
-{ mjolnir::LoggerManager::set_default_logger(
+{
+    mjolnir::LoggerManager::set_default_logger(
         "test_global_stoichiometric_interaction.log");
 
     using traits_type   = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
@@ -177,7 +178,7 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_double)
 
                     // calc F(x)
                     interaction.calc_force(sys);
-mjolnir::math::Y(sys.position(idx)) += dr;
+                    mjolnir::math::Y(sys.position(idx)) += dr;
 
                     // calc U(x+dx)
                     const auto E1 = interaction.calc_energy(sys);
