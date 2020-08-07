@@ -228,19 +228,21 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         using namespace mjolnir::literals::string_literals;
         // Basin1{BondLength:Harmonic ...} Basin2{...} V_MB chi
 
-        fmt += name1_ + "{"_s;
+        fmt += std::string(name1_.size()+1, ' ');
         real_type V_1 = this->dV1_;
         V_1 += loc1_.format_energy(sys, fmt);
         V_1 += glo1_.format_energy(sys, fmt);
         V_1 += ext1_.format_energy(sys, fmt);
-        fmt += "} "_s;
+        if(!fmt.empty() && fmt.back() == ' ') {fmt.pop_back();}
+        fmt += "  "_s;
 
-        fmt += name2_ + "{"_s;
+        fmt += std::string(name2_.size()+1, ' ');
         real_type V_2 = this->dV2_;
         V_2 += loc2_.format_energy(sys, fmt);
         V_2 += glo2_.format_energy(sys, fmt);
         V_2 += ext2_.format_energy(sys, fmt);
-        fmt += "} "_s;
+        if(!fmt.empty() && fmt.back() == ' ') {fmt.pop_back();}
+        fmt += "  "_s;
 
         // ( V1-V_MB   delta    ) (c1) = (0)
         // (  delta  V2+dV-V_MB ) (c2)   (0)

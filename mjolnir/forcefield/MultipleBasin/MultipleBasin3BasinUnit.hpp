@@ -279,26 +279,29 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
     {
         using namespace mjolnir::literals::string_literals;
 
-        fmt += name1_ + "{"_s;
+        fmt += std::string(name1_.size() + 1, ' ');
         real_type V_1 = this->dV1_;
         V_1 += std::get<0>(basin1_).format_energy(sys, fmt);
         V_1 += std::get<1>(basin1_).format_energy(sys, fmt);
         V_1 += std::get<2>(basin1_).format_energy(sys, fmt);
-        fmt += "} "_s;
+        if(!fmt.empty() && fmt.back() == ' ') {fmt.pop_back();}
+        fmt += "  "_s;
 
-        fmt += name2_ + "{"_s;
+        fmt += std::string(name2_.size() + 1, ' ');
         real_type V_2 = this->dV2_;
         V_2 += std::get<0>(basin2_).format_energy(sys, fmt);
         V_2 += std::get<1>(basin2_).format_energy(sys, fmt);
         V_2 += std::get<2>(basin2_).format_energy(sys, fmt);
-        fmt += "} "_s;
+        if(!fmt.empty() && fmt.back() == ' ') {fmt.pop_back();}
+        fmt += "  "_s;
 
-        fmt += name3_ + "{"_s;
+        fmt += std::string(name3_.size() + 1, ' ');
         real_type V_3 = this->dV3_;
         V_3 += std::get<0>(basin3_).format_energy(sys, fmt);
         V_3 += std::get<1>(basin3_).format_energy(sys, fmt);
         V_3 += std::get<2>(basin3_).format_energy(sys, fmt);
-        fmt += "} "_s;
+        if(!fmt.empty() && fmt.back() == ' ') {fmt.pop_back();}
+        fmt += "  "_s;
 
         const auto V_MB = this->calc_V_MB(V_1, V_2, V_3);
 

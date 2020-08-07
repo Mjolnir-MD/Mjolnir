@@ -193,6 +193,7 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
         loc_common_.format_energy_name(fmt);
         glo_common_.format_energy_name(fmt);
         ext_common_.format_energy_name(fmt);
+        if(!fmt.empty() && fmt.back() == ' ') {fmt.pop_back();}
         fmt += "} "_s;
         return;
     }
@@ -205,11 +206,12 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
             total += unit->format_energy(sys, fmt);
         }
 
-        fmt += "Common{"_s;
+        fmt += "       "_s; // Common{
         total += loc_common_.format_energy(sys, fmt);
         total += glo_common_.format_energy(sys, fmt);
         total += ext_common_.format_energy(sys, fmt);
-        fmt += "} "_s;
+        if(!fmt.empty() && fmt.back() == ' ') {fmt.pop_back();}
+        fmt += "  "_s; // }
         return total;
     }
 
