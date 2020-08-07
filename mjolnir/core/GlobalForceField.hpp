@@ -33,7 +33,7 @@ class GlobalForceField
     GlobalForceField& operator=(GlobalForceField&&) = default;
 
     GlobalForceField(const GlobalForceField& other)
-        : interactions_(other.size())
+        : fmt_widths_(other.fmt_widths_), interactions_(other.size())
     {
         std::transform(other.begin(), other.end(), this->interactions_.begin(),
             [](const interaction_ptr& interaction) -> interaction_ptr {
@@ -42,6 +42,7 @@ class GlobalForceField
     }
     GlobalForceField& operator=(const GlobalForceField& other)
     {
+        this->fmt_widths_.clear();
         this->interactions_.clear();
         this->interactions_.reserve(other.size());
         for(const auto& interaction : other)
@@ -53,7 +54,7 @@ class GlobalForceField
 
     void emplace(interaction_ptr inter)
     {
-        fmt_widths_  .push_back(std::min<std::size_t>(inter->name().size(), 10));
+        fmt_widths_  .push_back(std::max<std::size_t>(inter->name().size(), 10));
         interactions_.push_back(std::move(inter));
         return;
     }
