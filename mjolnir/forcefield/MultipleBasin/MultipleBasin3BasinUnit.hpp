@@ -57,7 +57,7 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
         : dV1_(dV1),  dV2_(dV2),  dV3_(dV3),
           delta12_(delta12), delta23_(delta23), delta31_(delta31),
           delta12_sq_(delta12 * delta12), delta23_sq_(delta23 * delta23),
-          delta31_sq_(delta31 * delta31), c1_(1), c2_(1), c3_(1),
+          delta31_sq_(delta31 * delta31),
           name1_(name1), name2_(name2), name3_(name3),
           basin1_(std::move(basin1)), basin2_(std::move(basin2)),
           basin3_(std::move(basin3))
@@ -189,12 +189,6 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
         const auto V_3  = this->calc_energy_basin3(sys) + this->dV3_;
         const auto V_MB = this->calc_V_MB(V_1, V_2, V_3);
 
-        this->c1_ = 1; // always 1, baseline.
-        this->c2_ = (delta12_ * (V_MB - V_3) + delta23_ * delta31_) /
-                    ((V_MB - V_2) * (V_MB - V_3) - delta23_sq_);
-        this->c3_ = (delta31_ * (V_MB - V_2) + delta12_ * delta23_) /
-                    ((V_MB - V_2) * (V_MB - V_3) - delta23_sq_);
-
         return V_MB;
     }
 
@@ -248,77 +242,80 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
         return;
     }
 
-    std::vector<std::string> list_energy_name() const override
+    void format_energy_name(std::string& fmt) const override
     {
         using namespace mjolnir::literals::string_literals;
         // Basin1{BondLength:Harmonic ...} Basin2{...} Basin3{...} Total c1 c2 c3
 
-        std::vector<std::string> basin1 = this->list_energy_name_basin1();
-        if(!basin1.empty())
-        {
-            basin1.front() = name1_ + "{"_s + basin1.front();
-            basin1.back() += "}"_s;
-        }
-        std::vector<std::string> basin2 = this->list_energy_name_basin2();
-        if(!basin2.empty())
-        {
-            basin2.front() = name2_ + "{"_s + basin2.front();
-            basin2.back() += "}"_s;
-        }
-        std::vector<std::string> basin3 = this->list_energy_name_basin3();
-        if(!basin3.empty())
-        {
-            basin3.front() = name3_ + "{"_s + basin3.front();
-            basin3.back() += "}"_s;
-        }
+        fmt += name1_ + "{"_s;
+        std::get<0>(basin1_).format_energy_name(fmt);
+        std::get<1>(basin1_).format_energy_name(fmt);
+        std::get<2>(basin1_).format_energy_name(fmt);
+        if(!fmt.empty() && fmt.back() == ' ') {fmt.pop_back();}
+        fmt += "} "_s;
 
-        std::vector<std::string> retval;
-        retval.reserve(basin1.size() + basin2.size() + basin3.size() + 4);
+        fmt += name2_ + "{"_s;
+        std::get<0>(basin2_).format_energy_name(fmt);
+        std::get<1>(basin2_).format_energy_name(fmt);
+        std::get<2>(basin2_).format_energy_name(fmt);
+        if(!fmt.empty() && fmt.back() == ' ') {fmt.pop_back();}
+        fmt += "} "_s;
 
-        std::copy(std::make_move_iterator(basin1.begin()),
-            std::make_move_iterator(basin1.end()), std::back_inserter(retval));
-        std::copy(std::make_move_iterator(basin2.begin()),
-            std::make_move_iterator(basin2.end()), std::back_inserter(retval));
-        std::copy(std::make_move_iterator(basin3.begin()),
-            std::make_move_iterator(basin3.end()), std::back_inserter(retval));
+        fmt += name3_ + "{"_s;
+        std::get<0>(basin3_).format_energy_name(fmt);
+        std::get<1>(basin3_).format_energy_name(fmt);
+        std::get<2>(basin3_).format_energy_name(fmt);
+        if(!fmt.empty() && fmt.back() == ' ') {fmt.pop_back();}
+        fmt += "} "_s;
 
-        retval.push_back("MultipleBasinTotal");
-        retval.push_back("MultipleBasin_c1");
-        retval.push_back("MultipleBasin_c2");
-        retval.push_back("MultipleBasin_c3");
+        fmt += "MultipleBasinTotal ";
+        fmt += "MultipleBasinC1 ";
+        fmt += "MultipleBasinC2 ";
+        fmt += "MultipleBasinC3 ";
 
-        return retval;
+        return;
     }
-    std::vector<real_type> dump_energy(const system_type& sys) const override
+    real_type format_energy(const system_type& sys, std::string& fmt) const override
     {
-        const auto es_1 = this->dump_energy_basin1(sys);
-        const auto es_2 = this->dump_energy_basin2(sys);
-        const auto es_3 = this->dump_energy_basin3(sys);
+        using namespace mjolnir::literals::string_literals;
 
-        const auto V_1 = std::accumulate(es_1.begin(), es_1.end(), real_type(0)) + this->dV1_;
-        const auto V_2 = std::accumulate(es_2.begin(), es_2.end(), real_type(0)) + this->dV2_;
-        const auto V_3 = std::accumulate(es_3.begin(), es_3.end(), real_type(0)) + this->dV3_;
+        fmt += name1_ + "{"_s;
+        real_type V_1 = this->dV1_;
+        V_1 += std::get<0>(basin1_).format_energy(sys, fmt);
+        V_1 += std::get<1>(basin1_).format_energy(sys, fmt);
+        V_1 += std::get<2>(basin1_).format_energy(sys, fmt);
+        fmt += "} "_s;
+
+        fmt += name2_ + "{"_s;
+        real_type V_2 = this->dV2_;
+        V_2 += std::get<0>(basin2_).format_energy(sys, fmt);
+        V_2 += std::get<1>(basin2_).format_energy(sys, fmt);
+        V_2 += std::get<2>(basin2_).format_energy(sys, fmt);
+        fmt += "} "_s;
+
+        fmt += name3_ + "{"_s;
+        real_type V_3 = this->dV3_;
+        V_3 += std::get<0>(basin3_).format_energy(sys, fmt);
+        V_3 += std::get<1>(basin3_).format_energy(sys, fmt);
+        V_3 += std::get<2>(basin3_).format_energy(sys, fmt);
+        fmt += "} "_s;
 
         const auto V_MB = this->calc_V_MB(V_1, V_2, V_3);
 
-        this->c1_ = 1; // always 1, baseline.
-        this->c2_ = (delta12_ * (V_MB - V_3) + delta23_ * delta31_) /
-                    ((V_MB - V_2) * (V_MB - V_3) - delta23_sq_);
-        this->c3_ = (delta31_ * (V_MB - V_2) + delta12_ * delta23_) /
-                    ((V_MB - V_2) * (V_MB - V_3) - delta23_sq_);
+        const real_type c1 = 1; // always 1, as a baseline.
+        const real_type c2 = (delta12_ * (V_MB - V_3) + delta23_ * delta31_) /
+                             ((V_MB - V_2) * (V_MB - V_3) - delta23_sq_);
+        const real_type c3 = (delta31_ * (V_MB - V_2) + delta12_ * delta23_) /
+                             ((V_MB - V_2) * (V_MB - V_3) - delta23_sq_);
 
-        std::vector<real_type> retval;
-        retval.reserve(es_1.size() + es_2.size() + es_3.size() + 4);
+        std::ostringstream oss;
+        oss << std::setw(18) << std::fixed << std::right << V_MB << ' ';
+        oss << std::setw(15) << std::fixed << std::right << c1   << ' ';
+        oss << std::setw(15) << std::fixed << std::right << c2   << ' ';
+        oss << std::setw(15) << std::fixed << std::right << c3   << ' ';
+        fmt += oss.str();
 
-        std::copy(es_1.begin(), es_1.end(), std::back_inserter(retval));
-        std::copy(es_2.begin(), es_2.end(), std::back_inserter(retval));
-        std::copy(es_3.begin(), es_3.end(), std::back_inserter(retval));
-
-        retval.push_back(V_MB);
-        retval.push_back(this->c1_);
-        retval.push_back(this->c2_);
-        retval.push_back(this->c3_);
-        return retval;
+        return V_MB;
     }
 
     // for tests
@@ -344,7 +341,7 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
     external_forcefield_type const& external3() const noexcept {return std::get<2>(basin3_);}
 
     // -----------------------------------------------------------------------
-    // calc_force/energy, dump/list_energy for each basin
+    // calc_force/energy for each basin
 
     real_type calc_force_and_energy_basin1(system_type& sys) const
     {
@@ -388,92 +385,6 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
         return std::get<0>(basin3_).calc_energy(sys) +
                std::get<1>(basin3_).calc_energy(sys) +
                std::get<2>(basin3_).calc_energy(sys);
-    }
-
-    std::vector<std::string> list_energy_name_basin1() const
-    {
-        auto retval = std::get<0>(basin1_).list_energy();
-        auto glo    = std::get<1>(basin1_).list_energy();
-        auto ext    = std::get<2>(basin1_).list_energy();
-
-        retval.reserve(retval.size() + glo.size() + ext.size());
-
-        std::copy(std::make_move_iterator(glo.begin()),
-                  std::make_move_iterator(glo.end()),
-                  std::back_inserter(retval));
-        std::copy(std::make_move_iterator(ext.begin()),
-                  std::make_move_iterator(ext.end()),
-                  std::back_inserter(retval));
-        return retval;
-    }
-    std::vector<std::string> list_energy_name_basin2() const
-    {
-        auto retval = std::get<0>(basin2_).list_energy();
-        auto glo    = std::get<1>(basin2_).list_energy();
-        auto ext    = std::get<2>(basin2_).list_energy();
-
-        retval.reserve(retval.size() + glo.size() + ext.size());
-
-        std::copy(std::make_move_iterator(glo.begin()),
-                  std::make_move_iterator(glo.end()),
-                  std::back_inserter(retval));
-        std::copy(std::make_move_iterator(ext.begin()),
-                  std::make_move_iterator(ext.end()),
-                  std::back_inserter(retval));
-        return retval;
-    }
-    std::vector<std::string> list_energy_name_basin3() const
-    {
-        auto retval = std::get<0>(basin3_).list_energy();
-        auto glo    = std::get<1>(basin3_).list_energy();
-        auto ext    = std::get<2>(basin3_).list_energy();
-
-        retval.reserve(retval.size() + glo.size() + ext.size());
-
-        std::copy(std::make_move_iterator(glo.begin()),
-                  std::make_move_iterator(glo.end()),
-                  std::back_inserter(retval));
-        std::copy(std::make_move_iterator(ext.begin()),
-                  std::make_move_iterator(ext.end()),
-                  std::back_inserter(retval));
-        return retval;
-    }
-
-    std::vector<real_type> dump_energy_basin1(const system_type& sys) const
-    {
-        auto retval = std::get<0>(basin1_).dump_energy(sys);
-        auto glo    = std::get<1>(basin1_).dump_energy(sys);
-        auto ext    = std::get<2>(basin1_).dump_energy(sys);
-
-        retval.reserve(retval.size() + glo.size() + ext.size());
-
-        std::copy(glo.begin(), glo.end(), std::back_inserter(retval));
-        std::copy(ext.begin(), ext.end(), std::back_inserter(retval));
-        return retval;
-    }
-    std::vector<real_type> dump_energy_basin2(const system_type& sys) const
-    {
-        auto retval = std::get<0>(basin2_).dump_energy(sys);
-        auto glo    = std::get<1>(basin2_).dump_energy(sys);
-        auto ext    = std::get<2>(basin2_).dump_energy(sys);
-
-        retval.reserve(retval.size() + glo.size() + ext.size());
-
-        std::copy(glo.begin(), glo.end(), std::back_inserter(retval));
-        std::copy(ext.begin(), ext.end(), std::back_inserter(retval));
-        return retval;
-    }
-    std::vector<real_type> dump_energy_basin3(const system_type& sys) const
-    {
-        auto retval = std::get<0>(basin3_).dump_energy(sys);
-        auto glo    = std::get<1>(basin3_).dump_energy(sys);
-        auto ext    = std::get<2>(basin3_).dump_energy(sys);
-
-        retval.reserve(retval.size() + glo.size() + ext.size());
-
-        std::copy(glo.begin(), glo.end(), std::back_inserter(retval));
-        std::copy(ext.begin(), ext.end(), std::back_inserter(retval));
-        return retval;
     }
 
   private:
@@ -553,11 +464,6 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
     real_type delta12_sq_;
     real_type delta23_sq_;
     real_type delta31_sq_;
-
-    // those are calculated in calc_energy().
-    mutable real_type c1_; // always 1.0, as a baseline (exists for consistency)
-    mutable real_type c2_; // relative to c1
-    mutable real_type c3_; // relative to c1
 
     std::string     name1_,  name2_,  name3_;
     forcefield_type basin1_, basin2_, basin3_;

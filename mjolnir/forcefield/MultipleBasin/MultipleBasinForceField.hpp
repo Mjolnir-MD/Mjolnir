@@ -177,60 +177,44 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
         return;
     }
 
-    std::vector<std::string> list_energy_name() const override
+    // -----------------------------------------------------------------------
+    // energy output format
+
+    void format_energy_name(std::string& fmt) const override
     {
         using namespace mjolnir::literals::string_literals;
 
-        std::vector<std::string> retval;
         for(const auto& unit : this->units_)
         {
-            auto ls = unit->list_energy_name();
-            std::copy(std::make_move_iterator(ls.begin()),
-                      std::make_move_iterator(ls.end()),
-                      std::back_inserter(retval));
+            unit->format_energy_name(fmt);
         }
-        std::vector<std::string> common;
-        auto loc_cmn = loc_common_.list_energy();
-        auto glo_cmn = glo_common_.list_energy();
-        auto ext_cmn = ext_common_.list_energy();
-        std::copy(std::make_move_iterator(loc_cmn.begin()),
-                  std::make_move_iterator(loc_cmn.end()),
-                  std::back_inserter(common));
-        std::copy(std::make_move_iterator(glo_cmn.begin()),
-                  std::make_move_iterator(glo_cmn.end()),
-                  std::back_inserter(common));
-        std::copy(std::make_move_iterator(ext_cmn.begin()),
-                  std::make_move_iterator(ext_cmn.end()),
-                  std::back_inserter(common));
-        if(!common.empty())
-        {
-            common.front() = "Common{"_s + common.front();
-            common.back() += "}"_s;
-        }
-        std::copy(std::make_move_iterator(common.begin()),
-                  std::make_move_iterator(common.end()),
-                  std::back_inserter(retval));
-        return retval;
+
+        fmt += "Common{"_s;
+        loc_common_.format_energy_name(fmt);
+        glo_common_.format_energy_name(fmt);
+        ext_common_.format_energy_name(fmt);
+        fmt += "} "_s;
+        return;
     }
 
-    std::vector<real_type> dump_energy(const system_type& sys) const override
+    real_type format_energy(const system_type& sys, std::string& fmt) const override
     {
-        std::vector<real_type> retval;
+        real_type total = 0.0;
         for(const auto& unit : this->units_)
         {
-            const auto ls = unit->dump_energy(sys);
-            std::copy(ls.begin(), ls.end(), std::back_inserter(retval));
+            total += unit->format_energy(sys, fmt);
         }
-        const auto loc_cmn = loc_common_.dump_energy(sys);
-        const auto glo_cmn = glo_common_.dump_energy(sys);
-        const auto ext_cmn = ext_common_.dump_energy(sys);
 
-        std::copy(loc_cmn.begin(), loc_cmn.end(), std::back_inserter(retval));
-        std::copy(glo_cmn.begin(), glo_cmn.end(), std::back_inserter(retval));
-        std::copy(ext_cmn.begin(), ext_cmn.end(), std::back_inserter(retval));
-
-        return retval;
+        fmt += "Common{"_s;
+        total += loc_common_.format_energy(sys, fmt);
+        total += glo_common_.format_energy(sys, fmt);
+        total += ext_common_.format_energy(sys, fmt);
+        fmt += "} "_s;
+        return total;
     }
+
+    // -----------------------------------------------------------------------
+
     topology_type const&              topology()   const noexcept override {return topol_;}
     constraint_forcefield_type const& constraint() const noexcept override {return constraint_;}
 
