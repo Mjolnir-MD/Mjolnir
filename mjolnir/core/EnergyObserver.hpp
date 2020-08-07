@@ -94,7 +94,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
         }
 
         const auto Ek = this->calc_kinetic_energy(sys);
-        ofs << std::setw(14) << std::right << Ek;
+        ofs << std::setw(14) << std::right << std::fixed << Ek;
         if(!is_finite(Ek))
         {
             MJOLNIR_GET_DEFAULT_LOGGER();
@@ -111,7 +111,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
                 is_ok = false;
             }
             ofs << ' ' << std::setw(10 + attr.first.size()) << std::right
-                << attr.second;
+                << std::fixed << attr.second;
         }
         ofs << std::endl; // flush before throwing an exception
 
