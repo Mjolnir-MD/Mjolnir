@@ -40,13 +40,10 @@ class EnergyObserver final : public ObserverBase<traitsT>
             << ", unit of energy : " << phys_constants::energy_unit() << '\n';
         ofs << "# timestep  ";
 
-        const auto names = ff->list_energy_name();
-        this->widths_.reserve(names.size());
-        for(std::size_t i=0; i<names.size(); ++i)
-        {
-            ofs << names.at(i) << ' ';
-            this->widths_.push_back(names.at(i).size());
-        }
+        std::string names;
+        ff->format_energy_name(names); // write into it
+        ofs << names;
+
         ofs << " kinetic_energy";
         for(const auto& attr : sys.attributes())
         {
@@ -62,13 +59,11 @@ class EnergyObserver final : public ObserverBase<traitsT>
     {
         std::ofstream ofs(this->file_name_, std::ios::app);
         ofs << "# timestep  ";
-        const auto names = ff->list_energy_name();
-        this->widths_.reserve(names.size());
-        for(std::size_t i=0; i<names.size(); ++i)
-        {
-            ofs << names.at(i) << ' ';
-            this->widths_.push_back(names.at(i).size());
-        }
+
+        std::string names;
+        ff->format_energy_name(names); // write into it
+        ofs << names;
+
         ofs << " kinetic_energy";
         for(const auto& attr : sys.attributes())
         {
@@ -88,22 +83,18 @@ class EnergyObserver final : public ObserverBase<traitsT>
         // ostream::width and outputs whole string.
         ofs << std::setw(11) << std::left << std::to_string(step) << ' ';
 
-        const auto energies = ff->dump_energy(sys);
-        for(std::size_t i=0; i<energies.size(); ++i)
+        std::string energies;
+        const auto potential_energy = ff->format_energy(sys, energies);
+        ofs << energies;
+        if(!is_finite(potential_energy))
         {
-            const real_type ene = energies.at(i);
-            if(!is_finite(ene))
-            {
-                MJOLNIR_GET_DEFAULT_LOGGER();
-                MJOLNIR_LOG_ERROR("energy becomes NaN.");
-                is_ok = false;
-            }
-            ofs << std::setw(this->widths_.at(i)) << std::fixed
-                << std::right << ene << ' ';
+            MJOLNIR_GET_DEFAULT_LOGGER();
+            MJOLNIR_LOG_ERROR("potential energy becomes NaN.");
+            is_ok = false;
         }
 
         const auto Ek = this->calc_kinetic_energy(sys);
-        ofs << std::setw(14) << std::right << Ek;
+        ofs << std::setw(14) << std::right << std::fixed << Ek;
         if(!is_finite(Ek))
         {
             MJOLNIR_GET_DEFAULT_LOGGER();
@@ -120,7 +111,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
                 is_ok = false;
             }
             ofs << ' ' << std::setw(10 + attr.first.size()) << std::right
-                << attr.second;
+                << std::fixed << attr.second;
         }
         ofs << std::endl; // flush before throwing an exception
 
