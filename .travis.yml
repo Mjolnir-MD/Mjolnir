@@ -17,21 +17,6 @@ matrix:
         - g++-9
         - boost1.70
         - cmake
-  - os: linux
-    language: cpp
-    compiler: clang
-    env: COMPILER="clang++-8" OMP_NUM_THREADS=4
-    addons:
-      apt:
-        update: true
-        sources:
-        - sourceline: 'ppa:mhier/libboost-latest'
-        - sourceline: 'ppa:ubuntu-toolchain-r/test'
-        - llvm-toolchain-xenial-8
-        packages:
-        - clang-8
-        - boost1.70
-        - cmake
 
 before_install:
 - mkdir -p cmake
@@ -45,4 +30,5 @@ script:
 - cd build
 - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DFIND_BOOST=ON -DUSE_OPENMP=ON -DBUILD_INTEGRATION_TEST=OFF -DSEPARATE_BUILD=ON ..
 - make VERBOSE=1
+- echo "OMP_NUM_THREADS=${OMP_NUM_THREADS}"
 - ctest --output-on-failure
