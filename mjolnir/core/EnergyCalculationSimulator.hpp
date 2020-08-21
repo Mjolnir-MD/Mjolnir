@@ -31,7 +31,8 @@ class EnergyCalculationSimulator final : public SimulatorBase
             system_type&& sys, forcefield_type&& ff, observer_type&& obs)
         : step_count_(0),     total_step_(total_step),
           ld_(std::move(ld)), sys_(std::move(sys)),
-          ff_(std::move(ff)), obs_(std::move(obs))
+          ff_(std::move(ff)), obs_(std::move(obs)),
+          old_position_(sys_.size())
     {}
     ~EnergyCalculationSimulator() override {}
 
@@ -56,6 +57,7 @@ class EnergyCalculationSimulator final : public SimulatorBase
     system_type     sys_;
     forcefield_type ff_;
     observer_type   obs_;
+    std::vector<coordinate_type> old_position_;
 };
 
 template<typename traitsT>
@@ -81,13 +83,30 @@ inline bool EnergyCalculationSimulator<traitsT>::step()
     // this calculates the energy.
     obs_.output(this->step_count_, 0.0, this->sys_, this->ff_);
 
+    // backup current configuration to calculate displacement to determine
+    // whether we need to update the neighboring list or not
+    for(std::size_t i=0; i<sys_.size(); ++i)
+    {
+        old_position_[i] = sys_.position(i);
+    }
+
     if(!ld_->load_next(sys_))
     {
         // if loader returns false, it means it fails to read the next traj.
         return false;
     }
 
-    ff_->update(sys_); // force update the neighboring lists
+    // Here, calling forcefield.update() is not a good idea. It outputs logs
+    // because it considers all the state including both system and forcefield
+    // has been changed. But, in this simulator, forcefield does not change.
+    real_type max_displacement_sq = 0.0;
+    for(std::size_t i=0; i<sys_.size(); ++i)
+    {
+        max_displacement_sq = std::max(max_displacement_sq, math::length_sq(
+                    sys_.adjust_direction(old_position_[i] - sys_.position(i))));
+    }
+    // update neighboring list if needed
+    ff_->reduce_margin(2 * std::sqrt(max_displacement_sq), sys_);
 
     ++step_count_;
 
