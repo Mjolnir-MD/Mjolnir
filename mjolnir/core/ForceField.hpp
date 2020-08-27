@@ -113,35 +113,20 @@ class ForceField final : public ForceFieldBase<traitsT>
             external_.calc_energy(sys);
     }
 
-    std::vector<std::string> list_energy_name() const override
+    void format_energy_name(std::string& fmt) const override
     {
-        auto retval = local_.list_energy();
-        auto glo    = global_.list_energy();
-        auto ext    = external_.list_energy();
-
-        retval.reserve(retval.size() + glo.size() + ext.size());
-
-        std::copy(std::make_move_iterator(glo.begin()),
-                  std::make_move_iterator(glo.end()),
-                  std::back_inserter(retval));
-
-        std::copy(std::make_move_iterator(ext.begin()),
-                  std::make_move_iterator(ext.end()),
-                  std::back_inserter(retval));
-
-        return retval;
+        local_   .format_energy_name(fmt);
+        global_  .format_energy_name(fmt);
+        external_.format_energy_name(fmt);
+        return ;
     }
-    std::vector<real_type> dump_energy(const system_type& sys) const override
+    real_type format_energy(const system_type& sys, std::string& fmt) const override
     {
-        auto retval = local_.dump_energy(sys);
-        auto glo    = global_.dump_energy(sys);
-        auto ext    = external_.dump_energy(sys);
-
-        retval.reserve(retval.size() + glo.size() + ext.size());
-
-        std::copy(glo.begin(), glo.end(), std::back_inserter(retval));
-        std::copy(ext.begin(), ext.end(), std::back_inserter(retval));
-        return retval;
+        real_type total = 0.0;
+        total += local_   .format_energy(sys, fmt);
+        total += global_  .format_energy(sys, fmt);
+        total += external_.format_energy(sys, fmt);
+        return total;
     }
 
     topology_type const& topology() const noexcept override {return topology_;}

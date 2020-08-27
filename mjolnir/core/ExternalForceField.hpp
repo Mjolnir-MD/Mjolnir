@@ -2,6 +2,7 @@
 #define MJOLNIR_CORE_EXTERNAL_FORCE_FIELD_HPP
 #include <mjolnir/core/ExternalForceInteractionBase.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <mjolnir/util/is_finite.hpp>
 #include <utility>
 #include <vector>
 #include <array>
@@ -32,7 +33,7 @@ class ExternalForceField
     ExternalForceField& operator=(ExternalForceField&&) = default;
 
     ExternalForceField(ExternalForceField const& other)
-        : interactions_(other.size())
+        : fmt_widths_(other.fmt_widths_), interactions_(other.size())
     {
         std::transform(other.begin(), other.end(), this->interactions_.begin(),
             [](const interaction_ptr& interaction) -> interaction_ptr {
@@ -41,6 +42,7 @@ class ExternalForceField
     }
     ExternalForceField& operator=(ExternalForceField const& other)
     {
+        this->fmt_widths_.clear();
         this->interactions_.clear();
         this->interactions_.reserve(other.size());
         for(const auto& interaction : other)
@@ -50,8 +52,9 @@ class ExternalForceField
         return *this;
     }
 
-    void emplace(interaction_ptr&& interaction)
+    void emplace(interaction_ptr interaction)
     {
+        fmt_widths_  .push_back(std::max<std::size_t>(interaction->name().size(), 10));
         interactions_.push_back(std::move(interaction));
         return;
     }
@@ -123,31 +126,47 @@ class ExternalForceField
         return energy;
     }
 
-    // basically, it is called only once at the begenning of a simulation.
-    // this function do a lot of stuff, such as memory allocation, but it does
-    // not affect runtime efficiency so much.
-    std::vector<std::string> list_energy() const
+    // ------------------------------------------------------------------------
+    // energy output related
+
+    void format_energy_name(std::string& fmt) const
     {
-        std::vector<std::string> retval;
-        for(const auto& i : interactions_)
+        for(const auto& interaction : interactions_)
         {
-            retval.push_back(i->name());
+            fmt += interaction->name();
+            fmt += ' ';
         }
-        return retval;
+        return ;
     }
 
-    std::vector<real_type> dump_energy(const system_type& sys) const
+    real_type format_energy(const system_type& sys, std::string& fmt) const
     {
-        std::vector<real_type> retval;
-        for(const auto& i : interactions_)
+        real_type total_energy = 0;
+        std::ostringstream oss;
+        for(std::size_t i=0; i<interactions_.size(); ++i)
         {
-            retval.push_back(i->calc_energy(sys));
+            const auto& interaction = interactions_[i];
+            const auto energy = interaction->calc_energy(sys);
+            oss << std::setw(this->fmt_widths_.at(i)) << std::fixed
+                << std::right << energy << ' ';
+
+            if(!is_finite(energy))
+            {
+                MJOLNIR_GET_DEFAULT_LOGGER();
+                MJOLNIR_LOG_ERROR("energy of ", interaction->name(),
+                                  " becomes NaN.");
+            }
+            total_energy += energy;
         }
-        return retval;
+        fmt += oss.str();
+        return total_energy;
     }
+
+    // ------------------------------------------------------------------------
 
     bool           empty()  const noexcept {return interactions_.empty();}
     std::size_t    size()   const noexcept {return interactions_.size();}
+
     iterator       begin()        noexcept {return interactions_.begin();}
     iterator       end()          noexcept {return interactions_.end();}
     const_iterator begin()  const noexcept {return interactions_.begin();}
@@ -157,6 +176,7 @@ class ExternalForceField
 
   private:
 
+    std::vector<std::size_t> fmt_widths_;
     container_type interactions_;
 };
 

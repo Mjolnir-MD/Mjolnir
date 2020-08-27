@@ -318,9 +318,8 @@ read_energy_calculation_simulator(
     MJOLNIR_LOG_NOTICE("reading a system ...");
     const auto system = read_table_from_file(systems.at(0), "systems");
 
-    const auto& boundary = toml::find(system, "boundary_shape");
     const auto& particles = toml::find(system, "particles").as_array();
-    System<traitsT> sys(particles.size(), read_boundary<traitsT>(boundary));
+    System<traitsT> sys(particles.size(), read_boundary<traitsT>(system));
 
     if(particles.size() != loader->num_particles())
     {
