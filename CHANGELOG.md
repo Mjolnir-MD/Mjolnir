@@ -1,5 +1,20 @@
 # Change Log
 
+## 1.17.0
+
+### Changed
+
+- update toml11 to v3.5.0
+- speedup EnergyCalculation simulator
+
+### Fixed
+
+- read boundary information correctly in EnergyCalculation simulator
+
+### Misc
+
+- refactor energy format methods
+
 ## 1.16.0
 
 ### Added
