@@ -1,8 +1,10 @@
 #ifndef MJOLNIR_CORE_RANDOM_NUMBER_GENERATOR_HPP
 #define MJOLNIR_CORE_RANDOM_NUMBER_GENERATOR_HPP
+#include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <random>
+#include <sstream>
 #include <cstdint>
 
 namespace mjolnir
