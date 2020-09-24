@@ -22,6 +22,24 @@ class RandomNumberGenerator
     {}
     ~RandomNumberGenerator() = default;
 
+    explicit RandomNumberGenerator(const std::string& internal_state)
+        : nrm_(0.0, 1.0)
+    {
+        std::istringstream iss(internal_state);
+        iss >> seed_ >> rng_;
+        if(iss.fail())
+        {
+            throw_exception<std::runtime_error>("[error] mjolnir::"
+                "RandomNumberGenerator: parse error in mt19937 ", internal_state);
+        }
+    }
+    std::string internal_state() const
+    {
+        std::ostringstream oss;
+        oss << seed_ << ' ' << rng_;
+        return oss.str();
+    }
+
     real_type uniform_real01()
     {
         return std::generate_canonical<
