@@ -92,6 +92,11 @@ class ObserverContainer
         }
     }
 
+    std::string prefix() const
+    {
+        return observers_.front()->prefix();
+    }
+
     // assign one another XXXObserver
     void push_back(observer_base_ptr&& obs)
     {
