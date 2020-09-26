@@ -5,6 +5,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceFieldBase.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
+#include <mjolnir/core/MsgPackSaver.hpp>
 
 namespace mjolnir
 {
@@ -21,16 +22,18 @@ class MolecularDynamicsSimulator final : public SimulatorBase
     using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using observer_type   = ObserverContainer<traits_type>;
     using rng_type        = RandomNumberGenerator<traits_type>;
+    using saver_type      = MsgPackSaver<traits_type>;
 
-    MolecularDynamicsSimulator(
-            const std::size_t tstep, const std::size_t save_step,
-            system_type&& sys, forcefield_type&& ff,
-            integrator_type&& integr, observer_type&& obs,
-            rng_type&& rng)
-    : total_step_(tstep), step_count_(0), save_step_(save_step), time_(0.),
-      system_(std::move(sys)), ff_(std::move(ff)),
-      integrator_(std::move(integr)), observers_(std::move(obs)),
-      rng_(std::move(rng))
+    MolecularDynamicsSimulator(const std::size_t tstep,
+        const std::size_t save_step, const std::size_t checkpoint,
+        system_type&& sys, forcefield_type&& ff,
+        integrator_type&& integr, observer_type&& obs,
+        rng_type&& rng)
+        : total_step_(tstep), step_count_(0), save_step_(save_step),
+          checkpoint_(checkpoint), time_(0),
+          system_(std::move(sys)), ff_(std::move(ff)),
+          integrator_(std::move(integr)), observers_(std::move(obs)),
+          saver_(observers_.prefix()), rng_(std::move(rng))
     {}
     ~MolecularDynamicsSimulator() override {}
 
@@ -55,16 +58,18 @@ class MolecularDynamicsSimulator final : public SimulatorBase
     std::size_t     total_step_;
     std::size_t     step_count_;
     std::size_t     save_step_;
+    std::size_t     checkpoint_;
     real_type       time_;
     system_type     system_;
     forcefield_type ff_;
     integrator_type integrator_;
     observer_type   observers_;
+    saver_type      saver_;
     rng_type        rng_;
 };
 
 template<typename traitsT, typename integratorT>
-inline void MolecularDynamicsSimulator<traitsT, integratorT>::initialize()
+void MolecularDynamicsSimulator<traitsT, integratorT>::initialize()
 {
     this->system_.initialize(this->rng_);
     this->ff_->initialize(this->system_);
@@ -76,12 +81,17 @@ inline void MolecularDynamicsSimulator<traitsT, integratorT>::initialize()
 }
 
 template<typename traitsT, typename integratorT>
-inline bool MolecularDynamicsSimulator<traitsT, integratorT>::step()
+bool MolecularDynamicsSimulator<traitsT, integratorT>::step()
 {
     if(step_count_ % save_step_ == 0)
     {
         observers_.output(this->step_count_, this->integrator_.delta_t(),
                           this->system_, this->ff_);
+    }
+    if(step_count_ % checkpoint_ == 0)
+    {
+        saver_.save(this->system_);
+        saver_.save(this->rng_);
     }
 
     integrator_.step(this->time_, system_, ff_, this->rng_);
@@ -92,7 +102,7 @@ inline bool MolecularDynamicsSimulator<traitsT, integratorT>::step()
 }
 
 template<typename traitsT, typename integratorT>
-inline void MolecularDynamicsSimulator<traitsT, integratorT>::run()
+void MolecularDynamicsSimulator<traitsT, integratorT>::run()
 {
     for(std::size_t i=0; i<total_step_; ++i)
     {
@@ -103,12 +113,14 @@ inline void MolecularDynamicsSimulator<traitsT, integratorT>::run()
 }
 
 template<typename traitsT, typename integratorT>
-inline void MolecularDynamicsSimulator<traitsT, integratorT>::finalize()
+void MolecularDynamicsSimulator<traitsT, integratorT>::finalize()
 {
     observers_.output(this->step_count_, this->integrator_.delta_t(),
                       this->system_, this->ff_);
     observers_.finalize(this->total_step_, this->integrator_.delta_t(),
                         this->system_, this->ff_);
+    saver_.save(this->system_);
+    saver_.save(this->rng_);
     return;
 }
 
