@@ -43,6 +43,34 @@ class RandomNumberGenerator<OpenMPSimulatorTraits<realT, boundaryT>>
     }
     ~RandomNumberGenerator() = default;
 
+    explicit RandomNumberGenerator(const std::string& internal_state)
+        : rngs_(omp_get_max_threads()),
+          nrms_(omp_get_max_threads(),
+                nrm_type(std::normal_distribution<real_type>(0.0, 1.0)))
+    {
+        std::istringstream iss(internal_state);
+        iss >> this->seed_;
+        for(auto& rng : this->rngs_)
+        {
+            iss >> rng.value;
+        }
+        if(iss.fail())
+        {
+            throw_exception<std::runtime_error>("[error] mjolnir::"
+                "RandomNumberGenerator<OMP>: parse error in ", internal_state);
+        }
+    }
+    std::string internal_state() const
+    {
+        std::ostringstream oss;
+        oss << this->seed_ << ' ';
+        for(const auto& rng : this->rngs_)
+        {
+            oss << rng.value << ' ';
+        }
+        return oss.str();
+    }
+
     real_type uniform_real01()
     {
         auto& rng = this->rngs_.at(omp_get_thread_num()).value;
