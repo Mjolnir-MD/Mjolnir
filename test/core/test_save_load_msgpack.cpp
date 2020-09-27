@@ -50,31 +50,39 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_unlimited, realT, real_type
         saver.save(sys);
         saver.save(rng);
     }
-    const system_type loaded = load_system_from_msgpack<traits_type>("test_save_load_msgpack_unlimited_system.msg");
+
+    MsgPackLoader<traits_type> loader;
+    const rng_type loaded_rng = loader.load_rng("test_save_load_msgpack_unlimited_rng.msg");
+    const bool same_rng = (rng == loaded_rng);
+    BOOST_TEST(same_rng);
+
+    const system_type loaded_sys = load_system_from_msgpack<traits_type>("test_save_load_msgpack_unlimited_system.msg");
 
     // It should be bitwise-same.
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        BOOST_TEST(sys.mass(i)     == loaded.mass(i)    );
-        BOOST_TEST(sys.rmass(i)    == loaded.rmass(i)   );
+        BOOST_TEST(sys.mass(i)     == loaded_sys.mass(i)    );
+        BOOST_TEST(sys.rmass(i)    == loaded_sys.rmass(i)   );
 
-        BOOST_TEST(math::X(sys.position(i)) == math::X(loaded.position(i)));
-        BOOST_TEST(math::Y(sys.position(i)) == math::Y(loaded.position(i)));
-        BOOST_TEST(math::Z(sys.position(i)) == math::Z(loaded.position(i)));
+        BOOST_TEST(math::X(sys.position(i)) == math::X(loaded_sys.position(i)));
+        BOOST_TEST(math::Y(sys.position(i)) == math::Y(loaded_sys.position(i)));
+        BOOST_TEST(math::Z(sys.position(i)) == math::Z(loaded_sys.position(i)));
 
-        BOOST_TEST(math::X(sys.velocity(i)) == math::X(loaded.velocity(i)));
-        BOOST_TEST(math::Y(sys.velocity(i)) == math::Y(loaded.velocity(i)));
-        BOOST_TEST(math::Z(sys.velocity(i)) == math::Z(loaded.velocity(i)));
+        BOOST_TEST(math::X(sys.velocity(i)) == math::X(loaded_sys.velocity(i)));
+        BOOST_TEST(math::Y(sys.velocity(i)) == math::Y(loaded_sys.velocity(i)));
+        BOOST_TEST(math::Z(sys.velocity(i)) == math::Z(loaded_sys.velocity(i)));
 
-        BOOST_TEST(math::X(sys.force(i))    == math::X(loaded.force(i))   );
-        BOOST_TEST(math::Y(sys.force(i))    == math::Y(loaded.force(i))   );
-        BOOST_TEST(math::Z(sys.force(i))    == math::Z(loaded.force(i))   );
+        BOOST_TEST(math::X(sys.force(i))    == math::X(loaded_sys.force(i))   );
+        BOOST_TEST(math::Y(sys.force(i))    == math::Y(loaded_sys.force(i))   );
+        BOOST_TEST(math::Z(sys.force(i))    == math::Z(loaded_sys.force(i))   );
 
-        BOOST_TEST(sys.name(i)     == loaded.name(i)    );
-        BOOST_TEST(sys.group(i)    == loaded.group(i)   );
+        BOOST_TEST(sys.name(i)     == loaded_sys.name(i)    );
+        BOOST_TEST(sys.group(i)    == loaded_sys.group(i)   );
     }
-    BOOST_TEST(sys.attribute("pi") == loaded.attribute("pi"));
-    BOOST_TEST(sys.attribute("e")  == loaded.attribute("e") );
+    BOOST_TEST(sys.attribute("pi") == loaded_sys.attribute("pi"));
+    BOOST_TEST(sys.attribute("e")  == loaded_sys.attribute("e") );
+
+
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_periodic, realT, real_types)
@@ -116,38 +124,43 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_periodic, realT, real_types
         saver.save(rng);
     }
 
-    const system_type loaded = load_system_from_msgpack<traits_type>("test_save_load_msgpack_periodic_system.msg");
+    MsgPackLoader<traits_type> loader;
+    const rng_type loaded_rng = loader.load_rng("test_save_load_msgpack_periodic_rng.msg");
+    const bool same_rng = (rng == loaded_rng);
+    BOOST_TEST(same_rng);
+
+    const system_type loaded_sys = load_system_from_msgpack<traits_type>("test_save_load_msgpack_periodic_system.msg");
 
     // It should be bitwise-same.
 
-    BOOST_TEST(math::X(sys.boundary().lower_bound()) == math::X(loaded.boundary().lower_bound()));
-    BOOST_TEST(math::Y(sys.boundary().lower_bound()) == math::Y(loaded.boundary().lower_bound()));
-    BOOST_TEST(math::Z(sys.boundary().lower_bound()) == math::Z(loaded.boundary().lower_bound()));
+    BOOST_TEST(math::X(sys.boundary().lower_bound()) == math::X(loaded_sys.boundary().lower_bound()));
+    BOOST_TEST(math::Y(sys.boundary().lower_bound()) == math::Y(loaded_sys.boundary().lower_bound()));
+    BOOST_TEST(math::Z(sys.boundary().lower_bound()) == math::Z(loaded_sys.boundary().lower_bound()));
 
-    BOOST_TEST(math::X(sys.boundary().upper_bound()) == math::X(loaded.boundary().upper_bound()));
-    BOOST_TEST(math::Y(sys.boundary().upper_bound()) == math::Y(loaded.boundary().upper_bound()));
-    BOOST_TEST(math::Z(sys.boundary().upper_bound()) == math::Z(loaded.boundary().upper_bound()));
+    BOOST_TEST(math::X(sys.boundary().upper_bound()) == math::X(loaded_sys.boundary().upper_bound()));
+    BOOST_TEST(math::Y(sys.boundary().upper_bound()) == math::Y(loaded_sys.boundary().upper_bound()));
+    BOOST_TEST(math::Z(sys.boundary().upper_bound()) == math::Z(loaded_sys.boundary().upper_bound()));
 
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        BOOST_TEST(sys.mass(i)     == loaded.mass(i)    );
-        BOOST_TEST(sys.rmass(i)    == loaded.rmass(i)   );
+        BOOST_TEST(sys.mass(i)     == loaded_sys.mass(i)    );
+        BOOST_TEST(sys.rmass(i)    == loaded_sys.rmass(i)   );
 
-        BOOST_TEST(math::X(sys.position(i)) == math::X(loaded.position(i)));
-        BOOST_TEST(math::Y(sys.position(i)) == math::Y(loaded.position(i)));
-        BOOST_TEST(math::Z(sys.position(i)) == math::Z(loaded.position(i)));
+        BOOST_TEST(math::X(sys.position(i)) == math::X(loaded_sys.position(i)));
+        BOOST_TEST(math::Y(sys.position(i)) == math::Y(loaded_sys.position(i)));
+        BOOST_TEST(math::Z(sys.position(i)) == math::Z(loaded_sys.position(i)));
 
-        BOOST_TEST(math::X(sys.velocity(i)) == math::X(loaded.velocity(i)));
-        BOOST_TEST(math::Y(sys.velocity(i)) == math::Y(loaded.velocity(i)));
-        BOOST_TEST(math::Z(sys.velocity(i)) == math::Z(loaded.velocity(i)));
+        BOOST_TEST(math::X(sys.velocity(i)) == math::X(loaded_sys.velocity(i)));
+        BOOST_TEST(math::Y(sys.velocity(i)) == math::Y(loaded_sys.velocity(i)));
+        BOOST_TEST(math::Z(sys.velocity(i)) == math::Z(loaded_sys.velocity(i)));
 
-        BOOST_TEST(math::X(sys.force(i))    == math::X(loaded.force(i))   );
-        BOOST_TEST(math::Y(sys.force(i))    == math::Y(loaded.force(i))   );
-        BOOST_TEST(math::Z(sys.force(i))    == math::Z(loaded.force(i))   );
+        BOOST_TEST(math::X(sys.force(i))    == math::X(loaded_sys.force(i))   );
+        BOOST_TEST(math::Y(sys.force(i))    == math::Y(loaded_sys.force(i))   );
+        BOOST_TEST(math::Z(sys.force(i))    == math::Z(loaded_sys.force(i))   );
 
-        BOOST_TEST(sys.name(i)     == loaded.name(i)    );
-        BOOST_TEST(sys.group(i)    == loaded.group(i)   );
+        BOOST_TEST(sys.name(i)     == loaded_sys.name(i)    );
+        BOOST_TEST(sys.group(i)    == loaded_sys.group(i)   );
     }
-    BOOST_TEST(sys.attribute("pi") == loaded.attribute("pi"));
-    BOOST_TEST(sys.attribute("e")  == loaded.attribute("e") );
+    BOOST_TEST(sys.attribute("pi") == loaded_sys.attribute("pi"));
+    BOOST_TEST(sys.attribute("e")  == loaded_sys.attribute("e") );
 }

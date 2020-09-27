@@ -51,6 +51,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_unlimited, realT, real_type
         saver.save(sys);
         saver.save(rng);
     }
+
+    MsgPackLoader<traits_type> loader;
+    const auto loaded_rng = loader.load_rng("test_omp_save_load_msgpack_unlimited_rng.msg");
+    const bool same_rng = (rng == loaded_rng);
+    BOOST_TEST(same_rng);
+
+
     const system_type loaded = load_system_from_msgpack<traits_type>("test_omp_save_load_msgpack_unlimited_system.msg");
 
     // It should be bitwise-same.
@@ -116,6 +123,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_periodic, realT, real_types
         saver.save(sys);
         saver.save(rng);
     }
+
+    MsgPackLoader<traits_type> loader;
+    const auto loaded_rng = loader.load_rng("test_omp_save_load_msgpack_periodic_rng.msg");
+    const bool same_rng = (rng == loaded_rng);
+    BOOST_TEST(same_rng);
+
     const system_type loaded = load_system_from_msgpack<traits_type>("test_omp_save_load_msgpack_periodic_system.msg");
 
     // It should be bitwise-same.
