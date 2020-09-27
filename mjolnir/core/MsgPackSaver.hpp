@@ -67,7 +67,7 @@ class MsgPackSaver
         to_msgpack(rng.internal_state());
 
         const auto filename = prefix_ + suffix + std::string(".msg");
-        std::ofstream ofs(filename);
+        std::ofstream ofs(filename, std::ios::binary);
         if(!ofs.good())
         {
             throw std::runtime_error("file open error: " + filename);
@@ -151,7 +151,7 @@ class MsgPackSaver
         // overwrite .msg file by the current status
 
         const std::string filename = prefix_ + suffix + std::string(".msg");
-        std::ofstream ofs(filename);
+        std::ofstream ofs(filename, std::ios::binary);
         if(!ofs.good())
         {
             throw std::runtime_error("file open error: " + filename);
