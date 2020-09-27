@@ -15,22 +15,14 @@ RandomNumberGenerator<traitsT> read_rng(const toml::value& simulator)
     MJOLNIR_LOG_FUNCTION();
 
     std::uint32_t seed = 0;
-    if(simulator.as_table().count("integrator") != 0)
+    if(simulator.contains("integrator") && simulator.at("integrator").contains("seed"))
     {
-        const auto& integrator = toml::find(simulator, "integrator");
-        if(integrator.as_table().count("seed") != 0)
-        {
-            MJOLNIR_LOG_WARN("deprecated: put `seed` under [simulator] table.");
-            MJOLNIR_LOG_WARN("deprecated: ```toml");
-            MJOLNIR_LOG_WARN("deprecated: [simulator]");
-            MJOLNIR_LOG_WARN("deprecated: seed = 12345");
-            MJOLNIR_LOG_WARN("deprecated: ```");
-            seed = toml::find<std::uint32_t>(integrator, "seed");
-        }
-        else
-        {
-            seed = toml::find<std::uint32_t>(simulator, "seed");
-        }
+        MJOLNIR_LOG_WARN("deprecated: put `seed` under [simulator] table.");
+        MJOLNIR_LOG_WARN("deprecated: ```toml");
+        MJOLNIR_LOG_WARN("deprecated: [simulator]");
+        MJOLNIR_LOG_WARN("deprecated: seed = 12345");
+        MJOLNIR_LOG_WARN("deprecated: ```");
+        seed = toml::find<std::uint32_t>(simulator, "integrator", "seed");
     }
     else
     {
