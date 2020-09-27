@@ -97,6 +97,19 @@ class RandomNumberGenerator<OpenMPSimulatorTraits<realT, boundaryT>>
         return nrm(rng) * stddev + mean;
     }
 
+    bool operator==(const RandomNumberGenerator<traits_type>& other) const
+    {
+        return this->rngs_.size() == other.rngs_.size() && std::equal(
+                this->rngs_.begin(), this->rngs_.end(), other.rngs_.begin(),
+                [](const rng_type& lhs, const rng_type& rhs) noexcept {
+                    return lhs.value == rhs.value;
+                });
+    }
+    bool operator!=(const RandomNumberGenerator<traits_type>& other) const
+    {
+        return !(*this == other);
+    }
+
   private:
     std::uint32_t seed_;
 

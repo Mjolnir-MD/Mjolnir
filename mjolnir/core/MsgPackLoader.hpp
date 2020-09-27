@@ -35,13 +35,45 @@ class MsgPackLoader
     using coordinate_type = typename traits_type::coordinate_type;
     using boundary_type   = typename traits_type::boundary_type;
     using system_type     = System<traits_type>;
+    using rng_type        = RandomNumberGenerator<traits_type>;
 
   public:
 
     MsgPackLoader() {}
     ~MsgPackLoader() {}
 
-    system_type load_system(const std::string& filename)
+    rng_type load_rng(const std::string& filename) const
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        std::ifstream file(filename);
+        if(!file.good())
+        {
+            MJOLNIR_LOG_ERROR("file open error: ", filename);
+            throw_exception<std::runtime_error>("[error] mjolnir::MsgPackLoader:"
+                    "failed to load ", filename, " file");
+
+        }
+
+        // -------------------------------------------------------------------
+        // check the first type tag
+        {
+            constexpr std::uint8_t fixmap1_code = 0x81;
+            const auto tag = detail::read_bytes_as<std::uint8_t>(file);
+            if(tag != fixmap1_code)
+            {
+                MJOLNIR_LOG_ERROR("invalid format in rng .msg file.");
+                MJOLNIR_LOG_ERROR("the root object should be a map with 1 elems.");
+                throw_exception<std::runtime_error>("[error] mjolnir::MsgPackLoader:"
+                        "failed to load ", filename, " file");
+            }
+        }
+        this->check_msgpack_key(file, filename, "internal_state");
+        return rng_type(this->from_msgpack<std::string>(file, filename));
+    }
+
+    system_type load_system(const std::string& filename) const
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -238,7 +270,7 @@ class MsgPackLoader
   private:
 
     void load_boundary(std::ifstream& file, const std::string filename,
-                       UnlimitedBoundary<real_type, coordinate_type>&)
+                       UnlimitedBoundary<real_type, coordinate_type>&) const
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -255,7 +287,7 @@ class MsgPackLoader
         return ;
     }
     void load_boundary(std::ifstream& file, const std::string filename,
-                       CuboidalPeriodicBoundary<real_type, coordinate_type>& b)
+                       CuboidalPeriodicBoundary<real_type, coordinate_type>& b) const
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -314,7 +346,7 @@ class MsgPackLoader
     }
 
     void check_msgpack_key(std::ifstream& file, const std::string& filename,
-                           const std::string& expected)
+                           const std::string& expected) const
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         // It's called so many times, thus it does not make a log-scope.
@@ -335,7 +367,7 @@ class MsgPackLoader
 
     template<typename T>
     typename std::enable_if<std::is_same<T, std::string>::value, std::string>::type
-    from_msgpack(std::ifstream& file, const std::string& filename)
+    from_msgpack(std::ifstream& file, const std::string& filename) const
     {
         this->check_file_state(file, filename);
 
@@ -343,7 +375,6 @@ class MsgPackLoader
         constexpr std::uint8_t str16_code = 0xda;
         constexpr std::uint8_t str32_code = 0xdb;
 
-        std::string str;
         const auto tag = detail::read_bytes_as<std::uint8_t>(file);
         // fixstr code: 0b'101x'xxxx.
         // in the range [0b'1010'0000 = 0xa0, 0b'1011'1111 = 0xbf]
@@ -352,26 +383,30 @@ class MsgPackLoader
             // 0x101x'xxxx
             // 0x0001'1111
             const std::uint8_t len = (tag & 0x1f);
-            std::copy_n(std::istream_iterator<char>(file), len,
-                        std::back_inserter(str));
+            std::vector<char> buf(len, '\0');
+            file.read(buf.data(), len);
+            return std::string(buf.begin(), buf.end());
         }
         else if(tag == str8_code)
         {
             const auto len = detail::read_bytes_as<std::uint8_t>(file);;
-            std::copy_n(std::istream_iterator<char>(file), len,
-                        std::back_inserter(str));
+            std::vector<char> buf(len, '\0');
+            file.read(buf.data(), len);
+            return std::string(buf.begin(), buf.end());
         }
         else if(tag == str16_code)
         {
             const auto len = from_big_endian<std::uint16_t>(file, filename);
-            std::copy_n(std::istream_iterator<char>(file), len,
-                        std::back_inserter(str));
+            std::vector<char> buf(len, '\0');
+            file.read(buf.data(), len);
+            return std::string(buf.begin(), buf.end());
         }
         else if(tag == str32_code)
         {
             const auto len = from_big_endian<std::uint32_t>(file, filename);
-            std::copy_n(std::istream_iterator<char>(file), len,
-                        std::back_inserter(str));
+            std::vector<char> buf(len, '\0');
+            file.read(buf.data(), len);
+            return std::string(buf.begin(), buf.end());
         }
         else
         {
@@ -379,12 +414,11 @@ class MsgPackLoader
                     "expected string (0xa0-0xbf, 0xd9, 0xda, 0xdb), but got "
                     "different type-tag: ", std::hex, std::uint32_t(tag));
         }
-        return str;
     }
 
     template<typename T>
     typename std::enable_if<std::is_same<T, float>::value, float>::type
-    from_msgpack(std::ifstream& file, const std::string& filename)
+    from_msgpack(std::ifstream& file, const std::string& filename) const
     {
         this->check_file_state(file, filename);
 
@@ -399,7 +433,7 @@ class MsgPackLoader
     }
     template<typename T>
     typename std::enable_if<std::is_same<T, double>::value, double>::type
-    from_msgpack(std::ifstream& file, const std::string& filename)
+    from_msgpack(std::ifstream& file, const std::string& filename) const
     {
         this->check_file_state(file, filename);
 
@@ -414,7 +448,7 @@ class MsgPackLoader
     }
 
     template<typename T>
-    T from_big_endian(std::ifstream& file, const std::string& filename)
+    T from_big_endian(std::ifstream& file, const std::string& filename) const
     {
         this->check_file_state(file, filename);
 
@@ -434,7 +468,7 @@ class MsgPackLoader
         return val;
     }
 
-    void check_file_state(std::ifstream& file, const std::string& filename)
+    void check_file_state(std::ifstream& file, const std::string& filename) const
     {
         if(file.eof())
         {

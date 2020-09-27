@@ -28,7 +28,7 @@ class RandomNumberGenerator
         : nrm_(0.0, 1.0)
     {
         std::istringstream iss(internal_state);
-        iss >> seed_ >> rng_;
+        iss >> this->seed_ >> this->rng_;
         if(iss.fail())
         {
             throw_exception<std::runtime_error>("[error] mjolnir::"
@@ -38,7 +38,7 @@ class RandomNumberGenerator
     std::string internal_state() const
     {
         std::ostringstream oss;
-        oss << seed_ << ' ' << rng_;
+        oss << this->seed_ << ' ' << this->rng_;
         return oss.str();
     }
 
@@ -63,6 +63,16 @@ class RandomNumberGenerator
     }
 
     std::uint32_t seed() const noexcept {return seed_;}
+
+    bool operator==(const RandomNumberGenerator<traits_type>& other) const
+    {
+        return this->rng_ == other.rng_;
+    }
+    bool operator!=(const RandomNumberGenerator<traits_type>& other) const
+    {
+        return !(*this == other);
+    }
+
 
   private:
     std::uint32_t seed_;

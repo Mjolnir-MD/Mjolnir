@@ -3,6 +3,7 @@
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
+#include <mjolnir/core/MsgPackLoader.hpp>
 
 namespace mjolnir
 {
@@ -33,7 +34,17 @@ RandomNumberGenerator<traitsT> read_rng(const toml::value& simulator)
     }
     else
     {
-        seed = toml::find<std::uint32_t>(simulator, "seed");
+        if(simulator.at("seed").is_integer())
+        {
+            seed = toml::find<std::uint32_t>(simulator, "seed");
+        }
+        else // load from saved checkpoint file
+        {
+            const std::string fname = toml::find<std::string>(simulator, "seed");
+            MsgPackLoader<traitsT> loader;
+            MJOLNIR_LOG_NOTICE("RNG is loaded from ", fname);
+            return loader.load_rng(fname);
+        }
     }
     MJOLNIR_LOG_NOTICE("seed is ", seed);
     return RandomNumberGenerator<traitsT>(seed);
