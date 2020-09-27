@@ -25,10 +25,9 @@ class RandomNumberGenerator
     ~RandomNumberGenerator() = default;
 
     explicit RandomNumberGenerator(const std::string& internal_state)
-        : nrm_(0.0, 1.0)
     {
         std::istringstream iss(internal_state);
-        iss >> this->seed_ >> this->rng_;
+        iss >> this->seed_ >> this->rng_ >> this->nrm_;
         if(iss.fail())
         {
             throw_exception<std::runtime_error>("[error] mjolnir::"
@@ -38,7 +37,7 @@ class RandomNumberGenerator
     std::string internal_state() const
     {
         std::ostringstream oss;
-        oss << this->seed_ << ' ' << this->rng_;
+        oss << this->seed_ << ' ' << this->rng_ << ' ' << this->nrm_;
         return oss.str();
     }
 
@@ -66,13 +65,12 @@ class RandomNumberGenerator
 
     bool operator==(const RandomNumberGenerator<traits_type>& other) const
     {
-        return this->rng_ == other.rng_;
+        return this->rng_ == other.rng_ && this->nrm_ == other.nrm_;
     }
     bool operator!=(const RandomNumberGenerator<traits_type>& other) const
     {
         return !(*this == other);
     }
-
 
   private:
     std::uint32_t seed_;

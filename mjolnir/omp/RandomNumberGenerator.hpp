@@ -44,15 +44,17 @@ class RandomNumberGenerator<OpenMPSimulatorTraits<realT, boundaryT>>
     ~RandomNumberGenerator() = default;
 
     explicit RandomNumberGenerator(const std::string& internal_state)
-        : rngs_(omp_get_max_threads()),
-          nrms_(omp_get_max_threads(),
-                nrm_type(std::normal_distribution<real_type>(0.0, 1.0)))
+        : rngs_(omp_get_max_threads()), nrms_(omp_get_max_threads())
     {
         std::istringstream iss(internal_state);
         iss >> this->seed_;
         for(auto& rng : this->rngs_)
         {
             iss >> rng.value;
+        }
+        for(auto& nrm : this->nrms_)
+        {
+            iss >> nrm.value;
         }
         if(iss.fail())
         {
@@ -67,6 +69,10 @@ class RandomNumberGenerator<OpenMPSimulatorTraits<realT, boundaryT>>
         for(const auto& rng : this->rngs_)
         {
             oss << rng.value << ' ';
+        }
+        for(const auto& nrm : this->nrms_)
+        {
+            oss << nrm.value << ' ';
         }
         return oss.str();
     }
@@ -102,6 +108,10 @@ class RandomNumberGenerator<OpenMPSimulatorTraits<realT, boundaryT>>
         return this->rngs_.size() == other.rngs_.size() && std::equal(
                 this->rngs_.begin(), this->rngs_.end(), other.rngs_.begin(),
                 [](const rng_type& lhs, const rng_type& rhs) noexcept {
+                    return lhs.value == rhs.value;
+                }) && this->nrms_.size() == other.nrms_.size() && std::equal(
+                this->nrms_.begin(), this->nrms_.end(), other.nrms_.begin(),
+                [](const nrm_type& lhs, const nrm_type& rhs) noexcept {
                     return lhs.value == rhs.value;
                 });
     }
