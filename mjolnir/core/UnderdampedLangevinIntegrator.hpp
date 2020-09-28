@@ -107,7 +107,7 @@ void UnderdampedLangevinIntegrator<traitsT>::initialize(
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
-    if(!ff->constraint().empty())
+    if( ! ff->constraint().empty())
     {
         MJOLNIR_LOG_WARN("Underdamped langevin integrator does not support "
             "constraint forcefield. [[forcefields.constraint]] will be ignored.");
@@ -115,22 +115,27 @@ void UnderdampedLangevinIntegrator<traitsT>::initialize(
 
     // initialize temperature and noise intensity
     this->update(system);
-    for(std::size_t i=0; i<system.size(); ++i)
+
+    // if loaded from MsgPack, we can skip it.
+    if( ! system.force_initialized())
     {
-        system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
-    }
+        for(std::size_t i=0; i<system.size(); ++i)
+        {
+            system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
+        }
 
-    // calculate force
-    ff->calc_force(system);
+        // calculate force
+        ff->calc_force(system);
 
-    for(std::size_t i=0; i<system.size(); ++i)
-    {
-        const auto  rmass = system.rmass(i);
-        const auto& force = system.force(i);
+        for(std::size_t i=0; i<system.size(); ++i)
+        {
+            const auto  rmass = system.rmass(i);
+            const auto& force = system.force(i);
 
-        sqrt_gamma_over_mass_[i] = std::sqrt(gammas_[i] * rmass);
-        acceleration_[i] = force * rmass +
-            this->gen_gaussian_vec(rng, this->noise_coef_ * sqrt_gamma_over_mass_[i]);
+            sqrt_gamma_over_mass_[i] = std::sqrt(gammas_[i] * rmass);
+            acceleration_[i] = force * rmass +
+                this->gen_gaussian_vec(rng, this->noise_coef_ * sqrt_gamma_over_mass_[i]);
+        }
     }
     return;
 }
