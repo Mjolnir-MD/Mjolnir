@@ -220,6 +220,7 @@ class MsgPackLoader
         // since velocity values are loaded from .msg file, we don't need to
         // re-initialize system.velocity by random numbers.
         sys.velocity_initialized() = true;
+        sys.force_initialized() = true;
 
         // -----------------------------------------------------------------------
         // load attributes
