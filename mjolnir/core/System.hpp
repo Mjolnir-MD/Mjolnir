@@ -38,7 +38,8 @@ class System
   public:
 
     System(const std::size_t num_particles, const boundary_type& bound)
-        : velocity_initialized_(false), boundary_(bound), attributes_(),
+        : velocity_initialized_(false), force_initialized_(false),
+          boundary_(bound), attributes_(),
           num_particles_(num_particles), masses_   (num_particles),
           rmasses_      (num_particles), positions_(num_particles),
           velocities_   (num_particles), forces_   (num_particles),
@@ -175,13 +176,15 @@ class System
 
     bool  velocity_initialized() const noexcept {return velocity_initialized_;}
     bool& velocity_initialized()       noexcept {return velocity_initialized_;}
+    bool  force_initialized()    const noexcept {return force_initialized_;}
+    bool& force_initialized()          noexcept {return force_initialized_;}
 
     coordinate_container_type const& forces() const noexcept {return forces_;}
     coordinate_container_type&       forces()       noexcept {return forces_;}
 
   private:
 
-    bool           velocity_initialized_;
+    bool           velocity_initialized_, force_initialized_;
     boundary_type  boundary_;
     attribute_type attributes_;
 

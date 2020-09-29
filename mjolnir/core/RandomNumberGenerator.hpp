@@ -1,8 +1,10 @@
 #ifndef MJOLNIR_CORE_RANDOM_NUMBER_GENERATOR_HPP
 #define MJOLNIR_CORE_RANDOM_NUMBER_GENERATOR_HPP
+#include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <random>
+#include <sstream>
 #include <cstdint>
 
 namespace mjolnir
@@ -21,6 +23,23 @@ class RandomNumberGenerator
         : seed_(seed), rng_(seed), nrm_(0.0, 1.0)
     {}
     ~RandomNumberGenerator() = default;
+
+    explicit RandomNumberGenerator(const std::string& internal_state)
+    {
+        std::istringstream iss(internal_state);
+        iss >> this->seed_ >> this->rng_ >> this->nrm_;
+        if(iss.fail())
+        {
+            throw_exception<std::runtime_error>("[error] mjolnir::"
+                "RandomNumberGenerator: parse error in mt19937 ", internal_state);
+        }
+    }
+    std::string internal_state() const
+    {
+        std::ostringstream oss;
+        oss << this->seed_ << ' ' << this->rng_ << ' ' << this->nrm_;
+        return oss.str();
+    }
 
     real_type uniform_real01()
     {
@@ -43,6 +62,15 @@ class RandomNumberGenerator
     }
 
     std::uint32_t seed() const noexcept {return seed_;}
+
+    bool operator==(const RandomNumberGenerator<traits_type>& other) const
+    {
+        return this->rng_ == other.rng_ && this->nrm_ == other.nrm_;
+    }
+    bool operator!=(const RandomNumberGenerator<traits_type>& other) const
+    {
+        return !(*this == other);
+    }
 
   private:
     std::uint32_t seed_;

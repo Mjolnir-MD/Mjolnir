@@ -43,6 +43,40 @@ class RandomNumberGenerator<OpenMPSimulatorTraits<realT, boundaryT>>
     }
     ~RandomNumberGenerator() = default;
 
+    explicit RandomNumberGenerator(const std::string& internal_state)
+        : rngs_(omp_get_max_threads()), nrms_(omp_get_max_threads())
+    {
+        std::istringstream iss(internal_state);
+        iss >> this->seed_;
+        for(auto& rng : this->rngs_)
+        {
+            iss >> rng.value;
+        }
+        for(auto& nrm : this->nrms_)
+        {
+            iss >> nrm.value;
+        }
+        if(iss.fail())
+        {
+            throw_exception<std::runtime_error>("[error] mjolnir::"
+                "RandomNumberGenerator<OMP>: parse error in ", internal_state);
+        }
+    }
+    std::string internal_state() const
+    {
+        std::ostringstream oss;
+        oss << this->seed_ << ' ';
+        for(const auto& rng : this->rngs_)
+        {
+            oss << rng.value << ' ';
+        }
+        for(const auto& nrm : this->nrms_)
+        {
+            oss << nrm.value << ' ';
+        }
+        return oss.str();
+    }
+
     real_type uniform_real01()
     {
         auto& rng = this->rngs_.at(omp_get_thread_num()).value;
@@ -67,6 +101,23 @@ class RandomNumberGenerator<OpenMPSimulatorTraits<realT, boundaryT>>
         auto& rng = this->rngs_.at(thread_id).value;
         auto& nrm = this->nrms_.at(thread_id).value;
         return nrm(rng) * stddev + mean;
+    }
+
+    bool operator==(const RandomNumberGenerator<traits_type>& other) const
+    {
+        return this->rngs_.size() == other.rngs_.size() && std::equal(
+                this->rngs_.begin(), this->rngs_.end(), other.rngs_.begin(),
+                [](const rng_type& lhs, const rng_type& rhs) noexcept {
+                    return lhs.value == rhs.value;
+                }) && this->nrms_.size() == other.nrms_.size() && std::equal(
+                this->nrms_.begin(), this->nrms_.end(), other.nrms_.begin(),
+                [](const nrm_type& lhs, const nrm_type& rhs) noexcept {
+                    return lhs.value == rhs.value;
+                });
+    }
+    bool operator!=(const RandomNumberGenerator<traits_type>& other) const
+    {
+        return !(*this == other);
     }
 
   private:

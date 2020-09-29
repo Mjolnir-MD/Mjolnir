@@ -83,13 +83,8 @@ read_boundary(const toml::value& system)
 template<typename traitsT>
 System<traitsT> load_system_from_msgpack(const std::string& msg_file)
 {
-    using boundary_type   = typename traitsT::boundary_type;
-    MsgPackLoader<traitsT> loader(msg_file);
-    loader.initialize(); // read number of particles
-
-    System<traitsT> sys(loader.num_particles(), boundary_type());
-    loader.load_next(sys);
-    return sys;
+    MsgPackLoader<traitsT> loader;
+    return loader.load_system(msg_file);
 }
 
 // It reads particles and other system-specific attributes (e.g. temperature)

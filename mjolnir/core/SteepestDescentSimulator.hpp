@@ -4,6 +4,7 @@
 #include <mjolnir/core/ObserverContainer.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceFieldBase.hpp>
+#include <mjolnir/core/MsgPackSaver.hpp>
 #include <mjolnir/math/math.hpp>
 #include <limits>
 
@@ -20,13 +21,16 @@ class SteepestDescentSimulator final : public SimulatorBase
     using system_type        = System<traits_type>;
     using forcefield_type    = std::unique_ptr<ForceFieldBase<traits_type>>;
     using observer_type      = ObserverContainer<traits_type>;
+    using saver_type      = MsgPackSaver<traits_type>;
 
     SteepestDescentSimulator(const real_type h, const real_type threshold,
-            const std::size_t step_limit, const std::size_t save_step,
-            system_type&& sys, forcefield_type&& ff, observer_type&& obs)
-    : h_(h), threshold_(threshold),
-      step_limit_(step_limit), step_count_(0), save_step_(save_step),
-      system_(std::move(sys)), ff_(std::move(ff)), observers_(std::move(obs))
+        const std::size_t step_limit, const std::size_t save_step,
+        const std::size_t checkpoint_step,
+        system_type&& sys, forcefield_type&& ff, observer_type&& obs)
+    : h_(h), threshold_(threshold), step_limit_(step_limit), step_count_(0),
+      save_step_(save_step), checkpoint_(checkpoint_step),
+      system_(std::move(sys)), ff_(std::move(ff)), observers_(std::move(obs)),
+      saver_(observers_.prefix())
     {}
     ~SteepestDescentSimulator() override {}
 
@@ -47,9 +51,11 @@ class SteepestDescentSimulator final : public SimulatorBase
     std::size_t     step_limit_;
     std::size_t     step_count_;
     std::size_t     save_step_;
+    std::size_t     checkpoint_;
     system_type     system_;
     forcefield_type ff_;
     observer_type   observers_;
+    saver_type      saver_;
 };
 
 template<typename traitsT>
@@ -74,6 +80,10 @@ inline bool SteepestDescentSimulator<traitsT>::step()
     {
         this->observers_.output(this->step_count_, /* dt */ real_type(0.0),
                                 this->system_, this->ff_);
+    }
+    if(step_count_ % checkpoint_ == 0)
+    {
+        saver_.save(this->system_);
     }
 
     // calculate negative derivatives (-dV/dr)
@@ -120,6 +130,7 @@ inline void SteepestDescentSimulator<traitsT>::finalize()
                               this->system_, this->ff_);
     this->observers_.finalize(this->step_limit_, /* dt */ real_type(0.0),
                               this->system_, this->ff_);
+    this->saver_.save(this->system_);
     return;
 }
 

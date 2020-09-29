@@ -5,6 +5,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceFieldBase.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
+#include <mjolnir/core/MsgPackSaver.hpp>
 
 namespace mjolnir
 {
@@ -50,18 +51,20 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
     using observer_type   = ObserverContainer<traits_type>;
     using scheduler_type  = scheduleT<real_type> ;
     using rng_type        = RandomNumberGenerator<traits_type>;
+    using saver_type      = MsgPackSaver<traits_type>;
 
-    SimulatedAnnealingSimulator(
-        const std::size_t tstep,     const std::size_t sstep,
+    SimulatedAnnealingSimulator(const std::size_t total_step,
+        const std::size_t sstep,     const std::size_t cstep,
         const std::size_t each_step, scheduler_type&&  scheduler,
         system_type&&     sys,       forcefield_type&& ff,
         integrator_type&& integr,    observer_type&&   obs,
         rng_type&& rng)
-    : total_step_(tstep), step_count_(0), save_step_(sstep), each_step_(each_step),
-      time_(0.0), r_total_step_(1.0 / tstep), scheduler_(scheduler),
+    : total_step_(total_step), step_count_(0), save_step_(sstep),
+      checkpoint_(cstep), each_step_(each_step),
+      time_(0.0), r_total_step_(1.0 / total_step), scheduler_(scheduler),
       system_(std::move(sys)), ff_(std::move(ff)),
       integrator_(std::move(integr)), observers_(std::move(obs)),
-      rng_(std::move(rng))
+      saver_(observers_.prefix()), rng_(std::move(rng))
     {}
     ~SimulatedAnnealingSimulator() override {}
 
@@ -86,6 +89,7 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
     std::size_t     total_step_;
     std::size_t     step_count_;
     std::size_t     save_step_;
+    std::size_t     checkpoint_;
     std::size_t     each_step_;
     real_type       time_;
     real_type       r_total_step_;
@@ -94,6 +98,7 @@ class SimulatedAnnealingSimulator final : public SimulatorBase
     forcefield_type ff_;
     integrator_type integrator_;
     observer_type   observers_;
+    saver_type      saver_;
     rng_type        rng_;
 };
 
@@ -124,6 +129,11 @@ inline bool SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::step()
     {
         observers_.output(this->step_count_, this->integrator_.delta_t(),
                           this->system_, this->ff_);
+    }
+    if(step_count_ % checkpoint_ == 0)
+    {
+        saver_.save(this->system_);
+        saver_.save(this->rng_);
     }
 
     integrator_.step(this->time_, system_, ff_, this->rng_);
@@ -168,6 +178,8 @@ SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::finalize()
                         this->system_, this->ff_);
     observers_.finalize(this->step_count_, this->integrator_.delta_t(),
                         this->system_, this->ff_);
+    saver_.save(this->system_);
+    saver_.save(this->rng_);
     return;
 }
 

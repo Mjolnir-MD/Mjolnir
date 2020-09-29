@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "test_save_load_msgpack"
+#define BOOST_TEST_MODULE "test_omp_save_load_msgpack"
 
 #ifdef BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -11,7 +11,7 @@
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceField.hpp>
-#include <mjolnir/core/MsgPackObserver.hpp>
+#include <mjolnir/core/MsgPackSaver.hpp>
 #include <mjolnir/input/read_system.hpp>
 
 using real_types = std::tuple<double, float>;
@@ -24,11 +24,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_unlimited, realT, real_type
     using coordinate_type = typename traits_type::coordinate_type;
     using system_type     = System<traits_type>;
     using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
-    using msgpackobs_type = MsgPackObserver<traits_type>;
+    using msgsaver_type   = MsgPackSaver<traits_type>;
     using boundary_type   = typename system_type::boundary_type;
+    using rng_type = RandomNumberGenerator<traits_type>;
 
-    std::mt19937 mt(123456789);
-    std::uniform_real_distribution<realT> uni(-10.0, 10.0);
+    rng_type rng(123456789);
     system_type sys(100, boundary_type());
     forcefield_type ff;
 
@@ -37,21 +37,28 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_unlimited, realT, real_type
 
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        sys.mass(i)     = uni(mt);
+        sys.mass(i)     = rng.uniform_real01();
         sys.rmass(i)    = realT(1.0) / sys.mass(i);
-        sys.position(i) = math::make_coordinate<coordinate_type>(uni(mt), uni(mt), uni(mt));
-        sys.velocity(i) = math::make_coordinate<coordinate_type>(uni(mt), uni(mt), uni(mt));
-        sys.force(i)    = math::make_coordinate<coordinate_type>(uni(mt), uni(mt), uni(mt));
+        sys.position(i) = math::make_coordinate<coordinate_type>(rng.uniform_real01(), rng.uniform_real01(), rng.uniform_real01());
+        sys.velocity(i) = math::make_coordinate<coordinate_type>(rng.uniform_real01(), rng.uniform_real01(), rng.uniform_real01());
+        sys.force(i)    = math::make_coordinate<coordinate_type>(rng.uniform_real01(), rng.uniform_real01(), rng.uniform_real01());
         sys.name(i)     = std::string("particle") + std::to_string(i);
         sys.group(i)    = std::string("group")    + std::to_string(i);
     }
 
     {
-        msgpackobs_type obs("test_omp_save_load_msgpack_unlimited");
-        obs.initialize(0, 0.1, sys, ff);
-        obs.output(0, 0.1, sys, ff);
+        msgsaver_type saver("test_omp_save_load_msgpack_unlimited");
+        saver.save(sys);
+        saver.save(rng);
     }
-    const system_type loaded = load_system_from_msgpack<traits_type>("test_omp_save_load_msgpack_unlimited.msg");
+
+    MsgPackLoader<traits_type> loader;
+    const auto loaded_rng = loader.load_rng("test_omp_save_load_msgpack_unlimited_rng.msg");
+    const bool same_rng = (rng == loaded_rng);
+    BOOST_TEST(same_rng);
+
+
+    const system_type loaded = load_system_from_msgpack<traits_type>("test_omp_save_load_msgpack_unlimited_system.msg");
 
     // It should be bitwise-same.
     for(std::size_t i=0; i<sys.size(); ++i)
@@ -86,11 +93,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_periodic, realT, real_types
     using coordinate_type = typename traits_type::coordinate_type;
     using system_type     = System<traits_type>;
     using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
-    using msgpackobs_type = MsgPackObserver<traits_type>;
+    using msgsaver_type   = MsgPackSaver<traits_type>;
     using boundary_type   = typename system_type::boundary_type;
+    using rng_type = RandomNumberGenerator<traits_type>;
 
-    std::mt19937 mt(123456789);
-    std::uniform_real_distribution<realT> uni(-10.0, 10.0);
+    rng_type rng(123456789);
     system_type sys(100, boundary_type(
         math::make_coordinate<coordinate_type>(-1.0, -2.0, -3.0),
         math::make_coordinate<coordinate_type>( 1.0,  2.0,  3.0)));
@@ -102,21 +109,27 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_periodic, realT, real_types
 
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        sys.mass(i)     = uni(mt);
+        sys.mass(i)     = rng.uniform_real01();
         sys.rmass(i)    = realT(1.0) / sys.mass(i);
-        sys.position(i) = math::make_coordinate<coordinate_type>(uni(mt), uni(mt), uni(mt));
-        sys.velocity(i) = math::make_coordinate<coordinate_type>(uni(mt), uni(mt), uni(mt));
-        sys.force(i)    = math::make_coordinate<coordinate_type>(uni(mt), uni(mt), uni(mt));
+        sys.position(i) = math::make_coordinate<coordinate_type>(rng.uniform_real01(), rng.uniform_real01(), rng.uniform_real01());
+        sys.velocity(i) = math::make_coordinate<coordinate_type>(rng.uniform_real01(), rng.uniform_real01(), rng.uniform_real01());
+        sys.force(i)    = math::make_coordinate<coordinate_type>(rng.uniform_real01(), rng.uniform_real01(), rng.uniform_real01());
         sys.name(i)     = std::string("particle") + std::to_string(i);
         sys.group(i)    = std::string("group")    + std::to_string(i);
     }
 
     {
-        msgpackobs_type obs("test_omp_save_load_msgpack_periodic");
-        obs.initialize(0, 0.1, sys, ff);
-        obs.output(0, 0.1, sys, ff);
+        msgsaver_type saver("test_omp_save_load_msgpack_periodic");
+        saver.save(sys);
+        saver.save(rng);
     }
-    const system_type loaded = load_system_from_msgpack<traits_type>("test_omp_save_load_msgpack_periodic.msg");
+
+    MsgPackLoader<traits_type> loader;
+    const auto loaded_rng = loader.load_rng("test_omp_save_load_msgpack_periodic_rng.msg");
+    const bool same_rng = (rng == loaded_rng);
+    BOOST_TEST(same_rng);
+
+    const system_type loaded = load_system_from_msgpack<traits_type>("test_omp_save_load_msgpack_periodic_system.msg");
 
     // It should be bitwise-same.
 
