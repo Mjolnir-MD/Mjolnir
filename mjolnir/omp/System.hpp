@@ -37,8 +37,8 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
   public:
 
     System(const std::size_t num_particles, const boundary_type& bound)
-        : velocity_initialized_(false), boundary_(bound),
-          attributes_(), num_particles_(num_particles),
+        : velocity_initialized_(false), force_initialized_(false),
+          boundary_(bound), attributes_(), num_particles_(num_particles),
           masses_   (num_particles), rmasses_   (num_particles),
           positions_(num_particles), velocities_(num_particles),
           forces_main_(num_particles),
@@ -85,7 +85,6 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
         MJOLNIR_LOG_NOTICE("done.");
         return;
     }
-
 
     coordinate_type adjust_direction(coordinate_type dr) const noexcept
     {return boundary_.adjust_direction(dr);}
@@ -193,12 +192,16 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     bool  velocity_initialized() const noexcept {return velocity_initialized_;}
     bool& velocity_initialized()       noexcept {return velocity_initialized_;}
 
+    // force_main is initialized or not. force_thread does not matter.
+    bool  force_initialized() const noexcept {return force_initialized_;}
+    bool& force_initialized()       noexcept {return force_initialized_;}
+
     coordinate_container_type const& forces() const noexcept {return forces_main_;}
     coordinate_container_type&       forces()       noexcept {return forces_main_;}
 
   private:
 
-    bool           velocity_initialized_;
+    bool           velocity_initialized_, force_initialized_;
     boundary_type  boundary_;
     attribute_type attributes_;
 

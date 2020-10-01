@@ -7,7 +7,6 @@
 #include <mjolnir/core/XYZObserver.hpp>
 #include <mjolnir/core/DCDObserver.hpp>
 #include <mjolnir/core/TRRObserver.hpp>
-#include <mjolnir/core/MsgPackObserver.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
@@ -95,8 +94,6 @@ read_observer(const toml::value& root)
             add_observer(observers, fmt, file_prefix);
         }
     }
-
-    observers.push_back(make_unique<MsgPackObserver<traitsT>>(file_prefix));
 
     // Energy is always written to "prefix.ene".
     observers.push_back(make_unique<EnergyObserver<traitsT>>(file_prefix));

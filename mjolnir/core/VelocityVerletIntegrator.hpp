@@ -66,11 +66,15 @@ void VelocityVerletIntegrator<traitsT>::initialize(
 
     this->update(system);
 
-    for(std::size_t i=0; i<system.size(); ++i)
+    // if loaded from MsgPack, we can skip it.
+    if( ! system.force_initialized())
     {
-        system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
+        for(std::size_t i=0; i<system.size(); ++i)
+        {
+            system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
+        }
+        ff->calc_force(system);
     }
-    ff->calc_force(system);
     return;
 }
 

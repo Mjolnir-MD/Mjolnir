@@ -45,16 +45,19 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
                 "constraint forcefield. [[forcefields.constraint]] will be ignored.");
         }
 
-
         // calculate parameters for each particles
         this->update(sys);
 
-#pragma omp parallel for
-        for(std::size_t i=0; i<sys.size(); ++i)
+        // if loaded from MsgPack, we can skip it.
+        if( ! sys.force_initialized())
         {
-            sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
+#pragma omp parallel for
+            for(std::size_t i=0; i<sys.size(); ++i)
+            {
+                sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
+            }
+            ff->calc_force(sys);
         }
-        ff->calc_force(sys);
         return;
     }
 

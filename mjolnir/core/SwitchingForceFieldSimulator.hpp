@@ -5,6 +5,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceFieldBase.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
+#include <mjolnir/core/MsgPackSaver.hpp>
 
 namespace mjolnir
 {
@@ -40,12 +41,14 @@ class SwitchingForceFieldSimulator final : public SimulatorBase
     using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using observer_type   = ObserverContainer<traits_type>;
     using rng_type        = RandomNumberGenerator<traits_type>;
+    using saver_type      = MsgPackSaver<traits_type>;
 
   public:
 
     SwitchingForceFieldSimulator(
         const std::size_t                                  tstep,
         const std::size_t                                  save_step,
+        const std::size_t                                  checkpoint_step,
         system_type&&                                      sys,
         std::vector<forcefield_type>&&                     ff,
         integrator_type&&                                  integr,
@@ -59,10 +62,12 @@ class SwitchingForceFieldSimulator final : public SimulatorBase
           total_step_(tstep),
           step_count_(0),
           save_step_(save_step),
+          checkpoint_(checkpoint_step),
           time_(0.),
           system_(std::move(sys)),
           integrator_(std::move(integr)),
           observers_(std::move(obs)),
+          saver_(observers_.prefix()),
           rng_(std::move(rng)),
           forcefields_(std::move(ff)),
           forcefield_index_(std::move(forcefield_index)),
@@ -104,10 +109,12 @@ class SwitchingForceFieldSimulator final : public SimulatorBase
     std::size_t     total_step_;
     std::size_t     step_count_;
     std::size_t     save_step_;
+    std::size_t     checkpoint_;
     real_type       time_;
     system_type     system_;
     integrator_type integrator_;
     observer_type   observers_;
+    saver_type      saver_;
     rng_type        rng_;
     std::vector<forcefield_type>                  forcefields_;
     std::map<std::string, std::size_t>       forcefield_index_;
@@ -143,6 +150,11 @@ inline bool SwitchingForceFieldSimulator<traitsT, integratorT>::step()
     {
         observers_.output(this->step_count_, this->integrator_.delta_t(),
                           this->system_, forcefields_[current_forcefield_]);
+    }
+    if(step_count_ % checkpoint_ == 0)
+    {
+        saver_.save(this->system_);
+        saver_.save(this->rng_);
     }
 
     integrator_.step(this->time_, system_, forcefields_[current_forcefield_],
@@ -194,6 +206,8 @@ inline void SwitchingForceFieldSimulator<traitsT, integratorT>::finalize()
                       this->system_, forcefields_[current_forcefield_]);
     observers_.finalize(this->total_step_, this->integrator_.delta_t(),
                         this->system_, forcefields_[current_forcefield_]);
+    saver_.save(this->system_);
+    saver_.save(this->rng_);
     return;
 }
 
