@@ -15,8 +15,7 @@ Flexible, well-organized, and modern molecular dynamics simulation code.
 
 Mainly focused on Coarse-Grained MD simulation.
 
-The detailed information can be found at https://mjolnir-md.github.io/Mjolnir/
-(currently, English version is under construction).
+The detailed information can be found at https://mjolnir-md.github.io/Mjolnir/ .
 
 ### Goals
 

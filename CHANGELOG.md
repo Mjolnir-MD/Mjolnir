@@ -1,5 +1,21 @@
 # Change Log
 
+## 1.18.0
+
+## Added
+
+- allow list of indices in offset (@yutakasi634 )
+- enable to load random number generator state from checkpoint file
+
+## Changed
+
+- update toml11 to v3.6.0
+
+## Fixed
+
+- avoid error in an edge case in PeriodicCellList
+- stabilize FLP angle potential calculation in an edge case
+
 ## 1.17.0
 
 ### Changed
