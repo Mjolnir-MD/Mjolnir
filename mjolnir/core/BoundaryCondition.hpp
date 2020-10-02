@@ -17,8 +17,15 @@ struct UnlimitedBoundary
     UnlimitedBoundary() = default;
     ~UnlimitedBoundary() = default;
 
-    coordinate_type adjust_direction(coordinate_type dr) const noexcept {return dr;}
-    coordinate_type adjust_position (coordinate_type r ) const noexcept {return r;}
+    // r1 -> r2
+    coordinate_type adjust_direction(coordinate_type from, coordinate_type to) const noexcept
+    {
+        return to - from;
+    }
+    coordinate_type adjust_position(coordinate_type r) const noexcept
+    {
+        return r;
+    }
 };
 
 template<typename realT, typename coordT>
@@ -41,8 +48,9 @@ struct CuboidalPeriodicBoundary
     {}
     ~CuboidalPeriodicBoundary() = default;
 
-    coordinate_type adjust_direction(coordinate_type dr) const noexcept
+    coordinate_type adjust_direction(coordinate_type from, coordinate_type to) const noexcept
     {
+        coordinate_type dr = to - from;
         if     (math::X(dr) < -math::X(halfw_)) {math::X(dr) += math::X(width_);}
         else if(math::X(dr) >= math::X(halfw_)) {math::X(dr) -= math::X(width_);}
         if     (math::Y(dr) < -math::Y(halfw_)) {math::Y(dr) += math::Y(width_);}

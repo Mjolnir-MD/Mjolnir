@@ -89,7 +89,7 @@ class GlobalPairInteraction<
                 const auto& param = ptnr.parameter(); // sum of radius
 
                 const coordinate_type rij =
-                    sys.adjust_direction(sys.position(j) - sys.position(i));
+                    sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type l_sq = math::length_sq(rij);
 
                 const real_type sigma_sq = param * param;
@@ -135,7 +135,7 @@ class GlobalPairInteraction<
                 const auto& param = ptnr.parameter();
 
                 const coordinate_type rij =
-                    sys.adjust_direction(sys.position(j) - sys.position(i));
+                    sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type l_sq = math::length_sq(rij);
 
                 const real_type sigma_sq = param * param;
@@ -175,7 +175,7 @@ class GlobalPairInteraction<
                 const auto& param = ptnr.parameter(); // sum of radius
 
                 const coordinate_type rij =
-                    sys.adjust_direction(sys.position(j) - sys.position(i));
+                    sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type l_sq = math::length_sq(rij);
 
                 const real_type sigma_sq = param * param;

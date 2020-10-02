@@ -150,7 +150,7 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
             const auto& pot  = this->potentials_[i];
             const auto& pos0 = sys.position(std::get<0>(pot)[1]);
             const auto& pos1 = sys.position(std::get<0>(pot)[2]);
-            const auto  dpos = sys.adjust_direction(pos1 - pos0);
+            const auto  dpos = sys.adjust_direction(pos0, pos1);
             const auto  len2 = math::length_sq(dpos);
 
             const real_type rc = std::get<3>(pot).cutoff() + abs_margin;
@@ -225,7 +225,7 @@ void DirectionalContactInteraction<
         //
         // U_dir = U_angle1(theta1) * U_angle2(theta2) * U_contact(|Pij|)
 
-        const auto  Pij = sys.adjust_direction(rPj - rPi); // Pi -> Pj
+        const auto  Pij = sys.adjust_direction(rPi, rPj); // Pi -> Pj
         const auto lPij = math::length(Pij);
         if(lPij > contact_pot.cutoff())
         {
@@ -236,7 +236,7 @@ void DirectionalContactInteraction<
 
         // ==========================================================
         // dU_angle1(theta1) / dr
-        const auto PiCi         = sys.adjust_direction(rCi - rPi);
+        const auto PiCi         = sys.adjust_direction(rPi, rCi);
         const auto inv_len_PiCi = math::rlength(PiCi);
         const auto PiCi_reg     = PiCi * inv_len_PiCi;
 
@@ -263,7 +263,7 @@ void DirectionalContactInteraction<
         MJOLNIR_LOG_DEBUG("dU_angle1 / drPi = {", dU_angle1_drPi, "}");
 
         // dU_angle2(theta2) / dr
-        const auto PjCj         = sys.adjust_direction(rCj - rPj);
+        const auto PjCj         = sys.adjust_direction(rPj, rCj);
         const auto inv_len_PjCj = math::rlength(PjCj);
         const auto PjCj_reg     = PjCj * inv_len_PjCj;
 
@@ -354,7 +354,7 @@ DirectionalContactInteraction<
         const coordinate_type& rPj = sys.position(Pj);
         const coordinate_type& rCj = sys.position(Cj);
 
-        const auto  Pij = sys.adjust_direction(rPj - rPi); // Pi -> Pj
+        const auto  Pij = sys.adjust_direction(rPi, rPj); // Pi -> Pj
         const auto lPij = math::length(Pij);
         if(lPij > contact_pot.cutoff())
         {
@@ -362,7 +362,7 @@ DirectionalContactInteraction<
         }
 
         // calculate theta1
-        const auto PiCi         = sys.adjust_direction(rCi - rPi);
+        const auto PiCi         = sys.adjust_direction(rPi, rCi);
         const auto inv_len_PiCi = math::rlength(PiCi);
         const auto PiCi_reg     = PiCi * inv_len_PiCi;
 
@@ -374,7 +374,7 @@ DirectionalContactInteraction<
         const auto theta1       = std::acos(cos_theta1);
 
         // calculate theta2
-        const auto PjCj         = sys.adjust_direction(rCj - rPj);
+        const auto PjCj         = sys.adjust_direction(rPj, rCj);
         const auto inv_len_PjCj = math::rlength(PjCj);
         const auto PjCj_reg     = PjCj * inv_len_PjCj;
 
@@ -430,7 +430,7 @@ DirectionalContactInteraction<
         //
         // U_dir = U_angle1(theta1) * U_angle2(theta2) * U_contact(|Pij|)
 
-        const auto  Pij = sys.adjust_direction(rPj - rPi); // Pi -> Pj
+        const auto  Pij = sys.adjust_direction(rPi, rPj); // Pi -> Pj
         const auto lPij = math::length(Pij);
         if(lPij > contact_pot.cutoff())
         {
@@ -441,7 +441,7 @@ DirectionalContactInteraction<
 
         // ==========================================================
         // dU_angle1(theta1) / dr
-        const auto PiCi         = sys.adjust_direction(rCi - rPi);
+        const auto PiCi         = sys.adjust_direction(rPi, rCi);
         const auto inv_len_PiCi = math::rlength(PiCi);
         const auto PiCi_reg     = PiCi * inv_len_PiCi;
 
@@ -468,7 +468,7 @@ DirectionalContactInteraction<
         MJOLNIR_LOG_DEBUG("dU_angle1 / drPi = {", dU_angle1_drPi, "}");
 
         // dU_angle2(theta2) / dr
-        const auto PjCj         = sys.adjust_direction(rCj - rPj);
+        const auto PjCj         = sys.adjust_direction(rPj, rCj);
         const auto inv_len_PjCj = math::rlength(PjCj);
         const auto PjCj_reg     = PjCj * inv_len_PjCj;
 

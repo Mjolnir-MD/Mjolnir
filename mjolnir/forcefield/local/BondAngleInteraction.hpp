@@ -66,11 +66,11 @@ class BondAngleInteraction final : public LocalInteractionBase<traitsT>
             const auto& p1 = sys.position(idxs[1]);
             const auto& p2 = sys.position(idxs[2]);
 
-            const auto r_ij         = sys.adjust_direction(p0 - p1);
+            const auto r_ij         = sys.adjust_direction(p1, p0);
             const auto inv_len_r_ij = math::rlength(r_ij);
             const auto r_ij_reg     = r_ij * inv_len_r_ij;
 
-            const auto r_kj         = sys.adjust_direction(p2 - p1);
+            const auto r_kj         = sys.adjust_direction(p1, p2);
             const auto inv_len_r_kj = math::rlength(r_kj);
             const auto r_kj_reg     = r_kj * inv_len_r_kj;
 
@@ -164,11 +164,11 @@ void BondAngleInteraction<traitsT, potentialT>::calc_force(
         const auto& p1 = sys.position(idxp.first[1]);
         const auto& p2 = sys.position(idxp.first[2]);
 
-        const auto r_ij         = sys.adjust_direction(p0 - p1);
+        const auto r_ij         = sys.adjust_direction(p1, p0);
         const auto inv_len_r_ij = math::rlength(r_ij);
         const auto r_ij_reg     = r_ij * inv_len_r_ij;
 
-        const auto r_kj         = sys.adjust_direction(p2 - p1);
+        const auto r_kj         = sys.adjust_direction(p1, p2);
         const auto inv_len_r_kj = math::rlength(r_kj);
         const auto r_kj_reg     = r_kj * inv_len_r_kj;
 
@@ -207,8 +207,8 @@ BondAngleInteraction<traitsT, potentialT>::calc_energy(
         const auto& p1 = sys.position(idxp.first[1]);
         const auto& p2 = sys.position(idxp.first[2]);
 
-        const auto rji = sys.adjust_direction(p0 - p1); // pj -> pi
-        const auto rjk = sys.adjust_direction(p2 - p1); // pj -> pi
+        const auto rji = sys.adjust_direction(p1, p0); // pj -> pi
+        const auto rjk = sys.adjust_direction(p1, p2); // pj -> pi
 
         const auto lsq_rji = math::length_sq(rji);
         const auto lsq_rjk = math::length_sq(rjk);

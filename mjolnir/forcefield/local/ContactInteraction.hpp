@@ -72,7 +72,7 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
             const std::size_t idx1 = idxp.first[1];
 
             const auto dpos =
-                sys.adjust_direction(sys.position(idx1) - sys.position(idx0));
+                sys.adjust_direction(sys.position(idx0), sys.position(idx1));
 
             const real_type len2 = math::length_sq(dpos); // l^2
             const real_type rlen = math::rsqrt(len2);     // 1/l
@@ -170,7 +170,7 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
             const auto& pot = this->potentials_[i];
             const auto pos0 = sys.position(pot.first[0]);
             const auto pos1 = sys.position(pot.first[1]);
-            const auto dpos = sys.adjust_direction(pos1 - pos0);
+            const auto dpos = sys.adjust_direction(pos0, pos1);
             const auto len2 = math::length_sq(dpos);
 
             const auto rc = pot.second.cutoff() + abs_margin;
@@ -213,7 +213,7 @@ void ContactInteraction<traitsT, potentialT>::calc_force(
         const std::size_t idx1 = idxp.first[1];
 
         const auto dpos =
-            sys.adjust_direction(sys.position(idx1) - sys.position(idx0));
+            sys.adjust_direction(sys.position(idx0), sys.position(idx1));
 
         const real_type len2 = math::length_sq(dpos); // l^2
         const real_type rlen = math::rsqrt(len2);     // 1/l
@@ -237,7 +237,7 @@ ContactInteraction<traitsT, potentialT>::calc_energy(
     {
         const auto& idxp = this->potentials_[active_contact];
         E += idxp.second.potential(math::length(sys.adjust_direction(
-                sys.position(idxp.first[1]) - sys.position(idxp.first[0]))));
+                sys.position(idxp.first[0]), sys.position(idxp.first[1]))));
     }
     return E;
 }

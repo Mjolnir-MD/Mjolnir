@@ -137,7 +137,7 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
             // ----------------------------------------------------------------
             // calculates the distance part
 
-            const auto rPD    = sys.adjust_direction(rD - rP); // PRO -> DNA
+            const auto rPD    = sys.adjust_direction(rP, rD); // PRO -> DNA
             const auto lPD_sq = math::length_sq(rPD);
             if(para.r_cut_sq < lPD_sq)
             {
@@ -154,7 +154,7 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
 
             const auto& rPC   = sys.position(para.PC);
             const auto& rPN   = sys.position(para.PN);
-            const auto rPNC   = sys.adjust_direction(rPC - rPN); // PN -> PC
+            const auto rPNC   = sys.adjust_direction(rPN, rPC); // PN -> PC
             const auto rlPNC  = math::rlength(rPNC);
             const auto dotPNC = math::dot_product(rPNC, rPD);
             const auto cosPNC = dotPNC * rlPD * rlPNC;
@@ -169,7 +169,7 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
             // calculates the angle part (phi)
 
             const auto& rS3   = sys.position(S3);
-            const auto rS3D   = sys.adjust_direction(rD - rS3); // S3' -> D
+            const auto rS3D   = sys.adjust_direction(rS3, rD); // S3' -> D
             const auto rlS3D  = math::rlength(rS3D);
             const auto dotS3D = math::dot_product(rPD, rS3D);
             const auto cosS3D = dotS3D * rlS3D * rlPD;
@@ -286,7 +286,7 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_energy(
             // ----------------------------------------------------------------
             // calculates the distance part
 
-            const auto rPD    = sys.adjust_direction(rD - rP); // PRO -> DNA
+            const auto rPD    = sys.adjust_direction(rP, rD); // PRO -> DNA
             const auto lPD_sq = math::length_sq(rPD);
             if(para.r_cut_sq < lPD_sq)
             {
@@ -301,7 +301,7 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_energy(
 
             const auto& rPC    = sys.position(para.PC);
             const auto& rPN    = sys.position(para.PN);
-            const auto rPNC    = sys.adjust_direction(rPC - rPN); // PN -> PC
+            const auto rPNC    = sys.adjust_direction(rPN, rPC); // PN -> PC
             const auto rlPNC   = math::rlength(rPNC);
             const auto dotPNC  = math::dot_product(rPNC, rPD);
             const auto cosPNC  = dotPNC * rlPD * rlPNC;
@@ -314,7 +314,7 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_energy(
             // calculates the angle part (phi)
 
             const auto& rS3   = sys.position(S3);
-            const auto rS3D   = sys.adjust_direction(rD - rS3); // S3' -> D
+            const auto rS3D   = sys.adjust_direction(rS3, rD); // S3' -> D
             const auto rlS3D  = math::rlength(rS3D);
             const auto dotS3D = math::dot_product(rPD, rS3D);
             const auto cosS3D = dotS3D * rlS3D * rlPD;
@@ -375,7 +375,7 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_force_and_energy(
             // ----------------------------------------------------------------
             // calculates the distance part
 
-            const auto rPD    = sys.adjust_direction(rD - rP); // PRO -> DNA
+            const auto rPD    = sys.adjust_direction(rP, rD); // PRO -> DNA
             const auto lPD_sq = math::length_sq(rPD);
             if(para.r_cut_sq < lPD_sq)
             {
@@ -392,7 +392,7 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_force_and_energy(
 
             const auto& rPC   = sys.position(para.PC);
             const auto& rPN   = sys.position(para.PN);
-            const auto rPNC   = sys.adjust_direction(rPC - rPN); // PN -> PC
+            const auto rPNC   = sys.adjust_direction(rPN, rPC); // PN -> PC
             const auto rlPNC  = math::rlength(rPNC);
             const auto dotPNC = math::dot_product(rPNC, rPD);
             const auto cosPNC = dotPNC * rlPD * rlPNC;
@@ -407,7 +407,7 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_force_and_energy(
             // calculates the angle part (phi)
 
             const auto& rS3   = sys.position(S3);
-            const auto rS3D   = sys.adjust_direction(rD - rS3); // S3' -> D
+            const auto rS3D   = sys.adjust_direction(rS3, rD); // S3' -> D
             const auto rlS3D  = math::rlength(rS3D);
             const auto dotS3D = math::dot_product(rPD, rS3D);
             const auto cosS3D = dotS3D * rlS3D * rlPD;
