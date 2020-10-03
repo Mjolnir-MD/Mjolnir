@@ -92,10 +92,14 @@ class System
         return;
     }
 
-    coordinate_type adjust_direction(coordinate_type dr) const noexcept
-    {return boundary_.adjust_direction(dr);}
+    coordinate_type adjust_direction(coordinate_type from, coordinate_type to) const noexcept
+    {
+        return boundary_.adjust_direction(from, to);
+    }
     coordinate_type  adjust_position(coordinate_type dr) const noexcept
-    {return boundary_.adjust_position(dr);}
+    {
+        return boundary_.adjust_position(dr);
+    }
 
     std::size_t size() const noexcept {return num_particles_;}
 

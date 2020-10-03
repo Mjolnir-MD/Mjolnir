@@ -197,8 +197,8 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
         const auto& rBj = sys.position(Bj);
         const auto& rSi = sys.position(Si);
 
-        const auto Bji = sys.adjust_direction(rBi - rBj); // Bj -> Bi
-        const auto SBi = sys.adjust_direction(rBi - rSi); // Si -> Bi
+        const auto Bji = sys.adjust_direction(rBj, rBi); // Bj -> Bi
+        const auto SBi = sys.adjust_direction(rSi, rBi); // Si -> Bi
 
         const auto lBji_sq = math::length_sq(Bji); // |Bji|^2
         const auto rlBji   = math::rsqrt(lBji_sq); // 1 / |Bji|
@@ -311,8 +311,8 @@ ThreeSPN2BaseStackingInteraction<traitsT>::calc_energy(
         const auto& rBj = sys.position(Bj);
         const auto& rSi = sys.position(Si);
 
-        const auto Bji = sys.adjust_direction(rBi - rBj); // Bj -> Bi
-        const auto SBi = sys.adjust_direction(rBi - rSi); // Si -> Bi
+        const auto Bji = sys.adjust_direction(rBj, rBi); // Bj -> Bi
+        const auto SBi = sys.adjust_direction(rSi, rBi); // Si -> Bi
 
         const auto lBji_sq = math::length_sq(Bji);
         const auto rlBji   = math::rsqrt(lBji_sq);
@@ -381,8 +381,8 @@ ThreeSPN2BaseStackingInteraction<traitsT>::calc_force_and_energy(
         const auto& rBj = sys.position(Bj);
         const auto& rSi = sys.position(Si);
 
-        const auto Bji = sys.adjust_direction(rBi - rBj); // Bj -> Bi
-        const auto SBi = sys.adjust_direction(rBi - rSi); // Si -> Bi
+        const auto Bji = sys.adjust_direction(rBj, rBi); // Bj -> Bi
+        const auto SBi = sys.adjust_direction(rSi, rBi); // Si -> Bi
 
         const auto lBji_sq = math::length_sq(Bji); // |Bji|^2
         const auto rlBji   = math::rsqrt(lBji_sq); // 1 / |Bji|

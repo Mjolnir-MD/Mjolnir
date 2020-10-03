@@ -89,7 +89,7 @@ class GlobalPairInteraction<
                 const auto j = ptnr.index;
 
                 const coordinate_type rij =
-                    sys.adjust_direction(sys.position(j) - sys.position(i));
+                    sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type l_sq = math::length_sq(rij);
 
                 if(r_cutoff_sq < l_sq) {continue;}
@@ -131,7 +131,7 @@ class GlobalPairInteraction<
                 const auto j = ptnr.index;
 
                 const coordinate_type rij =
-                    sys.adjust_direction(sys.position(j) - sys.position(i));
+                    sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type l_sq = math::length_sq(rij);
 
                 if(r_cutoff_sq < l_sq) {continue;}
@@ -166,7 +166,7 @@ class GlobalPairInteraction<
                 const auto j = ptnr.index;
 
                 const coordinate_type rij =
-                    sys.adjust_direction(sys.position(j) - sys.position(i));
+                    sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type l_sq = math::length_sq(rij);
 
                 if(r_cutoff_sq < l_sq) {continue;}

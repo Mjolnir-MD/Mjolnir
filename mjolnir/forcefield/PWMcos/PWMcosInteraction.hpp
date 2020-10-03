@@ -148,7 +148,7 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
             MJOLNIR_LOG_DEBUG("Base = ", B);
 
             const auto& rB     = sys.position(B);
-            const auto rBCa    = sys.adjust_direction(rCa - rB); // Bi -> Cj
+            const auto rBCa    = sys.adjust_direction(rB, rCa); // Bi -> Cj
             const auto lBCa_sq = math::length_sq(rBCa);
 
             if(para.r_cut_sq < lBCa_sq) {continue;}
@@ -165,7 +165,7 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
             // calculates the theta1 term
 
             const auto& rS    = sys.position(S);
-            const auto  rBS   = sys.adjust_direction(rS - rB); // Bi -> Si
+            const auto  rBS   = sys.adjust_direction(rB, rS); // Bi -> Si
             const auto rlBS   = math::rlength(rBS);
             const auto dot1   = math::dot_product(rBS, rBCa);
             const auto cos1   = dot1 * rlBS * rlBCa;
@@ -182,8 +182,8 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
             // calculates the theta2 term
 
             const auto& rB3   = sys.position(B3);
-            const auto& rB5   = sys.position(B5);                // (B5) -> (B3)
-            const auto  rB53  = sys.adjust_direction(rB3 - rB5); // Bi-1 -> Bi+1
+            const auto& rB5   = sys.position(B5);               // (B5) -> (B3)
+            const auto  rB53  = sys.adjust_direction(rB5, rB3); // Bi-1 -> Bi+1
             const auto rlB53  = math::rlength(rB53);
             const auto dot2   = math::dot_product(rB53, rBCa);
             const auto cos2   = dot2 * rlB53 * rlBCa;
@@ -200,8 +200,8 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
             // calculates the theta3 term
 
             const auto& rCaN  = sys.position(CaN);
-            const auto& rCaC  = sys.position(CaC);               //(CaC) -> (CaN)
-            const auto  rCCN  = sys.adjust_direction(rCaN-rCaC); // Cj+1 -> Cj-1
+            const auto& rCaC  = sys.position(CaC);                //(CaC) -> (CaN)
+            const auto  rCCN  = sys.adjust_direction(rCaC, rCaN); // Cj+1 -> Cj-1
             const auto rlCCN  = math::rlength(rCCN);
             const auto dot3   = math::dot_product(rCCN, rBCa);
             const auto cos3   = dot3 * rlCCN * rlBCa;
@@ -347,7 +347,7 @@ PWMcosInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
             const auto  B3 = ptnr.parameter().B3; // Base (Bi+1)
 
             const auto& rB     = sys.position(B);
-            const auto rBCa    = sys.adjust_direction(rCa - rB); // Bi -> Cj
+            const auto rBCa    = sys.adjust_direction(rB, rCa); // Bi -> Cj
             const auto lBCa_sq = math::length_sq(rBCa);
 
             if(para.r_cut_sq < lBCa_sq) {continue;}
@@ -363,7 +363,7 @@ PWMcosInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
             // calculates the theta1 term
 
             const auto& rS    = sys.position(S);
-            const auto  rBS   = sys.adjust_direction(rS - rB); // Bi -> Si
+            const auto  rBS   = sys.adjust_direction(rB, rS); // Bi -> Si
             const auto rlBS   = math::rlength(rBS);
             const auto dot1   = math::dot_product(rBS, rBCa);
             const auto cos1   = dot1 * rlBS * rlBCa;
@@ -376,8 +376,8 @@ PWMcosInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
             // calculates the theta2 term
 
             const auto& rB3   = sys.position(B3);
-            const auto& rB5   = sys.position(B5);                // (B5) -> (B3)
-            const auto  rB53  = sys.adjust_direction(rB3 - rB5); // Bi-1 -> Bi+1
+            const auto& rB5   = sys.position(B5);               // (B5) -> (B3)
+            const auto  rB53  = sys.adjust_direction(rB5, rB3); // Bi-1 -> Bi+1
             const auto rlB53  = math::rlength(rB53);
             const auto dot2   = math::dot_product(rB53, rBCa);
             const auto cos2   = dot2 * rlB53 * rlBCa;
@@ -390,8 +390,8 @@ PWMcosInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
             // calculates the theta3 term
 
             const auto& rCaN  = sys.position(CaN);
-            const auto& rCaC  = sys.position(CaC);               //(CaC) -> (CaN)
-            const auto  rCCN  = sys.adjust_direction(rCaN-rCaC); // Cj+1 -> Cj-1
+            const auto& rCaC  = sys.position(CaC);                //(CaC) -> (CaN)
+            const auto  rCCN  = sys.adjust_direction(rCaC, rCaN); // Cj+1 -> Cj-1
             const auto rlCCN  = math::rlength(rCCN);
             const auto dot3   = math::dot_product(rCCN, rBCa);
             const auto cos3   = dot3 * rlCCN * rlBCa;
@@ -466,7 +466,7 @@ PWMcosInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexce
             MJOLNIR_LOG_DEBUG("Base = ", B);
 
             const auto& rB     = sys.position(B);
-            const auto rBCa    = sys.adjust_direction(rCa - rB); // Bi -> Cj
+            const auto rBCa    = sys.adjust_direction(rB, rCa); // Bi -> Cj
             const auto lBCa_sq = math::length_sq(rBCa);
 
             if(para.r_cut_sq < lBCa_sq) {continue;}
@@ -483,7 +483,7 @@ PWMcosInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexce
             // calculates the theta1 term
 
             const auto& rS    = sys.position(S);
-            const auto  rBS   = sys.adjust_direction(rS - rB); // Bi -> Si
+            const auto  rBS   = sys.adjust_direction(rB, rS); // Bi -> Si
             const auto rlBS   = math::rlength(rBS);
             const auto dot1   = math::dot_product(rBS, rBCa);
             const auto cos1   = dot1 * rlBS * rlBCa;
@@ -500,8 +500,8 @@ PWMcosInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexce
             // calculates the theta2 term
 
             const auto& rB3   = sys.position(B3);
-            const auto& rB5   = sys.position(B5);                // (B5) -> (B3)
-            const auto  rB53  = sys.adjust_direction(rB3 - rB5); // Bi-1 -> Bi+1
+            const auto& rB5   = sys.position(B5);               // (B5) -> (B3)
+            const auto  rB53  = sys.adjust_direction(rB5, rB3); // Bi-1 -> Bi+1
             const auto rlB53  = math::rlength(rB53);
             const auto dot2   = math::dot_product(rB53, rBCa);
             const auto cos2   = dot2 * rlB53 * rlBCa;
@@ -518,8 +518,8 @@ PWMcosInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexce
             // calculates the theta3 term
 
             const auto& rCaN  = sys.position(CaN);
-            const auto& rCaC  = sys.position(CaC);               //(CaC) -> (CaN)
-            const auto  rCCN  = sys.adjust_direction(rCaN-rCaC); // Cj+1 -> Cj-1
+            const auto& rCaC  = sys.position(CaC);                //(CaC) -> (CaN)
+            const auto  rCCN  = sys.adjust_direction(rCaC, rCaN); // Cj+1 -> Cj-1
             const auto rlCCN  = math::rlength(rCCN);
             const auto dot3   = math::dot_product(rCCN, rBCa);
             const auto cos3   = dot3 * rlCCN * rlBCa;

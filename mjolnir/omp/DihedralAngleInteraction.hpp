@@ -59,9 +59,9 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
             const auto& r_k = sys.position(idx2);
             const auto& r_l = sys.position(idx3);
 
-            const coordinate_type r_ij = sys.adjust_direction(r_i - r_j);
-            const coordinate_type r_kj = sys.adjust_direction(r_k - r_j);
-            const coordinate_type r_lk = sys.adjust_direction(r_l - r_k);
+            const coordinate_type r_ij = sys.adjust_direction(r_j, r_i);
+            const coordinate_type r_kj = sys.adjust_direction(r_j, r_k);
+            const coordinate_type r_lk = sys.adjust_direction(r_k, r_l);
             const coordinate_type r_kl = real_type(-1.0) * r_lk;
 
             const real_type r_kj_lensq  = math::length_sq(r_kj);
@@ -107,11 +107,11 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
         {
             const auto& idxp = this->potentials[i];
             const coordinate_type r_ij = sys.adjust_direction(
-                    sys.position(idxp.first[0]) - sys.position(idxp.first[1]));
+                    sys.position(idxp.first[1]), sys.position(idxp.first[0]));
             const coordinate_type r_kj = sys.adjust_direction(
-                    sys.position(idxp.first[2]) - sys.position(idxp.first[1]));
+                    sys.position(idxp.first[1]), sys.position(idxp.first[2]));
             const coordinate_type r_lk = sys.adjust_direction(
-                    sys.position(idxp.first[3]) - sys.position(idxp.first[2]));
+                    sys.position(idxp.first[2]), sys.position(idxp.first[3]));
             const real_type r_kj_lensq_inv = real_type(1.0) / math::length_sq(r_kj);
 
             const coordinate_type n = math::cross_product(r_kj, real_type(-1.0) * r_lk);
@@ -150,9 +150,9 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
             const auto& r_k = sys.position(idx2);
             const auto& r_l = sys.position(idx3);
 
-            const coordinate_type r_ij = sys.adjust_direction(r_i - r_j);
-            const coordinate_type r_kj = sys.adjust_direction(r_k - r_j);
-            const coordinate_type r_lk = sys.adjust_direction(r_l - r_k);
+            const coordinate_type r_ij = sys.adjust_direction(r_j, r_i);
+            const coordinate_type r_kj = sys.adjust_direction(r_j, r_k);
+            const coordinate_type r_lk = sys.adjust_direction(r_k, r_l);
             const coordinate_type r_kl = real_type(-1.0) * r_lk;
 
             const real_type r_kj_lensq  = math::length_sq(r_kj);

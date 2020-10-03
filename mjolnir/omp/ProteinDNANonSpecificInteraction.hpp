@@ -112,7 +112,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 // ----------------------------------------------------------------
                 // calculates the distance part
 
-                const auto rPD    = sys.adjust_direction(rD - rP); // PRO -> DNA
+                const auto rPD    = sys.adjust_direction(rP, rD); // PRO -> DNA
                 const auto lPD_sq = math::length_sq(rPD);
                 if(para.r_cut_sq < lPD_sq)
                 {
@@ -129,7 +129,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
                 const auto& rPC   = sys.position(para.PC);
                 const auto& rPN   = sys.position(para.PN);
-                const auto rPNC   = sys.adjust_direction(rPC - rPN); // PN -> PC
+                const auto rPNC   = sys.adjust_direction(rPN, rPC); // PN -> PC
                 const auto rlPNC  = math::rlength(rPNC);
                 const auto dotPNC = math::dot_product(rPNC, rPD);
                 const auto cosPNC = dotPNC * rlPD * rlPNC;
@@ -144,7 +144,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 // calculates the angle part (phi)
 
                 const auto& rS3   = sys.position(S3);
-                const auto rS3D   = sys.adjust_direction(rD - rS3); // S3' -> D
+                const auto rS3D   = sys.adjust_direction(rS3, rD); // S3' -> D
                 const auto rlS3D  = math::rlength(rS3D);
                 const auto dotS3D = math::dot_product(rPD, rS3D);
                 const auto cosS3D = dotS3D * rlS3D * rlPD;
@@ -260,7 +260,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 // ----------------------------------------------------------------
                 // calculates the distance part
 
-                const auto rPD    = sys.adjust_direction(rD - rP); // PRO -> DNA
+                const auto rPD    = sys.adjust_direction(rP, rD); // PRO -> DNA
                 const auto lPD_sq = math::length_sq(rPD);
                 if(para.r_cut_sq < lPD_sq)
                 {
@@ -275,7 +275,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
                 const auto& rPC    = sys.position(para.PC);
                 const auto& rPN    = sys.position(para.PN);
-                const auto rPNC    = sys.adjust_direction(rPC - rPN); // PN -> PC
+                const auto rPNC    = sys.adjust_direction(rPN, rPC); // PN -> PC
                 const auto rlPNC   = math::rlength(rPNC);
                 const auto dotPNC  = math::dot_product(rPNC, rPD);
                 const auto cosPNC  = dotPNC * rlPD * rlPNC;
@@ -288,7 +288,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 // calculates the angle part (phi)
 
                 const auto& rS3   = sys.position(S3);
-                const auto rS3D   = sys.adjust_direction(rD - rS3); // S3' -> D
+                const auto rS3D   = sys.adjust_direction(rS3, rD); // S3' -> D
                 const auto rlS3D  = math::rlength(rS3D);
                 const auto dotS3D = math::dot_product(rPD, rS3D);
                 const auto cosS3D = dotS3D * rlS3D * rlPD;
@@ -347,7 +347,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 // ----------------------------------------------------------------
                 // calculates the distance part
 
-                const auto rPD    = sys.adjust_direction(rD - rP); // PRO -> DNA
+                const auto rPD    = sys.adjust_direction(rP, rD); // PRO -> DNA
                 const auto lPD_sq = math::length_sq(rPD);
                 if(para.r_cut_sq < lPD_sq)
                 {
@@ -364,7 +364,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
                 const auto& rPC   = sys.position(para.PC);
                 const auto& rPN   = sys.position(para.PN);
-                const auto rPNC   = sys.adjust_direction(rPC - rPN); // PN -> PC
+                const auto rPNC   = sys.adjust_direction(rPN, rPC); // PN -> PC
                 const auto rlPNC  = math::rlength(rPNC);
                 const auto dotPNC = math::dot_product(rPNC, rPD);
                 const auto cosPNC = dotPNC * rlPD * rlPNC;
@@ -379,7 +379,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 // calculates the angle part (phi)
 
                 const auto& rS3   = sys.position(S3);
-                const auto rS3D   = sys.adjust_direction(rD - rS3); // S3' -> D
+                const auto rS3D   = sys.adjust_direction(rS3, rD); // S3' -> D
                 const auto rlS3D  = math::rlength(rS3D);
                 const auto dotS3D = math::dot_product(rPD, rS3D);
                 const auto cosS3D = dotS3D * rlS3D * rlPD;
