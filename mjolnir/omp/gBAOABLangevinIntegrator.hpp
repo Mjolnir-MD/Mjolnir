@@ -65,7 +65,7 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 #pragma omp parallel for
             for(std::size_t i=0; i<system.size(); ++i)
             {
-                system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
+                system.force(i) = math::make_coordinate<coordinate_type>(0,0,0);
             }
             ff->calc_force(system);
         }
@@ -97,12 +97,13 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
         // initialize internal thread_local storage
         assert(dposition_threads_.size() == dvelocity_threads_.size());
+#pragma omp parallel for
         for(std::size_t i=0; i<dposition_threads_.size(); ++i)
         {
             dposition_threads_.at(i) = coordinate_container_type(
-                system.size(), math::make_coordinate<coordinate_type>(0,0,0));
+                system.size(), math::make_coordinate<coordinate_type>(0, 0, 0));
             dvelocity_threads_.at(i) = coordinate_container_type(
-                system.size(), math::make_coordinate<coordinate_type>(0,0,0));
+                system.size(), math::make_coordinate<coordinate_type>(0, 0, 0));
         }
         return;
     }
@@ -153,11 +154,12 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         }
         // update neighbor list; reduce margin, reconstruct the list if needed;
         real_type largest_disp2(0.0);
-#pragma omp parallel for
+#pragma omp parallel for reduction(max:largest_disp2)
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             coordinate_type displacement = sys.position(i) - this->old_position_[i];
             largest_disp2 = std::max(largest_disp2, math::length_sq(displacement));
+
             sys.position(i) = sys.adjust_position(sys.position(i));
 
             // reset force
@@ -168,6 +170,7 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
         // B step
         ff->calc_force(sys);
+
 #pragma omp parallel for
         for(std::size_t i=0; i<sys.size(); ++i)
         {
@@ -236,6 +239,7 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         while(rattle_step < constraint_ff.max_iteration())
         {
             bool corrected = false;
+
 #pragma omp parallel for
             for(std::size_t i=0; i<constraints.size(); ++i)
             {
@@ -269,8 +273,27 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
                     dvelocity_threads_[thid][indices[0]] -= correction_vec1 * r_dt_in_correction_;
                     dvelocity_threads_[thid][indices[1]] += correction_vec2 * r_dt_in_correction_;
 
+#pragma omp atomic write
                     corrected = true;
                 }
+            }
+
+            // TODO: compare with other way, like mutex.
+#pragma omp parallel for
+            for(std::size_t i=0; i<sys.size(); ++i)
+            {
+                auto dpos = math::make_coordinate<coordinate_type>(0,0,0);
+                auto dvel = math::make_coordinate<coordinate_type>(0,0,0);
+                for(std::size_t th=0; th<dposition_threads_.size(); ++th)
+                {
+                    dpos += dposition_threads_[th][i];
+                    dvel += dvelocity_threads_[th][i];
+
+                    dposition_threads_[th][i] = math::make_coordinate<coordinate_type>(0,0,0);
+                    dvelocity_threads_[th][i] = math::make_coordinate<coordinate_type>(0,0,0);
+                }
+                sys.position(i) += dpos;
+                sys.velocity(i) += dvel;
             }
 
             if(!corrected) {break;}
@@ -278,22 +301,6 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             ++rattle_step;
         }
 
-#pragma omp parallel for
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            auto dpos = math::make_coordinate<coordinate_type>(0,0,0);
-            auto dvel = math::make_coordinate<coordinate_type>(0,0,0);
-            for(std::size_t th=0; th<dposition_threads_.size(); ++th)
-            {
-                dpos += dposition_threads_[th][i];
-                dvel += dvelocity_threads_[th][i];
-
-                dposition_threads_[th][i] = math::make_coordinate<coordinate_type>(0,0,0);
-                dvelocity_threads_[th][i] = math::make_coordinate<coordinate_type>(0,0,0);
-            }
-            sys.position(i) += dpos;
-            sys.velocity(i) += dvel;
-        }
 
         if(constraint_ff.max_iteration() <= rattle_step)
         {
@@ -338,25 +345,26 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
                     const auto correction_vec = lambda * pos_diff;
                     dvelocity_threads_[thid][indices[0]] += correction_vec * rm1;
                     dvelocity_threads_[thid][indices[1]] -= correction_vec * rm2;
+
+#pragma omp atomic write
                     corrected = true;
                 }
+            }
+#pragma omp parallel for
+            for(std::size_t i=0; i<sys.size(); ++i)
+            {
+                auto dvel = math::make_coordinate<coordinate_type>(0,0,0);
+                for(std::size_t th=0; th<dvelocity_threads_.size(); ++th)
+                {
+                    dvel += dvelocity_threads_[th][i];
+                    dvelocity_threads_[th][i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+                }
+                sys.velocity(i) += dvel;
             }
 
             if(!corrected) {break;}
 
             ++rattle_step;
-        }
-
-#pragma omp parallel for
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            auto dvel = math::make_coordinate<coordinate_type>(0,0,0);
-            for(std::size_t th=0; th<dvelocity_threads_.size(); ++th)
-            {
-                dvel += dvelocity_threads_[th][i];
-                dvelocity_threads_[th][i] = math::make_coordinate<coordinate_type>(0, 0, 0);
-            }
-            sys.velocity(i) += dvel;
         }
 
         if(constraint_ff.max_iteration() <= rattle_step)
