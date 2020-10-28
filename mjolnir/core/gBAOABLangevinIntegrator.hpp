@@ -345,5 +345,12 @@ gBAOABLangevinIntegrator<traitsT>::step(
     return time + dt_;
 }
 
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class gBAOABLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class gBAOABLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class gBAOABLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class gBAOABLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
+
 } // mjolnir
 #endif /* MJOLNIR_CORE_G_BAOAB_LANGEVIN_INTEGRATOR_HPP */

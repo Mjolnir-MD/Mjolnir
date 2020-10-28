@@ -43,9 +43,10 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
           positions_(num_particles), velocities_(num_particles),
           forces_main_(num_particles),
           forces_threads_(omp_get_max_threads(),
-              coordinate_container_type(num_particles),
+              coordinate_container_type(num_particles,
+                  math::make_coordinate<coordinate_type>(0,0,0)),
               cache_aligned_allocator<coordinate_container_type>{}),
-          names_    (num_particles), groups_    (num_particles)
+          names_(num_particles), groups_(num_particles)
     {}
     ~System() = default;
 
