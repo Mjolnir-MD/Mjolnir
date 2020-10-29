@@ -137,7 +137,7 @@ class AxisAlignedPlane
     calc_distance(const coordinate_type& pos, const boundary_type& bd) const
     {
         return axis_type::sign() * axis_type::get_coordinate(
-                bd.adjust_direction(pos - this->origin_));
+                bd.adjust_direction(this->origin_, pos));
     }
 
     //XXX take care. the actual force that would be applied to a particle is

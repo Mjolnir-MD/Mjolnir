@@ -151,6 +151,9 @@ read_input_file(const std::string& filename)
     MJOLNIR_LOG_FUNCTION();
     MJOLNIR_LOG_NOTICE("the log file is `", logger_name, '`');
 
+    MJOLNIR_LOG_NOTICE("mjolnir version ", MJOLNIR_VERSION);
+    MJOLNIR_LOG_NOTICE("compiled using ",  MJOLNIR_COMPILER_VERSION);
+
     // Check top-level toml-values. Since it uses logger to warn,
     // we need to call it after `MJOLNIR_SET_DEFAULT_LOGGER(logger_name)`.
     check_keys_available(root, {"files"_s, "units"_s, "simulator"_s,

@@ -99,7 +99,7 @@ class gBAOABLangevinIntegrator
                 auto& v1 = sys.velocity(indices[0]);
                 auto& v2 = sys.velocity(indices[1]);
 
-                const auto      dp  = sys.adjust_direction(p2 - p1);
+                const auto      dp  = sys.adjust_direction(p1, p2);
                 const real_type dp2 = math::length_sq(dp);
                 const real_type missmatch2 = square_v0s_[i] - dp2;
 
@@ -108,7 +108,7 @@ class gBAOABLangevinIntegrator
                     const auto& op1 = this->old_pos_rattle_[indices[0]];
                     const auto& op2 = this->old_pos_rattle_[indices[1]];
 
-                    const auto old_dp = sys.adjust_direction(op2 - op1);
+                    const auto old_dp = sys.adjust_direction(op1, op2);
                     const auto dot_old_new_dp = math::dot_product(old_dp, dp);
                     const auto lambda =
                         0.5 * missmatch2 * reduced_mass_[i] / dot_old_new_dp;
@@ -158,7 +158,7 @@ class gBAOABLangevinIntegrator
                 auto& v1  = sys.velocity(indices[0]);
                 auto& v2  = sys.velocity(indices[1]);
 
-                const auto pos_diff = sys.adjust_direction(p2 - p1);
+                const auto pos_diff = sys.adjust_direction(p1, p2);
                 const auto vel_diff = v2 - v1;
                 const auto dot_pdvd = math::dot_product(pos_diff, vel_diff);
                 const auto lambda   = dot_pdvd * reduced_mass_[i] * r_square_v0s_[i];
@@ -344,6 +344,13 @@ gBAOABLangevinIntegrator<traitsT>::step(
 
     return time + dt_;
 }
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class gBAOABLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class gBAOABLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class gBAOABLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class gBAOABLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
 
 } // mjolnir
 #endif /* MJOLNIR_CORE_G_BAOAB_LANGEVIN_INTEGRATOR_HPP */

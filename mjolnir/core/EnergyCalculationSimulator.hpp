@@ -103,7 +103,7 @@ inline bool EnergyCalculationSimulator<traitsT>::step()
     for(std::size_t i=0; i<sys_.size(); ++i)
     {
         max_displacement_sq = std::max(max_displacement_sq, math::length_sq(
-                    sys_.adjust_direction(old_position_[i] - sys_.position(i))));
+                    sys_.adjust_direction(sys_.position(i), old_position_[i])));
     }
     // update neighboring list if needed
     ff_->reduce_margin(2 * std::sqrt(max_displacement_sq), sys_);

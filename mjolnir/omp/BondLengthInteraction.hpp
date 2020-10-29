@@ -52,7 +52,7 @@ class BondLengthInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
             const std::size_t idx1 = idxp.first[1];
 
             const auto dpos =
-                sys.adjust_direction(sys.position(idx1) - sys.position(idx0));
+                sys.adjust_direction(sys.position(idx0), sys.position(idx1));
 
             const real_type len2 = math::length_sq(dpos); // l^2
             const real_type rlen = math::rsqrt(len2);     // 1/l
@@ -74,7 +74,7 @@ class BondLengthInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         {
             const auto& idxp = this->potentials[i];
             E += idxp.second.potential(math::length(sys.adjust_direction(
-                    sys.position(idxp.first[1]) - sys.position(idxp.first[0]))));
+                    sys.position(idxp.first[0]), sys.position(idxp.first[1]))));
         }
         return E;
     }
@@ -91,7 +91,7 @@ class BondLengthInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
             const std::size_t idx1 = idxp.first[1];
 
             const auto dpos =
-                sys.adjust_direction(sys.position(idx1) - sys.position(idx0));
+                sys.adjust_direction(sys.position(idx0), sys.position(idx1));
 
             const real_type len2 = math::length_sq(dpos); // l^2
             const real_type rlen = math::rsqrt(len2);     // 1/l
