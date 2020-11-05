@@ -99,7 +99,7 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto& rBj  = sys.position(Bj);
                 const auto  bp_kind = para.bp_kind;
 
-                const auto Bij = sys.adjust_direction(rBj - rBi); // Bi -> Bj
+                const auto Bij = sys.adjust_direction(rBi, rBj); // Bi -> Bj
                 const auto lBij_sq = math::length_sq(Bij);
                 if(lBij_sq > potential_.cutoff_sq())
                 {
@@ -152,8 +152,8 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto& rSi = sys.position(Si);
                 const auto& rSj = sys.position(Sj);
 
-                const auto SBi = sys.adjust_direction(rBi - rSi); // Si -> Bi
-                const auto SBj = sys.adjust_direction(rBj - rSj); // Sj -> Bj
+                const auto SBi = sys.adjust_direction(rSi, rBi); // Si -> Bi
+                const auto SBj = sys.adjust_direction(rSj, rBj); // Sj -> Bj
 
                 const auto lSBi_sq = math::length_sq(SBi); // |SBi|^2
                 const auto lSBj_sq = math::length_sq(SBj); // |SBj|^2
@@ -376,7 +376,7 @@ class ThreeSPN2BaseBaseInteraction<
                     const auto cs_kind = para.cs_i_kind;
 
                     const auto& rBj5     = sys.position(Bj_next);
-                    const auto  Bj5i     = sys.adjust_direction(rBi - rBj5);
+                    const auto  Bj5i     = sys.adjust_direction(rBj5, rBi);
                     const auto  lBj5i_sq = math::length_sq(Bj5i); // |Bj5i|^2
                     const auto  rlBj5i   = math::rsqrt(lBj5i_sq);  // 1 / |Bj5i|
 
@@ -451,7 +451,7 @@ class ThreeSPN2BaseBaseInteraction<
                     const auto cs_kind = para.cs_j_kind;
 
                     const auto& rBi3     = sys.position(Bi_next);
-                    const auto  Bi3j     = sys.adjust_direction(rBj - rBi3);
+                    const auto  Bi3j     = sys.adjust_direction(rBi3, rBj);
                     const auto  lBi3j_sq = math::length_sq(Bi3j); // |Bi3j|^2
                     const auto  rlBi3j   = math::rsqrt(lBi3j_sq);  // 1 / |Bi3j|
 
@@ -532,7 +532,7 @@ class ThreeSPN2BaseBaseInteraction<
 
                 const auto  bp_kind = para.bp_kind;
 
-                const auto Bij = sys.adjust_direction(rBj - rBi); // Bi -> Bj
+                const auto Bij = sys.adjust_direction(rBi, rBj); // Bi -> Bj
 
                 const auto lBij_sq = math::length_sq(Bij);
                 if(lBij_sq > potential_.cutoff_sq())
@@ -573,8 +573,8 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto& rSi = sys.position(Si);
                 const auto& rSj = sys.position(Sj);
 
-                const auto SBi = sys.adjust_direction(rBi - rSi); // Si -> Bi
-                const auto SBj = sys.adjust_direction(rBj - rSj); // Sj -> Bj
+                const auto SBi = sys.adjust_direction(rSi, rBi); // Si -> Bi
+                const auto SBj = sys.adjust_direction(rSj, rBj); // Sj -> Bj
 
                 const auto lSBi_sq = math::length_sq(SBi); // |SBi|^2
                 const auto lSBj_sq = math::length_sq(SBj); // |SBj|^2
@@ -701,7 +701,7 @@ class ThreeSPN2BaseBaseInteraction<
 
                     const auto& rBj5 = sys.position(Bj_next);
 
-                    const auto Bj5i     = sys.adjust_direction(rBi - rBj5);
+                    const auto Bj5i     = sys.adjust_direction(rBj5, rBi);
                     const auto lBj5i_sq = math::length_sq(Bj5i);
                     const auto rlBj5i   = math::rsqrt(lBj5i_sq);
 
@@ -740,7 +740,7 @@ class ThreeSPN2BaseBaseInteraction<
 
                     const auto& rBi3    = sys.position(Bi_next);
 
-                    const auto Bi3j     = sys.adjust_direction(rBj - rBi3);
+                    const auto Bi3j     = sys.adjust_direction(rBi3, rBj);
                     const auto lBi3j_sq = math::length_sq(Bi3j);
                     const auto rlBi3j   = math::rsqrt(lBi3j_sq);
 
@@ -785,7 +785,7 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto& rBj  = sys.position(Bj);
                 const auto  bp_kind = para.bp_kind;
 
-                const auto Bij = sys.adjust_direction(rBj - rBi); // Bi -> Bj
+                const auto Bij = sys.adjust_direction(rBi, rBj); // Bi -> Bj
                 const auto lBij_sq = math::length_sq(Bij);
                 if(lBij_sq > potential_.cutoff_sq())
                 {
@@ -839,8 +839,8 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto& rSi = sys.position(Si);
                 const auto& rSj = sys.position(Sj);
 
-                const auto SBi = sys.adjust_direction(rBi - rSi); // Si -> Bi
-                const auto SBj = sys.adjust_direction(rBj - rSj); // Sj -> Bj
+                const auto SBi = sys.adjust_direction(rSi, rBi); // Si -> Bi
+                const auto SBj = sys.adjust_direction(rSj, rBj); // Sj -> Bj
 
                 const auto lSBi_sq = math::length_sq(SBi); // |SBi|^2
                 const auto lSBj_sq = math::length_sq(SBj); // |SBj|^2
@@ -1065,7 +1065,7 @@ class ThreeSPN2BaseBaseInteraction<
                     const auto cs_kind = para.cs_i_kind;
 
                     const auto& rBj5     = sys.position(Bj_next);
-                    const auto  Bj5i     = sys.adjust_direction(rBi - rBj5);
+                    const auto  Bj5i     = sys.adjust_direction(rBj5, rBi);
                     const auto  lBj5i_sq = math::length_sq(Bj5i); // |Bj5i|^2
                     const auto  rlBj5i   = math::rsqrt(lBj5i_sq);  // 1 / |Bj5i|
 
@@ -1140,7 +1140,7 @@ class ThreeSPN2BaseBaseInteraction<
                     const auto cs_kind = para.cs_j_kind;
 
                     const auto& rBi3     = sys.position(Bi_next);
-                    const auto  Bi3j     = sys.adjust_direction(rBj - rBi3);
+                    const auto  Bi3j     = sys.adjust_direction(rBi3, rBj);
                     const auto  lBi3j_sq = math::length_sq(Bi3j); // |Bi3j|^2
                     const auto  rlBi3j   = math::rsqrt(lBi3j_sq);  // 1 / |Bi3j|
 

@@ -227,7 +227,7 @@ void UnlimitedGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighb
                 // particles are already filtered.
 
                 const auto& rj = sys.position(j);
-                if(math::length_sq(sys.adjust_direction(rj - ri)) < r_c2)
+                if(math::length_sq(sys.adjust_direction(ri, rj)) < r_c2)
                 {
                     MJOLNIR_LOG_DEBUG("add index ", j, " to list ", i);
                     partner.emplace_back(j, pot.prepare_params(i, j));

@@ -28,13 +28,15 @@ read_molecular_dynamics_simulator(
     MJOLNIR_LOG_FUNCTION();
 
     check_keys_available(simulator, {"type"_s, "boundary_type"_s, "precision"_s,
-        "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s, "delta_t"_s,
-        "integrator"_s, "forcefields"_s, "env"_s});
+        "parallelism"_s, "seed"_s, "total_step"_s, "save_step"_s, "checkpoint_step"_s,
+        "delta_t"_s, "integrator"_s, "forcefields"_s, "env"_s});
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
+    const auto cstep = toml::find_or(simulator, "checkpoint_step", sstep);
     MJOLNIR_LOG_NOTICE("total step is ", tstep);
-    MJOLNIR_LOG_NOTICE("save  step is ", sstep);
+    MJOLNIR_LOG_NOTICE("save step is ", sstep);
+    MJOLNIR_LOG_NOTICE("checkpoint step is ", cstep);
 
     // later move them, so non-const
     auto sys  = read_system    <traitsT>(root, 0);
@@ -44,7 +46,7 @@ read_molecular_dynamics_simulator(
     auto intg = read_integrator<integratorT>(simulator);
 
     return make_unique<MolecularDynamicsSimulator<traitsT, integratorT>>(
-            tstep, sstep, std::move(sys), std::move(ff), std::move(intg),
+            tstep, sstep, cstep, std::move(sys), std::move(ff), std::move(intg),
             std::move(obs), std::move(rng));
 }
 
@@ -65,13 +67,16 @@ read_steepest_descent_simulator(
     const auto save_step = toml::find<std::size_t>(simulator, "save_step");
     const auto delta     = toml::find<real_type  >(simulator, "delta");
     const auto threshold = toml::find<real_type  >(simulator, "threshold");
+    const auto chkp_step = toml::find_or(simulator, "checkpoint_step", save_step);
 
     MJOLNIR_LOG_NOTICE("step_limit is ", step_lim);
     MJOLNIR_LOG_NOTICE("save_step  is ", save_step);
+    MJOLNIR_LOG_NOTICE("checkpoint is ", chkp_step);
     MJOLNIR_LOG_NOTICE("delta      is ", delta);
     MJOLNIR_LOG_NOTICE("threshold  is ", threshold);
 
-    return make_unique<simulator_type>(delta, threshold, step_lim, save_step,
+    return make_unique<simulator_type>(delta, threshold, step_lim,
+            save_step, chkp_step,
             read_system<traitsT>(root, 0),
             read_forcefield<traitsT>(root, simulator),
             read_observer<traitsT>(root));
@@ -92,6 +97,7 @@ read_simulated_annealing_simulator(
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
+    const auto cstep = toml::find_or(simulator, "checkpoint_step", sstep);
 
     MJOLNIR_LOG_NOTICE("total step is ", tstep);
     MJOLNIR_LOG_NOTICE("save  step is ", sstep);
@@ -140,7 +146,7 @@ read_simulated_annealing_simulator(
 
         return make_unique<
             SimulatedAnnealingSimulator<traitsT, integratorT, LinearScheduler>>(
-                tstep, sstep, each_step, std::move(sch),  std::move(sys),
+                tstep, sstep, cstep, each_step, std::move(sch),  std::move(sys),
                 std::move(ff), std::move(intg), std::move(obs), std::move(rng));
     }
     else
@@ -168,8 +174,10 @@ read_switching_forcefield_simulator(
 
     const auto tstep = toml::find<std::size_t>(simulator, "total_step");
     const auto sstep = toml::find<std::size_t>(simulator, "save_step");
+    const auto cstep = toml::find_or(simulator, "checkpoint_step", sstep);
     MJOLNIR_LOG_NOTICE("total step is ", tstep);
     MJOLNIR_LOG_NOTICE("save  step is ", sstep);
+    MJOLNIR_LOG_NOTICE("checkpoint is ", cstep);
 
     // later move them, so non-const
     auto sys  = read_system  <traitsT>(root, 0);
@@ -233,7 +241,7 @@ read_switching_forcefield_simulator(
     }
 
     return make_unique<SwitchingForceFieldSimulator<traitsT, integratorT>>(
-            tstep, sstep, std::move(sys), std::move(ffs), std::move(intg),
+            tstep, sstep, cstep, std::move(sys), std::move(ffs), std::move(intg),
             std::move(obs), std::move(rng), std::move(ffidx), std::move(sch));
 }
 
@@ -318,9 +326,8 @@ read_energy_calculation_simulator(
     MJOLNIR_LOG_NOTICE("reading a system ...");
     const auto system = read_table_from_file(systems.at(0), "systems");
 
-    const auto& boundary = toml::find(system, "boundary_shape");
     const auto& particles = toml::find(system, "particles").as_array();
-    System<traitsT> sys(particles.size(), read_boundary<traitsT>(boundary));
+    System<traitsT> sys(particles.size(), read_boundary<traitsT>(system));
 
     if(particles.size() != loader->num_particles())
     {

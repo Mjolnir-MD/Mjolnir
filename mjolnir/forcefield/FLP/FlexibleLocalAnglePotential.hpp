@@ -146,11 +146,11 @@ class FlexibleLocalAnglePotential
     {
         constexpr real_type one_over_six = real_type(1.0) / real_type(6.0);
 
-        std::size_t n = std::floor((th - min_theta) * rdtheta);
+        std::size_t n = std::min<std::size_t>(9, std::floor((th - min_theta) * rdtheta));
 
         if     (thetas[n+1] < th) {n++;}
         else if(th <   thetas[n]) {n--;}
-        assert(n < 9);
+        assert(n <= 9);
         assert(thetas[n] <= th && th <= thetas[n+1]);
 
         const real_type a = (thetas[n+1] - th) * rdtheta;
@@ -168,11 +168,11 @@ class FlexibleLocalAnglePotential
     {
         constexpr real_type one_over_six = real_type(1.0) / real_type(6.0);
 
-        std::size_t n = std::floor((th - min_theta) * rdtheta);
+        std::size_t n = std::min<std::size_t>(9, std::floor((th - min_theta) * rdtheta));
 
         if     (thetas[n+1] < th) {n++;}
         else if(th <   thetas[n]) {n--;}
-        assert(n < 9);
+        assert(n <= 9);
         assert(thetas[n] <= th && th <= thetas[n+1]);
 
         const real_type a = (thetas[n+1] - th) * rdtheta;

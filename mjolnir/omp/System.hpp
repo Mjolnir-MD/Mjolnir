@@ -37,15 +37,16 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
   public:
 
     System(const std::size_t num_particles, const boundary_type& bound)
-        : velocity_initialized_(false), boundary_(bound),
-          attributes_(), num_particles_(num_particles),
+        : velocity_initialized_(false), force_initialized_(false),
+          boundary_(bound), attributes_(), num_particles_(num_particles),
           masses_   (num_particles), rmasses_   (num_particles),
           positions_(num_particles), velocities_(num_particles),
           forces_main_(num_particles),
           forces_threads_(omp_get_max_threads(),
-              coordinate_container_type(num_particles),
+              coordinate_container_type(num_particles,
+                  math::make_coordinate<coordinate_type>(0,0,0)),
               cache_aligned_allocator<coordinate_container_type>{}),
-          names_    (num_particles), groups_    (num_particles)
+          names_(num_particles), groups_(num_particles)
     {}
     ~System() = default;
 
@@ -86,9 +87,8 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
         return;
     }
 
-
-    coordinate_type adjust_direction(coordinate_type dr) const noexcept
-    {return boundary_.adjust_direction(dr);}
+    coordinate_type adjust_direction(coordinate_type from, coordinate_type to) const noexcept
+    {return boundary_.adjust_direction(from, to);}
     coordinate_type  adjust_position(coordinate_type dr) const noexcept
     {return boundary_.adjust_position(dr);}
 
@@ -193,12 +193,16 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     bool  velocity_initialized() const noexcept {return velocity_initialized_;}
     bool& velocity_initialized()       noexcept {return velocity_initialized_;}
 
+    // force_main is initialized or not. force_thread does not matter.
+    bool  force_initialized() const noexcept {return force_initialized_;}
+    bool& force_initialized()       noexcept {return force_initialized_;}
+
     coordinate_container_type const& forces() const noexcept {return forces_main_;}
     coordinate_container_type&       forces()       noexcept {return forces_main_;}
 
   private:
 
-    bool           velocity_initialized_;
+    bool           velocity_initialized_, force_initialized_;
     boundary_type  boundary_;
     attribute_type attributes_;
 

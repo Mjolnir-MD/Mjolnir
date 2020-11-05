@@ -33,8 +33,11 @@ class ForceFieldBase
     virtual void calc_force(system_type& sys) const noexcept = 0;
     virtual real_type calc_energy(const system_type& sys) const noexcept = 0;
 
-    virtual std::vector<std::string> list_energy_name() const = 0;
-    virtual std::vector<real_type> dump_energy(const system_type& sys) const = 0;
+    // format names of all the interactions for .ene file. must not contain '\n'.
+    virtual void format_energy_name(std::string&) const = 0;
+    // format all energies and related stuff for .ene file. must not contain '\n'.
+    // returns the total energy as the return value.
+    virtual real_type format_energy(const system_type&, std::string&) const = 0;
 
     virtual topology_type const& topology() const noexcept = 0;
 

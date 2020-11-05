@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_CORE_LOADER_BASE_HPP
 #define MJOLNIR_CORE_LOADER_BASE_HPP
+#include <mjolnir/util/binary_io.hpp>
 #include <fstream>
 #include <string>
 
@@ -38,22 +39,6 @@ class LoaderBase
     virtual std::string const& filename() const noexcept = 0;
 };
 
-namespace detail
-{
-// it is a helper function to read value as an array of bytes
-template<typename T>
-T read_bytes_as(std::istream& os)
-{
-    T v;
-    os.read(reinterpret_cast<char*>(std::addressof(v)), sizeof(T));
-    return v;
-}
-inline void skip_bytes(std::istream& os, std::size_t N)
-{
-    os.ignore(N);
-    return;
-}
-} // detail
 } // mjolnir
 
 #ifdef MJOLNIR_SEPARATE_BUILD

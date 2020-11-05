@@ -1,18 +1,19 @@
-#ifndef MJOLNIR_CORE_MSGPACK_OBSERVER_HPP
-#define MJOLNIR_CORE_MSGPACK_OBSERVER_HPP
+#ifndef MJOLNIR_CORE_MSGPACK_SAVER_HPP
+#define MJOLNIR_CORE_MSGPACK_SAVER_HPP
 #include <mjolnir/util/macro.hpp>
-#include <mjolnir/core/ObserverBase.hpp>
-#include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/util/binary_io.hpp>
+#include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <mjolnir/core/System.hpp>
-#include <mjolnir/core/Unit.hpp>
 #include <fstream>
 #include <iomanip>
 
 namespace mjolnir
 {
 
-// Serialize System into MsgPack format that is equivalent to the following JSON
+// Serialize System and RNG into the following MsgPack format.
 // In the current implementation, the order should be preserved.
+//
+// system:
 // fixmap<3> {
 //     "boundary"     : fixmap<2>{"lower": [real, real, real],
 //                                "upper": [real, real, real]}
@@ -29,56 +30,58 @@ namespace mjolnir
 //     ]
 //     "attributres"  : map<N>{"temperature": real, ...},
 // }
+//
+// rng:
+// fixmap<1>{"internal_state": string}
 
 template<typename traitsT>
-class MsgPackObserver final : public ObserverBase<traitsT>
+class MsgPackSaver
 {
   public:
-    using base_type         = ObserverBase<traitsT>;
-    using traits_type       = typename base_type::traits_type;
-    using real_type         = typename base_type::real_type;
-    using coordinate_type   = typename base_type::coordinate_type;
-    using system_type       = typename base_type::system_type;
-    using forcefield_type   = typename base_type::forcefield_type;
-
-    // system attribute container type. map-like class.
-    using attribute_type    = typename system_type::attribute_type;
+    using traits_type     = traitsT;
+    using real_type       = typename traits_type::real_type;
+    using coordinate_type = typename traits_type::coordinate_type;
+    using system_type     = System<traits_type>;
+    using attribute_type  = typename system_type::attribute_type;
+    using rng_type        = RandomNumberGenerator<traits_type>;
 
   public:
 
-    explicit MsgPackObserver(const std::string& filename_prefix)
-      : base_type(), prefix_(filename_prefix),
-        filename_(filename_prefix + std::string(".msg"))
+    explicit MsgPackSaver(const std::string& filename_prefix)
+      : prefix_(filename_prefix)
     {}
-    ~MsgPackObserver() override {}
+    ~MsgPackSaver() {}
 
-    void initialize(const std::size_t,  const real_type,
-                    const system_type&, const forcefield_type&) override
+    void save(const rng_type& rng)
     {
-        MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_LOG_FUNCTION();
-        MJOLNIR_LOG_NOTICE("checkpoint file is ", filename_);
+        // sometimes we need both x_rng1.msg and x_rng2.msg...
+        return this->save(rng, "_rng");
+    }
+    void save(const rng_type& rng, const std::string& suffix)
+    {
+        constexpr std::uint8_t fixmap1_code = 0x81;
+        this->buffer_.clear();
+        this->buffer_.push_back(fixmap1_code);
 
-        // check the specified file can be opened.
-        // Here, it does not clear the content.
-        std::ofstream ofs(filename_, std::ios_base::app);
+        to_msgpack("internal_state");
+        to_msgpack(rng.internal_state());
+
+        const auto filename = prefix_ + suffix + std::string(".msg");
+        std::ofstream ofs(filename, std::ios::binary);
         if(!ofs.good())
         {
-            MJOLNIR_LOG_ERROR("file open error: ", filename_);
-            throw std::runtime_error("file open error");
+            throw std::runtime_error("file open error: " + filename);
         }
+        ofs.write(reinterpret_cast<const char*>(buffer_.data()),buffer_.size());
         ofs.close();
         return;
     }
 
-    void update(const std::size_t,  const real_type,
-                const system_type&, const forcefield_type&) override
+    void save(const system_type& sys)
     {
-        return; // do nothing.
+        return this->save(sys, "_system");
     }
-
-    void output(const std::size_t, const real_type,
-                const system_type& sys, const forcefield_type&) override
+    void save(const system_type& sys, const std::string& suffix)
     {
         // 0b'1000'0011
         // 0x    8    3
@@ -147,24 +150,18 @@ class MsgPackObserver final : public ObserverBase<traitsT>
         // -------------------------------------------------------------------
         // overwrite .msg file by the current status
 
-        std::ofstream ofs(filename_);
+        const std::string filename = prefix_ + suffix + std::string(".msg");
+        std::ofstream ofs(filename, std::ios::binary);
         if(!ofs.good())
         {
-            throw std::runtime_error("file open error: " + filename_);
+            throw std::runtime_error("file open error: " + filename);
         }
         ofs.write(reinterpret_cast<const char*>(buffer_.data()),buffer_.size());
         ofs.close();
         return;
     }
 
-    void finalize(const std::size_t step, const real_type t,
-                  const system_type& sys, const forcefield_type& ff) override
-    {
-        this->output(step, t, sys, ff);
-        return;
-    }
-
-    std::string const& prefix() const noexcept override {return prefix_;}
+    std::string const& prefix() const noexcept {return prefix_;}
 
   private:
 
@@ -308,15 +305,15 @@ class MsgPackObserver final : public ObserverBase<traitsT>
   private:
 
     std::string prefix_;
-    std::string filename_;
     std::vector<std::uint8_t> buffer_;
 };
+
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class MsgPackObserver<SimulatorTraits<double, UnlimitedBoundary>       >;
-extern template class MsgPackObserver<SimulatorTraits<float,  UnlimitedBoundary>       >;
-extern template class MsgPackObserver<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-extern template class MsgPackObserver<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+extern template class MsgPackSaver<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class MsgPackSaver<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class MsgPackSaver<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class MsgPackSaver<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 #endif
 
 } // mjolnir
-#endif // MJOLNIR_CORE_MSGPACK_OBSERVER_HPP
+#endif // MJOLNIR_CORE_MSGPACK_SAVER_HPP

@@ -52,7 +52,7 @@ class BondLengthInteraction<
             const auto&       pot  = idxp.second;
 
             const auto dpos =
-                sys.adjust_direction(sys.position(idx1) - sys.position(idx0));
+                sys.adjust_direction(sys.position(idx0), sys.position(idx1));
 
             const real_type len2  = math::length_sq(dpos);
             if(pot.cutoff() * pot.cutoff() <= len2)
@@ -79,7 +79,7 @@ class BondLengthInteraction<
         for(const auto& idxp : this->potentials_)
         {
             E += idxp.second.potential(math::length(sys.adjust_direction(
-                    sys.position(idxp.first[1]) - sys.position(idxp.first[0]))));
+                    sys.position(idxp.first[0]), sys.position(idxp.first[1]))));
         }
         return E;
     }
@@ -93,7 +93,7 @@ class BondLengthInteraction<
             const auto&       pot  = idxp.second;
 
             const auto dpos =
-                sys.adjust_direction(sys.position(idx1) - sys.position(idx0));
+                sys.adjust_direction(sys.position(idx0), sys.position(idx1));
 
             const real_type len2 = math::length_sq(dpos);
             if(pot.cutoff() * pot.cutoff() <= len2)

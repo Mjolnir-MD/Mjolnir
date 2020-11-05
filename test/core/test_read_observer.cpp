@@ -26,14 +26,12 @@ BOOST_AUTO_TEST_CASE(read_observer)
         )"_toml);
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs.observers().size() == 3u);
+        BOOST_TEST(obs.observers().size() == 2u);
         BOOST_TEST(obs.observers().at(0)->prefix() == "./test");
         BOOST_TEST(obs.observers().at(1)->prefix() == "./test");
-        BOOST_TEST(obs.observers().at(2)->prefix() == "./test");
 
         bool has_xyz = false;
         bool has_ene = false;
-        bool has_msg = false;
         for(const auto& ptr : obs.observers())
         {
             const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(ptr.get());
@@ -46,16 +44,10 @@ BOOST_AUTO_TEST_CASE(read_observer)
             {
                 has_ene = true;
             }
-            const auto msg = dynamic_cast<mjolnir::MsgPackObserver<traits_type>*>(ptr.get());
-            if(static_cast<bool>(msg))
-            {
-                has_msg = true;
-            }
         }
 
         BOOST_TEST(has_xyz);
         BOOST_TEST(has_ene);
-        BOOST_TEST(has_msg);
     }
     {
         using namespace toml::literals;
@@ -66,14 +58,12 @@ BOOST_AUTO_TEST_CASE(read_observer)
         )"_toml);
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs.observers().size() == 3u);
+        BOOST_TEST(obs.observers().size() == 2u);
         BOOST_TEST(obs.observers().at(0)->prefix() == "./test");
         BOOST_TEST(obs.observers().at(1)->prefix() == "./test");
-        BOOST_TEST(obs.observers().at(2)->prefix() == "./test");
 
         bool has_xyz = false;
         bool has_ene = false;
-        bool has_msg = false;
         for(const auto& ptr : obs.observers())
         {
             const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(ptr.get());
@@ -86,15 +76,9 @@ BOOST_AUTO_TEST_CASE(read_observer)
             {
                 has_ene = true;
             }
-            const auto msg = dynamic_cast<mjolnir::MsgPackObserver<traits_type>*>(ptr.get());
-            if(static_cast<bool>(msg))
-            {
-                has_msg = true;
-            }
         }
         BOOST_TEST(has_xyz);
         BOOST_TEST(has_ene);
-        BOOST_TEST(has_msg);
     }
 
     // XXX
@@ -113,14 +97,12 @@ BOOST_AUTO_TEST_CASE(read_observer)
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
 
-        BOOST_TEST(obs.observers().size() == 3u);
+        BOOST_TEST(obs.observers().size() == 2u);
         BOOST_TEST(obs.observers().at(0)->prefix() == "./test/test");
         BOOST_TEST(obs.observers().at(1)->prefix() == "./test/test");
-        BOOST_TEST(obs.observers().at(2)->prefix() == "./test/test");
 
         bool has_xyz = false;
         bool has_ene = false;
-        bool has_msg = false;
         for(const auto& ptr : obs.observers())
         {
             const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(ptr.get());
@@ -133,15 +115,9 @@ BOOST_AUTO_TEST_CASE(read_observer)
             {
                 has_ene = true;
             }
-            const auto msg = dynamic_cast<mjolnir::MsgPackObserver<traits_type>*>(ptr.get());
-            if(static_cast<bool>(msg))
-            {
-                has_msg = true;
-            }
         }
         BOOST_TEST(has_xyz);
         BOOST_TEST(has_ene);
-        BOOST_TEST(has_msg);
     }
 }
 
@@ -162,11 +138,10 @@ BOOST_AUTO_TEST_CASE(read_xyz_observer)
         )"_toml);
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs.observers().size() == 3u);
+        BOOST_TEST(obs.observers().size() == 2u);
 
         bool has_xyz = false;
         bool has_ene = false;
-        bool has_msg = false;
         for(const auto& ptr : obs.observers())
         {
             const auto xyz = dynamic_cast<mjolnir::XYZObserver<traits_type>*>(ptr.get());
@@ -179,15 +154,9 @@ BOOST_AUTO_TEST_CASE(read_xyz_observer)
             {
                 has_ene = true;
             }
-            const auto msg = dynamic_cast<mjolnir::MsgPackObserver<traits_type>*>(ptr.get());
-            if(static_cast<bool>(msg))
-            {
-                has_msg = true;
-            }
         }
         BOOST_TEST(has_xyz);
         BOOST_TEST(has_ene);
-        BOOST_TEST(has_msg);
     }
 }
 
@@ -208,11 +177,10 @@ BOOST_AUTO_TEST_CASE(read_dcd_observer)
         )"_toml);
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs.observers().size() == 3u);
+        BOOST_TEST(obs.observers().size() == 2u);
 
         bool has_dcd = false;
         bool has_ene = false;
-        bool has_msg = false;
         for(const auto& ptr : obs.observers())
         {
             const auto dcd = dynamic_cast<mjolnir::DCDObserver<traits_type>*>(ptr.get());
@@ -225,15 +193,9 @@ BOOST_AUTO_TEST_CASE(read_dcd_observer)
             {
                 has_ene = true;
             }
-            const auto msg = dynamic_cast<mjolnir::MsgPackObserver<traits_type>*>(ptr.get());
-            if(static_cast<bool>(msg))
-            {
-                has_msg = true;
-            }
         }
         BOOST_TEST(has_dcd);
         BOOST_TEST(has_ene);
-        BOOST_TEST(has_msg);
     }
 }
 
@@ -254,11 +216,10 @@ BOOST_AUTO_TEST_CASE(read_trr_observer)
         )"_toml);
 
         const auto obs = mjolnir::read_observer<traits_type>(v);
-        BOOST_TEST(obs.observers().size() == 3u);
+        BOOST_TEST(obs.observers().size() == 2u);
 
         bool has_trr = false;
         bool has_ene = false;
-        bool has_msg = false;
         for(const auto& ptr : obs.observers())
         {
             const auto trr = dynamic_cast<mjolnir::TRRObserver<traits_type>*>(ptr.get());
@@ -271,14 +232,8 @@ BOOST_AUTO_TEST_CASE(read_trr_observer)
             {
                 has_ene = true;
             }
-            const auto msg = dynamic_cast<mjolnir::MsgPackObserver<traits_type>*>(ptr.get());
-            if(static_cast<bool>(msg))
-            {
-                has_msg = true;
-            }
         }
         BOOST_TEST(has_trr);
         BOOST_TEST(has_ene);
-        BOOST_TEST(has_msg);
     }
 }

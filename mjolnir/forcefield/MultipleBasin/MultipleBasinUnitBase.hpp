@@ -54,8 +54,8 @@ class MultipleBasinUnitBase
     virtual void scale_margin (const real_type scale,   const system_type&) = 0;
 
     // energy output
-    virtual std::vector<std::string> list_energy_name() const = 0;
-    virtual std::vector<real_type>   dump_energy(const system_type&) const = 0;
+    virtual void format_energy_name(std::string&) const = 0;
+    virtual real_type format_energy(const system_type&, std::string&) const = 0;
 };
 
 } // mjolnir

@@ -101,9 +101,10 @@ class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, Potentia
     std::size_t calc_index(const coordinate_type& pos) const noexcept
     {
         const auto ofs = pos - this->lower_bound_;
-        return this->calc_index(std::floor(math::X(ofs) * this->r_x_),
-                                std::floor(math::Y(ofs) * this->r_y_),
-                                std::floor(math::Z(ofs) * this->r_z_));
+        return this->calc_index(// to avoid numeric error
+            std::min<std::size_t>(std::floor(math::X(ofs) * this->r_x_), dim_x_-1),
+            std::min<std::size_t>(std::floor(math::Y(ofs) * this->r_y_), dim_y_-1),
+            std::min<std::size_t>(std::floor(math::Z(ofs) * this->r_z_), dim_z_-1));
     }
 
     std::size_t calc_index(const std::size_t i, const std::size_t j,
@@ -237,7 +238,7 @@ void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbo
                 // particles are already filtered.
 
                 const auto& rj = sys.position(j);
-                if(math::length_sq(sys.adjust_direction(rj - ri)) < r_c2)
+                if(math::length_sq(sys.adjust_direction(ri, rj)) < r_c2)
                 {
                     MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
                     partner.emplace_back(j, pot.prepare_params(i, j));

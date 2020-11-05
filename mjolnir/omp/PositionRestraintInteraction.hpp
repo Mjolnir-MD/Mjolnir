@@ -51,7 +51,7 @@ class PositionRestraintInteraction<
             const auto& pot = std::get<2>(pots); // potential form
 
             const auto& r_i = sys.position(pid);
-            const auto  dr  = sys.adjust_direction(pos - r_i);
+            const auto  dr  = sys.adjust_direction(r_i, pos);
 
             const auto rlen = math::rlength(dr); // 1 / |dr|
             const auto dist = math::length_sq(dr) * rlen;
@@ -76,7 +76,7 @@ class PositionRestraintInteraction<
             const auto& pot = std::get<2>(pots); // potential form
 
             const auto& r_i = sys.position(pid);
-            const auto  dr  = sys.adjust_direction(pos - r_i);
+            const auto  dr  = sys.adjust_direction(r_i, pos);
 
             const auto dist = math::length(dr);
             E += pot.potential(dist);
@@ -97,7 +97,7 @@ class PositionRestraintInteraction<
             const auto& pot = std::get<2>(pots); // potential form
 
             const auto& r_i = sys.position(pid);
-            const auto  dr  = sys.adjust_direction(pos - r_i);
+            const auto  dr  = sys.adjust_direction(r_i, pos);
 
             const auto rlen = math::rlength(dr); // 1 / |dr|
             const auto dist = math::length_sq(dr) * rlen;

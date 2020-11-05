@@ -117,7 +117,7 @@ void VerletList<traitsT, potentialT>::make(neighbor_list_type& neighbors,
                 continue;
             }
             const auto& rj = sys.position(j);
-            if(math::length_sq(sys.adjust_direction(rj - ri)) < rc2)
+            if(math::length_sq(sys.adjust_direction(ri, rj)) < rc2)
             {
                 partner.emplace_back(j, pot.prepare_params(i, j));
             }

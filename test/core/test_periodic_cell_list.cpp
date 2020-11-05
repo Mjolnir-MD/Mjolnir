@@ -137,14 +137,14 @@ BOOST_AUTO_TEST_CASE(test_CellList_PeriodicBoundary)
             {
                 // should be enough distant (>= threshold)
                 const auto dist = mjolnir::math::length(sys.adjust_direction(
-                            sys.position(j) - sys.position(i)));
+                            sys.position(i), sys.position(j)));
                 BOOST_TEST(dist >= threshold);
             }
             else
             {
                 // should be enough close (< threshold)
                 const auto dist = mjolnir::math::length(sys.adjust_direction(
-                            sys.position(j) - sys.position(i)));
+                            sys.position(i), sys.position(j)));
                 BOOST_TEST(dist < threshold);
             }
         }
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_partial)
             {
                 // should be enough distant (>= threshold)
                 const auto dist = mjolnir::math::length(sys.adjust_direction(
-                            sys.position(j) - sys.position(i)));
+                            sys.position(i), sys.position(j)));
                 const bool enough_distant = dist >= threshold;
 
                 // or not a participant
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_partial)
 
                 // should be enough close (< threshold)
                 const auto dist = mjolnir::math::length(sys.adjust_direction(
-                            sys.position(j) - sys.position(i)));
+                            sys.position(i), sys.position(j)));
                 BOOST_TEST(dist < threshold);
             }
         }
@@ -325,7 +325,7 @@ BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_partial_2)
             {
                 // should be enough distant (>= threshold)
                 const auto dist = mjolnir::math::length(sys.adjust_direction(
-                            sys.position(j) - sys.position(i)));
+                            sys.position(i), sys.position(j)));
                 const bool enough_distant = dist >= threshold;
 
                 // or not a participant
@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_partial_2)
 
                 // should be enough close (< threshold)
                 const auto dist = mjolnir::math::length(sys.adjust_direction(
-                            sys.position(j) - sys.position(i)));
+                            sys.position(i), sys.position(j)));
                 BOOST_TEST(dist < threshold);
             }
         }

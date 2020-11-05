@@ -21,6 +21,7 @@
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/make_unique.hpp>
+#include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
 
 namespace mjolnir
@@ -409,10 +410,30 @@ read_local_potential(const toml::value& local)
     retval.reserve(params.size());
     for(const auto& item : params)
     {
-        const auto offset = find_parameter_or<std::int64_t>(item, env, "offset", 0);
+        const auto offset = find_parameter_or<toml::value>(item, env, "offset", toml::value(0));
 
         auto indices = find_parameter<indices_t>(item, env, "indices");
-        for(auto& i : indices) {i += offset;}
+
+        if(offset.is_array())
+        {
+            if(offset.size() != indices.size())
+            {
+                throw_exception<std::runtime_error>("[error] "
+                    "mjolnir::read_local_potentials:",
+                    "invalid size of offset array", offset.size(), "here",
+                    "the size of offset array must much to the size of indices array.",
+                    "expected value is ", indices.size(), ".");
+            }
+
+            for(std::size_t i=0; i<indices.size(); ++i)
+            {
+                indices[i] += offset[i].as_integer();
+            }
+        }
+        else
+        {
+            for(auto& i : indices) {i += offset.as_integer();}
+        }
 
         MJOLNIR_LOG_INFO_NO_LF("idxs = ", indices, ", ");
 
@@ -452,10 +473,32 @@ read_local_potentials(const toml::value& local,
         using potential_1_type = potential1T<real_type>;
         using potential_2_type = potential2T<real_type>;
 
-        const auto offset = find_parameter_or<std::int64_t>(item, env, "offset", 0);
+        const auto offset = find_parameter_or<toml::value>(item, env, "offset", toml::value(0));
 
         auto indices = find_parameter<indices_type>(item, env, "indices");
-        for(auto& i : indices) {i += offset;}
+
+        if(offset.is_array())
+        {
+            if(offset.size() != indices.size())
+            {
+                throw_exception<std::runtime_error>("[error] "
+                    "mjolnir::read_local_potentials:",
+                    "invalid size of offset array", offset.size(), "here",
+                    "the size of offset array must much to the size of indices array.",
+                    "expected value is ", indices.size(), ".");
+            }
+
+            for(std::size_t i=0; i<indices.size(); ++i)
+            {
+                indices[i] += offset[i].as_integer();
+            }
+        }
+        else
+        {
+            for(auto& i : indices) {i += offset.as_integer();}
+        }
+
+
         MJOLNIR_LOG_INFO("idxs = ", indices);
 
         const auto& pot1 = find_parameter<toml::value>(item, env, pot1_name);
