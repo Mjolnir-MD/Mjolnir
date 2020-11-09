@@ -207,7 +207,7 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
             const index_type j     = ptnr.index;
             const index_type idx_b = idx_buffer_map[j];
             const coordinate_type rij =
-               sys.adjust_direction(sys.position(j) - sys.position(i));
+               sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type       l2    = math::length_sq(rij); // |rij|^2
             const real_type       rl    = math::rsqrt(l2);      // 1 / |rij|
             const coordinate_type e     = rij * rl;             // rij / |rij|
@@ -300,7 +300,7 @@ GlobalStoichiometricInteraction<traitsT>::calc_energy(const system_type& sys) co
             const index_type j     = ptnr.index;
             const index_type idx_b = idx_buffer_map[j];
             const coordinate_type rij =
-                sys.adjust_direction(sys.position(j) - sys.position(i));
+                sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type l2  = math::length_sq(rij); // |rij|^2
             const real_type rl  = math::rsqrt(l2);      // 1 / |rij|
             const real_type l   = l2 * rl;              // |rij|
@@ -366,7 +366,7 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
             const index_type j     = ptnr.index;
             const index_type idx_b = idx_buffer_map[j];
             const coordinate_type rij =
-               sys.adjust_direction(sys.position(j) - sys.position(i));
+               sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type       l2    = math::length_sq(rij); // |rij|^2
             const real_type       rl    = math::rsqrt(l2);      // 1 / |rij|
             const coordinate_type e     = rij * rl;             // rij / |rij|
