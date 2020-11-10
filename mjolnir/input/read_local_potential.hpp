@@ -14,6 +14,7 @@
 #include <mjolnir/forcefield/local/SumLocalPotential.hpp>
 #include <mjolnir/forcefield/local/UniformPotential.hpp>
 #include <mjolnir/forcefield/local/WormLikeChainPotential.hpp>
+#include <mjolnir/forcefield/local/WormLikeChainOffsetPotential.hpp>
 #include <mjolnir/forcefield/FLP/FlexibleLocalAnglePotential.hpp>
 #include <mjolnir/forcefield/FLP/FlexibleLocalDihedralPotential.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BondPotential.hpp>
@@ -242,6 +243,23 @@ read_worm_like_chain_potential(const toml::value& param, const toml::value& env)
 }
 
 template<typename realT>
+WormLikeChainOffsetPotential<realT>
+read_worm_like_chain_offset_potential(const toml::value& param, const toml::value& env)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    using real_type = realT;
+    check_keys_available(param, {"indices", "p", "lc", "offset", "dist_offset"});
+
+    auto p        = find_parameter<real_type>(param, env, "p");
+    auto lc       = find_parameter<real_type>(param, env, "lc");
+    auto dist_ofs = find_parameter<real_type>(param, env, "dist_offset");
+
+    MJOLNIR_LOG_INFO("WormLikeChainOffsetPotential = {p = ", p, ", lc = ", lc, "dist_offset", dist_ofs, "}");
+    return WormLikeChainOffsetPotential<realT>(p, lc, dist_ofs);
+}
+
+
+template<typename realT>
 ThreeSPN2BondPotential<realT>
 read_3spn2_bond_potential(const toml::value& param, const toml::value& env)
 {
@@ -375,6 +393,15 @@ struct read_local_potential_impl<WormLikeChainPotential<realT>>
     invoke(const toml::value& param, const toml::value& env)
     {
         return read_worm_like_chain_potential<realT>(param, env);
+    }
+};
+template<typename realT>
+struct read_local_potential_impl<WormLikeChainOffsetPotential<realT>>
+{
+    static WormLikeChainOffsetPotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
+    {
+        return read_worm_like_chain_offset_potential<realT>(param, env);
     }
 };
 template<typename realT>
