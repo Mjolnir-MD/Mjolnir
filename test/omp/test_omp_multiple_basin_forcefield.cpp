@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_2Basin_numerical_difference)
             std::make_tuple(std::move(locc), std::move(gloc), std::move(extc)),
             std::move(units));
 
-    for(std::size_t i = 0; i < 1000; ++i)
+    for(std::size_t i = 0; i < 100; ++i)
     {
         system_type sys(2, boundary_type{});
 
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_2Basin_consistency)
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
 
-    for(std::size_t i = 0; i < 1000; ++i)
+    for(std::size_t i = 0; i < 100; ++i)
     {
         system_type         sys_openmp (Nparticle, boundary_type{});
         default_system_type sys_default(Nparticle, boundary_type{});
@@ -347,7 +347,7 @@ BOOST_AUTO_TEST_CASE(MultipleBasin_3Basin_numerical_difference)
             std::make_tuple(std::move(locc), std::move(gloc), std::move(extc)),
             std::move(units));
 
-    for(std::size_t i = 0; i < 1000; ++i)
+    for(std::size_t i = 0; i < 100; ++i)
     {
         system_type sys(2, boundary_type{});
 
@@ -543,7 +543,7 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_3Basin_consistency)
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
 
-    for(std::size_t i = 0; i < 1000; ++i)
+    for(std::size_t i = 0; i < 100; ++i)
     {
         system_type         sys_openmp (Nparticle, boundary_type{});
         default_system_type sys_default(Nparticle, boundary_type{});
