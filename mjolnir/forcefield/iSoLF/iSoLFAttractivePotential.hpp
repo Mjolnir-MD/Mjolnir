@@ -130,7 +130,7 @@ class iSoLFAttractivePotential
         const real_type romega = std::get<3>(p); // 1 / 2omega_ij
         const real_type sine   = std::sin(2 * pi * romega * r_sigma_rc);
 
-        return -epsilon * pi * romega * sine;
+        return epsilon * pi * romega * sine;
     }
 
     real_type cutoff_ratio()   const noexcept {return std::numeric_limits<real_type>::infinity();}
