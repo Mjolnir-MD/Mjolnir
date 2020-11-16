@@ -1,4 +1,4 @@
-#include <mjolnir/core/GBAOABLangevinIntegrator.hpp>
+#include <mjolnir/core/gBAOABLangevinIntegrator.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

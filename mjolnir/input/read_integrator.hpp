@@ -4,7 +4,7 @@
 #include <mjolnir/core/VelocityVerletIntegrator.hpp>
 #include <mjolnir/core/UnderdampedLangevinIntegrator.hpp>
 #include <mjolnir/core/BAOABLangevinIntegrator.hpp>
-#include <mjolnir/core/GBAOABLangevinIntegrator.hpp>
+#include <mjolnir/core/gBAOABLangevinIntegrator.hpp>
 #include <mjolnir/core/SystemMotionRemover.hpp>
 #include <mjolnir/input/utility.hpp>
 #include <mjolnir/util/logger.hpp>
