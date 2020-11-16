@@ -91,6 +91,16 @@ read_global_pair_interaction(const toml::value& global)
             read_uniform_lennard_jones_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
+    else if(potential == "WCA")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is WCA.");
+        using potential_t   = WCAPotential<traitsT>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+
+        return make_unique<interaction_t>(
+            read_wca_potential<traitsT>(global),
+            read_spatial_partition<traitsT, potential_t>(global));
+    }
     else if(potential == "3SPN2ExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is 3SPN2ExcludedVolume.");
