@@ -9,6 +9,7 @@ set(mjolnir_forcefield_global_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/HardCoreExcludedVolumePotential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/LennardJonesPotential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/UniformLennardJonesPotential.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/WCAPotential.cpp"
     )
 set(mjolnir_forcefield_cpp_files
     ${mjolnir_forcefield_cpp_files}
