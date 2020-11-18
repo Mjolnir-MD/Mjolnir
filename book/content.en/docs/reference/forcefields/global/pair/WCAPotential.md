@@ -1,9 +1,9 @@
 +++
-title = "LennardJones"
+title = "WCA"
 weight = 100000
 +++
 
-# LennardJonesPotential
+# WCAPotential
 
 The well-known WCA (Weeks-Chandler-Andersen) potential. It is 
 
