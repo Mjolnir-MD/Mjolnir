@@ -229,6 +229,14 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
             // make the result consistent with NaivePairCalculation...
             std::sort(partner.begin(), partner.end());
             neighbors.add_list_for(i, partner.begin(), partner.end());
+
+            // approximate the memory usage and avoid frequent memory allocation.
+            // This block is just for efficiency, and does not affect on the result.
+            if(idx == 16)
+            {
+                neighbors.reserve(neighbors.num_neighbors() / 16,
+                                  leading_participants.size(), sys.size());
+            }
         }
         this->current_margin_ = cutoff_ * margin_;
         return ;

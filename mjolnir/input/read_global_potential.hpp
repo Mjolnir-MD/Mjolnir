@@ -211,7 +211,7 @@ read_excluded_volume_potential(const toml::value& global)
     for(const auto& param : ps)
     {
         const auto idx    = find_parameter<std::size_t>(param, env, "index") +
-                            find_parameter_or<std::size_t>(param, env, "offset", 0);
+                            find_parameter_or<std::int64_t>(param, env, "offset", 0);
         const auto radius = find_parameter<real_type  >(param, env, "radius");
 
         params.emplace_back(idx, radius);
@@ -255,7 +255,7 @@ read_inverse_power_potential(const toml::value& global)
     for(const auto& param : ps)
     {
         const auto idx    = find_parameter<std::size_t>(param, env, "index") +
-                            find_parameter_or<std::size_t>(param, env, "offset", 0);
+                            find_parameter_or<std::int64_t>(param, env, "offset", 0);
         const auto radius = find_parameter<real_type  >(param, env, "radius");
 
         params.emplace_back(idx, radius);
@@ -295,7 +295,7 @@ read_hard_core_excluded_volume_potential(const toml::value& global)
     for(const auto& param : ps)
     {
         const auto idx = find_parameter<std::size_t>(param, env, "index") +
-                         find_parameter_or<std::size_t>(param, env, "offset", 0);
+                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
 
         const auto core_radius          =
             find_parameter<real_type>(param, env, "core_radius");
@@ -338,7 +338,7 @@ read_lennard_jones_potential(const toml::value& global)
     for(const auto& param : ps)
     {
         const auto idx     = find_parameter<std::size_t>(param, env, "index") +
-                             find_parameter_or<std::size_t>(param, env, "offset", 0);
+                             find_parameter_or<std::int64_t>(param, env, "offset", 0);
         const auto sigma   = find_parameter<real_type>(param, env, "sigma",   u8"σ");
         const auto epsilon = find_parameter<real_type>(param, env, "epsilon", u8"ε");
 
@@ -383,7 +383,7 @@ read_uniform_lennard_jones_potential(const toml::value& global)
         for(const auto& param : parameters)
         {
             const auto idx = find_parameter<std::size_t>(param, env, "index") +
-                             find_parameter_or<std::size_t>(param, env, "offset", 0);
+                             find_parameter_or<std::int64_t>(param, env, "offset", 0);
             params.emplace_back(idx, parameter_type{});
         }
         check_parameter_overlap(env, parameters, params);
@@ -465,7 +465,7 @@ read_debye_huckel_potential(const toml::value& global)
     for(const auto& param : ps)
     {
         const auto idx = find_parameter<std::size_t>(param, env, "index") +
-                         find_parameter_or<std::size_t>(param, env, "offset", 0);
+                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
         const auto charge = find_parameter<real_type  >(param, env, "charge");
 
         params.emplace_back(idx, parameter_type{charge});
@@ -500,7 +500,7 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
     for(const auto& param : ps)
     {
         const auto idx = find_parameter<std::size_t>(param, env, "index") +
-                         find_parameter_or<std::size_t>(param, env, "offset", 0);
+                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
 
         const auto kind = toml::find<std::string>(param, "kind");
         if(kind != "S" && kind != "P" &&
