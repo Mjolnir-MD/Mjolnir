@@ -49,10 +49,6 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
         pot_sum_b_      .resize(participants_b_num);
         pot_deriv_sum_a_.resize(participants_a_num);
         pot_deriv_sum_b_.resize(participants_b_num);
-        activated_a_    .resize(participants_a_num);
-        activated_b_    .resize(participants_b_num);
-        act_deriv_a_    .resize(participants_a_num);
-        act_deriv_b_    .resize(participants_b_num);
     }
     ~GlobalStoichiometricInteraction() {}
 
@@ -113,27 +109,6 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
     }
 
   private:
-    real_type activation_func(const real_type x) const noexcept
-    {
-        // This function correspond to
-        //                     0             (x < -1)
-        // sigma(x) =  1/4 (2 + 3x - x^3)    (-1 <= x <= 1)
-        //                     1             (1 < x)
-
-        if(x < -1.0){return 0;}
-        if(1.0 < x) {return 1;}
-        const real_type x_2 = x * x;
-        const real_type x_3 = x_2 * x;
-        return (2.0 + 3.0 * x - x_3) * 0.25;
-    }
-
-    real_type deriv_activation_func(const real_type x) const
-    {
-        if(x < -1.0 || 1.0 < x){return 0;}
-        return 0.75 - 0.75 * x * x;
-    }
-
-  private:
 
     potential_type potential_;
     partition_type partition_;
@@ -158,15 +133,6 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
 
     // sum of derivation of potential function for specific second particle.
     mutable std::vector<coordinate_type>              pot_deriv_sum_b_;
-
-    // buffer container for pre calculated value of activation function for each particle.
-    mutable std::vector<real_type>                    activated_a_;
-    mutable std::vector<real_type>                    activated_b_;
-
-    // buffer container for pre calculated derivation value of activation function
-    // for each particle.
-    mutable std::vector<real_type>                    act_deriv_a_;
-    mutable std::vector<real_type>                    act_deriv_b_;
 };
 
 template<typename traitsT>
@@ -194,7 +160,7 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
     std::fill(pot_deriv_sum_b_.begin(), pot_deriv_sum_b_.end(),
               math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
 
-    // pre calculation for pot_sum and pot_deriv_sumb for each particle.
+    // pre calculation for pot_sum and pot_deriv_sum for each particle.
     const auto leading_participants   = potential_.leading_participants();
     const auto followint_participants = potential_.following_participants();
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
@@ -223,20 +189,6 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
         }
     }
 
-    // pre calculation for the value of activated function for each particle.
-    for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
-    {
-        const real_type x   = 2.0 * (coefb_ + 0.5 - pot_sum_a_[idx_a]);
-        activated_a_[idx_a] = activation_func(x);
-        act_deriv_a_[idx_a] = deriv_activation_func(x);
-    }
-    for(std::size_t idx_b=0; idx_b<participants_b_num; ++idx_b)
-    {
-        const real_type x   = 2.0 * (coefa_ + 0.5 - pot_sum_b_[idx_b]);
-        activated_b_[idx_b] = activation_func(x);
-        act_deriv_b_[idx_b] = deriv_activation_func(x);
-    }
-
     // force calculation
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
@@ -248,23 +200,38 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
             const index_type j     = ptnr.index;
             const index_type idx_b = idx_buffer_map[j];
             const real_type pots_buff_ab = pots_buff_a[idx_b];
-            const real_type activated_a  = activated_a_[idx_a];
-            const real_type activated_b  = activated_b_[idx_b];
             const coordinate_type& pot_derivs_buff_ab = pot_derivs_buff_a[idx_b];
-            const real_type term1_coef = activated_b * pots_buff_ab * act_deriv_a_[idx_a];
-            const real_type term2_coef = activated_a * pots_buff_ab * act_deriv_b_[idx_b];
-            const real_type term3_coef = activated_a * activated_b;
 
-            const index_type i = leading_participants[idx_a];
-            sys.force(i) += epsilon_ *
-                            (2.0 * term1_coef * pot_deriv_sum_a_[idx_a] +
-                            (2.0 * term2_coef - term3_coef) * pot_derivs_buff_ab);
-            sys.force(j) += epsilon_ *
-                            (2.0 * term2_coef * pot_deriv_sum_b_[idx_b] +
-                            (2.0 * term1_coef - term3_coef) * -pot_derivs_buff_ab);
+            const real_type max_pot_sum = std::max(pot_sum_a_[idx_a], pot_sum_b_[idx_b]);
+            if(max_pot_sum <= 1.0)
+            {
+                sys.force(i) -= pot_derivs_buff_ab;
+                sys.force(j) += pot_derivs_buff_ab;
+            }
+            else if(pot_sum_a_[idx_a] < pot_sum_b_[idx_b])
+            {
+                const real_type inv_pot_sum_b  = 1.0 / pot_sum_b_[idx_b];
+                const real_type inv_pot_sum_b2 = std::pow(inv_pot_sum_b, 2);
+                sys.force(i) += 
+                    pot_deriv_sum_a_[idx_a] * pots_buff_ab * inv_pot_sum_b2 -
+                    pot_derivs_buff_ab * inv_pot_sum_b;
+                sys.force(j) -=
+                    pot_derivs_buff_ab * pots_buff_ab * inv_pot_sum_b2 -
+                    pot_derivs_buff_ab * inv_pot_sum_b;
+            }
+            else // pot_sum_a_[idx_a] >= pot_sum_b_[idx_b] case
+            {
+                const real_type inv_pot_sum_a  = 1.0 / pot_sum_a_[idx_a];
+                const real_type inv_pot_sum_a2 = std::pow(inv_pot_sum_a, 2);
+                sys.force(i) +=
+                    pot_derivs_buff_ab * pots_buff_ab * inv_pot_sum_a2 -
+                    pot_derivs_buff_ab * inv_pot_sum_a;
+                sys.force(j) -=
+                    pot_deriv_sum_b_[idx_b] * pots_buff_ab * inv_pot_sum_a2 -
+                    pot_derivs_buff_ab * inv_pot_sum_a;
+            }
         }
     }
-
     return;
 }
 
@@ -319,7 +286,6 @@ GlobalStoichiometricInteraction<traitsT>::calc_energy(const system_type& sys) co
         {
             const real_type x_a = 2.0 * (coefb_ + 0.5 - pot_sum_a_[idx_a]);
             const real_type x_b = 2.0 * (coefa_ + 0.5 - pot_sum_b_[idx_b]);
-            retval += activation_func(x_a) * activation_func(x_b) * pots_buff_a[idx_b];
         }
     }
     retval *= -epsilon_;
@@ -382,20 +348,6 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
         }
     }
 
-    // pre calculation for the value of activated function for each particle.
-    for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
-    {
-        const real_type x   = 2.0 * (coefb_ + 0.5 - pot_sum_a_[idx_a]);
-        activated_a_[idx_a] = activation_func(x);
-        act_deriv_a_[idx_a] = deriv_activation_func(x);
-    }
-    for(std::size_t idx_b=0; idx_b<participants_b_num; ++idx_b)
-    {
-        const real_type x   = 2.0 * (coefa_ + 0.5 - pot_sum_b_[idx_b]);
-        activated_b_[idx_b] = activation_func(x);
-        act_deriv_b_[idx_b] = deriv_activation_func(x);
-    }
-
     // force calculation
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
@@ -407,20 +359,9 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
             const index_type j     = ptnr.index;
             const index_type idx_b = idx_buffer_map[j];
             const real_type pots_buff_ab = pots_buff_a[idx_b];
-            const real_type activated_a  = activated_a_[idx_a];
-            const real_type activated_b  = activated_b_[idx_b];
             const coordinate_type& pot_derivs_buff_ab = pot_derivs_buff_a[idx_b];
-            const real_type term1_coef = activated_b * pots_buff_ab * act_deriv_a_[idx_a];
-            const real_type term2_coef = activated_a * pots_buff_ab * act_deriv_b_[idx_b];
-            const real_type term3_coef = activated_a * activated_b;
 
             const index_type i = leading_participants[idx_a];
-            sys.force(i) += epsilon_ *
-                            (2.0 * term1_coef * pot_deriv_sum_a_[idx_a] +
-                            (2.0 * term2_coef - term3_coef) * pot_derivs_buff_ab);
-            sys.force(j) += epsilon_ *
-                            (2.0 * term2_coef * pot_deriv_sum_b_[idx_b] +
-                            (2.0 * term1_coef - term3_coef) * -pot_derivs_buff_ab);
         }
     }
 
@@ -432,7 +373,6 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
         {
             const real_type x_a = 2.0 * (coefb_ + 0.5 - pot_sum_a_[idx_a]);
             const real_type x_b = 2.0 * (coefa_ + 0.5 - pot_sum_b_[idx_b]);
-            retval += activation_func(x_a) * activation_func(x_b) * pots_buff_a[idx_b];
         }
     }
     retval *= -epsilon_;
