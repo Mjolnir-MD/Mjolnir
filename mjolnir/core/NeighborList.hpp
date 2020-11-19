@@ -228,6 +228,16 @@ class NeighborList
         return ;
     }
 
+    void reserve(const std::size_t approx_neighbors,
+                 const std::size_t num_participants,
+                 const std::size_t num_particles)
+    {
+        neighbors_.reserve(approx_neighbors * num_participants);
+        ranges_.reserve(num_particles);
+    }
+
+    std::size_t num_neighbors() const noexcept {return neighbors_.size();}
+
     range_type operator[](const std::size_t i) const noexcept
     {
         return range_type{
