@@ -138,11 +138,11 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
 template<typename traitsT>
 void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) const noexcept
 {
+    // TODO: refactoring division operation
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
 
     const std::size_t participants_a_num = potential_.participants_a_num();
-    const std::size_t participants_b_num = potential_.participants_b_num();
 
     // initialization of each buffering container.
     for(std::size_t idx=0; idx<participants_a_num; ++idx)
@@ -205,30 +205,30 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
             const real_type max_pot_sum = std::max(pot_sum_a_[idx_a], pot_sum_b_[idx_b]);
             if(max_pot_sum <= 1.0)
             {
-                sys.force(i) -= pot_derivs_buff_ab;
-                sys.force(j) += pot_derivs_buff_ab;
+                sys.force(i) -= epsilon_ * pot_derivs_buff_ab;
+                sys.force(j) += epsilon_ * pot_derivs_buff_ab;
             }
             else if(pot_sum_a_[idx_a] < pot_sum_b_[idx_b])
             {
                 const real_type inv_pot_sum_b  = 1.0 / pot_sum_b_[idx_b];
                 const real_type inv_pot_sum_b2 = std::pow(inv_pot_sum_b, 2);
                 sys.force(i) += 
-                    pot_deriv_sum_a_[idx_a] * pots_buff_ab * inv_pot_sum_b2 -
-                    pot_derivs_buff_ab * inv_pot_sum_b;
+                    epsilon_ * (pot_deriv_sum_a_[idx_a] * pots_buff_ab * inv_pot_sum_b2 -
+                    pot_derivs_buff_ab * inv_pot_sum_b);
                 sys.force(j) -=
-                    pot_derivs_buff_ab * pots_buff_ab * inv_pot_sum_b2 -
-                    pot_derivs_buff_ab * inv_pot_sum_b;
+                    epsilon_ * (pot_derivs_buff_ab * pots_buff_ab * inv_pot_sum_b2 -
+                    pot_derivs_buff_ab * inv_pot_sum_b);
             }
             else // pot_sum_a_[idx_a] >= pot_sum_b_[idx_b] case
             {
                 const real_type inv_pot_sum_a  = 1.0 / pot_sum_a_[idx_a];
                 const real_type inv_pot_sum_a2 = std::pow(inv_pot_sum_a, 2);
                 sys.force(i) +=
-                    pot_derivs_buff_ab * pots_buff_ab * inv_pot_sum_a2 -
-                    pot_derivs_buff_ab * inv_pot_sum_a;
+                    epsilon_ * (pot_derivs_buff_ab * pots_buff_ab * inv_pot_sum_a2 -
+                    pot_derivs_buff_ab * inv_pot_sum_a);
                 sys.force(j) -=
-                    pot_deriv_sum_b_[idx_b] * pots_buff_ab * inv_pot_sum_a2 -
-                    pot_derivs_buff_ab * inv_pot_sum_a;
+                    epsilon_ * (pot_deriv_sum_b_[idx_b] * pots_buff_ab * inv_pot_sum_a2 -
+                    pot_derivs_buff_ab * inv_pot_sum_a);
             }
         }
     }
@@ -239,6 +239,7 @@ template<typename traitsT>
 typename GlobalStoichiometricInteraction<traitsT>::real_type
 GlobalStoichiometricInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
 {
+    // TODO: refactoring division operation
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
 
@@ -284,8 +285,16 @@ GlobalStoichiometricInteraction<traitsT>::calc_energy(const system_type& sys) co
         const std::vector<real_type>& pots_buff_a = potentials_buff_[idx_a];
         for(std::size_t idx_b=0; idx_b<participants_b_num; ++idx_b)
         {
-            const real_type x_a = 2.0 * (coefb_ + 0.5 - pot_sum_a_[idx_a]);
-            const real_type x_b = 2.0 * (coefa_ + 0.5 - pot_sum_b_[idx_b]);
+            const real_type pots_buff_ab = pots_buff_a[idx_b];
+            const real_type max_pot_sum = std::max(pot_sum_a_[idx_a], pot_sum_b_[idx_b]);
+            if(max_pot_sum <= 1.0)
+            {
+                retval += pots_buff_ab;
+            }
+            else
+            {
+                retval += pots_buff_ab / max_pot_sum;
+            }
         }
     }
     retval *= -epsilon_;
@@ -297,6 +306,7 @@ template<typename traitsT>
 typename GlobalStoichiometricInteraction<traitsT>::real_type
 GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexcept
 {
+    // refactoring division operation
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
 
@@ -361,7 +371,34 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
             const real_type pots_buff_ab = pots_buff_a[idx_b];
             const coordinate_type& pot_derivs_buff_ab = pot_derivs_buff_a[idx_b];
 
-            const index_type i = leading_participants[idx_a];
+            const real_type max_pot_sum = std::max(pot_sum_a_[idx_a], pot_sum_b_[idx_b]);
+            if(max_pot_sum <= 1.0)
+            {
+                sys.force(i) -= epsilon_ * pot_derivs_buff_ab;
+                sys.force(j) += epsilon_ * pot_derivs_buff_ab;
+            }
+            else if(pot_sum_a_[idx_a] < pot_sum_b_[idx_b])
+            {
+                const real_type inv_pot_sum_b  = 1.0 / pot_sum_b_[idx_b];
+                const real_type inv_pot_sum_b2 = std::pow(inv_pot_sum_b, 2);
+                sys.force(i) += 
+                    epsilon_ * (pot_deriv_sum_a_[idx_a] * pots_buff_ab * inv_pot_sum_b2 -
+                    pot_derivs_buff_ab * inv_pot_sum_b);
+                sys.force(j) -=
+                    epsilon_ * (pot_derivs_buff_ab * pots_buff_ab * inv_pot_sum_b2 -
+                    pot_derivs_buff_ab * inv_pot_sum_b);
+            }
+            else // pot_sum_a_[idx_a] >= pot_sum_b_[idx_b] case
+            {
+                const real_type inv_pot_sum_a  = 1.0 / pot_sum_a_[idx_a];
+                const real_type inv_pot_sum_a2 = std::pow(inv_pot_sum_a, 2);
+                sys.force(i) +=
+                    epsilon_ * (pot_derivs_buff_ab * pots_buff_ab * inv_pot_sum_a2 -
+                    pot_derivs_buff_ab * inv_pot_sum_a);
+                sys.force(j) -=
+                    epsilon_ * (pot_deriv_sum_b_[idx_b] * pots_buff_ab * inv_pot_sum_a2 -
+                    pot_derivs_buff_ab * inv_pot_sum_a);
+            }
         }
     }
 
@@ -371,8 +408,16 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
         const std::vector<real_type>& pots_buff_a = potentials_buff_[idx_a];
         for(std::size_t idx_b=0; idx_b<participants_b_num; ++idx_b)
         {
-            const real_type x_a = 2.0 * (coefb_ + 0.5 - pot_sum_a_[idx_a]);
-            const real_type x_b = 2.0 * (coefa_ + 0.5 - pot_sum_b_[idx_b]);
+            const real_type pots_buff_ab = pots_buff_a[idx_b];
+            const real_type max_pot_sum = std::max(pot_sum_a_[idx_a], pot_sum_b_[idx_b]);
+            if(max_pot_sum <= 1.0)
+            {
+                retval += pots_buff_ab;
+            }
+            else
+            {
+                retval += pots_buff_ab / max_pot_sum;
+            }
         }
     }
     retval *= -epsilon_;
