@@ -25,6 +25,7 @@ set(TEST_NAMES
     test_3spn2_base_base_interaction_potential
     test_lennard_jones_potential
     test_uniform_lennard_jones_potential
+    test_wca_potential
     test_excluded_volume_potential
     test_inverse_power_potential
     test_hard_core_excluded_volume_potential
@@ -84,6 +85,7 @@ set(TEST_NAMES
     test_read_lennard_jones_potential
     test_read_uniform_lennard_jones_potential
     test_read_excluded_volume_wall_potential
+    test_read_wca_potential
     test_read_lennard_jones_wall_potential
     test_read_implicit_membrane_potential
     test_read_uniform_potential
