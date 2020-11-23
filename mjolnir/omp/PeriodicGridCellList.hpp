@@ -5,6 +5,8 @@
 #include <mjolnir/omp/sort.hpp>
 #include <mjolnir/core/PeriodicGridCellList.hpp>
 
+#include <omp.h>
+
 namespace mjolnir
 {
 
@@ -40,7 +42,11 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 
     PeriodicGridCellList()
         : cutoff_(0), margin_(1), current_margin_(-1),
-          r_x_(-1), r_y_(-1), r_z_(-1), dim_x_(0), dim_y_(0), dim_z_(0)
+          r_x_(-1), r_y_(-1), r_z_(-1), dim_x_(0), dim_y_(0), dim_z_(0),
+          offsets_threads_(omp_get_max_threads()),
+          partners_threads_(omp_get_max_threads()),
+          neighbors_threads_(omp_get_max_threads()),
+          nranges_threads_(omp_get_max_threads())
     {}
     ~PeriodicGridCellList() override {}
     PeriodicGridCellList(PeriodicGridCellList const&) = default;
@@ -50,7 +56,11 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 
     explicit PeriodicGridCellList(const real_type margin)
         : cutoff_(0), margin_(margin), current_margin_(-1),
-          r_x_(-1), r_y_(-1), r_z_(-1), dim_x_(0), dim_y_(0), dim_z_(0)
+          r_x_(-1), r_y_(-1), r_z_(-1), dim_x_(0), dim_y_(0), dim_z_(0),
+          offsets_threads_(omp_get_max_threads()),
+          partners_threads_(omp_get_max_threads()),
+          neighbors_threads_(omp_get_max_threads()),
+          nranges_threads_(omp_get_max_threads())
     {}
 
     bool valid() const noexcept override
@@ -160,14 +170,14 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         return;
     }
 
-    void make(neighbor_list_type& neighbors,
+    void make(neighbor_list_type& neighbor_list,
               const system_type& sys, const potential_type& pot) override
     {
         // `participants` is a list that contains indices of particles that are
         // related to the potential.
         const auto& participants = pot.participants();
 
-        neighbors.clear();
+        neighbor_list.clear();
         if(index_by_cell_    .size() != participants.size() ||
            index_by_cell_buf_.size() != participants.size())
         {
@@ -213,56 +223,120 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         const real_type r_c  = cutoff_ * (1. + margin_);
         const real_type r_c2 = r_c * r_c;
 
-//XXX ParallelNeighborList consumes quite a lot of memory resources and makes
-//XXX both construction and access slower (especially when system has a small
-//XXX number of particles). Because of this, after some benchmarking, I found
-//XXX that normal NeighborList works good for most of the cases. Some part of
-//XXX neighbor-list construction cannot be parallelized, but it becomes still
-//XXX faster.
         const auto leading_participants = pot.leading_participants();
 
-        std::vector<neighbor_type> partner;
-        for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
+        assert(std::is_sorted(leading_participants.begin(), leading_participants.end()));
+
+        constexpr std::size_t nil = std::numeric_limits<std::size_t>::max();
+        std::fill(offsets_threads_.begin(), offsets_threads_.end(), nil);
+
+#pragma omp parallel
         {
-            partner.clear();
-            const auto   i = leading_participants[idx];
-            const auto& ri = sys.position(i);
+            const std::size_t num_threads = omp_get_num_threads();
+            const std::size_t thread_id   = omp_get_thread_num();
 
-            const auto& cell = cell_list_[calc_index(ri)];
+            const std::size_t dN = leading_participants.size() / num_threads;
+            const std::size_t first = dN *  thread_id;
+            const std::size_t last  = (thread_id+1 == num_threads) ?
+                leading_participants.size() : dN * (thread_id+1);
 
-            for(std::size_t cidx : cell.second) // for all adjacent cells...
+            const std::size_t first_idx = leading_participants[first];
+            const std::size_t  last_idx = (thread_id+1 == num_threads) ?
+                leading_participants[leading_participants.size()-1] + 1 : leading_participants[last];
+
+            this->offsets_threads_[thread_id] = first_idx;
+
+            auto& partners  = this->partners_threads_[thread_id];
+            auto& neighbors = this->neighbors_threads_[thread_id];
+            auto& nranges   = this->nranges_threads_[thread_id];
+
+            neighbors.clear(); // keep capacity
+            nranges  .clear();
+            nranges.resize(last_idx + 1 - first_idx, 0);
+
+            for(std::size_t idx=first; idx<last; ++idx)
             {
-                for(auto pici : cell_list_[cidx].first)
-                {
-                    const auto j = pici.first;
-                    if(!pot.has_interaction(i, j))
-                    {
-                        continue;
-                    }
-                    // here we don't need to search `participants` because
-                    // cell list contains only participants. non-related
-                    // particles are already filtered.
+                partners.clear();
+                const auto     i = leading_participants[idx];
+                const auto    ri = sys.position(i);
+                const auto& cell = cell_list_[calc_index(ri)];
 
-                    const auto& rj = sys.position(j);
-                    if(math::length_sq(sys.adjust_direction(ri, rj)) < r_c2)
+                for(std::size_t cidx : cell.second) // for all adjacent cells...
+                {
+                    for(auto pici : cell_list_[cidx].first)
                     {
-                        partner.emplace_back(j, pot.prepare_params(i, j));
+                        const auto j = pici.first;
+                        if(!pot.has_interaction(i, j))
+                        {
+                            continue;
+                        }
+
+                        // here we don't need to search `participants` because
+                        // cell list contains only participants. non-related
+                        // particles are already filtered.
+
+                        const auto& rj = sys.position(j);
+                        if(math::length_sq(sys.adjust_direction(ri, rj)) < r_c2)
+                        {
+                            partners.emplace_back(j, pot.prepare_params(i, j));
+                        }
                     }
                 }
-            }
-            // make the result consistent with NaivePairCalculation...
-            std::sort(partner.begin(), partner.end());
-            neighbors.add_list_for(i, partner.begin(), partner.end());
+                // make the result consistent with NaivePairCalculation...
+                std::sort(partners.begin(), partners.end());
 
-            // approximate the memory usage and avoid frequent memory allocation.
-            // This block is just for efficiency, and does not affect on the result.
-            if(idx == 16)
-            {
-                neighbors.reserve(neighbors.num_neighbors() / 16,
-                                  leading_participants.size(), sys.size());
+                nranges[i - first_idx    ] = neighbors.size();
+                nranges[i - first_idx + 1] = neighbors.size() + partners.size();
+
+                neighbors.reserve(neighbors.size() + partners.size());
+                std::copy(partners.begin(), partners.end(),
+                          std::back_inserter(neighbors));
+
+                if(idx == first+16)
+                {
+                    neighbors.reserve(dN * neighbors.size() / 16);
+                }
             }
         }
 
+        auto& principal_neighbors = neighbor_list.neighbors();
+        auto& principal_ranges    = neighbor_list.ranges();
+
+        std::size_t total_neighbors = 0;
+        for(std::size_t th=0; th < offsets_threads_.size(); ++th)
+        {
+            const auto offset = offsets_threads_[th];
+            if(offset == std::numeric_limits<std::size_t>::max())
+            {
+                break;
+            }
+            total_neighbors += neighbors_threads_[th].size();
+        }
+
+        principal_neighbors.resize(total_neighbors);
+        principal_ranges   .resize(sys.size(), 0);
+
+#pragma omp parallel for schedule(static, 1)
+        for(std::size_t th=0; th < offsets_threads_.size(); ++th)
+        {
+            const auto index_offset = offsets_threads_[th];
+            if(index_offset != std::numeric_limits<std::size_t>::max())
+            {
+                std::size_t neighbor_offset = 0;
+                for(std::size_t t=0; t<th; ++t)
+                {
+                    neighbor_offset += neighbors_threads_[t].size();
+                }
+                auto& neighbors = this->neighbors_threads_[th];
+                std::copy(neighbors.begin(), neighbors.end(),
+                          principal_neighbors.begin() + neighbor_offset);
+
+                auto& nranges = this->nranges_threads_[th];
+                std::transform(nranges.begin() + 1, nranges.end(),
+                      principal_ranges.begin() + 1 + index_offset,
+                      [=](const std::size_t i) {return i + neighbor_offset;});
+            }
+        }
         this->current_margin_ = cutoff_ * margin_;
         return ;
     }
@@ -348,6 +422,11 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
     cell_index_container_type index_by_cell_buf_;
     // index_by_cell_ has {particle idx, cell idx} and sorted by cell idx
     // first term of cell list contains first and last idx of index_by_cell
+
+    std::vector<std::size_t> offsets_threads_;
+    std::vector<std::vector<neighbor_type>> partners_threads_;
+    std::vector<std::vector<neighbor_type>> neighbors_threads_;
+    std::vector<std::vector<std::size_t>>   nranges_threads_;
 };
 } // mjolnir
 
