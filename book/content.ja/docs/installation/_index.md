@@ -70,6 +70,8 @@ $ make test
 
 よく使うオプションを列挙します。
 
+- `-DCMAKE_CXX_COMPILER=/path/to/compiler`
+  - CMakeの機能です。使用するコンパイラを指定することができます。
 - `-DUSE_OPENMP=(ON|OFF)`
   - デフォルトで`ON`です。
   - `ON`の場合、OpenMPが使用可能なら、OpenMPを使用したコードを含めてコンパイルします。
@@ -78,9 +80,13 @@ $ make test
   - インストール済みのBoostを探します。見つからなければ、ビルドは失敗します。
 - `-DBOOST_ROOT=/path/to/boost`
   - FindBoostの機能です。Boostがインストールされているディレクトリを指定します。
-- `-DCMAKE_CXX_COMPILER=/path/to/compiler`
-  - CMakeの機能です。使用するコンパイラを指定することができます。
 - `-DSEPARATE_BUILD=(ON|OFF)`
   - デフォルトで`OFF`です。
   - `ON`の場合、分割コンパイルを行います。
   - 何度も変更してコンパイルを繰り返す開発者が時間を短縮するための機能です。
+- `-DSINGLE_PRECISION_SUPPORT=(ON|OFF)`
+  - デフォルトで`ON`です。
+  - `OFF`の場合、`float`版のコンパイルが抑制されます。コンパイルが速くなります。
+- `-DDOUBLE_PRECISION_SUPPORT=(ON|OFF)`
+  - デフォルトで`ON`です。
+  - `OFF`の場合、`double`版のコンパイルが抑制されます。コンパイルが速くなります。

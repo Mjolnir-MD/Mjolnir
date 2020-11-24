@@ -12,11 +12,11 @@ The following potentials are available.
 
 - [LennardJones]({{<relref "LennardJonesPotential.md">}})
 - [UniformLennardJones]({{<relref "UniformLennardJonesPotential.md">}})
-- [DebyeHuckel](DebyeHuckelPotential.md)
-- [ExcludedVolume](ExcludedVolumePotential.md)
-- [InversePower](InversePowerPotential.md)
-- [HardCoreExcludedVolume](HardCoreExcludedVolumePotential.md)
-- [3SPN2ExcludedVolume](3SPN2ExcludedVolumePotential.md)
+- [DebyeHuckel]({{<relref "DebyeHuckelPotential.md">}})
+- [ExcludedVolume]({{<relref "ExcludedVolumePotential.md">}})
+- [InversePower]({{<relref "InversePowerPotential.md">}})
+- [HardCoreExcludedVolume]({{<relref "HardCoreExcludedVolumePotential.md">}})
+- [3SPN2ExcludedVolume]({{<relref "3SPN2ExcludedVolumePotential.md">}})
 
 ## Example
 
@@ -44,10 +44,10 @@ parameters = [
   - The following potentials are available.
   - [`"LennardJones"`]({{<relref "LennardJonesPotential.md">}})
   - [`"UniformLennardJones"`]({{<relref "UniformLennardJonesPotential.md">}})
-  - [`"DebyeHuckel"`](DebyeHuckelPotential.md)
-  - [`"ExcludedVolume"`](ExcludedVolumePotential.md)
-  - [`"InversePower"`](InversePowerPotential.md)
-  - [`"HardCoreExcludedVolume"`](HardCoreExcludedVolumePotential.md)
+  - [`"DebyeHuckel"`]({{<relref "DebyeHuckelPotential.md">}})
+  - [`"ExcludedVolume"`]({{<relref "ExcludedVolumePotential.md">}})
+  - [`"InversePower"`]({{<relref "InversePowerPotential.md">}})
+  - [`"HardCoreExcludedVolume"`]({{<relref "HardCoreExcludedVolumePotential.md">}})
 - `ignore`: Table
   - It describes the condition when the pair of particles does not interact to each other.
   - For detail, see [the ignore section of GlobalForceField]({{<relref "/docs/reference/forcefields/global#ignore">}})
