@@ -13,7 +13,8 @@ namespace mjolnir
 {
 
 // attractive part of the iSoLF potential for coarse-grained lipids developed by
-// - Diego Ugarte La Torre and Shoji Takada (2020)
+// - Diego Ugarte La Torre and Shoji Takada (2020) J. Chem. Phys 153, 205101
+//   https://doi.org/10.1063/5.0026342
 //
 // This class contains sigmas, epsilons, and omegas of the particles and
 // calculates energy and derivative of the potential function.
