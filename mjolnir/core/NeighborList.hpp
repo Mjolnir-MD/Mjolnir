@@ -253,6 +253,13 @@ class NeighborList
         };
     }
 
+    // ------------------------------------------------------------------------
+    // Caution: take great care when you use the following functions.
+    //          If possible, use `add_list_for` instead.
+
+    container_type&        neighbors() noexcept {return neighbors_;}
+    std::vector<std::size_t>& ranges() noexcept {return ranges_;}
+
   private:
     container_type           neighbors_;
     std::vector<std::size_t> ranges_;
