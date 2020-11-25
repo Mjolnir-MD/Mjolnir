@@ -10,6 +10,7 @@
 #include <mjolnir/forcefield/global/WCAPotential.hpp>
 #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2ExcludedVolumePotential.hpp>
+#include <mjolnir/forcefield/iSoLF/iSoLFAttractivePotential.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/make_unique.hpp>
@@ -533,6 +534,50 @@ read_3spn2_excluded_volume_potential(const toml::value& global)
             read_ignored_molecule(global), read_ignored_group(global));
 }
 
+template<typename traitsT>
+iSoLFAttractivePotential<traitsT>
+read_isolf_potential(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using potential_type = iSoLFAttractivePotential<traitsT>;
+    using real_type      = typename potential_type::real_type;
+    using parameter_type = typename potential_type::parameter_type;
+
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+
+    if(global.contains("cutoff"))
+    {
+        MJOLNIR_LOG_WARN("iSoLF has an exact cutoff distance. While the simulation,"
+            " the exact cutoff is used and specified cutoff will be ignored.");
+    }
+
+    const auto& ps = toml::find<toml::array>(global, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        // offset can be a negative value
+        const auto idx     = find_parameter<std::int64_t>(param, env, "index") +
+                             find_parameter_or<std::int64_t>(param, env, "offset", 0);
+        const auto sigma   = find_parameter<real_type>(param, env, "sigma"  );
+        const auto epsilon = find_parameter<real_type>(param, env, "epsilon");
+        const auto omega   = find_parameter<real_type>(param, env, "omega"  );
+
+        params.emplace_back(idx, parameter_type{sigma, epsilon, omega});
+        MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma,
+                       ", epsilon = ", epsilon, ", omega = ", omega);
+    }
+
+    check_parameter_overlap(env, ps, params);
+
+    return potential_type(std::move(params),
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
+}
+
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_excluded_volume_potential(const toml::value& global);
 extern template ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_excluded_volume_potential(const toml::value& global);
@@ -573,6 +618,12 @@ extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, Unlimit
 extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_3spn2_excluded_volume_potential(const toml::value& global);
 extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_3spn2_excluded_volume_potential(const toml::value& global);
 extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_3spn2_excluded_volume_potential(const toml::value& global);
+
+extern template iSoLFAttractivePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_isolf_potential(const toml::value& global);
+extern template iSoLFAttractivePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_isolf_potential(const toml::value& global);
+extern template iSoLFAttractivePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_isolf_potential(const toml::value& global);
+extern template iSoLFAttractivePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_isolf_potential(const toml::value& global);
+
 #endif
 
 } // mjolnir
