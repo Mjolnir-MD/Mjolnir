@@ -1,4 +1,4 @@
-[[forcefields.global]]
+[[global]]
 interaction = "Pair"
 potential   = "ExcludedVolume"
 ignore.molecule = "Nothing"
