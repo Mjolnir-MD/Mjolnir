@@ -1,5 +1,22 @@
 # Change Log
 
+## 1.20.0
+
+### Added
+
+- WCA potential
+- iSoLF potential
+- `(SINGLE|DOUBLE)_PRECISION_SUPPORT=(ON|OFF)` to CMake options
+
+### Changed
+
+- speedup NeighborList construction
+
+### Fixed
+
+- Allow negative offset value in global interaction
+- Fix link in documentation (@yutakasi634 )
+
 ## 1.19.0
 
 ### Added
