@@ -23,6 +23,8 @@ The detailed information can be found at https://mjolnir-md.github.io/Mjolnir/ .
 2. Transparency: To do everything that a user wants and nothing more than that.
 3. Efficiency: To be fast whenever possible without breaking the above goals.
 
+### Capability
+
 ## Build
 
 All the depending libraries are automatically downloaded in the CMake script.
@@ -37,14 +39,14 @@ $ make test # optional
 
 After this, you will find executable binary in `bin` directory.
 
-The codes are tested with the following compilers on [Travis CI](https://travis-ci.org/ToruNiina/Mjolnir).
-- `g++-9`, `g++-8`, `g++-7` on `Linux`
-- `clang++-8`, `clang++-7` on `Linux`
-- `clang++` on `OS X`
+The codes are tested with the following compilers on [GitHub Actions](https://github.com/Mjolnir-MD/Mjolnir/actions).
+- `g++-9`, `g++-8` on `Ubuntu-18.04`
+- with or without OpenMP
 
 ## Dependency
 
 Mjolnir depends on [toml11](https://github.com/ToruNiina/toml11).
+
 The test codes depend on [Boost C++ Library](https://www.boost.org/).
 
 These libraries are automatically downloaded in the CMake script.
