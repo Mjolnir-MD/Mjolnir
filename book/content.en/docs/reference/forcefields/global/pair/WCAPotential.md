@@ -42,11 +42,11 @@ To calculate {{<katex>}} \sigma {{</katex>}} and {{<katex>}} \epsilon {{</katex>
 
 - `index`: Integer
   - The index of the particle.
-- `offset`: Integer (ptional. By default, 0.)
+- `offset`: Integer (optional. By default, 0.)
   - Offset value of the index.
 - `sigma`: Floating
   - It determines the effective particle size.
-- `epsilon`: Integer
+- `epsilon`: Floating
   - It determines the strength of the potential.
 
 Since this potential becomes exactly 0 at {{<katex>}} r = \sigma\sqrt[6]{2} {{</katex>}}, always this cutoff distance is used. You don't need to set `cutoff`.
