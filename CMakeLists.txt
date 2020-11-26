@@ -108,6 +108,20 @@ if(DEBUG)
     add_definitions(-DMJOLNIR_DEBUG)
 endif()
 
+option(SINGLE_PRECISION_SUPPORT "support float type" ON)
+if(NOT SINGLE_PRECISION_SUPPORT)
+    add_definitions(-DMJOLNIR_WITHOUT_SINGLE_PRECISION)
+endif()
+
+option(DOUBLE_PRECISION_SUPPORT "support double type" ON)
+if(NOT DOUBLE_PRECISION_SUPPORT)
+    add_definitions(-DMJOLNIR_WITHOUT_DOUBLE_PRECISION)
+endif()
+
+if((NOT SINGLE_PRECISION_SUPPORT) AND (NOT DOUBLE_PRECISION_SUPPORT))
+    message(FATAL_ERROR "Both float and double are disabled, nothing to be built")
+endif()
+
 option(USE_APPROX "\
 use approximation instruction for time-consuming math functions" OFF)
 if(USE_APPROX)

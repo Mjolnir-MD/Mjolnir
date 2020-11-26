@@ -10,10 +10,10 @@ length = "angstrom" # "angstorm" or "Å" or "nm"
 energy = "kcal/mol" # "kcal/mol" or "kJ/mol"
 
 [simulator]
-file_name = "lennard-jones-langevin.toml"
+include = "lennard-jones-langevin.toml"
 
 [[systems]]
-file_name = "lennard-jones-system.toml"
+include = "lennard-jones-system.toml"
 
 [[forcefields]]
-file_name = "lennard-jones-forcefields.toml"
+include = "lennard-jones-forcefields.toml"

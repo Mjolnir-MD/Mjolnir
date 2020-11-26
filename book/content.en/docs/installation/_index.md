@@ -67,6 +67,10 @@ $ make test
 
 ### Options for CMake
 
+All those are optional variables.
+
+- `-DCMAKE_CXX_COMPILER=/path/to/compiler`
+  - It is an option for CMake. You can choose what compiler would be used.
 - `-DUSE_OPENMP=(ON|OFF)`
   - `ON` by default.
   - If `ON`, compile with OpenMP (if it is available).
@@ -78,9 +82,13 @@ $ make test
 - `-DBOOST_ROOT=/path/to/boost`
   - It is an option for `FindBoost` package in CMake.
     You can specify the path to boost you want to use.
-- `-DCMAKE_CXX_COMPILER=/path/to/compiler`
-  - It is an option for CMake. You can choose what compiler would be used.
 - `-DSEPARATE_BUILD=(ON|OFF)`
   - `OFF` by default.
   - If `ON`, compile codes separately and link them after compilation.
     This feature is for developers who compiles it a lot of times.
+- `-DSINGLE_PRECISION_SUPPORT=(ON|OFF)`
+  - `ON` by default.
+  - If `OFF`, `float` version of the code will be ignored and the compilation finishes quickly.
+- `-DDOUBLE_PRECISION_SUPPORT=(ON|OFF)`
+  - `ON` by default.
+  - If `OFF`, `double` version of the code will be ignored and the compilation finishes quickly.

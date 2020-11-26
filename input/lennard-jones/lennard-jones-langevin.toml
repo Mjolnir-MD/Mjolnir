@@ -1,4 +1,4 @@
-[simulator]
+# [simulator]
 type          = "MolecularDynamics"
 boundary_type = "PeriodicCuboid"
 precision     = "double"

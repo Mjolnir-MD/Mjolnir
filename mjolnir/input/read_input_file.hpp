@@ -105,26 +105,34 @@ read_precision(const toml::value& root, const toml::value& simulator)
     MJOLNIR_LOG_FUNCTION();
 
     const auto prec = toml::find<std::string>(simulator, "precision");
+
+#ifndef MJOLNIR_WITHOUT_DOUBLE_PRECISION
     if(prec == "double")
     {
         MJOLNIR_LOG_NOTICE("precision is double");
         return read_boundary<double>(root, simulator);
     }
-    else if(prec == "float")
+#endif
+
+#ifndef MJOLNIR_WITHOUT_SINGLE_PRECISION
+    if(prec == "float")
     {
         MJOLNIR_LOG_NOTICE("precision is float");
         return read_boundary<float>(root, simulator);
     }
-    else
-    {
-        throw_exception<std::runtime_error>(toml::format_error("[error] "
-            "mjolnir::read_precision: invalid precision",
-            toml::find(simulator, "precition"), "here", {
-            "expected value is one of the following.",
-            "- \"double\": 64 bit floating-point",
-            "- \"float\" : 32 bit floating-point"
-            }));
-    }
+#endif
+
+    throw_exception<std::runtime_error>(toml::format_error("[error] "
+        "mjolnir::read_precision: invalid precision",
+        toml::find(simulator, "precision"), "here", {
+        "expected value is one of the following."
+#ifndef MJOLNIR_WITHOUT_DOUBLE_PRECISION
+        , "- \"double\": 64 bit floating-point"
+#endif
+#ifndef MJOLNIR_WITHOUT_SINGLE_PRECISION
+        , "- \"float\" : 32 bit floating-point"
+#endif
+        }));
 }
 
 inline std::unique_ptr<SimulatorBase>

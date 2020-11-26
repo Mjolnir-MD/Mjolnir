@@ -9,10 +9,10 @@ length = "angstrom" # "angstorm" or "Å" or "nm"
 energy = "kcal/mol" # "kcal/mol" or "kJ/mol"
 
 [simulator]
-file_name = "excluded-volume-langevin.toml"
+include = "excluded-volume-langevin.toml"
 
 [[systems]]
-file_name = "excluded-volume-system.toml"
+include = "excluded-volume-system.toml"
 
 [[forcefields]]
-file_name = "excluded-volume-forcefields.toml"
+include = "excluded-volume-forcefields.toml"
