@@ -13,7 +13,7 @@ iSoLFAttractive attractive part of the iSoLF potential for coarse-grained lipids
 {{<katex display>}}
 U(r) =
 \begin{cases}
--\epsilon_{ij} & r_{ij} < (\sqrt[6]{2}\sigma_{ij}\\
+-\epsilon_{ij} & r_{ij} < \sqrt[6]{2}\sigma_{ij}\\
 -\epsilon_{ij} \cos^2\left[\frac{\pi}{2\omega_{ij}}(r_{ij} - \sqrt[6]{2}\sigma_{ij}) \right] & (\sqrt[6]{2}\sigma_{ij} < r_{ij} < \sqrt[6]{2}\sigma_{ij} + \omega_{ij})\\
 0 & (\sqrt[6]{2}\sigma_{ij} + \omega_{ij} < r_{ij})
 \end{cases}

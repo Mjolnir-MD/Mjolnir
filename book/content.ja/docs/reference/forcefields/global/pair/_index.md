@@ -12,11 +12,13 @@ bookCollapseSection = true
 
 - [LennardJones]({{<relref "LennardJonesPotential.md">}})
 - [UniformLennardJones]({{<relref "UniformLennardJonesPotential.md">}})
-- [DebyeHuckel](DebyeHuckelPotential.md)
-- [ExcludedVolume](ExcludedVolumePotential.md)
-- [InversePower](InversePowerPotential.md)
-- [HardCoreExcludedVolume](HardCoreExcludedVolumePotential.md)
-- [3SPN2ExcludedVolume](3SPN2ExcludedVolumePotential.md)
+- [DebyeHuckel]({{<relref "DebyeHuckelPotential.md">}})
+- [ExcludedVolume]({{<relref "ExcludedVolumePotential.md">}})
+- [InversePower]({{<relref "InversePowerPotential.md">}})
+- [HardCoreExcludedVolume]({{<relref "HardCoreExcludedVolumePotential.md">}})
+- [WCA]({{<relref "WCAPotential.md">}})
+- [iSoLFAttractive]({{<relref "iSoLFAttractivePotential.md">}})
+- [3SPN2ExcludedVolume]({{<relref "3SPN2ExcludedVolumePotential.md">}})
 
 ## 例
 

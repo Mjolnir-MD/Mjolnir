@@ -16,6 +16,8 @@ The following potentials are available.
 - [ExcludedVolume]({{<relref "ExcludedVolumePotential.md">}})
 - [InversePower]({{<relref "InversePowerPotential.md">}})
 - [HardCoreExcludedVolume]({{<relref "HardCoreExcludedVolumePotential.md">}})
+- [WCAPotential]({{<relref "WCAPotential.md">}})
+- [iSoLFAttractive]({{<relref "iSoLFAttractivePotential.md">}})
 - [3SPN2ExcludedVolume]({{<relref "3SPN2ExcludedVolumePotential.md">}})
 
 ## Example
@@ -48,6 +50,8 @@ parameters = [
   - [`"ExcludedVolume"`]({{<relref "ExcludedVolumePotential.md">}})
   - [`"InversePower"`]({{<relref "InversePowerPotential.md">}})
   - [`"HardCoreExcludedVolume"`]({{<relref "HardCoreExcludedVolumePotential.md">}})
+  - [`"WCA"`]({{<relref "WCAPotential.md">}})
+  - [`"iSoLFAttractive"`]({{<relref "iSoLFAttractive.md">}})
 - `ignore`: Table
   - It describes the condition when the pair of particles does not interact to each other.
   - For detail, see [the ignore section of GlobalForceField]({{<relref "/docs/reference/forcefields/global#ignore">}})

@@ -13,7 +13,7 @@ iSoLFは以下の文献で開発された粗視化膜モデルで、iSoLFAttract
 {{<katex display>}}
 U(r) =
 \begin{cases}
--\epsilon_{ij} & r_{ij} < (\sqrt[6]{2}\sigma_{ij}\\
+-\epsilon_{ij} & r_{ij} < \sqrt[6]{2}\sigma_{ij}\\
 -\epsilon_{ij} \cos^2\left[\frac{\pi}{2\omega_{ij}}(r_{ij} - \sqrt[6]{2}\sigma_{ij}) \right] & (\sqrt[6]{2}\sigma_{ij} < r_{ij} < \sqrt[6]{2}\sigma_{ij} + \omega_{ij})\\
 0 & (\sqrt[6]{2}\sigma_{ij} + \omega_{ij} < r_{ij})
 \end{cases}
