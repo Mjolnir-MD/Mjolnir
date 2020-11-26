@@ -1,6 +1,6 @@
 +++
 title = "3SPN2ExcludedVolume"
-weight = 700000
+weight = 900000
 +++
 
 # 3SPN2ExcludedVolumePotential

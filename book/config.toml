@@ -1,4 +1,4 @@
-baseURL      = "http://toruniina.github.io/Mjolnir" # TODO mjolnir-md
+baseURL      = "http://mjolnir-md.github.io/Mjolnir"
 title        = "Mjolnir documentation"
 theme        = 'hugo-book'
 languageCode = "en-us"
