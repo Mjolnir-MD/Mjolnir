@@ -50,14 +50,14 @@ struct fixed_vector
     {
         if(N < sz)
         {
-            throw std::bad_alloc("fixed_vector(size_t): too many elements");
+            throw std::runtime_error("fixed_vector(size_t): too many elements");
         }
     }
     fixed_vector(const std::size_t sz, const value_type& x): size_(sz)
     {
         if(N < sz)
         {
-            throw std::bad_alloc("fixed_vector(size_t, value_type): too many elements");
+            throw std::runtime_error("fixed_vector(size_t, value_type): too many elements");
         }
         std::fill_n(container_.begin(), sz, x);
     }
@@ -67,7 +67,7 @@ struct fixed_vector
         const auto sz = std::distance(first, last);
         if(N < sz)
         {
-            throw std::bad_alloc("fixed_vector(first, last): too many elements");
+            throw std::runtime_error("fixed_vector(first, last): too many elements");
         }
         this->size_ = sz;
         std::copy(first, last, container_.begin());
@@ -78,7 +78,7 @@ struct fixed_vector
         if(N < il.size())
         {
             size_ = 0;
-            throw std::bad_alloc("fixed_vector(initializer_list): too many elements");
+            throw std::runtime_error("fixed_vector(initializer_list): too many elements");
         }
         std::copy(il.begin(), il.end(), container_.begin());
     }
@@ -86,7 +86,7 @@ struct fixed_vector
     {
         if(N < il.size())
         {
-            throw std::bad_alloc("fixed_vector& operator=(initializer_list): too many elements");
+            throw std::runtime_error("fixed_vector& operator=(initializer_list): too many elements");
         }
         size_ = il.size();
         std::copy(il.begin(), il.end(), container_.begin());
@@ -96,26 +96,29 @@ struct fixed_vector
     {
         if(this->size_ == N)
         {
-            throw std::bad_alloc("fixed_vector::push_back(): too many elements");
+            throw std::runtime_error("fixed_vector::push_back(): too many elements");
         }
         container_[size_] = v;
+        this->size_ += 1;
     }
     void push_back(value_type&& v)
     {
         if(this->size_ == N)
         {
-            throw std::bad_alloc("fixed_vector::push_back(): too many elements");
+            throw std::runtime_error("fixed_vector::push_back(): too many elements");
         }
         container_[size_] = std::move(v);
+        this->size_ += 1;
     }
     template<typename ... Ts>
     void emplace_back(Ts&& ... args)
     {
         if(this->size_ == N)
         {
-            throw std::bad_alloc("fixed_vector::emplace_back(): too many elements");
+            throw std::runtime_error("fixed_vector::emplace_back(): too many elements");
         }
         container_[size_] = value_type(std::forward<Ts>(args)...);
+        this->size_ += 1;
     }
     void pop_back()
     {
