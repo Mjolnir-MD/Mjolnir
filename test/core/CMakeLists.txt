@@ -8,6 +8,7 @@ set(TEST_NAMES
     test_exclusion_list
     test_system_motion_remover
     test_file_inclusion
+    test_fixed_vector
 
     test_harmonic_potential
     test_gaussian_potential
