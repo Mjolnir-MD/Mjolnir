@@ -13,6 +13,7 @@ set(mjolnir_core_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/NeighborList.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/UnlimitedGridCellList.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/PeriodicGridCellList.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ZorderRTree.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/VerletList.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/NaivePairCalculation.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/IgnoreMolecule.cpp"
