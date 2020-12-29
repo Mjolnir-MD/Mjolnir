@@ -165,9 +165,9 @@ class ZorderRTree final : public SpatialPartitionBase<traitsT, PotentialT>
         whole.lower = math::make_coordinate<coordinate_type>( inf,  inf,  inf);
         whole.upper = math::make_coordinate<coordinate_type>(-inf, -inf, -inf);
 
-        for(std::size_t i=0; i<participants.size(); ++i)
+        for(const auto& i : participants)
         {
-            whole = merge_aabb(whole, sys.position(participants[i]));
+            whole = merge_aabb(whole, sys.position(i));
         }
         const auto width = whole.upper - whole.lower;
 
@@ -268,6 +268,7 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbo
         math::Z(pos) *= math::Z(rwidth);
         zindices[i] = std::make_pair(zindex(pos), static_cast<std::uint32_t>(idx));
     }
+    // zindices contains {zindex, particle idx}
 
     // ------------------------------------------------------------------------
     // construct RTree
@@ -308,6 +309,7 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbo
             math::Z(pos) *= math::Z(rwidth);
             zindices[i - node_front] = std::make_pair(zindex(pos), i);
         }
+        // zindices contains {zindex, node idx}
         std::sort(zindices.begin(), zindices.end());
 
         // update next node_front before adding a node of the current level
@@ -321,16 +323,20 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbo
             node.parent  = nil;
             node.is_leaf = false;
 
-            node.box.lower = tree_[zindices[i].second].box.lower;
-            node.box.upper = tree_[zindices[i].second].box.upper;
-            node.children.push_back(zindices[i].second);
-            tree_[zindices[i].second].parent = parent_idx;
-
+            // the first child (box does not need to be merged)
+            {
+                const auto child_node_idx = zindices[i].second;
+                node.box.lower = tree_[child_node_idx].box.lower;
+                node.box.upper = tree_[child_node_idx].box.upper;
+                node.children.push_back(child_node_idx);
+                tree_[child_node_idx].parent = parent_idx;
+            }
             for(std::size_t j=i+1; j<std::min(i + MaxElem, N); ++j)
             {
-                node.box = merge_aabb(node.box, tree_[zindices[i].second].box);
-                node.children.push_back(zindices[j].second);
-                tree_[zindices[j].second].parent = parent_idx;
+                const auto child_node_idx = zindices[j].second;
+                node.box = merge_aabb(node.box, tree_[child_node_idx].box);
+                node.children.push_back(child_node_idx);
+                tree_[child_node_idx].parent = parent_idx;
             }
             tree_.push_back(std::move(node));
         }
@@ -344,8 +350,8 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbo
         node.children.push_back(node_front);
         for(std::size_t i=node_front+1; i < tree_.size(); ++i)
         {
-            node.children.push_back(i);
             node.box = merge_aabb(node.box, tree_[i].box);
+            node.children.push_back(i);
             tree_[i].parent = root;
         }
         tree_.push_back(node);
