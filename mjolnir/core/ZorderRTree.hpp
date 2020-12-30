@@ -224,6 +224,8 @@ class ZorderRTree final : public SpatialPartitionBase<traitsT, PotentialT>
         return;
     }
 
+    void diagnosis(const system_type& sys, const potential_type& pot) const;
+
   private:
 
     real_type cutoff_;
@@ -326,8 +328,7 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbo
             // the first child (box does not need to be merged)
             {
                 const auto child_node_idx = zindices[i].second;
-                node.box.lower = tree_[child_node_idx].box.lower;
-                node.box.upper = tree_[child_node_idx].box.upper;
+                node.box = tree_[child_node_idx].box;
                 node.children.push_back(child_node_idx);
                 tree_[child_node_idx].parent = parent_idx;
             }
@@ -356,6 +357,8 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbo
         }
         tree_.push_back(node);
     }
+
+//     this->diagnosis(sys, pot);
 
     // ------------------------------------------------------------------------
     // construct NeighborList
@@ -386,8 +389,8 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbo
             {
                 for(const auto& j : node.children)
                 {
-                    MJOLNIR_LOG_DEBUG("looking particle", j);
-                    if(!pot.has_interaction(i, j))
+                    MJOLNIR_LOG_DEBUG("looking particle (", i, ", ", j, ")");
+                    if( ! pot.has_interaction(i, j))
                     {
                         continue;
                     }
@@ -429,6 +432,68 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbo
     }
 
     this->current_margin_ = cutoff_ * margin_;
+    return ;
+}
+
+template<typename traitsT, typename PotentialT, std::size_t MaxElem>
+void ZorderRTree<traitsT, PotentialT, MaxElem>::diagnosis(
+        const system_type& sys, const potential_type& pot) const
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+
+    std::vector<bool> found(sys.size(), false);
+    for(const auto& node : tree_)
+    {
+        if(node.is_leaf)
+        {
+            for(const auto& child : node.children)
+            {
+                if(found.at(child))
+                {
+                    MJOLNIR_LOG_ERROR(child, "-th particle found twise!");
+                }
+                found.at(child) = true;
+
+                const auto& pos = sys.position(child);
+
+                bool included = true;
+                if(math::X(pos) < math::X(node.box.lower) || math::X(node.box.upper) < math::X(pos)) {included = false;}
+                if(math::Y(pos) < math::Y(node.box.lower) || math::Y(node.box.upper) < math::Y(pos)) {included = false;}
+                if(math::Z(pos) < math::Z(node.box.lower) || math::Z(node.box.upper) < math::Z(pos)) {included = false;}
+
+                if( ! included)
+                {
+                    MJOLNIR_LOG_ERROR(child, "-th particle sticks out of box!");
+                }
+            }
+        }
+        else
+        {
+            for(const auto& child : node.children)
+            {
+                const auto& child_box = tree_.at(child).box;
+
+                bool included = true;
+                if(math::X(child_box.lower) < math::X(node.box.lower) || math::X(node.box.upper) < math::X(child_box.upper)) {included = false;}
+                if(math::Y(child_box.lower) < math::Y(node.box.lower) || math::Y(node.box.upper) < math::Y(child_box.upper)) {included = false;}
+                if(math::Z(child_box.lower) < math::Z(node.box.lower) || math::Z(node.box.upper) < math::Z(child_box.upper)) {included = false;}
+
+                if( ! included)
+                {
+                    MJOLNIR_LOG_ERROR(child, "-th node sticks out of box!");
+                }
+            }
+        }
+    }
+
+    for(const auto& p : pot.participants())
+    {
+        if( ! found.at(p))
+        {
+            MJOLNIR_LOG_ERROR(p, "-th particle not found in the tree");
+        }
+    }
     return ;
 }
 
