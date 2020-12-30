@@ -101,6 +101,7 @@ It provides spatial partitioning algorithm to construct a neighbor list.
 - `type`: String
   - The following spatial partitioning methods are available.
   - `"CellList"`
+  - `"RTree"`
   - `"VerletList"`
 - `margin`: Floating
   - The margin in the neighboring list, relative to the cutoff length.
