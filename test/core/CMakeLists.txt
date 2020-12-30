@@ -66,6 +66,7 @@ set(TEST_NAMES
     test_periodic_verlet_list
     test_unlimited_cell_list
     test_periodic_cell_list
+    test_zorder_rtree
 
     test_read_harmonic_potential
     test_read_go_contact_potential
