@@ -68,6 +68,13 @@ class ZorderRTree final : public SpatialPartitionBase<traitsT, PotentialT>
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
+        if( ! is_simulator_traits<traits_type>::value)
+        {
+            MJOLNIR_LOG_WARN("spatial_partition.RTree is implemented for single"
+                             " core simulation. Consider using CellList for"
+                             " parallel simulation.");
+        }
+
         const real_type max_cutoff = pot.max_cutoff_length();
         this->set_cutoff(max_cutoff);
 
