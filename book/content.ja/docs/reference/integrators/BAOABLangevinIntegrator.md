@@ -7,10 +7,14 @@ weight = 1000
 
 ランジュバン方程式に従い、温度・体積・粒子数 (NVT) 一定のシミュレーションを行います。
 
+{{<katex display>}}
+m\frac{d^2 \bold{r}}{dt^2} = \bold{f}(\bold{r}) - m\gamma\bold{v} + \beta(t)
+{{</katex>}}
+
 以下の論文で提案された手法です。
 
-- Leimkuhler B, Matthews C. Appl. Math. Res. Exp. (2013)
-- Leimkuhler B, Matthews C. J. Chem. Phys. (2013)
+- [Benedict Leimkuhler and Charles Matthews. Appl. Math. Res. Exp. (2013) 2013:1, pp. 34-56](https://doi.org/10.1093/amrx/abs010)
+- [Benedict Leimkuhler and Charles Matthews. J. Chem. Phys. (2013) 138:17, 174102](https://doi.org/10.1063/1.4802990)
 
 ## 例
 
