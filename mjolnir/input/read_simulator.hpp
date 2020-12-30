@@ -130,6 +130,8 @@ read_simulated_annealing_simulator(
             "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
                                       " based on the Velocity Verlet",
             "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator"
+            "- \"g-BAOABLangevin\"    : geodesic BAOAB Langevin Integrator",
+            "- \"G-JFLangevin\"       : Verlet-type Langevin Integrator by G-J&F"
             }));
     }
 
@@ -477,6 +479,12 @@ read_integrator_type(const toml::value& root, const toml::value& simulator)
         using integratorT = gBAOABLangevinIntegrator<traitsT>;
         return read_simulator<traitsT, integratorT>(root, simulator);
     }
+    else if(integ == "G-JFLangevin")
+    {
+        MJOLNIR_LOG_NOTICE("Integrator is G-JFLangevin.");
+        using integratorT = GJFNVTLangevinIntegrator<traitsT>;
+        return read_simulator<traitsT, integratorT>(root, simulator);
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -487,7 +495,8 @@ read_integrator_type(const toml::value& root, const toml::value& simulator)
             "- \"UnderdampedLangevin\": simple Underdamped Langevin Integrator"
                                       " based on the Velocity Verlet",
             "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator",
-            "- \"g-BAOABLangevin\"    : geodesic BAOAB Langevin Integrator"
+            "- \"g-BAOABLangevin\"    : geodesic BAOAB Langevin Integrator",
+            "- \"G-JFLangevin\"       : Verlet-type Langevin Integrator by G-J&F"
             }));
     }
 }
