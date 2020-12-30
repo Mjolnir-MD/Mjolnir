@@ -8,7 +8,7 @@ weight = 600000
 Worm-Like chain modelに基づいたポテンシャルです。
 
 {{<katex display>}}
-U(r) = \frac{k_B T}{p}  \left(\frac{l_c}{4} \frac{1}{1 - \frac{r}{l_c}} - \frac{r}{4} + \frac{r^2}{2l_c}\right)
+U(r) = \frac{k_B T}{p}  \left(\frac{l_c}{4} \left[ \frac{1}{1 - \frac{r}{l_c}} - 1 \right] - \frac{r}{4} + \frac{r^2}{2l_c}\right)
 {{</katex>}}
 
 ## 例
