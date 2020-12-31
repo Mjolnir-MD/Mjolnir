@@ -1,11 +1,16 @@
 +++
 title = "UnderdampedLangevin"
-weight = 3000
+weight = 4000
 +++
 
 # UnderdampedLangevin
 
 ランジュバン方程式に従い、温度・体積・粒子数一定のシミュレーションを行います。
+
+{{<katex display>}}
+m\frac{d^2 \bold{r}}{dt^2} = \bold{f}(\bold{r}) - m\gamma\bold{v} + \beta(t)
+{{</katex>}}
+
 
 以下の論文で提案された手法です。
 

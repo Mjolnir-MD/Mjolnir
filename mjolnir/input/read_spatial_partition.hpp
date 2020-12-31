@@ -7,6 +7,7 @@
 #include <mjolnir/core/PeriodicGridCellList.hpp>
 #include <mjolnir/core/NaivePairCalculation.hpp>
 #include <mjolnir/core/VerletList.hpp>
+#include <mjolnir/core/ZorderRTree.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/logger.hpp>
 
@@ -77,6 +78,16 @@ read_spatial_partition(const toml::value& global)
                 celllist_dispatcher<boundary_type>::template
                 invoke<traitsT, potentialT>(margin));
     }
+    else if(type == "RTree" || type == "ZorderRTree")
+    {
+        const auto margin = toml::find<real_type>(sp, "margin");
+        MJOLNIR_LOG_NOTICE("-- Spatial Partition is RTree "
+                           "with relative margin = ", margin);
+
+        return SpatialPartition<traitsT, potentialT>(
+                make_unique<ZorderRTree<traitsT, potentialT>>(margin));
+    }
+
     else if(type == "VerletList")
     {
         using verlet_list_type = VerletList<traitsT, potentialT>;
