@@ -2,6 +2,7 @@
 #define MJOLNIR_CORE_BOUNDARY_CONDITION_HPP
 #include <mjolnir/math/math.hpp>
 #include <cstddef>
+#include <cassert>
 
 namespace mjolnir
 {
@@ -12,6 +13,8 @@ struct UnlimitedBoundary
   public:
     using real_type       = realT;
     using coordinate_type = coordT;
+
+    static constexpr real_type inf = std::numeric_limits<real_type>::infinity();
 
   public:
     UnlimitedBoundary() = default;
@@ -26,7 +29,28 @@ struct UnlimitedBoundary
     {
         return r;
     }
+
+    void set_boundary(const coordinate_type&, const coordinate_type&) noexcept {assert(false);}
+    void set_lower_bound(const coordinate_type&) noexcept {assert(false);}
+    void set_upper_bound(const coordinate_type&) noexcept {assert(false);}
+
+    coordinate_type lower_bound() const noexcept
+    {
+        return math::make_coordinate<coordinate_type>(-inf, -inf, -inf);
+    }
+    coordinate_type upper_bound() const noexcept
+    {
+        return math::make_coordinate<coordinate_type>( inf,  inf,  inf);
+    }
+    coordinate_type width()       const noexcept
+    {
+        return math::make_coordinate<coordinate_type>( inf,  inf,  inf);
+    }
+
+    constexpr bool is_inside_of(const coordinate_type& r) const noexcept {return true;}
 };
+template<typename realT, typename coordT>
+constexpr typename UnlimitedBoundary<realT, coordT>::real_type UnlimitedBoundary<realT, coordT>::inf;
 
 template<typename realT, typename coordT>
 struct CuboidalPeriodicBoundary
@@ -98,6 +122,17 @@ struct CuboidalPeriodicBoundary
         this->width_ = this->upper_ - this->lower_;
         this->halfw_ = this->width_ * 0.5;
         return;
+    }
+
+    bool is_inside_of(const coordinate_type& r) const noexcept
+    {
+        if     (math::X(r) <  math::X(lower_)) {return false;}
+        else if(math::X(r) >= math::X(upper_)) {return false;}
+        if     (math::Y(r) <  math::Y(lower_)) {return false;}
+        else if(math::Y(r) >= math::Y(upper_)) {return false;}
+        if     (math::Z(r) <  math::Z(lower_)) {return false;}
+        else if(math::Z(r) >= math::Z(upper_)) {return false;}
+        return true;
     }
 
   private:
