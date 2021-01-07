@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.21.0
+
+### Added
+
+- RTree as a spatial partitioning
+- G-JF Langevin Integrator
+
+### Fixed
+
+- Fix formula of worm like chain (@yutakasi634 )
+
 ## 1.20.0
 
 ### Added
