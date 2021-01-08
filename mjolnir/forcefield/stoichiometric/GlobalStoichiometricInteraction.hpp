@@ -194,7 +194,7 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
         const index_type i = leading_participants[idx_a];
         const std::vector<real_type>&       pots_buff_a       = potentials_buff_[idx_a];
         const std::vector<coordinate_type>& pot_derivs_buff_a = pot_derivs_buff_[idx_a];
-        const coordinate_type&              pot_derivs_sum_a  = pot_derivs_sum_a_[idx_a];
+        const coordinate_type&              pot_derivs_sum_a  = pot_deriv_sum_a_[idx_a];
         for(const auto& ptnr : partition_.partners(i))
         {
             const index_type j     = ptnr.index;
