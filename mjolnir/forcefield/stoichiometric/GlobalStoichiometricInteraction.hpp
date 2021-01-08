@@ -138,7 +138,6 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
 template<typename traitsT>
 void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) const noexcept
 {
-    // TODO: refactoring division operation
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
 
@@ -195,6 +194,7 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
         const index_type i = leading_participants[idx_a];
         const std::vector<real_type>&       pots_buff_a       = potentials_buff_[idx_a];
         const std::vector<coordinate_type>& pot_derivs_buff_a = pot_derivs_buff_[idx_a];
+        const coordinate_type&              pot_derivs_sum_a  = pot_derivs_sum_a_[idx_a];
         for(const auto& ptnr : partition_.partners(i))
         {
             const index_type j     = ptnr.index;
@@ -213,22 +213,20 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
                 const real_type inv_pot_sum_b  = 1.0 / pot_sum_b_[idx_b];
                 const real_type inv_pot_sum_b2 = std::pow(inv_pot_sum_b, 2);
                 sys.force(i) += 
-                    epsilon_ * (pot_deriv_sum_a_[idx_a] * pots_buff_ab * inv_pot_sum_b2 -
-                    pot_derivs_buff_ab * inv_pot_sum_b);
+                    epsilon_ * pot_derivs_buff_ab *inv_pot_sum_b * (pots_buff_ab * inv_pot_sum_b - 1.0);
                 sys.force(j) -=
-                    epsilon_ * (pot_derivs_buff_ab * pots_buff_ab * inv_pot_sum_b2 -
-                    pot_derivs_buff_ab * inv_pot_sum_b);
+                    epsilon_ * (pot_deriv_sum_b_[idx_b] * pots_buff_ab * inv_pot_sum_b2 -
+                                pot_derivs_buff_ab * inv_pot_sum_b);
             }
             else // pot_sum_a_[idx_a] >= pot_sum_b_[idx_b] case
             {
                 const real_type inv_pot_sum_a  = 1.0 / pot_sum_a_[idx_a];
                 const real_type inv_pot_sum_a2 = std::pow(inv_pot_sum_a, 2);
                 sys.force(i) +=
-                    epsilon_ * (pot_derivs_buff_ab * pots_buff_ab * inv_pot_sum_a2 -
-                    pot_derivs_buff_ab * inv_pot_sum_a);
+                    epsilon_ * (pot_derivs_sum_a * pots_buff_ab * inv_pot_sum_a2 -
+                                pot_derivs_buff_ab * inv_pot_sum_a);
                 sys.force(j) -=
-                    epsilon_ * (pot_deriv_sum_b_[idx_b] * pots_buff_ab * inv_pot_sum_a2 -
-                    pot_derivs_buff_ab * inv_pot_sum_a);
+                    epsilon_ * pot_derivs_buff_ab * inv_pot_sum_a * (pots_buff_ab * inv_pot_sum_a - 1.0);
             }
         }
     }
