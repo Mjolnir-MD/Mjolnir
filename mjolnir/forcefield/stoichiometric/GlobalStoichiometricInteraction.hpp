@@ -185,7 +185,7 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
             pot_deriv_sum_a         += deriv;
             pot_deriv_sum_b_[idx_b] -= deriv;
             pots_buff_a     [idx_b] =  pot;
-            pot_sum_a_              += pot;
+            pot_sum_a               += pot;
             pot_sum_b_      [idx_b] += pot;
         }
     }
