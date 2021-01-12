@@ -193,44 +193,73 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
     // force calculation
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
-        const index_type i = leading_participants[idx_a];
-        const std::vector<real_type>&       pots_buff_a       = potentials_buff_[idx_a];
-        const std::vector<coordinate_type>& pot_derivs_buff_a = pot_derivs_buff_[idx_a];
-        const real_type                     pot_sum_a         = pot_sum_a_      [idx_a];
-        const coordinate_type&              pot_derivs_sum_a  = pot_deriv_sum_a_[idx_a];
-        for(const auto& ptnr : partition_.partners(i))
-        {
-            const index_type j     = ptnr.index;
-            const index_type idx_b = idx_buffer_map[j];
-            const real_type pots_buff_ab = pots_buff_a[idx_b];
-            const coordinate_type& pot_derivs_buff_ab = pot_derivs_buff_a[idx_b];
-            const real_type pot_sum_b = pot_sum_b_[idx_b];
+        const index_type                    i                 = leading_participants[idx_a];
+        const std::vector<real_type>&       pots_buff_a       = potentials_buff_    [idx_a];
+        const std::vector<coordinate_type>& pot_derivs_buff_a = pot_derivs_buff_    [idx_a];
+        const real_type                     pot_sum_a         = pot_sum_a_          [idx_a];
 
-            const real_type max_pot_sum = std::max(pot_sum_a, pot_sum_b);
-            if(max_pot_sum <= 1.0)
+        if(pot_sum_a <= 1.0)
+        {
+            for(const auto& ptnr : partition_.partners(i))
             {
-                sys.force(i) -= epsilon_ * pot_derivs_buff_ab;
-                sys.force(j) += epsilon_ * pot_derivs_buff_ab;
+                const index_type       j     = ptnr.index;
+                const index_type       idx_b = idx_buffer_map[j];
+                const coordinate_type& pot_derivs_buff_ab = pot_derivs_buff_a[idx_b];
+                const real_type        pot_sum_b          = pot_sum_b_       [idx_b];
+
+                if(pot_sum_b <= 1.0)
+                {
+                    sys.force(i) -= epsilon_ * pot_derivs_buff_ab;
+                    sys.force(j) += epsilon_ * pot_derivs_buff_ab;
+                } 
+                else
+                {
+                    const real_type pots_buff_ab   = pots_buff_a[idx_b];
+                    const real_type inv_pot_sum_b  = 1.0 / pot_sum_b;
+                    const real_type inv_pot_sum_b2 = std::pow(inv_pot_sum_b, 2);
+                    sys.force(i) +=
+                        epsilon_ * pot_derivs_buff_ab *inv_pot_sum_b *
+                        (pots_buff_ab * inv_pot_sum_b - 1.0);
+                    sys.force(j) -=
+                        epsilon_ * (pot_deriv_sum_b_[idx_b] * pots_buff_ab * inv_pot_sum_b2 -
+                                    pot_derivs_buff_ab * inv_pot_sum_b);
+                }
             }
-            else if(pot_sum_a < pot_sum_b)
+        }
+        else // 1.0 < pot_sum_a case
+        {
+            const coordinate_type& pot_derivs_sum_a = pot_deriv_sum_a_[idx_a];
+
+            for(const auto& ptnr : partition_.partners(i))
             {
-                const real_type inv_pot_sum_b  = 1.0 / pot_sum_b;
-                const real_type inv_pot_sum_b2 = std::pow(inv_pot_sum_b, 2);
-                sys.force(i) += 
-                    epsilon_ * pot_derivs_buff_ab *inv_pot_sum_b * (pots_buff_ab * inv_pot_sum_b - 1.0);
-                sys.force(j) -=
-                    epsilon_ * (pot_deriv_sum_b_[idx_b] * pots_buff_ab * inv_pot_sum_b2 -
-                                pot_derivs_buff_ab * inv_pot_sum_b);
-            }
-            else // pot_sum_a_[idx_a] >= pot_sum_b_[idx_b] case
-            {
-                const real_type inv_pot_sum_a  = 1.0 / pot_sum_a;
-                const real_type inv_pot_sum_a2 = std::pow(inv_pot_sum_a, 2);
-                sys.force(i) +=
-                    epsilon_ * (pot_derivs_sum_a * pots_buff_ab * inv_pot_sum_a2 -
-                                pot_derivs_buff_ab * inv_pot_sum_a);
-                sys.force(j) -=
-                    epsilon_ * pot_derivs_buff_ab * inv_pot_sum_a * (pots_buff_ab * inv_pot_sum_a - 1.0);
+                const index_type j     = ptnr.index;
+                const index_type idx_b = idx_buffer_map[j];
+                const real_type        pots_buff_ab       = pots_buff_a      [idx_b];
+                const coordinate_type& pot_derivs_buff_ab = pot_derivs_buff_a[idx_b];
+                const real_type        pot_sum_b          = pot_sum_b_       [idx_b];
+
+                if(pot_sum_b < pot_sum_a)
+                {
+                    const real_type inv_pot_sum_a  = 1.0 / pot_sum_a;
+                    const real_type inv_pot_sum_a2 = std::pow(inv_pot_sum_a, 2);
+                    sys.force(i) +=
+                        epsilon_ * (pot_derivs_sum_a * pots_buff_ab * inv_pot_sum_a2 -
+                                    pot_derivs_buff_ab * inv_pot_sum_a);
+                    sys.force(j) -=
+                        epsilon_ * pot_derivs_buff_ab * inv_pot_sum_a *
+                        (pots_buff_ab * inv_pot_sum_a - 1.0);
+                }
+                else // pot_sum_a <= pot_sum_b
+                {
+                    const real_type inv_pot_sum_b  = 1.0 / pot_sum_b;
+                    const real_type inv_pot_sum_b2 = std::pow(inv_pot_sum_b, 2);
+                    sys.force(i) +=
+                        epsilon_ * pot_derivs_buff_ab *inv_pot_sum_b *
+                        (pots_buff_ab * inv_pot_sum_b - 1.0);
+                    sys.force(j) -=
+                        epsilon_ * (pot_deriv_sum_b_[idx_b] * pots_buff_ab * inv_pot_sum_b2 -
+                                    pot_derivs_buff_ab * inv_pot_sum_b);
+                }
             }
         }
     }
