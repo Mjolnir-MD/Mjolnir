@@ -177,9 +177,8 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
                sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type       l2    = math::length_sq(rij); // |rij|^2
             const real_type       rl    = math::rsqrt(l2);      // 1 / |rij|
-            const coordinate_type e     = rij * rl;             // rij / |rij|
             const real_type       l     = l2 * rl;
-            const coordinate_type deriv = potential_.derivative(l) * e;
+            const coordinate_type deriv = potential_.derivative(l) * rl * rij;
             const real_type       pot   = potential_.potential(l);
             derivs_buff_a   [idx_b] =  deriv;
             pot_deriv_sum_a         += deriv;
@@ -209,26 +208,31 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
 
                 if(pot_sum_b <= 1.0)
                 {
-                    sys.force(i) -= epsilon_ * pot_derivs_buff_ab;
-                    sys.force(j) += epsilon_ * pot_derivs_buff_ab;
+                    const coordinate_type force = epsilon_ * pot_derivs_buff_ab;
+                    sys.force(i) -= force;
+                    sys.force(j) += force;
                 } 
                 else
                 {
                     const real_type pots_buff_ab   = pots_buff_a[idx_b];
                     const real_type inv_pot_sum_b  = 1.0 / pot_sum_b;
-                    const real_type inv_pot_sum_b2 = std::pow(inv_pot_sum_b, 2);
+                    const real_type ep_pot_sum_b           = epsilon_ * inv_pot_sum_b;
+                    const real_type pots_buff_ab_pot_sum_b = pots_buff_ab * inv_pot_sum_b;
                     sys.force(i) +=
-                        epsilon_ * pot_derivs_buff_ab *inv_pot_sum_b *
-                        (pots_buff_ab * inv_pot_sum_b - 1.0);
+                        ep_pot_sum_b *
+                        (pots_buff_ab_pot_sum_b - 1.0) * pot_derivs_buff_ab;
                     sys.force(j) -=
-                        epsilon_ * (pot_deriv_sum_b_[idx_b] * pots_buff_ab * inv_pot_sum_b2 -
-                                    pot_derivs_buff_ab * inv_pot_sum_b);
+                        ep_pot_sum_b *
+                        (pots_buff_ab_pot_sum_b * pot_deriv_sum_b_[idx_b] - pot_derivs_buff_ab);
                 }
             }
         }
         else // 1.0 < pot_sum_a case
         {
+            const real_type inv_pot_sum_a  = 1.0 / pot_sum_a;
+            const real_type ep_pot_sum_a   = epsilon_ * inv_pot_sum_a;
             const coordinate_type& pot_derivs_sum_a = pot_deriv_sum_a_[idx_a];
+            const coordinate_type  pot_derivs_sum_a_pot_sum_a = inv_pot_sum_a * pot_derivs_sum_a;
 
             for(const auto& ptnr : partition_.partners(i))
             {
@@ -240,25 +244,24 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
 
                 if(pot_sum_b < pot_sum_a)
                 {
-                    const real_type inv_pot_sum_a  = 1.0 / pot_sum_a;
-                    const real_type inv_pot_sum_a2 = std::pow(inv_pot_sum_a, 2);
                     sys.force(i) +=
-                        epsilon_ * (pot_derivs_sum_a * pots_buff_ab * inv_pot_sum_a2 -
-                                    pot_derivs_buff_ab * inv_pot_sum_a);
+                        ep_pot_sum_a *
+                        (pots_buff_ab * pot_derivs_sum_a_pot_sum_a - pot_derivs_buff_ab);
                     sys.force(j) -=
-                        epsilon_ * pot_derivs_buff_ab * inv_pot_sum_a *
-                        (pots_buff_ab * inv_pot_sum_a - 1.0);
+                        ep_pot_sum_a  *
+                        (pots_buff_ab * inv_pot_sum_a - 1.0) * pot_derivs_buff_ab;
                 }
                 else // pot_sum_a <= pot_sum_b
                 {
                     const real_type inv_pot_sum_b  = 1.0 / pot_sum_b;
-                    const real_type inv_pot_sum_b2 = std::pow(inv_pot_sum_b, 2);
+                    const real_type ep_pot_sum_b   = epsilon_ * inv_pot_sum_b;
+                    const real_type pots_buff_ab_pot_sum_b = pots_buff_ab * inv_pot_sum_b;
                     sys.force(i) +=
-                        epsilon_ * pot_derivs_buff_ab *inv_pot_sum_b *
-                        (pots_buff_ab * inv_pot_sum_b - 1.0);
+                        ep_pot_sum_b *
+                        (pots_buff_ab_pot_sum_b - 1.0) * pot_derivs_buff_ab;
                     sys.force(j) -=
-                        epsilon_ * (pot_deriv_sum_b_[idx_b] * pots_buff_ab * inv_pot_sum_b2 -
-                                    pot_derivs_buff_ab * inv_pot_sum_b);
+                        ep_pot_sum_b *
+                        (pots_buff_ab_pot_sum_b * pot_deriv_sum_b_[idx_b] - pot_derivs_buff_ab);
                 }
             }
         }
