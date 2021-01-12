@@ -100,8 +100,9 @@ class WormLikeChainOffsetPotential
 
   private:
 
-    real_type p_, lc_, offset_;
+    real_type p_, lc_;
     real_type inv_lc_; // 1 / lc
+    real_type offset_;
     real_type temperature_; // [K]
     real_type kBT_4p_; // kBT / 4p
 };
