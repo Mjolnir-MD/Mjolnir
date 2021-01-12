@@ -111,6 +111,7 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
             "- \"RepulsiveGoContact\" : repulsive part of native contact potential",
             "- \"Gaussian\"           : well-known gaussian potential",
             "- \"WormLikeChain\" : potential based on worm-like chain model",
+            "- \"WormLikeChainOffset\" : potential based on worm-like chain model with distance offset",
             "- \"3SPN2Bond\"          : bond length potential for 3SPN2"
             }));
     }
