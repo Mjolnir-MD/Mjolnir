@@ -10,7 +10,7 @@ namespace mjolnir
 // via polypeptide linker. The formula of this potential partialy referenced
 // Guillaume et al., (2013).
 // This interaction include offset for r.
-// V(r)  = kT/p  * (lc/4 * 1/(1 - (r - offset)/lc) - (r - offset)/4 + (r - offset)^2/2lc)
+// V(r)  = kT/p  * (lc/4 * (1/(1 - (r - offset)/lc) - 1) - (r - offset)/4 + (r - offset)^2/2lc)
 // dV/dr = kT/p * (1/4 * (1/(1 - (r - offset)/lc)^2 - 1) - (r - offset)/lc)
 template<typename realT>
 class WormLikeChainOffsetPotential
@@ -31,7 +31,7 @@ class WormLikeChainOffsetPotential
     {
         if(dist <= offset_) {return kBT_4p_ * lc_;}
         const real_type l = dist - offset_;
-        return kBT_4p_ * (lc_* lc_ / (lc_ - l) - l + 2.0 * l * l * inv_lc_);
+        return kBT_4p_ * (lc_* (lc_ / (lc_ - l) - 1.0) - l + 2.0 * l * l * inv_lc_);
     }
 
     real_type derivative(const real_type dist) const noexcept
