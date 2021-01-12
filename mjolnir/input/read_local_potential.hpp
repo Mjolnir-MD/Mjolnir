@@ -248,14 +248,14 @@ read_worm_like_chain_offset_potential(const toml::value& param, const toml::valu
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     using real_type = realT;
-    check_keys_available(param, {"indices", "p", "lc", "offset", "dist_offset"});
+    check_keys_available(param, {"indices", "p", "lc", "offset", "l0"});
 
     auto p        = find_parameter<real_type>(param, env, "p");
     auto lc       = find_parameter<real_type>(param, env, "lc");
-    auto dist_ofs = find_parameter<real_type>(param, env, "dist_offset");
+    auto dist_ofs = find_parameter<real_type>(param, env, "l0");
 
-    MJOLNIR_LOG_INFO("WormLikeChainOffsetPotential = {p = ", p, ", lc = ", lc, "dist_offset", dist_ofs, "}");
-    return WormLikeChainOffsetPotential<realT>(p, lc, dist_ofs);
+    MJOLNIR_LOG_INFO("WormLikeChainOffsetPotential = {p = ", p, ", lc = ", lc, " l0 = ", l0, "}");
+    return WormLikeChainOffsetPotential<realT>(p, lc, l0);
 }
 
 
