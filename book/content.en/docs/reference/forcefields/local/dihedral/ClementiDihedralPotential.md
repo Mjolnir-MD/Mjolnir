@@ -1,5 +1,5 @@
 +++
-title = "ClementiGo"
+title = "ClementiDihedral"
 weight = 400000
 +++
 
