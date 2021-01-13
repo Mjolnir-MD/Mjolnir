@@ -6,12 +6,12 @@
 add_executable(mjolnir mjolnir.cpp)
 set_target_properties(mjolnir PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
-    COMPILE_FLAGS "${MJOLNIR_WARNING_FLAGS} ${MJOLNIR_OPTIMIZATON_FLAGS}")
+    COMPILE_FLAGS "${MJOLNIR_WARNING_FLAGS} ${MJOLNIR_OPTIMIZATION_FLAGS}")
 
 if(SEPARATE_BUILD)
     add_library(mjolnir_core STATIC ${mjolnir_source_files})
     set_target_properties(mjolnir_core PROPERTIES
-        COMPILE_FLAGS "${MJOLNIR_WARNING_FLAGS} ${MJOLNIR_OPTIMIZATON_FLAGS}")
+        COMPILE_FLAGS "${MJOLNIR_WARNING_FLAGS} ${MJOLNIR_OPTIMIZATION_FLAGS}")
     target_link_libraries(mjolnir mjolnir_core)
 endif()
 
