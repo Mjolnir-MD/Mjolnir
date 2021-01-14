@@ -19,8 +19,8 @@ class WormLikeChainOffsetPotential
     using real_type   = realT;
 
   public:
-    WormLikeChainOffsetPotential(const real_type p, const real_type lc, const real_type offset) noexcept
-        : p_(p), lc_(lc), inv_lc_(1.0 / lc), offset_(offset), temperature_(300.0)
+    WormLikeChainOffsetPotential(const real_type p, const real_type lc, const real_type l0) noexcept
+        : p_(p), lc_(lc), l0_(l0), inv_lc_(1.0 / lc), temperature_(300.0)
     {
         // XXX should be updated before use because T is default value!
         this->calc_parameters();
@@ -29,15 +29,15 @@ class WormLikeChainOffsetPotential
 
     real_type potential(const real_type dist) const noexcept
     {
-        if(dist <= offset_) {return kBT_4p_ * lc_;}
-        const real_type l = dist - offset_;
+        if(dist <= l0_) {return kBT_4p_ * lc_;}
+        const real_type l = dist - l0_;
         return kBT_4p_ * (lc_* (lc_ / (lc_ - l) - 1.0) - l + 2.0 * l * l * inv_lc_);
     }
 
     real_type derivative(const real_type dist) const noexcept
     {
-        if(dist <= offset_) {return 0.0;}
-        const real_type l      = dist - offset_;
+        if(dist <= l0_) {return 0.0;}
+        const real_type l      = dist - l0_;
         const real_type l_lc   = l * inv_lc_;
 
         const real_type diff_one_l_lc = 1 - l_lc;
@@ -78,7 +78,7 @@ class WormLikeChainOffsetPotential
 
     real_type lc() const noexcept {return lc_;}
     real_type p() const noexcept {return p_;}
-    real_type offset() const noexcept {return offset_;}
+    real_type l0() const noexcept {return l0_;}
 
     real_type cutoff() const noexcept // no cutoff exists.
     {return std::numeric_limits<real_type>::infinity();}
@@ -100,9 +100,8 @@ class WormLikeChainOffsetPotential
 
   private:
 
-    real_type p_, lc_;
+    real_type p_, lc_, l0_;
     real_type inv_lc_; // 1 / lc
-    real_type offset_;
     real_type temperature_; // [K]
     real_type kBT_4p_; // kBT / 4p
 };
