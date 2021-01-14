@@ -6,6 +6,6 @@
 
 namespace mjolnir
 {
-    template class WormLikeChainOffsetPotential<double>;
-    template class WormLikeChainOffsetPotential<float>;
+template class WormLikeChainOffsetPotential<double>;
+template class WormLikeChainOffsetPotential<float>;
 } // mjolnir
