@@ -20,7 +20,7 @@ U(v) = k_1(1-\cos(v-v_0)) + k_3(1-\cos(3(v-v_0)))
 ```toml
 [[forcefields.local]]
 interaction = "DihedralAngle"
-potential   = "Gaussian"
+potential   = "ClementiDihedral"
 topology    = "none"
 parameters  = [
     {indices = [0,1,2,3], v0 = -2.20, k1 = 1.0, k3 = 0.5},

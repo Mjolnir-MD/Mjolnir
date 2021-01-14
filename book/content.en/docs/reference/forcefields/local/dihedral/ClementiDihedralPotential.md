@@ -20,7 +20,7 @@ It is introduced in the following paper.
 ```toml
 [[forcefields.local]]
 interaction = "DihedralAngle"
-potential   = "Gaussian"
+potential   = "ClementiDihedral"
 topology    = "none"
 parameters  = [
     {indices = [0,1,2,3], v0 = -2.20, k1 = 1.0, k3 = 0.5},
