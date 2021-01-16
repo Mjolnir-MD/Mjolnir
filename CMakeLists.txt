@@ -10,8 +10,8 @@ include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/extlib)
 add_definitions(-DTOML11_COLORIZE_ERROR_MESSAGE)
 
-# -----------------------------------------------------------------------------
-# check version and defime a macro
+# =============================================================================
+# check git hash and tag. then defime a macro, `MJOLNIR_VERSION_INFO`.
 
 set(MJOLNIR_MOST_RECENT_TAG     "v0.0.0")
 set(MJOLNIR_DIFFERENCE_FROM_TAG "0")
@@ -43,8 +43,9 @@ add_definitions("-DMJOLNIR_COMPILER_VERSION=\"${CMAKE_CXX_COMPILER}\"")
 
 message(STATUS "MJOLNIR_VERSION = ${MJOLNIR_VERSION_INFO}")
 
-# -----------------------------------------------------------------------------
-# add compilation flags (for general)
+# =============================================================================
+# add warning flags
+
 include(CheckCXXCompilerFlag)
 
 set(MJOLNIR_WARNING_FLAGS "")
@@ -62,7 +63,9 @@ if(MJOLNIR_COMPILER_HAS_WPEDANTIC)
     set(MJOLNIR_WARNING_FLAGS "${MJOLNIR_WARNING_FLAGS} -Wpedantic")
 endif()
 
-# ----------------------------------------------------------------------------
+message(STATUS "warning flags are ${MJOLNIR_WARNING_FLAGS}")
+
+# =============================================================================
 # add optimization flags
 
 set(MJOLNIR_OPTIMIZATON_FLAGS "")
@@ -100,20 +103,26 @@ endif()
 
 message(STATUS "optimization flags are ${MJOLNIR_OPTIMIZATON_FLAGS}")
 
-# -----------------------------------------------------------------------------
+# =============================================================================
 # check input flags
+
+# -----------------------------------------------------------------------------
+# Check debug flag
 
 option(DEBUG "dump debug information" OFF)
 if(DEBUG)
     add_definitions(-DMJOLNIR_DEBUG)
 endif()
 
-option(SINGLE_PRECISION_SUPPORT "support float type" ON)
+# -----------------------------------------------------------------------------
+# check float/double flags
+
+option(SINGLE_PRECISION_SUPPORT "support float (32-bit floating point) type" ON)
 if(NOT SINGLE_PRECISION_SUPPORT)
     add_definitions(-DMJOLNIR_WITHOUT_SINGLE_PRECISION)
 endif()
 
-option(DOUBLE_PRECISION_SUPPORT "support double type" ON)
+option(DOUBLE_PRECISION_SUPPORT "support double (64-bit floating point) type" ON)
 if(NOT DOUBLE_PRECISION_SUPPORT)
     add_definitions(-DMJOLNIR_WITHOUT_DOUBLE_PRECISION)
 endif()
@@ -122,11 +131,17 @@ if((NOT SINGLE_PRECISION_SUPPORT) AND (NOT DOUBLE_PRECISION_SUPPORT))
     message(FATAL_ERROR "Both float and double are disabled, nothing to be built")
 endif()
 
+# -----------------------------------------------------------------------------
+# check approximation flag
+
 option(USE_APPROX "\
 use approximation instruction for time-consuming math functions" OFF)
 if(USE_APPROX)
     add_definitions(-DMJOLNIR_WITH_APPROX)
 endif()
+
+# -----------------------------------------------------------------------------
+# check openmp flag
 
 option(USE_OPENMP "use OpenMP for CPU parallelization" ON)
 if(USE_OPENMP)
@@ -140,9 +155,17 @@ if(USE_OPENMP)
     endif()
 endif()
 
+# -----------------------------------------------------------------------------
+# check whether unit/integration tests are needed (used later)
+
 option(BUILD_INTEGRATION_TEST "\
 build integration test that does not run automatically \
 because it takes relatively long time" ON)
+
+option(BUILD_UNIT_TEST "build unit tests" ON)
+
+# -----------------------------------------------------------------------------
+# check separate build
 
 option(SEPARATE_BUILD "separate build process. It reduces the compilation time \
 after building it once. But it possibly gains performance loss. So this is not \
@@ -166,49 +189,53 @@ if(SEPARATE_BUILD)
 #     add_definitions(-flto)
 endif()
 
-option(BUILD_UNIT_TEST "build unit tests" ON)
-
-# -----------------------------------------------------------------------------
+# =============================================================================
+# download dependencies
 
 execute_process(COMMAND git submodule update --init --recursive
                 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 option(FIND_BOOST "find boost library" OFF)
-if(BOOST_ROOT OR FIND_BOOST)
-    # if BOOST_ROOT is manually defined, use the library.
-    find_package(Boost 1.67.0 REQUIRED COMPONENTS unit_test_framework)
-    include_directories(${Boost_INCLUDE_DIRS})
-else()
-    if(EXISTS "${PROJECT_SOURCE_DIR}/extlib/boost_1_73_0/boost/version.hpp")
-        message(STATUS "boost 1.73.0 exists.")
-        include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_73_0)
+if(BUILD_UNIT_TEST)
+    if(BOOST_ROOT OR FIND_BOOST)
+        # if BOOST_ROOT is manually defined, use the library.
+        find_package(Boost 1.67.0 REQUIRED COMPONENTS unit_test_framework)
+        include_directories(${Boost_INCLUDE_DIRS})
     else()
-        message(STATUS "Boost library not found. Donwloading...")
-        message(STATUS "It can take minutes. hang tight!")
+        if(EXISTS "${PROJECT_SOURCE_DIR}/extlib/boost_1_73_0/boost/version.hpp")
+            message(STATUS "boost 1.73.0 exists.")
+            include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_73_0)
+        else()
+            message(STATUS "Boost library not found. Donwloading...")
+            message(STATUS "It can take minutes. hang tight!")
 
-        file(DOWNLOAD https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.bz2
-            ${PROJECT_SOURCE_DIR}/extlib/boost_1_73_0.tar.bz2
-            EXPECTED_HASH SHA256=4eb3b8d442b426dc35346235c8733b5ae35ba431690e38c6a8263dce9fcbb402
-            STATUS MJOLNIR_DOWNLOAD_BOOST_STATUS)
+            file(DOWNLOAD https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.bz2
+                ${PROJECT_SOURCE_DIR}/extlib/boost_1_73_0.tar.bz2
+                EXPECTED_HASH SHA256=4eb3b8d442b426dc35346235c8733b5ae35ba431690e38c6a8263dce9fcbb402
+                STATUS MJOLNIR_DOWNLOAD_BOOST_STATUS)
 
-        # check status
-        list(GET MJOLNIR_DOWNLOAD_BOOST_STATUS 0 MJOLNIR_DOWNLOAD_BOOST_RESULT)
-        if(NOT ${MJOLNIR_DOWNLOAD_BOOST_RESULT} EQUAL 0)
-            list(GET MJOLNIR_DOWNLOAD_BOOST_STATUS 1 MJOLNIR_DOWNLOAD_BOOST_ERROR)
-            message(FATAL_ERROR "failed to download Boost library."
-                ${MJOLNIR_DOWNLOAD_BOOST_ERROR})
+            # check status
+            list(GET MJOLNIR_DOWNLOAD_BOOST_STATUS 0 MJOLNIR_DOWNLOAD_BOOST_RESULT)
+            if(NOT ${MJOLNIR_DOWNLOAD_BOOST_RESULT} EQUAL 0)
+                list(GET MJOLNIR_DOWNLOAD_BOOST_STATUS 1 MJOLNIR_DOWNLOAD_BOOST_ERROR)
+                message(FATAL_ERROR "failed to download Boost library."
+                    ${MJOLNIR_DOWNLOAD_BOOST_ERROR})
+            endif()
+
+            message(STATUS "downloading completed. Unpacking...")
+
+            execute_process(COMMAND tar xf boost_1_73_0.tar.bz2
+                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
+                OUTPUT_QUIET ERROR_QUIET)
+
+            include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_73_0)
+            message(STATUS "done.")
         endif()
-
-        message(STATUS "downloading completed. Unpacking...")
-
-        execute_process(COMMAND tar xf boost_1_73_0.tar.bz2
-            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
-            OUTPUT_QUIET ERROR_QUIET)
-
-        include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_73_0)
-        message(STATUS "done.")
     endif()
-endif()
+endif(BUILD_UNIT_TEST)
+
+# =============================================================================
+# Build the code
 
 set(mjolnir_source_files)
 if(SEPARATE_BUILD)
