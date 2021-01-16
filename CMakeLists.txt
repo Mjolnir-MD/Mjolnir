@@ -132,6 +132,23 @@ if((NOT SINGLE_PRECISION_SUPPORT) AND (NOT DOUBLE_PRECISION_SUPPORT))
 endif()
 
 # -----------------------------------------------------------------------------
+# check boundary flags
+
+option(UNLIMITED_BOUNDARY_SUPPORT "support unlimited boundary (infinite space)" ON)
+if(NOT UNLIMITED_BOUNDARY_SUPPORT)
+    add_definitions(-DMJOLNIR_WITHOUT_UNLIMITED_BOUNDARY)
+endif()
+
+option(PERIODIC_BOUNDARY_SUPPORT "support periodic boundary (cuboidal)" ON)
+if(NOT PERIODIC_BOUNDARY_SUPPORT)
+    add_definitions(-DMJOLNIR_WITHOUT_PERIODIC_BOUNDARY)
+endif()
+
+if((NOT UNLIMITED_BOUNDARY_SUPPORT) AND (NOT PERIODIC_BOUNDARY_SUPPORT))
+    message(FATAL_ERROR "Both unlimited and periodic boundaries are disabled, nothing to be built")
+endif()
+
+# -----------------------------------------------------------------------------
 # check approximation flag
 
 option(USE_APPROX "\

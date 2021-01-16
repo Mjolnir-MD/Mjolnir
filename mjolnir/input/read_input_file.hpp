@@ -70,12 +70,17 @@ read_boundary(const toml::value& root, const toml::value& simulator)
     MJOLNIR_LOG_FUNCTION();
 
     const auto boundary = toml::find<std::string>(simulator, "boundary_type");
+
+#ifndef MJOLNIR_WITHOUT_UNLIMITED_BOUNDARY
     if(boundary == "Unlimited")
     {
         MJOLNIR_LOG_NOTICE("Boundary Condition is Unlimited");
         return read_parallelism<realT, UnlimitedBoundary>(root, simulator);
     }
-    else if(boundary == "Periodic")
+#endif
+
+#ifndef MJOLNIR_WITHOUT_PERIODIC_BOUNDARY
+    if(boundary == "Periodic")
     {
         MJOLNIR_LOG_NOTICE("Boundary Condition is Periodic. "
                            "The shape is cuboid.");
@@ -86,16 +91,20 @@ read_boundary(const toml::value& root, const toml::value& simulator)
         MJOLNIR_LOG_NOTICE("Boundary Condition is PeriodicCuboid");
         return read_parallelism<realT, CuboidalPeriodicBoundary>(root, simulator);
     }
-    else
-    {
-        throw_exception<std::runtime_error>(toml::format_error("[error] "
-            "mjolnir::read_boundary: invalid boundary",
-            toml::find(simulator, "boundary_type"), "here", {
-            "- \"Unlimited\"     : no boundary condition. infinite space",
-            "- \"Periodic\"      : periodic boundary. Assuming cuboidal shape.",
-            "- \"PeriodicCuboid\": periodic boundary with cuboidal shape"
-            }));
-    }
+#endif
+
+    throw_exception<std::runtime_error>(toml::format_error("[error] "
+        "mjolnir::read_boundary: invalid boundary",
+        toml::find(simulator, "boundary_type"), "here", {
+        "expected value is one of the following."
+#ifndef MJOLNIR_WITHOUT_UNLIMITED_BOUNDARY
+        , "- \"Unlimited\"     : no boundary condition. infinite space"
+#endif
+#ifndef MJOLNIR_WITHOUT_PERIODIC_BOUNDARY
+        , "- \"Periodic\"      : periodic boundary. Assuming cuboidal shape."
+        , "- \"PeriodicCuboid\": periodic boundary with cuboidal shape"
+#endif
+        }));
 }
 
 inline std::unique_ptr<SimulatorBase>
