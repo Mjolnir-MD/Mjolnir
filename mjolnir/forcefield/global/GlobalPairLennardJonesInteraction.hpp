@@ -30,7 +30,7 @@ class GlobalPairInteraction<
     using partition_type  = SpatialPartition<traits_type, potential_type>;
 
   public:
-    GlobalPairInteraction()           = default;
+    GlobalPairInteraction()  = default;
     ~GlobalPairInteraction() override {}
 
     GlobalPairInteraction(potential_type&& pot, partition_type&& part)
