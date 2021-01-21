@@ -17,4 +17,8 @@ template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoun
 
 template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>>>;
 template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>>;
+
+template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, GlobalStoichiometricInteractionPotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>>>;
+template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, GlobalStoichiometricInteractionPotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>>;
+
 } // mjolnir
