@@ -188,7 +188,7 @@ struct fixed_vector
     {
         if(N < sz)
         {
-            throw std::bad_alloc("fixed_vector::resize()");
+            throw std::bad_alloc();
         }
         size_ = sz;
     }
@@ -196,7 +196,7 @@ struct fixed_vector
     {
         if(N < sz)
         {
-            throw std::bad_alloc("fixed_vector::resize()");
+            throw std::bad_alloc();
         }
         if(size_ < sz)
         {
