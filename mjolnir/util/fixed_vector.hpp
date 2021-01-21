@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <string>
 #include <mjolnir/util/string.hpp>
+#include <mjolnir/util/throw_exception.hpp>
 
 namespace mjolnir
 {
@@ -161,9 +162,8 @@ struct fixed_vector
     {
         if(size_ <= i)
         {
-            using namespace ::mjolnir::literals::string_literals;
-            std::out_of_range("fixed_vector::at("_s + std::to_string(i) + "): "
-                "index exceeds the current size (" + std::to_string(size_) + ")");
+            throw_exception<std::out_of_range>("fixed_vector::at(", i, "): "
+                "index exceeds the current size (", size_, ")");
         }
         return container_.at(i);
     }
@@ -171,9 +171,8 @@ struct fixed_vector
     {
         if(size_ <= i)
         {
-            using namespace ::mjolnir::literals::string_literals;
-            std::out_of_range("fixed_vector::at("_s + std::to_string(i) + "): "
-                "index exceeds the current size (" + std::to_string(size_) + ")");
+            throw_exception<std::out_of_range>("fixed_vector::at(", i, "): "
+                "index exceeds the current size (", size_, ")");
         }
         return container_.at(i);
     }
