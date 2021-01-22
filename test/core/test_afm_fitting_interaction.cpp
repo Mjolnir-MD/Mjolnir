@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(AFMFitting_calc_force)
         const auto init = sys;
         interaction.initialize(init);
 
-        constexpr real_type tol = 1e-3;
+        constexpr real_type tol = 2e-3;
         constexpr real_type dr  = 1e-4;
         for(std::size_t idx=0; idx<sys.size(); ++idx)
         {
