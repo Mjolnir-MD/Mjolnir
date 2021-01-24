@@ -153,6 +153,7 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         const std::size_t participants_b_num = potential_.participants_b_num();
     
         // initialization of each buffering container.
+#pragma omp parallel for
         for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
         {
             std::vector<real_type>&       pots_buff_a   = potentials_buff_[idx_a];
@@ -164,7 +165,7 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         std::fill(pot_sum_a_.begin(), pot_sum_a_.end(), 0.0);
         std::fill(pot_deriv_sum_a_.begin(), pot_deriv_sum_a_.end(),
                   math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
-    
+
         for(std::size_t idx_b=0; idx_b<participants_b_num; ++idx_b)
         {
             std::vector<real_type>&       pot_sum_b_thread       = pot_sum_b_thread_[idx_b];
