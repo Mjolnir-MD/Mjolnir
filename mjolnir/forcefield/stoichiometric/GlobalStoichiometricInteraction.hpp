@@ -46,9 +46,9 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
         : potential_(std::move(pot)), partition_(std::move(part)),
           epsilon_(epsilon), coefa_(coefa), coefb_(coefb)
     {
-        std::size_t participants_a_num = potential_.participants_a_num();
-        std::size_t participants_b_num = potential_.participants_b_num();
-        std::size_t participants_ab    = participants_a_num * participants_b_num;
+        const std::size_t participants_a_num = potential_.participants_a_num();
+        const std::size_t participants_b_num = potential_.participants_b_num();
+        const std::size_t participants_ab    = participants_a_num * participants_b_num;
         pot_derivs_buff_.resize(participants_ab);
         potentials_buff_.resize(participants_ab);
         partner_buffer_ranges_.resize(participants_a_num);
@@ -153,6 +153,9 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
     MJOLNIR_LOG_FUNCTION_DEBUG();
 
     // initialization of each buffering container.
+    std::fill(potentials_buff_.begin(), potentials_buff_.end(), 0.0);
+    std::fill(pot_derivs_buff_.begin(), pot_derivs_buff_.end(),
+              math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
     std::fill(pot_sum_a_.begin(), pot_sum_a_.end(), 0.0);
     std::fill(pot_sum_b_.begin(), pot_sum_b_.end(), 0.0);
     std::fill(pot_deriv_sum_a_.begin(), pot_deriv_sum_a_.end(),
@@ -301,6 +304,7 @@ GlobalStoichiometricInteraction<traitsT>::calc_energy(const system_type& sys) co
     MJOLNIR_LOG_FUNCTION_DEBUG();
 
     // initialization of each buffering container.
+    std::fill(potentials_buff_.begin(), potentials_buff_.end(), 0.0);
     std::fill(pot_sum_a_.begin(), pot_sum_a_.end(), 0.0);
     std::fill(pot_sum_b_.begin(), pot_sum_b_.end(), 0.0);
 
@@ -375,6 +379,9 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
     MJOLNIR_LOG_FUNCTION_DEBUG();
 
     // initialization of each buffering container.
+    std::fill(potentials_buff_.begin(), potentials_buff_.end(), 0.0);
+    std::fill(pot_derivs_buff_.begin(), pot_derivs_buff_.end(),
+              math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
     std::fill(pot_sum_a_.begin(), pot_sum_a_.end(), 0.0);
     std::fill(pot_sum_b_.begin(), pot_sum_b_.end(), 0.0);
     std::fill(pot_deriv_sum_a_.begin(), pot_deriv_sum_a_.end(),
