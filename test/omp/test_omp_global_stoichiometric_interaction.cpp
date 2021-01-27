@@ -107,6 +107,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             seq_sys.mass(i)     = sys.mass(i);
+            seq_sys.rmass(i)    = sys.rmass(i);
             seq_sys.position(i) = sys.position(i);
             seq_sys.velocity(i) = sys.velocity(i);
             seq_sys.force(i)    = sys.force(i);
