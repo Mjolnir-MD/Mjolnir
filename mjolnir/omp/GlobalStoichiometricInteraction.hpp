@@ -182,10 +182,10 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         const auto        leading_participants = potential_.leading_participants();
         const std::size_t participants_a_num   = potential_.participants_a_num();
         const std::size_t participants_b_num   = potential_.participants_b_num();
+
+        // This for loop is not thread safe.
         auto pot_buff_iter   = potentials_buff_.begin();
         auto deriv_buff_iter = pot_derivs_buff_.begin();
-
-#pragma omp parallel for
         for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
         {
             const index_type i = leading_participants[idx_a];
@@ -197,13 +197,22 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
             std::advance(pot_buff_iter,   range_size);
             std::advance(deriv_buff_iter, range_size);
-            auto pot_range   = make_range(pot_first_iter,   pot_buff_iter);
-            auto deriv_range = make_range(deriv_first_iter, deriv_buff_iter);
 
             partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
             std::get<0>(partner_buffer_range) = partner;
-            std::get<1>(partner_buffer_range) = pot_range;
-            std::get<2>(partner_buffer_range) = deriv_range;
+            std::get<1>(partner_buffer_range) = make_range(pot_first_iter,   pot_buff_iter);
+            std::get<2>(partner_buffer_range) = make_range(deriv_first_iter, deriv_buff_iter);
+        }
+
+#pragma omp parallel for
+        for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
+        {
+            const index_type i = leading_participants[idx_a];
+
+            partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
+            const auto& partner     = std::get<0>(partner_buffer_range);
+            const auto& pot_range   = std::get<1>(partner_buffer_range);
+            const auto& deriv_range = std::get<2>(partner_buffer_range);
 
             real_type&       pot_sum_a       = pot_sum_a_      [idx_a];
             coordinate_type& pot_deriv_sum_a = pot_deriv_sum_a_[idx_a];
@@ -351,23 +360,32 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         const auto        leading_participants = potential_.leading_participants();
         const std::size_t participants_a_num   = potential_.participants_a_num();
         const std::size_t participants_b_num   = potential_.participants_b_num();
-        auto              pot_buff_iter        = potentials_buff_.begin();
 
+        // This for loop is not thread safe
+        auto pot_buff_iter = potentials_buff_.begin();
         for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
         {
             const index_type i = leading_participants[idx_a];
 
-            partner_range_type partner        = partition_.partners(i);
-            const index_type   range_size     = partner.size();
-            const auto         pot_first_iter = pot_buff_iter;
+            const partner_range_type& partner        = partition_.partners(i);
+            const index_type          range_size     = partner.size();
+            potential_buffer_iterator pot_first_iter = pot_buff_iter;
 
-            std::advance(pot_buff_iter, range_size);
+            std::advance(pot_buff_iter,   range_size); // thread unsafe
 
             partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
-            auto pot_range = make_range(pot_first_iter, pot_buff_iter);
-
             std::get<0>(partner_buffer_range) = partner;
-            std::get<1>(partner_buffer_range) = pot_range;
+            std::get<1>(partner_buffer_range) = make_range(pot_first_iter, pot_buff_iter);
+        }
+
+#pragma omp parallel for
+        for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
+        {
+            const index_type i = leading_participants[idx_a];
+
+            partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
+            const auto& partner   = std::get<0>(partner_buffer_range);
+            const auto& pot_range = std::get<1>(partner_buffer_range);
 
             real_type& pot_sum_a = pot_sum_a_[idx_a];
 
@@ -455,10 +473,10 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         const auto        leading_participants = potential_.leading_participants();
         const std::size_t participants_a_num   = potential_.participants_a_num();
         const std::size_t participants_b_num   = potential_.participants_b_num();
+
+        // This for loop is not thread safe.
         auto pot_buff_iter   = potentials_buff_.begin();
         auto deriv_buff_iter = pot_derivs_buff_.begin();
-
-#pragma omp parallel for
         for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
         {
             const index_type i = leading_participants[idx_a];
@@ -470,13 +488,22 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
             std::advance(pot_buff_iter,   range_size);
             std::advance(deriv_buff_iter, range_size);
-            partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
-            auto pot_range   = make_range(pot_first_iter,   pot_buff_iter);
-            auto deriv_range = make_range(deriv_first_iter, deriv_buff_iter);
 
+            partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
             std::get<0>(partner_buffer_range) = partner;
-            std::get<1>(partner_buffer_range) = pot_range;
-            std::get<2>(partner_buffer_range) = deriv_range;
+            std::get<1>(partner_buffer_range) = make_range(pot_first_iter,   pot_buff_iter);
+            std::get<2>(partner_buffer_range) = make_range(deriv_first_iter, deriv_buff_iter);
+        }
+
+#pragma omp parallel for
+        for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
+        {
+            const index_type i = leading_participants[idx_a];
+
+            partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
+            const auto& partner     = std::get<0>(partner_buffer_range);
+            const auto& pot_range   = std::get<1>(partner_buffer_range);
+            const auto& deriv_range = std::get<2>(partner_buffer_range);
 
             real_type&       pot_sum_a       = pot_sum_a_      [idx_a];
             coordinate_type& pot_deriv_sum_a = pot_deriv_sum_a_[idx_a];
