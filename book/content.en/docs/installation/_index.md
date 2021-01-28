@@ -92,3 +92,10 @@ All those are optional variables.
 - `-DDOUBLE_PRECISION_SUPPORT=(ON|OFF)`
   - `ON` by default.
   - If `OFF`, `double` version of the code will be ignored and the compilation finishes quickly.
+- `-DUNLIMITED_BOUNDARY_SUPPORT=(ON|OFF)`
+  - `ON` by default.
+  - If `OFF`, `UnlimitedBoundary` would not be able to be used, but the compilation finishes quickly.
+- `-DPERIODIC_BOUNDARY_SUPPORT=(ON|OFF)`
+  - `ON` by default.
+  - If `OFF`, `CuboidalPeriodicBoundary` would not be able to be used, but the compilation finishes quickly.
+

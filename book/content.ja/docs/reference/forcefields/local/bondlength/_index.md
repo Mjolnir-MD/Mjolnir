@@ -16,6 +16,7 @@ bookCollapseSection = true
 - [AttractiveGoContact]({{<relref "GoContactPotential.md">}})
 - [RepulsiveGoContact]({{<relref "GoContactPotential.md">}})
 - [WormLikeChain]({{<relref "WormLikeChainPotential.md">}})
+- [WormLikeChainOffset]({{<relref "WormLikeChainOffsetPotential.md">}})
 - [3SPN2Bond]({{<relref "3SPN2BondPotential.md">}})
 
 ## 例

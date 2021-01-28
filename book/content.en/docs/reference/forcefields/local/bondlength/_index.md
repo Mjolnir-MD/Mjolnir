@@ -15,6 +15,7 @@ The following potentials are available.
 - [AttractiveGoContact]({{<relref "GoContactPotential.md">}})
 - [RepulsiveGoContact]({{<relref "GoContactPotential.md">}})
 - [WormLikeChain]({{<relref "WormLikeChainPotential.md">}})
+- [WormLikeChainOffset]({{<relref "WormLikeChainOffsetPotential">}})
 - [3SPN2Bond]({{<relref "3SPN2BondPotential.md">}})
 
 ## Example
