@@ -10,6 +10,7 @@ set(mjolnir_forcefield_local_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/HarmonicPotential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/PeriodicGaussianPotential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/WormLikeChainPotential.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/WormLikeChainOffsetPotential.cpp"
     # -------------------------------------------------------------------------
     # interaction
     "${CMAKE_CURRENT_SOURCE_DIR}/BondAngleInteraction.cpp"

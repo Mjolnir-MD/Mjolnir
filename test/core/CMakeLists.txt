@@ -15,6 +15,7 @@ set(TEST_NAMES
     test_periodic_gaussian_potential
     test_cosine_potential
     test_worm_like_chain_potential
+    test_worm_like_chain_offset_potential
     test_flp_angle_potential
     test_flp_dihedral_potential
     test_clementi_dihedral_potential
@@ -75,6 +76,7 @@ set(TEST_NAMES
     test_read_clementi_dihedral_potential
     test_read_gaussian_potential
     test_read_worm_like_chain_potential
+    test_read_worm_like_chain_offset_potential
     test_read_periodic_gaussian_potential
     test_read_flexible_local_angle_potential
     test_read_flexible_local_dihedral_potential

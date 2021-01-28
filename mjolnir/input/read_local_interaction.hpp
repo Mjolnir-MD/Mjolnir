@@ -83,6 +83,14 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
                 kind, read_local_potential<2, potentialT>(local));
     }
+    else if(potential == "WormLikeChainOffset")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is WormLikeChainOffsetPotential");
+        using potentialT = WormLikeChainOffsetPotential<real_type>;
+
+        return make_unique<BondLengthInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<2, potentialT>(local));
+    }
     else if(potential == "3SPN2Bond")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is 3SPN2Bond.");
@@ -103,6 +111,7 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
             "- \"RepulsiveGoContact\" : repulsive part of native contact potential",
             "- \"Gaussian\"           : well-known gaussian potential",
             "- \"WormLikeChain\" : potential based on worm-like chain model",
+            "- \"WormLikeChainOffset\" : potential based on worm-like chain model with distance offset",
             "- \"3SPN2Bond\"          : bond length potential for 3SPN2"
             }));
     }
