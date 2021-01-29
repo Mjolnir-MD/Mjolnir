@@ -119,11 +119,10 @@ class SpatialPartition
     {
         return partition_->reduce_margin(neighbors_, dmargin, sys, pot);
     }
-    void scale_margin(const real_type scale, const system_type& sys,
+    bool scale_margin(const real_type scale, const system_type& sys,
                       const potential_type& pot)
     {
-        partition_->scale_margin(neighbors_, scale, sys, pot);
-        return ;
+        return partition_->scale_margin(neighbors_, scale, sys, pot);
     }
 
     real_type cutoff() const noexcept {return partition_->cutoff();}
