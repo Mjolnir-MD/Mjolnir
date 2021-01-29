@@ -308,7 +308,7 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
     }
 
     //XXX do NOT call this from `parallel` region.
-    void reduce_margin(neighbor_list_type& neighbors, const real_type dmargin,
+    bool reduce_margin(neighbor_list_type& neighbors, const real_type dmargin,
         const system_type& sys, const potential_type& pot) override
     {
         this->current_margin_ -= dmargin;
@@ -316,8 +316,9 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         if(this->current_margin_ < 0.)
         {
             this->make(neighbors, sys, pot);
+            return true;
         }
-        return ;
+        return false;
     }
     void scale_margin(neighbor_list_type& neighbors, const real_type scale,
         const system_type& sys, const potential_type& pot) override

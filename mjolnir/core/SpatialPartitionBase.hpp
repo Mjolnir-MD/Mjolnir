@@ -48,7 +48,7 @@ class SpatialPartitionBase
     virtual void make  (neighbor_list_type&,
             const system_type&, const potential_type&) = 0;
 
-    virtual void reduce_margin(neighbor_list_type&, const real_type,
+    virtual bool reduce_margin(neighbor_list_type&, const real_type,
             const system_type&, const potential_type&) = 0;
 
     virtual void scale_margin(neighbor_list_type&, const real_type,
@@ -112,11 +112,12 @@ class SpatialPartition
         partition_->make(neighbors_, sys, pot);
         return ;
     }
-    void reduce_margin(const real_type dmargin, const system_type& sys,
+
+    // reduce_margin return true if neighbour list is updated
+    bool reduce_margin(const real_type dmargin, const system_type& sys,
                        const potential_type& pot)
     {
-        partition_->reduce_margin(neighbors_, dmargin, sys, pot);
-        return ;
+        return partition_->reduce_margin(neighbors_, dmargin, sys, pot);
     }
     void scale_margin(const real_type scale, const system_type& sys,
                       const potential_type& pot)
