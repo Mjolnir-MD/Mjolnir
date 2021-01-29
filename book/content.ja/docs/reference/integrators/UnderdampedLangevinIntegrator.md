@@ -22,9 +22,6 @@ m\frac{d^2 \bold{r}}{dt^2} = \bold{f}(\bold{r}) - m\gamma\bold{v} + \beta(t)
 ```toml
 [simulator]
 integrator.type = "UnderdampedLangevin"
-integrator.remove.translation = true
-integrator.remove.rotation    = true
-integrator.remove.rescale     = true
 integrator.gammas = [
     {index = 0, gamma = 1.0},
     {index = 1, gamma = 1.0},
@@ -38,9 +35,13 @@ integrator.gammas = [
 
 - `type`: 文字列型
   - [Integrator](Integrator.md)の種類を指定します。`"BAOABLangevin"`です。
-- `remove`: テーブル型 (optional)
-  - 系全体の並進・回転速度成分を取り除くことができます。`true`にすると取り除かれます。
-  - `rescale`が`true`になっていた場合、全体の速度ベクトルをリスケールすることで速度を減算した分の運動エネルギーを補填します。
-  - 省略した場合、全て`false`になります。
 - `gammas`: テーブルの配列型
   - 粒子の摩擦係数{{<katex>}}\gamma_i{{</katex>}}を指定します。
+- `remove`: テーブル型 (optional)
+  - `translation`: 論理値型
+    - `true`の場合、毎ステップ、系全体の並進速度成分を取り除きます。
+  - `rotation`: 論理値型
+    - `true`の場合、毎ステップ、系全体の回転速度成分を取り除きます。
+  - `rescale`: 論理値型
+    - `true`になっていた場合、全体の速度ベクトルをリスケールすることで速度を減算した分の運動エネルギーを補填します。
+  - 省略した場合、全て`false`になります。
