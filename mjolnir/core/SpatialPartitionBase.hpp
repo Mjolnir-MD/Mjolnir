@@ -51,7 +51,7 @@ class SpatialPartitionBase
     virtual bool reduce_margin(neighbor_list_type&, const real_type,
             const system_type&, const potential_type&) = 0;
 
-    virtual void scale_margin(neighbor_list_type&, const real_type,
+    virtual bool scale_margin(neighbor_list_type&, const real_type,
             const system_type&, const potential_type&) = 0;
 
     virtual real_type cutoff() const noexcept = 0;
