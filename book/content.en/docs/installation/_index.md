@@ -25,7 +25,7 @@ to work on Windows properly.
 
 ### C++ compiler
 
-It requires C++11 compatible compiler. Since now it is 2019, default compilers
+It requires C++11 compatible compiler. Since now it is 2021, default compilers
 in most of the systems are compatible to C++11.
 
 But I recommend to use the later versions of compilers. Compilers are also
