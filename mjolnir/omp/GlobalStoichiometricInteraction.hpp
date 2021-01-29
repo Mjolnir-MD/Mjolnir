@@ -77,6 +77,7 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         MJOLNIR_LOG_INFO("potential is ", this->name());
         potential_.initialize(sys, topol);
         partition_.initialize(sys, this->potential_);
+        this->update_buffer_range();
 
         // When we calculate potential or derivative for specific idx, we buffering the
         // value in intermediate value container. So, we have to know which index in
@@ -97,11 +98,15 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->potential_.update(sys,topol);
         this->partition_.initialize(sys, potential_);
+        this->update_buffer_range();
     }
 
     void reduce_margin(const real_type dmargin, const system_type& sys) override
     {
-        partition_.reduce_margin(dmargin, sys, potential_);
+        if(partition_.reduce_margin(dmargin, sys, potential_))
+        {
+            this->update_buffer_range();
+        }
     }
     void scale_margin(const real_type scale, const system_type& sys) override
     {
@@ -118,6 +123,35 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         return new GlobalStoichiometricInteraction(
                 potential_type(potential_), partition_type(partition_),
                 epsilon_, coefa_, coefb_);
+    }
+
+  private:
+    void update_buffer_range()
+    {
+        const auto        leading_participants = potential_.leading_participants();
+        const std::size_t participants_a_num   = potential_.participants_a_num();
+        auto pot_buff_iter   = potentials_buff_.begin();
+        auto deriv_buff_iter = pot_derivs_buff_.begin();
+
+        for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
+        {
+            const index_type i = leading_participants[idx_a];
+
+            const partner_range_type& partner    = partition_.partners(i);
+            const index_type          range_size = partner.size();
+            potential_buffer_iterator  pot_first_iter   = pot_buff_iter;
+            derivative_buffer_iterator deriv_first_iter = deriv_buff_iter;
+
+            std::advance(pot_buff_iter,   range_size);
+            std::advance(deriv_buff_iter, range_size);
+            auto pot_range   = make_range(pot_first_iter,   pot_buff_iter);
+            auto deriv_range = make_range(deriv_first_iter, deriv_buff_iter);
+
+            partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
+            std::get<0>(partner_buffer_range) = partner;
+            std::get<1>(partner_buffer_range) = make_range(pot_first_iter,   pot_buff_iter);
+            std::get<2>(partner_buffer_range) = make_range(deriv_first_iter, deriv_buff_iter);
+        }
     }
 
   private:
@@ -182,27 +216,6 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         const auto        leading_participants = potential_.leading_participants();
         const std::size_t participants_a_num   = potential_.participants_a_num();
         const std::size_t participants_b_num   = potential_.participants_b_num();
-
-        // This for loop is not thread safe.
-        auto pot_buff_iter   = potentials_buff_.begin();
-        auto deriv_buff_iter = pot_derivs_buff_.begin();
-        for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
-        {
-            const index_type i = leading_participants[idx_a];
-
-            const partner_range_type&  partner          = partition_.partners(i);
-            const index_type           range_size       = partner.size();
-            potential_buffer_iterator  pot_first_iter   = pot_buff_iter;
-            derivative_buffer_iterator deriv_first_iter = deriv_buff_iter;
-
-            std::advance(pot_buff_iter,   range_size);
-            std::advance(deriv_buff_iter, range_size);
-
-            partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
-            std::get<0>(partner_buffer_range) = partner;
-            std::get<1>(partner_buffer_range) = make_range(pot_first_iter,   pot_buff_iter);
-            std::get<2>(partner_buffer_range) = make_range(deriv_first_iter, deriv_buff_iter);
-        }
 
 #pragma omp parallel for
         for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
@@ -361,23 +374,6 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         const std::size_t participants_a_num   = potential_.participants_a_num();
         const std::size_t participants_b_num   = potential_.participants_b_num();
 
-        // This for loop is not thread safe
-        auto pot_buff_iter = potentials_buff_.begin();
-        for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
-        {
-            const index_type i = leading_participants[idx_a];
-
-            const partner_range_type& partner        = partition_.partners(i);
-            const index_type          range_size     = partner.size();
-            potential_buffer_iterator pot_first_iter = pot_buff_iter;
-
-            std::advance(pot_buff_iter,   range_size); // thread unsafe
-
-            partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
-            std::get<0>(partner_buffer_range) = partner;
-            std::get<1>(partner_buffer_range) = make_range(pot_first_iter, pot_buff_iter);
-        }
-
 #pragma omp parallel for
         for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
         {
@@ -473,27 +469,6 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         const auto        leading_participants = potential_.leading_participants();
         const std::size_t participants_a_num   = potential_.participants_a_num();
         const std::size_t participants_b_num   = potential_.participants_b_num();
-
-        // This for loop is not thread safe.
-        auto pot_buff_iter   = potentials_buff_.begin();
-        auto deriv_buff_iter = pot_derivs_buff_.begin();
-        for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
-        {
-            const index_type i = leading_participants[idx_a];
-
-            const partner_range_type&  partner          = partition_.partners(i);
-            const index_type           range_size       = partner.size();
-            potential_buffer_iterator  pot_first_iter   = pot_buff_iter;
-            derivative_buffer_iterator deriv_first_iter = deriv_buff_iter;
-
-            std::advance(pot_buff_iter,   range_size);
-            std::advance(deriv_buff_iter, range_size);
-
-            partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
-            std::get<0>(partner_buffer_range) = partner;
-            std::get<1>(partner_buffer_range) = make_range(pot_first_iter,   pot_buff_iter);
-            std::get<2>(partner_buffer_range) = make_range(deriv_first_iter, deriv_buff_iter);
-        }
 
 #pragma omp parallel for
         for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
