@@ -11,7 +11,7 @@ Unlike `BAOABLangevin`, it handles bond length constraints appropreately.
 
 `g-BAOABLangevin` is developed in the following paper.
 
-- [Leimkuhler B, Matthews C. Proc. R. Soc. A. (2016)](https://doi.org/10.1098/rspa.2016.0138)
+- [Leimkuhler B, Matthews C. Proc. R. Soc. A. (2016) 472: 20160138](https://doi.org/10.1098/rspa.2016.0138)
 
 ## Example
 
