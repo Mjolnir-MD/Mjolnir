@@ -5,7 +5,7 @@ weight = 20
 
 # Reference
 
-Mjolnir does not have any command-line option. It uses a toml file as the input.
+Mjolnir does not have any command-line option. It uses a [TOML](https://toml.io) file as the input.
 So a command to execute simulation looks like the following.
 
 
@@ -16,7 +16,7 @@ $ ./bin/mjolnir sample.toml
 This document introduces how to write an input file. Here, a brief introduction
 of major components in an input file are provided.
 
-For detailed information about TOML v0.5.0, the file format used in Mjolnir,
+For detailed information about TOML v1.0.0, the file format used in Mjolnir,
 can be found in the [toml-lang official site](https://toml.io).
 
 An input file for Mjolnir has of 5 main components.

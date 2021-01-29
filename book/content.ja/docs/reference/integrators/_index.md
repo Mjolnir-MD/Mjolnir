@@ -10,14 +10,22 @@ Integratorは、時間積分のアルゴリズムを意味します。
 
 以下のアルゴリズムを選択できます。
 
+## [G-JF Langevin]({{<relref "G-JFLangevinIntegrator.md">}})
+
+ランジュバン方程式に従い、温度・体積・粒子数一定のシミュレーションを行います。
+
+以下の論文で提案された手法です。
+
+- [Niels Grønbech-Jensen & Oded Farago, (2013) Mol.Phys. 111:8, 983-991](https://doi.org/10.1080/00268976.2012.760055)
+
 ## [BAOABLangevin]({{<relref "BAOABLangevinIntegrator.md">}})
 
 ランジュバン方程式に従い、温度・体積・粒子数一定のシミュレーションを行います。
 
 以下の論文で提案された手法です。
 
-- Leimkuhler B, Matthews C. Appl. Math. Res. Exp. (2013)
-- Leimkuhler B, Matthews C. J. Chem. Phys. (2013)
+- [Benedict Leimkuhler and Charles Matthews. Appl. Math. Res. Exp. (2013) 2013:1, pp. 34-56](https://doi.org/10.1093/amrx/abs010)
+- [Benedict Leimkuhler and Charles Matthews. J. Chem. Phys. (2013) 138:17, 174102](https://doi.org/10.1063/1.4802990)
 
 OpenMMで推奨されているアルゴリズムです。
 
@@ -29,7 +37,7 @@ OpenMMで推奨されているアルゴリズムです。
 
 以下の論文で提案された手法です。
 
-- Leimkuhler B, Matthews C. Proc. R. Soc. A. (2016)
+- [Leimkuhler B, Matthews C. Proc. R. Soc. A. (2016)](https://doi.org/10.1098/rspa.2016.0138)
 
 ## [UnderdampedLangevin]({{<relref "UnderdampedLangevinIntegrator.md">}})
 
