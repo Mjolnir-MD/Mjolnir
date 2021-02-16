@@ -39,6 +39,7 @@
 #include <mjolnir/omp/UnderdampedLangevinIntegrator.hpp>
 #include <mjolnir/omp/BAOABLangevinIntegrator.hpp>
 #include <mjolnir/omp/gBAOABLangevinIntegrator.hpp>
+#include <mjolnir/omp/GJFNVTLangevinIntegrator.hpp>
 #include <mjolnir/omp/SystemMotionRemover.hpp>
 
 #endif// MJOLNIR_OMP_OMP_HPP

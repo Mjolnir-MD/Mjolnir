@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_numerical_diff,
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
 
-    for(const auto bases : {
+    for(const auto& bases : {
             std::vector<base_kind>{base_kind::A, base_kind::T},
             std::vector<base_kind>{base_kind::T, base_kind::A},
             std::vector<base_kind>{base_kind::C, base_kind::G},
@@ -401,7 +401,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
 
-    for(const auto bases : {
+    for(const auto& bases : {
             std::vector<base_kind>{base_kind::A, base_kind::T, base_kind::G, base_kind::G},
             std::vector<base_kind>{base_kind::A, base_kind::T, base_kind::C, base_kind::C},
             std::vector<base_kind>{base_kind::T, base_kind::A, base_kind::G, base_kind::G},
@@ -869,7 +869,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_energy_and_force,
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
 
-    for(const auto bases : {
+    for(const auto& bases : {
             std::vector<base_kind>{base_kind::A, base_kind::T},
             std::vector<base_kind>{base_kind::T, base_kind::A},
             std::vector<base_kind>{base_kind::C, base_kind::G},
@@ -1112,7 +1112,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_energy_and_force
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
 
-    for(const auto bases : {
+    for(const auto& bases : {
             std::vector<base_kind>{base_kind::A, base_kind::T, base_kind::G, base_kind::G},
             std::vector<base_kind>{base_kind::A, base_kind::T, base_kind::C, base_kind::C},
             std::vector<base_kind>{base_kind::T, base_kind::A, base_kind::G, base_kind::G},

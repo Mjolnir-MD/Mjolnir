@@ -1,5 +1,20 @@
 # Change Log
 
+## 1.22.0
+
+### Added
+
+- support OpenMP in G-J&F Langevin
+- add WormLikeChainOffsetPotential (@yutakasi634 )
+
+### Changed
+
+- make boundary condition support optional in CMake
+
+### Fixed
+
+- fix several tiny mistakes in the reference documents
+
 ## 1.21.0
 
 ### Added

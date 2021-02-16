@@ -25,7 +25,7 @@ to work on Windows properly.
 
 ### C++ compiler
 
-It requires C++11 compatible compiler. Since now it is 2019, default compilers
+It requires C++11 compatible compiler. Since now it is 2021, default compilers
 in most of the systems are compatible to C++11.
 
 But I recommend to use the later versions of compilers. Compilers are also
@@ -92,3 +92,10 @@ All those are optional variables.
 - `-DDOUBLE_PRECISION_SUPPORT=(ON|OFF)`
   - `ON` by default.
   - If `OFF`, `double` version of the code will be ignored and the compilation finishes quickly.
+- `-DUNLIMITED_BOUNDARY_SUPPORT=(ON|OFF)`
+  - `ON` by default.
+  - If `OFF`, `UnlimitedBoundary` would not be able to be used, but the compilation finishes quickly.
+- `-DPERIODIC_BOUNDARY_SUPPORT=(ON|OFF)`
+  - `ON` by default.
+  - If `OFF`, `CuboidalPeriodicBoundary` would not be able to be used, but the compilation finishes quickly.
+
