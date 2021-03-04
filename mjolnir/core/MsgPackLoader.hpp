@@ -362,7 +362,7 @@ class MsgPackLoader
             throw_exception<std::runtime_error>("[error] mjolnir::MsgPackLoader:"
                     "failed to load key ", expected, " from ", filename, ".");
         }
-        MJOLNIR_LOG_INFO("key \"", expected, "\" found.");
+        MJOLNIR_LOG_DEBUG("key \"", expected, "\" found.");
         return;
     }
 

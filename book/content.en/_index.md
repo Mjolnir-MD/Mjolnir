@@ -13,6 +13,10 @@ This is a document for Mjolnir.
 
 It explains how to build Mjolnir.
 
+## [Tutorial]({{< relref "/docs/tutorial" >}})
+
+It explains how to write an input file.
+
 ## [Reference]({{< relref "/docs/reference" >}})
 
 It explains what components are in input files and what does the parameters mean.
