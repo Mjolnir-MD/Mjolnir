@@ -129,7 +129,22 @@ class GlobalStoichiometricInteractionPotential
     }
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
-        return !exclusion_list_.is_excluded(i, j);
+        // i and j need to be contained in different leading or following participants.
+        const auto lead_part = leading_participants();
+        const auto foll_part = following_participants();
+        if(std::find(lead_part.begin(), lead_part.end(), i) != lead_part.end())
+        {
+            if(std::find(foll_part.begin(), foll_part.end(), j) != foll_part.end())
+            {
+                return !exclusion_list_.is_excluded(i, j);
+            }
+        }
+        else if(std::find(lead_part.begin(), lead_part.end(), j) != lead_part.end())
+        {
+            return !exclusion_list_.is_excluded(i, j);
+        }
+
+        return false;
     }
 
     // -----------------------------------------------------------------------
