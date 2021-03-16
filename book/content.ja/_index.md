@@ -13,6 +13,10 @@ English version is [here](../en/)
 
 Mjolnirを使うために必要な手順を説明します。
 
+## [Tutorial]({{< relref "/docs/tutorial" >}})
+
+入力ファイルの書き方を簡単に説明します。
+
 ## [Reference]({{< relref "/docs/reference" >}})
 
 入力ファイルで用いることのできる設定と、その効果を説明します。
