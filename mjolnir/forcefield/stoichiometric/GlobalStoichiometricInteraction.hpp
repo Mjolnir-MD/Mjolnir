@@ -124,6 +124,7 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
   private:
     void update_buffer_range()
     {
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
         const auto        leading_participants = potential_.leading_participants();
         const std::size_t participants_a_num   = potential_.participants_a_num();
         auto pot_buff_iter   = potentials_buff_.begin();
@@ -135,6 +136,8 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
 
             const partner_range_type&  partner          = partition_.partners(i);
             const index_type           range_size       = partner.size();
+            MJOLNIR_LOG_DEBUG("partner size of particle ", i, " is ", range_size);
+
             potential_buffer_iterator  pot_first_iter   = pot_buff_iter;
             derivative_buffer_iterator deriv_first_iter = deriv_buff_iter;
 
