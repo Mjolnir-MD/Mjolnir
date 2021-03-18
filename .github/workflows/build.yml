@@ -9,16 +9,45 @@ jobs:
       matrix:
         compiler: ['g++-9', 'g++-8']
         separate: ['ON', 'OFF']
+
+    env:
+      BOOST_ROOT: ${{github.workspace}}/3rdparty/boost
+      BOOST_URL: https://sourceforge.net/projects/boost/files/boost/1.72.0/boost_1_72_0.tar.bz2/download
+
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           submodules: true
+
+      - name: Restore Boost cache
+        uses: actions/cache@v2.1.4
+        id: cache-boost
+        with:
+          path: ${{env.BOOST_ROOT}}
+          key: boost
+
+      - name: Install Boost
+        if: steps.cache-boost.outputs.cache-hit != 'true'
+        run: |
+          if [ "$OS" == "Windows_NT" ]; then
+            # fix up paths to be forward slashes consistently
+            BOOST_ROOT=$(echo $BOOST_ROOT | sed 's/\\/\//g')
+          fi
+          mkdir -p $BOOST_ROOT
+          curl --progress-bar --location --output $BOOST_ROOT/download.tar.bz2 $BOOST_URL
+          7z -o$BOOST_ROOT x $BOOST_ROOT/download.tar.bz2 -y -bd
+          7z -o$BOOST_ROOT x $BOOST_ROOT/download.tar -y -bd
+          cd $BOOST_ROOT && cp -r boost_*/* .
+          rm -rf boost_*/* download.tar.bz2 download.tar
+        shell: bash
+
       - name: Configure
         run: |
             mkdir build
             cd build
-            cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DSEPARATE_BUILD=${{ matrix.separate }} -DUSE_OPENMP=ON -DBUILD_INTEGRATION_TEST=OFF -DBoost_USE_MULTITHREADED=ON -DBoost_ARCHITECTURE=-x64 -DBoost_ADDITIONAL_VERSIONS=1.72.0 -DFIND_BOOST=ON -DBoost_NO_BOOST_CMAKE=ON -DBOOST_ROOT=${BOOST_ROOT_1_72_0}
+            cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DSEPARATE_BUILD=${{ matrix.separate }} -DUSE_OPENMP=ON -DBUILD_INTEGRATION_TEST=OFF -DFIND_BOOST=ON -DBoost_NO_BOOST_CMAKE=ON -DBOOST_ROOT=${BOOST_ROOT}
       - name: Build
         run: |
             cd build && cmake --build .
