@@ -1,5 +1,27 @@
 # Change Log
 
+## 1.24.0
+
+### Changed
+
+- update toml11 to v3.6.1
+- update GitHub Actions setting
+
+### Fixed
+
+- activate loggers in some tests (@yutakashi634)
+
+## 1.23.0
+
+### Added
+
+- a short example input file to the document
+
+### Changed
+
+- enable margin-related functions to return a bool value (@yutakasi634 )
+- reduce log output while loading msgpack to simplify and shorten the log file
+
 ## 1.22.0
 
 ### Added
