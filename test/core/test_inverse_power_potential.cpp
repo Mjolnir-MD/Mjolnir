@@ -12,6 +12,9 @@
 
 BOOST_AUTO_TEST_CASE(InversePower_double)
 {
+    mjolnir::LoggerManager::set_default_logger(
+            "test_inverse_power_potential.log");
+
     using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type   = typename traits_type::real_type;
     using integer_type = typename mjolnir::InversePowerPotential<traits_type>::integer_type;
