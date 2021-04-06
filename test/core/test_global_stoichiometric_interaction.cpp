@@ -13,10 +13,13 @@
 #include <mjolnir/forcefield/stoichiometric/GlobalStoichiometricInteractionPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
+#include <random>
+#include <numeric>
+
 BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_one_on_one_double)
 {
     mjolnir::LoggerManager::set_default_logger(
-        "test_global_stoichiometric_interaction_one_on_one.log");
+        "test_global_stoichiometric_interaction_one_on_one_double.log");
 
     using traits_type   = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type     = traits_type::real_type;
@@ -62,10 +65,10 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_one_on_one_double)
     system.group(2) = "NONE";
     system.group(3) = "NONE";
 
-    system.position(0) = coord_type( 0.0, 0.0, 0.0);
-    system.position(1) = coord_type( 1.5, 0.0, 0.0);
-    system.position(2) = coord_type(-1.5, 0.0, 0.0);
-    system.position(3) = coord_type( 3.0, 0.0, 0.0);
+    system.position(0) = coord_type( 1.0, 0.0, 0.0);
+    system.position(1) = coord_type( 0.0, 0.0, 0.0);
+    system.position(2) = coord_type( 0.0, 1.0, 0.0);
+    system.position(3) = coord_type(-1.0,-1.0, 0.0);
     system.velocity(0) = coord_type( 0.0, 0.0, 0.0);
     system.velocity(1) = coord_type( 0.0, 0.0, 0.0);
     system.velocity(2) = coord_type( 0.0, 0.0, 0.0);
@@ -92,22 +95,10 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_one_on_one_double)
     interaction.initialize(system, topology);
 
     const system_type init = system;
-    // check the initial force of the system
     interaction.calc_force(system);
-    // check the force between different kind particle
-    BOOST_TEST(mjolnir::math::X(system.force(0)) ==  1.5, boost::test_tools::tolerance(tol));
-    BOOST_TEST(mjolnir::math::X(system.force(1)) == -1.5, boost::test_tools::tolerance(tol));
-    BOOST_TEST(mjolnir::math::Y(system.force(0)) ==  0.0, boost::test_tools::tolerance(tol));
-    BOOST_TEST(mjolnir::math::Y(system.force(1)) ==  0.0, boost::test_tools::tolerance(tol));
-    BOOST_TEST(mjolnir::math::Z(system.force(0)) ==  0.0, boost::test_tools::tolerance(tol));
-    BOOST_TEST(mjolnir::math::Z(system.force(1)) ==  0.0, boost::test_tools::tolerance(tol));
-
     // check the force between same kind particle is 0
-    BOOST_TEST(mjolnir::math::X(system.force(2)) == 0.0, boost::test_tools::tolerance(tol));
     BOOST_TEST(mjolnir::math::X(system.force(3)) == 0.0, boost::test_tools::tolerance(tol));
-    BOOST_TEST(mjolnir::math::Y(system.force(2)) == 0.0, boost::test_tools::tolerance(tol));
     BOOST_TEST(mjolnir::math::Y(system.force(3)) == 0.0, boost::test_tools::tolerance(tol));
-    BOOST_TEST(mjolnir::math::Z(system.force(2)) == 0.0, boost::test_tools::tolerance(tol));
     BOOST_TEST(mjolnir::math::Z(system.force(3)) == 0.0, boost::test_tools::tolerance(tol));
 
     for(std::size_t idx=0; idx<system.size(); ++idx)
@@ -298,7 +289,7 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_total_force_double)
 BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_one_on_two_double)
 {
     mjolnir::LoggerManager::set_default_logger(
-        "test_global_stoichiometric_interaction_one_on_two.log");
+        "test_global_stoichiometric_interaction_one_on_two_double.log");
 
     using traits_type   = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type     = traits_type::real_type;
