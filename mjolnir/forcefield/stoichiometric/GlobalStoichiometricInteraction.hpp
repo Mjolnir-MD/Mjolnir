@@ -75,11 +75,17 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
         // value in intermediate value container. So, we have to know which index in
         // the system correspond to which index of buffering container. These for loop
         // is to make that container.
-        idx_buffer_map.resize(sys.size());
-        const auto following_participants = potential_.following_participants();
-        for(std::size_t idx=0; idx<following_participants.size(); ++idx)
+        idx_buffer_map_.resize(sys.size());
+        const auto participants = potential_.participants();
+        const auto participants_a = potential_.participants_a();
+        const auto participants_b = potential_.participants_b();
+        for(std::size_t idx_a=0; idx_a<participants_a.size(); ++idx_a)
         {
-            idx_buffer_map[following_participants[idx]] = idx;
+            idx_buffer_map_[participants_a[idx_a]] = idx_a;
+        }
+        for(std::size_t idx_b=0; idx_b<participants_b.size(); ++idx_b)
+        {
+            idx_buffer_map_[participants_b[idx_b]] = idx_b;
         }
     }
 
@@ -125,14 +131,14 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
     void update_buffer_range()
     {
         MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
-        const auto        leading_participants = potential_.leading_participants();
+        const auto        participants_a = potential_.participants_a();
         const std::size_t participants_a_num   = potential_.participants_a_num();
         auto pot_buff_iter   = potentials_buff_.begin();
         auto deriv_buff_iter = pot_derivs_buff_.begin();
 
         for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
         {
-            const index_type i = leading_participants[idx_a];
+            const index_type i = participants_a[idx_a];
 
             const partner_range_type&  partner          = partition_.partners(i);
             const index_type           range_size       = partner.size();
@@ -164,7 +170,7 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
 
     // -----------------------------------------------------------------------
     // Variable for mapping system index to buffering index
-    std::vector<std::size_t> idx_buffer_map;
+    std::vector<std::size_t> idx_buffer_map_;
 
     // Variables for buffering intermediate value.
     // These value can change in calc_force and calc_energy function.
@@ -199,12 +205,12 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
 
     // make index pair list to specify the range of buffer for specific a and
     // pre calculation for pot_sum and pot_deriv_sum for each particle.
-    const auto        leading_participants = potential_.leading_participants();
+    const auto        participants_a       = potential_.participants_a();
     const std::size_t participants_a_num   = potential_.participants_a_num();
 
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
-        const index_type i = leading_participants[idx_a];
+        const index_type i = participants_a[idx_a];
 
         partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
         const auto& partner     = std::get<0>(partner_buffer_range);
@@ -228,7 +234,7 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
             pot_sum_a             += pot;
             pot_deriv_sum_a       += deriv;
 
-            const index_type idx_b  =  idx_buffer_map[j];
+            const index_type idx_b  =  idx_buffer_map_[j];
             pot_sum_b_      [idx_b] += pot;
             pot_deriv_sum_b_[idx_b] -= deriv;
         }
@@ -237,7 +243,7 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
     // force calculation
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
-        const index_type i = leading_participants[idx_a];
+        const index_type i = participants_a[idx_a];
 
         const auto&     partner_buffer_tuple  = partner_buffer_ranges_[idx_a];
         const auto&     partner               = std::get<0>(partner_buffer_tuple);
@@ -250,29 +256,41 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
             for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
             {
                 const index_type j         = partner[ptnr_idx].index;
-                const index_type idx_b     = idx_buffer_map[j];
+                const index_type idx_b     = idx_buffer_map_[j];
                 const real_type  pot_sum_b = pot_sum_b_[idx_b];
-                const coordinate_type& pot_derivs_buff_ab = derivative_buff_range[ptnr_idx];
+                const coordinate_type& deriv_buff_ab = derivative_buff_range[ptnr_idx];
 
                 if(pot_sum_b <= 1.0)
                 {
-                    const coordinate_type force = epsilon_ * pot_derivs_buff_ab;
+                    const coordinate_type force = epsilon_ * deriv_buff_ab;
                     sys.force(i) -= force;
                     sys.force(j) += force;
-                } 
-                else
+                }
+                else // pot_sum_a < pot_sum_b
                 {
-                    const real_type  pots_buff_ab           = potential_buff_range[ptnr_idx];
-                    const real_type  pot_sum_b              = pot_sum_b_          [idx_b];
-                    const real_type  inv_pot_sum_b          = 1.0 / pot_sum_b;
-                    const real_type  ep_pot_sum_b           = epsilon_ * inv_pot_sum_b;
-                    const real_type  pots_buff_ab_pot_sum_b = pots_buff_ab * inv_pot_sum_b;
-                    sys.force(i) +=
-                        ep_pot_sum_b *
-                        (pots_buff_ab_pot_sum_b - 1.0) * pot_derivs_buff_ab;
-                    sys.force(j) -=
-                        ep_pot_sum_b *
-                        (pots_buff_ab_pot_sum_b * pot_deriv_sum_b_[idx_b] - pot_derivs_buff_ab);
+                    const real_type       pot_buff_ab   = potential_buff_range[ptnr_idx];
+                    const real_type       pot_sum_b     = pot_sum_b_          [idx_b];
+                    const coordinate_type deriv_sum_b   = pot_deriv_sum_b_    [idx_b];
+                    const real_type       inv_pot_sum_b = 1.0 / pot_sum_b;
+                    const real_type       ep_pot_sum_b  = epsilon_ * inv_pot_sum_b;
+                    const real_type       ep_pot_sum_b2 = ep_pot_sum_b * inv_pot_sum_b;
+
+                    sys.force(i) -= ep_pot_sum_b * deriv_buff_ab;
+                    sys.force(j) +=
+                        ep_pot_sum_b2 * (pot_buff_ab * deriv_sum_b + pot_sum_b * deriv_buff_ab);
+
+                    // the force to not a or b particle from a-b pair
+                    const auto& j_partner = partition_.partners(j);
+                    for(const auto& j_ptnr : j_partner)
+                    {
+                        const index_type k     = j_ptnr.index;
+                        const index_type idx_c = idx_buffer_map_[k];
+                        const auto&      partner_buffer_tuple_c = partner_buffer_ranges_[idx_c];
+                        const auto&      deriv_buff_range_c     = std::get<2>(partner_buffer_tuple_c);
+
+                        sys.force(k) +=
+                            ep_pot_sum_b2 * pot_buff_ab * deriv_buff_range_c[idx_b];
+                    }
                 }
             }
         }
@@ -280,37 +298,57 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
         {
             const real_type inv_pot_sum_a  = 1.0 / pot_sum_a;
             const real_type ep_pot_sum_a   = epsilon_ * inv_pot_sum_a;
-            const coordinate_type& pot_derivs_sum_a = pot_deriv_sum_a_[idx_a];
-            const coordinate_type  pot_derivs_sum_a_pot_sum_a = inv_pot_sum_a * pot_derivs_sum_a;
+            const real_type ep_pot_sum_a2  = ep_pot_sum_a * inv_pot_sum_a;
+            const coordinate_type& derivs_sum_a = pot_deriv_sum_a_[idx_a];
+            const coordinate_type  derivs_sum_a_pot_sum_a = inv_pot_sum_a * derivs_sum_a;
 
             for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
             {
                 const index_type j     = partner[ptnr_idx].index;
-                const index_type idx_b = idx_buffer_map[j];
-                const real_type        pots_buff_ab       = potential_buff_range [ptnr_idx];
-                const coordinate_type& pot_derivs_buff_ab = derivative_buff_range[ptnr_idx];
-                const real_type        pot_sum_b          = pot_sum_b_       [idx_b];
+                const index_type idx_b = idx_buffer_map_[j];
+                const real_type        pot_buff_ab  = potential_buff_range [ptnr_idx];
+                const coordinate_type& deriv_buff_ab = derivative_buff_range[ptnr_idx];
+                const real_type        pot_sum_b     = pot_sum_b_       [idx_b];
+                const coordinate_type& derivs_sum_b  = pot_deriv_sum_b_[idx_b];
 
                 if(pot_sum_b < pot_sum_a)
                 {
                     sys.force(i) +=
-                        ep_pot_sum_a *
-                        (pots_buff_ab * pot_derivs_sum_a_pot_sum_a - pot_derivs_buff_ab);
-                    sys.force(j) -=
-                        ep_pot_sum_a  *
-                        (pots_buff_ab * inv_pot_sum_a - 1.0) * pot_derivs_buff_ab;
+                        ep_pot_sum_a2 * (derivs_sum_a * pot_buff_ab - pot_sum_a * deriv_buff_ab);
+                    sys.force(j) += ep_pot_sum_a  * deriv_buff_ab;
+
+                    // the force to not a or b particle from a-b pair
+                    for(const auto& i_ptnr : partner)
+                    {
+                        const index_type k     = i_ptnr.index;
+                        const index_type idx_d = idx_buffer_map_[k];
+
+                        sys.force(k) -=
+                            ep_pot_sum_a2 * pot_buff_ab * derivative_buff_range[idx_d];
+                    }
                 }
                 else // pot_sum_a <= pot_sum_b
                 {
                     const real_type inv_pot_sum_b  = 1.0 / pot_sum_b;
                     const real_type ep_pot_sum_b   = epsilon_ * inv_pot_sum_b;
-                    const real_type pots_buff_ab_pot_sum_b = pots_buff_ab * inv_pot_sum_b;
-                    sys.force(i) +=
-                        ep_pot_sum_b *
-                        (pots_buff_ab_pot_sum_b - 1.0) * pot_derivs_buff_ab;
-                    sys.force(j) -=
-                        ep_pot_sum_b *
-                        (pots_buff_ab_pot_sum_b * pot_deriv_sum_b_[idx_b] - pot_derivs_buff_ab);
+                    const real_type ep_pot_sum_b2  = ep_pot_sum_b * inv_pot_sum_b;
+
+                    sys.force(i) -= ep_pot_sum_b * deriv_buff_ab;
+                    sys.force(j) +=
+                        ep_pot_sum_b2 * (pot_buff_ab * derivs_sum_b + pot_sum_b * deriv_buff_ab);
+
+                    // the force to not a or b particle from a-b pair
+                    const auto& j_partner = partition_.partners(j);
+                    for(const auto& j_ptnr : j_partner)
+                    {
+                        const index_type k     = j_ptnr.index;
+                        const index_type idx_c = idx_buffer_map_[k];
+                        const auto&      partner_buffer_tuple_c = partner_buffer_ranges_[idx_c];
+                        const auto&      deriv_buff_range_c     = std::get<2>(partner_buffer_tuple_c);
+
+                        sys.force(k) +=
+                            ep_pot_sum_b2 * pot_buff_ab * deriv_buff_range_c[idx_b];
+                    }
                 }
             }
         }
@@ -331,12 +369,12 @@ GlobalStoichiometricInteraction<traitsT>::calc_energy(const system_type& sys) co
 
     // make index pair list to specify the range of buffer for specific a and
     // pre calculation for pot_sum and pot_deriv_sum for each particle.
-    const auto        leading_participants = potential_.leading_participants();
-    const std::size_t participants_a_num   = potential_.participants_a_num();
+    const auto        participants_a     = potential_.participants_a();
+    const std::size_t participants_a_num = potential_.participants_a_num();
 
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
-        const index_type   i = leading_participants[idx_a];
+        const index_type   i = participants_a[idx_a];
 
         partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
         const auto& partner   = std::get<0>(partner_buffer_range);
@@ -347,7 +385,7 @@ GlobalStoichiometricInteraction<traitsT>::calc_energy(const system_type& sys) co
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
             const index_type j     = partner[ptnr_idx].index;
-            const index_type idx_b = idx_buffer_map[j];
+            const index_type idx_b = idx_buffer_map_[j];
             const coordinate_type rij =
                 sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type l2  = math::length_sq(rij); // |rij|^2
@@ -371,16 +409,16 @@ GlobalStoichiometricInteraction<traitsT>::calc_energy(const system_type& sys) co
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
             const index_type j            = partner[ptnr_idx].index;
-            const index_type idx_b        = idx_buffer_map[j];
-            const real_type  pots_buff_ab = pots_buff_a[ptnr_idx];
+            const index_type idx_b        = idx_buffer_map_[j];
+            const real_type  pot_buff_ab  = pots_buff_a[ptnr_idx];
             const real_type  max_pot_sum  = std::max(pot_sum_a_[idx_a], pot_sum_b_[idx_b]);
             if(max_pot_sum <= 1.0)
             {
-                retval += pots_buff_ab;
+                retval += pot_buff_ab;
             }
             else
             {
-                retval += pots_buff_ab / max_pot_sum;
+                retval += pot_buff_ab / max_pot_sum;
             }
         }
     }
@@ -406,12 +444,12 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
 
     // make index pair list to specify the range of buffer for specific a and
     // pre calculation for pot_sum and pot_deriv_sumb for each particle.
-    const auto leading_participants      = potential_.leading_participants();
+    const auto        participants_a     = potential_.participants_a();
     const std::size_t participants_a_num = potential_.participants_a_num();
 
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
-        const index_type i = leading_participants[idx_a];
+        const index_type i = participants_a[idx_a];
 
         partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
         const auto& partner     = std::get<0>(partner_buffer_range);
@@ -435,7 +473,7 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
             pot_sum_a               += pot;
             pot_deriv_sum_a         += deriv;
 
-            const index_type idx_b  =  idx_buffer_map[j];
+            const index_type idx_b  =  idx_buffer_map_[j];
             pot_sum_b_      [idx_b] += pot;
             pot_deriv_sum_b_[idx_b] -= deriv;
         }
@@ -444,7 +482,7 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
     // force calculation
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
-        const index_type i = leading_participants[idx_a];
+        const index_type i = participants_a[idx_a];
 
         const auto& partner_buffer_tuple  = partner_buffer_ranges_[idx_a];
         const auto& partner               = std::get<0>(partner_buffer_tuple);
@@ -456,7 +494,7 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
             for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
             {
                 const index_type       j         = partner[ptnr_idx].index;
-                const index_type       idx_b     = idx_buffer_map[j];
+                const index_type       idx_b     = idx_buffer_map_[j];
                 const real_type        pot_sum_b = pot_sum_b_[idx_b];
                 const coordinate_type& pot_derivs_buff_ab = derivative_buff_range[ptnr_idx];
 
@@ -493,7 +531,7 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
             for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
             {
                 const index_type j     = partner[ptnr_idx].index;
-                const index_type idx_b = idx_buffer_map[j];
+                const index_type idx_b = idx_buffer_map_[j];
                 const real_type        pots_buff_ab       = potential_buff_range [ptnr_idx];
                 const coordinate_type& pot_derivs_buff_ab = derivative_buff_range[ptnr_idx];
                 const real_type        pot_sum_b          = pot_sum_b_       [idx_b];
@@ -533,7 +571,7 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
             const index_type j     = partner[ptnr_idx].index;
-            const index_type idx_b = idx_buffer_map[j];
+            const index_type idx_b = idx_buffer_map_[j];
             const real_type  pots_buff_ab = pots_buff_a[ptnr_idx];
             const real_type  max_pot_sum  = std::max(pot_sum_a_[idx_a], pot_sum_b_[idx_b]);
             if(max_pot_sum <= 1.0)

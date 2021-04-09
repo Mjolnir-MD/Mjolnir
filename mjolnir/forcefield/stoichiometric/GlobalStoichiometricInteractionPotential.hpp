@@ -3,6 +3,8 @@
 #include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
 
+#include <algorithm>
+
 namespace mjolnir
 {
 
@@ -36,14 +38,15 @@ class GlobalStoichiometricInteractionPotential
         : v0_(v0), v0_range_(v0 + range),
           inv_range_(1.0 / range), inv_range_6_(6.0 / range),
           participants_(participants_a),
-          participants_a_num_(participants_a.size()),
-          participants_b_num_(participants_b.size()),
+          participants_a_(participants_a), participants_a_num_(participants_a.size()),
+          participants_b_(participants_b),
           exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
         MJOLNIR_LOG_FUNCTION_DEBUG();
         participants_.insert(participants_.end(),
                              participants_b.begin(), participants_b.end());
+        std::sort(participants_.begin(), participants_.end());
     }
     ~GlobalStoichiometricInteractionPotential() = default;
     GlobalStoichiometricInteractionPotential(const GlobalStoichiometricInteractionPotential&) = default;
@@ -78,8 +81,11 @@ class GlobalStoichiometricInteractionPotential
         return inv_range_6_ * (r_v0_inv_range_2 - r_v0_inv_range);
     }
 
+    std::vector<std::size_t> participants_a() const noexcept {return participants_a_;}
+    std::vector<std::size_t> participants_b() const noexcept {return participants_b_;}
+
     std::size_t participants_a_num() const noexcept {return participants_a_num_;}
-    std::size_t participants_b_num() const noexcept {return participants_b_num_;}
+    std::size_t participants_b_num() const noexcept {return participants_b_.size();}
 
     real_type max_cutoff_length() const noexcept
     {
@@ -93,9 +99,9 @@ class GlobalStoichiometricInteractionPotential
 
         this->update(sys, topol);
         is_following_participants_.resize(sys.size(), false);
-        for(std::size_t idx : this->following_participants())
+        for(const auto& i : participants_b_)
         {
-            is_following_participants_[idx] = true;
+            is_following_participants_[i] = true;
         }
         return;
     }
@@ -117,27 +123,33 @@ class GlobalStoichiometricInteractionPotential
     range<typename std::vector<std::size_t>::const_iterator>
     leading_participants() const noexcept
     {
-        return make_range(participants_.begin(), 
-                          participants_.begin() + participants_a_num_);
+        return make_range(participants_.begin(), participants_.end());
     }
     range<typename std::vector<std::size_t>::const_iterator>
     possible_partners_of(const std::size_t /*participant_idx*/,
-                         const std::size_t /*particle_idx*/) const noexcept
+                         const std::size_t particle_idx) const noexcept
     {
-        return make_range(participants_.begin() + participants_a_num_,
-                          participants_.end());
-    }
-    range<typename std::vector<std::size_t>::const_iterator>
-    following_participants() const noexcept
-    {
-        return possible_partners_of(/*dummy param*/0, /*dummy param*/0);
+        if(is_following_participants_[particle_idx])
+        {
+            return make_range(participants_a_.begin(), participants_a_.end());
+        }
+        else
+        {
+            return make_range(participants_b_.begin(), participants_b_.end());
+        }
     }
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
-        // i can be supposed to be a member of leading_participants from
-        // the implementation of SpatialPartitions, so
-        // j have to be a memeber of following_participants_.
-        if(is_following_participants_[j])
+        // i is leading_participant and j is a member of possible_partners_of
+        // from implementation of SpatialPartition
+        if(is_following_participants_[i])
+        {
+            if(!is_following_participants_[j])
+            {
+                return !exclusion_list_.is_excluded(i, j);
+            }
+        }
+        else if(is_following_participants_[j])
         {
             return !exclusion_list_.is_excluded(i, j);
         }
@@ -155,8 +167,9 @@ class GlobalStoichiometricInteractionPotential
     real_type                inv_range_;
     real_type                inv_range_6_;
     std::vector<std::size_t> participants_;
+    std::vector<std::size_t> participants_a_;
     std::size_t              participants_a_num_;
-    std::size_t              participants_b_num_;
+    std::vector<std::size_t> participants_b_;
     std::vector<bool>        is_following_participants_;
 
     exclusion_list_type exclusion_list_;
