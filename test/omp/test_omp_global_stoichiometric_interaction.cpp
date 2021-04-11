@@ -18,7 +18,8 @@
 BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
 {
     constexpr double tol = 1e-8;
-    mjolnir::LoggerManager::set_default_logger("test_omp_global_stoichiometric_interaction.log");
+    mjolnir::LoggerManager::set_default_logger(
+            "test_omp_global_stoichiometric_interaction_calc_force.log");
 
     using traits_type      = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using coordinate_type  = typename traits_type::coordinate_type;
@@ -57,7 +58,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
         std::vector<std::size_t> a_particle_indices(Na_particle);
         std::iota(a_particle_indices.begin(), a_particle_indices.end(), 0);
         std::vector<std::size_t> b_particle_indices(Nb_particle);
-        std::iota(b_particle_indices.begin(), b_particle_indices.end(), Na_particle-1);
+        std::iota(b_particle_indices.begin(), b_particle_indices.end(), Na_particle);
 
         std::vector<std::size_t> seq_a_particle_indices = a_particle_indices;
         std::vector<std::size_t> seq_b_particle_indices = b_particle_indices;
@@ -76,16 +77,16 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
         system_type sys(N_partice, boundary_type{});
         topology_type topol(N_partice);
 
-        // locate 64 particle to 9x9x9 size cube
+        // locate 64 particle to random position
         for(std::size_t i=0; i<sys.size(); ++i)
         {
-            const auto i_x = i % 4;
-            const auto i_y = i / 4;
-            const auto i_z = i / 16;
-
             sys.mass(i)  = 1.0;
             sys.rmass(i) = 1.0;
-            sys.position(i) = mjolnir::math::make_coordinate<coordinate_type>(i_x*3.0, i_y*3.0, i_z*3.0);
+            sys.position(i) =
+                mjolnir::math::make_coordinate<coordinate_type>(
+                        rng.uniform_real(-3.0, 3.0),
+                        rng.uniform_real(-3.0, 3.0),
+                        rng.uniform_real(-3.0, 3.0));
             sys.velocity(i) = mjolnir::math::make_coordinate<coordinate_type>(0, 0, 0);
             sys.force(i)    = mjolnir::math::make_coordinate<coordinate_type>(0, 0, 0);
             sys.name(i)     = "X";
@@ -130,6 +131,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
             mjolnir::SpatialPartition<traits_type, potential_type>(
                 mjolnir::make_unique<partition_type>()),
             epsilon, stoichiometric_coef_a, stoichiometric_coef_b);
+
         sequencial_interaction_type seq_interaction(std::move(seq_potential),
             mjolnir::SpatialPartition<sequencial_traits_type, sequencial_potential_type>(
                 mjolnir::make_unique<sequencial_partition_type>()),
@@ -162,7 +164,8 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
 
 BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force_and_energy)
 {
-    mjolnir::LoggerManager::set_default_logger("test_omp_global_stoichiometric_interaction.log");
+    mjolnir::LoggerManager::set_default_logger(
+            "test_omp_global_stoichiometric_interaction_calc_force_and_energy.log");
 
     using traits_type      = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using coordinate_type  = typename traits_type::coordinate_type;
@@ -194,7 +197,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force_and_energy)
         std::vector<std::size_t> a_particle_indices(Na_particle);
         std::iota(a_particle_indices.begin(), a_particle_indices.end(), 0);
         std::vector<std::size_t> b_particle_indices(Nb_particle);
-        std::iota(b_particle_indices.begin(), b_particle_indices.end(), Na_particle-1);
+        std::iota(b_particle_indices.begin(), b_particle_indices.end(), Na_particle);
 
         potential_type potential(
             v0, range, std::move(a_particle_indices), std::move(b_particle_indices), {},
@@ -208,13 +211,13 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force_and_energy)
         // locate 64 particle to 9x9x9 size cube
         for(std::size_t i=0; i<sys.size(); ++i)
         {
-            const auto i_x = i % 4;
-            const auto i_y = i / 4;
-            const auto i_z = i / 16;
-
             sys.mass(i)     = 1.0;
             sys.rmass(i)    = 1.0;
-            sys.position(i) = mjolnir::math::make_coordinate<coordinate_type>(i_x*3.0, i_y*3.0, i_z*3.0);
+            sys.position(i) =
+                mjolnir::math::make_coordinate<coordinate_type>(
+                        rng.uniform_real(-3.0, 3.0),
+                        rng.uniform_real(-3.0, 3.0),
+                        rng.uniform_real(-3.0, 3.0));
             sys.velocity(i) = mjolnir::math::make_coordinate<coordinate_type>(0, 0, 0);
             sys.force(i)    = mjolnir::math::make_coordinate<coordinate_type>(0, 0, 0);
             sys.name(i)     = "X";
