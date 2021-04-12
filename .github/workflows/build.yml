@@ -7,7 +7,7 @@ jobs:
     runs-on: Ubuntu-20.04
     strategy:
       matrix:
-        compiler: ['g++-9', 'g++-8']
+        compiler: ['g++-10', 'g++-9']
         separate: ['ON', 'OFF']
 
     steps:
