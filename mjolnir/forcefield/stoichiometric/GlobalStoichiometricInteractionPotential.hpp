@@ -39,7 +39,7 @@ class GlobalStoichiometricInteractionPotential
           inv_range_(1.0 / range), inv_range_6_(6.0 / range),
           participants_(participants_a),
           participants_a_(participants_a), participants_a_num_(participants_a.size()),
-          participants_b_(participants_b),
+          participants_b_(participants_b), participants_b_num_(participants_b.size()),
           exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
@@ -64,8 +64,8 @@ class GlobalStoichiometricInteractionPotential
         if(r < v0_){return 1.0;}
         else if(v0_range_ < r){return 0.0;}
 
-        const real_type r_v0           = r - v0_;
-        const real_type r_v0_inv_range = r_v0 * inv_range_;
+        const real_type r_v0              = r - v0_;
+        const real_type r_v0_inv_range    = r_v0 * inv_range_;
         const real_type r_v0_inv_range_2  = r_v0_inv_range * r_v0_inv_range;
         const real_type r_v0_inv_range_3  = r_v0_inv_range_2 * r_v0_inv_range;
         return 1.0 - 3.0 * r_v0_inv_range_2 + 2.0 * r_v0_inv_range_3;
@@ -75,7 +75,7 @@ class GlobalStoichiometricInteractionPotential
     {
         if(r < v0_ || v0_range_ < r){return 0.0;}
 
-        const real_type r_v0          = r - v0_;
+        const real_type r_v0             = r - v0_;
         const real_type r_v0_inv_range   = r_v0 * inv_range_;
         const real_type r_v0_inv_range_2 = r_v0_inv_range * r_v0_inv_range;
         return inv_range_6_ * (r_v0_inv_range_2 - r_v0_inv_range);
@@ -85,7 +85,7 @@ class GlobalStoichiometricInteractionPotential
     std::vector<std::size_t> participants_b() const noexcept {return participants_b_;}
 
     std::size_t participants_a_num() const noexcept {return participants_a_num_;}
-    std::size_t participants_b_num() const noexcept {return participants_b_.size();}
+    std::size_t participants_b_num() const noexcept {return participants_b_num_;}
 
     real_type max_cutoff_length() const noexcept
     {
@@ -123,33 +123,19 @@ class GlobalStoichiometricInteractionPotential
     range<typename std::vector<std::size_t>::const_iterator>
     leading_participants() const noexcept
     {
-        return make_range(participants_.begin(), participants_.end());
+        return make_range(participants_a_.begin(), participants_a_.end());
     }
     range<typename std::vector<std::size_t>::const_iterator>
     possible_partners_of(const std::size_t /*participant_idx*/,
-                         const std::size_t particle_idx) const noexcept
+                         const std::size_t /*particle_idx*/) const noexcept
     {
-        if(is_following_participants_[particle_idx])
-        {
-            return make_range(participants_a_.begin(), participants_a_.end());
-        }
-        else
-        {
-            return make_range(participants_b_.begin(), participants_b_.end());
-        }
+        return make_range(participants_b_.begin(), participants_b_.end());
     }
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
         // i is leading_participant and j is a member of possible_partners_of
         // from implementation of SpatialPartition
-        if(is_following_participants_[i])
-        {
-            if(!is_following_participants_[j])
-            {
-                return !exclusion_list_.is_excluded(i, j);
-            }
-        }
-        else if(is_following_participants_[j])
+        if(is_following_participants_[j])
         {
             return !exclusion_list_.is_excluded(i, j);
         }
@@ -170,6 +156,7 @@ class GlobalStoichiometricInteractionPotential
     std::vector<std::size_t> participants_a_;
     std::size_t              participants_a_num_;
     std::vector<std::size_t> participants_b_;
+    std::size_t              participants_b_num_;
     std::vector<bool>        is_following_participants_;
 
     exclusion_list_type exclusion_list_;
