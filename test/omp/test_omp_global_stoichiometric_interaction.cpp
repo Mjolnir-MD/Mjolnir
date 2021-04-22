@@ -47,8 +47,8 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
     const std::size_t Na_particle = 32;
     const std::size_t Nb_particle = 32;
     const std::size_t N_partice   = Na_particle + Nb_particle;
-    const double      v0          = 2.0;
-    const double      range       = 2.0;
+    const double      v0          = 0.4;
+    const double      range       = 0.4;
 
     for(int num_thread = 1; num_thread<=max_number_of_threads; ++num_thread)
     {
@@ -150,11 +150,11 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
         // check the values are the same
         for(std::size_t i=0; i<sys.size(); ++i)
         {
-            BOOST_TEST(mjolnir::math::X(seq_sys.force(i)) == mjolnir::math::X(sys.force(i)),
+            BOOST_TEST(mjolnir::math::X(seq_sys.force(i)) - mjolnir::math::X(sys.force(i)) == .0,
                        boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Y(seq_sys.force(i)) == mjolnir::math::Y(sys.force(i)),
+            BOOST_TEST(mjolnir::math::Y(seq_sys.force(i)) - mjolnir::math::Y(sys.force(i)) == .0,
                        boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Z(seq_sys.force(i)) == mjolnir::math::Z(sys.force(i)),
+            BOOST_TEST(mjolnir::math::Z(seq_sys.force(i)) - mjolnir::math::Z(sys.force(i)) == .0,
                        boost::test_tools::tolerance(tol));
         }
         BOOST_TEST(interaction.calc_energy(sys) == seq_interaction.calc_energy(seq_sys),
@@ -264,11 +264,11 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force_and_energy)
         BOOST_TEST(ene == ref_ene, boost::test_tools::tolerance(tol));
         for(std::size_t i=0; i<sys.size(); ++i)
         {
-            BOOST_TEST(mjolnir::math::X(ref_sys.force(i)) == mjolnir::math::X(sys.force(i)),
+            BOOST_TEST(mjolnir::math::X(ref_sys.force(i)) - mjolnir::math::X(sys.force(i)) == .0,
                        boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Y(ref_sys.force(i)) == mjolnir::math::Y(sys.force(i)),
+            BOOST_TEST(mjolnir::math::Y(ref_sys.force(i)) - mjolnir::math::Y(sys.force(i)) == .0,
                        boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Z(ref_sys.force(i)) == mjolnir::math::Z(sys.force(i)),
+            BOOST_TEST(mjolnir::math::Z(ref_sys.force(i)) - mjolnir::math::Z(sys.force(i)) == .0,
                        boost::test_tools::tolerance(tol));
         }
     }
