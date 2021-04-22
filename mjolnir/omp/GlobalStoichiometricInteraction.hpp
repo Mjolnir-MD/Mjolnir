@@ -30,12 +30,11 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
     using potential_buffer_iterator    = typename potential_buffer_type::iterator;
     using derivative_buffer_iterator   = typename derivative_buffer_type::iterator;
     using partner_range_type           = typename partition_type::range_type;
-    using potential_buffer_range_type  = range<potential_buffer_iterator>;
-    using derivative_buffer_range_type = range<derivative_buffer_iterator>;
-    using partner_buffer_tuple_type    = std::tuple<partner_range_type,
-                                                    potential_buffer_range_type,
-                                                    derivative_buffer_range_type>;
-    using partner_buffer_ranges_type   = std::vector<partner_buffer_tuple_type>;
+    using partner_buffer_type          = std::vector<partner_range_type>;
+    using potential_range_type         = range<potential_buffer_iterator>;
+    using derivative_range_type        = range<derivative_buffer_iterator>;
+    using potential_range_buffer_type  = std::vector<potential_range_type>;
+    using derivative_range_buffer_type = std::vector<derivative_range_type>;
 
   public:
     GlobalStoichiometricInteraction(potential_type&& pot, partition_type&& part,
@@ -49,21 +48,27 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         const std::size_t participants_a_num = potential_.participants_a_num();
         const std::size_t participants_b_num = potential_.participants_b_num();
         const std::size_t participants_ab    = participants_a_num * participants_b_num;
-        derivs_buff_.resize(participants_ab);
+        derivs_buff_    .resize(participants_ab);
         potentials_buff_.resize(participants_ab);
-        partner_buffer_ranges_.resize(participants_a_num);
+        partner_buffer_    .resize(participants_a_num);
+        pot_buffer_range_  .resize(participants_a_num);
+        deriv_buffer_range_.resize(participants_a_num);
 
-        pots_sum_a_  .resize(participants_a_num);
-        pots_sum_b_  .resize(participants_b_num);
+        pots_sum_a_.resize(participants_a_num);
+        pots_sum_b_.resize(participants_b_num);
+        pots_partial_sum_a_.resize(participants_a_num);
+        pots_partial_sum_b_.resize(participants_b_num);
         derivs_sum_a_.resize(participants_a_num);
         derivs_sum_b_.resize(participants_b_num);
 
         pots_sum_thread_b_  .resize(num_threads_);
         derivs_sum_thread_b_.resize(num_threads_);
+        pots_partial_sum_thread_b_.resize(num_threads_);
         for(std::size_t thread_idx=0; thread_idx<num_threads_; ++thread_idx)
         {
-            pots_sum_thread_b_[thread_idx]      .resize(participants_b_num);
-            derivs_sum_thread_b_[thread_idx].resize(participants_b_num);
+            pots_sum_thread_b_  [thread_idx]      .resize(participants_b_num);
+            derivs_sum_thread_b_[thread_idx]      .resize(participants_b_num);
+            pots_partial_sum_thread_b_[thread_idx].resize(participants_b_num);
         }
     }
     ~GlobalStoichiometricInteraction() override {}
@@ -153,10 +158,9 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
             auto pot_range   = make_range(pot_first_iter,   pot_buff_iter);
             auto deriv_range = make_range(deriv_first_iter, deriv_buff_iter);
 
-            partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
-            std::get<0>(partner_buffer_range) = partner;
-            std::get<1>(partner_buffer_range) = make_range(pot_first_iter,   pot_buff_iter);
-            std::get<2>(partner_buffer_range) = make_range(deriv_first_iter, deriv_buff_iter);
+            partner_buffer_    [idx_a] = partner;
+            pot_buffer_range_  [idx_a] = make_range(pot_first_iter,   pot_buff_iter);
+            deriv_buffer_range_[idx_a] = make_range(deriv_first_iter, deriv_buff_iter);
         }
     }
 
@@ -180,13 +184,18 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
     mutable derivative_buffer_type derivs_buff_;
     mutable potential_buffer_type  pots_sum_a_;
     mutable potential_buffer_type  pots_sum_b_;
+    mutable potential_buffer_type  pots_partial_sum_a_;
+    mutable potential_buffer_type  pots_partial_sum_b_;
 
     // Variables to specify the range of specific a partners in buffer.
-    mutable partner_buffer_ranges_type partner_buffer_ranges_;
+    mutable partner_buffer_type          partner_buffer_;
+    mutable potential_range_buffer_type  pot_buffer_range_;
+    mutable derivative_range_buffer_type deriv_buffer_range_;
 
     // To avoid data race during summation about b
     mutable std::vector<potential_buffer_type>  pots_sum_thread_b_;
     mutable std::vector<derivative_buffer_type> derivs_sum_thread_b_;
+    mutable std::vector<potential_buffer_type>  pots_partial_sum_thread_b_;
 
     // sum of derivation of potential function for specific first particle.
     mutable derivative_buffer_type derivs_sum_a_;
@@ -202,19 +211,23 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         MJOLNIR_LOG_FUNCTION_DEBUG();
     
         // initialization of each buffering container.
-        std::fill(pots_sum_a_.begin(), pots_sum_a_.end(), 0.0);
-        std::fill(pots_sum_b_.begin(), pots_sum_b_.end(), 0.0);
+        std::fill(pots_sum_a_.begin(),         pots_sum_a_.end(),         0.0);
+        std::fill(pots_partial_sum_a_.begin(), pots_partial_sum_a_.end(), 0.0);
+        std::fill(pots_sum_b_.begin(),         pots_sum_b_.end(),         0.0);
+        std::fill(pots_partial_sum_b_.begin(), pots_partial_sum_b_.end(), 0.0);
         std::fill(derivs_sum_a_.begin(), derivs_sum_a_.end(),
                   math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
         std::fill(derivs_sum_b_.begin(), derivs_sum_b_.end(),
                   math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
         for(std::size_t thread_idx=0; thread_idx<num_threads_; ++thread_idx)
         {
-            potential_buffer_type&  pots_sum_thread   = pots_sum_thread_b_  [thread_idx];
-            derivative_buffer_type& derivs_sum_thread = derivs_sum_thread_b_[thread_idx];
+            potential_buffer_type&  pots_sum_thread         = pots_sum_thread_b_  [thread_idx];
+            derivative_buffer_type& derivs_sum_thread       = derivs_sum_thread_b_[thread_idx];
+            potential_buffer_type&  pots_partial_sum_thread = pots_partial_sum_thread_b_[thread_idx];
             std::fill(pots_sum_thread.begin(),   pots_sum_thread.end(), 0.0);
             std::fill(derivs_sum_thread.begin(), derivs_sum_thread.end(),
                       math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
+            std::fill(pots_partial_sum_thread.begin(), pots_partial_sum_thread.end(), 0.0);
         }
 
         // make index pair list to specify the range of buffer for specific a and
@@ -228,10 +241,9 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         {
             const index_type i = participants_a[idx_a];
 
-            partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
-            const auto& partner     = std::get<0>(partner_buffer_range);
-            const auto& pot_range   = std::get<1>(partner_buffer_range);
-            const auto& deriv_range = std::get<2>(partner_buffer_range);
+            const auto& partner     = partner_buffer_    [idx_a];
+            const auto& pot_range   = pot_buffer_range_  [idx_a];
+            const auto& deriv_range = deriv_buffer_range_[idx_a];
 
             real_type&       pots_sum_a   = pots_sum_a_  [idx_a];
             coordinate_type& derivs_sum_a = derivs_sum_a_[idx_a];
@@ -272,119 +284,142 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
             }
         }
 
+#pragma omp parallel for
+        for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
+        {
+            const auto&     partner            = partner_buffer_    [idx_a];
+            const auto&     pot_buff_range     = pot_buffer_range_  [idx_a];
+            const real_type pots_sum_a         = pots_sum_a_        [idx_a];
+            real_type&      pots_partial_sum_a = pots_partial_sum_a_[idx_a];
+
+            const std::size_t thread_id = omp_get_thread_num();
+            potential_buffer_type& pots_partial_sum_thread = pots_partial_sum_thread_b_[thread_id];
+
+            for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
+            {
+                const index_type j          = partner[ptnr_idx].index;
+                const index_type idx_b      = idx_buffer_map_[j];
+                const real_type  pots_sum_b = pots_sum_b_[idx_b];
+
+                if(std::max(pots_sum_a, pots_sum_b) <= 1.0) { continue; }
+
+                const real_type pot_buff_ab = pot_buff_range[ptnr_idx];
+                if(pots_sum_a < pots_sum_b)
+                {
+                    pots_partial_sum_thread[idx_b] += pot_buff_ab;
+                }
+                else // pots_sum_a >= pots_sum_b
+                {
+                    pots_partial_sum_a += pot_buff_ab;
+                }
+            }
+        }
+
+        for(std::size_t thread_idx=0; thread_idx<num_threads_; ++thread_idx)
+        {
+            const potential_buffer_type& pots_partial_sum_thread = pots_partial_sum_thread_b_[thread_idx];
+            for(std::size_t idx_b=0; idx_b<participants_b_num; ++idx_b)
+            {
+                pots_partial_sum_b_[idx_b] += pots_partial_sum_thread[idx_b];
+            }
+        }
+
         // force calculation
 #pragma omp parallel for
         for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
         {
             const index_type i = participants_a[idx_a];
 
-            const auto&     partner_buffer_tuple  = partner_buffer_ranges_[idx_a];
-            const auto&     partner               = std::get<0>(partner_buffer_tuple);
-            const auto&     potential_buff_range  = std::get<1>(partner_buffer_tuple);
-            const auto&     derivative_buff_range = std::get<2>(partner_buffer_tuple);
-            const real_type pots_sum_a            = pots_sum_a_[idx_a];
+            const auto& partner               = partner_buffer_    [idx_a];
+            const auto& potential_buff_range  = pot_buffer_range_  [idx_a];
+            const auto& derivative_buff_range = deriv_buffer_range_[idx_a];
+
+            const real_type        pots_sum_a         = pots_sum_a_        [idx_a];
+            const coordinate_type& derivs_sum_a       = derivs_sum_a_      [idx_a];
+            const real_type        pots_partial_sum_a = pots_partial_sum_a_[idx_a];
+            const real_type        inv_pots_sum_a     = 1.0 / pots_sum_a;
+            const real_type        ep_pots_sum_a      = epsilon_ * inv_pots_sum_a;
+            const real_type        ep_pots_sum_a2     = ep_pots_sum_a * inv_pots_sum_a;
 
             const std::size_t thread_id = omp_get_thread_num();
     
-            if(pots_sum_a <= 1.0)
+            for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
             {
-                for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
+                const index_type       j             = partner[ptnr_idx].index;
+                const index_type       idx_b         = idx_buffer_map_[j];
+                const real_type        pot_buff_ab   = potential_buff_range [ptnr_idx];
+                const coordinate_type& deriv_buff_ab = derivative_buff_range[ptnr_idx];
+                const real_type        pots_sum_b    = pots_sum_b_[idx_b];
+                const coordinate_type& derivs_sum_b  = derivs_sum_b_[idx_b];
+   
+                if(pots_sum_a <= 1.0)
                 {
-                    const index_type       j             = partner[ptnr_idx].index;
-                    const index_type       idx_b         = idx_buffer_map_[j];
-                    const real_type        pots_sum_b    = pots_sum_b_[idx_b];
-                    const coordinate_type& deriv_buff_ab = derivative_buff_range[ptnr_idx];
-    
                     if(pots_sum_b <= 1.0)
                     {
+                        // force from distance part derivation
                         const coordinate_type force = epsilon_ * deriv_buff_ab;
                         sys.force_thread(thread_id, i) -= force;
                         sys.force_thread(thread_id, j) += force;
                     } 
                     else // pots_sum_a < pots_sum_b
                     {
-                        const real_type        pot_buff_ab    = potential_buff_range[ptnr_idx];
-                        const real_type        pots_sum_b     = pots_sum_b_  [idx_b];
-                        const coordinate_type& derivs_sum_b   = derivs_sum_b_[idx_b];
-                        const real_type        inv_pots_sum_b = 1.0 / pots_sum_b;
-                        const real_type        ep_pots_sum_b  = epsilon_ * inv_pots_sum_b;
-                        const real_type        ep_pots_sum_b2 = ep_pots_sum_b * inv_pots_sum_b;
+                        const real_type inv_pots_sum_b = 1.0 / pots_sum_b;
+                        const real_type ep_pots_sum_b  = epsilon_ * inv_pots_sum_b;
+                        const real_type ep_pots_sum_b2 = ep_pots_sum_b * inv_pots_sum_b;
 
+                        // force from distance part derivation
                         sys.force_thread(thread_id, i) -= ep_pots_sum_b * deriv_buff_ab;
-                        sys.force_thread(thread_id, j) +=
-                            ep_pots_sum_b2 * (pot_buff_ab * derivs_sum_b + pots_sum_b * deriv_buff_ab);
+                        sys.force_thread(thread_id, j) += ep_pots_sum_b * deriv_buff_ab;
 
-                        // the force to not a or b particle from a-b pair
-                        const auto& j_partner = partition_.partners(j);
-                        for(const auto& j_ptnr : j_partner)
-                        {
-                            const index_type k     = j_ptnr.index;
-                            const index_type idx_c = idx_buffer_map_[k];
-                            const auto&      partner_buffer_tuple_c = partner_buffer_ranges_[idx_c];
-                            const auto&      deriv_buff_range_c     = std::get<2>(partner_buffer_tuple_c);
-
-                            sys.force_thread(thread_id, k) +=
-                                ep_pots_sum_b2 * pot_buff_ab * deriv_buff_range_c[idx_b];
-                        }
+                        // force from valence part derivation
+                        sys.force_thread(thread_id, j) += ep_pots_sum_b2 * derivs_sum_b * pot_buff_ab;
                     }
                 }
-            }
-            else // 1.0 < pots_sum_a case
-            {
-                const real_type inv_pots_sum_a  = 1.0 / pots_sum_a;
-                const real_type ep_pots_sum_a   = epsilon_ * inv_pots_sum_a;
-                const real_type ep_pots_sum_a2  = ep_pots_sum_a * inv_pots_sum_a;
-                const coordinate_type& derivs_sum_a = derivs_sum_a_[idx_a];
-                const coordinate_type  derivs_sum_a_pots_sum_a = inv_pots_sum_a * derivs_sum_a;
-
-                for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
+                else // 1.0 < pots_sum_a_case
                 {
-                    const index_type j     = partner[ptnr_idx].index;
-                    const index_type idx_b = idx_buffer_map_[j];
-                    const real_type        pot_buff_ab   = potential_buff_range [ptnr_idx];
-                    const coordinate_type& deriv_buff_ab = derivative_buff_range[ptnr_idx];
-                    const real_type        pots_sum_b    = pots_sum_b_  [idx_b];
-                    const coordinate_type& derivs_sum_b  = derivs_sum_b_[idx_b];
-    
-                    if(pots_sum_b < pots_sum_a)
+                    // force from depends on valence part
+                    if(pots_sum_b <= pots_sum_a)
                     {
-                        sys.force_thread(thread_id, i) +=
-                            ep_pots_sum_a2 * (derivs_sum_a * pot_buff_ab - pots_sum_a * deriv_buff_ab);
+                        // force from distance part derivation
+                        sys.force_thread(thread_id, i) -= ep_pots_sum_a * deriv_buff_ab;
                         sys.force_thread(thread_id, j) += ep_pots_sum_a * deriv_buff_ab;
 
-                        // the force to not a or b particle from a-b pair
-                        for(const auto& i_ptnr : partner)
-                        {
-                            const index_type k     = i_ptnr.index;
-                            const index_type idx_d = idx_buffer_map_[k];
-
-                            sys.force_thread(thread_id, k) -=
-                                ep_pots_sum_a2 * pot_buff_ab * derivative_buff_range[idx_d];
-                        }
+                        // force from valence part derivation
+                        sys.force_thread(thread_id, i) += ep_pots_sum_a2 * derivs_sum_a * pot_buff_ab;
                     }
-                    else // pots_sum_a <= pots_sum_b
+                    else // pots_sum_a < pots_sum_b
                     {
-                        const real_type inv_pots_sum_b  = 1.0 / pots_sum_b;
-                        const real_type ep_pots_sum_b   = epsilon_ * inv_pots_sum_b;
-                        const real_type ep_pots_sum_b2  = ep_pots_sum_b * inv_pots_sum_b;
+                        const real_type inv_pots_sum_b = 1.0 / pots_sum_b;
+                        const real_type ep_pots_sum_b  = epsilon_ * inv_pots_sum_b;
+                        const real_type ep_pots_sum_b2 = ep_pots_sum_b * inv_pots_sum_b;
 
+                        // force from distance part derivation
                         sys.force_thread(thread_id, i) -= ep_pots_sum_b * deriv_buff_ab;
-                        sys.force_thread(thread_id, j) +=
-                            ep_pots_sum_b2 * (pot_buff_ab * derivs_sum_b + pots_sum_b * deriv_buff_ab);
+                        sys.force_thread(thread_id, j) += ep_pots_sum_b * deriv_buff_ab;
 
-                        // the force to not a or b particle from a-b pair
-                        const auto& j_partner = partition_.partners(j);
-                        for(const auto& j_ptnr : j_partner)
-                        {
-                            const index_type k     = j_ptnr.index;
-                            const index_type idx_c = idx_buffer_map_[k];
-                            const auto&      partner_buffer_tuple_c = partner_buffer_ranges_[idx_c];
-                            const auto&      deriv_buff_range_c     = std::get<2>(partner_buffer_tuple_c);
-
-                            sys.force_thread(thread_id, k) +=
-                                ep_pots_sum_b2 * pot_buff_ab * deriv_buff_range_c[idx_b];
-                        }
+                        // force from valence part derivation
+                        sys.force_thread(thread_id, j) += ep_pots_sum_b2 * derivs_sum_b * pot_buff_ab;
                     }
+                    // force from depends on valence part
+                    sys.force_thread(thread_id, j) -= ep_pots_sum_a2 * deriv_buff_ab * pots_partial_sum_a;
+                }
+            }
+
+            // force from depends on valence part
+            for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
+            {
+                const index_type k          = partner[ptnr_idx].index;
+                const index_type idx_d      = idx_buffer_map_[k];
+                const real_type  pots_sum_d = pots_sum_b_[idx_d];
+                if(1.0 < pots_sum_d)
+                {
+                    const real_type        inv_pots_sum_d = 1.0 / pots_sum_d;
+                    const real_type        ep_pots_sum_d  = epsilon_ * inv_pots_sum_d;
+                    const real_type        ep_pots_sum_d2 = ep_pots_sum_d * inv_pots_sum_d;
+                    const coordinate_type& deriv_buff_ad  = derivative_buff_range[ptnr_idx];
+
+                    sys.force_thread(thread_id, i) +=
+                        ep_pots_sum_d2 * deriv_buff_ad * pots_partial_sum_b_[idx_d];
                 }
             }
         }
@@ -416,9 +451,8 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         {
             const index_type i = participants_a[idx_a];
 
-            partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
-            const auto& partner   = std::get<0>(partner_buffer_range);
-            const auto& pot_range = std::get<1>(partner_buffer_range);
+            const auto& partner   = partner_buffer_  [idx_a];
+            const auto& pot_range = pot_buffer_range_[idx_a];
 
             real_type& pots_sum_a = pots_sum_a_[idx_a];
 
@@ -456,9 +490,8 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 #pragma omp parallel for reduction(+:retval)
         for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a) 
         {
-            const partner_buffer_tuple_type&   partner_buffer_range = partner_buffer_ranges_[idx_a];
-            const partner_range_type&          partner              = std::get<0>(partner_buffer_range);
-            const potential_buffer_range_type& pots_buff_a          = std::get<1>(partner_buffer_range);
+            const partner_range_type&   partner     = partner_buffer_  [idx_a];
+            const potential_range_type& pots_buff_a = pot_buffer_range_[idx_a];
             for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
             {
                 const index_type j            = partner[ptnr_idx].index;
@@ -486,15 +519,17 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         MJOLNIR_LOG_FUNCTION_DEBUG();
     
         // initialization of each buffering container.
-        std::fill(pots_sum_a_.begin(), pots_sum_a_.end(), 0.0);
-        std::fill(pots_sum_b_.begin(), pots_sum_b_.end(), 0.0);
+        std::fill(pots_sum_a_.begin(),         pots_sum_a_.end(),         0.0);
+        std::fill(pots_partial_sum_a_.begin(), pots_partial_sum_a_.end(), 0.0);
+        std::fill(pots_sum_b_.begin(),         pots_sum_b_.end(),         0.0);
+        std::fill(pots_partial_sum_b_.begin(), pots_partial_sum_b_.end(), 0.0);
         std::fill(derivs_sum_a_.begin(), derivs_sum_a_.end(),
                   math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
         std::fill(derivs_sum_b_.begin(), derivs_sum_b_.end(),
                   math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
         for(std::size_t thread_idx=0; thread_idx<num_threads_; ++thread_idx)
         {
-            potential_buffer_type&  pots_sum_thread   = pots_sum_thread_b_      [thread_idx];
+            potential_buffer_type&  pots_sum_thread   = pots_sum_thread_b_  [thread_idx];
             derivative_buffer_type& derivs_sum_thread = derivs_sum_thread_b_[thread_idx];
             std::fill(pots_sum_thread.begin(),   pots_sum_thread.end(), 0.0);
             std::fill(derivs_sum_thread.begin(), derivs_sum_thread.end(),
@@ -512,10 +547,9 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         {
             const index_type i = participants_a[idx_a];
 
-            partner_buffer_tuple_type& partner_buffer_range = partner_buffer_ranges_[idx_a];
-            const auto& partner     = std::get<0>(partner_buffer_range);
-            const auto& pot_range   = std::get<1>(partner_buffer_range);
-            const auto& deriv_range = std::get<2>(partner_buffer_range);
+            const auto& partner     = partner_buffer_    [idx_a];
+            const auto& pot_range   = pot_buffer_range_  [idx_a];
+            const auto& deriv_range = deriv_buffer_range_[idx_a];
 
             real_type&       pots_sum_a   = pots_sum_a_  [idx_a];
             coordinate_type& derivs_sum_a = derivs_sum_a_[idx_a];
@@ -526,20 +560,20 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
     
             for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
             {
-                const index_type j     = partner[ptnr_idx].index;
-                const index_type idx_b = idx_buffer_map_[j];
-                const coordinate_type rij =
-                   sys.adjust_direction(sys.position(i), sys.position(j));
+                const index_type      j     = partner[ptnr_idx].index;
+                const coordinate_type rij   = sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type       l2    = math::length_sq(rij); // |rij|^2
                 const real_type       rl    = math::rsqrt(l2);      // 1 / |rij|
                 const real_type       l     = l2 * rl;
                 const coordinate_type deriv = potential_.derivative(l) * rl * rij;
                 const real_type       pot   = potential_.potential(l);
 
-                pot_range        [ptnr_idx] =  pot;
-                deriv_range      [ptnr_idx] =  deriv;
-                pots_sum_a                  += pot;
-                derivs_sum_a                += deriv;
+                pot_range  [ptnr_idx] =  pot;
+                deriv_range[ptnr_idx] =  deriv;
+                pots_sum_a            += pot;
+                derivs_sum_a          += deriv;
+
+                const index_type  idx_b     = idx_buffer_map_[j];
                 pots_sum_thread  [idx_b]    += pot;
                 derivs_sum_thread[idx_b]    -= deriv;
             }
@@ -555,131 +589,141 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 derivs_sum_b_[idx_b] += derivs_sum_thread[idx_b];
             }
         }
-    
+
+        for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
+        {
+            const auto& partner            = partner_buffer_    [idx_a];
+            const auto& pot_buff_range     = pot_buffer_range_  [idx_a];
+            real_type&  pots_partial_sum_a = pots_partial_sum_a_[idx_a];
+
+            for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
+            {
+                const index_type j          = partner[ptnr_idx].index;
+                const index_type idx_b      = idx_buffer_map_[j];
+                const real_type  pots_sum_a = pots_sum_a_[idx_a];
+                const real_type  pots_sum_b = pots_sum_b_[idx_b];
+
+                if(std::max(pots_sum_a, pots_sum_b) <= 1.0) { continue; }
+
+                const real_type pot_buff_ab = pot_buff_range[ptnr_idx];
+                if(pots_sum_a < pots_sum_b)
+                {
+                    pots_partial_sum_b_[idx_b] += pot_buff_ab;
+                }
+                else // pots_sum_a >= pots_sum_b
+                {
+                    pots_partial_sum_a += pot_buff_ab;
+                }
+            }
+        }
+
         // force calculation
 #pragma omp parallel for
         for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
         {
             const index_type i = participants_a[idx_a];
 
-            const auto&     partner_buffer_tuple  = partner_buffer_ranges_[idx_a];
-            const auto&     partner               = std::get<0>(partner_buffer_tuple);
-            const auto&     potential_buff_range  = std::get<1>(partner_buffer_tuple);
-            const auto&     derivative_buff_range = std::get<2>(partner_buffer_tuple);
-            const real_type pots_sum_a            = pots_sum_a_[idx_a];
+            const auto& partner               = partner_buffer_    [idx_a];
+            const auto& potential_buff_range  = pot_buffer_range_  [idx_a];
+            const auto& derivative_buff_range = deriv_buffer_range_[idx_a];
+
+            const real_type        pots_sum_a         = pots_sum_a_        [idx_a];
+            const coordinate_type& derivs_sum_a       = derivs_sum_a_      [idx_a];
+            const real_type        pots_partial_sum_a = pots_partial_sum_a_[idx_a];
+            const real_type        inv_pots_sum_a     = 1.0 / pots_sum_a;
+            const real_type        ep_pots_sum_a      = epsilon_ * inv_pots_sum_a;
+            const real_type        ep_pots_sum_a2     = ep_pots_sum_a * inv_pots_sum_a;
 
             const std::size_t thread_id = omp_get_thread_num();
 
-            if(pots_sum_a <= 1.0)
+            for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
             {
-                for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
+                const index_type       j             = partner[ptnr_idx].index;
+                const index_type       idx_b         = idx_buffer_map_[j];
+                const real_type        pot_buff_ab   = potential_buff_range [ptnr_idx];
+                const coordinate_type& deriv_buff_ab = derivative_buff_range[ptnr_idx];
+                const real_type        pots_sum_b    = pots_sum_b_  [idx_b];
+                const coordinate_type& derivs_sum_b  = derivs_sum_b_[idx_b];
+
+                if(pots_sum_a <= 1.0)
                 {
-                    const index_type       j             = partner[ptnr_idx].index;
-                    const index_type       idx_b         = idx_buffer_map_[j];
-                    const real_type        pots_sum_b    = pots_sum_b_  [idx_b];
-                    const coordinate_type& derivs_sum_b  = derivs_sum_b_[idx_b];
-                    const coordinate_type& deriv_buff_ab = derivative_buff_range[ptnr_idx];
-    
                     if(pots_sum_b <= 1.0)
                     {
+                        // force from distance part derivation
                         const coordinate_type force = epsilon_ * deriv_buff_ab;
                         sys.force_thread(thread_id, i) -= force;
                         sys.force_thread(thread_id, j) += force;
                     }
                     else // pots_sum_a < pots_sum_b case
                     {
-                        const real_type        pot_buff_ab    = potential_buff_range [ptnr_idx];
-                        const coordinate_type& deriv_buff_ab  = derivative_buff_range[ptnr_idx];
-                        const real_type        inv_pots_sum_b = 1.0 / pots_sum_b;
-                        const real_type        ep_pots_sum_b  = epsilon_ * inv_pots_sum_b;
-                        const real_type        ep_pots_sum_b2 = ep_pots_sum_b * inv_pots_sum_b;
+                        const real_type inv_pots_sum_b = 1.0 / pots_sum_b;
+                        const real_type ep_pots_sum_b  = epsilon_ * inv_pots_sum_b;
+                        const real_type ep_pots_sum_b2 = ep_pots_sum_b * inv_pots_sum_b;
 
+                        // force from distance part derivation
                         sys.force_thread(thread_id, i) -= ep_pots_sum_b * deriv_buff_ab;
-                        sys.force_thread(thread_id, j) +=
-                            ep_pots_sum_b2 * (pot_buff_ab * derivs_sum_b + pots_sum_b * deriv_buff_ab);
+                        sys.force_thread(thread_id, j) += ep_pots_sum_b * deriv_buff_ab;
 
-                        // the force to not a or b particle from a-b pair
-                        const auto& j_partner = partition_.partners(j);
-                        for(const auto& j_ptnr : j_partner)
-                        {
-                            const index_type k     = j_ptnr.index;
-                            const index_type idx_c = idx_buffer_map_[k];
-                            const auto&      partner_buffer_tuple_c = partner_buffer_ranges_[idx_c];
-                            const auto&      deriv_buff_range_c     = std::get<2>(partner_buffer_tuple_c);
-
-                            sys.force_thread(thread_id, k) +=
-                                ep_pots_sum_b2 * pot_buff_ab * deriv_buff_range_c[idx_b];
-                        }
+                        // force from valence part derivation
+                        sys.force_thread(thread_id, j) += ep_pots_sum_b2 * derivs_sum_b * pot_buff_ab;
                     }
                 }
-            }
-            else // 1.0 < pots_sum_a case
-            {
-                const real_type        inv_pots_sum_a = 1.0 / pots_sum_a;
-                const real_type        ep_pots_sum_a  = epsilon_ * inv_pots_sum_a;
-                const real_type        ep_pots_sum_a2 = ep_pots_sum_a * inv_pots_sum_a;
-                const coordinate_type& derivs_sum_a   = derivs_sum_a_[idx_a];
-    
-                for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
+                else // 1.0 < pots_sum_a case
                 {
-                    const index_type j     = partner[ptnr_idx].index;
-                    const index_type idx_b = idx_buffer_map_[j];
-                    const real_type        pot_buff_ab   = potential_buff_range [ptnr_idx];
-                    const coordinate_type& deriv_buff_ab = derivative_buff_range[ptnr_idx];
-                    const real_type        pots_sum_b    = pots_sum_b_          [idx_b];
-                    const coordinate_type& derivs_sum_b  = derivs_sum_b_        [idx_b];
-    
-                    if(pots_sum_b < pots_sum_a)
+                    // force from depends on valence part
+                    if(pots_sum_b <= pots_sum_a)
                     {
-                        sys.force_thread(thread_id, i) +=
-                            ep_pots_sum_a2 * (derivs_sum_a * pot_buff_ab - pots_sum_a * deriv_buff_ab);
+                        // force from distance part derivation
+                        sys.force_thread(thread_id, i) -= ep_pots_sum_a * deriv_buff_ab;
                         sys.force_thread(thread_id, j) += ep_pots_sum_a * deriv_buff_ab;
 
-                        // the force to not a or b particle from a-b pair
-                        for(const auto& i_ptnr : partner)
-                        {
-                            const index_type k     = i_ptnr.index;
-                            const index_type idx_d = idx_buffer_map_[k];
-
-                            sys.force_thread(thread_id, k) -=
-                                ep_pots_sum_a2 * pot_buff_ab * derivative_buff_range[idx_d];
-                        }
+                        // force from valence part derivation
+                        sys.force_thread(thread_id, i) += ep_pots_sum_a2 * derivs_sum_a * pot_buff_ab;
                     }
-                    else // pots_sum_a <= pots_sum_b
+                    else // pots_sum_a < pots_sum_b
                     {
                         const real_type inv_pots_sum_b = 1.0 / pots_sum_b;
                         const real_type ep_pots_sum_b  = epsilon_ * inv_pots_sum_b;
                         const real_type ep_pots_sum_b2 = ep_pots_sum_b * inv_pots_sum_b;
 
+                        // force from distance part derivation
                         sys.force_thread(thread_id, i) -= ep_pots_sum_b * deriv_buff_ab;
-                        sys.force_thread(thread_id, j) +=
-                            ep_pots_sum_b2 * (pot_buff_ab * derivs_sum_b + pots_sum_b * deriv_buff_ab);
+                        sys.force_thread(thread_id, j) += ep_pots_sum_b * deriv_buff_ab;
 
-                        // the force to not a or b particle from a-b pair
-                        const auto& j_partner = partition_.partners(j);
-                        for(const auto& j_ptnr : j_partner)
-                        {
-                            const index_type k     = j_ptnr.index;
-                            const index_type idx_c = idx_buffer_map_[k];
-                            const auto&      partner_buffer_tuple_c = partner_buffer_ranges_[idx_c];
-                            const auto&      deriv_buff_range_c     = std::get<2>(partner_buffer_tuple_c);
-
-                            sys.force_thread(thread_id, k) +=
-                                ep_pots_sum_b2 * pot_buff_ab * deriv_buff_range_c[idx_b];
-                        }
+                        // force from valence part derivation
+                        sys.force_thread(thread_id, j) += ep_pots_sum_b2 * derivs_sum_b * pot_buff_ab;
                     }
+                    // force from depends on valence part
+                    sys.force_thread(thread_id, j) -= ep_pots_sum_a2 * deriv_buff_ab * pots_partial_sum_a;
+                }
+            }
+
+            // force from depends on valence part
+            for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
+            {
+                const index_type k          = partner[ptnr_idx].index;
+                const index_type idx_d      = idx_buffer_map_[k];
+                const real_type  pots_sum_d = pots_sum_b_[idx_d];
+                if(1.0 < pots_sum_d)
+                {
+                    const real_type        inv_pots_sum_d = 1.0 / pots_sum_d;
+                    const real_type        ep_pots_sum_d  = epsilon_ * inv_pots_sum_d;
+                    const real_type        ep_pots_sum_d2 = ep_pots_sum_d * inv_pots_sum_d;
+                    const coordinate_type& deriv_buff_ad  = derivative_buff_range[ptnr_idx];
+    
+                    sys.force_thread(thread_id, i) +=
+                        ep_pots_sum_d2 * deriv_buff_ad * pots_partial_sum_b_[idx_d];
                 }
             }
         }
-    
+
         // potential calculation
         real_type retval(0.0);
 #pragma omp parallel for reduction(+:retval)
         for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
         {
-            const partner_buffer_tuple_type&   partner_buffer_range = partner_buffer_ranges_[idx_a];
-            const partner_range_type&          partner              = std::get<0>(partner_buffer_range);
-            const potential_buffer_range_type& pot_buff_a           = std::get<1>(partner_buffer_range);
+            const partner_range_type&   partner    = partner_buffer_  [idx_a];
+            const potential_range_type& pot_buff_a = pot_buffer_range_[idx_a];
             for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
             {
                 const index_type j            = partner[ptnr_idx].index;
