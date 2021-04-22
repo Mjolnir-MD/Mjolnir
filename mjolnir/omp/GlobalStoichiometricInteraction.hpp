@@ -221,13 +221,13 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                   math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
         for(std::size_t thread_idx=0; thread_idx<num_threads_; ++thread_idx)
         {
-            potential_buffer_type&  pots_sum_thread         = pots_sum_thread_b_  [thread_idx];
-            derivative_buffer_type& derivs_sum_thread       = derivs_sum_thread_b_[thread_idx];
+            potential_buffer_type&  pots_sum_thread         = pots_sum_thread_b_        [thread_idx];
             potential_buffer_type&  pots_partial_sum_thread = pots_partial_sum_thread_b_[thread_idx];
-            std::fill(pots_sum_thread.begin(),   pots_sum_thread.end(), 0.0);
+            derivative_buffer_type& derivs_sum_thread       = derivs_sum_thread_b_      [thread_idx];
+            std::fill(pots_sum_thread.begin(),         pots_sum_thread.end(),         0.0);
+            std::fill(pots_partial_sum_thread.begin(), pots_partial_sum_thread.end(), 0.0);
             std::fill(derivs_sum_thread.begin(), derivs_sum_thread.end(),
                       math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
-            std::fill(pots_partial_sum_thread.begin(), pots_partial_sum_thread.end(), 0.0);
         }
 
         // make index pair list to specify the range of buffer for specific a and
@@ -529,9 +529,11 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                   math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
         for(std::size_t thread_idx=0; thread_idx<num_threads_; ++thread_idx)
         {
-            potential_buffer_type&  pots_sum_thread   = pots_sum_thread_b_  [thread_idx];
-            derivative_buffer_type& derivs_sum_thread = derivs_sum_thread_b_[thread_idx];
-            std::fill(pots_sum_thread.begin(),   pots_sum_thread.end(), 0.0);
+            potential_buffer_type&  pots_sum_thread         = pots_sum_thread_b_        [thread_idx];
+            potential_buffer_type&  pots_partial_sum_thread = pots_partial_sum_thread_b_[thread_idx];
+            derivative_buffer_type& derivs_sum_thread       = derivs_sum_thread_b_      [thread_idx];
+            std::fill(pots_sum_thread.begin(),           pots_sum_thread.end(),         0.0);
+            std::fill(pots_partial_sum_thread.begin(),   pots_partial_sum_thread.end(), 0.0);
             std::fill(derivs_sum_thread.begin(), derivs_sum_thread.end(),
                       math::make_coordinate<coordinate_type>(0.0, 0.0, 0.0));
         }
@@ -590,17 +592,21 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
             }
         }
 
+#pragma omp parallel for
         for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
         {
-            const auto& partner            = partner_buffer_    [idx_a];
-            const auto& pot_buff_range     = pot_buffer_range_  [idx_a];
-            real_type&  pots_partial_sum_a = pots_partial_sum_a_[idx_a];
+            const auto&     partner            = partner_buffer_    [idx_a];
+            const auto&     pot_buff_range     = pot_buffer_range_  [idx_a];
+            const real_type pots_sum_a         = pots_sum_a_        [idx_a];
+            real_type&      pots_partial_sum_a = pots_partial_sum_a_[idx_a];
+
+            const std::size_t thread_id = omp_get_thread_num();
+            potential_buffer_type& pots_partial_sum_thread = pots_partial_sum_thread_b_[thread_id];
 
             for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
             {
                 const index_type j          = partner[ptnr_idx].index;
                 const index_type idx_b      = idx_buffer_map_[j];
-                const real_type  pots_sum_a = pots_sum_a_[idx_a];
                 const real_type  pots_sum_b = pots_sum_b_[idx_b];
 
                 if(std::max(pots_sum_a, pots_sum_b) <= 1.0) { continue; }
@@ -608,12 +614,21 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const real_type pot_buff_ab = pot_buff_range[ptnr_idx];
                 if(pots_sum_a < pots_sum_b)
                 {
-                    pots_partial_sum_b_[idx_b] += pot_buff_ab;
+                    pots_partial_sum_thread[idx_b] += pot_buff_ab;
                 }
                 else // pots_sum_a >= pots_sum_b
                 {
                     pots_partial_sum_a += pot_buff_ab;
                 }
+            }
+        }
+
+        for(std::size_t thread_idx=0; thread_idx<num_threads_; ++thread_idx)
+        {
+            const potential_buffer_type& pots_partial_sum_thread = pots_partial_sum_thread_b_[thread_idx];
+            for(std::size_t idx_b=0; idx_b<participants_b_num; ++idx_b)
+            {
+                pots_partial_sum_b_[idx_b] += pots_partial_sum_thread[idx_b];
             }
         }
 
