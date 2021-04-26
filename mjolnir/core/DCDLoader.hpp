@@ -129,6 +129,12 @@ class DCDLoader final : public LoaderBase<traitsT>
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
+        file_.peek();
+        if(file_.eof())
+        {
+            return false;
+        }
+
         this->read_unitcell_if_needed(sys.boundary());
         {
             const auto block_beg = detail::read_bytes_as<std::int32_t>(file_);
