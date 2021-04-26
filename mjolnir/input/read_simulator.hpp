@@ -341,11 +341,49 @@ read_energy_calculation_simulator(
     }
 
     // clear all parameters once
+    bool position_found = false;
+    bool velocity_found = false;
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         const auto& p = particles.at(i);
-        // position(pos), velocity(vel) are ignored here
-        check_keys_available(p, {"m"_s, "mass"_s, "name"_s, "group"_s});
+        check_keys_available(p, {"m"_s, "mass"_s, "pos"_s, "position"_s,
+                "vel"_s, "velocity"_s, "name"_s, "group"_s});
+
+        if( ! position_found)
+        {
+            for(const auto key : {"pos"_s, "position"_s})
+            {
+                if( ! p.contains(key))
+                {
+                    continue;
+                }
+                const auto err_msg = toml::format_error("unused value \""_s +
+                    key + "\" found. this will never be used."_s, p.at(key),
+                    "this will be ignored because trajectory file is given");
+
+                // workaround to skip auto-added [error].
+                MJOLNIR_LOG_WARN(err_msg.substr(err_msg.find("unused")));
+                position_found = true;
+            }
+        }
+
+        if( ! velocity_found )
+        {
+            for(const auto key : {"vel"_s, "velocity"_s})
+            {
+                if( ! p.contains(key))
+                {
+                    continue;
+                }
+                const auto err_msg = toml::format_error("unused value \""_s +
+                    key + "\" found. this will never be used."_s, p.at(key),
+                    "this will be ignored because trajectory file is given");
+
+                // workaround to skip auto-added [error].
+                MJOLNIR_LOG_WARN(err_msg.substr(err_msg.find("unused")));
+                position_found = true;
+            }
+        }
 
         if(p.as_table().count("m") == 1)
         {
