@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.25.0
+
+### Added
+
+- add LennardJonesAttractive to global potential
+- output pressure if PBC is enabled
+
+### Fixed
+
+- make warning message in EnergyCalculation mode informative
+- consider the difference of sed command on BSD in CMakeLists
+
 ## 1.24.0
 
 ### Changed
