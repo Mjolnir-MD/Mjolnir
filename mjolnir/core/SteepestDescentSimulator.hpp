@@ -68,8 +68,8 @@ inline void SteepestDescentSimulator<traitsT>::initialize()
     // here, steepest_descent method has no physical `time`.
     // There is nothing we can except filling it with zero or something
     // that works as a marker.
-    this->observers_.initialize(this->step_limit_, /* dt */ real_type(0.0),
-                                this->system_, this->ff_);
+    this->observers_.initialize(this->step_limit_, this->save_step_,
+       /* there is no dt, so */ h_, this->system_, this->ff_);
     return;
 }
 

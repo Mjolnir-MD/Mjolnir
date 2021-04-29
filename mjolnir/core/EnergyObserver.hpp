@@ -32,7 +32,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
     }
     ~EnergyObserver() override {}
 
-    void initialize(const std::size_t, const real_type,
+    void initialize(const std::size_t, const std::size_t, const real_type,
                     const system_type& sys, const forcefield_type& ff) override
     {
         using phys_constants = physics::constants<real_type>;
