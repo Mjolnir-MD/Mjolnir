@@ -47,7 +47,7 @@ struct UnlimitedBoundary
         return math::make_coordinate<coordinate_type>( inf,  inf,  inf);
     }
 
-    constexpr bool is_inside_of(const coordinate_type& r) const noexcept {return true;}
+    constexpr bool is_inside_of(const coordinate_type&) const noexcept {return true;}
 };
 template<typename realT, typename coordT>
 constexpr typename UnlimitedBoundary<realT, coordT>::real_type UnlimitedBoundary<realT, coordT>::inf;
