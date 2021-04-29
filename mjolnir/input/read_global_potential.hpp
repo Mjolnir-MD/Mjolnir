@@ -7,6 +7,7 @@
 #include <mjolnir/forcefield/global/HardCoreExcludedVolumePotential.hpp>
 #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
 #include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
+#include <mjolnir/forcefield/global/LennardJonesAttractivePotential.hpp>
 #include <mjolnir/forcefield/global/WCAPotential.hpp>
 #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2ExcludedVolumePotential.hpp>
@@ -401,6 +402,46 @@ read_uniform_lennard_jones_potential(const toml::value& global)
 }
 
 template<typename traitsT>
+LennardJonesAttractivePotential<traitsT>
+read_lennard_jones_attractive_potential(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using potential_type = LennardJonesAttractivePotential<traitsT>;
+    using real_type      = typename potential_type::real_type;
+    using parameter_type = typename potential_type::parameter_type;
+
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff());
+    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+
+    const auto& ps = toml::find<toml::array>(global, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        const auto idx     = find_parameter<std::size_t>(param, env, "index") +
+                             find_parameter_or<std::int64_t>(param, env, "offset", 0);
+        const auto sigma   = find_parameter<real_type>(param, env, "sigma",   u8"σ");
+        const auto epsilon = find_parameter<real_type>(param, env, "epsilon", u8"ε");
+
+        params.emplace_back(idx, parameter_type{sigma, epsilon});
+        MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma, ", epsilon = ", epsilon);
+    }
+
+    check_parameter_overlap(env, ps, params);
+
+    return potential_type(cutoff, std::move(params),
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
+}
+
+
+template<typename traitsT>
 WCAPotential<traitsT>
 read_wca_potential(const toml::value& global)
 {
@@ -603,6 +644,11 @@ extern template UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBo
 extern template UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_uniform_lennard_jones_potential(const toml::value& global);
 extern template UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_uniform_lennard_jones_potential(const toml::value& global);
 extern template UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_uniform_lennard_jones_potential(const toml::value& global);
+
+extern template LennardJonesAttractivePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_lennard_jones_attractive_potential(const toml::value& global);
+extern template LennardJonesAttractivePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_lennard_jones_attractive_potential(const toml::value& global);
+extern template LennardJonesAttractivePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_lennard_jones_attractive_potential(const toml::value& global);
+extern template LennardJonesAttractivePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_lennard_jones_attractive_potential(const toml::value& global);
 
 extern template WCAPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_wca_potential(const toml::value& global);
 extern template WCAPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_wca_potential(const toml::value& global);
