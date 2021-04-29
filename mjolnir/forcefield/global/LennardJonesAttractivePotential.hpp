@@ -102,7 +102,7 @@ class LennardJonesAttractivePotential
         const real_type epsilon = p.second;
         if(r < sigma * sixth_root_of_two)
         {
-            return epsilon;
+            return -epsilon;
         }
         else if(sigma * this->cutoff_ratio_ < r)
         {
