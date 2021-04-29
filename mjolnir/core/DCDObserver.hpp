@@ -131,8 +131,10 @@ class DCDObserver final : public ObserverBase<traitsT>
         {
             const std::int32_t block_size(84);
             detail::write_as_bytes(ofs, block_size);
+
             ofs.write("CORD", 4);
 
+            // Later, in the finalize(), this value will be updated
             const std::int32_t number_of_frames(0);
             detail::write_as_bytes(ofs, number_of_frames);
 
