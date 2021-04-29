@@ -91,6 +91,16 @@ read_global_pair_interaction(const toml::value& global)
             read_uniform_lennard_jones_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
+    else if(potential == "LennardJonesAttractive")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is the attractive part of Lennard-Jones.");
+        using potential_t   = LennardJonesAttractivePotential<traitsT>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+
+        return make_unique<interaction_t>(
+            read_lennard_jones_attractive_potential<traitsT>(global),
+            read_spatial_partition<traitsT, potential_t>(global));
+    }
     else if(potential == "WCA")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is WCA.");

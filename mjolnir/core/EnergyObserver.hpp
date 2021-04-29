@@ -20,6 +20,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
     using coordinate_type   = typename base_type::coordinate_type;
     using system_type       = typename base_type::system_type;
     using forcefield_type   = typename base_type::forcefield_type;
+    using boundary_type     = typename traits_type::boundary_type;
 
   public:
 
@@ -45,6 +46,10 @@ class EnergyObserver final : public ObserverBase<traitsT>
         ofs << names;
 
         ofs << " kinetic_energy";
+        if(is_cuboidal_periodic_boundary<boundary_type>::value)
+        {
+            ofs << "             Pxx             Pyy             Pzz";
+        }
         for(const auto& attr : sys.attributes())
         {
             ofs << " attribute:" << attr.first;
@@ -65,6 +70,10 @@ class EnergyObserver final : public ObserverBase<traitsT>
         ofs << names;
 
         ofs << " kinetic_energy";
+        if(is_cuboidal_periodic_boundary<boundary_type>::value)
+        {
+            ofs << "             Pxx             Pyy             Pzz";
+        }
         for(const auto& attr : sys.attributes())
         {
             ofs << " attribute:" << attr.first;
@@ -93,13 +102,22 @@ class EnergyObserver final : public ObserverBase<traitsT>
             is_ok = false;
         }
 
-        const auto Ek = this->calc_kinetic_energy(sys);
+        real_type Ek(0), Px(0), Py(0), Pz(0);
+        std::tie(Ek, Px, Py, Pz) = this->calc_energy_and_pressure(sys,
+                is_cuboidal_periodic_boundary<boundary_type>{});
+
         ofs << std::setw(14) << std::right << std::fixed << Ek;
         if(!is_finite(Ek))
         {
             MJOLNIR_GET_DEFAULT_LOGGER();
             MJOLNIR_LOG_ERROR("kinetic energy becomes NaN.");
             is_ok = false;
+        }
+        if(is_cuboidal_periodic_boundary<boundary_type>::value)
+        {
+            ofs << std::setw(16) << std::right << std::setprecision(8) << std::scientific << Px;
+            ofs << std::setw(16) << std::right << std::setprecision(8) << std::scientific << Py;
+            ofs << std::setw(16) << std::right << std::setprecision(8) << std::scientific << Pz;
         }
 
         for(const auto& attr : sys.attributes())
@@ -130,6 +148,52 @@ class EnergyObserver final : public ObserverBase<traitsT>
 
   private:
 
+    std::tuple<real_type, real_type, real_type, real_type>
+    calc_energy_and_pressure(const system_type& sys, std::true_type)
+    {
+        const auto cell_width = sys.boundary().width();
+        const auto volume = math::X(cell_width) * math::Y(cell_width) * math::Z(cell_width);
+        const auto rvolume = real_type(1) / volume;
+
+        real_type Ek(0);
+        real_type Px(0);
+        real_type Py(0);
+        real_type Pz(0);
+
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            const auto  m = sys.mass(i);
+            const auto& r = sys.position(i);
+            const auto& v = sys.velocity(i);
+            const auto& f = sys.force(i);
+
+            Ek += math::length_sq(v) * m;
+            Px += m * math::X(v) * math::X(v) + math::X(f) * math::X(r);
+            Py += m * math::Y(v) * math::Y(v) + math::Y(f) * math::Y(r);
+            Pz += m * math::Z(v) * math::Z(v) + math::Z(f) * math::Z(r);
+        }
+        Ek *= 0.5;
+        Px *= rvolume;
+        Py *= rvolume;
+        Pz *= rvolume;
+
+        return std::make_tuple(Ek, Px, Py, Pz);
+    }
+
+    std::tuple<real_type, real_type, real_type, real_type>
+    calc_energy_and_pressure(const system_type& sys, std::false_type)
+    {
+        real_type Ek(0);
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            const auto  m = sys.mass(i);
+            const auto& v = sys.velocity(i);
+            Ek += math::length_sq(v) * m;
+        }
+        Ek *= 0.5;
+        return std::make_tuple(Ek, real_type(0.0), real_type(0.0), real_type(0.0));
+    }
+
     void clear_file(const std::string& fname) const
     {
         std::ofstream ofs(fname);
@@ -139,16 +203,6 @@ class EnergyObserver final : public ObserverBase<traitsT>
                 "[error] mjolnir::EnergyObserver: file open error: ", fname);
         }
         return;
-    }
-
-    real_type calc_kinetic_energy(const system_type& sys) const
-    {
-        real_type k = 0.0;
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            k += math::length_sq(sys.velocity(i)) * sys.mass(i);
-        }
-        return k * 0.5;
     }
 
   private:

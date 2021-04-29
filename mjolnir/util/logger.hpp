@@ -67,7 +67,7 @@ operator<<(std::basic_ostream<charT, traits>& os,
            const std::vector<T, Alloc>& vc)
 {
     os << '[';
-    for(const auto item : vc){os << item << ", ";}
+    for(const auto& item : vc){os << item << ", ";}
     os << ']';
     return os;
 }
@@ -79,7 +79,7 @@ operator<<(std::basic_ostream<charT, traits>& os,
            const std::map<Key, Value, Comp, Alloc>& mp)
 {
     os << '{';
-    for(const auto kv : mp){os << kv.first << '=' << kv.second << ", ";}
+    for(const auto& kv : mp){os << kv.first << '=' << kv.second << ", ";}
     os << '}';
     return os;
 }
@@ -91,7 +91,7 @@ operator<<(std::basic_ostream<charT, traits>& os,
            const std::unordered_map<Key, Value, Hash, Pred, Alloc>& mp)
 {
     os << '{';
-    for(const auto kv : mp){os << kv.first << '=' << kv.second << ", ";}
+    for(const auto& kv : mp){os << kv.first << '=' << kv.second << ", ";}
     os << '}';
     return os;
 }
