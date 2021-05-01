@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_POTENTIAL_LOCAL_MULTIPLE_BASIN_REPULSIVE_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_LOCAL_MULTIPLE_BASIN_REPULSIVE_POTENTIAL_HPP
+#include <cmath>
 
 namespace mjolnir
 {
@@ -19,7 +20,7 @@ class MBasinRepulsivePotential
   public:
 
     MBasinRepulsivePotential(const real_type e, const real_type v0) noexcept
-        : epsilon_(e), v0_(v0), at_zero_(v0 * real_type(5) / real_type(6))
+        : epsilon_(e), v0_(v0), at_zero_(v0 * std::sqrt(real_type(5) / real_type(6)))
     {}
     ~MBasinRepulsivePotential() = default;
 
