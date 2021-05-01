@@ -1,4 +1,4 @@
-#include <mjolnir/forcefield/local/MBasinAttractivePotential.hpp>
+#include <mjolnir/forcefield/MultipleBasin/MBasinAttractivePotential.hpp>
 
 #ifndef MJOLNIR_SEPARATE_BUILD
 #error "MJOLNIR_SEPARATE_BUILD flag is required"

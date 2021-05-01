@@ -15,8 +15,8 @@
 #include <mjolnir/forcefield/local/UniformPotential.hpp>
 #include <mjolnir/forcefield/local/WormLikeChainPotential.hpp>
 #include <mjolnir/forcefield/local/WormLikeChainOffsetPotential.hpp>
-#include <mjolnir/forcefield/local/MBasinAttractivePotential.hpp>
-#include <mjolnir/forcefield/local/MBasinRepulsivePotential.hpp>
+#include <mjolnir/forcefield/MultipleBasin/MBasinAttractivePotential.hpp>
+#include <mjolnir/forcefield/MultipleBasin/MBasinRepulsivePotential.hpp>
 #include <mjolnir/forcefield/FLP/FlexibleLocalAnglePotential.hpp>
 #include <mjolnir/forcefield/FLP/FlexibleLocalDihedralPotential.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BondPotential.hpp>

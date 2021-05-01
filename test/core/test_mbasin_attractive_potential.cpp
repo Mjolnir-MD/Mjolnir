@@ -7,7 +7,7 @@
 #endif
 
 #include <mjolnir/forcefield/local/GoContactPotential.hpp>
-#include <mjolnir/forcefield/local/MBasinAttractivePotential.hpp>
+#include <mjolnir/forcefield/MultipleBasin/MBasinAttractivePotential.hpp>
 #include <iomanip>
 
 BOOST_AUTO_TEST_CASE(MBasinAttractive)
