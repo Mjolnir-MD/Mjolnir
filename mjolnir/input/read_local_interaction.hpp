@@ -67,6 +67,23 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
                 kind, read_local_potential<2, potentialT>(local));
     }
+    else if(potential == "RepulsiveMBasinContact")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Repulsive MBasin contact.");
+        using potentialT = MBasinRepulsivePotential<real_type>;
+
+        return make_unique<BondLengthInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<2, potentialT>(local));
+    }
+    else if(potential == "AttractiveMBasinContact")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Attractive MBasin contact.");
+        using potentialT = MBasinAttractivePotential<real_type>;
+
+        return make_unique<BondLengthInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<2, potentialT>(local));
+    }
+
     else if(potential == "Gaussian")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Gaussian.");
