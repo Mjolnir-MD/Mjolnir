@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(MBasinrepulsive)
     }
     {
         const real_type x_min = r0 * std::sqrt(5.0 / 6.0);
-        const real_type x_max = pot.cutoff();
+        const real_type x_max = r0 * 2.5;
         const real_type dx = (x_max - x_min) / N;
         for(std::size_t i=1; i<N; ++i)
         {
