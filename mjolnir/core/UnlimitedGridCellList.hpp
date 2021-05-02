@@ -12,24 +12,23 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename ParameterListT, typename PotentialT>
+template<typename traitsT, typename potentialT>
 class UnlimitedGridCellList final
-    : public SpatialPartitionBase<traitsT, ParameterListT, PotentialT>
+    : public SpatialPartitionBase<traitsT, potentialT>
 {
   public:
-    using traits_type        = traitsT;
-    using potential_type     = PotentialT;
-    using parameter_list_type = ParameterListT;
+    using traits_type         = traitsT;
+    using potential_type      = potentialT;
+    using base_type           = SpatialPartitionBase<traits_type, potential_type>;
 
-    using base_type = SpatialPartitionBase<traits_type, parameter_list_type, potential_type>;
-
-    using system_type        = typename base_type::system_type;
-    using boundary_type      = typename base_type::boundary_type;
-    using real_type          = typename base_type::real_type;
-    using coordinate_type    = typename base_type::coordinate_type;
-    using neighbor_list_type = typename base_type::neighbor_list_type;
-    using neighbor_type      = typename base_type::neighbor_type;
-    using range_type         = typename base_type::range_type;
+    using system_type         = typename base_type::system_type;
+    using boundary_type       = typename base_type::boundary_type;
+    using real_type           = typename base_type::real_type;
+    using coordinate_type     = typename base_type::coordinate_type;
+    using neighbor_list_type  = typename base_type::neighbor_list_type;
+    using neighbor_type       = typename base_type::neighbor_type;
+    using range_type          = typename base_type::range_type;
+    using parameter_list_type = typename base_type::parameter_list_type;
 
     static constexpr std::size_t  dim_size()     {return 8u;}
     static constexpr std::int64_t dim()          {return 8; }
@@ -151,8 +150,8 @@ class UnlimitedGridCellList final
 
 };
 
-template<typename traitsT, typename ParameterListT, typename PotentialT>
-void UnlimitedGridCellList<traitsT, ParameterListT, potentialT>::make(
+template<typename traitsT, typename potentialT>
+void UnlimitedGridCellList<traitsT, potentialT>::make(
         neighbor_list_type& neighbors, const system_type& sys,
         const parameter_list_type& params)
 {
@@ -256,8 +255,8 @@ void UnlimitedGridCellList<traitsT, ParameterListT, potentialT>::make(
     return ;
 }
 
-template<typename traitsT, typename ParameterListT, typename PotentialT>
-void UnlimitedGridCellList<traitsT, ParameterListT, potentialT>::initialize(
+template<typename traitsT, typename potentialT>
+void UnlimitedGridCellList<traitsT, potentialT>::initialize(
         neighbor_list_type& neighbors, const system_type& sys,
         const parameter_list_type& params)
 {
@@ -266,7 +265,7 @@ void UnlimitedGridCellList<traitsT, ParameterListT, potentialT>::initialize(
 
     constexpr std::int64_t d = dim();
 
-    MJOLNIR_LOG_INFO(potential_type{}.name(), " cutoff = ", params.max_cutoff_length());
+    MJOLNIR_LOG_INFO(potential_type::name(), " cutoff = ", params.max_cutoff_length());
     MJOLNIR_LOG_INFO("dimension(independent from system size) = ", d, 'x', d, 'x', d);
 
     this->set_cutoff(params.max_cutoff_length());

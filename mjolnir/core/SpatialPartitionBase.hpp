@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_CORE_SPATIAL_PARTITON_BASE_HPP
 #define MJOLNIR_CORE_SPATIAL_PARTITON_BASE_HPP
+#include <mjolnir/forcefield/global/GlobalParameterList.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
 #include <mjolnir/util/make_unique.hpp>
@@ -14,19 +15,19 @@ namespace mjolnir
 // - UnlimitedGridCellList
 // - PeriodicGridCellList
 // It constructs NeighborLists. GlobalInteraction uses this internally.
-template<typename traitsT, typename ParameterListT, typename PotentialT>
+template<typename traitsT, typename potentialT>
 class SpatialPartitionBase
 {
   public:
 
     using traits_type         = traitsT;
+    using potential_type      = potentialT;
     using system_type         = System<traits_type>;
     using boundary_type       = typename traits_type::boundary_type;
     using real_type           = typename traits_type::real_type;
     using coordinate_type     = typename traits_type::coordinate_type;
 
-    using parameter_list_type = ParameterListT;
-    using potential_type      = PotentialT;
+    using parameter_list_type = GlobalParameterList<traits_type, potential_type>;
     using neighbor_list_type  = NeighborList<potential_type>;
     using neighbor_type       = typename neighbor_list_type::neighbor_type;
     using range_type          = typename neighbor_list_type::range_type;
@@ -60,7 +61,7 @@ class SpatialPartitionBase
     virtual SpatialPartitionBase* clone() const = 0;
 };
 
-template<typename traitsT, typename PotentialT>
+template<typename traitsT, typename potentialT>
 class SpatialPartition
 {
   public:
@@ -71,15 +72,13 @@ class SpatialPartition
     using real_type           = typename traits_type::real_type;
     using coordinate_type     = typename traits_type::coordinate_type;
 
-    using parameter_list_type = ParameterListT;
-    using potential_type      = PotentialT;
+    using potential_type      = potentialT;
+    using parameter_list_type = GlobalParameterList<traits_type, potential_type>;
     using neighbor_list_type  = NeighborList<potential_type>;
     using neighbor_type       = typename neighbor_list_type::neighbor_type;
     using range_type          = typename neighbor_list_type::range_type;
 
-    using partition_base_type =
-        SpatialPartitionBase<traits_type, parameter_list_type, potential_type>;
-
+    using partition_base_type = SpatialPartitionBase<traits_type, potential_type>;
     using partition_type      = std::unique_ptr<partition_base_type>;
 
   public:

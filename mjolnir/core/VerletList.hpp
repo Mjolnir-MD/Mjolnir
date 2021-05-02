@@ -7,24 +7,23 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename ParameterListT, typename PotentialT>
+template<typename traitsT, typename potentialT>
 class VerletList final
-    : public SpatialPartitionBase<traitsT, ParameterListT, PotentialT>
+    : public SpatialPartitionBase<traitsT, potentialT>
 {
   public:
     using traits_type         = traitsT;
-    using potential_type      = PotentialT;
-    using parameter_list_type = ParameterListT;
+    using potential_type      = potentialT;
+    using base_type           = SpatialPartitionBase<traits_type, potential_type>;
 
-    using base_type = SpatialPartitionBase<traits_type, parameter_list_type, potential_type>;
-
-    using system_type        = typename base_type::system_type;
-    using boundary_type      = typename base_type::boundary_type;
-    using real_type          = typename base_type::real_type;
-    using coordinate_type    = typename base_type::coordinate_type;
-    using neighbor_list_type = typename base_type::neighbor_list_type;
-    using neighbor_type      = typename base_type::neighbor_type;
-    using range_type         = typename base_type::range_type;
+    using system_type         = typename base_type::system_type;
+    using boundary_type       = typename base_type::boundary_type;
+    using real_type           = typename base_type::real_type;
+    using coordinate_type     = typename base_type::coordinate_type;
+    using neighbor_list_type  = typename base_type::neighbor_list_type;
+    using neighbor_type       = typename base_type::neighbor_type;
+    using range_type          = typename base_type::range_type;
+    using parameter_list_type = typename base_type::parameter_list_type;
 
   public:
 
@@ -96,8 +95,8 @@ class VerletList final
     real_type current_margin_;
 };
 
-template<typename traitsT, typename ParameterListT, typename PotentialT>
-void VerletList<traitsT, ParameterListT, potentialT>::make(
+template<typename traitsT, typename potentialT>
+void VerletList<traitsT, potentialT>::make(
         neighbor_list_type& neighbors, const system_type& sys,
         const parameter_list_type& params)
 {

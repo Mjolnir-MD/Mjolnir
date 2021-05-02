@@ -13,18 +13,16 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename ParameterListT, typename PotentialT, std::size_t MaxElem = 8>
+template<typename traitsT, typename potentialT, std::size_t MaxElem = 8>
 class ZorderRTree final
-    : public SpatialPartitionBase<traitsT, ParameterListT, PotentialT>
+    : public SpatialPartitionBase<traitsT, potentialT>
 {
     static_assert(MaxElem > 1, "MaxElem > 1");
 
   public:
     using traits_type         = traitsT;
-    using potential_type      = PotentialT;
-    using parameter_list_type = ParameterListT;
-
-    using base_type = SpatialPartitionBase<traits_type, parameter_list_type, potential_type>;
+    using potential_type      = potentialT;
+    using base_type           = SpatialPartitionBase<traits_type, potential_type>;
 
     using system_type        = typename base_type::system_type;
     using boundary_type      = typename base_type::boundary_type;
@@ -33,6 +31,7 @@ class ZorderRTree final
     using neighbor_list_type = typename base_type::neighbor_list_type;
     using neighbor_type      = typename base_type::neighbor_type;
     using range_type         = typename base_type::range_type;
+    using parameter_list_type = typename base_type::parameter_list_type;
 
     struct AABB
     {
@@ -81,7 +80,7 @@ class ZorderRTree final
         const real_type max_cutoff = params.max_cutoff_length();
         this->set_cutoff(max_cutoff);
 
-        MJOLNIR_LOG_INFO(potential_type{}.name(), " cutoff = ", max_cutoff);
+        MJOLNIR_LOG_INFO(potential_type::name(), " cutoff = ", max_cutoff);
 
         this->make(neighbors, sys, params);
         return;
@@ -246,8 +245,8 @@ class ZorderRTree final
     std::vector<Node> tree_;
 };
 
-template<typename traitsT, typename ParameterListT, typename PotentialT, std::size_t MaxElem>
-void ZorderRTree<traitsT, ParameterListT, PotentialT, MaxElem>::make(
+template<typename traitsT, typename potentialT, std::size_t MaxElem>
+void ZorderRTree<traitsT, potentialT, MaxElem>::make(
         neighbor_list_type& neighbors, const system_type& sys,
         const parameter_list_type& params)
 {
@@ -448,8 +447,8 @@ void ZorderRTree<traitsT, ParameterListT, PotentialT, MaxElem>::make(
     return ;
 }
 
-template<typename traitsT, typename ParameterListT, typename PotentialT, std::size_t MaxElem>
-void ZorderRTree<traitsT, ParameterListT, PotentialT, MaxElem>::diagnosis(
+template<typename traitsT, typename potentialT, std::size_t MaxElem>
+void ZorderRTree<traitsT, potentialT, MaxElem>::diagnosis(
         const system_type& sys, const parameter_list_type& params) const
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
