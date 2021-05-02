@@ -143,7 +143,7 @@ inline bool operator<=(
 }
 template<typename potT>
 inline bool operator>=(
-    const neighbor_element<paramT>& lhs, const neighbor_element<paramT>& rhs)
+    const neighbor_element<potT>& lhs, const neighbor_element<potT>& rhs)
 {
     return lhs.index >= rhs.index;
 }
