@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_INTEARACTION_GLOBAL_PAIR_INTEARACTION_HPP
 #define MJOLNIR_INTEARACTION_GLOBAL_PAIR_INTEARACTION_HPP
+#include <mjolnir/forcefield/global/GlobalParameterList.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/GlobalInteractionBase.hpp>
 #include <mjolnir/core/SpatialPartitionBase.hpp>
@@ -24,27 +25,28 @@ namespace mjolnir
 // By combining potential calculations, we can omit `sqrt()` that is usually
 // used to calculate the distance between particles.
 //
-template<typename traitsT, typename potentialT>
+template<typename traitsT, typename potentialT, typename ruleT>
 class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
 {
   public:
-    using traits_type     = traitsT;
-    using potential_type  = potentialT;
-    using base_type       = GlobalInteractionBase<traitsT>;
-    using real_type       = typename base_type::real_type;
-    using coordinate_type = typename base_type::coordinate_type;
-    using system_type     = typename base_type::system_type;
-    using topology_type   = typename base_type::topology_type;
-    using boundary_type   = typename base_type::boundary_type;
-    using partition_type  = SpatialPartition<traits_type, potential_type>;
+    using traits_type         = traitsT;
+    using potential_type      = potentialT;
+    using rule_type           = ruleT;
+    using base_type           = GlobalInteractionBase<traitsT>;
+    using real_type           = typename base_type::real_type;
+    using coordinate_type     = typename base_type::coordinate_type;
+    using system_type         = typename base_type::system_type;
+    using topology_type       = typename base_type::topology_type;
+    using boundary_type       = typename base_type::boundary_type;
+    using partition_type      = SpatialPartition<traits_type, potential_type>;
+    using parameter_list_type = GlobalParameterList<traits_type, rule_type>;
 
   public:
-    GlobalPairInteraction()           = default;
-    ~GlobalPairInteraction() override {}
 
-    GlobalPairInteraction(potential_type&& pot, partition_type&& part)
-        : potential_(std::move(pot)), partition_(std::move(part))
+    GlobalPairInteraction(parameter_list_type&& para, partition_type&& part)
+        : parameters_(std::move(para)), partition_(std::move(part))
     {}
+    ~GlobalPairInteraction() override {}
 
     /*! @brief initialize spatial partition (e.g. CellList)                   *
      *  @details before calling `calc_(force|energy)`, this should be called. */
@@ -53,8 +55,9 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
-        this->potential_.initialize(sys, topol);
-        this->partition_.initialize(sys, this->potential_);
+
+        this->parameters_.initialize(sys, topol, potential_type{})
+        this->partition_ .initialize(sys, parameters_);
     }
 
     /*! @brief update parameters (e.g. temperature, ionic strength, ...)  *
@@ -66,8 +69,8 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
-        this->potential_.update(sys, topol);
-        // potential update may change the cutoff length!
+
+        this->parameters_.update(sys, topol, potential_type{});
         this->partition_.initialize(sys, this->potential_);
     }
 
@@ -89,19 +92,20 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
     std::string name() const override
     {return "Pair:"_s + potential_type::name();}
 
-    potential_type const& potential() const noexcept {return potential_;}
-    potential_type &      potential()       noexcept {return potential_;}
+    parameter_list_type const& parameters() const noexcept {return parameters_;}
+    parameter_list_type &      parameters()       noexcept {return parameters_;}
 
+    // deep-copy through the base class, GlobalInteractionBase*
     base_type* clone() const override
     {
         return new GlobalPairInteraction(
-                potential_type(potential_), partition_type(partition_));
+                parameter_list_type(parameters_), partition_type(partition_));
     }
 
   private:
 
-    potential_type potential_;
-    partition_type partition_;
+    partition_type      partition_;
+    parameter_list_type parameters_;
 
 #ifdef MJOLNIR_WITH_OPENMP
     // OpenMP implementation uses its own implementation to run it in parallel.
