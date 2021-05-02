@@ -2,16 +2,17 @@
 #define MJOLNIR_INPUT_READ_GLOBAL_POTENTIAL_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/input/utility.hpp>
-#include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
-#include <mjolnir/forcefield/global/InversePowerPotential.hpp>
-#include <mjolnir/forcefield/global/HardCoreExcludedVolumePotential.hpp>
+// #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
+// #include <mjolnir/forcefield/global/InversePowerPotential.hpp>
+// #include <mjolnir/forcefield/global/HardCoreExcludedVolumePotential.hpp>
+#include <mjolnir/forcefield/global/GlobalParameterList.hpp>
 #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
-#include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
-#include <mjolnir/forcefield/global/LennardJonesAttractivePotential.hpp>
-#include <mjolnir/forcefield/global/WCAPotential.hpp>
-#include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
-#include <mjolnir/forcefield/3SPN2/ThreeSPN2ExcludedVolumePotential.hpp>
-#include <mjolnir/forcefield/iSoLF/iSoLFAttractivePotential.hpp>
+// #include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
+// #include <mjolnir/forcefield/global/LennardJonesAttractivePotential.hpp>
+// #include <mjolnir/forcefield/global/WCAPotential.hpp>
+// #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
+// #include <mjolnir/forcefield/3SPN2/ThreeSPN2ExcludedVolumePotential.hpp>
+// #include <mjolnir/forcefield/iSoLF/iSoLFAttractivePotential.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/make_unique.hpp>
@@ -185,150 +186,153 @@ read_ignore_particles_within(const toml::value& global)
     return ignore_particle_within;
 }
 
+// template<typename traitsT>
+// ExcludedVolumePotential<traitsT>
+// read_excluded_volume_potential(const toml::value& global)
+// {
+//     MJOLNIR_GET_DEFAULT_LOGGER();
+//     MJOLNIR_LOG_FUNCTION();
+//     using potential_type = ExcludedVolumePotential<traitsT>;
+//     using real_type      = typename potential_type::real_type;
+//     using parameter_type = typename potential_type::parameter_type;
+// 
+//     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+// 
+//     const real_type eps = toml::find<real_type>(global, "epsilon");
+//     MJOLNIR_LOG_INFO("epsilon = ", eps);
+// 
+//     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+//             potential_type::default_cutoff());
+//     MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+// 
+//     const auto& ps = toml::find<toml::array>(global, "parameters");
+//     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+// 
+//     std::vector<std::pair<std::size_t, parameter_type>> params;
+//     params.reserve(ps.size());
+//     for(const auto& param : ps)
+//     {
+//         const auto idx    = find_parameter<std::size_t>(param, env, "index") +
+//                             find_parameter_or<std::int64_t>(param, env, "offset", 0);
+//         const auto radius = find_parameter<real_type  >(param, env, "radius");
+// 
+//         params.emplace_back(idx, radius);
+//         MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
+//     }
+//     check_parameter_overlap(env, ps, params);
+// 
+//     return potential_type(eps, cutoff, params,
+//             read_ignore_particles_within(global),
+//             read_ignored_molecule(global), read_ignored_group(global));
+// }
+// 
+// template<typename traitsT>
+// InversePowerPotential<traitsT>
+// read_inverse_power_potential(const toml::value& global)
+// {
+//     MJOLNIR_GET_DEFAULT_LOGGER();
+//     MJOLNIR_LOG_FUNCTION();
+//     using potential_type = InversePowerPotential<traitsT>;
+//     using real_type      = typename potential_type::real_type;
+//     using integer_type   = typename potential_type::integer_type;
+//     using parameter_type = typename potential_type::parameter_type;
+// 
+//     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+// 
+//     const real_type eps = toml::find<real_type>(global, "epsilon");
+//     MJOLNIR_LOG_INFO("epsilon = ", eps);
+// 
+//     const integer_type n = toml::find<integer_type>(global, "n");
+//     MJOLNIR_LOG_INFO("n = ", n);
+// 
+//     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+//             potential_type::default_cutoff(n));
+//     MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+// 
+//     const auto& ps = toml::find<toml::array>(global, "parameters");
+//     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+// 
+//     std::vector<std::pair<std::size_t, parameter_type>> params;
+//     params.reserve(ps.size());
+//     for(const auto& param : ps)
+//     {
+//         const auto idx    = find_parameter<std::size_t>(param, env, "index") +
+//                             find_parameter_or<std::int64_t>(param, env, "offset", 0);
+//         const auto radius = find_parameter<real_type  >(param, env, "radius");
+// 
+//         params.emplace_back(idx, radius);
+//         MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
+//     }
+//     check_parameter_overlap(env, ps, params);
+// 
+//     return potential_type(eps, n, cutoff, params,
+//             read_ignore_particles_within(global),
+//             read_ignored_molecule(global), read_ignored_group(global));
+// }
+// 
+// template<typename traitsT>
+// HardCoreExcludedVolumePotential<traitsT>
+// read_hard_core_excluded_volume_potential(const toml::value& global)
+// {
+//     MJOLNIR_GET_DEFAULT_LOGGER();
+//     MJOLNIR_LOG_FUNCTION();
+//     using potential_type = HardCoreExcludedVolumePotential<traitsT>;
+//     using real_type      = typename potential_type::real_type;
+//     using parameter_type = typename potential_type::parameter_type;
+// 
+//     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+// 
+//     const real_type eps = toml::find<real_type>(global, "epsilon");
+//     MJOLNIR_LOG_INFO("epsilon = ", eps);
+// 
+//     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+//             potential_type::default_cutoff());
+//     MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+// 
+//     const auto& ps = toml::find<toml::array>(global, "parameters");
+//     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+// 
+//     std::vector<std::pair<std::size_t, parameter_type>> params;
+//     params.reserve(ps.size());
+//     for(const auto& param : ps)
+//     {
+//         const auto idx = find_parameter<std::size_t>(param, env, "index") +
+//                          find_parameter_or<std::int64_t>(param, env, "offset", 0);
+// 
+//         const auto core_radius          =
+//             find_parameter<real_type>(param, env, "core_radius");
+//         const auto soft_shell_thickness =
+//             find_parameter<real_type>(param, env, "soft_shell_thickness");
+// 
+//         params.emplace_back(idx, parameter_type{soft_shell_thickness, core_radius});
+//         MJOLNIR_LOG_INFO("idx = ", idx, ", core_radius = ", core_radius,
+//                          ", soft_shell_thickness = ", soft_shell_thickness);
+//     }
+// 
+//     check_parameter_overlap(env, ps, params);
+// 
+//     return potential_type(eps, cutoff, std::move(params),
+//         read_ignore_particles_within(global),
+//         read_ignored_molecule(global), read_ignored_group(global));
+// }
+
 template<typename traitsT>
-ExcludedVolumePotential<traitsT>
-read_excluded_volume_potential(const toml::value& global)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    using potential_type = ExcludedVolumePotential<traitsT>;
-    using real_type      = typename potential_type::real_type;
-    using parameter_type = typename potential_type::parameter_type;
-
-    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-
-    const real_type eps = toml::find<real_type>(global, "epsilon");
-    MJOLNIR_LOG_INFO("epsilon = ", eps);
-
-    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
-            potential_type::default_cutoff());
-    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
-
-    const auto& ps = toml::find<toml::array>(global, "parameters");
-    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-    std::vector<std::pair<std::size_t, parameter_type>> params;
-    params.reserve(ps.size());
-    for(const auto& param : ps)
-    {
-        const auto idx    = find_parameter<std::size_t>(param, env, "index") +
-                            find_parameter_or<std::int64_t>(param, env, "offset", 0);
-        const auto radius = find_parameter<real_type  >(param, env, "radius");
-
-        params.emplace_back(idx, radius);
-        MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
-    }
-    check_parameter_overlap(env, ps, params);
-
-    return potential_type(eps, cutoff, params,
-            read_ignore_particles_within(global),
-            read_ignored_molecule(global), read_ignored_group(global));
-}
-
-template<typename traitsT>
-InversePowerPotential<traitsT>
-read_inverse_power_potential(const toml::value& global)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    using potential_type = InversePowerPotential<traitsT>;
-    using real_type      = typename potential_type::real_type;
-    using integer_type   = typename potential_type::integer_type;
-    using parameter_type = typename potential_type::parameter_type;
-
-    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-
-    const real_type eps = toml::find<real_type>(global, "epsilon");
-    MJOLNIR_LOG_INFO("epsilon = ", eps);
-
-    const integer_type n = toml::find<integer_type>(global, "n");
-    MJOLNIR_LOG_INFO("n = ", n);
-
-    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
-            potential_type::default_cutoff(n));
-    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
-
-    const auto& ps = toml::find<toml::array>(global, "parameters");
-    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-    std::vector<std::pair<std::size_t, parameter_type>> params;
-    params.reserve(ps.size());
-    for(const auto& param : ps)
-    {
-        const auto idx    = find_parameter<std::size_t>(param, env, "index") +
-                            find_parameter_or<std::int64_t>(param, env, "offset", 0);
-        const auto radius = find_parameter<real_type  >(param, env, "radius");
-
-        params.emplace_back(idx, radius);
-        MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
-    }
-    check_parameter_overlap(env, ps, params);
-
-    return potential_type(eps, n, cutoff, params,
-            read_ignore_particles_within(global),
-            read_ignored_molecule(global), read_ignored_group(global));
-}
-
-template<typename traitsT>
-HardCoreExcludedVolumePotential<traitsT>
-read_hard_core_excluded_volume_potential(const toml::value& global)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    using potential_type = HardCoreExcludedVolumePotential<traitsT>;
-    using real_type      = typename potential_type::real_type;
-    using parameter_type = typename potential_type::parameter_type;
-
-    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-
-    const real_type eps = toml::find<real_type>(global, "epsilon");
-    MJOLNIR_LOG_INFO("epsilon = ", eps);
-
-    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
-            potential_type::default_cutoff());
-    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
-
-    const auto& ps = toml::find<toml::array>(global, "parameters");
-    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-    std::vector<std::pair<std::size_t, parameter_type>> params;
-    params.reserve(ps.size());
-    for(const auto& param : ps)
-    {
-        const auto idx = find_parameter<std::size_t>(param, env, "index") +
-                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
-
-        const auto core_radius          =
-            find_parameter<real_type>(param, env, "core_radius");
-        const auto soft_shell_thickness =
-            find_parameter<real_type>(param, env, "soft_shell_thickness");
-
-        params.emplace_back(idx, parameter_type{soft_shell_thickness, core_radius});
-        MJOLNIR_LOG_INFO("idx = ", idx, ", core_radius = ", core_radius,
-                         ", soft_shell_thickness = ", soft_shell_thickness);
-    }
-
-    check_parameter_overlap(env, ps, params);
-
-    return potential_type(eps, cutoff, std::move(params),
-        read_ignore_particles_within(global),
-        read_ignored_molecule(global), read_ignored_group(global));
-}
-
-template<typename traitsT>
-LennardJonesPotential<traitsT>
+GlobalParameterList<traitsT, LennardJonesPotential<typename traitsT::real_type>>
 read_lennard_jones_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using potential_type = LennardJonesPotential<traitsT>;
-    using real_type      = typename potential_type::real_type;
+
+    using real_type      = typename traitsT::real_type;
+    using potential_type = LennardJonesPotential<real_type>;
+    using parameter_list = GlobalParameterList<traitsT, potential_type>;
     using parameter_type = typename potential_type::parameter_type;
 
     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
 
     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
             potential_type::default_cutoff());
+    potential_type::set_cutoff_length(cutoff);
     MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
 
     const auto& ps = toml::find<toml::array>(global, "parameters");
@@ -346,329 +350,329 @@ read_lennard_jones_potential(const toml::value& global)
         params.emplace_back(idx, parameter_type{sigma, epsilon});
         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma, ", epsilon = ", epsilon);
     }
-
     check_parameter_overlap(env, ps, params);
 
-    return potential_type(cutoff, std::move(params),
+    return parameter_list(
+            make_unique<LorentzBerthelotRule<traitsT, potential_type>>(std::move(params)),
             read_ignore_particles_within(global),
             read_ignored_molecule(global), read_ignored_group(global));
 }
 
-template<typename traitsT>
-UniformLennardJonesPotential<traitsT>
-read_uniform_lennard_jones_potential(const toml::value& global)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    using potential_type = UniformLennardJonesPotential<traitsT>;
-    using real_type      = typename potential_type::real_type;
-    using parameter_type = typename potential_type::parameter_type;
-
-    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-
-    const auto sigma   = toml::expect<real_type>(global, u8"σ").or_other(
-                         toml::expect<real_type>(global, "sigma")).unwrap();
-    const auto epsilon = toml::expect<real_type>(global, u8"ε").or_other(
-                         toml::expect<real_type>(global, "epsilon")).unwrap();
-    MJOLNIR_LOG_INFO("sigma   = ", sigma);
-    MJOLNIR_LOG_INFO("epsilon = ", epsilon);
-
-    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
-            potential_type::default_cutoff());
-    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
-
-    std::vector<std::pair<std::size_t, parameter_type>> params;
-    if(global.as_table().count("parameters") == 1)
-    {
-        const auto& parameters = toml::find<toml::array>(global, "parameters");
-        for(const auto& param : parameters)
-        {
-            const auto idx = find_parameter<std::size_t>(param, env, "index") +
-                             find_parameter_or<std::int64_t>(param, env, "offset", 0);
-            params.emplace_back(idx, parameter_type{});
-        }
-        check_parameter_overlap(env, parameters, params);
-    }
-    else
-    {
-        MJOLNIR_LOG_WARN("deprecated: `parameters` field in UniformLennardJones"
-                         "potential will be required in the future release.");
-        MJOLNIR_LOG_WARN("deprecated: write participants explicitly.");
-    }
-
-    return potential_type(sigma, epsilon, cutoff, params,
-            read_ignore_particles_within(global),
-            read_ignored_molecule(global), read_ignored_group(global));
-}
-
-template<typename traitsT>
-LennardJonesAttractivePotential<traitsT>
-read_lennard_jones_attractive_potential(const toml::value& global)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    using potential_type = LennardJonesAttractivePotential<traitsT>;
-    using real_type      = typename potential_type::real_type;
-    using parameter_type = typename potential_type::parameter_type;
-
-    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-
-    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
-            potential_type::default_cutoff());
-    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
-
-    const auto& ps = toml::find<toml::array>(global, "parameters");
-    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-    std::vector<std::pair<std::size_t, parameter_type>> params;
-    params.reserve(ps.size());
-    for(const auto& param : ps)
-    {
-        const auto idx     = find_parameter<std::size_t>(param, env, "index") +
-                             find_parameter_or<std::int64_t>(param, env, "offset", 0);
-        const auto sigma   = find_parameter<real_type>(param, env, "sigma",   u8"σ");
-        const auto epsilon = find_parameter<real_type>(param, env, "epsilon", u8"ε");
-
-        params.emplace_back(idx, parameter_type{sigma, epsilon});
-        MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma, ", epsilon = ", epsilon);
-    }
-
-    check_parameter_overlap(env, ps, params);
-
-    return potential_type(cutoff, std::move(params),
-            read_ignore_particles_within(global),
-            read_ignored_molecule(global), read_ignored_group(global));
-}
-
-
-template<typename traitsT>
-WCAPotential<traitsT>
-read_wca_potential(const toml::value& global)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    using potential_type = WCAPotential<traitsT>;
-    using real_type      = typename potential_type::real_type;
-    using parameter_type = typename potential_type::parameter_type;
-
-    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-
-    if(global.contains("cutoff"))
-    {
-        MJOLNIR_LOG_WARN("WCA has a exact cutoff distance. While the simulation,"
-            " the exact cutoff is used and specified cutoff will be ignored.");
-    }
-
-    const auto& ps = toml::find<toml::array>(global, "parameters");
-    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-    std::vector<std::pair<std::size_t, parameter_type>> params;
-    params.reserve(ps.size());
-    for(const auto& param : ps)
-    {
-        const auto idx     = find_parameter<std::size_t>(param, env, "index") +
-                             find_parameter_or<std::size_t>(param, env, "offset", 0);
-        const auto sigma   = find_parameter<real_type>(param, env, "sigma",   u8"σ");
-        const auto epsilon = find_parameter<real_type>(param, env, "epsilon", u8"ε");
-
-        params.emplace_back(idx, parameter_type{sigma, epsilon});
-        MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma, ", epsilon = ", epsilon);
-    }
-
-    check_parameter_overlap(env, ps, params);
-
-    return potential_type(potential_type::default_cutoff(), std::move(params),
-            read_ignore_particles_within(global),
-            read_ignored_molecule(global), read_ignored_group(global));
-}
-
-template<typename traitsT>
-DebyeHuckelPotential<traitsT>
-read_debye_huckel_potential(const toml::value& global)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    using potential_type = DebyeHuckelPotential<traitsT>;
-    using real_type      = typename potential_type::real_type;
-    using parameter_type = typename potential_type::parameter_type;
-
-    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-
-    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
-            potential_type::default_cutoff());
-    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
-
-    const auto& ps = toml::find<toml::array>(global, "parameters");
-    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-    std::vector<std::pair<std::size_t, parameter_type>> params;
-    params.reserve(ps.size());
-    for(const auto& param : ps)
-    {
-        const auto idx = find_parameter<std::size_t>(param, env, "index") +
-                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
-        const auto charge = find_parameter<real_type  >(param, env, "charge");
-
-        params.emplace_back(idx, parameter_type{charge});
-        MJOLNIR_LOG_INFO("idx = ", idx, ", charge = ", charge);
-    }
-
-    check_parameter_overlap(env, ps, params);
-
-    return potential_type(cutoff, std::move(params),
-            read_ignore_particles_within(global),
-            read_ignored_molecule(global), read_ignored_group(global));
-}
-
-template<typename traitsT>
-ThreeSPN2ExcludedVolumePotential<traitsT>
-read_3spn2_excluded_volume_potential(const toml::value& global)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    using potential_type = ThreeSPN2ExcludedVolumePotential<traitsT>;
-    using real_type      = typename potential_type::real_type;
-    using parameter_type = typename potential_type::parameter_type;
-    using bead_kind      = parameter_3SPN2::bead_kind;
-
-    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-
-    const auto& ps = toml::find<toml::array>(global, "parameters");
-    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-    std::vector<std::pair<std::size_t, parameter_type>> params;
-    params.reserve(ps.size());
-    for(const auto& param : ps)
-    {
-        const auto idx = find_parameter<std::size_t>(param, env, "index") +
-                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
-
-        const auto kind = toml::find<std::string>(param, "kind");
-        if(kind != "S" && kind != "P" &&
-           kind != "A" && kind != "T" && kind != "G" && kind != "C")
-        {
-            throw_exception<std::runtime_error>(toml::format_error("[error] "
-                "mjolnir::read_3spn2_excluded_volume_potential: unknown bead "
-                "kind", find_parameter<toml::value>(param, env, "kind"),
-                "expected S, P, A, T, G, C."));
-        }
-        bead_kind bead;
-        switch(kind.front())
-        {
-            case 'P': {bead = bead_kind::Phosphate; break;}
-            case 'S': {bead = bead_kind::Sugar;     break;}
-            case 'A': {bead = bead_kind::BaseA;     break;}
-            case 'T': {bead = bead_kind::BaseT;     break;}
-            case 'G': {bead = bead_kind::BaseG;     break;}
-            case 'C': {bead = bead_kind::BaseC;     break;}
-            default:  {assert(false);}
-        }
-        params.emplace_back(idx, bead);
-        MJOLNIR_LOG_INFO("idx = ", idx, ", kind = ", bead);
-    }
-
-    ThreeSPN2ExcludedVolumePotentialParameter<real_type> default_parameters;
-
-    check_parameter_overlap(env, ps, params);
-    return potential_type(std::move(default_parameters), params,
-            read_ignore_particles_within(global),
-            read_ignored_molecule(global), read_ignored_group(global));
-}
-
-template<typename traitsT>
-iSoLFAttractivePotential<traitsT>
-read_isolf_potential(const toml::value& global)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    using potential_type = iSoLFAttractivePotential<traitsT>;
-    using real_type      = typename potential_type::real_type;
-    using parameter_type = typename potential_type::parameter_type;
-
-    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-
-    if(global.contains("cutoff"))
-    {
-        MJOLNIR_LOG_WARN("iSoLF has an exact cutoff distance. While the simulation,"
-            " the exact cutoff is used and specified cutoff will be ignored.");
-    }
-
-    const auto& ps = toml::find<toml::array>(global, "parameters");
-    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-    std::vector<std::pair<std::size_t, parameter_type>> params;
-    params.reserve(ps.size());
-    for(const auto& param : ps)
-    {
-        // offset can be a negative value
-        const auto idx     = find_parameter<std::int64_t>(param, env, "index") +
-                             find_parameter_or<std::int64_t>(param, env, "offset", 0);
-        const auto sigma   = find_parameter<real_type>(param, env, "sigma"  );
-        const auto epsilon = find_parameter<real_type>(param, env, "epsilon");
-        const auto omega   = find_parameter<real_type>(param, env, "omega"  );
-
-        params.emplace_back(idx, parameter_type{sigma, epsilon, omega});
-        MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma,
-                       ", epsilon = ", epsilon, ", omega = ", omega);
-    }
-
-    check_parameter_overlap(env, ps, params);
-
-    return potential_type(std::move(params),
-            read_ignore_particles_within(global),
-            read_ignored_molecule(global), read_ignored_group(global));
-}
+// template<typename traitsT>
+// UniformLennardJonesPotential<traitsT>
+// read_uniform_lennard_jones_potential(const toml::value& global)
+// {
+//     MJOLNIR_GET_DEFAULT_LOGGER();
+//     MJOLNIR_LOG_FUNCTION();
+//     using potential_type = UniformLennardJonesPotential<traitsT>;
+//     using real_type      = typename potential_type::real_type;
+//     using parameter_type = typename potential_type::parameter_type;
+// 
+//     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+// 
+//     const auto sigma   = toml::expect<real_type>(global, u8"σ").or_other(
+//                          toml::expect<real_type>(global, "sigma")).unwrap();
+//     const auto epsilon = toml::expect<real_type>(global, u8"ε").or_other(
+//                          toml::expect<real_type>(global, "epsilon")).unwrap();
+//     MJOLNIR_LOG_INFO("sigma   = ", sigma);
+//     MJOLNIR_LOG_INFO("epsilon = ", epsilon);
+// 
+//     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+//             potential_type::default_cutoff());
+//     MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+// 
+//     std::vector<std::pair<std::size_t, parameter_type>> params;
+//     if(global.as_table().count("parameters") == 1)
+//     {
+//         const auto& parameters = toml::find<toml::array>(global, "parameters");
+//         for(const auto& param : parameters)
+//         {
+//             const auto idx = find_parameter<std::size_t>(param, env, "index") +
+//                              find_parameter_or<std::int64_t>(param, env, "offset", 0);
+//             params.emplace_back(idx, parameter_type{});
+//         }
+//         check_parameter_overlap(env, parameters, params);
+//     }
+//     else
+//     {
+//         MJOLNIR_LOG_WARN("deprecated: `parameters` field in UniformLennardJones"
+//                          "potential will be required in the future release.");
+//         MJOLNIR_LOG_WARN("deprecated: write participants explicitly.");
+//     }
+// 
+//     return potential_type(sigma, epsilon, cutoff, params,
+//             read_ignore_particles_within(global),
+//             read_ignored_molecule(global), read_ignored_group(global));
+// }
+// 
+// template<typename traitsT>
+// LennardJonesAttractivePotential<traitsT>
+// read_lennard_jones_attractive_potential(const toml::value& global)
+// {
+//     MJOLNIR_GET_DEFAULT_LOGGER();
+//     MJOLNIR_LOG_FUNCTION();
+//     using potential_type = LennardJonesAttractivePotential<traitsT>;
+//     using real_type      = typename potential_type::real_type;
+//     using parameter_type = typename potential_type::parameter_type;
+// 
+//     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+// 
+//     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+//             potential_type::default_cutoff());
+//     MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+// 
+//     const auto& ps = toml::find<toml::array>(global, "parameters");
+//     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+// 
+//     std::vector<std::pair<std::size_t, parameter_type>> params;
+//     params.reserve(ps.size());
+//     for(const auto& param : ps)
+//     {
+//         const auto idx     = find_parameter<std::size_t>(param, env, "index") +
+//                              find_parameter_or<std::int64_t>(param, env, "offset", 0);
+//         const auto sigma   = find_parameter<real_type>(param, env, "sigma",   u8"σ");
+//         const auto epsilon = find_parameter<real_type>(param, env, "epsilon", u8"ε");
+// 
+//         params.emplace_back(idx, parameter_type{sigma, epsilon});
+//         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma, ", epsilon = ", epsilon);
+//     }
+// 
+//     check_parameter_overlap(env, ps, params);
+// 
+//     return potential_type(cutoff, std::move(params),
+//             read_ignore_particles_within(global),
+//             read_ignored_molecule(global), read_ignored_group(global));
+// }
+// 
+// 
+// template<typename traitsT>
+// WCAPotential<traitsT>
+// read_wca_potential(const toml::value& global)
+// {
+//     MJOLNIR_GET_DEFAULT_LOGGER();
+//     MJOLNIR_LOG_FUNCTION();
+//     using potential_type = WCAPotential<traitsT>;
+//     using real_type      = typename potential_type::real_type;
+//     using parameter_type = typename potential_type::parameter_type;
+// 
+//     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+// 
+//     if(global.contains("cutoff"))
+//     {
+//         MJOLNIR_LOG_WARN("WCA has a exact cutoff distance. While the simulation,"
+//             " the exact cutoff is used and specified cutoff will be ignored.");
+//     }
+// 
+//     const auto& ps = toml::find<toml::array>(global, "parameters");
+//     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+// 
+//     std::vector<std::pair<std::size_t, parameter_type>> params;
+//     params.reserve(ps.size());
+//     for(const auto& param : ps)
+//     {
+//         const auto idx     = find_parameter<std::size_t>(param, env, "index") +
+//                              find_parameter_or<std::size_t>(param, env, "offset", 0);
+//         const auto sigma   = find_parameter<real_type>(param, env, "sigma",   u8"σ");
+//         const auto epsilon = find_parameter<real_type>(param, env, "epsilon", u8"ε");
+// 
+//         params.emplace_back(idx, parameter_type{sigma, epsilon});
+//         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma, ", epsilon = ", epsilon);
+//     }
+// 
+//     check_parameter_overlap(env, ps, params);
+// 
+//     return potential_type(potential_type::default_cutoff(), std::move(params),
+//             read_ignore_particles_within(global),
+//             read_ignored_molecule(global), read_ignored_group(global));
+// }
+// 
+// template<typename traitsT>
+// DebyeHuckelPotential<traitsT>
+// read_debye_huckel_potential(const toml::value& global)
+// {
+//     MJOLNIR_GET_DEFAULT_LOGGER();
+//     MJOLNIR_LOG_FUNCTION();
+//     using potential_type = DebyeHuckelPotential<traitsT>;
+//     using real_type      = typename potential_type::real_type;
+//     using parameter_type = typename potential_type::parameter_type;
+// 
+//     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+// 
+//     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+//             potential_type::default_cutoff());
+//     MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+// 
+//     const auto& ps = toml::find<toml::array>(global, "parameters");
+//     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+// 
+//     std::vector<std::pair<std::size_t, parameter_type>> params;
+//     params.reserve(ps.size());
+//     for(const auto& param : ps)
+//     {
+//         const auto idx = find_parameter<std::size_t>(param, env, "index") +
+//                          find_parameter_or<std::int64_t>(param, env, "offset", 0);
+//         const auto charge = find_parameter<real_type  >(param, env, "charge");
+// 
+//         params.emplace_back(idx, parameter_type{charge});
+//         MJOLNIR_LOG_INFO("idx = ", idx, ", charge = ", charge);
+//     }
+// 
+//     check_parameter_overlap(env, ps, params);
+// 
+//     return potential_type(cutoff, std::move(params),
+//             read_ignore_particles_within(global),
+//             read_ignored_molecule(global), read_ignored_group(global));
+// }
+// 
+// template<typename traitsT>
+// ThreeSPN2ExcludedVolumePotential<traitsT>
+// read_3spn2_excluded_volume_potential(const toml::value& global)
+// {
+//     MJOLNIR_GET_DEFAULT_LOGGER();
+//     MJOLNIR_LOG_FUNCTION();
+//     using potential_type = ThreeSPN2ExcludedVolumePotential<traitsT>;
+//     using real_type      = typename potential_type::real_type;
+//     using parameter_type = typename potential_type::parameter_type;
+//     using bead_kind      = parameter_3SPN2::bead_kind;
+// 
+//     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+// 
+//     const auto& ps = toml::find<toml::array>(global, "parameters");
+//     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+// 
+//     std::vector<std::pair<std::size_t, parameter_type>> params;
+//     params.reserve(ps.size());
+//     for(const auto& param : ps)
+//     {
+//         const auto idx = find_parameter<std::size_t>(param, env, "index") +
+//                          find_parameter_or<std::int64_t>(param, env, "offset", 0);
+// 
+//         const auto kind = toml::find<std::string>(param, "kind");
+//         if(kind != "S" && kind != "P" &&
+//            kind != "A" && kind != "T" && kind != "G" && kind != "C")
+//         {
+//             throw_exception<std::runtime_error>(toml::format_error("[error] "
+//                 "mjolnir::read_3spn2_excluded_volume_potential: unknown bead "
+//                 "kind", find_parameter<toml::value>(param, env, "kind"),
+//                 "expected S, P, A, T, G, C."));
+//         }
+//         bead_kind bead;
+//         switch(kind.front())
+//         {
+//             case 'P': {bead = bead_kind::Phosphate; break;}
+//             case 'S': {bead = bead_kind::Sugar;     break;}
+//             case 'A': {bead = bead_kind::BaseA;     break;}
+//             case 'T': {bead = bead_kind::BaseT;     break;}
+//             case 'G': {bead = bead_kind::BaseG;     break;}
+//             case 'C': {bead = bead_kind::BaseC;     break;}
+//             default:  {assert(false);}
+//         }
+//         params.emplace_back(idx, bead);
+//         MJOLNIR_LOG_INFO("idx = ", idx, ", kind = ", bead);
+//     }
+// 
+//     ThreeSPN2ExcludedVolumePotentialParameter<real_type> default_parameters;
+// 
+//     check_parameter_overlap(env, ps, params);
+//     return potential_type(std::move(default_parameters), params,
+//             read_ignore_particles_within(global),
+//             read_ignored_molecule(global), read_ignored_group(global));
+// }
+// 
+// template<typename traitsT>
+// iSoLFAttractivePotential<traitsT>
+// read_isolf_potential(const toml::value& global)
+// {
+//     MJOLNIR_GET_DEFAULT_LOGGER();
+//     MJOLNIR_LOG_FUNCTION();
+//     using potential_type = iSoLFAttractivePotential<traitsT>;
+//     using real_type      = typename potential_type::real_type;
+//     using parameter_type = typename potential_type::parameter_type;
+// 
+//     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+// 
+//     if(global.contains("cutoff"))
+//     {
+//         MJOLNIR_LOG_WARN("iSoLF has an exact cutoff distance. While the simulation,"
+//             " the exact cutoff is used and specified cutoff will be ignored.");
+//     }
+// 
+//     const auto& ps = toml::find<toml::array>(global, "parameters");
+//     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+// 
+//     std::vector<std::pair<std::size_t, parameter_type>> params;
+//     params.reserve(ps.size());
+//     for(const auto& param : ps)
+//     {
+//         // offset can be a negative value
+//         const auto idx     = find_parameter<std::int64_t>(param, env, "index") +
+//                              find_parameter_or<std::int64_t>(param, env, "offset", 0);
+//         const auto sigma   = find_parameter<real_type>(param, env, "sigma"  );
+//         const auto epsilon = find_parameter<real_type>(param, env, "epsilon");
+//         const auto omega   = find_parameter<real_type>(param, env, "omega"  );
+// 
+//         params.emplace_back(idx, parameter_type{sigma, epsilon, omega});
+//         MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", sigma,
+//                        ", epsilon = ", epsilon, ", omega = ", omega);
+//     }
+// 
+//     check_parameter_overlap(env, ps, params);
+// 
+//     return potential_type(std::move(params),
+//             read_ignore_particles_within(global),
+//             read_ignored_molecule(global), read_ignored_group(global));
+// }
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_excluded_volume_potential(const toml::value& global);
-extern template ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_excluded_volume_potential(const toml::value& global);
-extern template ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_excluded_volume_potential(const toml::value& global);
-extern template ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_excluded_volume_potential(const toml::value& global);
+// extern template ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_excluded_volume_potential(const toml::value& global);
+// extern template ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_excluded_volume_potential(const toml::value& global);
+// extern template ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_excluded_volume_potential(const toml::value& global);
+// extern template ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_excluded_volume_potential(const toml::value& global);
+// 
+// extern template InversePowerPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_inverse_power_potential(const toml::value&);
+// extern template InversePowerPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_inverse_power_potential(const toml::value&);
+// extern template InversePowerPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_inverse_power_potential(const toml::value&);
+// extern template InversePowerPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_inverse_power_potential(const toml::value&);
+// 
+// extern template HardCoreExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_hard_core_excluded_volume_potential(const toml::value& global);
+// extern template HardCoreExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_hard_core_excluded_volume_potential(const toml::value& global);
+// extern template HardCoreExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_hard_core_excluded_volume_potential(const toml::value& global);
+// extern template HardCoreExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_hard_core_excluded_volume_potential(const toml::value& global);
 
-extern template InversePowerPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_inverse_power_potential(const toml::value&);
-extern template InversePowerPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_inverse_power_potential(const toml::value&);
-extern template InversePowerPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_inverse_power_potential(const toml::value&);
-extern template InversePowerPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_inverse_power_potential(const toml::value&);
+// extern template LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_lennard_jones_potential(const toml::value& global);
+// extern template LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_lennard_jones_potential(const toml::value& global);
+// extern template LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_lennard_jones_potential(const toml::value& global);
+// extern template LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_lennard_jones_potential(const toml::value& global);
 
-extern template HardCoreExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_hard_core_excluded_volume_potential(const toml::value& global);
-extern template HardCoreExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_hard_core_excluded_volume_potential(const toml::value& global);
-extern template HardCoreExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_hard_core_excluded_volume_potential(const toml::value& global);
-extern template HardCoreExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_hard_core_excluded_volume_potential(const toml::value& global);
-
-extern template LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_lennard_jones_potential(const toml::value& global);
-extern template LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_lennard_jones_potential(const toml::value& global);
-extern template LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_lennard_jones_potential(const toml::value& global);
-extern template LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_lennard_jones_potential(const toml::value& global);
-
-extern template UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_uniform_lennard_jones_potential(const toml::value& global);
-extern template UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_uniform_lennard_jones_potential(const toml::value& global);
-extern template UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_uniform_lennard_jones_potential(const toml::value& global);
-extern template UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_uniform_lennard_jones_potential(const toml::value& global);
-
-extern template LennardJonesAttractivePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_lennard_jones_attractive_potential(const toml::value& global);
-extern template LennardJonesAttractivePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_lennard_jones_attractive_potential(const toml::value& global);
-extern template LennardJonesAttractivePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_lennard_jones_attractive_potential(const toml::value& global);
-extern template LennardJonesAttractivePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_lennard_jones_attractive_potential(const toml::value& global);
-
-extern template WCAPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_wca_potential(const toml::value& global);
-extern template WCAPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_wca_potential(const toml::value& global);
-extern template WCAPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_wca_potential(const toml::value& global);
-extern template WCAPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_wca_potential(const toml::value& global);
-
-extern template DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_debye_huckel_potential(const toml::value& global);
-extern template DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_debye_huckel_potential(const toml::value& global);
-extern template DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_debye_huckel_potential(const toml::value& global);
-extern template DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_debye_huckel_potential(const toml::value& global);
-
-extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_3spn2_excluded_volume_potential(const toml::value& global);
-extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_3spn2_excluded_volume_potential(const toml::value& global);
-extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_3spn2_excluded_volume_potential(const toml::value& global);
-extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_3spn2_excluded_volume_potential(const toml::value& global);
-
-extern template iSoLFAttractivePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_isolf_potential(const toml::value& global);
-extern template iSoLFAttractivePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_isolf_potential(const toml::value& global);
-extern template iSoLFAttractivePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_isolf_potential(const toml::value& global);
-extern template iSoLFAttractivePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_isolf_potential(const toml::value& global);
+// extern template UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_uniform_lennard_jones_potential(const toml::value& global);
+// extern template UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_uniform_lennard_jones_potential(const toml::value& global);
+// extern template UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_uniform_lennard_jones_potential(const toml::value& global);
+// extern template UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_uniform_lennard_jones_potential(const toml::value& global);
+// 
+// extern template LennardJonesAttractivePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_lennard_jones_attractive_potential(const toml::value& global);
+// extern template LennardJonesAttractivePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_lennard_jones_attractive_potential(const toml::value& global);
+// extern template LennardJonesAttractivePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_lennard_jones_attractive_potential(const toml::value& global);
+// extern template LennardJonesAttractivePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_lennard_jones_attractive_potential(const toml::value& global);
+// 
+// extern template WCAPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_wca_potential(const toml::value& global);
+// extern template WCAPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_wca_potential(const toml::value& global);
+// extern template WCAPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_wca_potential(const toml::value& global);
+// extern template WCAPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_wca_potential(const toml::value& global);
+// 
+// extern template DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_debye_huckel_potential(const toml::value& global);
+// extern template DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_debye_huckel_potential(const toml::value& global);
+// extern template DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_debye_huckel_potential(const toml::value& global);
+// extern template DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_debye_huckel_potential(const toml::value& global);
+// 
+// extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_3spn2_excluded_volume_potential(const toml::value& global);
+// extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_3spn2_excluded_volume_potential(const toml::value& global);
+// extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_3spn2_excluded_volume_potential(const toml::value& global);
+// extern template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_3spn2_excluded_volume_potential(const toml::value& global);
+// 
+// extern template iSoLFAttractivePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_isolf_potential(const toml::value& global);
+// extern template iSoLFAttractivePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_isolf_potential(const toml::value& global);
+// extern template iSoLFAttractivePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_isolf_potential(const toml::value& global);
+// extern template iSoLFAttractivePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_isolf_potential(const toml::value& global);
 
 #endif
 

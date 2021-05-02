@@ -8,8 +8,8 @@
 #include <mjolnir/forcefield/local/DihedralAngleInteraction.hpp>
 #include <mjolnir/forcefield/local/DummyInteraction.hpp>
 
-#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingPotential.hpp>
-#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingInteraction.hpp>
+// #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingPotential.hpp>
+// #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseStackingInteraction.hpp>
 
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
@@ -91,14 +91,14 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
                 kind, read_local_potential<2, potentialT>(local));
     }
-    else if(potential == "3SPN2Bond")
-    {
-        MJOLNIR_LOG_NOTICE("-- potential function is 3SPN2Bond.");
-        using potentialT = ThreeSPN2BondPotential<real_type>;
-
-        return make_unique<BondLengthInteraction<traitsT, potentialT>>(
-                kind, read_local_potential<2, potentialT>(local));
-    }
+//     else if(potential == "3SPN2Bond")
+//     {
+//         MJOLNIR_LOG_NOTICE("-- potential function is 3SPN2Bond.");
+//         using potentialT = ThreeSPN2BondPotential<real_type>;
+// 
+//         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
+//                 kind, read_local_potential<2, potentialT>(local));
+//     }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -353,130 +353,130 @@ read_dummy_interaction(const std::string& kind, const toml::value& local)
     return make_unique<DummyInteraction<traitsT>>(kind, std::move(indices_list));
 }
 
-template<typename traitsT>
-std::unique_ptr<LocalInteractionBase<traitsT>>
-read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value& local)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    using real_type      = typename traitsT::real_type;
-    using potential_type = ThreeSPN2BaseStackingPotential<real_type>;
-    using base_kind      = parameter_3SPN2::base_kind;
-
-    // [[forcefields.local]]
-    // interaction = "3SPN2BaseStacking"
-    // topology    = "nucleotide"
-    // parameters = [
-    //     {strand = 0, nucleotide =  0,          S =   0, B =   1, Base = "A"},
-    //     {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
-    //     # ...
-    // ]
-
-    using indices_type   = std::array<std::size_t, 3>; // {S, B3, B5}
-    using parameter_type = typename potential_type::parameter_type;
-
-    potential_type potential;
-    const auto pot = toml::find<std::string>(local, "potential");
-    if(pot == "3SPN2")
-    {
-        MJOLNIR_LOG_NOTICE("potential is 3SPN2");
-        ThreeSPN2BaseStackingPotentialParameter<real_type> para_3SPN2;
-        potential = potential_type(para_3SPN2);
-    }
-    else if (pot == "3SPN2C")
-    {
-        MJOLNIR_LOG_NOTICE("potential is 3SPN2C");
-        ThreeSPN2CBaseStackingPotentialParameter<real_type> para_3SPN2C;
-        potential = potential_type(para_3SPN2C);
-    }
-    else
-    {
-        throw_exception<std::runtime_error>(toml::format_error("[error] "
-            "mjolnir::read_local_3spn2_base_stacking_interaction: "
-            "invalid potential", toml::find(local, "potential"), "here", {
-            "expected value is one of the following.",
-            "- \"3SPN2\" : The general 3SPN2 parameter set.",
-            "- \"3SPN2C\": The parameter set optimized to reproduce curveture of dsDNA."
-            }));
-    }
-
-    const auto& params = toml::find<toml::array>(local, "parameters");
-    MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
-
-    const auto& env = local.contains("env") ? local.at("env") : toml::value{};
-    // parameters = [
-    //     {strand = 0, nucleotide =  0,          S =   0, B =   1, Base = "A"},
-    //     {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
-    //     # ...
-    // ]
-    using nucleotide_index_type = parameter_3SPN2::NucleotideIndex;
-    std::vector<nucleotide_index_type> nuc_idxs;
-    nuc_idxs.reserve(params.size());
-    for(const auto& item : params)
-    {
-        nucleotide_index_type nuc_idx;
-
-        const auto ofs = find_parameter_or<std::int64_t>(item, env, "offset", 0);
-
-        // at the edge of the DNA, Phosphate may not exist.
-        if(item.as_table().count("P") != 0)
-        {
-            nuc_idx.P = find_parameter<std::size_t>(item, env, "P") + ofs;
-        }
-        nuc_idx.S          = find_parameter<std::size_t>(item, env, "S") + ofs;
-        nuc_idx.B          = find_parameter<std::size_t>(item, env, "B") + ofs;
-        nuc_idx.strand     = find_parameter<std::size_t>(item, env, "strand");
-        nuc_idx.nucleotide = find_parameter<std::size_t>(item, env, "nucleotide");
-
-        const auto bk      = toml::find<std::string>(item, "Base");
-        if     (bk == "A") {nuc_idx.base = base_kind::A;}
-        else if(bk == "T") {nuc_idx.base = base_kind::T;}
-        else if(bk == "G") {nuc_idx.base = base_kind::G;}
-        else if(bk == "C") {nuc_idx.base = base_kind::C;}
-        else
-        {
-            throw_exception<std::runtime_error>(toml::format_error("[error] "
-                "mjolnir::read_local_3spn2_base_stacking_interaction: "
-                "invalid Base", item, "here", {
-                "expected value is one of the \"A\", \"T\", \"C\", \"G\"."
-                }));
-        }
-
-        MJOLNIR_LOG_INFO("ThreeSPN2BaseStackingPotential: nucleotide = ", nuc_idx);
-        nuc_idxs.push_back(nuc_idx);
-    }
-
-    std::sort(nuc_idxs.begin(), nuc_idxs.end(),
-        [](const nucleotide_index_type& lhs, const nucleotide_index_type& rhs) {
-            return std::make_pair(lhs.strand, lhs.nucleotide) <
-                   std::make_pair(rhs.strand, rhs.nucleotide);
-        });
-
-    std::vector<std::pair<indices_type, parameter_type>> parameters;
-    parameters.reserve(params.size());
-    for(std::size_t i=1; i<nuc_idxs.size(); ++i)
-    {
-        const auto& Base5 = nuc_idxs.at(i-1);
-        const auto& Base3 = nuc_idxs.at(i);
-
-        if(Base5.strand != Base3.strand)
-        {
-            continue; // if the strands are different, there is no stacking.
-        }
-        assert(Base3.base != base_kind::X);
-        assert(Base5.base != base_kind::X);
-
-        const std::array<std::size_t, 3> idxs{{Base5.S, Base5.B, Base3.B}};
-        const auto bs_kind = potential.bs_kind(Base5.base, Base3.base);
-
-        MJOLNIR_LOG_INFO("ThreeSPN2BaseStackingPotential = {S = ", Base5.S,
-            ", B5 = ", Base5.B, ", B3 = ", Base3.B, ", bases = ", bs_kind, '}');
-
-        parameters.emplace_back(idxs, bs_kind);
-    }
-    return make_unique<ThreeSPN2BaseStackingInteraction<traitsT>>(kind,
-            std::move(parameters), std::move(potential), std::move(nuc_idxs));
-}
+// template<typename traitsT>
+// std::unique_ptr<LocalInteractionBase<traitsT>>
+// read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value& local)
+// {
+//     MJOLNIR_GET_DEFAULT_LOGGER();
+//     MJOLNIR_LOG_FUNCTION();
+//     using real_type      = typename traitsT::real_type;
+//     using potential_type = ThreeSPN2BaseStackingPotential<real_type>;
+//     using base_kind      = parameter_3SPN2::base_kind;
+// 
+//     // [[forcefields.local]]
+//     // interaction = "3SPN2BaseStacking"
+//     // topology    = "nucleotide"
+//     // parameters = [
+//     //     {strand = 0, nucleotide =  0,          S =   0, B =   1, Base = "A"},
+//     //     {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
+//     //     # ...
+//     // ]
+// 
+//     using indices_type   = std::array<std::size_t, 3>; // {S, B3, B5}
+//     using parameter_type = typename potential_type::parameter_type;
+// 
+//     potential_type potential;
+//     const auto pot = toml::find<std::string>(local, "potential");
+//     if(pot == "3SPN2")
+//     {
+//         MJOLNIR_LOG_NOTICE("potential is 3SPN2");
+//         ThreeSPN2BaseStackingPotentialParameter<real_type> para_3SPN2;
+//         potential = potential_type(para_3SPN2);
+//     }
+//     else if (pot == "3SPN2C")
+//     {
+//         MJOLNIR_LOG_NOTICE("potential is 3SPN2C");
+//         ThreeSPN2CBaseStackingPotentialParameter<real_type> para_3SPN2C;
+//         potential = potential_type(para_3SPN2C);
+//     }
+//     else
+//     {
+//         throw_exception<std::runtime_error>(toml::format_error("[error] "
+//             "mjolnir::read_local_3spn2_base_stacking_interaction: "
+//             "invalid potential", toml::find(local, "potential"), "here", {
+//             "expected value is one of the following.",
+//             "- \"3SPN2\" : The general 3SPN2 parameter set.",
+//             "- \"3SPN2C\": The parameter set optimized to reproduce curveture of dsDNA."
+//             }));
+//     }
+// 
+//     const auto& params = toml::find<toml::array>(local, "parameters");
+//     MJOLNIR_LOG_NOTICE("-- ", params.size(), " interactions are found.");
+// 
+//     const auto& env = local.contains("env") ? local.at("env") : toml::value{};
+//     // parameters = [
+//     //     {strand = 0, nucleotide =  0,          S =   0, B =   1, Base = "A"},
+//     //     {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
+//     //     # ...
+//     // ]
+//     using nucleotide_index_type = parameter_3SPN2::NucleotideIndex;
+//     std::vector<nucleotide_index_type> nuc_idxs;
+//     nuc_idxs.reserve(params.size());
+//     for(const auto& item : params)
+//     {
+//         nucleotide_index_type nuc_idx;
+// 
+//         const auto ofs = find_parameter_or<std::int64_t>(item, env, "offset", 0);
+// 
+//         // at the edge of the DNA, Phosphate may not exist.
+//         if(item.as_table().count("P") != 0)
+//         {
+//             nuc_idx.P = find_parameter<std::size_t>(item, env, "P") + ofs;
+//         }
+//         nuc_idx.S          = find_parameter<std::size_t>(item, env, "S") + ofs;
+//         nuc_idx.B          = find_parameter<std::size_t>(item, env, "B") + ofs;
+//         nuc_idx.strand     = find_parameter<std::size_t>(item, env, "strand");
+//         nuc_idx.nucleotide = find_parameter<std::size_t>(item, env, "nucleotide");
+// 
+//         const auto bk      = toml::find<std::string>(item, "Base");
+//         if     (bk == "A") {nuc_idx.base = base_kind::A;}
+//         else if(bk == "T") {nuc_idx.base = base_kind::T;}
+//         else if(bk == "G") {nuc_idx.base = base_kind::G;}
+//         else if(bk == "C") {nuc_idx.base = base_kind::C;}
+//         else
+//         {
+//             throw_exception<std::runtime_error>(toml::format_error("[error] "
+//                 "mjolnir::read_local_3spn2_base_stacking_interaction: "
+//                 "invalid Base", item, "here", {
+//                 "expected value is one of the \"A\", \"T\", \"C\", \"G\"."
+//                 }));
+//         }
+// 
+//         MJOLNIR_LOG_INFO("ThreeSPN2BaseStackingPotential: nucleotide = ", nuc_idx);
+//         nuc_idxs.push_back(nuc_idx);
+//     }
+// 
+//     std::sort(nuc_idxs.begin(), nuc_idxs.end(),
+//         [](const nucleotide_index_type& lhs, const nucleotide_index_type& rhs) {
+//             return std::make_pair(lhs.strand, lhs.nucleotide) <
+//                    std::make_pair(rhs.strand, rhs.nucleotide);
+//         });
+// 
+//     std::vector<std::pair<indices_type, parameter_type>> parameters;
+//     parameters.reserve(params.size());
+//     for(std::size_t i=1; i<nuc_idxs.size(); ++i)
+//     {
+//         const auto& Base5 = nuc_idxs.at(i-1);
+//         const auto& Base3 = nuc_idxs.at(i);
+// 
+//         if(Base5.strand != Base3.strand)
+//         {
+//             continue; // if the strands are different, there is no stacking.
+//         }
+//         assert(Base3.base != base_kind::X);
+//         assert(Base5.base != base_kind::X);
+// 
+//         const std::array<std::size_t, 3> idxs{{Base5.S, Base5.B, Base3.B}};
+//         const auto bs_kind = potential.bs_kind(Base5.base, Base3.base);
+// 
+//         MJOLNIR_LOG_INFO("ThreeSPN2BaseStackingPotential = {S = ", Base5.S,
+//             ", B5 = ", Base5.B, ", B3 = ", Base3.B, ", bases = ", bs_kind, '}');
+// 
+//         parameters.emplace_back(idxs, bs_kind);
+//     }
+//     return make_unique<ThreeSPN2BaseStackingInteraction<traitsT>>(kind,
+//             std::move(parameters), std::move(potential), std::move(nuc_idxs));
+// }
 
 
 template<typename realT,
@@ -676,11 +676,11 @@ read_local_interaction(const toml::value& local)
         MJOLNIR_LOG_NOTICE("Dummy interaction found.");
         return read_dummy_interaction<traitsT>(kind, local);
     }
-    else if(interaction == "3SPN2BaseStacking")
-    {
-        MJOLNIR_LOG_NOTICE("3SPN2BaseStacking interaction found.");
-        return read_3spn2_base_stacking_interaction<traitsT>(kind, local);
-    }
+//     else if(interaction == "3SPN2BaseStacking")
+//     {
+//         MJOLNIR_LOG_NOTICE("3SPN2BaseStacking interaction found.");
+//         return read_3spn2_base_stacking_interaction<traitsT>(kind, local);
+//     }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -729,10 +729,10 @@ extern template std::unique_ptr<LocalInteractionBase<SimulatorTraits<float,  Unl
 extern template std::unique_ptr<LocalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_dummy_interaction(const std::string& kind, const toml::value& local);
 extern template std::unique_ptr<LocalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_dummy_interaction(const std::string& kind, const toml::value& local);
 
-extern template std::unique_ptr<LocalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value& local);
-extern template std::unique_ptr<LocalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value& local);
-extern template std::unique_ptr<LocalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value& local);
-extern template std::unique_ptr<LocalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value& local);
+// extern template std::unique_ptr<LocalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value& local);
+// extern template std::unique_ptr<LocalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value& local);
+// extern template std::unique_ptr<LocalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value& local);
+// extern template std::unique_ptr<LocalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value& local);
 #endif
 
 } // mjolnir
