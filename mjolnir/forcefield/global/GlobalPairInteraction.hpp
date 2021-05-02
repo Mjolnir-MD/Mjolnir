@@ -25,13 +25,12 @@ namespace mjolnir
 // By combining potential calculations, we can omit `sqrt()` that is usually
 // used to calculate the distance between particles.
 //
-template<typename traitsT, typename potentialT, typename ruleT>
+template<typename traitsT, typename potentialT>
 class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
 {
   public:
     using traits_type         = traitsT;
     using potential_type      = potentialT;
-    using rule_type           = ruleT;
     using base_type           = GlobalInteractionBase<traitsT>;
     using real_type           = typename base_type::real_type;
     using coordinate_type     = typename base_type::coordinate_type;
@@ -39,7 +38,7 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
     using topology_type       = typename base_type::topology_type;
     using boundary_type       = typename base_type::boundary_type;
     using partition_type      = SpatialPartition<traits_type, potential_type>;
-    using parameter_list_type = GlobalParameterList<traits_type, rule_type>;
+    using parameter_list_type = GlobalParameterList<traits_type, potential_type>;
 
   public:
 
@@ -56,7 +55,7 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
 
-        this->parameters_.initialize(sys, topol, potential_type{})
+        this->parameters_.initialize(sys, topol);
         this->partition_ .initialize(sys, parameters_);
     }
 
@@ -70,18 +69,18 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
 
-        this->parameters_.update(sys, topol, potential_type{});
-        this->partition_.initialize(sys, this->potential_);
+        this->parameters_.update(sys, topol);
+        this->partition_.initialize(sys, this->parameters_);
     }
 
     void reduce_margin(const real_type dmargin, const system_type& sys) override
     {
-        this->partition_.reduce_margin(dmargin, sys, this->potential_);
+        this->partition_.reduce_margin(dmargin, sys, this->parameters_);
         return;
     }
     void scale_margin(const real_type scale, const system_type& sys) override
     {
-        this->partition_.scale_margin(scale, sys, this->potential_);
+        this->partition_.scale_margin(scale, sys, this->parameters_);
         return;
     }
 
@@ -90,7 +89,9 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
     real_type calc_force_and_energy(system_type&) const noexcept override;
 
     std::string name() const override
-    {return "Pair:"_s + potential_type::name();}
+    {
+        return "Pair:"_s + potential_type::name();
+    }
 
     parameter_list_type const& parameters() const noexcept {return parameters_;}
     parameter_list_type &      parameters()       noexcept {return parameters_;}
@@ -104,8 +105,8 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
 
   private:
 
-    partition_type      partition_;
     parameter_list_type parameters_;
+    partition_type      partition_;
 
 #ifdef MJOLNIR_WITH_OPENMP
     // OpenMP implementation uses its own implementation to run it in parallel.
@@ -119,21 +120,21 @@ template<typename traitsT, typename potT>
 void GlobalPairInteraction<traitsT, potT>::calc_force(
         system_type& sys) const noexcept
 {
-    const auto leading_participants = this->potential_.leading_participants();
+    const auto leading_participants = this->parameters_.leading_participants();
     for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
     {
         const auto i = leading_participants[idx];
         for(const auto& ptnr : this->partition_.partners(i))
         {
-            const auto  j     = ptnr.index;
-            const auto& param = ptnr.parameter();
+            const auto  j   = ptnr.index;
+            const auto& pot = ptnr.potential();
 
             const auto rij =
                 sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type l2 = math::length_sq(rij); // |rij|^2
             const real_type rl = math::rsqrt(l2);      // 1 / |rij|
             const real_type l  = l2 * rl;              // |rij|^2 / |rij|
-            const real_type f_mag = potential_.derivative(l, param);
+            const real_type f_mag = pot.derivative(l);
 
             // if length exceeds cutoff, potential returns just 0.
             if(f_mag == 0.0){continue;}
@@ -153,18 +154,18 @@ GlobalPairInteraction<traitsT, potT>::calc_energy(
 {
     real_type E = 0.0;
 
-    const auto leading_participants = this->potential_.leading_participants();
+    const auto leading_participants = this->parameters_.leading_participants();
     for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
     {
         const auto i = leading_participants[idx];
         for(const auto& ptnr : this->partition_.partners(i))
         {
-            const auto  j     = ptnr.index;
-            const auto& param = ptnr.parameter();
+            const auto  j   = ptnr.index;
+            const auto& pot = ptnr.potential();
 
             const real_type l = math::length(
                 sys.adjust_direction(sys.position(i), sys.position(j)));
-            E += potential_.potential(l, param);
+            E += pot.potential(l);
         }
     }
     return E;
@@ -176,26 +177,26 @@ GlobalPairInteraction<traitsT, potT>::calc_force_and_energy(
         system_type& sys) const noexcept
 {
     real_type energy = 0.0;
-    const auto leading_participants = this->potential_.leading_participants();
+    const auto leading_participants = this->parameters_.leading_participants();
     for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
     {
         const auto i = leading_participants[idx];
         for(const auto& ptnr : this->partition_.partners(i))
         {
-            const auto  j     = ptnr.index;
-            const auto& param = ptnr.parameter();
+            const auto  j   = ptnr.index;
+            const auto& pot = ptnr.potential();
 
             const auto rij =
                 sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type l2 = math::length_sq(rij); // |rij|^2
             const real_type rl = math::rsqrt(l2);      // 1 / |rij|
             const real_type l  = l2 * rl;              // |rij|^2 / |rij|
-            const real_type f_mag = potential_.derivative(l, param);
+            const real_type f_mag = pot.derivative(l);
 
             // if length exceeds cutoff, potential returns just 0.
             if(f_mag == 0.0){continue;}
 
-            energy += potential_.potential(l, param);
+            energy += pot.potential(l);
             const coordinate_type f = rij * (f_mag * rl);
             sys.force(i) += f;
             sys.force(j) -= f;
