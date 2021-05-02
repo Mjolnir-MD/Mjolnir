@@ -12,14 +12,16 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename PotentialT>
-class UnlimitedGridCellList final : public SpatialPartitionBase<traitsT, PotentialT>
+template<typename traitsT, typename ParameterListT, typename PotentialT>
+class UnlimitedGridCellList final
+    : public SpatialPartitionBase<traitsT, ParameterListT, PotentialT>
 {
   public:
-
     using traits_type        = traitsT;
     using potential_type     = PotentialT;
-    using base_type          = SpatialPartitionBase<traits_type, potential_type>;
+    using parameter_list_type = ParameterListT;
+
+    using base_type = SpatialPartitionBase<traits_type, parameter_list_type, potential_type>;
 
     using system_type        = typename base_type::system_type;
     using boundary_type      = typename base_type::boundary_type;
@@ -62,29 +64,30 @@ class UnlimitedGridCellList final : public SpatialPartitionBase<traitsT, Potenti
         return current_margin_ >= 0.;
     }
 
-    void initialize(neighbor_list_type& neighbors,
-                    const system_type& sys, const potential_type& pot) override;
-    void make(neighbor_list_type& neighbors,
-              const system_type& sys, const potential_type& pot) override;
+    void initialize(neighbor_list_type& neighbors, const system_type& sys,
+                    const parameter_list_type& params) override;
+
+    void make(neighbor_list_type& neighbors, const system_type& sys,
+              const parameter_list_type& params) override;
 
     bool reduce_margin(neighbor_list_type& neighbors, const real_type dmargin,
-                       const system_type& sys, const potential_type& pot) override
+                       const system_type& sys, const parameter_list_type& params) override
     {
         this->current_margin_ -= dmargin;
         if(this->current_margin_ < 0)
         {
-            this->make(neighbors, sys, pot);
+            this->make(neighbors, sys, params);
             return true;
         }
         return false;
     }
     bool scale_margin(neighbor_list_type& neighbors, const real_type scale,
-                const system_type& sys, const potential_type& pot) override
+                const system_type& sys, const parameter_list_type& params) override
     {
         this->current_margin_ = (cutoff_ + current_margin_) * scale - cutoff_;
         if(this->current_margin_ < 0)
         {
-            this->make(neighbors, sys, pot);
+            this->make(neighbors, sys, params);
             return true;
         }
         return false;
@@ -148,16 +151,17 @@ class UnlimitedGridCellList final : public SpatialPartitionBase<traitsT, Potenti
 
 };
 
-template<typename traitsT, typename potentialT>
-void UnlimitedGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbors,
-        const system_type& sys, const potential_type& pot)
+template<typename traitsT, typename ParameterListT, typename PotentialT>
+void UnlimitedGridCellList<traitsT, ParameterListT, potentialT>::make(
+        neighbor_list_type& neighbors, const system_type& sys,
+        const parameter_list_type& params)
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
 
     // `participants` is a list that contains indices of particles that are
     // related to the potential.
-    const auto& participants = pot.participants();
+    const auto& participants = params.participants();
 
     neighbors.clear();
     index_by_cell_.resize(participants.size());
@@ -198,7 +202,7 @@ void UnlimitedGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighb
     const real_type r_c  = cutoff_ * (1 + margin_);
     const real_type r_c2 = r_c * r_c;
 
-    const auto leading_participants = pot.leading_participants();
+    const auto leading_participants = params.leading_participants();
 
     std::vector<neighbor_type> partner;
     for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
@@ -220,7 +224,7 @@ void UnlimitedGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighb
             {
                 const auto j = pici.first;
                 MJOLNIR_LOG_DEBUG("looking particle ", j);
-                if(!pot.has_interaction(i, j))
+                if(!params.has_interaction(i, j))
                 {
                     continue;
                 }
@@ -232,7 +236,7 @@ void UnlimitedGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighb
                 if(math::length_sq(sys.adjust_direction(ri, rj)) < r_c2)
                 {
                     MJOLNIR_LOG_DEBUG("add index ", j, " to list ", i);
-                    partner.emplace_back(j, pot.prepare_params(i, j));
+                    partner.emplace_back(j, potential_type(params.prepare_params(i, j)));
                 }
             }
         }
@@ -252,19 +256,20 @@ void UnlimitedGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighb
     return ;
 }
 
-template<typename traitsT, typename potentialT>
-void UnlimitedGridCellList<traitsT, potentialT>::initialize(
-        neighbor_list_type& neighbors,
-        const system_type& sys, const potential_type& pot)
+template<typename traitsT, typename ParameterListT, typename PotentialT>
+void UnlimitedGridCellList<traitsT, ParameterListT, potentialT>::initialize(
+        neighbor_list_type& neighbors, const system_type& sys,
+        const parameter_list_type& params)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
     constexpr std::int64_t d = dim();
 
-    MJOLNIR_LOG_INFO(pot.name(), " cutoff = ", pot.max_cutoff_length());
+    MJOLNIR_LOG_INFO(potential_type{}.name(), " cutoff = ", params.max_cutoff_length());
     MJOLNIR_LOG_INFO("dimension(independent from system size) = ", d, 'x', d, 'x', d);
-    this->set_cutoff(pot.max_cutoff_length());
+
+    this->set_cutoff(params.max_cutoff_length());
 
     // initialize cell list
     for(int x = 0; x < d; ++x)
@@ -311,31 +316,31 @@ void UnlimitedGridCellList<traitsT, potentialT>::initialize(
         cell.second[26] = calc_index(x_next, y_next, z_next);
     }
 
-    this->make(neighbors, sys, pot);
+    this->make(neighbors, sys, params);
     return;
 }
 } // mjolnir
 
-#ifdef MJOLNIR_SEPARATE_BUILD
-#include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
-#include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
-#include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
-#include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
-
-namespace mjolnir
-{
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
-
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
-
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
-
-extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
-extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
-}
-#endif // SEPARATE_BUILD
+// #ifdef MJOLNIR_SEPARATE_BUILD
+// #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
+// #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
+// #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
+// #include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
+//
+// namespace mjolnir
+// {
+// extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+// extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
+//
+// extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+// extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
+//
+// extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+// extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
+//
+// extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+// extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
+// }
+// #endif // SEPARATE_BUILD
 
 #endif/* MJOLNIR_UNLIMITED_GRID_CELL_LIST */
