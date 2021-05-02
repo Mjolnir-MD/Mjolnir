@@ -19,7 +19,7 @@ namespace mjolnir
 {
 
 // google with "empty base optimization(EBO)".
-// By using EBO, we can compress the object size when `paramT` is a empty class.
+// By using EBO, we can compress the object size when `potT` is a empty class.
 // without this, empty parameter type consumes 8 byte (on x86_64) because
 // std::size_t requires 8-byte alignment.
 
@@ -29,16 +29,16 @@ namespace detail
 // another layer that checks `std::is_empty`. If empty, it inherits it and EBO
 // removes the overhead. If not empty(like `double`), it keeps storage for the
 // value. `neighbor_elmenet_impl` stores value if `std::true_type` is passed.
-template<typename paramT, bool IsEmpty>
+template<typename potT, bool IsEmpty>
 struct neighbor_element_impl;
 
-template<typename paramT>
-struct neighbor_element_impl<paramT, true> : private paramT // for EBO
+template<typename potT>
+struct neighbor_element_impl<potT, true> : private potT // for EBO
 {
-    using parameter_type = paramT;
+    using potential_type = potT;
 
-    explicit neighbor_element_impl(const parameter_type&) {}
-    explicit neighbor_element_impl(parameter_type&&)      {}
+    explicit neighbor_element_impl(const potential_type&) {}
+    explicit neighbor_element_impl(potential_type&&)      {}
 
     neighbor_element_impl()  = default;
     ~neighbor_element_impl() = default;
@@ -47,17 +47,17 @@ struct neighbor_element_impl<paramT, true> : private paramT // for EBO
     neighbor_element_impl& operator=(const neighbor_element_impl&) = default;
     neighbor_element_impl& operator=(neighbor_element_impl&&)      = default;
 
-    parameter_type&       parameter()       noexcept {return *this;}
-    parameter_type const& parameter() const noexcept {return *this;}
+    potential_type&       potential()       noexcept {return *this;}
+    potential_type const& potential() const noexcept {return *this;}
 };
 
-template<typename paramT>
-struct neighbor_element_impl<paramT, false>
+template<typename potT>
+struct neighbor_element_impl<potT, false>
 {
-    using parameter_type = paramT;
+    using potential_type = potT;
 
-    explicit neighbor_element_impl(const parameter_type& p): param(p) {}
-    explicit neighbor_element_impl(parameter_type&& p): param(std::move(p)) {}
+    explicit neighbor_element_impl(const potential_type& p): pot(p) {}
+    explicit neighbor_element_impl(potential_type&& p): pot(std::move(p)) {}
 
     neighbor_element_impl()  = default;
     ~neighbor_element_impl() = default;
@@ -66,26 +66,27 @@ struct neighbor_element_impl<paramT, false>
     neighbor_element_impl& operator=(const neighbor_element_impl&) = default;
     neighbor_element_impl& operator=(neighbor_element_impl&&)      = default;
 
-    parameter_type&       parameter()       noexcept {return param;}
-    parameter_type const& parameter() const noexcept {return param;}
+    potential_type&       potential()       noexcept {return this->pot;}
+    potential_type const& potential() const noexcept {return this->pot;}
 
-    paramT param;
+    potential_type pot;
 };
 
 } // detail
 
-template<typename paramT>
+template<typename potT>
 struct neighbor_element
-: private detail::neighbor_element_impl<paramT, std::is_empty<paramT>::value>
+    : private detail::neighbor_element_impl<potT, std::is_empty<potT>::value>
 {
-    using base_type =
-        detail::neighbor_element_impl<paramT, std::is_empty<paramT>::value>;
-    using parameter_type = typename base_type::parameter_type;
+    static constexpr bool potential_is_empty = std::is_empty<potT>::value;
 
-    neighbor_element(std::size_t idx, const paramT& p)
+    using base_type = detail::neighbor_element_impl<potT, potential_is_empty>;
+    using potential_type = typename base_type::potential_type;
+
+    neighbor_element(std::size_t idx, const potT& p)
         : base_type(p), index(idx)
     {}
-    neighbor_element(std::size_t idx, paramT&& p)
+    neighbor_element(std::size_t idx, potT&& p)
         : base_type(std::move(p)), index(idx)
     {}
 
@@ -96,49 +97,51 @@ struct neighbor_element
     neighbor_element& operator=(const neighbor_element&) = default;
     neighbor_element& operator=(neighbor_element&&)      = default;
 
-    parameter_type&       parameter()       noexcept {return base_type::parameter();}
-    parameter_type const& parameter() const noexcept {return base_type::parameter();}
+    potential_type&       potential()       noexcept {return base_type::potential();}
+    potential_type const& potential() const noexcept {return base_type::potential();}
 
-    // paramT param; // derived from neighbor_element_impl
+    // potential_type pot; // derived from neighbor_element_impl
     std::size_t index;
 };
+template<typename potT>
+constexpr bool neighbor_element<potT>::potential_is_empty;
 
 // Check the EBO works and the size of neighbor_element with empty class
 // is equal to the size of `std::size_t index;`.
 static_assert(sizeof(std::size_t) == sizeof(neighbor_element<empty_t>),
               "checking neighbor_element reduces size of empty object");
 
-template<typename paramT>
+template<typename potT>
 inline bool operator==(
-    const neighbor_element<paramT>& lhs, const neighbor_element<paramT>& rhs)
+    const neighbor_element<potT>& lhs, const neighbor_element<potT>& rhs)
 {
     return lhs.index == rhs.index;
 }
-template<typename paramT>
+template<typename potT>
 inline bool operator!=(
-    const neighbor_element<paramT>& lhs, const neighbor_element<paramT>& rhs)
+    const neighbor_element<potT>& lhs, const neighbor_element<potT>& rhs)
 {
     return lhs.index != rhs.index;
 }
-template<typename paramT>
+template<typename potT>
 inline bool operator<(
-    const neighbor_element<paramT>& lhs, const neighbor_element<paramT>& rhs)
+    const neighbor_element<potT>& lhs, const neighbor_element<potT>& rhs)
 {
     return lhs.index < rhs.index;
 }
-template<typename paramT>
+template<typename potT>
 inline bool operator>(
-    const neighbor_element<paramT>& lhs, const neighbor_element<paramT>& rhs)
+    const neighbor_element<potT>& lhs, const neighbor_element<potT>& rhs)
 {
     return lhs.index > rhs.index;
 }
-template<typename paramT>
+template<typename potT>
 inline bool operator<=(
-    const neighbor_element<paramT>& lhs, const neighbor_element<paramT>& rhs)
+    const neighbor_element<potT>& lhs, const neighbor_element<potT>& rhs)
 {
     return lhs.index <= rhs.index;
 }
-template<typename paramT>
+template<typename potT>
 inline bool operator>=(
     const neighbor_element<paramT>& lhs, const neighbor_element<paramT>& rhs)
 {
@@ -148,12 +151,12 @@ inline bool operator>=(
 // ----------------------------------------------------------------------------
 // neighbor list
 
-template<typename parameterT>
+template<typename potentialT>
 class NeighborList
 {
   public:
-    using parameter_type = parameterT;
-    using neighbor_type  = neighbor_element<parameter_type>;
+    using potential_type = potentialT;
+    using neighbor_type  = neighbor_element<potential_type>;
     using container_type = std::vector<neighbor_type>;
     using range_type     = range<typename container_type::const_iterator>;
 
@@ -264,14 +267,6 @@ class NeighborList
     container_type           neighbors_;
     std::vector<std::size_t> ranges_;
 };
-
-#ifdef MJOLNIR_SEPARATE_BUILD
-extern template class NeighborList<empty_t>;
-extern template class NeighborList<float >;
-extern template class NeighborList<double>;
-extern template class NeighborList<std::pair<float , float >>;
-extern template class NeighborList<std::pair<double, double>>;
-#endif// MJOLNIR_SEPARATE_BUILD
 
 } // mjolnir
 #endif// MJOLNIR_NEIGHBOR_LIST_HPP
