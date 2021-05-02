@@ -7,20 +7,44 @@
 
 namespace mjolnir
 {
+
+template<typename traitsT, typename potentialT>
+struct ParameterCombinationRuleBase
+{
+  public:
+    using traits_type         = traitsT;
+    using potential_type      = potentialT;
+    using pair_parameter_type = typename potential_type::parameter_type;
+
+  public:
+
+    virtual ~ParameterCombinationRuleBase() = default;
+
+    // calculate combination of parameters
+    virtual pair_parameter_type
+    generate(const std::size_t i, const std::size_t j) const noexcept = 0;
+
+    // This function is for cutoff distance
+    virtual real_type max_cutoff_length(const potential_type& pot) const = 0;
+
+    virtual std::vector<std::size_t>&       participants()       noexcept = 0;
+    virtual std::vector<std::size_t> const& participants() const noexcept = 0;
+};
+
 //
 // GlobalParameterList contains list of per-particle parameter used in a pair
 // interaction and a combination rule.
 //
-template<typename traitsT, typename ruleT>
+template<typename traitsT, typename potentialT>
 class GlobalParameterList
 {
   public:
     using traits_type           = traitsT;
-    using combination_rule_type = ruleT;
-    using parameter_type        = typename rule_type::parameter_type;
-    using pair_parameter_type   = typename rule_type::pair_parameter_type;
+    using potential_type        = potentialT;
+    using combination_rule_base = ParameterCombinationRuleBase<traits_type, potential_type>;
+    using combination_rule_type = std::unique_ptr<combination_rule_base>;
+    using pair_parameter_type   = typename potential_type::parameter_type;
     using system_type           = System<traits_type>;
-    using container_type        = std::vector<parameter_type>;
 
     // topology stuff
     using topology_type        = Topology;
@@ -35,15 +59,14 @@ class GlobalParameterList
 
     GlobalParameterList(combination_rule_type rule,
         const std::map<connection_kind_type, std::size_t>& exclusions,
-        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp,
-        parameter_type default_parameter)
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
       : rule_(std::move(rule)),
         exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {}
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
-        return rule_(i, j);
+        return rule_->generate(i, j);
     }
 
     // These value
@@ -66,7 +89,7 @@ class GlobalParameterList
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        this->max_cutoff_length_ = rule_.max_cutoff_length(pot);
+        this->max_cutoff_length_ = rule_->max_cutoff_length(pot);
         this->exclusion_list_.make(sys, topol);
         return;
     }
@@ -88,12 +111,12 @@ class GlobalParameterList
     }
     std::vector<std::size_t> const& participants() const noexcept
     {
-        return rule_.participants();
+        return rule_->participants();
     }
     range<typename std::vector<std::size_t>::const_iterator>
     leading_participants() const noexcept
     {
-        const auto& ps = rule_.participants();
+        const auto& ps = rule_->participants();
         return make_range(ps.begin(), std::prev(ps.end()));
     }
     range<typename std::vector<std::size_t>::const_iterator>
@@ -110,9 +133,6 @@ class GlobalParameterList
     {
         return exclusion_list_;
     }
-
-    container_type&       parameters()       noexcept {return rule_.parameters();}
-    container_type const& parameters() const noexcept {return rule_.parameters();}
 
     combination_rule_type&       rule()       noexcept {return rule_;}
     combination_rule_type const& rule() const noexcept {return rule_;}
@@ -143,16 +163,21 @@ class GlobalParameterList
 // pair parameters. So, the comparator should be able to be used for both
 // per-particle parameters and pair parameters.
 
-template<typename realT>
-struct LorentzBerthelotRule
+template<typename traitsT, typename potentialT>
+class LorentzBerthelotRule final
+    : public ParameterCombinationRuleBase<traitsT, potentialT>
 {
   public:
-    using real_type           = realT;
+    using traits_type         = traitsT;
+    using potential_type      = potentialT;
+    using real_type           = typename traits_type::real_type;
     using parameter_type      = std::pair<real_type, real_type>;
     using pair_parameter_type = std::pair<real_type, real_type>;
     using container_type      = std::vector<parameter_type>;
 
   public:
+
+    ~LorentzBerthelotRule() override {}
 
     explicit LorentzBerthelotRule(
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters)
@@ -172,7 +197,8 @@ struct LorentzBerthelotRule
     }
 
     // calculate combination of parameters
-    pair_parameter_type operator()(const std::size_t i, std::size_t j) const noexcept
+    pair_parameter_type
+    generate(const std::size_t i, const std::size_t j) const noexcept override
     {
         const auto& para1 = parameters_[i];
         const auto& para2 = parameters_[j];
@@ -187,8 +213,7 @@ struct LorentzBerthelotRule
     }
 
     // This function is for cutoff distance
-    template<typename PotentialT>
-    real_type max_cutoff_length(const PotentialT& pot) const
+    real_type max_cutoff_length(const potential_type& pot) const override
     {
         if(parameters_.empty())
         {
@@ -205,8 +230,8 @@ struct LorentzBerthelotRule
     container_type&       parameters()       noexcept {return parameters_;}
     container_type const& parameters() const noexcept {return parameters_;}
 
-    std::vector<std::size_t>&       participants()       noexcept {return participants_;}
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+    std::vector<std::size_t>&       participants()       noexcept override {return participants_;}
+    std::vector<std::size_t> const& participants() const noexcept override {return participants_;}
 
   private:
 
@@ -214,19 +239,25 @@ struct LorentzBerthelotRule
     container_type           parameters_;
 };
 
-template<typename pair_parameterT>
+template<typename traitsT, typename potentialT>
 struct CombinationTable
+    : public ParameterCombinationRuleBase<traitsT, potentialT>
 {
   public:
+    using traits_type         = traitsT;
+    using potential_type      = potentialT;
     using parameter_type      = std::string;
-    using pair_parameter_type = parameterT;
+    using pair_parameter_type = typename potential_type::parameter_type;
     using container_type      = std::vector<parameter_type>;
     using table_type          = std::unordered_map<std::string, pair_parameter_type>;
 
   public:
 
-    CombinationTable(const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-                     table_type&& table)
+    ~CombinationTable() override {}
+
+    CombinationTable(
+        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
+        table_type&& table)
         : table_(std::move(table))
     {
         this->parameters_  .reserve(parameters.size());
@@ -245,7 +276,7 @@ struct CombinationTable
 
     // Since it concats the names, it is better to keep parameter name short.
     pair_parameter_type
-    operator()(const std::size_t i, const std::size_t j) const noexcept
+    generate(const std::size_t i, const std::size_t j) const noexcept override
     {
         const auto& para1 = parameters_[i];
         const auto& para2 = parameters_[j];
@@ -253,15 +284,14 @@ struct CombinationTable
     }
 
     // This function is for cutoff distance
-    template<typename PotentialT>
-    real_type max_cutoff_length(const PotentialT& pot) const
+    real_type max_cutoff_length(const potential_type& pot) const override
     {
         if(parameters_.empty())
         {
             return std::numeric_limits<real_type>::infinity();
         }
 
-        using value_type = typename container_type::value_type; // kv-pair
+        using value_type = typename table_type::value_type; // kv-pair
         const auto max_iter = std::max_element(table_.begin(), table_.end(),
             [&](const value_type& lkv, const value_type& rkv) noexcept -> bool {
                 return pot.get_parameter_comparator(lkv.second, rkv.second);
@@ -272,14 +302,14 @@ struct CombinationTable
 
     // accessors
 
-    container_type const& table() const noexcept {return table_;}
-    container_type&       table()       noexcept {return table_;}
+    table_type const& table() const noexcept {return table_;}
+    table_type&       table()       noexcept {return table_;}
 
     container_type&       parameters()       noexcept {return parameters_;}
     container_type const& parameters() const noexcept {return parameters_;}
 
-    std::vector<std::size_t>&       participants()       noexcept {return participants_;}
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+    std::vector<std::size_t>&       participants()       noexcept override {return participants_;}
+    std::vector<std::size_t> const& participants() const noexcept override {return participants_;}
 
   private:
 
