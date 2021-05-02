@@ -15,6 +15,7 @@ struct CombinationRuleBase
     using traits_type         = traitsT;
     using potential_type      = potentialT;
     using pair_parameter_type = typename potential_type::parameter_type;
+    using real_type           = typename traits_type::real_type;
 
   public:
 
@@ -25,10 +26,12 @@ struct CombinationRuleBase
     generate(const std::size_t i, const std::size_t j) const noexcept = 0;
 
     // This function is for cutoff distance
-    virtual real_type max_cutoff_length(const potential_type& pot) const = 0;
+    virtual real_type max_cutoff_length() const = 0;
 
     virtual std::vector<std::size_t>&       participants()       noexcept = 0;
     virtual std::vector<std::size_t> const& participants() const noexcept = 0;
+
+    virtual CombinationRuleBase<traits_type, potential_type>* clone() const = 0;
 };
 
 //
@@ -41,6 +44,7 @@ class GlobalParameterList
   public:
     using traits_type           = traitsT;
     using potential_type        = potentialT;
+    using real_type             = typename traits_type::real_type;
     using combination_rule_base = CombinationRuleBase<traits_type, potential_type>;
     using combination_rule_type = std::unique_ptr<combination_rule_base>;
     using pair_parameter_type   = typename potential_type::parameter_type;
@@ -64,6 +68,17 @@ class GlobalParameterList
         exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {}
 
+    GlobalParameterList(const GlobalParameterList& other)
+      : rule_(other.rule_->clone()), exclusion_list_(other.exclusion_list_)
+    {}
+
+    GlobalParameterList& operator=(const GlobalParameterList& other)
+    {
+        rule_.reset(other.rule_->clone());
+        exclusion_list_ = other.exclusion_list_;
+        return *this;
+    }
+
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
         return rule_->generate(i, j);
@@ -71,25 +86,21 @@ class GlobalParameterList
 
     // These value
 
-    template<typename PotentialT>
-    void initialize(const system_type& sys, const topology_type& topol,
-                    const PotentialT& pot) noexcept
+    void initialize(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        this->update(sys, topol, pot);
+        this->update(sys, topol);
         return;
     }
 
-    template<typename PotentialT>
-    void update(const system_type& sys, const topology_type& topol,
-                const PotentialT& pot) noexcept
+    void update(const system_type& sys, const topology_type& topol) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        this->max_cutoff_length_ = rule_->max_cutoff_length(pot);
+        this->max_cutoff_length_ = rule_->max_cutoff_length();
         this->exclusion_list_.make(sys, topol);
         return;
     }
@@ -123,6 +134,7 @@ class GlobalParameterList
     possible_partners_of(const std::size_t participant_idx,
                          const std::size_t /*particle_idx*/) const noexcept
     {
+        const auto& ps = rule_->participants();
         return make_range(ps.begin() + participant_idx + 1, ps.end());
     }
 
@@ -175,6 +187,8 @@ class LorentzBerthelotRule final
     using pair_parameter_type = std::pair<real_type, real_type>;
     using container_type      = std::vector<parameter_type>;
 
+    using base_type           = CombinationRuleBase<traits_type, potential_type>;
+
   public:
 
     ~LorentzBerthelotRule() override {}
@@ -190,7 +204,7 @@ class LorentzBerthelotRule final
             this->participants_.push_back(idx);
             if(this->parameters_.size() <= idx)
             {
-                this->parameters_.resize(idx+1, default_parameter);
+                this->parameters_.resize(idx+1, potential_type::default_parameter());
             }
             this->parameters_.at(idx) = idxp.second;
         }
@@ -213,16 +227,22 @@ class LorentzBerthelotRule final
     }
 
     // This function is for cutoff distance
-    real_type max_cutoff_length(const potential_type& pot) const override
+    real_type max_cutoff_length() const override
     {
+        using parameter_comparator = typename potential_type::parameter_comparator;
         if(parameters_.empty())
         {
             return std::numeric_limits<real_type>::infinity();
         }
         const auto max_iter = std::max_element(
-                parameters_.begin(), parameters_.end(), pot.get_parameter_comparator());
+                parameters_.begin(), parameters_.end(), parameter_comparator{});
 
-        return PotentialT(*max_iter).cutoff();
+        return potential_type(*max_iter).cutoff();
+    }
+
+    base_type* clone() const override
+    {
+        return new LorentzBerthelotRule(*this);
     }
 
     // accessors for testing
@@ -250,6 +270,8 @@ struct CombinationTable
     using pair_parameter_type = typename potential_type::parameter_type;
     using container_type      = std::vector<parameter_type>;
     using table_type          = std::unordered_map<std::string, pair_parameter_type>;
+    using real_type           = typename traits_type::real_type;
+    using base_type           = CombinationRuleBase<traits_type, potential_type>;
 
   public:
 
@@ -268,7 +290,7 @@ struct CombinationTable
             this->participants_.push_back(idx);
             if(this->parameters_.size() <= idx)
             {
-                this->parameters_.resize(idx+1, default_parameter);
+                this->parameters_.resize(idx+1, std::string(""));
             }
             this->parameters_.at(idx) = idxp.second;
         }
@@ -284,20 +306,28 @@ struct CombinationTable
     }
 
     // This function is for cutoff distance
-    real_type max_cutoff_length(const potential_type& pot) const override
+    real_type max_cutoff_length() const override
     {
         if(parameters_.empty())
         {
             return std::numeric_limits<real_type>::infinity();
         }
 
+        using parameter_comparator = typename potential_type::parameter_comparator;
+        const auto comp = parameter_comparator{};
+
         using value_type = typename table_type::value_type; // kv-pair
         const auto max_iter = std::max_element(table_.begin(), table_.end(),
             [&](const value_type& lkv, const value_type& rkv) noexcept -> bool {
-                return pot.get_parameter_comparator(lkv.second, rkv.second);
+                return comp(lkv.second, rkv.second);
             });
 
-        return PotentialT(max_iter->second).cutoff();
+        return potential_type(max_iter->second).cutoff();
+    }
+
+    base_type* clone() const override
+    {
+        return new CombinationTable(*this);
     }
 
     // accessors
