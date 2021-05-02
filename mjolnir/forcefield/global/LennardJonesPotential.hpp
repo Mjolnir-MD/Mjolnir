@@ -29,18 +29,18 @@ class LennardJonesPotential
         return parameter_type{real_type(0), real_type(0)};
     }
 
-    static void set_cutoff_length(const real_type cutoff_ratio)
+    static void set_cutoff_ratio(const real_type ratio)
     {
-        if(self_type::cutoff_length < cutoff_ratio)
+        if(self_type::cutoff_ratio < ratio)
         {
-            self_type::cutoff_length  = cutoff_ratio;
-            self_type::coef_at_cutoff = std::pow(real_type(1) / cutoff_ratio, 12)
-                                      - std::pow(real_type(1) / cutoff_ratio, 6);
+            self_type::cutoff_ratio  = ratio;
+            self_type::coef_at_cutoff = std::pow(real_type(1) / ratio, 12)
+                                      - std::pow(real_type(1) / ratio, 6);
         }
         return;
     }
 
-    static real_type cutoff_length;
+    static real_type cutoff_ratio;
     static real_type coef_at_cutoff;
 
   public:
@@ -55,7 +55,7 @@ class LennardJonesPotential
 
     real_type potential(const real_type r) const noexcept
     {
-        if(this->sigma_ * self_type::cutoff_length < r){return real_type(0);}
+        if(this->sigma_ * self_type::cutoff_ratio < r){return real_type(0);}
 
         const real_type sr1 = sigma_ / r;
         const real_type sr3 = sr1 * sr1 * sr1;
@@ -65,7 +65,7 @@ class LennardJonesPotential
     }
     real_type derivative(const real_type r) const noexcept
     {
-        if(this->sigma_ * self_type::cutoff_length < r){return real_type(0);}
+        if(this->sigma_ * self_type::cutoff_ratio < r){return real_type(0);}
 
         const real_type rinv = 1 / r;
         const real_type sr1  = sigma_ * rinv;
@@ -88,7 +88,7 @@ class LennardJonesPotential
 
     real_type cutoff()  const noexcept
     {
-        return this->sigma_ * self_type::cutoff_length;
+        return this->sigma_ * self_type::cutoff_ratio;
     }
 
   public:
@@ -121,7 +121,7 @@ class LennardJonesPotential
 };
 
 template<typename realT>
-typename LennardJonesPotential<realT>::real_type LennardJonesPotential<realT>::cutoff_length  = 0.0;
+typename LennardJonesPotential<realT>::real_type LennardJonesPotential<realT>::cutoff_ratio  = 0.0;
 template<typename realT>
 typename LennardJonesPotential<realT>::real_type LennardJonesPotential<realT>::coef_at_cutoff = 0.0;
 

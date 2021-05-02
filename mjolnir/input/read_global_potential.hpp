@@ -332,7 +332,7 @@ read_lennard_jones_potential(const toml::value& global)
 
     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
             potential_type::default_cutoff());
-    potential_type::set_cutoff_length(cutoff);
+    potential_type::set_cutoff_ratio(cutoff);
     MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
 
     const auto& ps = toml::find<toml::array>(global, "parameters");
