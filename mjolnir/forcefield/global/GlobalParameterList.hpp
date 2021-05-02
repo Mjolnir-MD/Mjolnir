@@ -9,7 +9,7 @@ namespace mjolnir
 {
 
 template<typename traitsT, typename potentialT>
-struct ParameterCombinationRuleBase
+struct CombinationRuleBase
 {
   public:
     using traits_type         = traitsT;
@@ -18,7 +18,7 @@ struct ParameterCombinationRuleBase
 
   public:
 
-    virtual ~ParameterCombinationRuleBase() = default;
+    virtual ~CombinationRuleBase() = default;
 
     // calculate combination of parameters
     virtual pair_parameter_type
@@ -41,7 +41,7 @@ class GlobalParameterList
   public:
     using traits_type           = traitsT;
     using potential_type        = potentialT;
-    using combination_rule_base = ParameterCombinationRuleBase<traits_type, potential_type>;
+    using combination_rule_base = CombinationRuleBase<traits_type, potential_type>;
     using combination_rule_type = std::unique_ptr<combination_rule_base>;
     using pair_parameter_type   = typename potential_type::parameter_type;
     using system_type           = System<traits_type>;
@@ -165,7 +165,7 @@ class GlobalParameterList
 
 template<typename traitsT, typename potentialT>
 class LorentzBerthelotRule final
-    : public ParameterCombinationRuleBase<traitsT, potentialT>
+    : public CombinationRuleBase<traitsT, potentialT>
 {
   public:
     using traits_type         = traitsT;
@@ -241,7 +241,7 @@ class LorentzBerthelotRule final
 
 template<typename traitsT, typename potentialT>
 struct CombinationTable
-    : public ParameterCombinationRuleBase<traitsT, potentialT>
+    : public CombinationRuleBase<traitsT, potentialT>
 {
   public:
     using traits_type         = traitsT;
