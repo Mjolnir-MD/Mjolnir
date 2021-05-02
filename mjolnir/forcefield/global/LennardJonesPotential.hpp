@@ -1,9 +1,13 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_LENNARD_JONES_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_LENNARD_JONES_POTENTIAL_HPP
 #include <limits>
+#include <utility>
+#include <cmath>
 
 namespace mjolnir
 {
+
+template<typename T> struct System;
 
 // Well-known Lennard-Jones interaction with Lorentz-Berthelot combining rules.
 // This class contains sigmas and epsilons of the particles and calculates
@@ -25,6 +29,17 @@ class LennardJonesPotential
         return parameter_type{real_type(0), real_type(0)};
     }
 
+    static void set_cutoff_length(const real_type cutoff_ratio)
+    {
+        if(self_type::cutoff_length < cutoff_ratio)
+        {
+            self_type::cutoff_length  = cutoff_ratio;
+            self_type::coef_at_cutoff = std::pow(real_type(1) / cutoff_ratio, 12)
+                                      - std::pow(real_type(1) / cutoff_ratio, 6);
+        }
+        return;
+    }
+
     static real_type cutoff_length;
     static real_type coef_at_cutoff;
 
@@ -40,24 +55,24 @@ class LennardJonesPotential
 
     real_type potential(const real_type r) const noexcept
     {
-        if(this->sigma_ * self_type::cutoff_ratio < r){return real_type(0);}
+        if(this->sigma_ * self_type::cutoff_length < r){return real_type(0);}
 
-        const real_type sr1 = sigma / r;
+        const real_type sr1 = sigma_ / r;
         const real_type sr3 = sr1 * sr1 * sr1;
         const real_type sr6 = sr3 * sr3;
 
         return real_type(4) * epsilon_ * (sr6 * (sr6 - real_type(1)) - self_type::coef_at_cutoff);
     }
-    real_type derivative(const real_type r, const pair_parameter_type& p) const noexcept
+    real_type derivative(const real_type r) const noexcept
     {
-        if(this->sigma_ * self_type::cutoff_ratio < r){return real_type(0);}
+        if(this->sigma_ * self_type::cutoff_length < r){return real_type(0);}
 
         const real_type rinv = 1 / r;
-        const real_type sr1  = sigma * rinv;
+        const real_type sr1  = sigma_ * rinv;
         const real_type sr3  = sr1 * sr1 * sr1;
         const real_type sr6  = sr3 * sr3;
 
-        return real_type(24) * epsilon * sr6 * (real_type(1) - real_type(2) * sr6) * rinv;
+        return real_type(24) * epsilon_ * sr6 * (real_type(1) - real_type(2) * sr6) * rinv;
     }
 
     template<typename T>
@@ -73,7 +88,7 @@ class LennardJonesPotential
 
     real_type cutoff()  const noexcept
     {
-        return this->sigma_ * self_type::cutoff_ratio;
+        return this->sigma_ * self_type::cutoff_length;
     }
 
   public:
@@ -106,9 +121,9 @@ class LennardJonesPotential
 };
 
 template<typename realT>
-real_type LennardJonesPotential<realT>::cutoff_ratio   = std::numeric_limits<realT>::infinity();
+typename LennardJonesPotential<realT>::real_type LennardJonesPotential<realT>::cutoff_length  = 0.0;
 template<typename realT>
-real_type LennardJonesPotential<realT>::coef_at_cutoff = 0.0;
+typename LennardJonesPotential<realT>::real_type LennardJonesPotential<realT>::coef_at_cutoff = 0.0;
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template class LennardJonesPotential<double>;
