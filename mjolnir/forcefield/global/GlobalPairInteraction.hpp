@@ -208,27 +208,27 @@ GlobalPairInteraction<traitsT, potT>::calc_force_and_energy(
 
 } // mjolnir
 
-#include <mjolnir/forcefield/global/GlobalPairExcludedVolumeInteraction.hpp>
+// #include <mjolnir/forcefield/global/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/forcefield/global/GlobalPairLennardJonesInteraction.hpp>
-#include <mjolnir/forcefield/global/GlobalPairUniformLennardJonesInteraction.hpp>
-
-#ifdef MJOLNIR_SEPARATE_BUILD
-// explicitly specialize BondAngleInteraction with LocalPotentials
-#include <mjolnir/core/BoundaryCondition.hpp>
-#include <mjolnir/core/SimulatorTraits.hpp>
-#include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
-
-namespace mjolnir
-{
-
-// EXV, L-J and UL-J have its own specialization, so DO NOT specialize here.
-
-// D-H
-extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       >>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       >>;
-extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-} // mjolnir
-#endif // MJOLNIR_SEPARATE_BUILD
+// #include <mjolnir/forcefield/global/GlobalPairUniformLennardJonesInteraction.hpp>
+// 
+// #ifdef MJOLNIR_SEPARATE_BUILD
+// // explicitly specialize BondAngleInteraction with LocalPotentials
+// #include <mjolnir/core/BoundaryCondition.hpp>
+// #include <mjolnir/core/SimulatorTraits.hpp>
+// #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
+// 
+// namespace mjolnir
+// {
+// 
+// // EXV, L-J and UL-J have its own specialization, so DO NOT specialize here.
+// 
+// // D-H
+// extern template class GlobalPairInteraction<SimulatorTraits<double, UnlimitedBoundary>,        DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       >>;
+// extern template class GlobalPairInteraction<SimulatorTraits<float,  UnlimitedBoundary>,        DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       >>;
+// extern template class GlobalPairInteraction<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+// extern template class GlobalPairInteraction<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
+// } // mjolnir
+// #endif // MJOLNIR_SEPARATE_BUILD
 
 #endif /* MJOLNIR_GLOBAL_PAIR_INTEARACTION */
