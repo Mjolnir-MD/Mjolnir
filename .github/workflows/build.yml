@@ -22,7 +22,7 @@ jobs:
         run: |
             mkdir build
             cd build
-            cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DSEPARATE_BUILD=${{ matrix.separate }} -DUSE_OPENMP=ON -DBUILD_INTEGRATION_TEST=OFF -DFIND_BOOST=ON
+            cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DSEPARATE_BUILD=${{ matrix.separate }} -DUSE_OPENMP=OFF -DBUILD_INTEGRATION_TEST=OFF -DFIND_BOOST=ON
       - name: Build
         run: |
             cd build && cmake --build .
