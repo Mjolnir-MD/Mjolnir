@@ -486,7 +486,7 @@ read_tabulated_lennard_jones_attractive_potential(const toml::value& global)
             if(p1 != p2)
             {
                 const auto key_opposite = p2 + std::string(":") + p1;
-                if(table.contains(key_opposite) != 0)
+                if(table.count(key_opposite) != 0)
                 {
                     MJOLNIR_LOG_WARN("TabulatedLJ does not distinguish two parameters, A.B and B.A.");
                 }
@@ -504,7 +504,7 @@ read_tabulated_lennard_jones_attractive_potential(const toml::value& global)
     {
         const auto idx  = find_parameter   <std::size_t >(param, env, "index") +
                           find_parameter_or<std::int64_t>(param, env, "offset", 0);
-        const auto name = find_parameter<real_type>(param, env, "name");
+        const auto name = toml::find<std::string>(param, "name");
 
         params.emplace_back(idx, name);
         MJOLNIR_LOG_INFO("idx = ", idx, ", name = ", name);

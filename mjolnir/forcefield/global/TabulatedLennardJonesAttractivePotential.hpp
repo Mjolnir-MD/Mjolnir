@@ -22,7 +22,7 @@ class TabulatedLennardJonesAttractivePotential
     using parameter_type       = std::string;
     using pair_parameter_type  = std::pair<real_type, real_type>; // {sigma, epsilon};
     using container_type       = std::vector<parameter_type>;
-    using table_type           = std::unordered_map<std::string, pair_parameter_type>
+    using table_type           = std::unordered_map<std::string, pair_parameter_type>;
 
     // topology stuff
     using topology_type        = Topology;
@@ -44,13 +44,14 @@ class TabulatedLennardJonesAttractivePotential
 
   public:
 
-    LennardJonesAttractivePotential(
+    TabulatedLennardJonesAttractivePotential(
         const real_type cutoff_ratio, table_type&& table,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-    : cutoff_ratio_(cutoff_ratio), table_(std::move(table)),
+    : cutoff_ratio_(cutoff_ratio),
       coef_at_cutoff_(std::pow(1 / cutoff_ratio, 12) - std::pow(1 / cutoff_ratio, 6)),
+      table_(std::move(table)),
       exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
@@ -66,17 +67,17 @@ class TabulatedLennardJonesAttractivePotential
             this->parameters_.at(idx) = idxp.second;
         }
     }
-    ~LennardJonesAttractivePotential() = default;
+    ~TabulatedLennardJonesAttractivePotential() = default;
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
         const auto key = parameters_[i] + ":" + parameters_[j];
-        if(table.count(key) == 0)
+        if(table_.count(key) == 0)
         {
             MJOLNIR_GET_DEFAULT_LOGGER();
-            MJOLNIR_LOG_FATAL("parameter \"", key, "\" is not in the table");
+            MJOLNIR_LOG_ERROR("parameter \"", key, "\" is not in the table");
         }
-        return table_[key];
+        return table_.at(key);
     }
 
     // forwarding functions for clarity...
@@ -140,7 +141,7 @@ class TabulatedLennardJonesAttractivePotential
             this->table_.cbegin(), this->table_.cend(),
             [](const value_type& lhs, const value_type& rhs) noexcept {
                 return lhs.second.first < rhs.second.first;
-            })->first;
+            })->second.first;
 
         return max_sigma * this->cutoff_ratio_;
     }
@@ -200,7 +201,7 @@ class TabulatedLennardJonesAttractivePotential
 
     // ------------------------------------------------------------------------
     // used by Observer.
-    static const char* name() noexcept {return "LennardJones";}
+    static const char* name() noexcept {return "TabulatedLennardJonesAttractive";}
 
     // ------------------------------------------------------------------------
     // the following accessers would be used in tests.
