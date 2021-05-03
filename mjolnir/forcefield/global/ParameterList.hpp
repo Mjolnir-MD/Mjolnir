@@ -15,6 +15,13 @@ namespace mjolnir
 // - Generate pair-parameters using combination rule (like Lorentz-Berthelot)
 // - Store topology-dependent interaction rule (exclusion list)
 //
+// It requires potentialT to have
+// - typedef potentialT::parameter_type
+// - typedef potentialT::parameter_comparator
+// - static  potentialT::default_parameter()
+// -         potentialT::cutoff()
+// -         potentialT::potentialT(parameter_type)
+//
 template<typename traitsT, typename potentialT>
 struct ParameterListBase
 {
