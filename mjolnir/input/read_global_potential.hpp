@@ -476,14 +476,22 @@ read_tabulated_lennard_jones_attractive_potential(const toml::value& global)
         const auto& p1 = kv.first;
         for(const auto& kv2 : toml::get<toml::table>(kv.second))
         {
-            const auto& p2   = kv2.first;
-            const auto& para = kv2.second;
+            const auto& p2  = kv2.first;
+            const auto para = std::make_pair(
+                    find_parameter<real_type>(kv2.second, env, "sigma"),
+                    find_parameter<real_type>(kv2.second, env, "epsilon"));
 
             const auto key = p1 + std::string(":") + p2;
-            table[key] = std::make_pair(
-                    find_parameter<real_type>(para, env, "sigma"),
-                    find_parameter<real_type>(para, env, "epsilon")
-                );
+            table[key] = para;
+            if(p1 != p2)
+            {
+                const auto key_opposite = p2 + std::string(":") + p1;
+                if(table.contains(key_opposite) != 0)
+                {
+                    MJOLNIR_LOG_WARN("TabulatedLJ does not distinguish two parameters, A.B and B.A.");
+                }
+                table[key_opposite] = para;
+            }
         }
     }
 
