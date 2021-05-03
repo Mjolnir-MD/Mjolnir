@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_FORCEFIELD_GLOBAL_PAIR_INTEARACTION_HPP
 #define MJOLNIR_FORCEFIELD_GLOBAL_PAIR_INTEARACTION_HPP
-#include <mjolnir/forcefield/global/GlobalParameterList.hpp>
+#include <mjolnir/forcefield/global/ParameterList.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/GlobalInteractionBase.hpp>
 #include <mjolnir/core/SpatialPartitionBase.hpp>

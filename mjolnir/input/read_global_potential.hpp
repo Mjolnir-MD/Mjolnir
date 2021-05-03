@@ -5,7 +5,7 @@
 // #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
 // #include <mjolnir/forcefield/global/InversePowerPotential.hpp>
 // #include <mjolnir/forcefield/global/HardCoreExcludedVolumePotential.hpp>
-#include <mjolnir/forcefield/global/GlobalParameterList.hpp>
+#include <mjolnir/forcefield/global/ParameterList.hpp>
 #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
 // #include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
 // #include <mjolnir/forcefield/global/LennardJonesAttractivePotential.hpp>

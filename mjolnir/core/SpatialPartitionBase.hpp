@@ -1,6 +1,6 @@
 #ifndef MJOLNIR_CORE_SPATIAL_PARTITON_BASE_HPP
 #define MJOLNIR_CORE_SPATIAL_PARTITON_BASE_HPP
-#include <mjolnir/forcefield/global/GlobalParameterList.hpp>
+#include <mjolnir/forcefield/global/ParameterList.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/NeighborList.hpp>
 #include <mjolnir/util/make_unique.hpp>
