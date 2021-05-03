@@ -28,6 +28,7 @@ set(TEST_NAMES
     test_lennard_jones_potential
     test_uniform_lennard_jones_potential
     test_lennard_jones_attractive_potential
+    test_tabulated_lennard_jones_attractive_potential
     test_wca_potential
     test_isolf_potential
     test_excluded_volume_potential
