@@ -317,7 +317,7 @@ read_ignore_particles_within(const toml::value& global)
 // }
 
 template<typename traitsT>
-GlobalParameterList<traitsT, LennardJonesPotential<typename traitsT::real_type>>
+ParameterList<traitsT, LennardJonesPotential<typename traitsT::real_type>>
 read_lennard_jones_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
@@ -325,7 +325,7 @@ read_lennard_jones_potential(const toml::value& global)
 
     using real_type      = typename traitsT::real_type;
     using potential_type = LennardJonesPotential<real_type>;
-    using parameter_list = GlobalParameterList<traitsT, potential_type>;
+    using parameter_list = ParameterList<traitsT, potential_type>;
     using parameter_type = typename potential_type::parameter_type;
 
     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
@@ -352,10 +352,9 @@ read_lennard_jones_potential(const toml::value& global)
     }
     check_parameter_overlap(env, ps, params);
 
-    return parameter_list(
-            make_unique<LorentzBerthelotRule<traitsT, potential_type>>(std::move(params)),
-            read_ignore_particles_within(global),
-            read_ignored_molecule(global), read_ignored_group(global));
+    return parameter_list(make_unique<LorentzBerthelotRule<traitsT, potential_type>>(
+            std::move(params), read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global)));
 }
 
 // template<typename traitsT>

@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_INTEARACTION_GLOBAL_PAIR_INTEARACTION_HPP
-#define MJOLNIR_INTEARACTION_GLOBAL_PAIR_INTEARACTION_HPP
+#ifndef MJOLNIR_FORCEFIELD_GLOBAL_PAIR_INTEARACTION_HPP
+#define MJOLNIR_FORCEFIELD_GLOBAL_PAIR_INTEARACTION_HPP
 #include <mjolnir/forcefield/global/GlobalParameterList.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/GlobalInteractionBase.hpp>
@@ -38,7 +38,7 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
     using topology_type       = typename base_type::topology_type;
     using boundary_type       = typename base_type::boundary_type;
     using partition_type      = SpatialPartition<traits_type, potential_type>;
-    using parameter_list_type = GlobalParameterList<traits_type, potential_type>;
+    using parameter_list_type = ParameterList<traits_type, potential_type>;
 
   public:
 

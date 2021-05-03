@@ -28,7 +28,7 @@ class GlobalPairInteraction<
     using boundary_type       = typename base_type::boundary_type;
     using potential_type      = LennardJonesPotential<real_type>;
     using partition_type      = SpatialPartition<traits_type, potential_type>;
-    using parameter_list_type = GlobalParameterList<traits_type, potential_type>;
+    using parameter_list_type = ParameterList<traits_type, potential_type>;
 
   public:
 
