@@ -3,6 +3,7 @@
 #include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/math/math.hpp>
+#include <mjolnir/util/logger.hpp>
 #include <vector>
 #include <algorithm>
 #include <numeric>
@@ -44,11 +45,11 @@ class TabulatedLennardJonesAttractivePotential
   public:
 
     LennardJonesAttractivePotential(
-        const real_type cutoff_ratio, const table_type& table,
+        const real_type cutoff_ratio, table_type&& table,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-    : cutoff_ratio_(cutoff_ratio), table_(table),
+    : cutoff_ratio_(cutoff_ratio), table_(std::move(table)),
       coef_at_cutoff_(std::pow(1 / cutoff_ratio, 12) - std::pow(1 / cutoff_ratio, 6)),
       exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
@@ -69,9 +70,13 @@ class TabulatedLennardJonesAttractivePotential
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
     {
-        const auto& kind1 = parameters_[i];
-        const auto& kind2 = parameters_[j];
-        return table_[kind1 + "-" + kind2];
+        const auto key = parameters_[i] + ":" + parameters_[j];
+        if(table.count(key) == 0)
+        {
+            MJOLNIR_GET_DEFAULT_LOGGER();
+            MJOLNIR_LOG_FATAL("parameter \"", key, "\" is not in the table");
+        }
+        return table_[key];
     }
 
     // forwarding functions for clarity...
