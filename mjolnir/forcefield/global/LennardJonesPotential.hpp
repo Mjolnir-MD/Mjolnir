@@ -18,7 +18,7 @@ class LennardJonesPotential
   public:
     using real_type      = realT;
     using parameter_type = std::pair<real_type, real_type>; // {sigma, epsilon}
-    using self_type      = LennardJonesPotential<realT>;
+    using self_type      = LennardJonesPotential<real_type>;
 
     static constexpr real_type default_cutoff() noexcept
     {
@@ -108,11 +108,6 @@ class LennardJonesPotential
             return lhs.first < rhs.first; // take larger sigma
         }
     };
-
-    parameter_comparator get_parameter_comparator() const noexcept
-    {
-        return parameter_comparator{};
-    }
 
   private:
 
