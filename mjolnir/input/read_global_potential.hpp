@@ -8,7 +8,9 @@
 #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
 #include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/forcefield/global/LennardJonesAttractivePotential.hpp>
+#include <mjolnir/forcefield/global/TabulatedLennardJonesAttractivePotential.hpp>
 #include <mjolnir/forcefield/global/WCAPotential.hpp>
+#include <mjolnir/forcefield/global/TabulatedWCAPotential.hpp>
 #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2ExcludedVolumePotential.hpp>
 #include <mjolnir/forcefield/iSoLF/iSoLFAttractivePotential.hpp>
@@ -440,6 +442,81 @@ read_lennard_jones_attractive_potential(const toml::value& global)
             read_ignored_molecule(global), read_ignored_group(global));
 }
 
+template<typename traitsT>
+TabulatedLennardJonesAttractivePotential<traitsT>
+read_tabulated_lennard_jones_attractive_potential(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using potential_type      = TabulatedLennardJonesAttractivePotential<traitsT>;
+    using real_type           = typename potential_type::real_type;
+    using parameter_type      = typename potential_type::parameter_type;
+    using pair_parameter_type = typename potential_type::pair_parameter_type;
+
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff());
+    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+
+    // [[forcefield.global]]
+    // interaciton = "Pair"
+    // potential = "AttractiveLennardJones"
+    // table.A.A = {sigma = 1.0, epsilon = 2.0}
+    // table.A.B = {sigma = 1.0, epsilon = 2.0} # B.A will be the same
+    // table.B.B = {sigma = 1.0, epsilon = 2.0}
+    // parameters = [
+    //     {index = 0, name = "A"},
+    //     {index = 1, name = "A"},
+    //     {index = 2, name = "B"},
+    //     {index = 3, name = "B"},
+    // ]
+    std::unordered_map<std::string, pair_parameter_type> table;
+    for(const auto& kv : toml::find<toml::table>(global, "table"))
+    {
+        const auto& p1 = kv.first;
+        for(const auto& kv2 : toml::get<toml::table>(kv.second))
+        {
+            const auto& p2  = kv2.first;
+            const auto para = std::make_pair(
+                    find_parameter<real_type>(kv2.second, env, "sigma"),
+                    find_parameter<real_type>(kv2.second, env, "epsilon"));
+
+            const auto key = p1 + std::string(":") + p2;
+            table[key] = para;
+            if(p1 != p2)
+            {
+                const auto key_opposite = p2 + std::string(":") + p1;
+                if(table.count(key_opposite) != 0)
+                {
+                    MJOLNIR_LOG_WARN("TabulatedLJ does not distinguish two parameters, A.B and B.A.");
+                }
+                table[key_opposite] = para;
+            }
+        }
+    }
+
+    const auto& ps = toml::find<toml::array>(global, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        const auto idx  = find_parameter   <std::size_t >(param, env, "index") +
+                          find_parameter_or<std::int64_t>(param, env, "offset", 0);
+        const auto name = toml::find<std::string>(param, "name");
+
+        params.emplace_back(idx, name);
+        MJOLNIR_LOG_INFO("idx = ", idx, ", name = ", name);
+    }
+    check_parameter_overlap(env, ps, params);
+
+    return potential_type(cutoff, std::move(table), std::move(params),
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
+}
+
 
 template<typename traitsT>
 WCAPotential<traitsT>
@@ -481,6 +558,86 @@ read_wca_potential(const toml::value& global)
             read_ignore_particles_within(global),
             read_ignored_molecule(global), read_ignored_group(global));
 }
+
+template<typename traitsT>
+TabulatedWCAPotential<traitsT>
+read_tabulated_wca_potential(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using potential_type      = TabulatedWCAPotential<traitsT>;
+    using real_type           = typename potential_type::real_type;
+    using parameter_type      = typename potential_type::parameter_type;
+    using pair_parameter_type = typename potential_type::pair_parameter_type;
+
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+
+    if(global.contains("cutoff"))
+    {
+        MJOLNIR_LOG_WARN("WCA has the exact cutoff distance. While the simulation,"
+            " the exact cutoff is used and specified cutoff will be ignored.");
+    }
+
+    // [[forcefield.global]]
+    // interaciton = "Pair"
+    // potential = "AttractiveLennardJones"
+    // table.A.A = {sigma = 1.0, epsilon = 2.0}
+    // table.A.B = {sigma = 1.0, epsilon = 2.0} # B.A will be the same
+    // table.B.B = {sigma = 1.0, epsilon = 2.0}
+    // parameters = [
+    //     {index = 0, name = "A"},
+    //     {index = 1, name = "A"},
+    //     {index = 2, name = "B"},
+    //     {index = 3, name = "B"},
+    // ]
+    std::unordered_map<std::string, pair_parameter_type> table;
+    for(const auto& kv : toml::find<toml::table>(global, "table"))
+    {
+        const auto& p1 = kv.first;
+        for(const auto& kv2 : toml::get<toml::table>(kv.second))
+        {
+            const auto& p2  = kv2.first;
+            const auto para = std::make_pair(
+                    find_parameter<real_type>(kv2.second, env, "sigma"),
+                    find_parameter<real_type>(kv2.second, env, "epsilon"));
+
+            const auto key = p1 + std::string(":") + p2;
+            table[key] = para;
+            if(p1 != p2)
+            {
+                const auto key_opposite = p2 + std::string(":") + p1;
+                if(table.count(key_opposite) != 0)
+                {
+                    MJOLNIR_LOG_WARN("WCA does not distinguish two pair-parameters, A.B and B.A.");
+                }
+                table[key_opposite] = para;
+            }
+        }
+    }
+
+    const auto& ps = toml::find<toml::array>(global, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        const auto idx  = find_parameter   <std::size_t>(param, env, "index") +
+                          find_parameter_or<std::size_t>(param, env, "offset", 0);
+        const auto name = toml::find<std::string>(param, "name");
+
+        params.emplace_back(idx, name);
+        MJOLNIR_LOG_INFO("idx = ", idx, ", name = ", name);
+    }
+
+    check_parameter_overlap(env, ps, params);
+
+    return potential_type(potential_type::default_cutoff(),
+            std::move(table), std::move(params),
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
+}
+
 
 template<typename traitsT>
 DebyeHuckelPotential<traitsT>
