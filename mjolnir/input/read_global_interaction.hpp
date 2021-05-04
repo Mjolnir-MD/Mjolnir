@@ -116,12 +116,24 @@ read_global_pair_interaction(const toml::value& global)
     else if(potential == "WCA")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is WCA.");
-        using potential_t   = WCAPotential<traitsT>;
-        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+        if(global.contains("table"))
+        {
+            using potential_t   = TabulatedWCAPotential<traitsT>;
+            using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
-        return make_unique<interaction_t>(
-            read_wca_potential<traitsT>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+            return make_unique<interaction_t>(
+                read_tabulated_wca_potential<traitsT>(global),
+                read_spatial_partition<traitsT, potential_t>(global));
+        }
+        else
+        {
+            using potential_t   = WCAPotential<traitsT>;
+            using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+
+            return make_unique<interaction_t>(
+                read_wca_potential<traitsT>(global),
+                read_spatial_partition<traitsT, potential_t>(global));
+        }
     }
     else if(potential == "3SPN2ExcludedVolume")
     {
