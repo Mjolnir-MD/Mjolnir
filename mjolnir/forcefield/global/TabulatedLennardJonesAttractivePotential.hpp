@@ -37,7 +37,7 @@ class TabulatedLennardJonesAttractivePotential
     {
         return real_type(2.5);
     }
-    static constexpr parameter_type default_parameter() noexcept
+    static parameter_type default_parameter() noexcept
     {
         return std::string("");
     }

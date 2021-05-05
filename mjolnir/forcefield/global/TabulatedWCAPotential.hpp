@@ -41,7 +41,7 @@ class TabulatedWCAPotential
     {
         return real_type(1.12246204831); // pow(2.0, 1.0 / 6.0)
     }
-    static constexpr parameter_type default_parameter() noexcept
+    static parameter_type default_parameter() noexcept
     {
         return std::string("");
     }
