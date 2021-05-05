@@ -4,6 +4,7 @@ set(mjolnir_core_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/BAOABLangevinIntegrator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/gBAOABLangevinIntegrator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/GJFNVTLangevinIntegrator.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/GFWNpTLangevinIntegrator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/UnderdampedLangevinIntegrator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/VelocityVerletIntegrator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/MolecularDynamicsSimulator.cpp"
