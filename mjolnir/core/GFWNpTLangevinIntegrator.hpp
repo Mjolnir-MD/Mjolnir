@@ -336,6 +336,9 @@ class GFWNpTLangevinIntegrator
         Y(noise_coeff_cell_) = std::sqrt((1 - exp_2gamma_dt_y) * kBT * Y(rm_cell_));
         Z(noise_coeff_cell_) = std::sqrt((1 - exp_2gamma_dt_z) * kBT * Z(rm_cell_));
 
+        MJOLNIR_LOG_INFO("1 / M_cell = ", rm_cell_);
+        MJOLNIR_LOG_INFO("beta_cell  = ", noise_coeff_cell_);
+
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             const auto gamma    = this->gammas_.at(i);
@@ -374,6 +377,8 @@ class GFWNpTLangevinIntegrator
     // When the off-diagonal terms vanish, the Su and the Sl functions become
     // the same with each other and are drastically simplified.
     // Here it implements diagonal version of Su and Sl.
+    //
+    // Since S always uses t = dt/2, here it assumes that t = dt/2.
     coordinate_type S(coordinate_type x0,      const coordinate_type b,
                       const coordinate_type A, const coordinate_type coef_S)
     {
@@ -383,9 +388,12 @@ class GFWNpTLangevinIntegrator
         Y(x0) *= Y(coef_S);
         Z(x0) *= Z(coef_S);
 
-        X(x0) -= (real_type(1) - X(coef_S)) * X(b) / X(A);
-        Y(x0) -= (real_type(1) - Y(coef_S)) * Y(b) / Y(A);
-        Z(x0) -= (real_type(1) - Z(coef_S)) * Z(b) / Z(A);
+        // use tailor expansion of F1(0, adt/2), as in the paper
+        const auto tA = halfdt_ * A;
+
+        X(x0) += halfdt_ * X(b) * (real_type(1) + X(tA) / real_type(2) + X(tA) * X(tA) / real_type(6));
+        Y(x0) += halfdt_ * Y(b) * (real_type(1) + Y(tA) / real_type(2) + Y(tA) * Y(tA) / real_type(6));
+        Z(x0) += halfdt_ * Z(b) * (real_type(1) + Z(tA) / real_type(2) + Z(tA) * Z(tA) / real_type(6));
 
         return x0;
     }
