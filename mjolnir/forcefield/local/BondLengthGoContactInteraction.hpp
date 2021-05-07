@@ -70,6 +70,8 @@ class BondLengthInteraction<
             const auto f    = coef * dpos;
             sys.force(idx0) -= f;
             sys.force(idx1) += f;
+
+            sys.virial() += math::tensor_product(dpos, f);
         }
         return;
     }
@@ -113,6 +115,8 @@ class BondLengthInteraction<
             const auto f    = coef * dpos;
             sys.force(idx0) -= f;
             sys.force(idx1) += f;
+
+            sys.virial() += math::tensor_product(dpos, f);
         }
         return energy;
     }

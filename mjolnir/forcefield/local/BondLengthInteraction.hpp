@@ -115,7 +115,7 @@ void BondLengthInteraction<traitsT, potentialT>::calc_force(
         const std::size_t idx0 = idxp.first[0];
         const std::size_t idx1 = idxp.first[1];
 
-        const auto dpos =
+        const auto dpos = // from r0 -> r1 = r1 - r0
             sys.adjust_direction(sys.position(idx0), sys.position(idx1));
 
         const real_type len2 = math::length_sq(dpos); // l^2
@@ -126,6 +126,8 @@ void BondLengthInteraction<traitsT, potentialT>::calc_force(
         const coordinate_type f = dpos * (force * rlen);
         sys.force(idx0) -= f;
         sys.force(idx1) += f;
+
+        sys.virial() += math::tensor_product(dpos, f);
     }
     return;
 }
@@ -167,6 +169,8 @@ BondLengthInteraction<traitsT, potentialT>::calc_force_and_energy(
         const coordinate_type f = dpos * (force * rlen);
         sys.force(idx0) -= f;
         sys.force(idx1) += f;
+
+        sys.virial() += math::tensor_product(dpos, f);
     }
     return energy;
 }

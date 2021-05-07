@@ -147,10 +147,18 @@ DihedralAngleInteraction<traitsT, pT>::calc_force(system_type& sys) const noexce
         const real_type coef_ijk = math::dot_product(r_ij, r_kj) * r_kj_rlensq;
         const real_type coef_jkl = math::dot_product(r_kl, r_kj) * r_kj_rlensq;
 
+        const auto Fj = (coef_ijk - real_type(1.0)) * Fi - coef_jkl * Fl;
+        const auto Fk = (coef_jkl - real_type(1.0)) * Fl - coef_ijk * Fi;
+
         sys.force(idx0) += Fi;
-        sys.force(idx1) += (coef_ijk - real_type(1.0)) * Fi - coef_jkl * Fl;
-        sys.force(idx2) += (coef_jkl - real_type(1.0)) * Fl - coef_ijk * Fi;
+        sys.force(idx1) += Fj;
+        sys.force(idx2) += Fk;
         sys.force(idx3) += Fl;
+
+        sys.virial() += math::tensor_product(r_j + r_ij,        Fi) +
+                        math::tensor_product(r_j,               Fj) +
+                        math::tensor_product(r_j + r_kj,        Fk) +
+                        math::tensor_product(r_j + r_kj + r_lk, Fl);
     }
     return;
 }
@@ -204,9 +212,9 @@ DihedralAngleInteraction<traitsT, pT>::calc_force_and_energy(system_type& sys) c
         const auto& r_k = sys.position(idx2);
         const auto& r_l = sys.position(idx3);
 
-        const coordinate_type r_ij = sys.adjust_direction(r_j, r_i);
-        const coordinate_type r_kj = sys.adjust_direction(r_j, r_k);
-        const coordinate_type r_lk = sys.adjust_direction(r_k, r_l);
+        const coordinate_type r_ij = sys.adjust_direction(r_j, r_i); // j->i
+        const coordinate_type r_kj = sys.adjust_direction(r_j, r_k); // j->k
+        const coordinate_type r_lk = sys.adjust_direction(r_k, r_l); // k->l
         const coordinate_type r_kl = real_type(-1.0) * r_lk;
 
         const real_type r_kj_lensq  = math::length_sq(r_kj);
@@ -235,10 +243,18 @@ DihedralAngleInteraction<traitsT, pT>::calc_force_and_energy(system_type& sys) c
         const real_type coef_ijk = math::dot_product(r_ij, r_kj) * r_kj_rlensq;
         const real_type coef_jkl = math::dot_product(r_kl, r_kj) * r_kj_rlensq;
 
+        const auto Fj = (coef_ijk - real_type(1.0)) * Fi - coef_jkl * Fl;
+        const auto Fk = (coef_jkl - real_type(1.0)) * Fl - coef_ijk * Fi;
+
         sys.force(idx0) += Fi;
-        sys.force(idx1) += (coef_ijk - real_type(1.0)) * Fi - coef_jkl * Fl;
-        sys.force(idx2) += (coef_jkl - real_type(1.0)) * Fl - coef_ijk * Fi;
+        sys.force(idx1) += Fj;
+        sys.force(idx2) += Fk;
         sys.force(idx3) += Fl;
+
+        sys.virial() += math::tensor_product(r_j + r_ij,        Fi) +
+                        math::tensor_product(r_j,               Fj) +
+                        math::tensor_product(r_j + r_kj,        Fk) +
+                        math::tensor_product(r_j + r_kj + r_lk, Fl);
     }
     return energy;
 }
