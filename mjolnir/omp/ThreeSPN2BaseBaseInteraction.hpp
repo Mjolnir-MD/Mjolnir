@@ -134,6 +134,9 @@ class ThreeSPN2BaseBaseInteraction<
                         // remember that F = -dU.
                         sys.force_thread(thread_id, Bi) -= dU_rep * Bji_reg;
                         sys.force_thread(thread_id, Bj) -= dU_rep * Bij_reg;
+
+                        // Bij = Bj - Bi
+                        sys.virial_thread(thread_id) += math::tensor_product(Bij, -F);
                     }
                 }
 
@@ -222,6 +225,11 @@ class ThreeSPN2BaseBaseInteraction<
                     {
                         const auto U_dU_attr = potential_.U_dU_attr(bp_kind, lBij);
 
+                        auto f_Si = math::make_coordinate<coordinate_type>(0,0,0);
+                        auto f_Sj = math::make_coordinate<coordinate_type>(0,0,0);
+                        auto f_Bi = math::make_coordinate<coordinate_type>(0,0,0);
+                        auto f_Bj = math::make_coordinate<coordinate_type>(0,0,0);
+
                         // --------------------------------------------------------
                         // calc dihedral term
                         // -sin(dphi)/2 f(dtheta1) f(dtheta2) U_attr(Bij) dphi/dr
@@ -238,10 +246,10 @@ class ThreeSPN2BaseBaseInteraction<
                             const auto coef_Bi = dot_SBiBj * rlBij_sq;
                             const auto coef_Bj = dot_SBjBi * rlBij_sq;
 
-                            sys.force_thread(thread_id, Si) += fSi;
-                            sys.force_thread(thread_id, Bi) += (coef_Bi - real_type(1.0)) * fSi - coef_Bj * fSj;
-                            sys.force_thread(thread_id, Bj) += (coef_Bj - real_type(1.0)) * fSj - coef_Bi * fSi;
-                            sys.force_thread(thread_id, Sj) += fSj;
+                            f_Si += fSi;
+                            f_Bi += (coef_Bi - real_type(1.0)) * fSi - coef_Bj * fSj;
+                            f_Bj += (coef_Bj - real_type(1.0)) * fSj - coef_Bi * fSi;
+                            f_Sj += fSj;
                         }
 
                         const auto dihd_term = real_type(0.5) * (real_type(1.0) + cos_dphi);
@@ -262,9 +270,9 @@ class ThreeSPN2BaseBaseInteraction<
                                              (cos_theta1 * BSi_reg - Bij_reg);
                             const auto fBj = (coef_rsin * rlBij) *
                                              (cos_theta1 * Bij_reg - BSi_reg);
-                            sys.force_thread(thread_id, Si) += fSi;
-                            sys.force_thread(thread_id, Bi) -= (fSi + fBj);
-                            sys.force_thread(thread_id, Bj) += fBj;
+                            f_Si += fSi;
+                            f_Bi -= (fSi + fBj);
+                            f_Bj += fBj;
                         }
                         // --------------------------------------------------------
                         // calc theta2 term
@@ -282,9 +290,9 @@ class ThreeSPN2BaseBaseInteraction<
                                              (cos_theta2 * Bji_reg - BSj_reg);
                             const auto fSj = (coef_rsin * rlSBj) *
                                              (cos_theta2 * BSj_reg - Bji_reg);
-                            sys.force_thread(thread_id, Bi) += fBi;
-                            sys.force_thread(thread_id, Bj) -= (fBi + fSj);
-                            sys.force_thread(thread_id, Sj) += fSj;
+                            f_Bi += fBi;
+                            f_Bj -= (fBi + fSj);
+                            f_Sj += fSj;
                         }
                         // --------------------------------------------------------
                         // calc distance
@@ -293,9 +301,18 @@ class ThreeSPN2BaseBaseInteraction<
                         {
                             // remember that F = -dU. Here `coef` = -dU.
                             const auto coef = -dihd_term * f1 * f2 * U_dU_attr.second;
-                            sys.force_thread(thread_id, Bi) += coef * Bji_reg;
-                            sys.force_thread(thread_id, Bj) += coef * Bij_reg;
+                            f_Bi += coef * Bji_reg;
+                            f_Bj += coef * Bij_reg;
                         }
+                        sys.force_thread(thread_id, Si) += f_Si;
+                        sys.force_thread(thread_id, Bi) += f_Bi;
+                        sys.force_thread(thread_id, Bj) += f_Bj;
+                        sys.force_thread(thread_id, Sj) += f_Sj;
+
+                        sys.virial_thread(thread_id)  += math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
+                                         math::tensor_product(                   rBi , f_Bi) +
+                                         math::tensor_product(             rBi + Bij,  f_Bj) +
+                                         math::tensor_product(sys.transpose(rSj, rBi), f_Sj) ;
                     }
                 }
 
@@ -356,6 +373,13 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto fSi_theta3 = real_type(-1) * fBi_theta3;
                 const auto fSj_theta3 = real_type(-1) * fBj_theta3;
 
+                auto f_Si      = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_Sj      = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_Bi      = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_Bj      = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_Bi_next = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_Bj_next = math::make_coordinate<coordinate_type>(0,0,0);
+
                 // adjacent of Base j exists. its not the edge of the strand.
                 if(Bj_next_exists)
                 {
@@ -401,10 +425,10 @@ class ThreeSPN2BaseBaseInteraction<
                         if(df3 != real_type(0))
                         {
                             const auto coef = -df3 * fCS * U_dU_attr.first;
-                            sys.force_thread(thread_id, Si) += coef * fSi_theta3;
-                            sys.force_thread(thread_id, Sj) += coef * fSj_theta3;
-                            sys.force_thread(thread_id, Bi) += coef * fBi_theta3;
-                            sys.force_thread(thread_id, Bj) += coef * fBj_theta3;
+                            f_Si += coef * fSi_theta3;
+                            f_Sj += coef * fSj_theta3;
+                            f_Bi += coef * fBi_theta3;
+                            f_Bj += coef * fBj_theta3;
                         }
                         // --------------------------------------------------------
                         // f(theta_3) df/dtheta_CS U_attr(eps, alp, rij) dtheta_CS/dr
@@ -418,17 +442,17 @@ class ThreeSPN2BaseBaseInteraction<
                             const auto fSi  =  coef_rsin * rlSBi  * (cos_theta_CS * BSi_reg + Bj5i_reg);
                             const auto fBj5 = -coef_rsin * rlBj5i * (cos_theta_CS * Bj5i_reg + BSi_reg);
 
-                            sys.force_thread(thread_id, Si)      += fSi;
-                            sys.force_thread(thread_id, Bi)      -= (fSi + fBj5);
-                            sys.force_thread(thread_id, Bj_next) += fBj5;
+                            f_Si      += fSi;
+                            f_Bi      -= (fSi + fBj5);
+                            f_Bj_next += fBj5;
                         }
                         // --------------------------------------------------------
                         // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
                         if(U_dU_attr.second != real_type(0.0))
                         {
                             const auto coef = -f3 * fCS * U_dU_attr.second;
-                            sys.force_thread(thread_id, Bi)      += coef * Bj5i_reg;
-                            sys.force_thread(thread_id, Bj_next) -= coef * Bj5i_reg;
+                            f_Bi      += coef * Bj5i_reg;
+                            f_Bj_next -= coef * Bj5i_reg;
                         }
                     }
                 }
@@ -475,10 +499,10 @@ class ThreeSPN2BaseBaseInteraction<
                         if(df3 != real_type(0))
                         {
                             const auto coef = -df3 * fCS * U_dU_attr.first;
-                            sys.force_thread(thread_id, Si) += coef * fSi_theta3;
-                            sys.force_thread(thread_id, Sj) += coef * fSj_theta3;
-                            sys.force_thread(thread_id, Bi) += coef * fBi_theta3;
-                            sys.force_thread(thread_id, Bj) += coef * fBj_theta3;
+                            f_Si += coef * fSi_theta3;
+                            f_Sj += coef * fSj_theta3;
+                            f_Bi += coef * fBi_theta3;
+                            f_Bj += coef * fBj_theta3;
                         }
                         // --------------------------------------------------------
                         // f(theta_3) df/dtheta_CS U_attr(eps, alp, rij) dtheta_CS/dr
@@ -491,20 +515,33 @@ class ThreeSPN2BaseBaseInteraction<
 
                             const auto fSj  =  coef_rsin * rlSBj  * (cos_theta_CS * BSj_reg + Bi3j_reg);
                             const auto fBi3 = -coef_rsin * rlBi3j * (cos_theta_CS * Bi3j_reg + BSj_reg);
-                            sys.force_thread(thread_id, Sj)      += fSj;
-                            sys.force_thread(thread_id, Bj)      -= (fSj + fBi3);
-                            sys.force_thread(thread_id, Bi_next) += fBi3;
+                            f_Sj      += fSj;
+                            f_Bj      -= (fSj + fBi3);
+                            f_Bi_next += fBi3;
                         }
                         // --------------------------------------------------------
                         // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
                         if(U_dU_attr.second != real_type(0.0))
                         {
                             const auto coef = -f3 * fCS * U_dU_attr.second;
-                            sys.force_thread(thread_id, Bj)      += coef * Bi3j_reg;
-                            sys.force_thread(thread_id, Bi_next) -= coef * Bi3j_reg;
+                            f_Bj      += coef * Bi3j_reg;
+                            f_Bi_next -= coef * Bi3j_reg;
                         }
                     }
                 }
+                sys.force_thread(thread_id, Si)      += f_Si     ;
+                sys.force_thread(thread_id, Sj)      += f_Sj     ;
+                sys.force_thread(thread_id, Bi)      += f_Bi     ;
+                sys.force_thread(thread_id, Bj)      += f_Bj     ;
+                sys.force_thread(thread_id, Bi_next) += f_Bi_next;
+                sys.force_thread(thread_id, Bj_next) += f_Bj_next;
+
+                sys.virial_thread(thread_id)  += math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
+                                 math::tensor_product(                   rBi , f_Bi) +
+                                 math::tensor_product(              rBi + Bij, f_Bj) +
+                                 math::tensor_product(sys.transpose(rSj, rBi), f_Sj) +
+                                 math::tensor_product(sys.transpose(sys.position(Bi_next), rBi), f_Bi_next) +
+                                 math::tensor_product(sys.transpose(sys.position(Bj_next), rBi), f_Bj_next) ;
             }
         }
         return;
@@ -821,6 +858,8 @@ class ThreeSPN2BaseBaseInteraction<
                         // remember that F = -dU.
                         sys.force_thread(thread_id, Bi) -= dU_rep * Bji_reg;
                         sys.force_thread(thread_id, Bj) -= dU_rep * Bij_reg;
+
+                        sys.virial_thread(thread_id) += math::tensor_product(Bij, -F); // (Bj - Bi) * Fj
                     }
                 }
 
@@ -907,6 +946,11 @@ class ThreeSPN2BaseBaseInteraction<
 
                     if(cos_dphi != real_type(-1.0))
                     {
+                        auto f_Si = math::make_coordinate<coordinate_type>(0,0,0);
+                        auto f_Sj = math::make_coordinate<coordinate_type>(0,0,0);
+                        auto f_Bi = math::make_coordinate<coordinate_type>(0,0,0);
+                        auto f_Bj = math::make_coordinate<coordinate_type>(0,0,0);
+
                         const auto U_dU_attr = potential_.U_dU_attr(bp_kind, lBij);
 
                         energy += 0.5 * (1 + cos_dphi) * f1 * f2 * U_dU_attr.first;
@@ -927,10 +971,10 @@ class ThreeSPN2BaseBaseInteraction<
                             const auto coef_Bi = dot_SBiBj * rlBij_sq;
                             const auto coef_Bj = dot_SBjBi * rlBij_sq;
 
-                            sys.force_thread(thread_id, Si) += fSi;
-                            sys.force_thread(thread_id, Bi) += (coef_Bi - real_type(1.0)) * fSi - coef_Bj * fSj;
-                            sys.force_thread(thread_id, Bj) += (coef_Bj - real_type(1.0)) * fSj - coef_Bi * fSi;
-                            sys.force_thread(thread_id, Sj) += fSj;
+                            f_Si += fSi;
+                            f_Bi += (coef_Bi - real_type(1.0)) * fSi - coef_Bj * fSj;
+                            f_Bj += (coef_Bj - real_type(1.0)) * fSj - coef_Bi * fSi;
+                            f_Sj += fSj;
                         }
 
                         const auto dihd_term = real_type(0.5) * (real_type(1.0) + cos_dphi);
@@ -951,9 +995,9 @@ class ThreeSPN2BaseBaseInteraction<
                                              (cos_theta1 * BSi_reg - Bij_reg);
                             const auto fBj = (coef_rsin * rlBij) *
                                              (cos_theta1 * Bij_reg - BSi_reg);
-                            sys.force_thread(thread_id, Si) += fSi;
-                            sys.force_thread(thread_id, Bi) -= (fSi + fBj);
-                            sys.force_thread(thread_id, Bj) += fBj;
+                            f_Si += fSi;
+                            f_Bi -= (fSi + fBj);
+                            f_Bj += fBj;
                         }
                         // --------------------------------------------------------
                         // calc theta2 term
@@ -971,9 +1015,9 @@ class ThreeSPN2BaseBaseInteraction<
                                              (cos_theta2 * Bji_reg - BSj_reg);
                             const auto fSj = (coef_rsin * rlSBj) *
                                              (cos_theta2 * BSj_reg - Bji_reg);
-                            sys.force_thread(thread_id, Bi) += fBi;
-                            sys.force_thread(thread_id, Bj) -= (fBi + fSj);
-                            sys.force_thread(thread_id, Sj) += fSj;
+                            f_Bi += fBi;
+                            f_Bj -= (fBi + fSj);
+                            f_Sj += fSj;
                         }
                         // --------------------------------------------------------
                         // calc distance
@@ -982,9 +1026,20 @@ class ThreeSPN2BaseBaseInteraction<
                         {
                             // remember that F = -dU. Here `coef` = -dU.
                             const auto coef = -dihd_term * f1 * f2 * U_dU_attr.second;
-                            sys.force_thread(thread_id, Bi) += coef * Bji_reg;
-                            sys.force_thread(thread_id, Bj) += coef * Bij_reg;
+                            f_Bi += coef * Bji_reg;
+                            f_Bj += coef * Bij_reg;
                         }
+
+                        sys.force_thread(thread_id, Si) += f_Si;
+                        sys.force_thread(thread_id, Bi) += f_Bi;
+                        sys.force_thread(thread_id, Bj) += f_Bj;
+                        sys.force_thread(thread_id, Sj) += f_Sj;
+
+                        sys.virial_thread(thread_id)  += math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
+                                         math::tensor_product(                   rBi , f_Bi) +
+                                         math::tensor_product(              rBi + Bij, f_Bj) +
+                                         math::tensor_product(sys.transpose(rSj, rBi), f_Sj) ;
+
                     }
                 }
 
@@ -1045,6 +1100,13 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto fSi_theta3 = real_type(-1) * fBi_theta3;
                 const auto fSj_theta3 = real_type(-1) * fBj_theta3;
 
+                auto f_Si      = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_Sj      = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_Bi      = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_Bj      = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_Bi_next = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_Bj_next = math::make_coordinate<coordinate_type>(0,0,0);
+
                 // adjacent of Base j exists. its not the edge of the strand.
                 if(Bj_next_exists)
                 {
@@ -1090,10 +1152,10 @@ class ThreeSPN2BaseBaseInteraction<
                         if(df3 != real_type(0))
                         {
                             const auto coef = -df3 * fCS * U_dU_attr.first;
-                            sys.force_thread(thread_id, Si) += coef * fSi_theta3;
-                            sys.force_thread(thread_id, Sj) += coef * fSj_theta3;
-                            sys.force_thread(thread_id, Bi) += coef * fBi_theta3;
-                            sys.force_thread(thread_id, Bj) += coef * fBj_theta3;
+                            f_Si += coef * fSi_theta3;
+                            f_Sj += coef * fSj_theta3;
+                            f_Bi += coef * fBi_theta3;
+                            f_Bj += coef * fBj_theta3;
                         }
                         // --------------------------------------------------------
                         // f(theta_3) df/dtheta_CS U_attr(eps, alp, rij) dtheta_CS/dr
@@ -1107,17 +1169,17 @@ class ThreeSPN2BaseBaseInteraction<
                             const auto fSi  =  coef_rsin * rlSBi  * (cos_theta_CS * BSi_reg + Bj5i_reg);
                             const auto fBj5 = -coef_rsin * rlBj5i * (cos_theta_CS * Bj5i_reg + BSi_reg);
 
-                            sys.force_thread(thread_id, Si)      += fSi;
-                            sys.force_thread(thread_id, Bi)      -= (fSi + fBj5);
-                            sys.force_thread(thread_id, Bj_next) += fBj5;
+                            f_Si      += fSi;
+                            f_Bi      -= (fSi + fBj5);
+                            f_Bj_next += fBj5;
                         }
                         // --------------------------------------------------------
                         // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
                         if(U_dU_attr.second != real_type(0.0))
                         {
                             const auto coef = -f3 * fCS * U_dU_attr.second;
-                            sys.force_thread(thread_id, Bi)      += coef * Bj5i_reg;
-                            sys.force_thread(thread_id, Bj_next) -= coef * Bj5i_reg;
+                            f_Bi      += coef * Bj5i_reg;
+                            f_Bj_next -= coef * Bj5i_reg;
                         }
                     }
                 }
@@ -1164,10 +1226,10 @@ class ThreeSPN2BaseBaseInteraction<
                         if(df3 != real_type(0))
                         {
                             const auto coef = -df3 * fCS * U_dU_attr.first;
-                            sys.force_thread(thread_id, Si) += coef * fSi_theta3;
-                            sys.force_thread(thread_id, Sj) += coef * fSj_theta3;
-                            sys.force_thread(thread_id, Bi) += coef * fBi_theta3;
-                            sys.force_thread(thread_id, Bj) += coef * fBj_theta3;
+                            f_Si += coef * fSi_theta3;
+                            f_Sj += coef * fSj_theta3;
+                            f_Bi += coef * fBi_theta3;
+                            f_Bj += coef * fBj_theta3;
                         }
                         // --------------------------------------------------------
                         // f(theta_3) df/dtheta_CS U_attr(eps, alp, rij) dtheta_CS/dr
@@ -1180,20 +1242,34 @@ class ThreeSPN2BaseBaseInteraction<
 
                             const auto fSj  =  coef_rsin * rlSBj  * (cos_theta_CS * BSj_reg + Bi3j_reg);
                             const auto fBi3 = -coef_rsin * rlBi3j * (cos_theta_CS * Bi3j_reg + BSj_reg);
-                            sys.force_thread(thread_id, Sj)      += fSj;
-                            sys.force_thread(thread_id, Bj)      -= (fSj + fBi3);
-                            sys.force_thread(thread_id, Bi_next) += fBi3;
+                            f_Sj      += fSj;
+                            f_Bj      -= (fSj + fBi3);
+                            f_Bi_next += fBi3;
                         }
                         // --------------------------------------------------------
                         // f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
                         if(U_dU_attr.second != real_type(0.0))
                         {
                             const auto coef = -f3 * fCS * U_dU_attr.second;
-                            sys.force_thread(thread_id, Bj)      += coef * Bi3j_reg;
-                            sys.force_thread(thread_id, Bi_next) -= coef * Bi3j_reg;
+                            f_Bj      += coef * Bi3j_reg;
+                            f_Bi_next -= coef * Bi3j_reg;
                         }
                     }
                 }
+                sys.force_thread(thread_id, Si)      += f_Si     ;
+                sys.force_thread(thread_id, Sj)      += f_Sj     ;
+                sys.force_thread(thread_id, Bi)      += f_Bi     ;
+                sys.force_thread(thread_id, Bj)      += f_Bj     ;
+                sys.force_thread(thread_id, Bi_next) += f_Bi_next;
+                sys.force_thread(thread_id, Bj_next) += f_Bj_next;
+
+                sys.virial_thread(thread_id)
+                    += math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
+                       math::tensor_product(                   rBi , f_Bi) +
+                       math::tensor_product(              rBi + Bij, f_Bj) +
+                       math::tensor_product(sys.transpose(rSj, rBi), f_Sj) +
+                       math::tensor_product(sys.transpose(sys.position(Bi_next), rBi), f_Bi_next) +
+                       math::tensor_product(sys.transpose(sys.position(Bj_next), rBi), f_Bj_next) ;
             }
         }
         return energy;

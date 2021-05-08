@@ -127,6 +127,8 @@ class ThreeSPN2BaseStackingInteraction<
             {
                 sys.force_thread(thread_id, Bi) -= dU_rep * Bji_reg;
                 sys.force_thread(thread_id, Bj) += dU_rep * Bji_reg;
+
+                sys.virial_thread(thread_id) += math::tensor_product(Bij, -f);
             }
 
             // --------------------------------------------------------------------
@@ -166,6 +168,10 @@ class ThreeSPN2BaseStackingInteraction<
             // calc the first term in the attractive part
             // = df(theta) U_attr(rij) dtheta/dr
             //
+            auto f_Si = math::make_coordinate<coordinate_type>(0,0,0);
+            auto f_Bi = math::make_coordinate<coordinate_type>(0,0,0);
+            auto f_Bj = math::make_coordinate<coordinate_type>(0,0,0);
+
             if(df_theta != real_type(0.0))
             {
                 const auto coef = -df_theta * U_dU_attr.first;
@@ -177,9 +183,9 @@ class ThreeSPN2BaseStackingInteraction<
                 const auto fSi = (coef_rsin * rlSBi) * (Bji_reg - cos_theta * SBi_reg);
                 const auto fBj = (coef_rsin * rlBji) * (SBi_reg - cos_theta * Bji_reg);
 
-                sys.force_thread(thread_id, Si) +=  fSi;
-                sys.force_thread(thread_id, Bi) -= (fSi + fBj);
-                sys.force_thread(thread_id, Bj) +=        fBj;
+                f_Si +=  fSi;
+                f_Bi -= (fSi + fBj);
+                f_Bj +=        fBj;
             }
 
             // --------------------------------------------------------------------
@@ -189,9 +195,16 @@ class ThreeSPN2BaseStackingInteraction<
             if(U_dU_attr.second != real_type(0.0))
             {
                 const auto coef = f_theta * U_dU_attr.second;
-                sys.force_thread(thread_id, Bi) -= coef * Bji_reg;
-                sys.force_thread(thread_id, Bj) += coef * Bji_reg;
+                f_Bi -= coef * Bji_reg;
+                f_Bj += coef * Bji_reg;
             }
+            sys.force_thread(thread_id, Si) += f_Si;
+            sys.force_thread(thread_id, Bi) += f_Bi;
+            sys.force_thread(thread_id, Bj) += f_Bj;
+
+            sys.virial_thread(thread_id) += math::tensor_product(rBi, f_Bi) +
+                                            math::tensor_product(rBi - Bji, f_Bj) +
+                                            math::tensor_product(rBi - SBi, f_Si) ;
         }
         return ;
     }
@@ -309,8 +322,11 @@ class ThreeSPN2BaseStackingInteraction<
             const auto dU_rep = potential_.dU_rep(bs_kind, lBji);
             if(dU_rep != real_type(0.0))
             {
-                sys.force_thread(thread_id, Bi) -= dU_rep * Bji_reg;
-                sys.force_thread(thread_id, Bj) += dU_rep * Bji_reg;
+                const auto f = dU_rep * Bji_reg;
+                sys.force_thread(thread_id, Bi) -= f;
+                sys.force_thread(thread_id, Bj) += f;
+
+                sys.virial_thread(thread_id) += math::tensor_product(Bij, -f);
             }
 
             E += potential_.U_rep(bs_kind, lBji);
@@ -350,6 +366,10 @@ class ThreeSPN2BaseStackingInteraction<
 
             E += U_dU_attr.first * f_theta;
 
+            auto f_Si = math::make_coordinate<coordinate_type>(0,0,0);
+            auto f_Bi = math::make_coordinate<coordinate_type>(0,0,0);
+            auto f_Bj = math::make_coordinate<coordinate_type>(0,0,0);
+
             // --------------------------------------------------------------------
             // calc the first term in the attractive part
             // = df(theta) U_attr(rij) dtheta/dr
@@ -365,9 +385,9 @@ class ThreeSPN2BaseStackingInteraction<
                 const auto fSi = (coef_rsin * rlSBi) * (Bji_reg - cos_theta * SBi_reg);
                 const auto fBj = (coef_rsin * rlBji) * (SBi_reg - cos_theta * Bji_reg);
 
-                sys.force_thread(thread_id, Si) +=  fSi;
-                sys.force_thread(thread_id, Bi) -= (fSi + fBj);
-                sys.force_thread(thread_id, Bj) +=        fBj;
+                f_Si +=  fSi;
+                f_Bi -= (fSi + fBj);
+                f_Bj +=        fBj;
             }
 
             // --------------------------------------------------------------------
@@ -377,9 +397,16 @@ class ThreeSPN2BaseStackingInteraction<
             if(U_dU_attr.second != real_type(0.0))
             {
                 const auto coef = f_theta * U_dU_attr.second;
-                sys.force_thread(thread_id, Bi) -= coef * Bji_reg;
-                sys.force_thread(thread_id, Bj) += coef * Bji_reg;
+                f_Bi -= coef * Bji_reg;
+                f_Bj += coef * Bji_reg;
             }
+            sys.force_thread(thread_id, Si) += f_Si;
+            sys.force_thread(thread_id, Bi) += f_Bi;
+            sys.force_thread(thread_id, Bj) += f_Bj;
+
+            sys.virial_thread(thread_id) += math::tensor_product(rBi, f_Bi) +
+                                            math::tensor_product(rBi - Bji, f_Bj) +
+                                            math::tensor_product(rBi - SBi, f_Si) ;
         }
         return E;
     }

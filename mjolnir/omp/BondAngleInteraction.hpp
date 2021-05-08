@@ -74,15 +74,19 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
             const real_type coef_inv_sin = (sin_theta > math::abs_tolerance<real_type>()) ?
                                  coef / sin_theta : coef / math::abs_tolerance<real_type>();
 
-            const coordinate_type Fi =
-                (coef_inv_sin * inv_len_r_ij) * (cos_theta * r_ij_reg - r_kj_reg);
+            const auto Fi = (coef_inv_sin * inv_len_r_ij) * (cos_theta * r_ij_reg - r_kj_reg);
+            const auto Fk = (coef_inv_sin * inv_len_r_kj) * (cos_theta * r_kj_reg - r_ij_reg);
+            const auto Fj = -Fi - Fk;
 
-            const coordinate_type Fk =
-                (coef_inv_sin * inv_len_r_kj) * (cos_theta * r_kj_reg - r_ij_reg);
+            const std::size_t thread_id = omp_get_thread_num();
 
-            sys.force_thread(omp_get_thread_num(), idx0) += Fi;
-            sys.force_thread(omp_get_thread_num(), idx1) -= (Fi + Fk);
-            sys.force_thread(omp_get_thread_num(), idx2) += Fk;
+            sys.force_thread(thread_id, idx0) += Fi;
+            sys.force_thread(thread_id, idx1) += Fj;
+            sys.force_thread(thread_id, idx2) += Fk;
+
+            sys.virial_thread(thread_id) += math::tensor_product(p1 + r_ij, Fi) +
+                                            math::tensor_product(p1,        Fj) +
+                                            math::tensor_product(p1 + r_kj, Fk);
         }
         return;
     }
@@ -150,15 +154,19 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
             const real_type coef_inv_sin = (sin_theta > math::abs_tolerance<real_type>()) ?
                                  coef / sin_theta : coef / math::abs_tolerance<real_type>();
 
-            const coordinate_type Fi =
-                (coef_inv_sin * inv_len_r_ij) * (cos_theta * r_ij_reg - r_kj_reg);
+            const auto Fi = (coef_inv_sin * inv_len_r_ij) * (cos_theta * r_ij_reg - r_kj_reg);
+            const auto Fk = (coef_inv_sin * inv_len_r_kj) * (cos_theta * r_kj_reg - r_ij_reg);
+            const auto Fj = -Fi - Fk;
 
-            const coordinate_type Fk =
-                (coef_inv_sin * inv_len_r_kj) * (cos_theta * r_kj_reg - r_ij_reg);
+            const std::size_t thread_id = omp_get_thread_num();
 
-            sys.force_thread(omp_get_thread_num(), idx0) += Fi;
-            sys.force_thread(omp_get_thread_num(), idx1) -= (Fi + Fk);
-            sys.force_thread(omp_get_thread_num(), idx2) += Fk;
+            sys.force_thread(thread_id, idx0) += Fi;
+            sys.force_thread(thread_id, idx1) += Fj;
+            sys.force_thread(thread_id, idx2) += Fk;
+
+            sys.virial_thread(thread_id) += math::tensor_product(p1 + r_ij, Fi) +
+                                            math::tensor_product(p1,        Fj) +
+                                            math::tensor_product(p1 + r_kj, Fk);
         }
         return E;
     }
