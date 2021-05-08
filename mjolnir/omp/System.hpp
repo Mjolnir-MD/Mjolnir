@@ -93,9 +93,17 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     }
 
     coordinate_type adjust_direction(coordinate_type from, coordinate_type to) const noexcept
-    {return boundary_.adjust_direction(from, to);}
+    {
+        return boundary_.adjust_direction(from, to);
+    }
     coordinate_type  adjust_position(coordinate_type dr) const noexcept
-    {return boundary_.adjust_position(dr);}
+    {
+        return boundary_.adjust_position(dr);
+    }
+    coordinate_type transpose(coordinate_type tgt, const coordinate_type& ref) const noexcept
+    {
+        return boundary_.transpose(tgt, ref);
+    }
 
     std::size_t size() const noexcept {return num_particles_;}
 
