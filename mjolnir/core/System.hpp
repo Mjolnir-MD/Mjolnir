@@ -22,6 +22,7 @@ class System
     using string_type     = std::string;
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using boundary_type   = typename traits_type::boundary_type;
     using topology_type   = Topology;
     using attribute_type  = std::map<std::string, real_type>;
@@ -39,7 +40,7 @@ class System
 
     System(const std::size_t num_particles, const boundary_type& bound)
         : velocity_initialized_(false), force_initialized_(false),
-          boundary_(bound), attributes_(),
+          boundary_(bound), attributes_(), virial_(0,0,0, 0,0,0, 0,0,0),
           num_particles_(num_particles), masses_   (num_particles),
           rmasses_      (num_particles), positions_(num_particles),
           velocities_   (num_particles), forces_   (num_particles),
@@ -99,6 +100,10 @@ class System
     coordinate_type  adjust_position(coordinate_type dr) const noexcept
     {
         return boundary_.adjust_position(dr);
+    }
+    coordinate_type transpose(coordinate_type tgt, const coordinate_type& ref) const noexcept
+    {
+        return boundary_.transpose(tgt, ref);
     }
 
     std::size_t size() const noexcept {return num_particles_;}
@@ -168,6 +173,9 @@ class System
     string_type const& group(std::size_t i) const noexcept {return groups_[i];}
     string_type&       group(std::size_t i)       noexcept {return groups_[i];}
 
+    matrix33_type&       virial()       noexcept {return virial_;}
+    matrix33_type const& virial() const noexcept {return virial_;}
+
     boundary_type&       boundary()       noexcept {return boundary_;}
     boundary_type const& boundary() const noexcept {return boundary_;}
 
@@ -191,6 +199,7 @@ class System
     bool           velocity_initialized_, force_initialized_;
     boundary_type  boundary_;
     attribute_type attributes_;
+    matrix33_type  virial_;
 
     std::size_t                  num_particles_;
     real_container_type          masses_;
