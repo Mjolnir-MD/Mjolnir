@@ -81,7 +81,7 @@ class ContactInteraction<
             sys.force_thread(thread_id, idx0) -= f;
             sys.force_thread(thread_id, idx1) += f;
 
-            sys.virial_threads(thread_id) += math::tensor_product(dpos, f);
+            sys.virial_thread(thread_id) += math::tensor_product(dpos, f);
         }
         return;
     }
@@ -136,7 +136,7 @@ class ContactInteraction<
             sys.force_thread(thread_id, idx0) -= f;
             sys.force_thread(thread_id, idx1) += f;
 
-            sys.virial_threads(thread_id) += math::tensor_product(dpos, f);
+            sys.virial_thread(thread_id) += math::tensor_product(dpos, f);
         }
         return E;
     }

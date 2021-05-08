@@ -95,7 +95,7 @@ class GlobalPairInteraction<
                 sys.force_thread(thread_id, i) += f;
                 sys.force_thread(thread_id, j) -= f;
 
-                sys.virial_threads(thread_id) += math::tensor_product(rij, -f);
+                sys.virial_thread(thread_id) += math::tensor_product(rij, -f);
             }
         }
         return ;
@@ -151,7 +151,7 @@ class GlobalPairInteraction<
                 sys.force_thread(thread_id, i) += f;
                 sys.force_thread(thread_id, j) -= f;
 
-                sys.virial_threads(thread_id) += math::tensor_product(rij, -f);
+                sys.virial_thread(thread_id) += math::tensor_product(rij, -f);
             }
         }
         return energy;

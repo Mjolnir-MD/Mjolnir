@@ -166,11 +166,11 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     matrix33_type&       virial()       noexcept {return virial_;}
     matrix33_type const& virial() const noexcept {return virial_;}
 
-    matrix33_type&       virial_threads(std::size_t thread_num)       noexcept
+    matrix33_type&       virial_thread(std::size_t thread_num)       noexcept
     {
         return virial_threads_[thread_num];
     }
-    matrix33_type const& virial_threads(std::size_t thread_num) const noexcept
+    matrix33_type const& virial_thread(std::size_t thread_num) const noexcept
     {
         return virial_threads_[thread_num];
     }

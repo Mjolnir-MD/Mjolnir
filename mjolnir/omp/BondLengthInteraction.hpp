@@ -63,7 +63,7 @@ class BondLengthInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
             sys.force_thread(omp_get_thread_num(), idx0) -= f;
             sys.force_thread(omp_get_thread_num(), idx1) += f;
 
-            sys.virial_threads(thread_id) += math::tensor_product(dpos, f);
+            sys.virial_thread(thread_id) += math::tensor_product(dpos, f);
         }
         return;
     }
@@ -105,7 +105,7 @@ class BondLengthInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
             sys.force_thread(omp_get_thread_num(), idx0) -= f;
             sys.force_thread(omp_get_thread_num(), idx1) += f;
 
-            sys.virial_threads(thread_id) += math::tensor_product(dpos, f);
+            sys.virial_thread(thread_id) += math::tensor_product(dpos, f);
         }
         return E;
     }
