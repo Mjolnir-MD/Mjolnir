@@ -52,14 +52,15 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
             const std::size_t idx1 = idxp.first[1];
             const std::size_t idx2 = idxp.first[2];
 
-            const coordinate_type r_ij =
-                sys.adjust_direction(sys.position(idx1), sys.position(idx0));
+            const auto& p0 = sys.position(idx0);
+            const auto& p1 = sys.position(idx1);
+            const auto& p2 = sys.position(idx2);
 
+            const coordinate_type r_ij         = sys.adjust_direction(p1, p0);
             const real_type       inv_len_r_ij = math::rlength(r_ij);
             const coordinate_type r_ij_reg     = r_ij * inv_len_r_ij;
 
-            const coordinate_type r_kj =
-                sys.adjust_direction(sys.position(idx1), sys.position(idx2));
+            const coordinate_type r_kj = sys.adjust_direction(p1, p2);
 
             const real_type       inv_len_r_kj = math::rlength(r_kj);
             const coordinate_type r_kj_reg     = r_kj * inv_len_r_kj;
@@ -130,16 +131,15 @@ class BondAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
             const std::size_t idx0 = idxp.first[0];
             const std::size_t idx1 = idxp.first[1];
             const std::size_t idx2 = idxp.first[2];
+            const auto& p0 = sys.position(idx0);
+            const auto& p1 = sys.position(idx1);
+            const auto& p2 = sys.position(idx2);
 
-            const coordinate_type r_ij =
-                sys.adjust_direction(sys.position(idx1), sys.position(idx0));
-
+            const coordinate_type r_ij         = sys.adjust_direction(p1, p0);
             const real_type       inv_len_r_ij = math::rlength(r_ij);
             const coordinate_type r_ij_reg     = r_ij * inv_len_r_ij;
 
-            const coordinate_type r_kj =
-                sys.adjust_direction(sys.position(idx1), sys.position(idx2));
-
+            const coordinate_type r_kj         = sys.adjust_direction(p1, p2);
             const real_type       inv_len_r_kj = math::rlength(r_kj);
             const coordinate_type r_kj_reg     = r_kj * inv_len_r_kj;
 

@@ -125,10 +125,12 @@ class ThreeSPN2BaseStackingInteraction<
             const auto dU_rep = potential_.dU_rep(bs_kind, lBji);
             if(dU_rep != real_type(0.0))
             {
-                sys.force_thread(thread_id, Bi) -= dU_rep * Bji_reg;
-                sys.force_thread(thread_id, Bj) += dU_rep * Bji_reg;
+                const auto f = dU_rep * Bji_reg;
+                sys.force_thread(thread_id, Bi) -= f;
+                sys.force_thread(thread_id, Bj) += f;
 
-                sys.virial_thread(thread_id) += math::tensor_product(Bij, -f);
+                // Bji = Bj -> Bi = Bi - Bj
+                sys.virial_thread(thread_id) += math::tensor_product(Bji, -f);
             }
 
             // --------------------------------------------------------------------
@@ -326,7 +328,7 @@ class ThreeSPN2BaseStackingInteraction<
                 sys.force_thread(thread_id, Bi) -= f;
                 sys.force_thread(thread_id, Bj) += f;
 
-                sys.virial_thread(thread_id) += math::tensor_product(Bij, -f);
+                sys.virial_thread(thread_id) += math::tensor_product(Bji, -f);
             }
 
             E += potential_.U_rep(bs_kind, lBji);
