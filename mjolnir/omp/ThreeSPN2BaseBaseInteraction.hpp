@@ -132,7 +132,7 @@ class ThreeSPN2BaseBaseInteraction<
                     if(dU_rep != real_type(0))
                     {
                         // remember that F = -dU.
-                        const auto F = -dU_rep * Bji_reg
+                        const auto F = -dU_rep * Bji_reg;
                         sys.force_thread(thread_id, Bi) -= F;
                         sys.force_thread(thread_id, Bj) += F;
 
@@ -857,10 +857,11 @@ class ThreeSPN2BaseBaseInteraction<
                     if(dU_rep != real_type(0))
                     {
                         // remember that F = -dU.
-                        sys.force_thread(thread_id, Bi) -= dU_rep * Bji_reg;
-                        sys.force_thread(thread_id, Bj) -= dU_rep * Bij_reg;
+                        const auto F = dU_rep * Bji_reg;
+                        sys.force_thread(thread_id, Bi) -= F;
+                        sys.force_thread(thread_id, Bj) += F;
 
-                        sys.virial_thread(thread_id) += math::tensor_product(Bij, -F); // (Bj - Bi) * Fj
+                        sys.virial_thread(thread_id) += math::tensor_product(Bij, F); // (Bj - Bi) * Fj
                     }
                 }
 
