@@ -30,6 +30,12 @@ struct UnlimitedBoundary
         return r;
     }
 
+    // transpose `target` with respect to ref to make it the nearest pair
+    coordinate_type transpose(coordinate_type target, const coordinate_type& /*ref*/) const noexcept
+    {
+        return target;
+    }
+
     void set_boundary(const coordinate_type&, const coordinate_type&) noexcept {assert(false);}
     void set_lower_bound(const coordinate_type&) noexcept {assert(false);}
     void set_upper_bound(const coordinate_type&) noexcept {assert(false);}
@@ -94,6 +100,13 @@ struct CuboidalPeriodicBoundary
         else if(math::Z(pos) >= math::Z(upper_)) {math::Z(pos) -= math::Z(width_);}
         return pos;
     }
+
+    // transpose `target` with respect to ref to make it the nearest pair
+    coordinate_type transpose(coordinate_type target, const coordinate_type& ref) const noexcept
+    {
+        return ref + this->adjust_direction(ref, target);
+    }
+
 
     coordinate_type const& lower_bound() const noexcept {return lower_;}
     coordinate_type const& upper_bound() const noexcept {return upper_;}
