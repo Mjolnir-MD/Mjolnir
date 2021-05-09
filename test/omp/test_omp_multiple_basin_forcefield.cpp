@@ -298,6 +298,12 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_2Basin_consistency)
             BOOST_TEST(Z(sys_default.force(j)) == Z(sys_openmp.force(j)),
                        boost::test_tools::tolerance(tol));
         }
+        // check the virials are the same
+        for(std::size_t i=0; i<9; ++i)
+        {
+            BOOST_TEST(sys.virial()[i] == seq_sys.virial()[i], boost::test_tools::tolerance(tol));
+        }
+
     }
 }
 
@@ -593,6 +599,13 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_3Basin_consistency)
             BOOST_TEST(Z(sys_default.force(j)) == Z(sys_openmp.force(j)),
                        boost::test_tools::tolerance(tol));
         }
+        // check the virials are the same
+        for(std::size_t i=0; i<9; ++i)
+        {
+            BOOST_TEST(sys.virial()[i] == seq_sys.virial()[i], boost::test_tools::tolerance(tol));
+        }
+
+
     }
 }
 
