@@ -26,8 +26,9 @@ BOOST_AUTO_TEST_CASE(Contact_numerical_difference)
 
     const real_type k(1.0);
     const real_type native(std::sqrt(3.0));
+    const real_type sigma(0.15);
 
-    potential_type   potential(k, native);
+    potential_type   potential(k, sigma, native);
     interaction_type interaction("none", {{ {{0,1}}, potential}});
 
     std::mt19937 mt(123456789);
@@ -150,7 +151,7 @@ BOOST_AUTO_TEST_CASE(Contact_numerical_difference)
         matrix33_type vir(0,0,0, 0,0,0, 0,0,0);
         for(std::size_t idx=0; idx<sys.size(); ++idx)
         {
-            vir += math::tensor_product(sys.position(idx), sys.force(idx));
+            vir += mjolnir::math::tensor_product(sys.position(idx), sys.force(idx));
         }
 
         BOOST_TEST(sys.virial()(0,0) == vir(0,0), boost::test_tools::tolerance(tol));
@@ -182,8 +183,9 @@ BOOST_AUTO_TEST_CASE(Contact_calc_force_and_energy)
 
     const real_type k(1.0);
     const real_type native(std::sqrt(3.0));
+    const real_type sigma(0.15);
 
-    potential_type   potential(k, native);
+    potential_type   potential(k, sigma, native);
     interaction_type interaction("none", {{ {{0,1}}, potential}});
 
     std::mt19937 mt(123456789);

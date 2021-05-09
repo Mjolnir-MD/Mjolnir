@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(GlobalPairInteraction_numeric_limits)
         matrix33_type vir(0,0,0, 0,0,0, 0,0,0);
         for(std::size_t idx=0; idx<sys.size(); ++idx)
         {
-            vir += math::tensor_product(sys.position(idx), sys.force(idx));
+            vir += mjolnir::math::tensor_product(sys.position(idx), sys.force(idx));
         }
 
         BOOST_TEST(sys.virial()(0,0) == vir(0,0), boost::test_tools::tolerance(tol));
