@@ -45,11 +45,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
         ff->format_energy_name(names); // write into it
         ofs << names;
 
-        ofs << " kinetic_energy";
-        if(is_cuboidal_periodic_boundary<boundary_type>::value)
-        {
-            ofs << "             Pxx             Pyy             Pzz";
-        }
+        ofs << " kinetic_energy             Pxx             Pyy             Pzz";
         for(const auto& attr : sys.attributes())
         {
             ofs << " attribute:" << attr.first;
@@ -69,11 +65,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
         ff->format_energy_name(names); // write into it
         ofs << names;
 
-        ofs << " kinetic_energy";
-        if(is_cuboidal_periodic_boundary<boundary_type>::value)
-        {
-            ofs << "             Pxx             Pyy             Pzz";
-        }
+        ofs << " kinetic_energy             Pxx             Pyy             Pzz";
         for(const auto& attr : sys.attributes())
         {
             ofs << " attribute:" << attr.first;
@@ -107,17 +99,14 @@ class EnergyObserver final : public ObserverBase<traitsT>
                 is_cuboidal_periodic_boundary<boundary_type>{});
 
         ofs << std::setw(14) << std::right << std::fixed << Ek;
+        ofs << std::setw(16) << std::right << std::setprecision(8) << std::scientific << Px;
+        ofs << std::setw(16) << std::right << std::setprecision(8) << std::scientific << Py;
+        ofs << std::setw(16) << std::right << std::setprecision(8) << std::scientific << Pz;
         if(!is_finite(Ek))
         {
             MJOLNIR_GET_DEFAULT_LOGGER();
             MJOLNIR_LOG_ERROR("kinetic energy becomes NaN.");
             is_ok = false;
-        }
-        if(is_cuboidal_periodic_boundary<boundary_type>::value)
-        {
-            ofs << std::setw(16) << std::right << std::setprecision(8) << std::scientific << Px;
-            ofs << std::setw(16) << std::right << std::setprecision(8) << std::scientific << Py;
-            ofs << std::setw(16) << std::right << std::setprecision(8) << std::scientific << Pz;
         }
 
         for(const auto& attr : sys.attributes())
@@ -149,16 +138,16 @@ class EnergyObserver final : public ObserverBase<traitsT>
   private:
 
     std::tuple<real_type, real_type, real_type, real_type>
-    calc_energy_and_pressure(const system_type& sys, std::true_type)
+    calc_energy_and_pressure(const system_type& sys)
     {
         const auto cell_width = sys.boundary().width();
         const auto volume = math::X(cell_width) * math::Y(cell_width) * math::Z(cell_width);
         const auto rvolume = real_type(1) / volume;
 
         real_type Ek(0);
-        real_type Px(0);
-        real_type Py(0);
-        real_type Pz(0);
+        real_type Px(sys.virial()(0, 0));
+        real_type Py(sys.virial()(1, 1));
+        real_type Pz(sys.virial()(2, 2));
 
         for(std::size_t i=0; i<sys.size(); ++i)
         {
@@ -168,30 +157,15 @@ class EnergyObserver final : public ObserverBase<traitsT>
             const auto& f = sys.force(i);
 
             Ek += math::length_sq(v) * m;
-            Px += m * math::X(v) * math::X(v) + math::X(f) * math::X(r);
-            Py += m * math::Y(v) * math::Y(v) + math::Y(f) * math::Y(r);
-            Pz += m * math::Z(v) * math::Z(v) + math::Z(f) * math::Z(r);
+            Px += m * math::X(v) * math::X(v);
+            Py += m * math::Y(v) * math::Y(v);
+            Pz += m * math::Z(v) * math::Z(v);
         }
         Ek *= 0.5;
         Px *= rvolume;
         Py *= rvolume;
         Pz *= rvolume;
-
         return std::make_tuple(Ek, Px, Py, Pz);
-    }
-
-    std::tuple<real_type, real_type, real_type, real_type>
-    calc_energy_and_pressure(const system_type& sys, std::false_type)
-    {
-        real_type Ek(0);
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            const auto  m = sys.mass(i);
-            const auto& v = sys.velocity(i);
-            Ek += math::length_sq(v) * m;
-        }
-        Ek *= 0.5;
-        return std::make_tuple(Ek, real_type(0.0), real_type(0.0), real_type(0.0));
     }
 
     void clear_file(const std::string& fname) const
