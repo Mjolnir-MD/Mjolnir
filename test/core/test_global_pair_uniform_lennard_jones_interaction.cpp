@@ -169,11 +169,12 @@ BOOST_AUTO_TEST_CASE(GlobalPairUniformLennardJonesInteraction_numeric_limits)
         }
         // -----------------------------------------------------------------
         // check virial
+        using matrix33_type = typename traits::matrix33_type;
 
         sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         for(std::size_t idx=0; idx<sys.size(); ++idx)
         {
-            sys.force(idx) = coord_type(0,0,0);
+            sys.force(idx) = coordinate_type(0,0,0);
         }
         interaction.calc_force(sys);
 

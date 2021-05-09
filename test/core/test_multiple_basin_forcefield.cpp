@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(MultipleBasin_2Basin_numerical_difference)
         {
             sys.force(idx) = coord_type(0,0,0);
         }
-        interaction.calc_force(sys);
+        forcefield.calc_force(sys);
 
         matrix33_type vir(0,0,0, 0,0,0, 0,0,0);
         for(std::size_t idx=0; idx<sys.size(); ++idx)

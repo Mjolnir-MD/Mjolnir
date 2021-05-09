@@ -282,6 +282,7 @@ BOOST_AUTO_TEST_CASE(DihedralAngleInteraction_numerical_diff)
 
         // -----------------------------------------------------------------
         // check virial
+        using matrix33_type = typename traits_type::matrix33_type;
 
         sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         for(std::size_t idx=0; idx<sys.size(); ++idx)

@@ -353,7 +353,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BaseStackingInteraction_calc_force_and_en
     using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type        = traits_type::real_type;
     using coord_type       = traits_type::coordinate_type;
-    using matrix33_type     = traits_type::matrix33_type;
     using boundary_type    = traits_type::boundary_type;
     using system_type      = mjolnir::System<traits_type>;
     using interaction_type = mjolnir::ThreeSPN2BaseStackingInteraction<traits_type>;
