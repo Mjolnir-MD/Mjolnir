@@ -889,9 +889,9 @@ ThreeSPN2BaseBaseInteraction<traitsT>::calc_force_and_energy(
                 if(dU_rep != real_type(0))
                 {
                     // remember that F = -dU.
-                    const auto F = dU_rep * Bji_reg;
-                    sys.force(Bi) -= F;
-                    sys.force(Bj) += F;
+                    const auto F = -dU_rep * Bji_reg;
+                    sys.force(Bi) += F;
+                    sys.force(Bj) -= F;
 
                     sys.virial() += math::tensor_product(Bij, -F); // (Bj - Bi) * Fj
                 }

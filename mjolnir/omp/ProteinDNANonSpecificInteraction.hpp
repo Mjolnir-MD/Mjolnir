@@ -234,11 +234,12 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 sys.force_thread(thread_id, para.PN) += f_PN;
                 sys.force_thread(thread_id, para.PC) += f_PC;
 
-                sys.virial() += math::tensor_product(rP,       f_P)
-                             +  math::tensor_product(rP + rPD, f_D)
-                             +  math::tensor_product(sys.transpose(rS3, rP), f_S3)
-                             +  math::tensor_product(sys.transpose(rPN, rP), f_PN)
-                             +  math::tensor_product(sys.transpose(rPC, rP), f_PC);
+                sys.virial_thread(thread_id) +=
+                    math::tensor_product(rP,       f_P) +
+                    math::tensor_product(rP + rPD, f_D) +
+                    math::tensor_product(sys.transpose(rS3, rP), f_S3) +
+                    math::tensor_product(sys.transpose(rPN, rP), f_PN) +
+                    math::tensor_product(sys.transpose(rPC, rP), f_PC) ;
             }
         }
         return;
@@ -488,11 +489,12 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 sys.force_thread(thread_id, para.PN) += f_PN;
                 sys.force_thread(thread_id, para.PC) += f_PC;
 
-                sys.virial() += math::tensor_product(rP,       f_P)
-                             +  math::tensor_product(rP + rPD, f_D)
-                             +  math::tensor_product(sys.transpose(rS3, rP), f_S3)
-                             +  math::tensor_product(sys.transpose(rPN, rP), f_PN)
-                             +  math::tensor_product(sys.transpose(rPC, rP), f_PC);
+                sys.virial_thread(thread_id) +=
+                    math::tensor_product(rP,       f_P) +
+                    math::tensor_product(rP + rPD, f_D) +
+                    math::tensor_product(sys.transpose(rS3, rP), f_S3) +
+                    math::tensor_product(sys.transpose(rPN, rP), f_PN) +
+                    math::tensor_product(sys.transpose(rPC, rP), f_PC) ;
             }
         }
         return energy;

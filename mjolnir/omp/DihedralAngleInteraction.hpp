@@ -98,10 +98,11 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
             sys.force_thread(thread_id, idx2) += Fk;
             sys.force_thread(thread_id, idx3) += Fl;
 
-            sys.virial() += math::tensor_product(r_j + r_ij,        Fi) +
-                            math::tensor_product(r_j,               Fj) +
-                            math::tensor_product(r_j + r_kj,        Fk) +
-                            math::tensor_product(r_j + r_kj + r_lk, Fl);
+            sys.virial_thread(thread_id) +=
+                math::tensor_product(r_j + r_ij,        Fi) +
+                math::tensor_product(r_j,               Fj) +
+                math::tensor_product(r_j + r_kj,        Fk) +
+                math::tensor_product(r_j + r_kj + r_lk, Fl);
         }
         return;
     }
@@ -198,10 +199,11 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
             sys.force_thread(thread_id, idx2) += Fk;
             sys.force_thread(thread_id, idx3) += Fl;
 
-            sys.virial() += math::tensor_product(r_j + r_ij,        Fi) +
-                            math::tensor_product(r_j,               Fj) +
-                            math::tensor_product(r_j + r_kj,        Fk) +
-                            math::tensor_product(r_j + r_kj + r_lk, Fl);
+            sys.virial_thread(thread_id) +=
+                math::tensor_product(r_j + r_ij,        Fi) +
+                math::tensor_product(r_j,               Fj) +
+                math::tensor_product(r_j + r_kj,        Fk) +
+                math::tensor_product(r_j + r_kj + r_lk, Fl);
         }
         return E;
     }

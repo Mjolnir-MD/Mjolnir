@@ -187,7 +187,7 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     void postprocess_forces() noexcept
     {
         // sumup virial and zero-clear the thread local virials
-        virial_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+//         virial_ = matrix33_type(0,0,0, 0,0,0, 0,0,0); // allow non-parallelized stuff
         for(std::size_t thread_id=0, max_threads=omp_get_max_threads();
                 thread_id < max_threads; ++thread_id)
         {
