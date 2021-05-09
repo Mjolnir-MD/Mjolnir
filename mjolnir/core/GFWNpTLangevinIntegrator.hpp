@@ -80,10 +80,7 @@ class GFWNpTLangevinIntegrator
         const auto h_cell = sys.boundary().width();
         this->P_ins_ = this->calc_pressure(sys, h_cell);
 
-        sys.attribute("P_instantaneous_x") = X(P_ins_);
-        sys.attribute("P_instantaneous_y") = Y(P_ins_);
-        sys.attribute("P_instantaneous_z") = Z(P_ins_);
-        sys.attribute("volume")            = X(h_cell) * Y(h_cell) * Z(h_cell);
+        sys.attribute("volume") = X(h_cell) * Y(h_cell) * Z(h_cell);
 
         return;
     }
@@ -238,6 +235,7 @@ class GFWNpTLangevinIntegrator
         inv_h   = make_coordinate<coordinate_type>(
                     1 / X(h_cell), 1 / Y(h_cell), 1 / Z(h_cell));
 
+        sys.attribute("volume") = det_h;
         sys.boundary().set_boundary(cell_origin, cell_origin + h_cell);
 
         // --------------------------------------------------------------------
@@ -273,11 +271,6 @@ class GFWNpTLangevinIntegrator
         // using just updated velocities and virial from `calc_force`
 
         this->P_ins_ = this->calc_pressure(sys, h_cell);
-
-        sys.attribute("P_instantaneous_x") = X(P_ins_);
-        sys.attribute("P_instantaneous_y") = Y(P_ins_);
-        sys.attribute("P_instantaneous_z") = Z(P_ins_);
-        sys.attribute("volume")            = det_h;
 
         P_diff = P_ins_ - P_ref_;
 
