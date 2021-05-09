@@ -529,6 +529,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BaseStackingInteraction_calc_force_and_en
             BOOST_TEST(mjolnir::math::Y(sys.force(2)) == 0.0);
             BOOST_TEST(mjolnir::math::Z(sys.force(2)) == 0.0);
 
+            using matrix33_type = typename traits_type::matrix33_type;
+            sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+
             auto ref_sys = sys;
             constexpr real_type tol = 1e-4;
 
@@ -542,6 +545,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BaseStackingInteraction_calc_force_and_en
                 BOOST_TEST(mjolnir::math::X(sys.force(idx)) == mjolnir::math::X(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
                 BOOST_TEST(mjolnir::math::Y(sys.force(idx)) == mjolnir::math::Y(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
                 BOOST_TEST(mjolnir::math::Z(sys.force(idx)) == mjolnir::math::Z(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+            }
+            for(std::size_t i=0; i<9; ++i)
+            {
+                BOOST_TEST(sys.virial()[i] == ref_sys.virial()[i], boost::test_tools::tolerance(tol));
             }
         } // perturbation
         } // theta

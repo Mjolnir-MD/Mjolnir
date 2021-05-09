@@ -288,5 +288,9 @@ BOOST_AUTO_TEST_CASE(GlobalPairUniformLennardJonesInteraction_numeric_force_and_
             BOOST_TEST(mjolnir::math::Y(sys.force(idx)) == mjolnir::math::Y(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
             BOOST_TEST(mjolnir::math::Z(sys.force(idx)) == mjolnir::math::Z(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
         }
+        for(std::size_t i=0; i<9; ++i)
+        {
+            BOOST_TEST(sys.virial()[i] == ref_sys.virial()[i], boost::test_tools::tolerance(tol));
+        }
     }
 }
