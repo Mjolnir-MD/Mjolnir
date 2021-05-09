@@ -30,6 +30,7 @@ class GFWNpTLangevinIntegrator
     using boundary_type   = typename traits_type::boundary_type;
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using system_type     = System<traits_type>;
     using forcefield_type = std::unique_ptr<ForceFieldBase<traitsT>>;
     using rng_type        = RandomNumberGenerator<traits_type>;
@@ -72,6 +73,7 @@ class GFWNpTLangevinIntegrator
         {
             sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
+        sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         ff->calc_force(sys);
 
         // calculate the current pressure using the force calculated here
@@ -145,6 +147,7 @@ class GFWNpTLangevinIntegrator
                                           v_over_h, coef_S);
                 sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
             }
+            sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         }
 
         // --------------------------------------------------------------------
@@ -267,6 +270,8 @@ class GFWNpTLangevinIntegrator
 
         // --------------------------------------------------------------------
         // calc current pressure
+        // using just updated velocities and virial from `calc_force`
+
         this->P_ins_ = this->calc_pressure(sys, h_cell);
 
         sys.attribute("P_instantaneous_x") = X(P_ins_);
@@ -357,7 +362,8 @@ class GFWNpTLangevinIntegrator
         const auto det_h = math::X(h_cell) * math::Y(h_cell) * math::Z(h_cell);
 
         // instantaneous pressure
-        auto Pins = math::make_coordinate<coordinate_type>(0, 0, 0);
+        const auto& vir = sys.virial();
+        auto Pins = math::make_coordinate<coordinate_type>(vir(0,0), vir(1,1), vir(2,2));
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             const auto m = sys.mass(i);
@@ -369,7 +375,7 @@ class GFWNpTLangevinIntegrator
             // of the tensor product (cij = ai * bj) becomes hadamard product
             // (cii = ai * bi).
 
-            Pins += m * math::hadamard_product(v, v) + math::hadamard_product(f, r);
+            Pins += m * math::hadamard_product(v, v);
         }
         return Pins / det_h;
     }
