@@ -255,6 +255,35 @@ BOOST_AUTO_TEST_CASE(PDNS_Interaction)
                                    ", -dE/dr = " << -dE/dr);
             }
         }
+
+        // -----------------------------------------------------------------
+        // check virial
+
+        sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+        for(std::size_t idx=0; idx<sys.size(); ++idx)
+        {
+            sys.force(idx) = coord_type(0,0,0);
+        }
+        interaction.calc_force(sys);
+
+        matrix33_type vir(0,0,0, 0,0,0, 0,0,0);
+        for(std::size_t idx=0; idx<sys.size(); ++idx)
+        {
+            vir += math::tensor_product(sys.position(idx), sys.force(idx));
+        }
+
+        BOOST_TEST(sys.virial()(0,0) == vir(0,0), boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.virial()(0,1) == vir(0,1), boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.virial()(0,2) == vir(0,2), boost::test_tools::tolerance(tol));
+
+        BOOST_TEST(sys.virial()(1,0) == vir(1,0), boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.virial()(1,1) == vir(1,1), boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.virial()(1,2) == vir(1,2), boost::test_tools::tolerance(tol));
+
+        BOOST_TEST(sys.virial()(2,0) == vir(2,0), boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.virial()(2,1) == vir(2,1), boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.virial()(2,2) == vir(2,2), boost::test_tools::tolerance(tol));
+
     } // theta2
     } // theta1
     } // rbp
