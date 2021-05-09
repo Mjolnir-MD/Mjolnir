@@ -29,6 +29,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BaseStackingInteraction_numerical_diff,
     using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type        = traits_type::real_type;
     using coord_type       = traits_type::coordinate_type;
+    using matrix33_type     = traits_type::matrix33_type;
     using boundary_type    = traits_type::boundary_type;
     using system_type      = mjolnir::System<traits_type>;
     using interaction_type = mjolnir::ThreeSPN2BaseStackingInteraction<traits_type>;
@@ -322,7 +323,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BaseStackingInteraction_numerical_diff,
             matrix33_type vir(0,0,0, 0,0,0, 0,0,0);
             for(std::size_t idx=0; idx<sys.size(); ++idx)
             {
-                vir += math::tensor_product(sys.position(idx), sys.force(idx));
+                vir += mjolnir::math::tensor_product(sys.position(idx), sys.force(idx));
             }
 
             BOOST_TEST(sys.virial()(0,0) == vir(0,0), boost::test_tools::tolerance(tol));
@@ -352,6 +353,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BaseStackingInteraction_calc_force_and_en
     using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type        = traits_type::real_type;
     using coord_type       = traits_type::coordinate_type;
+    using matrix33_type     = traits_type::matrix33_type;
     using boundary_type    = traits_type::boundary_type;
     using system_type      = mjolnir::System<traits_type>;
     using interaction_type = mjolnir::ThreeSPN2BaseStackingInteraction<traits_type>;
