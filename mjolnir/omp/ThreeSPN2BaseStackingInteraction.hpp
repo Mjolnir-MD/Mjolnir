@@ -129,7 +129,7 @@ class ThreeSPN2BaseStackingInteraction<
                 sys.force_thread(thread_id, Bi) -= f;
                 sys.force_thread(thread_id, Bj) += f;
 
-                // Bji = Bj -> Bi = Bi - Bj
+                // Bji = Bj -> Bi = Bi - Bj ; vir = (Bi - Bj) * f_Bi
                 sys.virial_thread(thread_id) += math::tensor_product(Bji, -f);
             }
 

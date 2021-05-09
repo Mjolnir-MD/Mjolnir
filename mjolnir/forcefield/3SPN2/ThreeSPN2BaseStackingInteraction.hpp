@@ -249,7 +249,8 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
             // purely repulsive. add the repulsive force to the system and quit.
             sys.force(Bi) += f_Bi;
             sys.force(Bj) += f_Bj;
-            sys.virial() += math::tensor_product(Bji, f_Bj); // (Bj - Bi) * f_Bi
+            // Bji = Bj -> Bi = Bi - Bj
+            sys.virial() += math::tensor_product(Bji, f_Bi); // (Bi - Bj) * fBi
             continue;
         }
         const auto df_theta  = potential_.df(theta, theta_0);
