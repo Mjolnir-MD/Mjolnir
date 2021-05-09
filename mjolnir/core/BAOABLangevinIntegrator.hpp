@@ -126,7 +126,7 @@ void BAOABLangevinIntegrator<traitsT>::initialize(
         {
             system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
-        sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+        system.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         ff->calc_force(system);
     }
     return;

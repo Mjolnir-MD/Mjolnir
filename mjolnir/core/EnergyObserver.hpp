@@ -95,8 +95,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
         }
 
         real_type Ek(0), Px(0), Py(0), Pz(0);
-        std::tie(Ek, Px, Py, Pz) = this->calc_energy_and_pressure(sys,
-                is_cuboidal_periodic_boundary<boundary_type>{});
+        std::tie(Ek, Px, Py, Pz) = this->calc_energy_and_pressure(sys);
 
         ofs << std::setw(14) << std::right << std::fixed << Ek;
         ofs << std::setw(16) << std::right << std::setprecision(8) << std::scientific << Px;
@@ -152,9 +151,7 @@ class EnergyObserver final : public ObserverBase<traitsT>
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             const auto  m = sys.mass(i);
-            const auto& r = sys.position(i);
             const auto& v = sys.velocity(i);
-            const auto& f = sys.force(i);
 
             Ek += math::length_sq(v) * m;
             Px += m * math::X(v) * math::X(v);

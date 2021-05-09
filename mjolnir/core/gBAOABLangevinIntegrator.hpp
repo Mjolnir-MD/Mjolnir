@@ -20,6 +20,7 @@ class gBAOABLangevinIntegrator
     using traits_type      = traitsT;
     using real_type        = typename traits_type::real_type;
     using coordinate_type  = typename traits_type::coordinate_type;
+    using matrix33_type    = typename traits_type::matrix33_type;
     using indices_type     = std::array<std::size_t, 2>;
     using system_type      = System<traitsT>;
     using forcefield_type = std::unique_ptr<ForceFieldBase<traitsT>>;
@@ -242,7 +243,7 @@ void gBAOABLangevinIntegrator<traitsT>::initialize(
         {
             system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
-        sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+        system.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         ff->calc_force(system);
     }
 

@@ -42,6 +42,7 @@ class MsgPackSaver
     using traits_type     = traitsT;
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using system_type     = System<traits_type>;
     using attribute_type  = typename system_type::attribute_type;
     using rng_type        = RandomNumberGenerator<traits_type>;
@@ -242,7 +243,7 @@ class MsgPackSaver
         return ;
     }
 
-    void to_msgpack(const matrxi33_type& m)
+    void to_msgpack(const matrix33_type& m)
     {
         // [float; 9]
         // fixarray (9)
