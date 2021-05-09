@@ -73,6 +73,7 @@ void VelocityVerletIntegrator<traitsT>::initialize(
         {
             system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
+        sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         ff->calc_force(system);
     }
     return;
@@ -95,6 +96,7 @@ VelocityVerletIntegrator<traitsT>::step(
 
         largest_disp2 = std::max(largest_disp2, math::length_sq(disp));
     }
+    sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
     // update neighbor list; reduce margin, reconstruct the list if needed
     ff->reduce_margin(2 * std::sqrt(largest_disp2), sys);

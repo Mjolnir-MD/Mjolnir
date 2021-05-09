@@ -242,6 +242,7 @@ void gBAOABLangevinIntegrator<traitsT>::initialize(
         {
             system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
+        sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         ff->calc_force(system);
     }
 
@@ -324,6 +325,7 @@ gBAOABLangevinIntegrator<traitsT>::step(
         // reset force
         sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
     }
+    sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
     ff->reduce_margin(2 * std::sqrt(largest_disp2), sys);
 
