@@ -189,6 +189,12 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
             //          f(r)  g(theta) dg(phi) dphi/dr   ]
             const auto k = para.k;
 
+            auto f_P  = math::make_coordinate<coordinate_type>(0,0,0);
+            auto f_D  = math::make_coordinate<coordinate_type>(0,0,0);
+            auto f_S3 = math::make_coordinate<coordinate_type>(0,0,0);
+            auto f_PN = math::make_coordinate<coordinate_type>(0,0,0);
+            auto f_PC = math::make_coordinate<coordinate_type>(0,0,0);
+
             // df(r) g(theta) g(phi)
             if(g_dg_theta.first  != 0 && g_dg_phi.first  != 0)
             {
@@ -198,8 +204,8 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
                     f_df.second * g_dg_theta.first * g_dg_phi.first;
                 const auto F = -coef * rPD;
 
-                sys.force(P) -= F;
-                sys.force(D) += F;
+                f_P -= F;
+                f_D += F;
             }
 
             // f(r) dg(theta) g(phi)
@@ -219,10 +225,10 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
                 const auto F_P  = -coef_sin * rlPD  * (rPNC_reg - cosPNC * rPD_reg );
                 const auto F_PN = -coef_sin * rlPNC * (rPD_reg  - cosPNC * rPNC_reg);
 
-                sys.force(D)       -= F_P;
-                sys.force(P)       += F_P;
-                sys.force(para.PN) += F_PN;
-                sys.force(para.PC) -= F_PN;
+                f_D  -= F_P;
+                f_P  += F_P;
+                f_PN += F_PN;
+                f_PC -= F_PN;
             }
 
             // f(r) dg(theta) g(phi)
@@ -242,10 +248,22 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
                 const auto F_P = -coef_sin * rlPD  * (rS3D_reg - cosS3D * rPD_reg);
                 const auto F_S = -coef_sin * rlS3D * (rPD_reg  - cosS3D * rS3D_reg);
 
-                sys.force(P)  += F_P;
-                sys.force(D)  -= F_P + F_S;
-                sys.force(S3) += F_S;
+                f_P  += F_P;
+                f_D  -= F_P + F_S;
+                f_S3 += F_S;
             }
+
+            sys.force(P)       += f_P;
+            sys.force(D)       += f_D;
+            sys.force(S3)      += f_S3;
+            sys.force(para.PN) += f_PN;
+            sys.force(para.PC) += f_PC;
+
+            sys.virial() += math::tensor_product(rP,       f_P)
+                         +  math::tensor_product(rP + rPD, f_D)
+                         +  math::tensor_product(sys.transpose(rS3, rP), f_S3)
+                         +  math::tensor_product(sys.transpose(rPN, rP), f_PN)
+                         +  math::tensor_product(sys.transpose(rPC, rP), f_PC);
         }
     }
     return;
@@ -427,6 +445,12 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_force_and_energy(
             //          f(r)  g(theta) dg(phi) dphi/dr   ]
             const auto k = para.k;
 
+            auto f_P  = math::make_coordinate<coordinate_type>(0,0,0);
+            auto f_D  = math::make_coordinate<coordinate_type>(0,0,0);
+            auto f_S3 = math::make_coordinate<coordinate_type>(0,0,0);
+            auto f_PN = math::make_coordinate<coordinate_type>(0,0,0);
+            auto f_PC = math::make_coordinate<coordinate_type>(0,0,0);
+
             energy += k * f_df.first * g_dg_theta.first * g_dg_phi.first;
 
             // df(r) g(theta) g(phi)
@@ -438,8 +462,8 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_force_and_energy(
                     f_df.second * g_dg_theta.first * g_dg_phi.first;
                 const auto F = -coef * rPD;
 
-                sys.force(P) -= F;
-                sys.force(D) += F;
+                f_P -= F;
+                f_D += F;
             }
 
             // f(r) dg(theta) g(phi)
@@ -459,10 +483,10 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_force_and_energy(
                 const auto F_P  = -coef_sin * rlPD  * (rPNC_reg - cosPNC * rPD_reg );
                 const auto F_PN = -coef_sin * rlPNC * (rPD_reg  - cosPNC * rPNC_reg);
 
-                sys.force(D)       -= F_P;
-                sys.force(P)       += F_P;
-                sys.force(para.PN) += F_PN;
-                sys.force(para.PC) -= F_PN;
+                f_D  -= F_P;
+                f_P  += F_P;
+                f_PN += F_PN;
+                f_PC -= F_PN;
             }
 
             // f(r) dg(theta) g(phi)
@@ -482,10 +506,22 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_force_and_energy(
                 const auto F_P = -coef_sin * rlPD  * (rS3D_reg - cosS3D * rPD_reg);
                 const auto F_S = -coef_sin * rlS3D * (rPD_reg  - cosS3D * rS3D_reg);
 
-                sys.force(P)  += F_P;
-                sys.force(D)  -= F_P + F_S;
-                sys.force(S3) += F_S;
+                f_P  += F_P;
+                f_D  -= F_P + F_S;
+                f_S3 += F_S;
             }
+
+            sys.force(P)       += f_P;
+            sys.force(D)       += f_D;
+            sys.force(S3)      += f_S3;
+            sys.force(para.PN) += f_PN;
+            sys.force(para.PC) += f_PC;
+
+            sys.virial() += math::tensor_product(rP,       f_P)
+                         +  math::tensor_product(rP + rPD, f_D)
+                         +  math::tensor_product(sys.transpose(rS3, rP), f_S3)
+                         +  math::tensor_product(sys.transpose(rPN, rP), f_PN)
+                         +  math::tensor_product(sys.transpose(rPC, rP), f_PC);
         }
     }
     return energy;

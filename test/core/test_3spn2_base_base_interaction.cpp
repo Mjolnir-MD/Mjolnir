@@ -29,6 +29,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_numerical_diff,
     using traits_type       = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type         = traits_type::real_type;
     using coord_type        = traits_type::coordinate_type;
+    using matrix33_type     = traits_type::matrix33_type;
     using boundary_type     = traits_type::boundary_type;
     using system_type       = mjolnir::System<traits_type>;
     using topology_type     = mjolnir::Topology;
@@ -306,6 +307,34 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_numerical_diff,
                                boost::test_tools::tolerance(tol));
                 }
             }
+
+            // -----------------------------------------------------------------
+            // check virial
+
+            sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+            for(std::size_t idx=0; idx<sys.size(); ++idx)
+            {
+                sys.force(idx) = coord_type(0,0,0);
+            }
+            interaction.calc_force(sys);
+
+            matrix33_type vir(0,0,0, 0,0,0, 0,0,0);
+            for(std::size_t idx=0; idx<sys.size(); ++idx)
+            {
+                vir += mjolnir::math::tensor_product(sys.position(idx), sys.force(idx));
+            }
+
+            BOOST_TEST(sys.virial()(0,0) == vir(0,0), boost::test_tools::tolerance(tol));
+            BOOST_TEST(sys.virial()(0,1) == vir(0,1), boost::test_tools::tolerance(tol));
+            BOOST_TEST(sys.virial()(0,2) == vir(0,2), boost::test_tools::tolerance(tol));
+
+            BOOST_TEST(sys.virial()(1,0) == vir(1,0), boost::test_tools::tolerance(tol));
+            BOOST_TEST(sys.virial()(1,1) == vir(1,1), boost::test_tools::tolerance(tol));
+            BOOST_TEST(sys.virial()(1,2) == vir(1,2), boost::test_tools::tolerance(tol));
+
+            BOOST_TEST(sys.virial()(2,0) == vir(2,0), boost::test_tools::tolerance(tol));
+            BOOST_TEST(sys.virial()(2,1) == vir(2,1), boost::test_tools::tolerance(tol));
+            BOOST_TEST(sys.virial()(2,2) == vir(2,2), boost::test_tools::tolerance(tol));
         } // theta2
         } // theta1
         } // rbp
@@ -322,6 +351,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
     using traits_type       = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type         = traits_type::real_type;
     using coord_type        = traits_type::coordinate_type;
+    using matrix33_type     = traits_type::matrix33_type;
     using boundary_type     = traits_type::boundary_type;
     using system_type       = mjolnir::System<traits_type>;
     using topology_type     = mjolnir::Topology;
@@ -788,6 +818,35 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
                                boost::test_tools::tolerance(tol));
                 }
             }
+
+            // -----------------------------------------------------------------
+            // check virial
+
+            sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+            for(std::size_t idx=0; idx<sys.size(); ++idx)
+            {
+                sys.force(idx) = coord_type(0,0,0);
+            }
+            interaction.calc_force(sys);
+
+            matrix33_type vir(0,0,0, 0,0,0, 0,0,0);
+            for(std::size_t idx=0; idx<sys.size(); ++idx)
+            {
+                vir += mjolnir::math::tensor_product(sys.position(idx), sys.force(idx));
+            }
+
+            BOOST_TEST(sys.virial()(0,0) == vir(0,0), boost::test_tools::tolerance(tol));
+            BOOST_TEST(sys.virial()(0,1) == vir(0,1), boost::test_tools::tolerance(tol));
+            BOOST_TEST(sys.virial()(0,2) == vir(0,2), boost::test_tools::tolerance(tol));
+
+            BOOST_TEST(sys.virial()(1,0) == vir(1,0), boost::test_tools::tolerance(tol));
+            BOOST_TEST(sys.virial()(1,1) == vir(1,1), boost::test_tools::tolerance(tol));
+            BOOST_TEST(sys.virial()(1,2) == vir(1,2), boost::test_tools::tolerance(tol));
+
+            BOOST_TEST(sys.virial()(2,0) == vir(2,0), boost::test_tools::tolerance(tol));
+            BOOST_TEST(sys.virial()(2,1) == vir(2,1), boost::test_tools::tolerance(tol));
+            BOOST_TEST(sys.virial()(2,2) == vir(2,2), boost::test_tools::tolerance(tol));
+
         } // thetaCS_j
         } // thetaCS_i
         } // theta3
@@ -1017,6 +1076,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_energy_and_force,
                 BOOST_TEST(mjolnir::math::X(sys.force(idx)) == mjolnir::math::X(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
                 BOOST_TEST(mjolnir::math::Y(sys.force(idx)) == mjolnir::math::Y(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
                 BOOST_TEST(mjolnir::math::Z(sys.force(idx)) == mjolnir::math::Z(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+            }
+            for(std::size_t i=0; i<9; ++i)
+            {
+                BOOST_TEST(sys.virial()[i] == ref_sys.virial()[i], boost::test_tools::tolerance(tol));
             }
         } // theta2
         } // theta1
@@ -1420,6 +1483,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_energy_and_force
                 sys.position(idx) += coord_type(0.01 * uni(mt), 0.01 * uni(mt), 0.01 * uni(mt));
                 sys.force(idx)     = coord_type(0.0, 0.0, 0.0);
             }
+            using matrix33_type = typename traits_type::matrix33_type;
+            sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+
             system_type ref_sys = sys;
 
             constexpr real_type tol = 1e-4;
@@ -1434,6 +1500,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_energy_and_force
                 BOOST_TEST(mjolnir::math::X(sys.force(idx)) == mjolnir::math::X(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
                 BOOST_TEST(mjolnir::math::Y(sys.force(idx)) == mjolnir::math::Y(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
                 BOOST_TEST(mjolnir::math::Z(sys.force(idx)) == mjolnir::math::Z(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
+            }
+
+            for(std::size_t i=0; i<9; ++i)
+            {
+                BOOST_TEST(sys.virial()[i] == ref_sys.virial()[i], boost::test_tools::tolerance(tol));
             }
         } // thetaCS_j
         } // thetaCS_i

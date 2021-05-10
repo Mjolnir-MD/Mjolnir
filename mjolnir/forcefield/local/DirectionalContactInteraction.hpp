@@ -324,6 +324,11 @@ void DirectionalContactInteraction<
         sys.force(Pi) -= dU_dir_drPi;
         sys.force(Pj) -= dU_dir_drPj;
         sys.force(Cj) -= dU_dir_drCj;
+
+        sys.virial() += math::tensor_product(rPi + PiCi,       -dU_dir_drCi) // Ci
+                     +  math::tensor_product(rPi,              -dU_dir_drPi) // Pi
+                     +  math::tensor_product(rPi + Pij,        -dU_dir_drPj) // Pj
+                     +  math::tensor_product(rPi + Pij + PjCj, -dU_dir_drCj);// Cj
     }
     return;
 }
@@ -529,6 +534,11 @@ DirectionalContactInteraction<
         sys.force(Pi) -= dU_dir_drPi;
         sys.force(Pj) -= dU_dir_drPj;
         sys.force(Cj) -= dU_dir_drCj;
+
+        sys.virial() += math::tensor_product(rPi + PiCi,       -dU_dir_drCi) // Ci
+                     +  math::tensor_product(rPi,              -dU_dir_drPi) // Pi
+                     +  math::tensor_product(rPi + Pij,        -dU_dir_drPj) // Pj
+                     +  math::tensor_product(rPi + Pij + PjCj, -dU_dir_drCj);// Cj
 
         energy += U_angle1 * U_angle2 * U_con;
     }

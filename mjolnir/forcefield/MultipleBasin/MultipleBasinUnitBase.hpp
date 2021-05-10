@@ -33,6 +33,7 @@ class MultipleBasinUnitBase
     using traits_type     = traitsT;
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using system_type     = System<traits_type>;
     using topology_type   = Topology;
 

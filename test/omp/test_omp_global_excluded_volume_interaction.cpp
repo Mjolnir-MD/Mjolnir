@@ -136,6 +136,12 @@ BOOST_AUTO_TEST_CASE(omp_GlobalPair_UniformLennardJones_calc_force)
         }
         BOOST_TEST(interaction.calc_energy(sys) == seq_interaction.calc_energy(seq_sys),
                    boost::test_tools::tolerance(tol));
+
+        // check the virials are the same
+        for(std::size_t i=0; i<9; ++i)
+        {
+            BOOST_TEST(sys.virial()[i] == seq_sys.virial()[i], boost::test_tools::tolerance(tol));
+        }
     }
 }
 
