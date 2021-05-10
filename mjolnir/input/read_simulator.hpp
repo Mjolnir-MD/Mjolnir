@@ -523,6 +523,12 @@ read_integrator_type(const toml::value& root, const toml::value& simulator)
         using integratorT = GJFNVTLangevinIntegrator<traitsT>;
         return read_simulator<traitsT, integratorT>(root, simulator);
     }
+    else if(integ == "GFWNpTLangevin")
+    {
+        MJOLNIR_LOG_NOTICE("Integrator is GFWNpTLangevin.");
+        using integratorT = GFWNpTLangevinIntegrator<traitsT>;
+        return read_simulator<traitsT, integratorT>(root, simulator);
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "

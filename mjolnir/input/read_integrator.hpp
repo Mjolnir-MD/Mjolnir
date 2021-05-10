@@ -6,6 +6,7 @@
 #include <mjolnir/core/BAOABLangevinIntegrator.hpp>
 #include <mjolnir/core/gBAOABLangevinIntegrator.hpp>
 #include <mjolnir/core/GJFNVTLangevinIntegrator.hpp>
+#include <mjolnir/core/GFWNpTLangevinIntegrator.hpp>
 #include <mjolnir/core/SystemMotionRemover.hpp>
 #include <mjolnir/input/utility.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -305,6 +306,50 @@ read_GJFNVT_langevin_integrator(const toml::value& simulator)
             read_system_motion_remover<traitsT>(simulator));
 }
 
+template<typename traitsT>
+GFWNpTLangevinIntegrator<traitsT>
+read_GFW_NpT_langevin_integrator(const toml::value& simulator)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type       = typename traitsT::real_type;
+    using coordinate_type = typename traitsT::coordinate_type;
+
+    const real_type delta_t = toml::find<real_type>(simulator, "delta_t");
+    MJOLNIR_LOG_INFO("delta_t = ", delta_t);
+
+    const auto& integrator = toml::find(simulator, "integrator");
+
+    check_keys_available(integrator, {"type"_s, "chi"_s, "cell_mass"_s,
+            "cell_initial_velocity"_s, "cell_gamma"_s, "gammas"_s});
+
+    const auto chi        = toml::find<real_type>(integrator, "chi");
+    const auto m_cell     = toml::find<std::array<real_type, 3>>(integrator, "cell_mass");
+    const auto gamma_cell = toml::find<std::array<real_type, 3>>(integrator, "cell_gamma");
+    const auto v_cell_ini = toml::find_or<std::array<real_type, 3>>(integrator,
+        "cell_initial_velocity", std::array<real_type, 3>{{0, 0, 0}});
+
+    const auto& parameters = toml::find<toml::array>(integrator, "gammas");
+
+    std::vector<real_type> gamma(parameters.size());
+    for(const auto& params : parameters)
+    {
+        const auto idx = toml::find<std::size_t>(params, "index");
+        const auto  gm = toml::expect<real_type>(params, u8"γ").or_other(
+                         toml::expect<real_type>(params, "gamma")).unwrap();
+        if(gamma.size() <= idx) {gamma.resize(idx+1);}
+        gamma.at(idx) = gm;
+
+        MJOLNIR_LOG_INFO("idx = ", idx, ", gamma = ", gm);
+    }
+    return GFWNpTLangevinIntegrator<traitsT>(delta_t, chi,
+        math::make_coordinate<coordinate_type>(m_cell[0],     m_cell[1],     m_cell[2]),
+        math::make_coordinate<coordinate_type>(gamma_cell[0], gamma_cell[1], gamma_cell[2]),
+        math::make_coordinate<coordinate_type>(v_cell_ini[0], v_cell_ini[1], v_cell_ini[2]),
+        std::move(gamma));
+}
+
+
 
 // A mapping object from type information (template parameter) to the actual
 // read_xxx_integrator function
@@ -356,6 +401,15 @@ struct read_integrator_impl<GJFNVTLangevinIntegrator<traitsT>>
     }
 };
 
+template<typename traitsT>
+struct read_integrator_impl<GFWNpTLangevinIntegrator<traitsT>>
+{
+    static GFWNpTLangevinIntegrator<traitsT> invoke(const toml::value& sim)
+    {
+        return read_GFW_NpT_langevin_integrator<traitsT>(sim);
+    }
+};
+
 template<typename integratorT>
 integratorT read_integrator(const toml::value& sim)
 {
@@ -369,6 +423,7 @@ integratorT read_integrator(const toml::value& sim)
                                       " based on the Velocity Verlet",
             "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator",
             "- \"g-BAOABLangevin\"    : geodesic BAOAB Langevin Integrator",
+            "- \"GJWNpTLangevin\"     : BAOAB-type NpT Langevin Integrator",
             "- \"G-JFLangevin\"       : Verlet-type Langevin Integrator by G-J&F"
             }));
     }
@@ -400,6 +455,12 @@ extern template GJFNVTLangevinIntegrator<SimulatorTraits<double, UnlimitedBounda
 extern template GJFNVTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       > read_GJFNVT_langevin_integrator(const toml::value& simulator);
 extern template GJFNVTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_GJFNVT_langevin_integrator(const toml::value& simulator);
 extern template GJFNVTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_GJFNVT_langevin_integrator(const toml::value& simulator);
+
+extern template GFWNpTLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>       > read_GFW_NpT_langevin_integrator(const toml::value& simulator);
+extern template GFWNpTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       > read_GFW_NpT_langevin_integrator(const toml::value& simulator);
+extern template GFWNpTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_GFW_NpT_langevin_integrator(const toml::value& simulator);
+extern template GFWNpTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_GFW_NpT_langevin_integrator(const toml::value& simulator);
+
 #endif
 
 } // mjolnir
