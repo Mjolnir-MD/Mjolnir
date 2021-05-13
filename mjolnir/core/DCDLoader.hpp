@@ -129,6 +129,12 @@ class DCDLoader final : public LoaderBase<traitsT>
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
+        file_.peek();
+        if(file_.eof())
+        {
+            return false;
+        }
+
         this->read_unitcell_if_needed(sys.boundary());
         {
             const auto block_beg = detail::read_bytes_as<std::int32_t>(file_);
@@ -141,7 +147,9 @@ class DCDLoader final : public LoaderBase<traitsT>
             if(block_beg != block_end)
             {
                 MJOLNIR_LOG_WARN("DCD file ", filename_, " seems to be broken.");
-                MJOLNIR_LOG_WARN("Size of the coordinate block is inconsistent");
+                MJOLNIR_LOG_WARN("Size of the X coordinate block is inconsistent."
+                                 " Block header says there are ", block_beg,
+                  " bytes, and the block footer says ", block_end, " bytes.");
                 return false;
             }
         }
@@ -156,7 +164,9 @@ class DCDLoader final : public LoaderBase<traitsT>
             if(block_beg != block_end)
             {
                 MJOLNIR_LOG_WARN("DCD file ", filename_, " seems to be broken.");
-                MJOLNIR_LOG_WARN("Size of the coordinate block is inconsistent");
+                MJOLNIR_LOG_WARN("Size of the Y coordinate block is inconsistent."
+                                 " Block header says there are ", block_beg,
+                  " bytes, and the block footer says ", block_end, " bytes.");
                 return false;
             }
         }
@@ -171,7 +181,10 @@ class DCDLoader final : public LoaderBase<traitsT>
             if(block_beg != block_end)
             {
                 MJOLNIR_LOG_WARN("DCD file ", filename_, " seems to be broken.");
-                MJOLNIR_LOG_WARN("Size of the coordinate block is inconsistent");
+                MJOLNIR_LOG_WARN("Size of the Z coordinate block is inconsistent."
+                                 " Block header says there are ", block_beg,
+                  " bytes, and the block footer says ", block_end, " bytes.");
+
                 return false;
             }
         }

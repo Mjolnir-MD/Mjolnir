@@ -17,21 +17,39 @@ set(MJOLNIR_MOST_RECENT_TAG     "v0.0.0")
 set(MJOLNIR_DIFFERENCE_FROM_TAG "0")
 set(MJOLNIR_CURRENT_COMMIT_HASH "0")
 
-execute_process(
-    COMMAND bash "-c" "git describe --tags --long HEAD | sed -r 's/(v[0-9]+\\.[0-9]+\\.[0-9]+)-([0-9]+)-g([a-z0-9]+)/\\1/'"
-    OUTPUT_VARIABLE MJOLNIR_MOST_RECENT_TAG
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
-execute_process(
-    COMMAND bash "-c" "git describe --tags --long HEAD | sed -r 's/(v[0-9]+\\.[0-9]+\\.[0-9]+)-([0-9]+)-g([a-z0-9]+)/\\2/'"
-    OUTPUT_VARIABLE MJOLNIR_DIFFERENCE_FROM_TAG
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
-execute_process(
-    COMMAND bash "-c" "git describe --tags --long HEAD | sed -r 's/(v[0-9]+\\.[0-9]+\\.[0-9]+)-([0-9]+)-g([a-z0-9]+)/\\3/'"
-    OUTPUT_VARIABLE MJOLNIR_CURRENT_COMMIT_HASH
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+if(APPLE)
+    execute_process(
+        COMMAND bash "-c" "git describe --tags --long HEAD | sed -E 's/(v[0-9]+\\.[0-9]+\\.[0-9]+)-([0-9]+)-g([a-z0-9]+)/\\1/'"
+        OUTPUT_VARIABLE MJOLNIR_MOST_RECENT_TAG
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+    execute_process(
+        COMMAND bash "-c" "git describe --tags --long HEAD | sed -E 's/(v[0-9]+\\.[0-9]+\\.[0-9]+)-([0-9]+)-g([a-z0-9]+)/\\2/'"
+        OUTPUT_VARIABLE MJOLNIR_DIFFERENCE_FROM_TAG
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+    execute_process(
+        COMMAND bash "-c" "git describe --tags --long HEAD | sed -E 's/(v[0-9]+\\.[0-9]+\\.[0-9]+)-([0-9]+)-g([a-z0-9]+)/\\3/'"
+        OUTPUT_VARIABLE MJOLNIR_CURRENT_COMMIT_HASH
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+else()
+    execute_process(
+        COMMAND bash "-c" "git describe --tags --long HEAD | sed -r 's/(v[0-9]+\\.[0-9]+\\.[0-9]+)-([0-9]+)-g([a-z0-9]+)/\\1/'"
+        OUTPUT_VARIABLE MJOLNIR_MOST_RECENT_TAG
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+    execute_process(
+        COMMAND bash "-c" "git describe --tags --long HEAD | sed -r 's/(v[0-9]+\\.[0-9]+\\.[0-9]+)-([0-9]+)-g([a-z0-9]+)/\\2/'"
+        OUTPUT_VARIABLE MJOLNIR_DIFFERENCE_FROM_TAG
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+    execute_process(
+        COMMAND bash "-c" "git describe --tags --long HEAD | sed -r 's/(v[0-9]+\\.[0-9]+\\.[0-9]+)-([0-9]+)-g([a-z0-9]+)/\\3/'"
+        OUTPUT_VARIABLE MJOLNIR_CURRENT_COMMIT_HASH
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+endif()
 
 set(MJOLNIR_VERSION_INFO "${MJOLNIR_MOST_RECENT_TAG}")
 if(NOT MJOLNIR_DIFFERENCE_FROM_TAG STREQUAL "0")

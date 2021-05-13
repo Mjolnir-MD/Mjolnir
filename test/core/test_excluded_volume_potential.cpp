@@ -12,6 +12,9 @@
 
 BOOST_AUTO_TEST_CASE(EXV_double)
 {
+    mjolnir::LoggerManager::set_default_logger(
+            "test_excluded_volume_potential.log");
+
     using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type   = typename traits_type::real_type;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;
@@ -46,6 +49,9 @@ BOOST_AUTO_TEST_CASE(EXV_double)
 
 BOOST_AUTO_TEST_CASE(EXV_float)
 {
+    mjolnir::LoggerManager::set_default_logger(
+            "test_excluded_volume_potential.log");
+
     using traits_type = mjolnir::SimulatorTraits<float, mjolnir::UnlimitedBoundary>;
     using real_type   = typename traits_type::real_type;
     using molecule_id_type = mjolnir::Topology::molecule_id_type;

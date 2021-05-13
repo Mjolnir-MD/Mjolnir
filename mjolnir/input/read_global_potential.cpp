@@ -31,6 +31,11 @@ template UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>
 template UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_uniform_lennard_jones_potential(const toml::value& global);
 template UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_uniform_lennard_jones_potential(const toml::value& global);
 
+template LennardJonesAttractivePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_lennard_jones_attractive_potential(const toml::value& global);
+template LennardJonesAttractivePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_lennard_jones_attractive_potential(const toml::value& global);
+template LennardJonesAttractivePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_lennard_jones_attractive_potential(const toml::value& global);
+template LennardJonesAttractivePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_lennard_jones_attractive_potential(const toml::value& global);
+
 template WCAPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_wca_potential(const toml::value& global);
 template WCAPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_wca_potential(const toml::value& global);
 template WCAPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_wca_potential(const toml::value& global);
