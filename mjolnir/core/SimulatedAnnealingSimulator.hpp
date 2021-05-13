@@ -148,9 +148,9 @@ inline bool SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::step()
             this->scheduler_.current(step_count_ * r_total_step_);
 
         MJOLNIR_LOG_DEBUG("T = ", system_.attribute("temperature"));
-    }
 
-    this->integrator_.update(system_);
+        this->integrator_.update(system_);
+    }
 
     return step_count_ < total_step_;
 }
