@@ -56,9 +56,9 @@ BOOST_AUTO_TEST_CASE(PullingForce)
     BOOST_TEST( 0.0 == mjolnir::math::Y(sys.force(1)), boost::test_tools::tolerance(tol));
     BOOST_TEST( 0.0 == mjolnir::math::Z(sys.force(1)), boost::test_tools::tolerance(tol));
 
-    BOOST_TEST(-3.0 == mjolnir::math::X(sys.force(2)), boost::test_tools::tolerance(tol));
-    BOOST_TEST(-4.0 == mjolnir::math::Y(sys.force(2)), boost::test_tools::tolerance(tol));
-    BOOST_TEST(-5.0 == mjolnir::math::Z(sys.force(2)), boost::test_tools::tolerance(tol));
+    BOOST_TEST(-0.3 == mjolnir::math::X(sys.force(2)), boost::test_tools::tolerance(tol));
+    BOOST_TEST(-0.4 == mjolnir::math::Y(sys.force(2)), boost::test_tools::tolerance(tol));
+    BOOST_TEST(-0.5 == mjolnir::math::Z(sys.force(2)), boost::test_tools::tolerance(tol));
 
     BOOST_TEST( 0.0 == mjolnir::math::X(sys.force(3)), boost::test_tools::tolerance(tol));
     BOOST_TEST( 0.0 == mjolnir::math::Y(sys.force(3)), boost::test_tools::tolerance(tol));

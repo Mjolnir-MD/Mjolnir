@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(read_pulling_force_interaction)
         const auto base = mjolnir::read_external_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
-        const auto derv = dynamic_cast<mjolnir::PullingForceInteraction<traits_type>(base.get());
+        const auto derv = dynamic_cast<mjolnir::PullingForceInteraction<traits_type>*>(base.get());
         BOOST_TEST(static_cast<bool>(derv));
 
         const auto& interaction = *derv;
@@ -37,9 +37,9 @@ BOOST_AUTO_TEST_CASE(read_pulling_force_interaction)
         BOOST_TEST(interaction.parameters().at(0).first ==   0);
         BOOST_TEST(interaction.parameters().at(1).first == 100);
 
-        BOOST_TEST(mjolnir::math::X(interaction.parameters().at(0).second) == 1.0, boost::test_tools::tolerance(1e-8));
-        BOOST_TEST(mjolnir::math::Y(interaction.parameters().at(0).second) == 2.0, boost::test_tools::tolerance(1e-8));
-        BOOST_TEST(mjolnir::math::Z(interaction.parameters().at(0).second) == 3.0, boost::test_tools::tolerance(1e-8));
+        BOOST_TEST(mjolnir::math::X(interaction.parameters().at(0).second) ==  1.0, boost::test_tools::tolerance(1e-8));
+        BOOST_TEST(mjolnir::math::Y(interaction.parameters().at(0).second) ==  2.0, boost::test_tools::tolerance(1e-8));
+        BOOST_TEST(mjolnir::math::Z(interaction.parameters().at(0).second) == 10.0, boost::test_tools::tolerance(1e-8));
 
         BOOST_TEST(mjolnir::math::X(interaction.parameters().at(1).second) ==-5.0, boost::test_tools::tolerance(1e-8));
         BOOST_TEST(mjolnir::math::Y(interaction.parameters().at(1).second) == 0.0, boost::test_tools::tolerance(1e-8));
