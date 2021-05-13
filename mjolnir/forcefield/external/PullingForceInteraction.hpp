@@ -67,12 +67,14 @@ class PullingForceInteraction final
         return;
     }
 
-    std::string name() const override {return "PullingForce:"_s;}
+    std::string name() const override {return std::string("PullingForce:");}
 
     base_type* clone() const override
     {
         return new PullingForceInteraction(container_type(parameters_));
     }
+
+    container_type const& parameters() const noexcept {return parameters_;}
 
   private:
 
