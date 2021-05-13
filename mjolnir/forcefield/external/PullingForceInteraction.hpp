@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_FORCEFIELD_EXTERNAL_PULLING_FORCE_INTERACTION_HPP
 #define MJOLNIR_FORCEFIELD_EXTERNAL_PULLING_FORCE_INTERACTION_HPP
+#include <mjolnir/core/ExternalForceInteractionBase.hpp>
 #include <mjolnir/core/System.hpp>
 
 namespace mjolnir
