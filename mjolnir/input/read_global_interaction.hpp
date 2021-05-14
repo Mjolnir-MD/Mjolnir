@@ -161,6 +161,16 @@ read_global_pair_interaction(const toml::value& global)
                 std::move(pot_para.first), std::move(pot_para.second),
                 read_spatial_partition<traitsT, potential_t>(global));
     }
+    else if(potential == "UniformCubicFunction")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is UniformCubicFunction");
+        using potential_t   = UniformCubicFunctionPotential<traitsT>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+
+        return make_unique<interaction_t>(
+            read_uniform_cubic_function_potential<traitsT>(global),
+            read_spatial_partition<traitsT, potential_t>(global));
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
@@ -173,7 +183,8 @@ read_global_pair_interaction(const toml::value& global)
             "- \"LennardJones\"         : famous r^12 - r^6 potential",
             "- \"UniformLennardJones\"  : famous r^12 - r^6 potential with uniform parameters",
             "- \"3SPN2ExcludedVolume\"  : excluded volume for 3SPN2 DNA model",
-            "- \"iSoLFAttractive\"      : attractive potential for iSoLF lipid model"
+            "- \"iSoLFAttractive\"      : attractive potential for iSoLF lipid model",
+            "- \"UniformCubicFunction\" : cubic function potential with uniform paramters"
             }));
     }
 }
