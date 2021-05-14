@@ -9,6 +9,7 @@
 #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
 #include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/forcefield/global/LennardJonesAttractivePotential.hpp>
+#include <mjolnir/forcefield/global/UniformCubicFunctionPotential.hpp>
 #include <mjolnir/forcefield/global/WCAPotential.hpp>
 #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2ExcludedVolumePotential.hpp>
@@ -593,6 +594,51 @@ read_wca_potential(const toml::value& global)
                     read_ignore_particles_within(global),
                     read_ignored_molecule(global), read_ignored_group(global))));
     }
+}
+
+
+template<typename traitsT>
+UniformCubicFunctionPotential<traitsT>
+read_uniform_cubic_function_potential(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using potential_type = UniformCubicFunctionPotential<traitsT>;
+    using real_type      = typename potential_type::real_type;
+    using parameter_type = typename potential_type::parameter_type;
+
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+
+    const real_type eps   = toml::expect<real_type>(global, u8"ε").or_other(
+                            toml::expect<real_type>(global, "epsilon")).unwrap();
+    const real_type v0    = toml::find<real_type>(global, "v0");
+    const real_type range = toml::find<real_type>(global, "range");
+    MJOLNIR_LOG_INFO("epsilon = ", eps);
+    MJOLNIR_LOG_INFO("v0      = ", v0);
+    MJOLNIR_LOG_INFO("range   = ", range);
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
+    if(global.as_table().count("parameters") == 1)
+    {
+        const auto& parameters = toml::find<toml::array>(global, "parameters");
+        for(const auto& param : parameters)
+        {
+            const auto idx = find_parameter<std::size_t>(param, env, "index") +
+                             find_parameter_or<std::int64_t>(param, env, "offset", 0);
+            params.emplace_back(idx, parameter_type{});
+        }
+        check_parameter_overlap(env, parameters, params);
+    }
+    else
+    {
+        throw_exception<std::runtime_error>("[error] "
+            "mjolnir::read_uniform_cubic_function_potential: the number of "
+            "parameters field must be one.");
+    }
+
+    return potential_type(eps, v0, range, params,
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global));
 }
 
 template<typename traitsT>
