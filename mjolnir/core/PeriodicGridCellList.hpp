@@ -220,9 +220,15 @@ void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbo
             this->lower_bound_ = current_lower_bound;
             this->system_size_ = current_system_size;
 
+            // reset `r_x_`s using cutoff length
+            this->set_cutoff(pot.max_cutoff_length());
+
             const auto dim_x = std::max<std::size_t>(3, std::floor(math::X(system_size_) * r_x_));
             const auto dim_y = std::max<std::size_t>(3, std::floor(math::Y(system_size_) * r_y_));
             const auto dim_z = std::max<std::size_t>(3, std::floor(math::Z(system_size_) * r_z_));
+
+            MJOLNIR_LOG_DEBUG("cell = ", current_system_size);
+            MJOLNIR_LOG_DEBUG("cell = ", dim_x, "x", dim_y, "x", dim_z);
 
             // if the number of cells changes, we need to reconstruct the
             // cell size.

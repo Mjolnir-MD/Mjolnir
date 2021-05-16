@@ -122,6 +122,9 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
                 this->lower_bound_ = current_lower_bound;
                 this->system_size_ = current_system_size;
 
+                // reset `r_x_`s using cutoff length
+                this->set_cutoff(pot.max_cutoff_length());
+
                 const auto dim_x = std::max<std::size_t>(3, std::floor(math::X(system_size_) * r_x_));
                 const auto dim_y = std::max<std::size_t>(3, std::floor(math::Y(system_size_) * r_y_));
                 const auto dim_z = std::max<std::size_t>(3, std::floor(math::Z(system_size_) * r_z_));
