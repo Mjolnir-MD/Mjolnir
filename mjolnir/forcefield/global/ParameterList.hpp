@@ -17,10 +17,12 @@ namespace mjolnir
 //
 // It requires potentialT to have
 // - typedef potentialT::parameter_type
-// - typedef potentialT::parameter_comparator
-// - static  potentialT::default_parameter()
-// -         potentialT::cutoff()
-// -         potentialT::potentialT(parameter_type)
+// -         potentialT::potentialT(parameter_type) (used in SpatialPartition)
+//
+// The default implementation requires
+// - typedef    potentialT::parameter_comparator
+// - static     potentialT::default_parameter()
+// - non-static potentialT::cutoff()
 //
 template<typename traitsT, typename potentialT>
 struct ParameterListBase
