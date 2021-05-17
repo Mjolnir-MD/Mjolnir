@@ -1,6 +1,6 @@
 +++
 title = "iSoLF"
-weight = 800000
+weight = 900000
 +++
 
 # iSoLFAttractivePotential

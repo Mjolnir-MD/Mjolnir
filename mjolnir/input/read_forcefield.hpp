@@ -236,6 +236,15 @@ read_multiple_basin_forcefield(const toml::value& root, const toml::value& simul
             const auto delta = -std::abs(toml::find<real_type>(unit, "delta"));
             MJOLNIR_LOG_INFO("delta(set) = ", delta);
 
+            if(ffs.count(names.at(0)) == 0)
+            {
+                MJOLNIR_LOG_ERROR("forcefield ", names.at(0), " is not defined.");
+            }
+            if(ffs.count(names.at(1)) == 0)
+            {
+                MJOLNIR_LOG_ERROR("forcefield ", names.at(1), " is not defined.");
+            }
+
             if(ffs.at(names.at(0)).first)
             {
                 MJOLNIR_LOG_WARN("forcefield ", names.at(0), " is used more "
@@ -281,6 +290,20 @@ read_multiple_basin_forcefield(const toml::value& root, const toml::value& simul
             MJOLNIR_LOG_NOTICE("delta12(set) = ", delta12);
             MJOLNIR_LOG_NOTICE("delta23(set) = ", delta23);
             MJOLNIR_LOG_NOTICE("delta31(set) = ", delta31);
+
+            if(ffs.count(names.at(0)) == 0)
+            {
+                MJOLNIR_LOG_ERROR("forcefield ", names.at(0), " is not defined.");
+            }
+            if(ffs.count(names.at(1)) == 0)
+            {
+                MJOLNIR_LOG_ERROR("forcefield ", names.at(1), " is not defined.");
+            }
+            if(ffs.count(names.at(2)) == 0)
+            {
+                MJOLNIR_LOG_ERROR("forcefield ", names.at(2), " is not defined.");
+            }
+
 
             if(ffs.at(names.at(0)).first)
             {

@@ -66,7 +66,34 @@ class PeriodicGridCellList final
 
     void initialize(neighbor_list_type& neighbors, const system_type& sys,
                     const parameter_list_type& params) override;
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
 
+        const real_type max_cutoff = params.max_cutoff_length();
+        this->set_cutoff(max_cutoff);
+
+        MJOLNIR_LOG_INFO(potential_type::name(), " cutoff = ", max_cutoff);
+
+        this->lower_bound_ = sys.boundary().lower_bound();
+        this->system_size_ = sys.boundary().width();
+
+        const auto dim_x = std::max<std::size_t>(3, std::floor(math::X(system_size_) * r_x_));
+        const auto dim_y = std::max<std::size_t>(3, std::floor(math::Y(system_size_) * r_y_));
+        const auto dim_z = std::max<std::size_t>(3, std::floor(math::Z(system_size_) * r_z_));
+
+        // allocate list of cells and set connectivity between them
+        this->construct_cells(dim_x, dim_y, dim_z);
+
+        // adjust cell width
+        this->r_x_ = real_type(1) / (math::X(this->system_size_) / this->dim_x_);
+        this->r_y_ = real_type(1) / (math::Y(this->system_size_) / this->dim_y_);
+        this->r_z_ = real_type(1) / (math::Z(this->system_size_) / this->dim_z_);
+
+        // construct neighbor list using cells
+        this->make(neighbors, sys, pot);
+        return;
+    }
     void make(neighbor_list_type& neighbors, const system_type& sys,
               const parameter_list_type& params) override;
 
@@ -111,12 +138,16 @@ class PeriodicGridCellList final
             std::min<std::size_t>(std::floor(math::Y(ofs) * this->r_y_), dim_y_-1),
             std::min<std::size_t>(std::floor(math::Z(ofs) * this->r_z_), dim_z_-1));
     }
-
     std::size_t calc_index(const std::size_t i, const std::size_t j,
                            const std::size_t k) const noexcept
     {
         return i + this->dim_x_ * j + this->dim_x_ * this->dim_y_ * k;
     }
+
+    // allocate list of cells and set connectivity between them.
+    // It does not change cell width, but change the connection between cells.
+    void construct_cells(
+        const std::size_t dim_x, const std::size_t dim_y, const std::size_t dim_z);
 
     void set_cutoff(const real_type c) noexcept
     {
@@ -150,6 +181,7 @@ class PeriodicGridCellList final
     std::size_t dim_z_;
 
     coordinate_type     lower_bound_;
+    coordinate_type     system_size_; // size of the boundary condition. in NPT, we need to check it
     cell_list_type      cell_list_;
     cell_index_container_type index_by_cell_;
     // index_by_cell_ has {particle idx, cell idx} and sorted by cell idx
@@ -170,6 +202,56 @@ void PeriodicGridCellList<traitsT, potentialT>::make(
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
+
+    // first check the system size because the box size might change under NPT.
+    // If it does not match exactly, it means we may need to reconstruct the
+    // cell list.
+    //
+    // If the dimension in each direction is the same, then we don't need to
+    // re-construct the cell list because the number of cells and their
+    // connectivity are kept.
+    {
+        const auto current_lower_bound = sys.boundary().lower_bound();
+        const auto current_system_size = sys.boundary().width();
+        if(math::X(lower_bound_) != math::X(current_lower_bound) ||
+           math::Y(lower_bound_) != math::Y(current_lower_bound) ||
+           math::Z(lower_bound_) != math::Z(current_lower_bound) ||
+           math::X(system_size_) != math::X(current_system_size) ||
+           math::Y(system_size_) != math::Y(current_system_size) ||
+           math::Z(system_size_) != math::Z(current_system_size) )
+        {
+            this->lower_bound_ = current_lower_bound;
+            this->system_size_ = current_system_size;
+
+            // reset `r_x_`s using cutoff length
+            this->set_cutoff(pot.max_cutoff_length());
+
+            const auto dim_x = std::max<std::size_t>(3, std::floor(math::X(system_size_) * r_x_));
+            const auto dim_y = std::max<std::size_t>(3, std::floor(math::Y(system_size_) * r_y_));
+            const auto dim_z = std::max<std::size_t>(3, std::floor(math::Z(system_size_) * r_z_));
+
+            MJOLNIR_LOG_DEBUG("cell = ", current_system_size);
+            MJOLNIR_LOG_DEBUG("cell = ", dim_x, "x", dim_y, "x", dim_z);
+
+            // if the number of cells changes, we need to reconstruct the
+            // cell size.
+            if(dim_x != dim_x_ || dim_y != dim_y_ || dim_z != dim_z_)
+            {
+                // the number of the cells changes and redefine connections.
+                // Also, member variable dim_x_, y_, z_ are updated
+                this->construct_cells(dim_x, dim_y, dim_z);
+            }
+
+            // update this regardless of the number of cells
+            this->r_x_ = 1.0 / (math::X(system_size_) / this->dim_x_);
+            this->r_y_ = 1.0 / (math::Y(system_size_) / this->dim_y_);
+            this->r_z_ = 1.0 / (math::Z(system_size_) / this->dim_z_);
+
+            MJOLNIR_LOG_DEBUG("reciplocal width of cells in x coordinate = ", r_x_);
+            MJOLNIR_LOG_DEBUG("reciplocal width of cells in y coordinate = ", r_y_);
+            MJOLNIR_LOG_DEBUG("reciplocal width of cells in z coordinate = ", r_z_);
+        }
+    }
 
     // `participants` is a list that contains indices of particles that are
     // related to the potential.
@@ -268,27 +350,20 @@ void PeriodicGridCellList<traitsT, potentialT>::make(
     return ;
 }
 
+// allocate list of cells and set connectivity between them
 template<typename traitsT, typename potentialT>
-void PeriodicGridCellList<traitsT, potentialT>::initialize(
-        neighbor_list_type& neighbors, const system_type& sys,
-        const parameter_list_type& params)
+void PeriodicGridCellList<traitsT, potentialT>::construct_cells(
+    const std::size_t dim_x, const std::size_t dim_y, const std::size_t dim_z)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
-    const real_type max_cutoff = params.max_cutoff_length();
-    this->set_cutoff(max_cutoff);
+    this->dim_x_ = dim_x;
+    this->dim_y_ = dim_y;
+    this->dim_z_ = dim_z;
 
-    MJOLNIR_LOG_INFO(potential_type::name(), " cutoff = ", max_cutoff);
-
-    this->lower_bound_ = sys.boundary().lower_bound();
-    const auto system_size = sys.boundary().width();
-
-    this->dim_x_ = std::max<std::size_t>(3, std::floor(math::X(system_size) * r_x_));
-    this->dim_y_ = std::max<std::size_t>(3, std::floor(math::Y(system_size) * r_y_));
-    this->dim_z_ = std::max<std::size_t>(3, std::floor(math::Z(system_size) * r_z_));
-
-    MJOLNIR_LOG_INFO("dimension = ", dim_x_, 'x', dim_y_, 'x', dim_z_);
+    MJOLNIR_LOG_INFO("constructing cells: dimension = ",
+                     dim_x_, 'x', dim_y_, 'x', dim_z_);
 
     if(dim_x_ == 3 || dim_y_ == 3 || dim_z_ == 3)
     {
@@ -298,20 +373,11 @@ void PeriodicGridCellList<traitsT, potentialT>::initialize(
                 " and the box size!");
     }
 
-    // it may expand cell a bit (to fit system range)
-    this->r_x_ = 1.0 / (math::X(system_size) / this->dim_x_);
-    this->r_y_ = 1.0 / (math::Y(system_size) / this->dim_y_);
-    this->r_z_ = 1.0 / (math::Z(system_size) / this->dim_z_);
-
-    MJOLNIR_LOG_DEBUG("reciplocal width of cells in x coordinate = ", r_x_);
-    MJOLNIR_LOG_DEBUG("reciplocal width of cells in y coordinate = ", r_y_);
-    MJOLNIR_LOG_DEBUG("reciplocal width of cells in z coordinate = ", r_z_);
-
     this->cell_list_.resize(dim_x_ * dim_y_ * dim_z_);
 
-    const int dimx = dim_x_;
-    const int dimy = dim_y_;
-    const int dimz = dim_z_;
+    const int dimx = static_cast<int>(dim_x_);
+    const int dimy = static_cast<int>(dim_y_);
+    const int dimz = static_cast<int>(dim_z_);
 
     for(int x = 0; x < dimx; ++x)
     {
@@ -321,12 +387,12 @@ void PeriodicGridCellList<traitsT, potentialT>::initialize(
     {
         auto& cell = this->cell_list_[calc_index(x, y, z)];
 
-        const std::size_t x_prev = (x ==        0) ? dimx - 1 : x - 1;
-        const std::size_t x_next = (x == dimx - 1) ?        0 : x + 1;
-        const std::size_t y_prev = (y ==        0) ? dimy - 1 : y - 1;
-        const std::size_t y_next = (y == dimy - 1) ?        0 : y + 1;
-        const std::size_t z_prev = (z ==        0) ? dimz - 1 : z - 1;
-        const std::size_t z_next = (z == dimz - 1) ?        0 : z + 1;
+        const std::size_t x_prev = (x ==        0) ? dim_x_ - 1 : x - 1;
+        const std::size_t x_next = (x == dimx - 1) ?          0 : x + 1;
+        const std::size_t y_prev = (y ==        0) ? dim_y_ - 1 : y - 1;
+        const std::size_t y_next = (y == dimy - 1) ?          0 : y + 1;
+        const std::size_t z_prev = (z ==        0) ? dim_z_ - 1 : z - 1;
+        const std::size_t z_next = (z == dimz - 1) ?          0 : z + 1;
 
         cell.second[ 0] = calc_index(x_prev, y_prev, z_prev);
         cell.second[ 1] = calc_index(x,      y_prev, z_prev);
@@ -367,7 +433,6 @@ void PeriodicGridCellList<traitsT, potentialT>::initialize(
     }
     }
     }
-    this->make(neighbors, sys, params);
     return;
 }
 

@@ -207,6 +207,8 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 auto F_Ca = math::make_coordinate<coordinate_type>(0, 0, 0);
                 auto F_B  = math::make_coordinate<coordinate_type>(0, 0, 0);
 
+                auto vir  = math::tensor_product(F_Ca, F_B); // zero matrix;
+
                 // ----------------------------------------------------------------
                 // calculate direction term
                 // = e(b) df/dr dr/dq g(theta1) g(theta2) g(theta3)
@@ -240,6 +242,8 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                     F_Ca         -= Fi;
                     F_B          += (Fi + Fk);
                     sys.force_thread(thread_id, S) -= Fk;
+
+                    vir += math::tensor_product(sys.transpose(rS, rCa), -Fk);
                 }
 
                 // ----------------------------------------------------------------
@@ -263,6 +267,9 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                     F_B           += Fi;
                     sys.force_thread(thread_id, B5) += Fk;
                     sys.force_thread(thread_id, B3) -= Fk;
+
+                    vir += math::tensor_product(sys.transpose(rB5, rCa),  Fk);
+                    vir += math::tensor_product(sys.transpose(rB3, rCa), -Fk);
                 }
 
                 // ----------------------------------------------------------------
@@ -286,6 +293,9 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                     F_B            += Fi;
                     sys.force_thread(thread_id, CaC) += Fk;
                     sys.force_thread(thread_id, CaN) -= Fk;
+
+                    vir += math::tensor_product(sys.transpose(rCaC, rCa),  Fk);
+                    vir += math::tensor_product(sys.transpose(rCaN, rCa), -Fk);
                 }
 
                 // ----------------------------------------------------------------
@@ -293,6 +303,10 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
                 sys.force_thread(thread_id, Ca) += F_Ca;
                 sys.force_thread(thread_id, B ) += F_B ;
+
+                vir += math::tensor_product(rCa, F_Ca);
+                vir += math::tensor_product(rB , F_B);
+                sys.virial_thread(thread_id) += vir;
             }
         }
         return ;
@@ -526,6 +540,7 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
                 auto F_Ca = math::make_coordinate<coordinate_type>(0, 0, 0);
                 auto F_B  = math::make_coordinate<coordinate_type>(0, 0, 0);
+                auto vir  = math::tensor_product(F_Ca, F_B); // zero matrix;
 
                 // ----------------------------------------------------------------
                 // calculate direction term
@@ -560,6 +575,8 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                     F_Ca         -= Fi;
                     F_B          += (Fi + Fk);
                     sys.force_thread(thread_id, S) -= Fk;
+
+                    vir += math::tensor_product(sys.transpose(rS, rCa), -Fk);
                 }
 
                 // ----------------------------------------------------------------
@@ -583,6 +600,8 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                     F_B           += Fi;
                     sys.force_thread(thread_id, B5) += Fk;
                     sys.force_thread(thread_id, B3) -= Fk;
+                    vir += math::tensor_product(sys.transpose(rB5, rCa),  Fk);
+                    vir += math::tensor_product(sys.transpose(rB3, rCa), -Fk);
                 }
 
                 // ----------------------------------------------------------------
@@ -606,6 +625,8 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                     F_B            += Fi;
                     sys.force_thread(thread_id, CaC) += Fk;
                     sys.force_thread(thread_id, CaN) -= Fk;
+                    vir += math::tensor_product(sys.transpose(rCaC, rCa),  Fk);
+                    vir += math::tensor_product(sys.transpose(rCaN, rCa), -Fk);
                 }
 
                 // ----------------------------------------------------------------
@@ -613,6 +634,10 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
                 sys.force_thread(thread_id, Ca) += F_Ca;
                 sys.force_thread(thread_id, B ) += F_B ;
+
+                vir += math::tensor_product(rCa, F_Ca);
+                vir += math::tensor_product(rB , F_B);
+                sys.virial_thread(thread_id) += vir;
             }
         }
         return energy;

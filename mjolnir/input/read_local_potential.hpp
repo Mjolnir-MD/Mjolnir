@@ -15,6 +15,8 @@
 #include <mjolnir/forcefield/local/UniformPotential.hpp>
 #include <mjolnir/forcefield/local/WormLikeChainPotential.hpp>
 #include <mjolnir/forcefield/local/WormLikeChainOffsetPotential.hpp>
+#include <mjolnir/forcefield/MultipleBasin/MBasinAttractivePotential.hpp>
+#include <mjolnir/forcefield/MultipleBasin/MBasinRepulsivePotential.hpp>
 #include <mjolnir/forcefield/FLP/FlexibleLocalAnglePotential.hpp>
 #include <mjolnir/forcefield/FLP/FlexibleLocalDihedralPotential.hpp>
 // #include <mjolnir/forcefield/3SPN2/ThreeSPN2BondPotential.hpp>
@@ -93,6 +95,39 @@ read_go_contact_repulsive_potential(
     MJOLNIR_LOG_INFO("GoContactRepulsivePotential = {v0 = ", v0, ", k = ", k, '}');
     return GoContactRepulsivePotential<realT>(k, v0);
 }
+
+template<typename realT>
+MBasinAttractivePotential<realT>
+read_mbasin_attractive_potential(
+        const toml::value& param, const toml::value& env)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    using real_type = realT;
+    check_keys_available(param, {"indices", "k", "v0", "offset"});
+
+    const auto k  = find_parameter<real_type>(param, env, "k");
+    const auto v0 = find_parameter<real_type>(param, env, "v0");
+
+    MJOLNIR_LOG_INFO("MBasinAttractivePotential = {v0 = ", v0, ", k = ", k, '}');
+    return MBasinAttractivePotential<realT>(k, v0);
+}
+
+template<typename realT>
+MBasinRepulsivePotential<realT>
+read_mbasin_repulsive_potential(
+        const toml::value& param, const toml::value& env)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    using real_type = realT;
+    check_keys_available(param, {"indices", "k", "v0", "offset"});
+
+    const auto k  = find_parameter<real_type>(param, env, "k");
+    const auto v0 = find_parameter<real_type>(param, env, "v0");
+
+    MJOLNIR_LOG_INFO("MBasinRepulsivePotential = {v0 = ", v0, ", k = ", k, '}');
+    return MBasinRepulsivePotential<realT>(k, v0);
+}
+
 
 template<typename realT>
 GaussianPotential<realT>
@@ -321,6 +356,24 @@ struct read_local_potential_impl<GoContactRepulsivePotential<realT>>
     invoke(const toml::value& param, const toml::value& env)
     {
         return read_go_contact_repulsive_potential<realT>(param, env);
+    }
+};
+template<typename realT>
+struct read_local_potential_impl<MBasinRepulsivePotential<realT>>
+{
+    static MBasinRepulsivePotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
+    {
+        return read_mbasin_repulsive_potential<realT>(param, env);
+    }
+};
+template<typename realT>
+struct read_local_potential_impl<MBasinAttractivePotential<realT>>
+{
+    static MBasinAttractivePotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
+    {
+        return read_mbasin_attractive_potential<realT>(param, env);
     }
 };
 template<typename realT>

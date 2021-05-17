@@ -40,7 +40,7 @@ class TRRObserver final : public ObserverBase<traitsT>
     }
     ~TRRObserver() override {}
 
-    void initialize(const std::size_t,  const real_type,
+    void initialize(const std::size_t,  const std::size_t, const real_type,
                     const system_type&, const forcefield_type&) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();

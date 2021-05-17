@@ -205,14 +205,18 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
         const auto lBji    = lBji_sq * rlBji;      // |Bji|
         const auto Bji_reg = Bji * rlBji;          // Bji / |Bji|
 
+        auto f_Bi = math::make_coordinate<coordinate_type>(0,0,0);
+        auto f_Bj = math::make_coordinate<coordinate_type>(0,0,0);
+        auto f_Si = math::make_coordinate<coordinate_type>(0,0,0);
+
         // ====================================================================
         // calc repulsive part, which does not depend on angle term.
 
         const auto dU_rep = potential_.dU_rep(bs_kind, lBji);
         if(dU_rep != real_type(0.0))
         {
-            sys.force(Bi) -= dU_rep * Bji_reg;
-            sys.force(Bj) += dU_rep * Bji_reg;
+            f_Bi -= dU_rep * Bji_reg;
+            f_Bj += dU_rep * Bji_reg;
         }
 
         // --------------------------------------------------------------------
@@ -242,7 +246,11 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
         const auto f_theta = potential_.f(theta, theta_0);
         if(f_theta == real_type(0.0))
         {
-            // purely repulsive.
+            // purely repulsive. add the repulsive force to the system and quit.
+            sys.force(Bi) += f_Bi;
+            sys.force(Bj) += f_Bj;
+            // Bji = Bj -> Bi = Bi - Bj
+            sys.virial() += math::tensor_product(Bji, f_Bi); // (Bi - Bj) * fBi
             continue;
         }
         const auto df_theta  = potential_.df(theta, theta_0);
@@ -263,9 +271,9 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
             const auto fSi = (coef_rsin * rlSBi) * (Bji_reg - cos_theta * SBi_reg);
             const auto fBj = (coef_rsin * rlBji) * (SBi_reg - cos_theta * Bji_reg);
 
-            sys.force(Si) +=  fSi;
-            sys.force(Bi) -= (fSi + fBj);
-            sys.force(Bj) +=        fBj;
+            f_Si +=  fSi;
+            f_Bi -= (fSi + fBj);
+            f_Bj +=        fBj;
         }
 
         // --------------------------------------------------------------------
@@ -275,9 +283,17 @@ void ThreeSPN2BaseStackingInteraction<traitsT>::calc_force(
         if(U_dU_attr.second != real_type(0.0))
         {
             const auto coef = f_theta * U_dU_attr.second;
-            sys.force(Bi) -= coef * Bji_reg;
-            sys.force(Bj) += coef * Bji_reg;
+            f_Bi -= coef * Bji_reg;
+            f_Bj += coef * Bji_reg;
         }
+
+        sys.force(Bi) += f_Bi;
+        sys.force(Bj) += f_Bj;
+        sys.force(Si) += f_Si;
+
+        sys.virial() += math::tensor_product(rBi,       f_Bi) +
+                        math::tensor_product(rBi - Bji, f_Bj) +
+                        math::tensor_product(rBi - SBi, f_Si);
     }
     return ;
 }
@@ -389,14 +405,18 @@ ThreeSPN2BaseStackingInteraction<traitsT>::calc_force_and_energy(
         const auto lBji    = lBji_sq * rlBji;      // |Bji|
         const auto Bji_reg = Bji * rlBji;          // Bji / |Bji|
 
+        auto f_Bi = math::make_coordinate<coordinate_type>(0,0,0);
+        auto f_Bj = math::make_coordinate<coordinate_type>(0,0,0);
+        auto f_Si = math::make_coordinate<coordinate_type>(0,0,0);
+
         // ====================================================================
         // calc repulsive part, which does not depend on angle term.
 
         const auto dU_rep = potential_.dU_rep(bs_kind, lBji);
         if(dU_rep != real_type(0.0))
         {
-            sys.force(Bi) -= dU_rep * Bji_reg;
-            sys.force(Bj) += dU_rep * Bji_reg;
+            f_Bi -= dU_rep * Bji_reg;
+            f_Bj += dU_rep * Bji_reg;
         }
         energy += potential_.U_rep(bs_kind, lBji);
 
@@ -427,7 +447,10 @@ ThreeSPN2BaseStackingInteraction<traitsT>::calc_force_and_energy(
         const auto f_theta = potential_.f(theta, theta_0);
         if(f_theta == real_type(0.0))
         {
-            // purely repulsive.
+            // purely repulsive. add the repulsive force to the system and quit.
+            sys.force(Bi) += f_Bi;
+            sys.force(Bj) += f_Bj;
+            sys.virial() += math::tensor_product(Bji, f_Bi); // (Bi - Bj) * f_Bi
             continue;
         }
         const auto df_theta  = potential_.df(theta, theta_0);
@@ -450,9 +473,9 @@ ThreeSPN2BaseStackingInteraction<traitsT>::calc_force_and_energy(
             const auto fSi = (coef_rsin * rlSBi) * (Bji_reg - cos_theta * SBi_reg);
             const auto fBj = (coef_rsin * rlBji) * (SBi_reg - cos_theta * Bji_reg);
 
-            sys.force(Si) +=  fSi;
-            sys.force(Bi) -= (fSi + fBj);
-            sys.force(Bj) +=        fBj;
+            f_Si +=  fSi;
+            f_Bi -= (fSi + fBj);
+            f_Bj +=        fBj;
         }
 
         // --------------------------------------------------------------------
@@ -462,9 +485,17 @@ ThreeSPN2BaseStackingInteraction<traitsT>::calc_force_and_energy(
         if(U_dU_attr.second != real_type(0.0))
         {
             const auto coef = f_theta * U_dU_attr.second;
-            sys.force(Bi) -= coef * Bji_reg;
-            sys.force(Bj) += coef * Bji_reg;
+            f_Bi -= coef * Bji_reg;
+            f_Bj += coef * Bji_reg;
         }
+
+        sys.force(Bi) += f_Bi;
+        sys.force(Bj) += f_Bj;
+        sys.force(Si) += f_Si;
+
+        sys.virial() += math::tensor_product(rBi,       f_Bi) +
+                        math::tensor_product(rBi - Bji, f_Bj) +
+                        math::tensor_product(rBi - SBi, f_Si);
     }
     return energy;
 }

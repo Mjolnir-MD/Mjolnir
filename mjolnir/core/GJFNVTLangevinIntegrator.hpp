@@ -22,6 +22,7 @@ class GJFNVTLangevinIntegrator
     using boundary_type   = typename traits_type::boundary_type;
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using system_type     = System<traitsT>;
     using forcefield_type = std::unique_ptr<ForceFieldBase<traitsT>>;
     using rng_type        = RandomNumberGenerator<traits_type>;
@@ -62,6 +63,7 @@ class GJFNVTLangevinIntegrator
             {
                 sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
             }
+            sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
             ff->calc_force(sys);
         }
         return;
@@ -165,6 +167,7 @@ GJFNVTLangevinIntegrator<traitsT>::step(const real_type time,
         // collect largest displacement
         largest_disp2 = std::max(largest_disp2, math::length_sq(dp));
     }
+    sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
     // update neighbor list; reduce margin, reconstruct the list if needed
     ff->reduce_margin(2 * std::sqrt(largest_disp2), sys);

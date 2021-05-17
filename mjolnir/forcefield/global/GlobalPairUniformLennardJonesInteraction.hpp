@@ -106,6 +106,9 @@ class GlobalPairInteraction<
 
                 sys.force(i) += f;
                 sys.force(j) -= f;
+
+                // rij * Fj = (rj - ri) * Fj = (ri - rj) * Fi
+                sys.virial() += math::tensor_product(rij, -f);
             }
         }
         return ;
@@ -184,6 +187,9 @@ class GlobalPairInteraction<
 
                 sys.force(i) += f;
                 sys.force(j) -= f;
+
+                // rij * Fj = (rj - ri) * Fj = (ri - rj) * Fi
+                sys.virial() += math::tensor_product(rij, -f);
             }
         }
         return energy;
