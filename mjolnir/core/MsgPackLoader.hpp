@@ -223,6 +223,29 @@ class MsgPackLoader
         sys.force_initialized() = true;
 
         // -----------------------------------------------------------------------
+        // load virial
+
+        this->check_msgpack_key(file, filename, "virial");
+        {
+            const auto tag = detail::read_bytes_as<std::uint8_t>(file);
+            if(tag != 0x99)
+            {
+                throw_exception<std::runtime_error>("[error] mjolnir::MsgPackLoader:"
+                        "expected tag 0x99, but got ", std::hex, std::uint32_t(tag));
+            }
+            auto& vir = sys.virial();
+            vir(0, 0) = this->from_msgpack<real_type>(file, filename);
+            vir(0, 1) = this->from_msgpack<real_type>(file, filename);
+            vir(0, 2) = this->from_msgpack<real_type>(file, filename);
+            vir(1, 0) = this->from_msgpack<real_type>(file, filename);
+            vir(1, 1) = this->from_msgpack<real_type>(file, filename);
+            vir(1, 2) = this->from_msgpack<real_type>(file, filename);
+            vir(2, 0) = this->from_msgpack<real_type>(file, filename);
+            vir(2, 1) = this->from_msgpack<real_type>(file, filename);
+            vir(2, 2) = this->from_msgpack<real_type>(file, filename);
+        }
+
+        // -----------------------------------------------------------------------
         // load attributes
 
         this->check_msgpack_key(file, filename, "attributes");

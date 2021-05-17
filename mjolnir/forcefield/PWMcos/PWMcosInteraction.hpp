@@ -225,8 +225,13 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
 
             const auto factor = coef * (e_pwm + shift);
 
-            auto F_Ca = math::make_coordinate<coordinate_type>(0, 0, 0);
-            auto F_B  = math::make_coordinate<coordinate_type>(0, 0, 0);
+            auto F_Ca  = math::make_coordinate<coordinate_type>(0, 0, 0);
+            auto F_B   = math::make_coordinate<coordinate_type>(0, 0, 0);
+            auto F_S   = math::make_coordinate<coordinate_type>(0, 0, 0);
+            auto F_B5  = math::make_coordinate<coordinate_type>(0, 0, 0);
+            auto F_B3  = math::make_coordinate<coordinate_type>(0, 0, 0);
+            auto F_CaN = math::make_coordinate<coordinate_type>(0, 0, 0);
+            auto F_CaC = math::make_coordinate<coordinate_type>(0, 0, 0);
 
             // ----------------------------------------------------------------
             // calculate direction term
@@ -258,9 +263,9 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
                 const auto Fk = (coef_rsin * rlBS ) *
                                 ((cos1 * rlBS ) * rBS  - rlBCa * rBCa);
 
-                F_Ca         -= Fi;
-                F_B          += (Fi + Fk);
-                sys.force(S) -= Fk;
+                F_Ca -= Fi;
+                F_B  += (Fi + Fk);
+                F_S  -= Fk;
             }
 
             // ----------------------------------------------------------------
@@ -280,10 +285,10 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
                 const auto Fk = (coef_rsin * rlB53) *
                                 ((cos2 * rlB53) * rB53 - rlBCa * rBCa);
 
-                F_Ca          -= Fi;
-                F_B           += Fi;
-                sys.force(B5) += Fk;
-                sys.force(B3) -= Fk;
+                F_Ca -= Fi;
+                F_B  += Fi;
+                F_B5 += Fk;
+                F_B3 -= Fk;
             }
 
             // ----------------------------------------------------------------
@@ -303,17 +308,30 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
                 const auto Fk = (coef_rsin * rlCCN) *
                                 ((cos3 * rlCCN) * rCCN - rlBCa * rBCa);
 
-                F_Ca           -= Fi;
-                F_B            += Fi;
-                sys.force(CaC) += Fk;
-                sys.force(CaN) -= Fk;
+                F_Ca  -= Fi;
+                F_B   += Fi;
+                F_CaC += Fk;
+                F_CaN -= Fk;
             }
 
             // ----------------------------------------------------------------
             // collect force on Ca and B
 
-            sys.force(Ca) += F_Ca;
-            sys.force(B ) += F_B ;
+            sys.force(Ca)  += F_Ca;
+            sys.force(B )  += F_B;
+            sys.force(S)   += F_S;
+            sys.force(B5)  += F_B5;
+            sys.force(B3)  += F_B3;
+            sys.force(CaN) += F_CaN;
+            sys.force(CaC) += F_CaC;
+
+            sys.virial() += math::tensor_product(              rCa,        F_Ca)
+                         +  math::tensor_product(sys.transpose(rB,   rCa), F_B)
+                         +  math::tensor_product(sys.transpose(rS,   rCa), F_S)
+                         +  math::tensor_product(sys.transpose(rB5,  rCa), F_B5)
+                         +  math::tensor_product(sys.transpose(rB3,  rCa), F_B3)
+                         +  math::tensor_product(sys.transpose(rCaN, rCa), F_CaN)
+                         +  math::tensor_product(sys.transpose(rCaC, rCa), F_CaC);
         }
     }
     return ;
@@ -546,8 +564,13 @@ PWMcosInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexce
             energy += factor * f_df.first *
                       g_dg_1.first * g_dg_2.first * g_dg_3.first;
 
-            auto F_Ca = math::make_coordinate<coordinate_type>(0, 0, 0);
-            auto F_B  = math::make_coordinate<coordinate_type>(0, 0, 0);
+            auto F_Ca  = math::make_coordinate<coordinate_type>(0, 0, 0);
+            auto F_B   = math::make_coordinate<coordinate_type>(0, 0, 0);
+            auto F_S   = math::make_coordinate<coordinate_type>(0, 0, 0);
+            auto F_B5  = math::make_coordinate<coordinate_type>(0, 0, 0);
+            auto F_B3  = math::make_coordinate<coordinate_type>(0, 0, 0);
+            auto F_CaN = math::make_coordinate<coordinate_type>(0, 0, 0);
+            auto F_CaC = math::make_coordinate<coordinate_type>(0, 0, 0);
 
             // ----------------------------------------------------------------
             // calculate direction term
@@ -579,9 +602,9 @@ PWMcosInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexce
                 const auto Fk = (coef_rsin * rlBS ) *
                                 ((cos1 * rlBS ) * rBS  - rlBCa * rBCa);
 
-                F_Ca         -= Fi;
-                F_B          += (Fi + Fk);
-                sys.force(S) -= Fk;
+                F_Ca -= Fi;
+                F_B  += (Fi + Fk);
+                F_S  -= Fk;
             }
 
             // ----------------------------------------------------------------
@@ -601,10 +624,10 @@ PWMcosInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexce
                 const auto Fk = (coef_rsin * rlB53) *
                                 ((cos2 * rlB53) * rB53 - rlBCa * rBCa);
 
-                F_Ca          -= Fi;
-                F_B           += Fi;
-                sys.force(B5) += Fk;
-                sys.force(B3) -= Fk;
+                F_Ca -= Fi;
+                F_B  += Fi;
+                F_B5 += Fk;
+                F_B3 -= Fk;
             }
 
             // ----------------------------------------------------------------
@@ -624,17 +647,30 @@ PWMcosInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexce
                 const auto Fk = (coef_rsin * rlCCN) *
                                 ((cos3 * rlCCN) * rCCN - rlBCa * rBCa);
 
-                F_Ca           -= Fi;
-                F_B            += Fi;
-                sys.force(CaC) += Fk;
-                sys.force(CaN) -= Fk;
+                F_Ca  -= Fi;
+                F_B   += Fi;
+                F_CaC += Fk;
+                F_CaN -= Fk;
             }
 
             // ----------------------------------------------------------------
             // collect force on Ca and B
 
-            sys.force(Ca) += F_Ca;
-            sys.force(B ) += F_B ;
+            sys.force(Ca)  += F_Ca;
+            sys.force(B )  += F_B ;
+            sys.force(S)   += F_S;
+            sys.force(B5)  += F_B5;
+            sys.force(B3)  += F_B3;
+            sys.force(CaN) += F_CaN;
+            sys.force(CaC) += F_CaC;
+
+            sys.virial() += math::tensor_product(              rCa,        F_Ca)
+                         +  math::tensor_product(sys.transpose(rB,   rCa), F_B)
+                         +  math::tensor_product(sys.transpose(rS,   rCa), F_S)
+                         +  math::tensor_product(sys.transpose(rB5,  rCa), F_B5)
+                         +  math::tensor_product(sys.transpose(rB3,  rCa), F_B3)
+                         +  math::tensor_product(sys.transpose(rCaN, rCa), F_CaN)
+                         +  math::tensor_product(sys.transpose(rCaC, rCa), F_CaC);
         }
     }
     return energy;

@@ -165,6 +165,12 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const auto k = para.k;
                 const auto thread_id = omp_get_thread_num();
 
+                auto f_P  = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_D  = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_S3 = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_PN = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_PC = math::make_coordinate<coordinate_type>(0,0,0);
+
                 // df(r) g(theta) g(phi)
                 if(g_dg_theta.first  != 0 && g_dg_phi.first  != 0)
                 {
@@ -174,8 +180,8 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                         f_df.second * g_dg_theta.first * g_dg_phi.first;
                     const auto F = -coef * rPD;
 
-                    sys.force_thread(thread_id, P) -= F;
-                    sys.force_thread(thread_id, D) += F;
+                    f_P -= F;
+                    f_D += F;
                 }
 
                 // f(r) dg(theta) g(phi)
@@ -195,10 +201,10 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                     const auto F_P  = -coef_sin * rlPD  * (rPNC_reg - cosPNC * rPD_reg );
                     const auto F_PN = -coef_sin * rlPNC * (rPD_reg  - cosPNC * rPNC_reg);
 
-                    sys.force_thread(thread_id, D)       -= F_P;
-                    sys.force_thread(thread_id, P)       += F_P;
-                    sys.force_thread(thread_id, para.PN) += F_PN;
-                    sys.force_thread(thread_id, para.PC) -= F_PN;
+                    f_D  -= F_P;
+                    f_P  += F_P;
+                    f_PN += F_PN;
+                    f_PC -= F_PN;
                 }
 
                 // f(r) dg(theta) g(phi)
@@ -218,10 +224,22 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                     const auto F_P = -coef_sin * rlPD  * (rS3D_reg - cosS3D * rPD_reg);
                     const auto F_S = -coef_sin * rlS3D * (rPD_reg  - cosS3D * rS3D_reg);
 
-                    sys.force_thread(thread_id, P)  += F_P;
-                    sys.force_thread(thread_id, D)  -= F_P + F_S;
-                    sys.force_thread(thread_id, S3) += F_S;
+                    f_P  += F_P;
+                    f_D  -= F_P + F_S;
+                    f_S3 += F_S;
                 }
+                sys.force_thread(thread_id, P)       += f_P;
+                sys.force_thread(thread_id, D)       += f_D;
+                sys.force_thread(thread_id, S3)      += f_S3;
+                sys.force_thread(thread_id, para.PN) += f_PN;
+                sys.force_thread(thread_id, para.PC) += f_PC;
+
+                sys.virial_thread(thread_id) +=
+                    math::tensor_product(rP,       f_P) +
+                    math::tensor_product(rP + rPD, f_D) +
+                    math::tensor_product(sys.transpose(rS3, rP), f_S3) +
+                    math::tensor_product(sys.transpose(rPN, rP), f_PN) +
+                    math::tensor_product(sys.transpose(rPC, rP), f_PC) ;
             }
         }
         return;
@@ -400,6 +418,12 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const auto k = para.k;
                 const auto thread_id = omp_get_thread_num();
 
+                auto f_P  = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_D  = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_S3 = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_PN = math::make_coordinate<coordinate_type>(0,0,0);
+                auto f_PC = math::make_coordinate<coordinate_type>(0,0,0);
+
                 energy += k * f_df.first * g_dg_theta.first * g_dg_phi.first;
 
                 // df(r) g(theta) g(phi)
@@ -411,8 +435,8 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                         f_df.second * g_dg_theta.first * g_dg_phi.first;
                     const auto F = -coef * rPD;
 
-                    sys.force_thread(thread_id, P) -= F;
-                    sys.force_thread(thread_id, D) += F;
+                    f_P -= F;
+                    f_D += F;
                 }
 
                 // f(r) dg(theta) g(phi)
@@ -432,10 +456,10 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                     const auto F_P  = -coef_sin * rlPD  * (rPNC_reg - cosPNC * rPD_reg );
                     const auto F_PN = -coef_sin * rlPNC * (rPD_reg  - cosPNC * rPNC_reg);
 
-                    sys.force_thread(thread_id, D)       -= F_P;
-                    sys.force_thread(thread_id, P)       += F_P;
-                    sys.force_thread(thread_id, para.PN) += F_PN;
-                    sys.force_thread(thread_id, para.PC) -= F_PN;
+                    f_D  -= F_P;
+                    f_P  += F_P;
+                    f_PN += F_PN;
+                    f_PC -= F_PN;
                 }
 
                 // f(r) dg(theta) g(phi)
@@ -455,10 +479,22 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                     const auto F_P = -coef_sin * rlPD  * (rS3D_reg - cosS3D * rPD_reg);
                     const auto F_S = -coef_sin * rlS3D * (rPD_reg  - cosS3D * rS3D_reg);
 
-                    sys.force_thread(thread_id, P)  += F_P;
-                    sys.force_thread(thread_id, D)  -= F_P + F_S;
-                    sys.force_thread(thread_id, S3) += F_S;
+                    f_P  += F_P;
+                    f_D  -= F_P + F_S;
+                    f_S3 += F_S;
                 }
+                sys.force_thread(thread_id, P)       += f_P;
+                sys.force_thread(thread_id, D)       += f_D;
+                sys.force_thread(thread_id, S3)      += f_S3;
+                sys.force_thread(thread_id, para.PN) += f_PN;
+                sys.force_thread(thread_id, para.PC) += f_PC;
+
+                sys.virial_thread(thread_id) +=
+                    math::tensor_product(rP,       f_P) +
+                    math::tensor_product(rP + rPD, f_D) +
+                    math::tensor_product(sys.transpose(rS3, rP), f_S3) +
+                    math::tensor_product(sys.transpose(rPN, rP), f_PN) +
+                    math::tensor_product(sys.transpose(rPC, rP), f_PC) ;
             }
         }
         return energy;

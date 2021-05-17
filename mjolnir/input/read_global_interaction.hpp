@@ -36,7 +36,7 @@ read_global_pair_interaction(const toml::value& global)
 //         MJOLNIR_LOG_NOTICE("-- potential function is Excluded Volume.");
 //         using potential_t   = ExcludedVolumePotential<traitsT>;
 //         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-// 
+//
 //         return make_unique<interaction_t>(
 //             read_excluded_volume_potential<traitsT>(global),
 //             read_spatial_partition<traitsT, potential_t>(global));
@@ -46,7 +46,7 @@ read_global_pair_interaction(const toml::value& global)
 //         MJOLNIR_LOG_NOTICE("-- potential function is Inverse Power.");
 //         using potential_t   = InversePowerPotential<traitsT>;
 //         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-// 
+//
 //         return make_unique<interaction_t>(
 //             read_inverse_power_potential<traitsT>(global),
 //             read_spatial_partition<traitsT, potential_t>(global));
@@ -56,7 +56,7 @@ read_global_pair_interaction(const toml::value& global)
 //         MJOLNIR_LOG_NOTICE("-- potential function is Hard Core Excluded Volume.");
 //         using potential_t   = HardCoreExcludedVolumePotential<traitsT>;
 //         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-// 
+//
 //         return make_unique<interaction_t>(
 //             read_hard_core_excluded_volume_potential<traitsT>(global),
 //             read_spatial_partition<traitsT, potential_t>(global));
@@ -66,7 +66,7 @@ read_global_pair_interaction(const toml::value& global)
 //         MJOLNIR_LOG_NOTICE("-- potential function is Debye-Huckel.");
 //         using potential_t   = DebyeHuckelPotential<traitsT>;
 //         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-// 
+//
 //         return make_unique<interaction_t>(
 //             read_debye_huckel_potential<traitsT>(global),
 //             read_spatial_partition<traitsT, potential_t>(global));
@@ -87,7 +87,7 @@ read_global_pair_interaction(const toml::value& global)
 //         MJOLNIR_LOG_NOTICE("-- potential function is Uniform Lennard-Jones.");
 //         using potential_t   = UniformLennardJonesPotential<traitsT>;
 //         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-// 
+//
 //         return make_unique<interaction_t>(
 //             read_uniform_lennard_jones_potential<traitsT>(global),
 //             read_spatial_partition<traitsT, potential_t>(global));
@@ -95,29 +95,53 @@ read_global_pair_interaction(const toml::value& global)
 //     else if(potential == "LennardJonesAttractive")
 //     {
 //         MJOLNIR_LOG_NOTICE("-- potential function is the attractive part of Lennard-Jones.");
-//         using potential_t   = LennardJonesAttractivePotential<traitsT>;
-//         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-// 
-//         return make_unique<interaction_t>(
-//             read_lennard_jones_attractive_potential<traitsT>(global),
-//             read_spatial_partition<traitsT, potential_t>(global));
+//         if(global.contains("table"))
+//         {
+//             using potential_t   = TabulatedLennardJonesAttractivePotential<traitsT>;
+//             using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+//
+//             return make_unique<interaction_t>(
+//                 read_tabulated_lennard_jones_attractive_potential<traitsT>(global),
+//                 read_spatial_partition<traitsT, potential_t>(global));
+//         }
+//         else
+//         {
+//             using potential_t   = LennardJonesAttractivePotential<traitsT>;
+//             using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+//
+//             return make_unique<interaction_t>(
+//                 read_lennard_jones_attractive_potential<traitsT>(global),
+//                 read_spatial_partition<traitsT, potential_t>(global));
+//         }
 //     }
 //     else if(potential == "WCA")
 //     {
 //         MJOLNIR_LOG_NOTICE("-- potential function is WCA.");
-//         using potential_t   = WCAPotential<traitsT>;
-//         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-// 
-//         return make_unique<interaction_t>(
-//             read_wca_potential<traitsT>(global),
-//             read_spatial_partition<traitsT, potential_t>(global));
+//         if(global.contains("table"))
+//         {
+//             using potential_t   = TabulatedWCAPotential<traitsT>;
+//             using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+//
+//             return make_unique<interaction_t>(
+//                 read_tabulated_wca_potential<traitsT>(global),
+//                 read_spatial_partition<traitsT, potential_t>(global));
+//         }
+//         else
+//         {
+//             using potential_t   = WCAPotential<traitsT>;
+//             using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+//
+//             return make_unique<interaction_t>(
+//                 read_wca_potential<traitsT>(global),
+//                 read_spatial_partition<traitsT, potential_t>(global));
+//         }
 //     }
 //     else if(potential == "3SPN2ExcludedVolume")
 //     {
 //         MJOLNIR_LOG_NOTICE("-- potential function is 3SPN2ExcludedVolume.");
 //         using potential_t   = ThreeSPN2ExcludedVolumePotential<traitsT>;
 //         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-// 
+//
 //         return make_unique<interaction_t>(
 //             read_3spn2_excluded_volume_potential<traitsT>(global),
 //             read_spatial_partition<traitsT, potential_t>(global));
@@ -127,7 +151,7 @@ read_global_pair_interaction(const toml::value& global)
 //         MJOLNIR_LOG_NOTICE("-- potential function is iSoLFAttractive.");
 //         using potential_t   = iSoLFAttractivePotential<traitsT>;
 //         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-// 
+//
 //         return make_unique<interaction_t>(
 //             read_isolf_potential<traitsT>(global),
 //             read_spatial_partition<traitsT, potential_t>(global));
@@ -151,7 +175,7 @@ read_global_pair_interaction(const toml::value& global)
 
 // // ----------------------------------------------------------------------------
 // // 3SPN2 Base-Base Interaction
-// 
+//
 // template<typename traitsT>
 // std::unique_ptr<GlobalInteractionBase<traitsT>>
 // read_global_3spn2_base_base_interaction(const toml::value& global)
@@ -162,7 +186,7 @@ read_global_pair_interaction(const toml::value& global)
 //     using base_kind           = parameter_3SPN2::base_kind;
 //     using potential_type      = ThreeSPN2BaseBaseInteractionPotential<traitsT>;
 //     using parameter_type      = typename potential_type::parameter_type;
-// 
+//
 //     // [[forcefields.global]]
 //     // interaction = "3SPN2BaseBase"
 //     // potential   = "3SPN2"
@@ -172,24 +196,24 @@ read_global_pair_interaction(const toml::value& global)
 //     // {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
 //     // # ...
 //     // ]
-// 
+//
 //     // ------------------------------------------------------------------------
 //     // read parameters
-// 
+//
 //     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-// 
+//
 //     const auto& ps = toml::find<toml::array>(global, "parameters");
 //     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-// 
+//
 //     using nucleotide_index_type = parameter_3SPN2::NucleotideIndex;
 //     std::vector<nucleotide_index_type> nuc_idxs;
-// 
+//
 //     nuc_idxs.reserve(ps.size());
 //     for(const auto& item : ps)
 //     {
 //         nucleotide_index_type nuc_idx;
 //         const auto ofs = find_parameter_or<std::int64_t>(item, env, "offset", 0);
-// 
+//
 //         // at the edge of the DNA, Phosphate may not exist.
 //         if(item.as_table().count("P") != 0)
 //         {
@@ -199,7 +223,7 @@ read_global_pair_interaction(const toml::value& global)
 //         nuc_idx.B          = find_parameter<std::size_t>(item, env, "B") + ofs;
 //         nuc_idx.strand     = find_parameter<std::size_t>(item, env, "strand");
 //         nuc_idx.nucleotide = find_parameter<std::size_t>(item, env, "nucleotide");
-// 
+//
 //         const auto bk      = toml::find<std::string>(item, "Base");
 //         if     (bk == "A") {nuc_idx.base = base_kind::A;}
 //         else if(bk == "T") {nuc_idx.base = base_kind::T;}
@@ -213,31 +237,31 @@ read_global_pair_interaction(const toml::value& global)
 //                 "expected value is one of the \"A\", \"T\", \"C\", \"G\"."
 //                 }));
 //         }
-// 
+//
 //         MJOLNIR_LOG_INFO("ThreeSPN2BaseBaseInteraction: nucleotide = ", nuc_idx);
 //         nuc_idxs.push_back(nuc_idx);
 //     }
-// 
+//
 //     std::sort(nuc_idxs.begin(), nuc_idxs.end(),
 //         [](const nucleotide_index_type& lhs, const nucleotide_index_type& rhs) {
 //             return std::make_pair(lhs.strand, lhs.nucleotide) <
 //                    std::make_pair(rhs.strand, rhs.nucleotide);
 //         });
-// 
+//
 //     std::vector<std::pair<std::size_t, parameter_type>> params;
 //     params.reserve(nuc_idxs.size());
 //     for(std::size_t i=0; i<nuc_idxs.size(); ++i)
 //     {
 //         const auto& base = nuc_idxs.at(i);
 //         const auto  B = base.B;
-// 
+//
 //         parameter_type p;
 //         p.nucleotide_index = base.nucleotide;
 //         p.base   = base.base;
 //         p.S_idx  = base.S;
 //         p.B5_idx = potential_type::invalid();
 //         p.B3_idx = potential_type::invalid();
-// 
+//
 //         if(i != 0 && nuc_idxs.at(i-1).strand == base.strand)
 //         {
 //             p.B5_idx = nuc_idxs.at(i-1).B;
@@ -248,10 +272,10 @@ read_global_pair_interaction(const toml::value& global)
 //         }
 //         MJOLNIR_LOG_INFO("Base idx = ", B, ", base = ", p.base, ", Sugar idx = ",
 //             p.S_idx, ", 5' adjacent = ", p.B5_idx, ", 3' adjacent", p.B3_idx);
-// 
+//
 //         params.emplace_back(B, p);
 //     }
-// 
+//
 //     const auto pot = toml::find<std::string>(global, "potential");
 //     if(pot == "3SPN2")
 //     {
@@ -259,7 +283,7 @@ read_global_pair_interaction(const toml::value& global)
 //         potential_type potential(para_3SPN2, std::move(params),
 //             read_ignore_particles_within(global),
 //             read_ignored_molecule(global), read_ignored_group(global));
-// 
+//
 //         return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(
 //                 std::move(potential),
 //                 read_spatial_partition<traitsT, potential_type>(global));
@@ -270,7 +294,7 @@ read_global_pair_interaction(const toml::value& global)
 //         potential_type potential(para_3SPN2C, std::move(params),
 //             read_ignore_particles_within(global),
 //             read_ignored_molecule(global), read_ignored_group(global));
-// 
+//
 //         return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(
 //                 std::move(potential),
 //                 read_spatial_partition<traitsT, potential_type>(global));
@@ -286,10 +310,10 @@ read_global_pair_interaction(const toml::value& global)
 //             }));
 //     }
 // }
-// 
+//
 // // ----------------------------------------------------------------------------
 // // PDNS Interaction
-// 
+//
 // template<typename traitsT>
 // std::unique_ptr<GlobalInteractionBase<traitsT>>
 // read_pdns_interaction(const toml::value& global)
@@ -300,7 +324,7 @@ read_global_pair_interaction(const toml::value& global)
 //     using real_type              = typename potential_type::real_type;
 //     using contact_parameter_type = typename potential_type::contact_parameter_type;
 //     using dna_index_type         = typename potential_type::dna_index_type;
-// 
+//
 //     // ```toml
 //     // [[forcefields.global]]
 //     // interaction = "PDNS"
@@ -319,26 +343,26 @@ read_global_pair_interaction(const toml::value& global)
 //     // # ...
 //     // ]
 //     // ```
-// 
+//
 //     // ------------------------------------------------------------------------
 //     // read parameters
-// 
+//
 //     const real_type dlt = toml::find<real_type>(global, "delta");
 //     const real_type sgm = toml::find<real_type>(global, "sigma");
-// 
+//
 //     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
 //             potential_type::default_cutoff());
-// 
+//
 //     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-// 
+//
 //     const auto& ps = toml::find<toml::array>(global, "parameters");
 //     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-// 
+//
 //     std::vector<contact_parameter_type> contacts;
 //     std::vector<dna_index_type>         dnas;
 //     contacts.reserve(ps.size());
 //     dnas    .reserve(ps.size());
-// 
+//
 //     for(const auto& item : ps)
 //     {
 //         const auto idx  = toml::find<std::size_t>(item, "index");
@@ -355,7 +379,7 @@ read_global_pair_interaction(const toml::value& global)
 //             para.theta0 = find_parameter<real_type>(item, env, "theta0");
 //             para.phi0   = find_parameter<real_type>(item, env, "phi0");
 //             contacts.push_back(para);
-// 
+//
 //             MJOLNIR_LOG_INFO("Protein: idx = ", para.P, ", PN = ", para.PN,
 //                 ", PC = ", para.PC, ", k = ", para.k, ", r0 = ", para.r0,
 //                 ", theta0 = ", para.theta0, ", phi0 = ", para.phi0);
@@ -385,10 +409,10 @@ read_global_pair_interaction(const toml::value& global)
 //             read_ignored_group(global)),
 //         read_spatial_partition<traitsT, potential_type>(global));
 // }
-// 
+//
 // // ----------------------------------------------------------------------------
 // // PWMcos Interaction
-// 
+//
 // template<typename traitsT>
 // std::unique_ptr<GlobalInteractionBase<traitsT>>
 // read_pwmcos_interaction(const toml::value& global)
@@ -400,7 +424,7 @@ read_global_pair_interaction(const toml::value& global)
 //     using contact_parameter_type = typename potential_type::contact_parameter_type;
 //     using dna_parameter_type     = typename potential_type::dna_parameter_type;
 //     using base_kind              = typename potential_type::base_kind;
-// 
+//
 //     // ```toml
 //     // [[forcefields.global]]
 //     // interaction = "PWMcos"
@@ -421,34 +445,34 @@ read_global_pair_interaction(const toml::value& global)
 //     // # ...
 //     // ]
 //     // ```
-// 
+//
 //     // ------------------------------------------------------------------------
 //     // read parameters
-// 
+//
 //     const real_type phi    = toml::find<real_type>(global, "phi");
 //     const real_type sgm    = toml::find<real_type>(global, "sigma");
 //     const real_type Eunit  = toml::find<real_type>(global, "energy_unit");
 //     const real_type Eshift = toml::find<real_type>(global, "energy_shift");
-// 
+//
 //     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
 //             potential_type::default_cutoff());
-// 
+//
 //     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-// 
+//
 //     const auto& ps = toml::find<toml::array>(global, "parameters");
 //     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-// 
+//
 //     std::vector<contact_parameter_type> contacts;
 //     std::vector<dna_parameter_type>     dnas;
 //     contacts.reserve(ps.size());
 //     dnas    .reserve(ps.size());
-// 
+//
 //     // base index
 //     const auto A = static_cast<std::size_t>(base_kind::A);
 //     const auto C = static_cast<std::size_t>(base_kind::C);
 //     const auto G = static_cast<std::size_t>(base_kind::G);
 //     const auto T = static_cast<std::size_t>(base_kind::T);
-// 
+//
 //     for(const auto& item : ps)
 //     {
 //         const auto idx  = toml::find<std::size_t>(item, "index");
@@ -470,9 +494,9 @@ read_global_pair_interaction(const toml::value& global)
 //             para.PWM[C]   = find_parameter<real_type>(item, env, "C");
 //             para.PWM[G]   = find_parameter<real_type>(item, env, "G");
 //             para.PWM[T]   = find_parameter<real_type>(item, env, "T");
-// 
+//
 //             contacts.push_back(para);
-// 
+//
 //             MJOLNIR_LOG_INFO("Protein: idx = ", idx + ofs, ", CaN = ", para.CaN,
 //                 ", CaC = ", para.CaC, ", gamma = ", para.gamma, ", epsilon = ", para.epsilon,
 //                 ", r0 = ", para.r0, ", theta1_0 = ", para.theta1_0,
@@ -485,11 +509,11 @@ read_global_pair_interaction(const toml::value& global)
 //             dna_parameter_type dp;
 //             dp.B  = idx + ofs;
 //             dp.S  = find_parameter<std::uint32_t>(item, env, "S") + ofs;
-// 
+//
 //             // it seems that 3' and 5' bases are required.
 //             dp.B5 = find_parameter<std::uint32_t>(item, env, "B5") + ofs;
 //             dp.B3 = find_parameter<std::uint32_t>(item, env, "B3") + ofs;
-// 
+//
 //             const auto& bk = toml::find<std::string>(item, "base");
 //             if     (bk == "A") {dp.base = base_kind::A;}
 //             else if(bk == "C") {dp.base = base_kind::C;}

@@ -89,12 +89,20 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
             const real_type coef_ijk = math::dot_product(r_ij, r_kj) * r_kj_rlensq;
             const real_type coef_jkl = math::dot_product(r_kl, r_kj) * r_kj_rlensq;
 
-            const auto thread_id = omp_get_thread_num();
+            const auto Fj = (coef_ijk - real_type(1.0)) * Fi - coef_jkl * Fl;
+            const auto Fk = (coef_jkl - real_type(1.0)) * Fl - coef_ijk * Fi;
 
+            const auto thread_id = omp_get_thread_num();
             sys.force_thread(thread_id, idx0) += Fi;
-            sys.force_thread(thread_id, idx1) += (coef_ijk - real_type(1.0)) * Fi - coef_jkl * Fl;
-            sys.force_thread(thread_id, idx2) += (coef_jkl - real_type(1.0)) * Fl - coef_ijk * Fi;
+            sys.force_thread(thread_id, idx1) += Fj;
+            sys.force_thread(thread_id, idx2) += Fk;
             sys.force_thread(thread_id, idx3) += Fl;
+
+            sys.virial_thread(thread_id) +=
+                math::tensor_product(r_j + r_ij,        Fi) +
+                math::tensor_product(r_j,               Fj) +
+                math::tensor_product(r_j + r_kj,        Fk) +
+                math::tensor_product(r_j + r_kj + r_lk, Fl);
         }
         return;
     }
@@ -181,12 +189,21 @@ class DihedralAngleInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentia
             const real_type coef_ijk = math::dot_product(r_ij, r_kj) * r_kj_rlensq;
             const real_type coef_jkl = math::dot_product(r_kl, r_kj) * r_kj_rlensq;
 
+            const auto Fj = (coef_ijk - real_type(1.0)) * Fi - coef_jkl * Fl;
+            const auto Fk = (coef_jkl - real_type(1.0)) * Fl - coef_ijk * Fi;
+
             const auto thread_id = omp_get_thread_num();
 
             sys.force_thread(thread_id, idx0) += Fi;
-            sys.force_thread(thread_id, idx1) += (coef_ijk - real_type(1.0)) * Fi - coef_jkl * Fl;
-            sys.force_thread(thread_id, idx2) += (coef_jkl - real_type(1.0)) * Fl - coef_ijk * Fi;
+            sys.force_thread(thread_id, idx1) += Fj;
+            sys.force_thread(thread_id, idx2) += Fk;
             sys.force_thread(thread_id, idx3) += Fl;
+
+            sys.virial_thread(thread_id) +=
+                math::tensor_product(r_j + r_ij,        Fi) +
+                math::tensor_product(r_j,               Fj) +
+                math::tensor_product(r_j + r_kj,        Fk) +
+                math::tensor_product(r_j + r_kj + r_lk, Fl);
         }
         return E;
     }

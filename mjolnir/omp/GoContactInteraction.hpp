@@ -80,6 +80,8 @@ class ContactInteraction<
             const std::size_t thread_id = omp_get_thread_num();
             sys.force_thread(thread_id, idx0) -= f;
             sys.force_thread(thread_id, idx1) += f;
+
+            sys.virial_thread(thread_id) += math::tensor_product(dpos, f);
         }
         return;
     }
@@ -133,6 +135,8 @@ class ContactInteraction<
             const std::size_t thread_id = omp_get_thread_num();
             sys.force_thread(thread_id, idx0) -= f;
             sys.force_thread(thread_id, idx1) += f;
+
+            sys.virial_thread(thread_id) += math::tensor_product(dpos, f);
         }
         return E;
     }
