@@ -21,33 +21,114 @@ namespace mjolnir
 //
 // Note: an identifier starts with a digit is not allowed in C++ standard.
 //       see N3337 2.11 for detail. So `3SPN2BaseBaseInteraction` is not a valid name.
-template<typename traitsT>
+//
+template<typename realT>
 class ThreeSPN2ExcludedVolumePotential
 {
   public:
-    using traits_type = traitsT;
-    using real_type   = typename traits_type::real_type;
-    using system_type = System<traits_type>;
-    using bead_kind   = parameter_3SPN2::bead_kind;
+    using real_type      = realT;
+    using parameter_type = real_type; // sigma_ij
+    using self_type      = ThreeSPN2ExcludedVolumePotential<real_type>;
 
-    using parameter_type      = bead_kind;
-    using pair_parameter_type = real_type; // sigma_ij
-
-    using container_type      = std::vector<parameter_type>;
-
-    // topology stuff
-    using topology_type        = Topology;
-    using molecule_id_type     = typename topology_type::molecule_id_type;
-    using group_id_type        = typename topology_type::group_id_type;
-    using connection_kind_type = typename topology_type::connection_kind_type;
-    using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
-    using ignore_group_type    = IgnoreGroup   <group_id_type>;
-    using exclusion_list_type  = ExclusionList <traits_type>;
-
+    static constexpr real_type default_cutoff() noexcept
+    {
+        return real_type(1);
+    }
     static constexpr parameter_type default_parameter() noexcept
     {
         return bead_kind::Unknown;
     }
+
+    static real_type epsilon; // 1 in [kJ/mol]
+//     static real_type cutoff_ratio;   // 1 sigma
+//     static real_type coef_at_cutoff; // 0.0
+
+  public:
+
+    explicit ThreeSPN2ExcludedVolumePotential(const parameter_type& params) noexcept
+        : sigma_(params)
+    {}
+    ~ThreeSPN2ExcludedVolumePotential() = default;
+
+    real_type potential(const real_type r) const noexcept
+    {
+        if(sigma_ <= r){return 0;}
+
+        const real_type r1s1   = sigma_ / r;
+        const real_type r3s3   = r1s1 * r1s1 * r1s1;
+        const real_type r6s6   = r3s3 * r3s3;
+        return epsilon * (r6s6 * (r6s6 - real_type(2)) + real_type(1));
+    }
+    real_type derivative(const real_type r) const noexcept
+    {
+        if(this->sigma_ <= r){return 0;}
+
+        const real_type rinv   = 1 / r;
+        const real_type r1s1   = sigma_ * rinv;
+        const real_type r3s3   = r1s1 * r1s1 * r1s1;
+        const real_type r6s6   = r3s3 * r3s3;
+        return real_type(12) * epsilon * rinv * r6s6 * (real_type(1) - r6s6);
+    }
+
+    template<typename T>
+    void initialize(const System<T>&) noexcept {return;}
+
+    template<typename T>
+    void update(const System<T>&) noexcept {return;}
+
+    static const char* name() noexcept {return "3SPN2ExcludedVolume";}
+
+    real_type sigma()  const noexcept {return this->sigma_;}
+    real_type cutoff() const noexcept {return this->sigma_;}
+
+  public:
+
+    // To culculate cutoff distance, we need to find the maximum sigma in the
+    // existing parameters. But the list of parameters will be given in a variety
+    // of ways, like Lorentz-Bertherot rule, combination table, or another way
+    // of combination rules.
+    //     To find the maximum parameter, we need to provide a way to compare
+    // parameters. But the way depends on the functional form of a potential.
+    // So this comparator should be defined in a Potential class.
+    struct parameter_comparator
+    {
+        constexpr bool
+        operator()(const parameter_type& lhs, const parameter_type& rhs) const noexcept
+        {
+            return lhs < rhs;
+        }
+    };
+
+  private:
+
+    real_type sigma_;
+};
+
+// ===========================================================================
+
+template<typename traitsT>
+class ThreeSPN2ExcludedVolumeParameter
+    : public ParameterListBase<traitsT, ThreeSPN2ExcludedVolumePotential<typename traitsT::real_type>>
+{
+  public:
+    using traits_type           = traitsT;
+    using real_type             = typename traits_type::real_type;
+    using potential_type        = ThreeSPN2ExcludedVolumePotential<real_type>;
+    using base_type             = ParameterListBase<traits_type, potential_type>;
+
+    using parameter_type        = std::pair<real_type, real_type>;
+    using pair_parameter_type   = typename potential_type::parameter_type;
+    using container_type        = std::vector<parameter_type>;
+
+    // topology stuff
+    using system_type           = System<traits_type>;
+    using topology_type         = Topology;
+    using molecule_id_type      = typename topology_type::molecule_id_type;
+    using group_id_type         = typename topology_type::group_id_type;
+    using connection_kind_type  = typename topology_type::connection_kind_type;
+    using ignore_molecule_type  = IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type     = IgnoreGroup   <group_id_type>;
+    using exclusion_list_type   = ExclusionList <traits_type>;
 
   public:
 
@@ -95,52 +176,18 @@ class ThreeSPN2ExcludedVolumePotential
     }
     ~ThreeSPN2ExcludedVolumePotential() = default;
 
-    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
+    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
     {
         return (this->sigma_of(this->parameters_[i]) +
                 this->sigma_of(this->parameters_[j])) * 0.5;
     }
 
-    // forwarding functions for clarity...
-    real_type potential(const std::size_t i, const std::size_t j,
-                        const real_type r) const noexcept
-    {
-        return this->potential(r, this->prepare_params(i, j));
-    }
-    real_type derivative(const std::size_t i, const std::size_t j,
-                         const real_type r) const noexcept
-    {
-        return this->derivative(r, this->prepare_params(i, j));
-    }
-
-    real_type potential(const real_type r, const pair_parameter_type& sigma) const noexcept
-    {
-        if(sigma <= r){return 0;}
-
-        const real_type r1s1   = sigma / r;
-        const real_type r3s3   = r1s1 * r1s1 * r1s1;
-        const real_type r6s6   = r3s3 * r3s3;
-        const real_type r12s12 = r6s6 * r6s6;
-        return this->epsilon_ * (r12s12 - 2 * r6s6 + 1);
-    }
-    real_type derivative(const real_type r, const pair_parameter_type& sigma) const noexcept
-    {
-        if(sigma <= r){return 0;}
-
-        const real_type rinv   = 1 / r;
-        const real_type r1s1   = sigma * rinv;
-        const real_type r3s3   = r1s1 * r1s1 * r1s1;
-        const real_type r6s6   = r3s3 * r3s3;
-        const real_type r12s12 = r6s6 * r6s6;
-        return 12 * epsilon_ * rinv * (r6s6 - r12s12);
-    }
-
-    real_type max_cutoff_length() const noexcept
+    real_type max_cutoff_length() const noexcept override
     {
         return this->cutoff_;
     }
 
-    void initialize(const system_type& sys, const topology_type& topol) noexcept
+    void initialize(const system_type& sys, const topology_type& topol) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -162,6 +209,7 @@ class ThreeSPN2ExcludedVolumePotential
 
                 // convert from kJ/mol to kcal/mol (/= 4.18)
                 this->epsilon_ *= unit::constants<real_type>::J_to_cal();
+                ThreeSPN2ExcludedVolumePotential<real_type>::epsilon = epsilon_;
             }
 
             const auto& length_unit = physics::constants<real_type>::length_unit();
@@ -191,7 +239,7 @@ class ThreeSPN2ExcludedVolumePotential
     }
 
     // nothing to do when system parameters change.
-    void update(const system_type& sys, const topology_type& topol) noexcept
+    void update(const system_type& sys, const topology_type& topol) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
