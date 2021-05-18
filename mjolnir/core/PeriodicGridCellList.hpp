@@ -65,7 +65,7 @@ class PeriodicGridCellList final
     }
 
     void initialize(neighbor_list_type& neighbors, const system_type& sys,
-                    const parameter_list_type& params) override;
+                    const parameter_list_type& params) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -91,7 +91,7 @@ class PeriodicGridCellList final
         this->r_z_ = real_type(1) / (math::Z(this->system_size_) / this->dim_z_);
 
         // construct neighbor list using cells
-        this->make(neighbors, sys, pot);
+        this->make(neighbors, sys, params);
         return;
     }
     void make(neighbor_list_type& neighbors, const system_type& sys,
@@ -224,7 +224,7 @@ void PeriodicGridCellList<traitsT, potentialT>::make(
             this->system_size_ = current_system_size;
 
             // reset `r_x_`s using cutoff length
-            this->set_cutoff(pot.max_cutoff_length());
+            this->set_cutoff(params.max_cutoff_length());
 
             const auto dim_x = std::max<std::size_t>(3, std::floor(math::X(system_size_) * r_x_));
             const auto dim_y = std::max<std::size_t>(3, std::floor(math::Y(system_size_) * r_y_));
