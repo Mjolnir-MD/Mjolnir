@@ -56,7 +56,7 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
         MJOLNIR_LOG_INFO("potential is ", this->name());
 
         this->parameters_.initialize(sys, topol);
-        this->partition_ .initialize(sys, parameters_);
+        this->partition_ .initialize(sys, parameters_.cref());
     }
 
     /*! @brief update parameters (e.g. temperature, ionic strength, ...)  *
@@ -70,17 +70,17 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
         MJOLNIR_LOG_INFO("potential is ", this->name());
 
         this->parameters_.update(sys, topol);
-        this->partition_.initialize(sys, this->parameters_);
+        this->partition_.initialize(sys, this->parameters_.cref());
     }
 
     void reduce_margin(const real_type dmargin, const system_type& sys) override
     {
-        this->partition_.reduce_margin(dmargin, sys, this->parameters_);
+        this->partition_.reduce_margin(dmargin, sys, this->parameters_.cref());
         return;
     }
     void scale_margin(const real_type scale, const system_type& sys) override
     {
-        this->partition_.scale_margin(scale, sys, this->parameters_);
+        this->partition_.scale_margin(scale, sys, this->parameters_.cref());
         return;
     }
 
@@ -93,8 +93,8 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
         return "Pair:"_s + potential_type::name();
     }
 
-    parameter_list_type const& parameters() const noexcept {return parameters_;}
-    parameter_list_type &      parameters()       noexcept {return parameters_;}
+    parameter_list_type const& parameters() const noexcept {return parameters_.cref();}
+    parameter_list_type &      parameters()       noexcept {return parameters_.cref();}
 
     // deep-copy through the base class, GlobalInteractionBase*
     base_type* clone() const override

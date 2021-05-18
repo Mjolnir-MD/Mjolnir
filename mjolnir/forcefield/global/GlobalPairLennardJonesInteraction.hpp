@@ -45,7 +45,7 @@ class GlobalPairInteraction<
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->parameters_.initialize(sys, topol);
-        this->partition_ .initialize(sys, parameters_);
+        this->partition_ .initialize(sys, parameters_.cref());
     }
 
     /*! @brief update parameters (e.g. temperature, ionic strength, ...)  *
@@ -59,17 +59,17 @@ class GlobalPairInteraction<
         MJOLNIR_LOG_INFO("potential is ", this->name());
 
         this->parameters_.update(sys, topol);
-        this->partition_.initialize(sys, this->parameters_);
+        this->partition_.initialize(sys, this->parameters_.cref());
     }
 
     void reduce_margin(const real_type dmargin, const system_type& sys) override
     {
-        this->partition_.reduce_margin(dmargin, sys, this->parameters_);
+        this->partition_.reduce_margin(dmargin, sys, this->parameters_.cref());
         return;
     }
     void scale_margin(const real_type scale, const system_type& sys) override
     {
-        this->partition_.scale_margin(scale, sys, this->parameters_);
+        this->partition_.scale_margin(scale, sys, this->parameters_.cref());
         return;
     }
 
