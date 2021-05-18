@@ -66,7 +66,7 @@ message(STATUS "MJOLNIR_VERSION = ${MJOLNIR_VERSION_INFO}")
 
 include(CheckCXXCompilerFlag)
 
-set(MJOLNIR_WARNING_FLAGS "")
+set(MJOLNIR_WARNING_FLAGS "-Wfatal-errors")
 
 check_cxx_compiler_flag("-Wall"      MJOLNIR_COMPILER_HAS_WALL)
 if(MJOLNIR_COMPILER_HAS_WALL)
@@ -195,9 +195,9 @@ endif()
 
 option(BUILD_INTEGRATION_TEST "\
 build integration test that does not run automatically \
-because it takes relatively long time" ON)
+because it takes relatively long time" OFF)
 
-option(BUILD_UNIT_TEST "build unit tests" ON)
+option(BUILD_UNIT_TEST "build unit tests" OFF)
 
 # -----------------------------------------------------------------------------
 # check separate build
