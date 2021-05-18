@@ -1,6 +1,7 @@
 #ifndef MJOLNIR_FORCEFIELD_3SPN2_EXV_POTENTIAL_HPP
 #define MJOLNIR_FORCEFIELD_3SPN2_EXV_POTENTIAL_HPP
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2Common.hpp>
+#include <mjolnir/forcefield/global/ParameterList.hpp>
 #include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/Unit.hpp>
@@ -32,11 +33,11 @@ class ThreeSPN2ExcludedVolumePotential
 
     static constexpr real_type default_cutoff() noexcept
     {
-        return real_type(1);
+        return real_type(1.0);
     }
     static constexpr parameter_type default_parameter() noexcept
     {
-        return bead_kind::Unknown;
+        return real_type(0.0);
     }
 
     static real_type epsilon; // 1 in [kJ/mol]
@@ -107,7 +108,7 @@ class ThreeSPN2ExcludedVolumePotential
 // ===========================================================================
 
 template<typename traitsT>
-class ThreeSPN2ExcludedVolumeParameter
+class ThreeSPN2ExcludedVolumeParameterList
     : public ParameterListBase<traitsT, ThreeSPN2ExcludedVolumePotential<typename traitsT::real_type>>
 {
   public:
@@ -116,7 +117,7 @@ class ThreeSPN2ExcludedVolumeParameter
     using potential_type        = ThreeSPN2ExcludedVolumePotential<real_type>;
     using base_type             = ParameterListBase<traits_type, potential_type>;
 
-    using parameter_type        = std::pair<real_type, real_type>;
+    using parameter_type        = parameter_3SPN2::bead_kind;
     using pair_parameter_type   = typename potential_type::parameter_type;
     using container_type        = std::vector<parameter_type>;
 
@@ -133,7 +134,7 @@ class ThreeSPN2ExcludedVolumeParameter
   public:
 
     template<typename ParameterSet>
-    ThreeSPN2ExcludedVolumePotential(const ParameterSet params,
+    ThreeSPN2ExcludedVolumeParameterList(const ParameterSet params,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
@@ -169,12 +170,12 @@ class ThreeSPN2ExcludedVolumeParameter
             this->participants_.push_back(idx);
             if(idx >= this->parameters_.size())
             {
-                this->parameters_.resize(idx+1, default_parameter());
+                this->parameters_.resize(idx+1, potential_type::default_parameter());
             }
             this->parameters_.at(idx) = idxp.second;
         }
     }
-    ~ThreeSPN2ExcludedVolumePotential() = default;
+    ~ThreeSPN2ExcludedVolumeParameterList() = default;
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
     {
@@ -244,6 +245,8 @@ class ThreeSPN2ExcludedVolumeParameter
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
+        using namespace parameter_3SPN2;
+
         // make exclusion list based on the topology
         exclusion_list_.make(sys, topol);
 
@@ -309,6 +312,7 @@ class ThreeSPN2ExcludedVolumeParameter
     // to check bases has base-pairing interaction.
     bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
     {
+        using namespace parameter_3SPN2;
         if(j <= i || exclusion_list_.is_excluded(i, j))
         {
             return false;
@@ -358,8 +362,9 @@ class ThreeSPN2ExcludedVolumeParameter
     std::vector<parameter_type>&       parameters()       noexcept {return parameters_;}
     std::vector<parameter_type> const& parameters() const noexcept {return parameters_;}
 
-    real_type sigma_of(bead_kind bk) const noexcept
+    real_type sigma_of(parameter_3SPN2::bead_kind bk) const noexcept
     {
+        using namespace parameter_3SPN2;
         switch(bk)
         {
             case bead_kind::Phosphate: {return this->sigma_P_;}
@@ -428,10 +433,10 @@ struct ThreeSPN2ExcludedVolumePotentialParameter
 
 namespace mjolnir
 {
-extern template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       >;
-extern template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
-extern template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-extern template class ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+extern template class ThreeSPN2ExcludedVolumeParameterList<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ThreeSPN2ExcludedVolumeParameterList<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ThreeSPN2ExcludedVolumeParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ThreeSPN2ExcludedVolumeParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
