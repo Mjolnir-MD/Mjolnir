@@ -27,7 +27,7 @@ class SpatialPartitionBase
     using real_type           = typename traits_type::real_type;
     using coordinate_type     = typename traits_type::coordinate_type;
 
-    using parameter_list_type = ParameterList<traits_type, potential_type>;
+    using parameter_list_type = ParameterListBase<traits_type, potential_type>;
     using neighbor_list_type  = NeighborList<potential_type>;
     using neighbor_type       = typename neighbor_list_type::neighbor_type;
     using range_type          = typename neighbor_list_type::range_type;
@@ -65,20 +65,20 @@ template<typename traitsT, typename potentialT>
 class SpatialPartition
 {
   public:
-
     using traits_type         = traitsT;
-    using system_type         = System<traits_type>;
-    using boundary_type       = typename traits_type::boundary_type;
-    using real_type           = typename traits_type::real_type;
-    using coordinate_type     = typename traits_type::coordinate_type;
-
     using potential_type      = potentialT;
-    using parameter_list_type = ParameterList<traits_type, potential_type>;
-    using neighbor_list_type  = NeighborList<potential_type>;
-    using neighbor_type       = typename neighbor_list_type::neighbor_type;
-    using range_type          = typename neighbor_list_type::range_type;
-
     using partition_base_type = SpatialPartitionBase<traits_type, potential_type>;
+
+    using system_type         = typename partition_base_type::system_type        ;
+    using boundary_type       = typename partition_base_type::boundary_type      ;
+    using real_type           = typename partition_base_type::real_type          ;
+    using coordinate_type     = typename partition_base_type::coordinate_type    ;
+
+    using parameter_list_type = typename partition_base_type::parameter_list_type;
+    using neighbor_list_type  = typename partition_base_type::neighbor_list_type ;
+    using neighbor_type       = typename partition_base_type::neighbor_type      ;
+    using range_type          = typename partition_base_type::range_type         ;
+
     using partition_type      = std::unique_ptr<partition_base_type>;
 
   public:
