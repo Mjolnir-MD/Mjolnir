@@ -1,6 +1,6 @@
 set(mjolnir_forcefield_cpp_files)
 
-# add_subdirectory(3SPN2)
+add_subdirectory(3SPN2)
 # add_subdirectory(PDNS)
 # add_subdirectory(PWMcos)
 add_subdirectory(FLP)
