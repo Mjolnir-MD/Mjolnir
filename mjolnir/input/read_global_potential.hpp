@@ -13,7 +13,7 @@
 // #include <mjolnir/forcefield/global/WCAPotential.hpp>
 // #include <mjolnir/forcefield/global/TabulatedWCAPotential.hpp>
 // #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
-// #include <mjolnir/forcefield/3SPN2/ThreeSPN2ExcludedVolumePotential.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2ExcludedVolumePotential.hpp>
 // #include <mjolnir/forcefield/iSoLF/iSoLFAttractivePotential.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/string.hpp>
@@ -679,61 +679,63 @@ read_lennard_jones_potential(const toml::value& global)
 //             read_ignored_molecule(global), read_ignored_group(global));
 // }
 // 
-// template<typename traitsT>
-// ThreeSPN2ExcludedVolumePotential<traitsT>
-// read_3spn2_excluded_volume_potential(const toml::value& global)
-// {
-//     MJOLNIR_GET_DEFAULT_LOGGER();
-//     MJOLNIR_LOG_FUNCTION();
-//     using potential_type = ThreeSPN2ExcludedVolumePotential<traitsT>;
-//     using real_type      = typename potential_type::real_type;
-//     using parameter_type = typename potential_type::parameter_type;
-//     using bead_kind      = parameter_3SPN2::bead_kind;
-// 
-//     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-// 
-//     const auto& ps = toml::find<toml::array>(global, "parameters");
-//     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-// 
-//     std::vector<std::pair<std::size_t, parameter_type>> params;
-//     params.reserve(ps.size());
-//     for(const auto& param : ps)
-//     {
-//         const auto idx = find_parameter<std::size_t>(param, env, "index") +
-//                          find_parameter_or<std::int64_t>(param, env, "offset", 0);
-// 
-//         const auto kind = toml::find<std::string>(param, "kind");
-//         if(kind != "S" && kind != "P" &&
-//            kind != "A" && kind != "T" && kind != "G" && kind != "C")
-//         {
-//             throw_exception<std::runtime_error>(toml::format_error("[error] "
-//                 "mjolnir::read_3spn2_excluded_volume_potential: unknown bead "
-//                 "kind", find_parameter<toml::value>(param, env, "kind"),
-//                 "expected S, P, A, T, G, C."));
-//         }
-//         bead_kind bead;
-//         switch(kind.front())
-//         {
-//             case 'P': {bead = bead_kind::Phosphate; break;}
-//             case 'S': {bead = bead_kind::Sugar;     break;}
-//             case 'A': {bead = bead_kind::BaseA;     break;}
-//             case 'T': {bead = bead_kind::BaseT;     break;}
-//             case 'G': {bead = bead_kind::BaseG;     break;}
-//             case 'C': {bead = bead_kind::BaseC;     break;}
-//             default:  {assert(false);}
-//         }
-//         params.emplace_back(idx, bead);
-//         MJOLNIR_LOG_INFO("idx = ", idx, ", kind = ", bead);
-//     }
-// 
-//     ThreeSPN2ExcludedVolumePotentialParameter<real_type> default_parameters;
-// 
-//     check_parameter_overlap(env, ps, params);
-//     return potential_type(std::move(default_parameters), params,
-//             read_ignore_particles_within(global),
-//             read_ignored_molecule(global), read_ignored_group(global));
-// }
-// 
+template<typename traitsT>
+ParameterList<traitsT, ThreeSPN2ExcludedVolumePotential<typename traitsT::real_type>>
+read_3spn2_excluded_volume_potential(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+
+    using real_type      = typename traitsT::real_type;
+    using potential_type = ThreeSPN2ExcludedVolumePotential<real_type>;
+    using bead_kind      = parameter_3SPN2::bead_kind;
+    using parameter_list = ParameterList<traitsT, potential_type>;
+    using parameter_type = // here we need to use the specific type of parameter
+        typename ThreeSPN2ExcludedVolumeParameterList<traitsT>::parameter_type;
+
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+
+    const auto& ps = toml::find<toml::array>(global, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        const auto idx = find_parameter<std::size_t>(param, env, "index") +
+                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
+
+        const auto kind = toml::find<std::string>(param, "kind");
+        if(kind != "S" && kind != "P" &&
+           kind != "A" && kind != "T" && kind != "G" && kind != "C")
+        {
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "mjolnir::read_3spn2_excluded_volume_potential: unknown bead "
+                "kind", find_parameter<toml::value>(param, env, "kind"),
+                "expected S, P, A, T, G, C."));
+        }
+        bead_kind bead;
+        switch(kind.front())
+        {
+            case 'P': {bead = bead_kind::Phosphate; break;}
+            case 'S': {bead = bead_kind::Sugar;     break;}
+            case 'A': {bead = bead_kind::BaseA;     break;}
+            case 'T': {bead = bead_kind::BaseT;     break;}
+            case 'G': {bead = bead_kind::BaseG;     break;}
+            case 'C': {bead = bead_kind::BaseC;     break;}
+            default:  {assert(false);}
+        }
+        params.emplace_back(idx, bead);
+        MJOLNIR_LOG_INFO("idx = ", idx, ", kind = ", bead);
+    }
+    check_parameter_overlap(env, ps, params);
+
+    return parameter_list(make_unique<ThreeSPN2ExcludedVolumeParameterList<traitsT>>(
+            ThreeSPN2ExcludedVolumePotentialParameter<real_type>{},
+            params, read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global)));
+}
+
 // template<typename traitsT>
 // iSoLFAttractivePotential<traitsT>
 // read_isolf_potential(const toml::value& global)
