@@ -112,7 +112,7 @@ ThreeSPN2ExcludedVolumePotential<realT>::epsilon;
 // ===========================================================================
 
 template<typename traitsT>
-class ThreeSPN2ExcludedVolumeParameterList
+class ThreeSPN2ExcludedVolumeParameterList final
     : public ParameterListBase<traitsT, ThreeSPN2ExcludedVolumePotential<typename traitsT::real_type>>
 {
   public:
