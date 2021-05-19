@@ -19,7 +19,7 @@
 #include <mjolnir/forcefield/MultipleBasin/MBasinRepulsivePotential.hpp>
 #include <mjolnir/forcefield/FLP/FlexibleLocalAnglePotential.hpp>
 #include <mjolnir/forcefield/FLP/FlexibleLocalDihedralPotential.hpp>
-// #include <mjolnir/forcefield/3SPN2/ThreeSPN2BondPotential.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BondPotential.hpp>
 
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/string.hpp>
@@ -294,20 +294,20 @@ read_worm_like_chain_offset_potential(const toml::value& param, const toml::valu
 }
 
 
-// template<typename realT>
-// ThreeSPN2BondPotential<realT>
-// read_3spn2_bond_potential(const toml::value& param, const toml::value& env)
-// {
-//     MJOLNIR_GET_DEFAULT_LOGGER();
-//     using real_type = realT;
-//     check_keys_available(param, {"indices", "k", "v0", "offset"});
-// 
-//     auto k  = find_parameter<real_type>(param, env, "k");
-//     auto v0 = find_parameter<real_type>(param, env, "v0");
-// 
-//     MJOLNIR_LOG_INFO("ThreeSPN2BondPotential = {k = ", k, ", v0 = ", v0, '}');
-//     return ThreeSPN2BondPotential<realT>(k, v0);
-// }
+template<typename realT>
+ThreeSPN2BondPotential<realT>
+read_3spn2_bond_potential(const toml::value& param, const toml::value& env)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    using real_type = realT;
+    check_keys_available(param, {"indices", "k", "v0", "offset"});
+
+    auto k  = find_parameter<real_type>(param, env, "k");
+    auto v0 = find_parameter<real_type>(param, env, "v0");
+
+    MJOLNIR_LOG_INFO("ThreeSPN2BondPotential = {k = ", k, ", v0 = ", v0, '}');
+    return ThreeSPN2BondPotential<realT>(k, v0);
+}
 
 // ----------------------------------------------------------------------------
 // utility function to read local potentials
@@ -457,15 +457,15 @@ struct read_local_potential_impl<WormLikeChainOffsetPotential<realT>>
         return read_worm_like_chain_offset_potential<realT>(param, env);
     }
 };
-// template<typename realT>
-// struct read_local_potential_impl<ThreeSPN2BondPotential<realT>>
-// {
-//     static ThreeSPN2BondPotential<realT>
-//     invoke(const toml::value& param, const toml::value& env)
-//     {
-//         return read_3spn2_bond_potential<realT>(param, env);
-//     }
-// };
+template<typename realT>
+struct read_local_potential_impl<ThreeSPN2BondPotential<realT>>
+{
+    static ThreeSPN2BondPotential<realT>
+    invoke(const toml::value& param, const toml::value& env)
+    {
+        return read_3spn2_bond_potential<realT>(param, env);
+    }
+};
 } // namespace detail
 
 // this function reads particle indices on which the potential will be applied
