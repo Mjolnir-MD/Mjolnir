@@ -105,6 +105,10 @@ class ThreeSPN2ExcludedVolumePotential
     real_type sigma_;
 };
 
+template<typename realT>
+typename ThreeSPN2ExcludedVolumePotential<realT>::real_type
+ThreeSPN2ExcludedVolumePotential<realT>::epsilon;
+
 // ===========================================================================
 
 template<typename traitsT>
@@ -170,12 +174,12 @@ class ThreeSPN2ExcludedVolumeParameterList
             this->participants_.push_back(idx);
             if(idx >= this->parameters_.size())
             {
-                this->parameters_.resize(idx+1, potential_type::default_parameter());
+                this->parameters_.resize(idx+1, parameter_3SPN2::bead_kind::Unknown);
             }
             this->parameters_.at(idx) = idxp.second;
         }
     }
-    ~ThreeSPN2ExcludedVolumeParameterList() = default;
+    ~ThreeSPN2ExcludedVolumeParameterList() override = default;
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
     {
@@ -294,23 +298,26 @@ class ThreeSPN2ExcludedVolumeParameterList
     // -----------------------------------------------------------------------
     // for spatial partitions
 
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+    std::vector<std::size_t> const& participants() const noexcept override
+    {
+        return participants_;
+    }
 
     range<typename std::vector<std::size_t>::const_iterator>
-    leading_participants() const noexcept
+    leading_participants() const noexcept override
     {
         return make_range(participants_.begin(), std::prev(participants_.end()));
     }
     range<typename std::vector<std::size_t>::const_iterator>
     possible_partners_of(const std::size_t participant_idx,
-                         const std::size_t /*particle_idx*/) const noexcept
+                         const std::size_t /*particle_idx*/) const noexcept override
     {
         return make_range(participants_.begin() + participant_idx + 1, participants_.end());
     }
 
     // ------------------------------------------------------------------------
     // to check bases has base-pairing interaction.
-    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept override
     {
         using namespace parameter_3SPN2;
         if(j <= i || exclusion_list_.is_excluded(i, j))
@@ -349,7 +356,15 @@ class ThreeSPN2ExcludedVolumeParameterList
         }
     }
 
-    exclusion_list_type const& exclusion_list() const noexcept {return exclusion_list_;}
+    exclusion_list_type const& exclusion_list() const noexcept override
+    {
+        return exclusion_list_;
+    }
+
+    base_type* clone() const override
+    {
+        return new ThreeSPN2ExcludedVolumeParameterList(*this);
+    }
 
     // ------------------------------------------------------------------------
     // used by Observer.
@@ -416,13 +431,13 @@ template<typename realT>
 struct ThreeSPN2ExcludedVolumePotentialParameter
 {
     using real_type = realT;
-    real_type epsilon = 1.0; // [kJ/mol]
-    real_type sigma_P = 4.5; // [angstrom]
-    real_type sigma_S = 6.2;
-    real_type sigma_A = 5.4;
-    real_type sigma_T = 7.1;
-    real_type sigma_G = 4.9;
-    real_type sigma_C = 6.4;
+    real_type epsilon = real_type(1.0); // [kJ/mol]
+    real_type sigma_P = real_type(4.5); // [angstrom]
+    real_type sigma_S = real_type(6.2);
+    real_type sigma_A = real_type(5.4);
+    real_type sigma_T = real_type(7.1);
+    real_type sigma_G = real_type(4.9);
+    real_type sigma_C = real_type(6.4);
 };
 
 } // mjolnir
