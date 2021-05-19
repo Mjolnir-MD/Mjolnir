@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_DEBYE_HUCKEL_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_DEBYE_HUCKEL_POTENTIAL_HPP
+#include <mjolnir/forcefield/global/ParameterList.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
@@ -13,31 +14,142 @@
 namespace mjolnir
 {
 
+template<typename realT>
+class DebyeHuckelPotential
+{
+  public:
+    using real_type      = realT;
+    using parameter_type = real_type; // qi qj / 4pi epsilon
+    using self_type      = DebyeHuckelPotential<real_type>;
+
+    static constexpr real_type default_cutoff() noexcept
+    {
+        return real_type(5.5);
+    }
+    static constexpr parameter_type default_parameter() noexcept
+    {
+        return parameter_type{real_type(0), real_type(0), real_type(0)};
+    }
+
+    static void set_cutoff_ratio(const real_type ratio)
+    {
+        if(self_type::cutoff_ratio < ratio)
+        {
+            self_type::cutoff_ratio   = ratio;
+            self_type::coef_at_cutoff = std::exp(-self_type::cutoff_ratio) /
+                    (self_type::debye_length * self_type::cutoff_ratio);
+        }
+        return;
+    }
+
+    static real_type cutoff_ratio;
+    static real_type coef_at_cutoff;
+    static real_type debye_length;
+    static real_type inv_debye_length;
+
+  public:
+
+    explicit DebyeHuckelPotential(const parameter_type& params) noexcept
+        : k_(params)
+    {}
+    ~DebyeHuckelPotential() = default;
+
+    real_type potential(const real_type r) const noexcept
+    {
+        if(self_type::cutoff_ratio <= r * inv_debye_length)
+        {
+            return 0.0;
+        }
+        return k_ * (std::exp(-r * inv_debye_length) / r - coef_at_cutoff);
+    }
+    real_type derivative(const real_type r) const noexcept
+    {
+        if(self_type::cutoff_ratio <= r * inv_debye_length)
+        {
+            return 0.0;
+        }
+        return -k_ * (debye_length + r) * inv_debye_length / (r * r) *
+               std::exp(-r * inv_debye_length);
+    }
+
+    template<typename T>
+    void initialize(const System<T>&) noexcept {return;}
+
+    template<typename T>
+    void update(const System<T>&) noexcept {return;}
+
+    static const char* name() noexcept {return "DebyeHuckel";}
+
+    real_type k() const noexcept {return this->k_;}
+
+    real_type cutoff()  const noexcept
+    {
+        return debye_length * self_type::cutoff_ratio;
+    }
+
+  public:
+
+    // To culculate cutoff distance, we need to find the maximum sigma in the
+    // existing parameters. But the list of parameters will be given in a variety
+    // of ways, like Lorentz-Bertherot rule, combination table, or another way
+    // of combination rules.
+    //     To find the maximum parameter, we need to provide a way to compare
+    // parameters. But the way depends on the functional form of a potential.
+    // So this comparator should be defined in a Potential class.
+    struct parameter_comparator
+    {
+        constexpr bool
+        operator()(const parameter_type& lhs, const parameter_type& rhs) const noexcept
+        {
+            return lhs < rhs; // anything is okay here. this is not used
+            // because cutoff length depends only on the debye length, not charges.
+        }
+    };
+
+  private:
+
+    real_type k_; // qiqj / 4pi epsilon
+};
+
+template<typename realT>
+typename DebyeHuckelPotential<realT>::real_type DebyeHuckelPotential<realT>::cutoff_ratio  = 0.0;
+template<typename realT>
+typename DebyeHuckelPotential<realT>::real_type DebyeHuckelPotential<realT>::coef_at_cutoff = 0.0;
+
+template<typename realT>
+typename DebyeHuckelPotential<realT>::real_type DebyeHuckelPotential<realT>::debye_length = 0.0;
+template<typename realT>
+typename DebyeHuckelPotential<realT>::real_type DebyeHuckelPotential<realT>::inv_debye_length = 0.0;
+
 // Debye-Huckel type electrostatic interaction.
-// This class contains charges and other parameters and calculates energy and
-// derivative of the potential function.
+// This class contains charges and other parameters and calculates pair parameter
+// from those information.
 // This class is an implementation of the electrostatic term used in the 3SPN
 // series of the coarse-grained DNA models (Knotts et al., (2007), Sambriski and
 // de Pablo, (2009), Hinckley et al., (2013), and Freeman et al., (2014))
 // It is same as the default electrostatic term in CafeMol (Kenzaki et al. 2011)
 template<typename traitsT>
-class DebyeHuckelPotential
+class DebyeHuckelParameterList final
+    : public ParameterListBase<traitsT, DebyeHuckelPotential<typename traitsT::real_type>>
 {
   public:
     using traits_type          = traitsT;
     using real_type            = typename traits_type::real_type;
-    using system_type          = System<traits_type>;
-    using parameter_type       = real_type;
-    using container_type       = std::vector<parameter_type>;
+    using potential_type       = DebyeHuckelPotential<real_type>;
+    using base_type            = ParameterListBase<traits_type, potential_type>;
 
-    // `pair_parameter_type` is a parameter for a interacting pair.
+    // `pair_parameter_type` is a parameter for an interacting pair.
     // Although it is the same type as `parameter_type` in this potential,
     // it can be different from normal parameter for each particle.
     // This enables NeighborList to cache a value to calculate forces between
     // the particles, e.g. by having qi * qj for pair of particles i and j.
-    using pair_parameter_type  = parameter_type;
+
+    using parameter_type       = real_type; // q_i
+    using pair_parameter_type  = typename potential_type::parameter_type;
+    using container_type       = std::vector<parameter_type>;
 
     // topology stuff
+    using system_type          = System<traits_type>;
     using topology_type        = Topology;
     using molecule_id_type     = typename topology_type::molecule_id_type;
     using group_id_type        = typename topology_type::group_id_type;
@@ -46,18 +158,9 @@ class DebyeHuckelPotential
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
     using exclusion_list_type  = ExclusionList<traits_type>;
 
-    static constexpr real_type default_cutoff() noexcept
-    {
-        return real_type(5.5);
-    }
-    static constexpr parameter_type default_parameter() noexcept
-    {
-        return real_type(0);
-    }
-
   public:
 
-    DebyeHuckelPotential(const real_type cutoff_ratio,
+    DebyeHuckelParameterList(const real_type cutoff_ratio,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
@@ -75,50 +178,24 @@ class DebyeHuckelPotential
             this->participants_.push_back(idx);
             if(idx >= this->parameters_.size())
             {
-                this->parameters_.resize(idx+1, default_parameter());
+                this->parameters_.resize(idx+1, real_type(0));
             }
             this->parameters_.at(idx) = idxp.second;
         }
     }
-    ~DebyeHuckelPotential() = default;
+    ~DebyeHuckelParameterList() = default;
 
-    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
+    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
     {
         return this->inv_4_pi_eps0_epsk_ * this->parameters_[i] * this->parameters_[j];
     }
 
-    real_type potential(const std::size_t i, const std::size_t j,
-                        const real_type   r) const noexcept
-    {
-        return this->potential(r, this->prepare_params(i, j));
-    }
-    real_type derivative(const std::size_t i, const std::size_t j,
-                         const real_type   r) const noexcept
-    {
-        return this->derivative(r, this->prepare_params(i, j));
-    }
-
-    real_type potential(const real_type r, const pair_parameter_type& p) const noexcept
-    {
-        if(this->max_cutoff_length() <= r) {return 0.0;}
-        return p * (std::exp(-r * this->inv_debye_length_) / r - coef_at_cutoff_);
-    }
-    real_type derivative(const real_type r, const pair_parameter_type& p) const noexcept
-    {
-        if(this->max_cutoff_length() <= r) {return 0.0;}
-        return -p * (debye_length_ + r) * this->inv_debye_length_ / (r * r) *
-               std::exp(-r * this->inv_debye_length_);
-    }
-
-    real_type cutoff_ratio()   const noexcept {return this->cutoff_ratio_;}
-    real_type coef_at_cutoff() const noexcept {return this->coef_at_cutoff_;}
-
-    real_type max_cutoff_length() const noexcept
+    real_type max_cutoff_length() const noexcept override
     {
         return this->debye_length_ * this->cutoff_ratio_;
     }
 
-    void initialize(const system_type& sys, const topology_type& topol) noexcept
+    void initialize(const system_type& sys, const topology_type& topol) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -136,7 +213,7 @@ class DebyeHuckelPotential
     }
 
     // for temperature/ionic concentration changes...
-    void update(const system_type& sys, const topology_type& topol) noexcept
+    void update(const system_type& sys, const topology_type& topol) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -167,26 +244,28 @@ class DebyeHuckelPotential
     //     See implementation of VerletList, CellList and GlobalPairInteraction
     // for more details about the usage of these functions.
 
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
-
+    std::vector<std::size_t> const& participants() const noexcept override
+    {
+        return participants_;
+    }
     range<typename std::vector<std::size_t>::const_iterator>
-    leading_participants() const noexcept
+    leading_participants() const noexcept override
     {
         return make_range(participants_.begin(), std::prev(participants_.end()));
     }
     range<typename std::vector<std::size_t>::const_iterator>
     possible_partners_of(const std::size_t participant_idx,
-                         const std::size_t /*particle_idx*/) const noexcept
+                         const std::size_t /*particle_idx*/) const noexcept override
     {
         return make_range(participants_.begin() + participant_idx + 1,
                           participants_.end());
     }
-    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept override
     {
         return (i < j) && !exclusion_list_.is_excluded(i, j);
     }
 
-    exclusion_list_type const& exclusion_list() const noexcept
+    exclusion_list_type const& exclusion_list() const noexcept override
     {
         return exclusion_list_; // for testing
     }
@@ -202,7 +281,13 @@ class DebyeHuckelPotential
     std::vector<real_type>&       charges()       noexcept {return parameters_;}
     std::vector<real_type> const& charges() const noexcept {return parameters_;}
 
+    real_type cutoff_ratio() const noexcept {return this->cutoff_ratio_;}
     real_type debye_length() const noexcept {return this->debye_length_;}
+
+    base_type* clone() const override
+    {
+        return new DebyeHuckelParameterList(*this);
+    }
 
   private:
 
@@ -240,8 +325,11 @@ class DebyeHuckelPotential
         MJOLNIR_LOG_INFO("1 / debye length  = ", inv_debye_length_);
         MJOLNIR_LOG_INFO("1 / 4pi eps0 epsk = ", inv_4_pi_eps0_epsk_);
 
-        this->coef_at_cutoff_ = std::exp(-cutoff_ratio_) /
-                                (debye_length_ * cutoff_ratio_);
+        // set parameter of potential_type
+        potential_type::debye_length     = this->debye_length_;
+        potential_type::inv_debye_length = this->inv_debye_length_;
+        potential_type::set_cutoff_ratio(cutoff_ratio_);
+
         return;
     }
 
@@ -255,7 +343,6 @@ class DebyeHuckelPotential
   private:
 
     real_type cutoff_ratio_; // relative to the debye length
-    real_type coef_at_cutoff_;
     real_type temperature_;  // [K]
     real_type ion_strength_; // [M]
     real_type inv_4_pi_eps0_epsk_;
@@ -275,10 +362,10 @@ class DebyeHuckelPotential
 
 namespace mjolnir
 {
-extern template class DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
-extern template class DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
-extern template class DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-extern template class DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+extern template class DebyeHuckelParameterList<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class DebyeHuckelParameterList<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class DebyeHuckelParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class DebyeHuckelParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 

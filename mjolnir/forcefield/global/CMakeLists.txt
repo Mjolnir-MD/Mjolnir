@@ -3,7 +3,7 @@ set(mjolnir_forcefield_global_cpp_files
 #     "${CMAKE_CURRENT_SOURCE_DIR}/GlobalPairExcludedVolumeInteraction.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/GlobalPairLennardJonesInteraction.cpp"
 #     "${CMAKE_CURRENT_SOURCE_DIR}/GlobalPairUniformLennardJonesInteraction.cpp"
-#     "${CMAKE_CURRENT_SOURCE_DIR}/DebyeHuckelPotential.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/DebyeHuckelPotential.cpp"
 #     "${CMAKE_CURRENT_SOURCE_DIR}/ExcludedVolumePotential.cpp"
 #     "${CMAKE_CURRENT_SOURCE_DIR}/InversePowerPotential.cpp"
 #     "${CMAKE_CURRENT_SOURCE_DIR}/HardCoreExcludedVolumePotential.cpp"
