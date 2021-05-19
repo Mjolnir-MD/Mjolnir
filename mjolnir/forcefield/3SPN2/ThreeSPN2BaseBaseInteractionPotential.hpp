@@ -182,7 +182,7 @@ class ThreeSPN2BaseBaseInteractionPotential
         return 2 * alpha * epsilon * term * (real_type(1) - term);
     }
 
-  private:
+    static const char* name() noexcept {return "3SPN2BaseBase";}
 
   public: // XXX public!! XXX
 
@@ -296,7 +296,10 @@ class ThreeSPN2BaseBaseInteractionParameterList
             this->participants_.push_back(idx);
             if(idx >= this->parameters_.size())
             {
-                this->parameters_.resize(idx+1, potential_type::default_parameter());
+                this->parameters_.resize(idx+1, parameter_type{base_kind::X,
+                        potential_type::invalid(), potential_type::invalid(),
+                        potential_type::invalid(), potential_type::invalid()
+                    });
             }
             this->parameters_.at(idx) = idxp.second;
         }
