@@ -31,16 +31,17 @@ read_global_pair_interaction(const toml::value& global)
 
     const auto potential = toml::find<std::string>(global, "potential");
 
-//     if(potential == "ExcludedVolume")
-//     {
-//         MJOLNIR_LOG_NOTICE("-- potential function is Excluded Volume.");
-//         using potential_t   = ExcludedVolumePotential<traitsT>;
-//         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-//
-//         return make_unique<interaction_t>(
-//             read_excluded_volume_potential<traitsT>(global),
-//             read_spatial_partition<traitsT, potential_t>(global));
-//     }
+    if(potential == "ExcludedVolume")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Excluded Volume.");
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = ExcludedVolumePotential<real_type>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+
+        return make_unique<interaction_t>(
+            read_excluded_volume_potential<traitsT>(global),
+            read_spatial_partition<traitsT, potential_t>(global));
+    }
 //     else if(potential == "InversePower")
 //     {
 //         MJOLNIR_LOG_NOTICE("-- potential function is Inverse Power.");
@@ -61,7 +62,7 @@ read_global_pair_interaction(const toml::value& global)
 //             read_hard_core_excluded_volume_potential<traitsT>(global),
 //             read_spatial_partition<traitsT, potential_t>(global));
 //     }
-    if(potential == "DebyeHuckel")
+    else if(potential == "DebyeHuckel")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Debye-Huckel.");
         using real_type     = typename traitsT::real_type;
