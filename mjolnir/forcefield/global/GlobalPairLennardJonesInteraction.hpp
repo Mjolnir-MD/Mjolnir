@@ -79,10 +79,8 @@ class GlobalPairInteraction<
         const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
 
         const auto leading_participants = this->parameters_.leading_participants();
-        for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
+        for(const std::size_t i : leading_participants)
         {
-            const auto i = leading_participants[idx];
-
             for(const auto& ptnr : this->partition_.partners(i))
             {
                 const auto  j   = ptnr.index;
