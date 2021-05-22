@@ -115,28 +115,29 @@ read_global_pair_interaction(const toml::value& global)
 //                 read_spatial_partition<traitsT, potential_t>(global));
 //         }
 //     }
-//     else if(potential == "WCA")
-//     {
-//         MJOLNIR_LOG_NOTICE("-- potential function is WCA.");
+    else if(potential == "WCA")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is WCA.");
 //         if(global.contains("table"))
 //         {
 //             using potential_t   = TabulatedWCAPotential<traitsT>;
 //             using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-//
+// 
 //             return make_unique<interaction_t>(
 //                 read_tabulated_wca_potential<traitsT>(global),
 //                 read_spatial_partition<traitsT, potential_t>(global));
 //         }
 //         else
 //         {
-//             using potential_t   = WCAPotential<traitsT>;
-//             using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-//
-//             return make_unique<interaction_t>(
-//                 read_wca_potential<traitsT>(global),
-//                 read_spatial_partition<traitsT, potential_t>(global));
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = WCAPotential<real_type>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+
+        return make_unique<interaction_t>(
+            read_wca_potential<traitsT>(global),
+            read_spatial_partition<traitsT, potential_t>(global));
 //         }
-//     }
+    }
     else if(potential == "3SPN2ExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is 3SPN2ExcludedVolume.");
@@ -597,10 +598,10 @@ extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  Un
 extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_interaction(const toml::value& global);
 extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_global_interaction(const toml::value& global);
 
-// extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_global_3spn2_base_base_interaction(const toml::value& global);
-// extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_global_3spn2_base_base_interaction(const toml::value& global);
-// extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_3spn2_base_base_interaction(const toml::value& global);
-// extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_global_3spn2_base_base_interaction(const toml::value& global);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_global_3spn2_base_base_interaction(const toml::value& global);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_global_3spn2_base_base_interaction(const toml::value& global);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_3spn2_base_base_interaction(const toml::value& global);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_global_3spn2_base_base_interaction(const toml::value& global);
 
 extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_global_pair_interaction(const toml::value& global);
 extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_global_pair_interaction(const toml::value& global);
