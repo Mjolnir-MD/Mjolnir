@@ -3,7 +3,6 @@
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/forcefield/global/GlobalPairInteraction.hpp>
 #include <mjolnir/forcefield/global/GlobalPairLennardJonesInteraction.hpp>
-// #include <mjolnir/forcefield/global/GlobalPairUniformLennardJonesInteraction.hpp>
 #include <mjolnir/forcefield/global/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseBaseInteraction.hpp>
 // #include <mjolnir/forcefield/PDNS/ProteinDNANonSpecificInteraction.hpp>

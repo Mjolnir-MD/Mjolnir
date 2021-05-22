@@ -442,7 +442,6 @@ void PeriodicGridCellList<traitsT, potentialT>::construct_cells(
 // #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 // #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
 // #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
-// #include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
 //
 // namespace mjolnir
 // {
@@ -454,9 +453,6 @@ void PeriodicGridCellList<traitsT, potentialT>::construct_cells(
 //
 // extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
 // extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-//
-// extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-// extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
 // }
 // #endif // SEPARATE_BUILD
 

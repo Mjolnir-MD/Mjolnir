@@ -395,7 +395,6 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
 #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
-#include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
 
 namespace mjolnir
 {
@@ -408,8 +407,6 @@ extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  Unlimi
 extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>>>;
 extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>>;
 
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>>>;
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>>;
 }
 #endif // MJOLNIR_SEPARATE_BUILD
 #endif/* MJOLNIR_UNLIMITED_GRID_CELL_LIST */

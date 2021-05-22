@@ -16,7 +16,6 @@ set(mjolnir_omp_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/GlobalPairExcludedVolumeInteraction.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/GlobalPairInteraction.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/GlobalPairLennardJonesInteraction.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/GlobalPairUniformLennardJonesInteraction.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ThreeSPN2BaseBaseInteraction.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ThreeSPN2BaseStackingInteraction.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ProteinDNANonSpecificInteraction.cpp"

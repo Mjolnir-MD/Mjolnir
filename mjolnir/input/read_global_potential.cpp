@@ -26,11 +26,6 @@ namespace mjolnir
 // template LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_lennard_jones_potential(const toml::value& global);
 // template LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_lennard_jones_potential(const toml::value& global);
 // 
-// template UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_uniform_lennard_jones_potential(const toml::value& global);
-// template UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_uniform_lennard_jones_potential(const toml::value& global);
-// template UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_uniform_lennard_jones_potential(const toml::value& global);
-// template UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_uniform_lennard_jones_potential(const toml::value& global);
-// 
 // template LennardJonesAttractivePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_lennard_jones_attractive_potential(const toml::value& global);
 // template LennardJonesAttractivePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_lennard_jones_attractive_potential(const toml::value& global);
 // template LennardJonesAttractivePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_lennard_jones_attractive_potential(const toml::value& global);

@@ -324,7 +324,6 @@ void UnlimitedGridCellList<traitsT, potentialT>::initialize(
 // #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 // #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
 // #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
-// #include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
 //
 // namespace mjolnir
 // {
@@ -336,9 +335,6 @@ void UnlimitedGridCellList<traitsT, potentialT>::initialize(
 //
 // extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
 // extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
-//
-// extern template class UnlimitedGridCellList<SimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
-// extern template class UnlimitedGridCellList<SimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
 // }
 // #endif // SEPARATE_BUILD
 

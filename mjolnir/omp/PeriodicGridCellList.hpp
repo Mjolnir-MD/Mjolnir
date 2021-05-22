@@ -497,7 +497,6 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
 #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
-#include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/forcefield/global/HardCoreExcludedVolumePotential.hpp>
 #include <mjolnir/forcefield/global/InversePowerPotential.hpp>
 #include <mjolnir/forcefield/global/WCAPotential.hpp>
@@ -512,9 +511,6 @@ extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  Cuboida
 
 extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>>;
 extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
 
 extern template class PeriodicGridCellList<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, HardCoreExcludedVolumePotential<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>>;
 extern template class PeriodicGridCellList<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, HardCoreExcludedVolumePotential<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>>;

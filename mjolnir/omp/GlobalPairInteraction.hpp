@@ -178,7 +178,6 @@ class GlobalPairInteraction<
 // specializations
 #include <mjolnir/omp/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/omp/GlobalPairLennardJonesInteraction.hpp>
-#include <mjolnir/omp/GlobalPairUniformLennardJonesInteraction.hpp>
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 // explicitly specialize BondAngleInteraction with LocalPotentials

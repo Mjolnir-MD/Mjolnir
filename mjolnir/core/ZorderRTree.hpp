@@ -515,7 +515,6 @@ void ZorderRTree<traitsT, potentialT, MaxElem>::diagnosis(
 // #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 // #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
 // #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
-// #include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
 //
 // namespace mjolnir
 // {
@@ -528,9 +527,6 @@ void ZorderRTree<traitsT, potentialT, MaxElem>::diagnosis(
 // // extern template class ZorderRTree<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
 // // extern template class ZorderRTree<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
 // //
-// // extern template class ZorderRTree<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-// // extern template class ZorderRTree<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-// //
 // // extern template class ZorderRTree<SimulatorTraits<double, UnlimitedBoundary>, DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
 // // extern template class ZorderRTree<SimulatorTraits<float,  UnlimitedBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
 // //
@@ -539,9 +535,6 @@ void ZorderRTree<traitsT, potentialT, MaxElem>::diagnosis(
 // //
 // // extern template class ZorderRTree<SimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
 // // extern template class ZorderRTree<SimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
-// //
-// // extern template class ZorderRTree<SimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
-// // extern template class ZorderRTree<SimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
 // }
 // #endif // SEPARATE_BUILD
 

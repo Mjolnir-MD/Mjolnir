@@ -20,8 +20,6 @@ namespace mjolnir
 //   - GlobalPairExcludedVolumeInteraction.hpp
 // - LennardJones
 //   - GlobalPairLennardJonesInteraction.hpp
-// - UniformLennardJones
-//   - GlobalPairUniformLennardJonesInteraction.hpp
 // By combining potential calculations, we can omit `sqrt()` that is usually
 // used to calculate the distance between particles.
 //
@@ -216,7 +214,6 @@ GlobalPairInteraction<traitsT, potT>::calc_force_and_energy(
 
 // #include <mjolnir/forcefield/global/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/forcefield/global/GlobalPairLennardJonesInteraction.hpp>
-// #include <mjolnir/forcefield/global/GlobalPairUniformLennardJonesInteraction.hpp>
 // 
 // #ifdef MJOLNIR_SEPARATE_BUILD
 // // explicitly specialize BondAngleInteraction with LocalPotentials
