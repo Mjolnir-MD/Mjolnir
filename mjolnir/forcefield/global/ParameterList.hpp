@@ -368,10 +368,12 @@ struct CombinationTable final
 
   public:
 
-    CombinationTable(
+    CombinationTable(table_type&& table,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-        table_type&& table)
-        : table_(std::move(table))
+        const std::map<connection_kind_type, std::size_t>& exclusions,
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+      : table_(std::move(table)),
+        exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
@@ -398,7 +400,7 @@ struct CombinationTable final
     {
         const auto& para1 = parameters_[i];
         const auto& para2 = parameters_[j];
-        return table_[para1 + std::string(":") + para2];
+        return table_.at(para1 + std::string(":") + para2);
     }
 
     void initialize(const system_type& sys, const topology_type& topol) noexcept override
