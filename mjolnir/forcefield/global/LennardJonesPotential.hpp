@@ -1,6 +1,5 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_LENNARD_JONES_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_LENNARD_JONES_POTENTIAL_HPP
-#include <limits>
 #include <utility>
 #include <cmath>
 
