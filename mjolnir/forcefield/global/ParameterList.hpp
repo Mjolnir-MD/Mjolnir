@@ -500,5 +500,120 @@ struct CombinationTable final
     exclusion_list_type      exclusion_list_;
 };
 
+//
+// It applies the same parameter for any pair.
+//
+template<typename traitsT, typename potentialT>
+struct UniformParameter final
+    : public ParameterListBase<traitsT, potentialT>
+{
+  public:
+
+    using traits_type         = traitsT;
+    using potential_type      = potentialT;
+    using base_type           = ParameterListBase<traits_type, potential_type>;
+
+    using real_type           = typename traits_type::real_type;
+    using pair_parameter_type = typename potential_type::parameter_type;
+
+    // topology stuff
+    using system_type          = System<traits_type>;
+    using topology_type        = Topology;
+    using molecule_id_type     = typename topology_type::molecule_id_type;
+    using group_id_type        = typename topology_type::group_id_type;
+    using connection_kind_type = typename topology_type::connection_kind_type;
+    using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type    = IgnoreGroup   <group_id_type>;
+    using exclusion_list_type  = ExclusionList <traits_type>;
+
+  public:
+
+    UniformParameter(const pair_parameter_type& para,
+            const std::vector<std::size_t>& participants)
+        : uniform_parameter_(para), participants_(participants)
+    {}
+    UniformParameter(const UniformParameter&) = default;
+    UniformParameter(UniformParameter&&)      = default;
+    UniformParameter& operator=(const UniformParameter&) = default;
+    UniformParameter& operator=(UniformParameter&&)      = default;
+    ~UniformParameter() override {}
+
+    // Since it concats the names, it is better to keep parameter name short.
+    pair_parameter_type
+    prepare_params(const std::size_t, const std::size_t) const noexcept override
+    {
+        return uniform_parameter_;
+    }
+
+    void initialize(const system_type& sys, const topology_type& topol) noexcept override
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        this->update(sys, topol);
+        return;
+    }
+
+    void update(const system_type& sys, const topology_type& topol) noexcept override
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        this->max_cutoff_length_ = potential_type(uniform_parameter_).cutoff();
+        this->exclusion_list_.make(sys, topol);
+        return;
+    }
+
+    real_type max_cutoff_length() const noexcept override {return max_cutoff_length_;}
+
+    // -----------------------------------------------------------------------
+    // Here, the default implementation uses Newton's 3rd law to reduce
+    // calculation. For an interacting pair (i, j), forces applied to i and j
+    // are equal in magnitude and opposite in direction. So, if a pair (i, j) is
+    // listed, (j, i) is not needed.
+    //     See implementation of VerletList, CellList and GlobalPairInteraction
+    // for more details about the usage of these functions.
+    //
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept override
+    {
+        // if not excluded, the pair has interaction.
+        return (i < j) && !exclusion_list_.is_excluded(i, j);
+    }
+    std::vector<std::size_t> const& participants() const noexcept override
+    {
+        return this->participants_;
+    }
+    range<typename std::vector<std::size_t>::const_iterator>
+    leading_participants() const noexcept override
+    {
+        return make_range(participants_.begin(), std::prev(participants_.end()));
+    }
+    range<typename std::vector<std::size_t>::const_iterator>
+    possible_partners_of(const std::size_t participant_idx,
+                         const std::size_t /*particle_idx*/) const noexcept override
+    {
+        return make_range(participants_.begin() + participant_idx + 1,
+                          participants_.end());
+    }
+
+    base_type* clone() const override
+    {
+        return new UniformParameter(*this);
+    }
+
+    exclusion_list_type const& exclusion_list() const noexcept override
+    {
+        return exclusion_list_;
+    }
+
+
+  private:
+
+    real_type                max_cutoff_length_;
+    pair_parameter_type      uniform_parameter_;
+    std::vector<std::size_t> participants_;
+    exclusion_list_type      exclusion_list_;
+};
+
 } // mjolnir
 #endif// MJOLNIR_GLOBAL_PARAMETER_LIST_HPP
