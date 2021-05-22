@@ -80,6 +80,24 @@ class WCAPotential
         return this->sigma_ * self_type::cutoff_ratio;
     }
 
+  public:
+
+    // To culculate cutoff distance, we need to find the maximum sigma in the
+    // existing parameters. But the list of parameters will be given in a variety
+    // of ways, like Lorentz-Bertherot rule, combination table, or another way
+    // of combination rules.
+    //     To find the maximum parameter, we need to provide a way to compare
+    // parameters. But the way depends on the functional form of a potential.
+    // So this comparator should be defined in a Potential class.
+    struct parameter_comparator
+    {
+        constexpr bool
+        operator()(const parameter_type& lhs, const parameter_type& rhs) const noexcept
+        {
+            return lhs.first < rhs.first; // take larger sigma
+        }
+    };
+
   private:
 
     real_type sigma_;
