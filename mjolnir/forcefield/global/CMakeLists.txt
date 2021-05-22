@@ -9,9 +9,6 @@ set(mjolnir_forcefield_global_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/LennardJonesPotential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/LennardJonesAttractivePotential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/WCAPotential.cpp"
-#     "${CMAKE_CURRENT_SOURCE_DIR}/TabulatedWCAPotential.cpp"
-#     "${CMAKE_CURRENT_SOURCE_DIR}/LennardJonesAttractivePotential.cpp"
-#     "${CMAKE_CURRENT_SOURCE_DIR}/TabulatedLennardJonesAttractivePotential.cpp"
     )
 set(mjolnir_forcefield_cpp_files
     ${mjolnir_forcefield_cpp_files}

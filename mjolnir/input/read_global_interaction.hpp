@@ -86,17 +86,6 @@ read_global_pair_interaction(const toml::value& global)
     else if(potential == "LennardJonesAttractive")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is the attractive part of Lennard-Jones.");
-//         if(global.contains("table"))
-//         {
-//             using potential_t   = TabulatedLennardJonesAttractivePotential<traitsT>;
-//             using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-// 
-//             return make_unique<interaction_t>(
-//                 read_tabulated_lennard_jones_attractive_potential<traitsT>(global),
-//                 read_spatial_partition<traitsT, potential_t>(global));
-//         }
-//         else
-//         {
         using real_type     = typename traitsT::real_type;
         using potential_t   = LennardJonesAttractivePotential<real_type>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
@@ -104,22 +93,10 @@ read_global_pair_interaction(const toml::value& global)
         return make_unique<interaction_t>(
             read_lennard_jones_attractive_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
-//         }
     }
     else if(potential == "WCA")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is WCA.");
-//         if(global.contains("table"))
-//         {
-//             using potential_t   = TabulatedWCAPotential<traitsT>;
-//             using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-// 
-//             return make_unique<interaction_t>(
-//                 read_tabulated_wca_potential<traitsT>(global),
-//                 read_spatial_partition<traitsT, potential_t>(global));
-//         }
-//         else
-//         {
         using real_type     = typename traitsT::real_type;
         using potential_t   = WCAPotential<real_type>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
@@ -127,7 +104,6 @@ read_global_pair_interaction(const toml::value& global)
         return make_unique<interaction_t>(
             read_wca_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
-//         }
     }
     else if(potential == "3SPN2ExcludedVolume")
     {
