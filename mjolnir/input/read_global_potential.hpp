@@ -2,10 +2,10 @@
 #define MJOLNIR_INPUT_READ_GLOBAL_POTENTIAL_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/input/utility.hpp>
+#include <mjolnir/forcefield/global/ParameterList.hpp>
 #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
 // #include <mjolnir/forcefield/global/InversePowerPotential.hpp>
-// #include <mjolnir/forcefield/global/HardCoreExcludedVolumePotential.hpp>
-#include <mjolnir/forcefield/global/ParameterList.hpp>
+#include <mjolnir/forcefield/global/HardCoreExcludedVolumePotential.hpp>
 #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
 #include <mjolnir/forcefield/global/LennardJonesAttractivePotential.hpp>
 #include <mjolnir/forcefield/global/WCAPotential.hpp>
@@ -271,52 +271,54 @@ read_excluded_volume_potential(const toml::value& global)
 //             read_ignore_particles_within(global),
 //             read_ignored_molecule(global), read_ignored_group(global));
 // }
-// 
-// template<typename traitsT>
-// HardCoreExcludedVolumePotential<traitsT>
-// read_hard_core_excluded_volume_potential(const toml::value& global)
-// {
-//     MJOLNIR_GET_DEFAULT_LOGGER();
-//     MJOLNIR_LOG_FUNCTION();
-//     using potential_type = HardCoreExcludedVolumePotential<traitsT>;
-//     using real_type      = typename potential_type::real_type;
-//     using parameter_type = typename potential_type::parameter_type;
-// 
-//     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-// 
-//     const real_type eps = toml::find<real_type>(global, "epsilon");
-//     MJOLNIR_LOG_INFO("epsilon = ", eps);
-// 
-//     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
-//             potential_type::default_cutoff());
-//     MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
-// 
-//     const auto& ps = toml::find<toml::array>(global, "parameters");
-//     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-// 
-//     std::vector<std::pair<std::size_t, parameter_type>> params;
-//     params.reserve(ps.size());
-//     for(const auto& param : ps)
-//     {
-//         const auto idx = find_parameter<std::size_t>(param, env, "index") +
-//                          find_parameter_or<std::int64_t>(param, env, "offset", 0);
-// 
-//         const auto core_radius          =
-//             find_parameter<real_type>(param, env, "core_radius");
-//         const auto soft_shell_thickness =
-//             find_parameter<real_type>(param, env, "soft_shell_thickness");
-// 
-//         params.emplace_back(idx, parameter_type{soft_shell_thickness, core_radius});
-//         MJOLNIR_LOG_INFO("idx = ", idx, ", core_radius = ", core_radius,
-//                          ", soft_shell_thickness = ", soft_shell_thickness);
-//     }
-// 
-//     check_parameter_overlap(env, ps, params);
-// 
-//     return potential_type(eps, cutoff, std::move(params),
-//         read_ignore_particles_within(global),
-//         read_ignored_molecule(global), read_ignored_group(global));
-// }
+
+template<typename traitsT>
+ParameterList<traitsT, HardCoreExcludedVolumePotential<typename traitsT::real_type>>
+read_hard_core_excluded_volume_potential(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+
+    using real_type      = typename traitsT::real_type;
+    using potential_type = HardCoreExcludedVolumePotential<real_type>;
+    using parameter_list = HardCoreExcludedVolumeParameterList<traitsT>;
+    using parameter_type = typename parameter_list::parameter_type;
+
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+
+    const real_type eps = toml::find<real_type>(global, "epsilon");
+    MJOLNIR_LOG_INFO("epsilon = ", eps);
+
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff());
+    potential_type::set_cutoff_ratio(cutoff);
+    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+
+    const auto& ps = toml::find<toml::array>(global, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        const auto idx = find_parameter<std::size_t>(param, env, "index") +
+                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
+
+        const auto core_radius =
+            find_parameter<real_type>(param, env, "core_radius");
+        const auto soft_shell_thickness =
+            find_parameter<real_type>(param, env, "soft_shell_thickness");
+
+        params.emplace_back(idx, parameter_type{soft_shell_thickness, core_radius});
+        MJOLNIR_LOG_INFO("idx = ", idx, ", core_radius = ", core_radius,
+                         ", soft_shell_thickness = ", soft_shell_thickness);
+    }
+    check_parameter_overlap(env, ps, params);
+
+    return ParameterList<traitsT, potential_type>(make_unique<parameter_list>(
+            eps, cutoff, std::move(params), read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global)));
+}
 
 template<typename traitsT>
 ParameterList<traitsT, LennardJonesPotential<typename traitsT::real_type>>
