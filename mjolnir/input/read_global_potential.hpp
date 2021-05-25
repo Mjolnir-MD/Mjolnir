@@ -4,7 +4,7 @@
 #include <mjolnir/input/utility.hpp>
 #include <mjolnir/forcefield/global/ParameterList.hpp>
 #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
-// #include <mjolnir/forcefield/global/InversePowerPotential.hpp>
+#include <mjolnir/forcefield/global/InversePowerPotential.hpp>
 #include <mjolnir/forcefield/global/HardCoreExcludedVolumePotential.hpp>
 #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
 #include <mjolnir/forcefield/global/LennardJonesAttractivePotential.hpp>
@@ -228,49 +228,52 @@ read_excluded_volume_potential(const toml::value& global)
             read_ignored_molecule(global), read_ignored_group(global)));
 }
 
-// template<typename traitsT>
-// InversePowerPotential<traitsT>
-// read_inverse_power_potential(const toml::value& global)
-// {
-//     MJOLNIR_GET_DEFAULT_LOGGER();
-//     MJOLNIR_LOG_FUNCTION();
-//     using potential_type = InversePowerPotential<traitsT>;
-//     using real_type      = typename potential_type::real_type;
-//     using integer_type   = typename potential_type::integer_type;
-//     using parameter_type = typename potential_type::parameter_type;
-// 
-//     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
-// 
-//     const real_type eps = toml::find<real_type>(global, "epsilon");
-//     MJOLNIR_LOG_INFO("epsilon = ", eps);
-// 
-//     const integer_type n = toml::find<integer_type>(global, "n");
-//     MJOLNIR_LOG_INFO("n = ", n);
-// 
-//     const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
-//             potential_type::default_cutoff(n));
-//     MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
-// 
-//     const auto& ps = toml::find<toml::array>(global, "parameters");
-//     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-// 
-//     std::vector<std::pair<std::size_t, parameter_type>> params;
-//     params.reserve(ps.size());
-//     for(const auto& param : ps)
-//     {
-//         const auto idx    = find_parameter<std::size_t>(param, env, "index") +
-//                             find_parameter_or<std::int64_t>(param, env, "offset", 0);
-//         const auto radius = find_parameter<real_type  >(param, env, "radius");
-// 
-//         params.emplace_back(idx, radius);
-//         MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
-//     }
-//     check_parameter_overlap(env, ps, params);
-// 
-//     return potential_type(eps, n, cutoff, params,
-//             read_ignore_particles_within(global),
-//             read_ignored_molecule(global), read_ignored_group(global));
-// }
+template<typename traitsT>
+ParameterList<traitsT, InversePowerPotential<typename traitsT::real_type>>
+read_inverse_power_potential(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type      = typename traitsT::real_type;
+    using potential_type = InversePowerPotential<real_type>;
+    using parameter_list = InversePowerParameterList<traitsT>;
+    using parameter_type = typename parameter_list::parameter_type;
+    using integer_type   = typename potential_type::integer_type;
+
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+
+    const real_type eps = toml::find<real_type>(global, "epsilon");
+    MJOLNIR_LOG_INFO("epsilon = ", eps);
+
+    const integer_type n = toml::find<integer_type>(global, "n");
+    MJOLNIR_LOG_INFO("n = ", n);
+
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff(n));
+    potential_type::set_cutoff_ratio(cutoff, n);
+    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+
+    const auto& ps = toml::find<toml::array>(global, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        const auto idx    = find_parameter<std::size_t>(param, env, "index") +
+                            find_parameter_or<std::int64_t>(param, env, "offset", 0);
+        const auto radius = find_parameter<real_type  >(param, env, "radius");
+
+        params.emplace_back(idx, radius);
+        MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", radius);
+    }
+    check_parameter_overlap(env, ps, params);
+
+    return ParameterList<traitsT, potential_type>(make_unique<parameter_list>(
+            eps, n, cutoff, std::move(params),
+            read_ignore_particles_within(global),
+            read_ignored_molecule(global), read_ignored_group(global)));
+}
 
 template<typename traitsT>
 ParameterList<traitsT, HardCoreExcludedVolumePotential<typename traitsT::real_type>>

@@ -41,16 +41,17 @@ read_global_pair_interaction(const toml::value& global)
             read_excluded_volume_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
-//     else if(potential == "InversePower")
-//     {
-//         MJOLNIR_LOG_NOTICE("-- potential function is Inverse Power.");
-//         using potential_t   = InversePowerPotential<traitsT>;
-//         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-//
-//         return make_unique<interaction_t>(
-//             read_inverse_power_potential<traitsT>(global),
-//             read_spatial_partition<traitsT, potential_t>(global));
-//     }
+    else if(potential == "InversePower")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Inverse Power.");
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = InversePowerPotential<real_type>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+
+        return make_unique<interaction_t>(
+            read_inverse_power_potential<traitsT>(global),
+            read_spatial_partition<traitsT, potential_t>(global));
+    }
     else if(potential == "HardCoreExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Hard Core Excluded Volume.");
