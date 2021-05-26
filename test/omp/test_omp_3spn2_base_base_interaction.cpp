@@ -14,7 +14,6 @@
 #include <mjolnir/core/VerletList.hpp>
 #include <mjolnir/omp/System.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
-#include <mjolnir/omp/BondAngleInteraction.hpp>
 #include <mjolnir/omp/ThreeSPN2BaseBaseInteraction.hpp>
 
 BOOST_AUTO_TEST_CASE(ThreeSPN2BasePairIntearction_numerical_diff)
