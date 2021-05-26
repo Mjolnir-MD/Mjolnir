@@ -133,11 +133,11 @@ class ThreeSPN2BaseBaseInteraction<
                     {
                         // remember that F = -dU.
                         const auto F = -dU_rep * Bji_reg;
-                        sys.force_thread(thread_id, Bi) -= F;
-                        sys.force_thread(thread_id, Bj) += F;
+                        sys.force_thread(thread_id, Bi) += F;
+                        sys.force_thread(thread_id, Bj) -= F;
 
                         // Bij = Bi -> Bj = rBj - rBi
-                        sys.virial_thread(thread_id) += math::tensor_product(Bij, F);
+                        sys.virial_thread(thread_id) += math::tensor_product(Bij, -F);
                     }
                 }
 
@@ -224,12 +224,12 @@ class ThreeSPN2BaseBaseInteraction<
 
                     if(cos_dphi != real_type(-1.0))
                     {
-                        const auto U_dU_attr = potential_.U_dU_attr(bp_kind, lBij);
-
                         auto f_Si = math::make_coordinate<coordinate_type>(0,0,0);
                         auto f_Sj = math::make_coordinate<coordinate_type>(0,0,0);
                         auto f_Bi = math::make_coordinate<coordinate_type>(0,0,0);
                         auto f_Bj = math::make_coordinate<coordinate_type>(0,0,0);
+
+                        const auto U_dU_attr = potential_.U_dU_attr(bp_kind, lBij);
 
                         // --------------------------------------------------------
                         // calc dihedral term
@@ -240,10 +240,10 @@ class ThreeSPN2BaseBaseInteraction<
                             const auto coef = real_type(0.5) * sin_dphi *
                                               f1 * f2 * U_dU_attr.first;
 
+                            const auto rlBij_sq = rlBij * rlBij; // 1 / |Bij|^2
                             const auto fSi = ( coef * lBij / m_lsq) * m;
                             const auto fSj = (-coef * lBij / n_lsq) * n;
 
-                            const auto rlBij_sq = rlBij * rlBij; // 1 / |Bij|^2
                             const auto coef_Bi = dot_SBiBj * rlBij_sq;
                             const auto coef_Bj = dot_SBjBi * rlBij_sq;
 
@@ -305,15 +305,17 @@ class ThreeSPN2BaseBaseInteraction<
                             f_Bi += coef * Bji_reg;
                             f_Bj += coef * Bij_reg;
                         }
+
                         sys.force_thread(thread_id, Si) += f_Si;
                         sys.force_thread(thread_id, Bi) += f_Bi;
                         sys.force_thread(thread_id, Bj) += f_Bj;
                         sys.force_thread(thread_id, Sj) += f_Sj;
 
-                        sys.virial_thread(thread_id)  += math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
-                                         math::tensor_product(                   rBi , f_Bi) +
-                                         math::tensor_product(             rBi + Bij,  f_Bj) +
-                                         math::tensor_product(sys.transpose(rSj, rBi), f_Sj) ;
+                        sys.virial_thread(thread_id)  +=
+                            math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
+                            math::tensor_product(                   rBi , f_Bi) +
+                            math::tensor_product(             rBi + Bij , f_Bj) +
+                            math::tensor_product(sys.transpose(rSj, rBi), f_Sj) ;
                     }
                 }
 
@@ -530,6 +532,7 @@ class ThreeSPN2BaseBaseInteraction<
                         }
                     }
                 }
+
                 sys.force_thread(thread_id, Si)      += f_Si     ;
                 sys.force_thread(thread_id, Sj)      += f_Sj     ;
                 sys.force_thread(thread_id, Bi)      += f_Bi     ;
@@ -537,12 +540,13 @@ class ThreeSPN2BaseBaseInteraction<
                 sys.force_thread(thread_id, Bi_next) += f_Bi_next;
                 sys.force_thread(thread_id, Bj_next) += f_Bj_next;
 
-                sys.virial_thread(thread_id)  += math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
-                                 math::tensor_product(                   rBi , f_Bi) +
-                                 math::tensor_product(              rBi + Bij, f_Bj) +
-                                 math::tensor_product(sys.transpose(rSj, rBi), f_Sj) +
-                                 math::tensor_product(sys.transpose(sys.position(Bi_next), rBi), f_Bi_next) +
-                                 math::tensor_product(sys.transpose(sys.position(Bj_next), rBi), f_Bj_next) ;
+                sys.virial_thread(thread_id)  +=
+                    math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
+                    math::tensor_product(                   rBi , f_Bi) +
+                    math::tensor_product(              rBi + Bij, f_Bj) +
+                    math::tensor_product(sys.transpose(rSj, rBi), f_Sj) +
+                    math::tensor_product(sys.transpose(sys.position(Bi_next), rBi), f_Bi_next) +
+                    math::tensor_product(sys.transpose(sys.position(Bj_next), rBi), f_Bj_next) ;
             }
         }
         return;
@@ -807,8 +811,8 @@ class ThreeSPN2BaseBaseInteraction<
         constexpr auto two_pi    = math::constants<real_type>::two_pi();
         constexpr auto tolerance = math::abs_tolerance<real_type>();
 
-        real_type energy = 0;
         const auto leading_participants = this->potential_.leading_participants();
+        real_type energy = 0;
 #pragma omp parallel for reduction(+:energy)
         for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
         {
@@ -857,11 +861,11 @@ class ThreeSPN2BaseBaseInteraction<
                     if(dU_rep != real_type(0))
                     {
                         // remember that F = -dU.
-                        const auto F = dU_rep * Bji_reg;
-                        sys.force_thread(thread_id, Bi) -= F;
-                        sys.force_thread(thread_id, Bj) += F;
+                        const auto F = -dU_rep * Bji_reg;
+                        sys.force_thread(thread_id, Bi) += F;
+                        sys.force_thread(thread_id, Bj) -= F;
 
-                        sys.virial_thread(thread_id) += math::tensor_product(Bij, F); // (Bj - Bi) * Fj
+                        sys.virial_thread(thread_id) += math::tensor_product(Bij, -F); // (Bj - Bi) * Fj
                     }
                 }
 
@@ -966,10 +970,10 @@ class ThreeSPN2BaseBaseInteraction<
                             const auto coef = real_type(0.5) * sin_dphi *
                                               f1 * f2 * U_dU_attr.first;
 
+                            const auto rlBij_sq = rlBij * rlBij; // 1 / |Bij|^2
                             const auto fSi = ( coef * lBij / m_lsq) * m;
                             const auto fSj = (-coef * lBij / n_lsq) * n;
 
-                            const auto rlBij_sq = rlBij * rlBij; // 1 / |Bij|^2
                             const auto coef_Bi = dot_SBiBj * rlBij_sq;
                             const auto coef_Bj = dot_SBjBi * rlBij_sq;
 
@@ -1041,7 +1045,6 @@ class ThreeSPN2BaseBaseInteraction<
                                          math::tensor_product(                   rBi , f_Bi) +
                                          math::tensor_product(              rBi + Bij, f_Bj) +
                                          math::tensor_product(sys.transpose(rSj, rBi), f_Sj) ;
-
                     }
                 }
 
@@ -1149,6 +1152,8 @@ class ThreeSPN2BaseBaseInteraction<
                         const auto U_dU_attr = potential_.U_dU_attr(cs_kind, lBj5i);
                         const auto Bj5i_reg  = rlBj5i * Bj5i;
 
+                        energy += f3 * fCS * U_dU_attr.first;
+
                         // --------------------------------------------------------
                         // df/dtheta3 f(theta_CS)  U_attr(eps, alp, rij) dtheta_3 /dr
                         if(df3 != real_type(0))
@@ -1223,6 +1228,8 @@ class ThreeSPN2BaseBaseInteraction<
                         const auto U_dU_attr = potential_.U_dU_attr(cs_kind, lBi3j);
                         const auto Bi3j_reg  = rlBi3j * Bi3j;
 
+                        energy += f3 * fCS * U_dU_attr.first;
+
                         // --------------------------------------------------------
                         // df/dtheta3 f(theta_CS)  U_attr(eps, alp, rij) dtheta_3 /dr
                         if(df3 != real_type(0))
@@ -1265,19 +1272,17 @@ class ThreeSPN2BaseBaseInteraction<
                 sys.force_thread(thread_id, Bi_next) += f_Bi_next;
                 sys.force_thread(thread_id, Bj_next) += f_Bj_next;
 
-                sys.virial_thread(thread_id)
-                    += math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
-                       math::tensor_product(                   rBi , f_Bi) +
-                       math::tensor_product(              rBi + Bij, f_Bj) +
-                       math::tensor_product(sys.transpose(rSj, rBi), f_Sj) +
-                       math::tensor_product(sys.transpose(sys.position(Bi_next), rBi), f_Bi_next) +
-                       math::tensor_product(sys.transpose(sys.position(Bj_next), rBi), f_Bj_next) ;
+                sys.virial_thread(thread_id) +=
+                    math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
+                    math::tensor_product(                   rBi , f_Bi) +
+                    math::tensor_product(              rBi + Bij, f_Bj) +
+                    math::tensor_product(sys.transpose(rSj, rBi), f_Sj) +
+                    math::tensor_product(sys.transpose(sys.position(Bi_next), rBi), f_Bi_next) +
+                    math::tensor_product(sys.transpose(sys.position(Bj_next), rBi), f_Bj_next) ;
             }
         }
         return energy;
     }
-
-
 
     std::string name() const override {return "3SPN2BaseBase";}
 
