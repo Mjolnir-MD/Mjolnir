@@ -4,6 +4,7 @@
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceFieldBase.hpp>
+#include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/core/SystemMotionRemover.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -64,10 +65,22 @@ class GFWNPTLangevinIntegrator
             MJOLNIR_LOG_WARN("GFW NPT langevin integrator does not support constraint"
                 " forcefield. [[forcefields.constraint]] will be ignored.");
         }
-        if(!ff->external().empty())
         {
-            MJOLNIR_LOG_WARN("GFW NPT langevin integrator currently does not "
-                "consider virial from external forcefield.");
+            if(const auto* ffptr = dynamic_cast<ForceField<traitsT> const*>(ff.get()))
+            {
+                if(!ffptr->external().empty())
+                {
+                    MJOLNIR_LOG_WARN("GFW NPT langevin integrator currently does not "
+                        "consider virial from external forcefield.");
+                }
+            }
+            else
+            {
+                // MultipleBasin is too complicated and it is difficult to check
+                // all the basins in all the units
+                MJOLNIR_LOG_WARN("GFW NPT langevin integrator currently does not "
+                    "consider virial from external forcefield.");
+            }
         }
 
         // calculate parameters for each particles
