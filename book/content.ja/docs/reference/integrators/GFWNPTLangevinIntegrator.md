@@ -1,30 +1,32 @@
 +++
-title = "UnderdampedLangevin"
-weight = 5000
+title = "GFWNPTLangevin"
+weight = 4000
 +++
 
-# UnderdampedLangevin
+# GFWNPTLangevin
 
-ランジュバン方程式に従い、温度・体積・粒子数一定のシミュレーションを行います。
+ランジュバン方程式に従い、温度・圧力・粒子数 (NPT) 一定のシミュレーションを行います。
 
 {{<katex display>}}
 m\frac{d^2 \bold{r}}{dt^2} = \bold{f}(\bold{r}) - m\gamma\bold{v} + \beta(t)
 {{</katex>}}
 
-
 以下の論文で提案された手法です。
 
-- J. D. Honeycutt and D. Thirumalai, (1992) Biopolymers
-- Z. Guo and D. Thirumalai, (1995) Biopolymers.
+- [Xingyu Gao, Jun Fang, and Han Wang. J. Chem. Phys. (2016) 144, 124113](https://doi.org/10.1063/1.4944909)
 
 ## 例
 
 ```toml
 [simulator]
-integrator.type = "UnderdampedLangevin"
+# ...
+integrator.type = "GFWNPTLangevin"
+integrator.chi  = 0.0
+integrator.cell_mass  = [1e3, 1e3, 1e3]
+integrator.cell_gamma = [0.1, 0.1, 0.1]
 integrator.gammas = [
-    {index = 0, gamma = 1.0},
-    {index = 1, gamma = 1.0},
+    {index = 0, gamma = 0.1},
+    {index = 1, gamma = 0.1},
     # ...
 ]
 ```
@@ -35,6 +37,12 @@ integrator.gammas = [
 
 - `type`: 文字列型
   - [Integrator](Integrator.md)の種類を指定します。`"BAOABLangevin"`です。
+- `chi`: 浮動小数点数
+  - パラメータ{{<katex>}} chi {{</katex>}}の値です。
+- `cell_mass`: 浮動小数点数の配列型
+  - 箱の運動に対応する質量です。
+- `cell_gamma`: 浮動小数点数の配列型
+  - 箱の運動に対応する摩擦係数です。
 - `gammas`: テーブルの配列型
   - 粒子の摩擦係数{{<katex>}}\gamma_i{{</katex>}}を指定します。
 - `remove`: テーブル型 (optional)
