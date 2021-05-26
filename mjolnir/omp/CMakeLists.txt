@@ -2,7 +2,7 @@ set(mjolnir_omp_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/System.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/RandomNumberGenerator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/SystemMotionRemover.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/GFWNpTLangevinIntegrator.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/GFWNPTLangevinIntegrator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/BAOABLangevinIntegrator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/gBAOABLangevinIntegrator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/GJFNVTLangevinIntegrator.cpp"

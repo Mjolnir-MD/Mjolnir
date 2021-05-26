@@ -4,7 +4,7 @@
 #include <mjolnir/omp/System.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/SystemMotionRemover.hpp>
-#include <mjolnir/core/GFWNpTLangevinIntegrator.hpp>
+#include <mjolnir/core/GFWNPTLangevinIntegrator.hpp>
 
 namespace mjolnir
 {
@@ -20,7 +20,7 @@ namespace mjolnir
 // corredponds to the case where we choose Mab -> inf (a != b). Under that
 // condition, the off-diagonal terms dissappear.
 template<typename realT, template<typename, typename> class boundaryT>
-class GFWNpTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
+class GFWNPTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 {
   public:
     using traits_type     = OpenMPSimulatorTraits<realT, boundaryT>;
@@ -34,7 +34,7 @@ class GFWNpTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
   public:
 
-    GFWNpTLangevinIntegrator(const real_type dt, const real_type chi,
+    GFWNPTLangevinIntegrator(const real_type dt, const real_type chi,
             const coordinate_type& m_cell,     const coordinate_type& gamma_cell,
             const coordinate_type& v_cell_ini, const std::vector<real_type>& gammas)
         : dt_(dt), halfdt_(dt / 2), temperature_(/* dummy = */ -1), chi_(chi),
@@ -45,11 +45,11 @@ class GFWNpTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     {
         if(!is_cuboidal_periodic_boundary<boundary_type>::value)
         {
-            throw_exception<std::runtime_error>("GFWNpTLangevinIntegrator: "
+            throw_exception<std::runtime_error>("GFWNPTLangevinIntegrator: "
                     "periodic boundary condition is required");
         }
     }
-    ~GFWNpTLangevinIntegrator() = default;
+    ~GFWNPTLangevinIntegrator() = default;
 
     void initialize(system_type& sys, forcefield_type& ff, rng_type&)
     {
@@ -294,7 +294,7 @@ class GFWNpTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     {
         if(!sys.has_attribute(attr))
         {
-            throw_exception<std::out_of_range>("mjolnir::GFWNpTLangevinIntegrator: "
+            throw_exception<std::out_of_range>("mjolnir::GFWNPTLangevinIntegrator: "
                 "It requires attribute `", attr, "`, but `", attr,
                 "` is not found in `system.attribute`.");
         }
@@ -431,10 +431,10 @@ class GFWNpTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class GFWNpTLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>>;
-extern template class GFWNpTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>>;
-extern template class GFWNpTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-extern template class GFWNpTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+extern template class GFWNPTLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class GFWNPTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class GFWNPTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class GFWNPTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 #endif
 
 } // mjolnir

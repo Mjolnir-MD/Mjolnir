@@ -6,7 +6,7 @@
 #include <mjolnir/core/BAOABLangevinIntegrator.hpp>
 #include <mjolnir/core/gBAOABLangevinIntegrator.hpp>
 #include <mjolnir/core/GJFNVTLangevinIntegrator.hpp>
-#include <mjolnir/core/GFWNpTLangevinIntegrator.hpp>
+#include <mjolnir/core/GFWNPTLangevinIntegrator.hpp>
 #include <mjolnir/core/SystemMotionRemover.hpp>
 #include <mjolnir/input/utility.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -307,8 +307,8 @@ read_GJFNVT_langevin_integrator(const toml::value& simulator)
 }
 
 template<typename traitsT>
-GFWNpTLangevinIntegrator<traitsT>
-read_GFW_NpT_langevin_integrator(const toml::value& simulator)
+GFWNPTLangevinIntegrator<traitsT>
+read_GFW_NPT_langevin_integrator(const toml::value& simulator)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -360,7 +360,7 @@ read_GFW_NpT_langevin_integrator(const toml::value& simulator)
 
         MJOLNIR_LOG_INFO("idx = ", idx, ", gamma = ", gm);
     }
-    return GFWNpTLangevinIntegrator<traitsT>(delta_t, chi,
+    return GFWNPTLangevinIntegrator<traitsT>(delta_t, chi,
         math::make_coordinate<coordinate_type>(m_cell[0],     m_cell[1],     m_cell[2]),
         math::make_coordinate<coordinate_type>(gamma_cell[0], gamma_cell[1], gamma_cell[2]),
         math::make_coordinate<coordinate_type>(v_cell_ini[0], v_cell_ini[1], v_cell_ini[2]),
@@ -420,11 +420,11 @@ struct read_integrator_impl<GJFNVTLangevinIntegrator<traitsT>>
 };
 
 template<typename traitsT>
-struct read_integrator_impl<GFWNpTLangevinIntegrator<traitsT>>
+struct read_integrator_impl<GFWNPTLangevinIntegrator<traitsT>>
 {
-    static GFWNpTLangevinIntegrator<traitsT> invoke(const toml::value& sim)
+    static GFWNPTLangevinIntegrator<traitsT> invoke(const toml::value& sim)
     {
-        return read_GFW_NpT_langevin_integrator<traitsT>(sim);
+        return read_GFW_NPT_langevin_integrator<traitsT>(sim);
     }
 };
 
@@ -441,7 +441,7 @@ integratorT read_integrator(const toml::value& sim)
                                       " based on the Velocity Verlet",
             "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator",
             "- \"g-BAOABLangevin\"    : geodesic BAOAB Langevin Integrator",
-            "- \"GJWNpTLangevin\"     : BAOAB-type NpT Langevin Integrator",
+            "- \"GJWNPTLangevin\"     : BAOAB-type NPT Langevin Integrator",
             "- \"G-JFLangevin\"       : Verlet-type Langevin Integrator by G-J&F"
             }));
     }
@@ -474,10 +474,10 @@ extern template GJFNVTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBounda
 extern template GJFNVTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_GJFNVT_langevin_integrator(const toml::value& simulator);
 extern template GJFNVTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_GJFNVT_langevin_integrator(const toml::value& simulator);
 
-extern template GFWNpTLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>       > read_GFW_NpT_langevin_integrator(const toml::value& simulator);
-extern template GFWNpTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       > read_GFW_NpT_langevin_integrator(const toml::value& simulator);
-extern template GFWNpTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_GFW_NpT_langevin_integrator(const toml::value& simulator);
-extern template GFWNpTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_GFW_NpT_langevin_integrator(const toml::value& simulator);
+extern template GFWNPTLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>       > read_GFW_NPT_langevin_integrator(const toml::value& simulator);
+extern template GFWNPTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       > read_GFW_NPT_langevin_integrator(const toml::value& simulator);
+extern template GFWNPTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_GFW_NPT_langevin_integrator(const toml::value& simulator);
+extern template GFWNPTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_GFW_NPT_langevin_integrator(const toml::value& simulator);
 
 #endif
 
