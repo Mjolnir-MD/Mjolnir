@@ -39,6 +39,14 @@ OpenMMで推奨されているアルゴリズムです。
 
 - [Leimkuhler B, Matthews C. Proc. R. Soc. A. (2016)](https://doi.org/10.1098/rspa.2016.0138)
 
+## [GFWNPTLangevin]({{<relref "GFWNPTLangevin">}})
+
+ランジュバン方程式に従い、温度・圧力・粒子数一定のシミュレーションを行います。
+
+以下の論文で提案された手法です。
+
+- [Xingyu Gao, Jun Fang, and Han Wang. J. Chem. Phys. (2016) 144, 124113](https://doi.org/10.1063/1.4944909)
+
 ## [UnderdampedLangevin]({{<relref "UnderdampedLangevinIntegrator.md">}})
 
 ランジュバン方程式に従い、温度・体積・粒子数一定のシミュレーションを行います。

@@ -15,6 +15,7 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     using traits_type     = OpenMPSimulatorTraits<realT, boundaryT>;
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using boundary_type   = typename traits_type::boundary_type;
     using topology_type   = Topology;
     using attribute_type  = std::map<std::string, real_type>;
@@ -38,7 +39,11 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
 
     System(const std::size_t num_particles, const boundary_type& bound)
         : velocity_initialized_(false), force_initialized_(false),
-          boundary_(bound), attributes_(), num_particles_(num_particles),
+          boundary_(bound), attributes_(),
+          virial_(0,0,0, 0,0,0, 0,0,0),
+          virial_threads_(omp_get_max_threads(),
+                          matrix33_type(0,0,0, 0,0,0, 0,0,0)),
+          num_particles_(num_particles),
           masses_   (num_particles), rmasses_   (num_particles),
           positions_(num_particles), velocities_(num_particles),
           forces_main_(num_particles),
@@ -88,9 +93,17 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     }
 
     coordinate_type adjust_direction(coordinate_type from, coordinate_type to) const noexcept
-    {return boundary_.adjust_direction(from, to);}
+    {
+        return boundary_.adjust_direction(from, to);
+    }
     coordinate_type  adjust_position(coordinate_type dr) const noexcept
-    {return boundary_.adjust_position(dr);}
+    {
+        return boundary_.adjust_position(dr);
+    }
+    coordinate_type transpose(coordinate_type tgt, const coordinate_type& ref) const noexcept
+    {
+        return boundary_.transpose(tgt, ref);
+    }
 
     std::size_t size() const noexcept {return num_particles_;}
 
@@ -150,13 +163,38 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
         return forces_threads_[thread_num][particle_id];
     }
 
-    // Here, since we already allocate forces_threads_, we don't need anything
-    // in preprocess_forces() function. On the contrary, since all the forces
-    // will be calculated in different cores, we need to merge those
-    // thread-local forces by summing up those for each particle.
-    void preprocess_forces() noexcept { /*do nothing*/ }
+    matrix33_type&       virial()       noexcept {return virial_;}
+    matrix33_type const& virial() const noexcept {return virial_;}
+
+    matrix33_type&       virial_thread(std::size_t thread_num)       noexcept
+    {
+        return virial_threads_[thread_num];
+    }
+    matrix33_type const& virial_thread(std::size_t thread_num) const noexcept
+    {
+        return virial_threads_[thread_num];
+    }
+
+    void preprocess_forces()  noexcept
+    {
+        // Do nothing. We already allocated the thread local forces and virials
+        // with zero values. Also, in the end of each step, postprocess_forces
+        // zero-clears everything.
+    }
+
+    // Since all the forces will be calculated in different cores, we need to
+    // merge those thread-local forces by summing up those for each particle.
     void postprocess_forces() noexcept
     {
+        // sumup virial and zero-clear the thread local virials
+//         virial_ = matrix33_type(0,0,0, 0,0,0, 0,0,0); // allow non-parallelized stuff
+        for(std::size_t thread_id=0, max_threads=omp_get_max_threads();
+                thread_id < max_threads; ++thread_id)
+        {
+            virial_ += virial_threads_[thread_id];
+            virial_threads_[thread_id] = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+        }
+
 #pragma omp parallel for
         for(std::size_t i=0; i<this->size(); ++i)
         {
@@ -205,6 +243,9 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     bool           velocity_initialized_, force_initialized_;
     boundary_type  boundary_;
     attribute_type attributes_;
+
+    matrix33_type  virial_;
+    std::vector<matrix33_type, cache_aligned_allocator<matrix33_type>> virial_threads_;
 
     std::size_t                  num_particles_;
     real_container_type          masses_;

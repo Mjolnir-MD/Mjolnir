@@ -90,10 +90,15 @@ class BondAngleInteraction final : public LocalInteractionBase<traitsT>
                             (cos_theta * r_ij_reg - r_kj_reg);
             const auto Fk = (coef_inv_sin * inv_len_r_kj) *
                             (cos_theta * r_kj_reg - r_ij_reg);
+            const auto Fj = -Fi - Fk;
 
             sys.force(idxs[0]) += Fi;
-            sys.force(idxs[1]) -= (Fi + Fk);
+            sys.force(idxs[1]) += Fj;
             sys.force(idxs[2]) += Fk;
+
+            sys.virial() += math::tensor_product(p1 + r_ij, Fi) +
+                            math::tensor_product(p1,        Fj) +
+                            math::tensor_product(p1 + r_kj, Fk);
         }
         return energy;
     }
@@ -164,11 +169,11 @@ void BondAngleInteraction<traitsT, potentialT>::calc_force(
         const auto& p1 = sys.position(idxp.first[1]);
         const auto& p2 = sys.position(idxp.first[2]);
 
-        const auto r_ij         = sys.adjust_direction(p1, p0);
+        const auto r_ij         = sys.adjust_direction(p1, p0); // p1 -> p0
         const auto inv_len_r_ij = math::rlength(r_ij);
         const auto r_ij_reg     = r_ij * inv_len_r_ij;
 
-        const auto r_kj         = sys.adjust_direction(p1, p2);
+        const auto r_kj         = sys.adjust_direction(p1, p2); // p1 -> p2
         const auto inv_len_r_kj = math::rlength(r_kj);
         const auto r_kj_reg     = r_kj * inv_len_r_kj;
 
@@ -187,10 +192,15 @@ void BondAngleInteraction<traitsT, potentialT>::calc_force(
                         (cos_theta * r_ij_reg - r_kj_reg);
         const auto Fk = (coef_inv_sin * inv_len_r_kj) *
                         (cos_theta * r_kj_reg - r_ij_reg);
+        const auto Fj = -Fi - Fk;
 
         sys.force(idxs[0]) += Fi;
-        sys.force(idxs[1]) -= (Fi + Fk);
+        sys.force(idxs[1]) += Fj;
         sys.force(idxs[2]) += Fk;
+
+        sys.virial() += math::tensor_product(p1 + r_ij, Fi) +
+                        math::tensor_product(p1,        Fj) +
+                        math::tensor_product(p1 + r_kj, Fk);
     }
     return;
 }

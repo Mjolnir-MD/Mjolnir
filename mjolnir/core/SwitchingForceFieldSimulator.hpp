@@ -137,8 +137,8 @@ inline void SwitchingForceFieldSimulator<traitsT, integratorT>::initialize()
     ff->initialize(this->system_);
     this->integrator_.initialize(this->system_, ff, this->rng_);
 
-    observers_.initialize(this->total_step_, this->integrator_.delta_t(),
-                          this->system_, ff);
+    observers_.initialize(this->total_step_, this->save_step_,
+                          this->integrator_.delta_t(), this->system_, ff);
 
     return;
 }

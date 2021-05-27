@@ -73,7 +73,8 @@ inline void EnergyCalculationSimulator<traitsT>::initialize()
 
     this->ff_->initialize(this->sys_);
 
-    this->obs_.initialize(this->total_step_, 0.0, this->sys_, this->ff_);
+    // Since neither save_step nor delta_t are not saved, we add some dummy value.
+    this->obs_.initialize(this->total_step_, 1, 1.0, this->sys_, this->ff_);
     return;
 }
 

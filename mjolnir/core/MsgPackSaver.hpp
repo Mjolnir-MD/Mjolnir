@@ -28,6 +28,7 @@ namespace mjolnir
 //             "group"   : string,
 //         }, ...
 //     ]
+//     "virial"       : [real; 9]
 //     "attributres"  : map<N>{"temperature": real, ...},
 // }
 //
@@ -41,6 +42,7 @@ class MsgPackSaver
     using traits_type     = traitsT;
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using system_type     = System<traits_type>;
     using attribute_type  = typename system_type::attribute_type;
     using rng_type        = RandomNumberGenerator<traits_type>;
@@ -142,6 +144,12 @@ class MsgPackSaver
         }
 
         // ---------------------------------------------------------------------
+        // write virial of the current state
+
+        to_msgpack("virial");
+        to_msgpack(sys.virial());
+
+        // ---------------------------------------------------------------------
         // write attributes list
 
         to_msgpack("attributes");
@@ -224,7 +232,7 @@ class MsgPackSaver
     void to_msgpack(const coordinate_type& v)
     {
         // [float, float, float]
-        // fixmap (3)
+        // fixarray (3)
         // 0b'1001'0011
         // 0x    9    3
         constexpr std::uint8_t fixarray3_code = 0x93;
@@ -232,6 +240,26 @@ class MsgPackSaver
         to_msgpack(math::X(v));
         to_msgpack(math::Y(v));
         to_msgpack(math::Z(v));
+        return ;
+    }
+
+    void to_msgpack(const matrix33_type& m)
+    {
+        // [float; 9]
+        // fixarray (9)
+        // 0b'1001'1001
+        // 0x    9    3
+        constexpr std::uint8_t fixarray9_code = 0x99;
+        buffer_.push_back(fixarray9_code);
+        to_msgpack(m(0, 0));
+        to_msgpack(m(0, 1));
+        to_msgpack(m(0, 2));
+        to_msgpack(m(1, 0));
+        to_msgpack(m(1, 1));
+        to_msgpack(m(1, 2));
+        to_msgpack(m(2, 0));
+        to_msgpack(m(2, 1));
+        to_msgpack(m(2, 2));
         return ;
     }
 

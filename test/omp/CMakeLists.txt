@@ -11,6 +11,8 @@ set(TEST_NAMES
     test_omp_gocontact_interaction
     test_omp_bond_angle_interaction
     test_omp_dihedral_angle_interaction
+    test_omp_3spn2_base_base_interaction
+    test_omp_3spn2_base_stacking_interaction
 
     test_omp_global_lennard_jones_interaction
     test_omp_global_uniform_lennard_jones_interaction

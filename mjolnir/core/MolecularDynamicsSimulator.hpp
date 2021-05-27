@@ -75,8 +75,8 @@ void MolecularDynamicsSimulator<traitsT, integratorT>::initialize()
     this->ff_->initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_, this->rng_);
 
-    observers_.initialize(this->total_step_, this->integrator_.delta_t(),
-                          this->system_, this->ff_);
+    observers_.initialize(this->total_step_, this->save_step_,
+                          this->integrator_.delta_t(), this->system_, this->ff_);
     return;
 }
 

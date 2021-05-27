@@ -113,8 +113,8 @@ SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::initialize()
     this->ff_->initialize(this->system_);
     this->integrator_.initialize(this->system_, this->ff_, this->rng_);
 
-    observers_.initialize(this->total_step_, this->integrator_.delta_t(),
-                          this->system_, this->ff_);
+    observers_.initialize(this->total_step_, this->total_step_,
+                          this->integrator_.delta_t(), this->system_, this->ff_);
     return;
 }
 
@@ -148,9 +148,9 @@ inline bool SimulatedAnnealingSimulator<traitsT, integratorT, scheduleT>::step()
             this->scheduler_.current(step_count_ * r_total_step_);
 
         MJOLNIR_LOG_DEBUG("T = ", system_.attribute("temperature"));
-    }
 
-    this->integrator_.update(system_);
+        this->integrator_.update(system_);
+    }
 
     return step_count_ < total_step_;
 }
