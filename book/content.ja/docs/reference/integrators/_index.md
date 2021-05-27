@@ -39,7 +39,7 @@ OpenMMで推奨されているアルゴリズムです。
 
 - [Leimkuhler B, Matthews C. Proc. R. Soc. A. (2016)](https://doi.org/10.1098/rspa.2016.0138)
 
-## [GFWNPTLangevin]({{<relref "GFWNPTLangevin">}})
+## [GFWNPTLangevin]({{<relref "GFWNPTLangevinIntegrator.md">}})
 
 ランジュバン方程式に従い、温度・圧力・粒子数一定のシミュレーションを行います。
 

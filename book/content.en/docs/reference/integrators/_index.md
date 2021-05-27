@@ -32,7 +32,7 @@ It is developed by the following paper.
 
 - [Leimkuhler B, Matthews C. Proc. R. Soc. A. (2016) 472:20160138](https://doi.org/10.1098/rspa.2016.0138)
 
-## [GFWNPTLangevin]({{<relref "GFWNPTLangevin">}})
+## [GFWNPTLangevin]({{<relref "GFWNPTLangevinIntegrator.md">}})
 
 It performs NPT Langevin simulation.
 
