@@ -31,9 +31,9 @@ template GJFNVTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>    
 template GJFNVTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_GJFNVT_langevin_integrator(const toml::value& simulator);
 template GJFNVTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_GJFNVT_langevin_integrator(const toml::value& simulator);
 
-template GFWNpTLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>       > read_GFW_NpT_langevin_integrator(const toml::value& simulator);
-template GFWNpTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       > read_GFW_NpT_langevin_integrator(const toml::value& simulator);
-template GFWNpTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_GFW_NpT_langevin_integrator(const toml::value& simulator);
-template GFWNpTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_GFW_NpT_langevin_integrator(const toml::value& simulator);
+template GFWNPTLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>       > read_GFW_NPT_langevin_integrator(const toml::value& simulator);
+template GFWNPTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>       > read_GFW_NPT_langevin_integrator(const toml::value& simulator);
+template GFWNPTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_GFW_NPT_langevin_integrator(const toml::value& simulator);
+template GFWNPTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_GFW_NPT_langevin_integrator(const toml::value& simulator);
 
 } // mjolnir

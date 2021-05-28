@@ -1,5 +1,25 @@
 # Change Log
 
+## 1.26.0
+
+### Added
+
+- NPT Langevin
+  - except external forcefield
+- Add an option to tabulate pair parameter (not using a combination rule) for WCA and L-J Attractive
+
+### Changed
+
+- update toml11 to v3.7.0
+
+### Fixed
+
+- fix dcd file format to correctly save the interval
+- fix force calculation in multi-unit multiple basin
+- add missing .gitignore in G-JF Integration test (@bondrewd )
+- update Boost URL (@bondrewd )
+- add missing tests for OpenMP 3SPN.2
+
 ## 1.25.0
 
 ### Added

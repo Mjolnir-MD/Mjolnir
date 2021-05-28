@@ -4,6 +4,7 @@
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/ForceFieldBase.hpp>
+#include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/core/SystemMotionRemover.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/util/logger.hpp>
@@ -23,7 +24,7 @@ namespace mjolnir
 // corredponds to the case where we choose Mab -> inf (a != b). Under that
 // condition, the off-diagonal terms dissappear.
 template<typename traitsT>
-class GFWNpTLangevinIntegrator
+class GFWNPTLangevinIntegrator
 {
   public:
     using traits_type     = traitsT;
@@ -37,7 +38,7 @@ class GFWNpTLangevinIntegrator
 
   public:
 
-    GFWNpTLangevinIntegrator(const real_type dt, const real_type chi,
+    GFWNPTLangevinIntegrator(const real_type dt, const real_type chi,
             const coordinate_type& m_cell,     const coordinate_type& gamma_cell,
             const coordinate_type& v_cell_ini, const std::vector<real_type>& gammas)
         : dt_(dt), halfdt_(dt / 2), temperature_(/* dummy = */ -1), chi_(chi),
@@ -48,11 +49,11 @@ class GFWNpTLangevinIntegrator
     {
         if(!is_cuboidal_periodic_boundary<boundary_type>::value)
         {
-            throw_exception<std::runtime_error>("GFWNpTLangevinIntegrator: "
+            throw_exception<std::runtime_error>("GFWNPTLangevinIntegrator: "
                     "periodic boundary condition is required");
         }
     }
-    ~GFWNpTLangevinIntegrator() = default;
+    ~GFWNPTLangevinIntegrator() = default;
 
     void initialize(system_type& sys, forcefield_type& ff, rng_type&)
     {
@@ -61,8 +62,25 @@ class GFWNpTLangevinIntegrator
 
         if(!ff->constraint().empty())
         {
-            MJOLNIR_LOG_WARN("BAOAB langevin integrator does not support constraint"
+            MJOLNIR_LOG_WARN("GFW NPT langevin integrator does not support constraint"
                 " forcefield. [[forcefields.constraint]] will be ignored.");
+        }
+        {
+            if(const auto* ffptr = dynamic_cast<ForceField<traitsT> const*>(ff.get()))
+            {
+                if(!ffptr->external().empty())
+                {
+                    MJOLNIR_LOG_WARN("GFW NPT langevin integrator currently does not "
+                        "consider virial from external forcefield.");
+                }
+            }
+            else
+            {
+                // MultipleBasin is too complicated and it is difficult to check
+                // all the basins in all the units
+                MJOLNIR_LOG_WARN("GFW NPT langevin integrator currently does not "
+                    "consider virial from external forcefield.");
+            }
         }
 
         // calculate parameters for each particles
@@ -292,7 +310,7 @@ class GFWNpTLangevinIntegrator
     {
         if(!sys.has_attribute(attr))
         {
-            throw_exception<std::out_of_range>("mjolnir::GFWNpTLangevinIntegrator: "
+            throw_exception<std::out_of_range>("mjolnir::GFWNPTLangevinIntegrator: "
                 "It requires attribute `", attr, "`, but `", attr,
                 "` is not found in `system.attribute`.");
         }
@@ -429,10 +447,10 @@ class GFWNpTLangevinIntegrator
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class GFWNpTLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>>;
-extern template class GFWNpTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>>;
-extern template class GFWNpTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-extern template class GFWNpTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+extern template class GFWNPTLangevinIntegrator<SimulatorTraits<double, UnlimitedBoundary>>;
+extern template class GFWNPTLangevinIntegrator<SimulatorTraits<float,  UnlimitedBoundary>>;
+extern template class GFWNPTLangevinIntegrator<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class GFWNPTLangevinIntegrator<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 #endif
 
 } // mjolnir
