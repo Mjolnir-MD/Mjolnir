@@ -473,62 +473,16 @@ read_wca_potential(const toml::value& global)
             " the exact cutoff is used and specified cutoff will be ignored.");
     }
 
-    // TODO: simplify the code by passing a lambda to read the parameters to a
-    //       function that reads ParameterList
-
     // check if `table` exists
     if(global.contains("table"))
     {
-        using parameter_list      = CombinationTable<traitsT, potential_type>;
-        using parameter_type      = typename parameter_list::parameter_type;
-        using pair_parameter_type = typename parameter_list::pair_parameter_type;
-
-        std::unordered_map<std::string, pair_parameter_type> table;
-        for(const auto& kv : toml::find<toml::table>(global, "table"))
-        {
-            const auto& p1 = kv.first;
-            for(const auto& kv2 : toml::get<toml::table>(kv.second))
-            {
-                const auto& p2  = kv2.first;
-                const auto para = std::make_pair(
-                        find_parameter<real_type>(kv2.second, env, "sigma"),
-                        find_parameter<real_type>(kv2.second, env, "epsilon"));
-
-                const auto key = p1 + std::string(":") + p2;
-                table[key] = para;
-                if(p1 != p2)
-                {
-                    const auto key_opposite = p2 + std::string(":") + p1;
-                    if(table.count(key_opposite) != 0)
-                    {
-                        MJOLNIR_LOG_WARN("parameter table does not distinguish "
-                                         "two parameters, A.B and B.A.");
-                    }
-                    table[key_opposite] = para;
-                }
-            }
-        }
-
-        const auto& ps = toml::find<toml::array>(global, "parameters");
-        MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-        std::vector<std::pair<std::size_t, parameter_type>> params;
-        params.reserve(ps.size());
-        for(const auto& param : ps)
-        {
-            const auto idx  = find_parameter   <std::size_t >(param, env, "index") +
-                              find_parameter_or<std::int64_t>(param, env, "offset", 0);
-            const auto name = toml::find<std::string>(param, "name");
-
-            params.emplace_back(idx, name);
-            MJOLNIR_LOG_INFO("idx = ", idx, ", name = ", name);
-        }
-        check_parameter_overlap(env, ps, params);
-
-        return ParameterList<traitsT, potential_type>(make_unique<parameter_list>(
-                std::move(table), std::move(params),
-                read_ignore_particles_within(global),
-                read_ignored_molecule(global), read_ignored_group(global)));
+        return ParameterList<traitsT, potential_type>(
+            read_parameter_table<traitsT, potential_type>(global,
+                [](const toml::value& val, const toml::value& env) {
+                    return std::make_pair(
+                        find_parameter<real_type>(val, env, "sigma"),
+                        find_parameter<real_type>(val, env, "epsilon"));
+                }));
     }
     else
     {
@@ -579,56 +533,13 @@ read_lennard_jones_attractive_potential(const toml::value& global)
     // check if `table` exists
     if(global.contains("table"))
     {
-        using parameter_list      = CombinationTable<traitsT, potential_type>;
-        using parameter_type      = typename parameter_list::parameter_type;
-        using pair_parameter_type = typename parameter_list::pair_parameter_type;
-
-        std::unordered_map<std::string, pair_parameter_type> table;
-        for(const auto& kv : toml::find<toml::table>(global, "table"))
-        {
-            const auto& p1 = kv.first;
-            for(const auto& kv2 : toml::get<toml::table>(kv.second))
-            {
-                const auto& p2  = kv2.first;
-                const auto para = std::make_pair(
-                        find_parameter<real_type>(kv2.second, env, "sigma"),
-                        find_parameter<real_type>(kv2.second, env, "epsilon"));
-
-                const auto key = p1 + std::string(":") + p2;
-                table[key] = para;
-                if(p1 != p2)
-                {
-                    const auto key_opposite = p2 + std::string(":") + p1;
-                    if(table.count(key_opposite) != 0)
-                    {
-                        MJOLNIR_LOG_WARN("parameter table does not distinguish "
-                                         "two parameters, A.B and B.A.");
-                    }
-                    table[key_opposite] = para;
-                }
-            }
-        }
-
-        const auto& ps = toml::find<toml::array>(global, "parameters");
-        MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
-
-        std::vector<std::pair<std::size_t, parameter_type>> params;
-        params.reserve(ps.size());
-        for(const auto& param : ps)
-        {
-            const auto idx  = find_parameter   <std::size_t >(param, env, "index") +
-                              find_parameter_or<std::int64_t>(param, env, "offset", 0);
-            const auto name = toml::find<std::string>(param, "name");
-
-            params.emplace_back(idx, name);
-            MJOLNIR_LOG_INFO("idx = ", idx, ", name = ", name);
-        }
-        check_parameter_overlap(env, ps, params);
-
-        return ParameterList<traitsT, potential_type>(make_unique<parameter_list>(
-                std::move(table), std::move(params),
-                read_ignore_particles_within(global),
-                read_ignored_molecule(global), read_ignored_group(global)));
+        return ParameterList<traitsT, potential_type>(
+            read_parameter_table<traitsT, potential_type>(global,
+                [](const toml::value& val, const toml::value& env) {
+                    return std::make_pair(
+                        find_parameter<real_type>(val, env, "sigma"),
+                        find_parameter<real_type>(val, env, "epsilon"));
+                }));
     }
     else
     {
