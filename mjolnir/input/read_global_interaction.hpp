@@ -118,16 +118,17 @@ read_global_pair_interaction(const toml::value& global)
             read_3spn2_excluded_volume_potential<traitsT>(global),
             read_spatial_partition<traitsT, potential_t>(global));
     }
-//     else if(potential == "iSoLFAttractive")
-//     {
-//         MJOLNIR_LOG_NOTICE("-- potential function is iSoLFAttractive.");
-//         using potential_t   = iSoLFAttractivePotential<traitsT>;
-//         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-//
-//         return make_unique<interaction_t>(
-//             read_isolf_potential<traitsT>(global),
-//             read_spatial_partition<traitsT, potential_t>(global));
-//     }
+    else if(potential == "iSoLFAttractive")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is iSoLFAttractive.");
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = iSoLFAttractivePotential<real_type>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+
+        return make_unique<interaction_t>(
+            read_isolf_potential<traitsT>(global),
+            read_spatial_partition<traitsT, potential_t>(global));
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
