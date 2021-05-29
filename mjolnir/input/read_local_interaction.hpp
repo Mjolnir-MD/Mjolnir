@@ -729,8 +729,7 @@ read_local_interaction(const toml::value& local)
             "- \"Contact\"       : 2-body bond interaction that might be broken",
             "- \"DihedralAngle\" : 4-body well-known dihedral angle interaction",
             "- \"DirectionalContact\" : 4-body contact interaction depends on the contact angle",
-            "- \"Dummy\"         : To represent a strange topology. It does nothing",
-            "- \"PDNS\"          : directional contact representing H-bond between protein and DNA"
+            "- \"Dummy\"         : To represent a strange topology. It does nothing"
             }));
     }
 }
