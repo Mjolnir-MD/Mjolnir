@@ -29,19 +29,20 @@ class ProteinDNANonSpecificInteraction final : public GlobalInteractionBase<trai
 {
   public:
 
-    using traits_type     = traitsT;
-    using base_type       = GlobalInteractionBase<traits_type>;
-    using real_type       = typename base_type::real_type;
-    using coordinate_type = typename base_type::coordinate_type;
-    using system_type     = typename base_type::system_type;
-    using topology_type   = typename base_type::topology_type;
-    using boundary_type   = typename base_type::boundary_type;
-    using potential_type  = ProteinDNANonSpecificPotential<traits_type>;
-    using partition_type  = SpatialPartition<traitsT, potential_type>;
+    using traits_type         = traitsT;
+    using base_type           = GlobalInteractionBase<traits_type>;
+    using real_type           = typename base_type::real_type;
+    using coordinate_type     = typename base_type::coordinate_type;
+    using system_type         = typename base_type::system_type;
+    using topology_type       = typename base_type::topology_type;
+    using boundary_type       = typename base_type::boundary_type;
+    using potential_type      = ProteinDNANonSpecificPotential<real_type>;
+    using partition_type      = SpatialPartition<traitsT, potential_type>;
+    using parameter_list_type = ProteinDNANonSpecificParameterList<traits_type>;
 
   public:
-    ProteinDNANonSpecificInteraction(potential_type&& pot, partition_type&& part)
-        : potential_(std::move(pot)), partition_(std::move(part))
+    ProteinDNANonSpecificInteraction(parameter_list_type&& para, partition_type&& part)
+        : parameters_(std::move(para)), partition_(std::move(part))
     {}
     ~ProteinDNANonSpecificInteraction() {}
 
@@ -51,8 +52,8 @@ class ProteinDNANonSpecificInteraction final : public GlobalInteractionBase<trai
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is PDNS");
 
-        this->potential_.initialize(sys, topol);
-        this->partition_.initialize(sys, this->potential_);
+        this->parameters_.initialize(sys, topol);
+        this->partition_ .initialize(sys, this->parameters_);
         return;
     }
 
@@ -62,19 +63,19 @@ class ProteinDNANonSpecificInteraction final : public GlobalInteractionBase<trai
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is PDNS");
 
-        this->potential_.update(sys, topol);
-        this->partition_.initialize(sys, this->potential_);
+        this->parameters_.update(sys, topol);
+        this->partition_ .initialize(sys, this->parameters_);
         return;
     }
 
     void reduce_margin(const real_type dmargin, const system_type& sys) override
     {
-        this->partition_.reduce_margin(dmargin, sys, this->potential_);
+        this->partition_.reduce_margin(dmargin, sys, this->parameters_);
         return ;
     }
     void scale_margin(const real_type scale, const system_type& sys) override
     {
-        this->partition_.scale_margin(scale, sys, this->potential_);
+        this->partition_.scale_margin(scale, sys, this->parameters_);
         return ;
     }
 
@@ -84,20 +85,18 @@ class ProteinDNANonSpecificInteraction final : public GlobalInteractionBase<trai
 
     std::string name() const override {return "PDNSInteraction";}
 
-    potential_type const& potential() const noexcept {return potential_;}
-    potential_type&       potential()       noexcept {return potential_;}
+    parameter_list_type const& parameters() const noexcept {return parameters_;}
+    parameter_list_type&       parameters()       noexcept {return parameters_;}
 
     base_type* clone() const override
     {
-        return new ProteinDNANonSpecificInteraction(
-                potential_type(potential_), partition_type(partition_));
+        return new ProteinDNANonSpecificInteraction(*this);
     }
 
   private:
 
-    potential_type potential_;
+    parameter_list_type parameters_;
     partition_type partition_;
-
 };
 
 template<typename traitsT>
@@ -112,17 +111,21 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
     // But this interaction is named as P-D ns, so here it uses `P` for protein
     // and `D` for DNA.
 
-    for(std::size_t i=0; i < this->potential_.contacts().size(); ++i)
-    {
-        const auto& para = potential_.contacts()[i];
+    const auto rsigma         = parameters_.rsigma();
+    const auto delta          = parameters_.delta();
+    const auto delta2         = parameters_.delta2();
+    const auto pi_over_2delta = parameters_.pi_over_2delta();
 
+    for(const auto& para : this->parameters_.contacts())
+    {
         const auto  P  = para.P;
         const auto& rP = sys.position(P);
         for(const auto& ptnr : this->partition_.partners(P))
         {
-            const auto  D  = ptnr.index;          // DNA phosphate
-            const auto  S3 = ptnr.parameter().S3; // 3' Sugar
-            const auto& rD = sys.position(D);
+            const auto  D   = ptnr.index;       // DNA phosphate
+            const auto& pot = ptnr.potential(); // parameters
+            const auto  S3  = pot.S3;           // 3' Sugar
+            const auto& rD  = sys.position(D);
 
             MJOLNIR_LOG_DEBUG("protein = ", P, ", DNA = ", D, ", r0 = ", para.r0);
 
@@ -145,7 +148,7 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
             }
             const auto rlPD   = math::rsqrt(lPD_sq);
             const auto  lPD   = lPD_sq * rlPD;
-            const auto f_df   = potential_.f_df(para.r0, lPD);
+            const auto f_df   = pot.f_df(para.r0, lPD, rsigma);
 
             MJOLNIR_LOG_DEBUG("f = ", f_df.first, ", df = ", f_df.second);
 
@@ -160,7 +163,7 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
             const auto cosPNC = dotPNC * rlPD * rlPNC;
             const auto theta  = std::acos(math::clamp<real_type>(cosPNC,-1,1));
 
-            const auto g_dg_theta = potential_.g_dg(para.theta0, theta);
+            const auto g_dg_theta = pot.g_dg(para.theta0, theta, delta, delta2, pi_over_2delta);
 
             MJOLNIR_LOG_DEBUG("g(theta) = ", g_dg_theta.first,
                              ", dg(theta) = ", g_dg_theta.second);
@@ -175,7 +178,7 @@ void ProteinDNANonSpecificInteraction<traitsT>::calc_force(
             const auto cosS3D = dotS3D * rlS3D * rlPD;
             const auto phi    = std::acos(math::clamp<real_type>(cosS3D,-1,1));
 
-            const auto g_dg_phi = potential_.g_dg(para.phi0, phi);
+            const auto g_dg_phi = pot.g_dg(para.phi0, phi, delta, delta2, pi_over_2delta);
 
             MJOLNIR_LOG_DEBUG("g(phi) = ", g_dg_phi.first,
                              ", dg(phi) = ", g_dg_phi.second);
@@ -281,17 +284,22 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_energy(
     // and `D` for DNA.
 
     real_type E = 0.0;
-    for(std::size_t i=0; i < this->potential_.contacts().size(); ++i)
-    {
-        const auto& para = potential_.contacts()[i];
 
+    const auto rsigma         = parameters_.rsigma();
+    const auto delta          = parameters_.delta();
+    const auto delta2         = parameters_.delta2();
+    const auto pi_over_2delta = parameters_.pi_over_2delta();
+
+    for(const auto& para : this->parameters_.contacts())
+    {
         const auto  P  = para.P;
         const auto& rP = sys.position(P);
         for(const auto& ptnr : this->partition_.partners(P))
         {
-            const auto  D  = ptnr.index;
-            const auto  S3 = ptnr.parameter().S3;
-            const auto& rD = sys.position(D);
+            const auto  D   = ptnr.index;
+            const auto& pot = ptnr.potential();
+            const auto  S3  = pot.S3;
+            const auto& rD  = sys.position(D);
 
             //  PC          S5'    |
             //    o         o--o B | theta is an angle formed by the vector
@@ -312,7 +320,7 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_energy(
             }
             const auto rlPD   = math::rsqrt(lPD_sq);
             const auto  lPD   = lPD_sq * rlPD;
-            const auto f      = potential_.f(para.r0, lPD);
+            const auto f      = pot.f(para.r0, lPD, rsigma);
 
             // ----------------------------------------------------------------
             // calculates the angle part (theta)
@@ -324,7 +332,7 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_energy(
             const auto dotPNC  = math::dot_product(rPNC, rPD);
             const auto cosPNC  = dotPNC * rlPD * rlPNC;
             const auto theta   = std::acos(math::clamp<real_type>(cosPNC,-1,1));
-            const auto g_theta = potential_.g(para.theta0, theta);
+            const auto g_theta = pot.g(para.theta0, theta, delta, delta2, pi_over_2delta);
 
             if(g_theta == real_type(0)) {continue;}
 
@@ -337,7 +345,7 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_energy(
             const auto dotS3D = math::dot_product(rPD, rS3D);
             const auto cosS3D = dotS3D * rlS3D * rlPD;
             const auto phi    = std::acos(math::clamp<real_type>(cosS3D,-1,1));
-            const auto g_phi  = potential_.g(para.phi0, phi);
+            const auto g_phi  = pot.g(para.phi0, phi, delta, delta2, pi_over_2delta);
 
             if(g_phi == real_type(0)) {continue;}
 
@@ -368,17 +376,22 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_force_and_energy(
     // and `D` for DNA.
 
     real_type energy = 0;
-    for(std::size_t i=0; i < this->potential_.contacts().size(); ++i)
-    {
-        const auto& para = potential_.contacts()[i];
 
+    const auto rsigma         = parameters_.rsigma();
+    const auto delta          = parameters_.delta();
+    const auto delta2         = parameters_.delta2();
+    const auto pi_over_2delta = parameters_.pi_over_2delta();
+
+    for(const auto& para : this->parameters_.contacts())
+    {
         const auto  P  = para.P;
         const auto& rP = sys.position(P);
         for(const auto& ptnr : this->partition_.partners(P))
         {
-            const auto  D  = ptnr.index;          // DNA phosphate
-            const auto  S3 = ptnr.parameter().S3; // 3' Sugar
-            const auto& rD = sys.position(D);
+            const auto  D   = ptnr.index;       // DNA phosphate
+            const auto& pot = ptnr.potential(); // parameter
+            const auto  S3  = pot.S3;           // 3' Sugar
+            const auto& rD  = sys.position(D);
 
             MJOLNIR_LOG_DEBUG("protein = ", P, ", DNA = ", D, ", r0 = ", para.r0);
 
@@ -401,7 +414,7 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_force_and_energy(
             }
             const auto rlPD   = math::rsqrt(lPD_sq);
             const auto  lPD   = lPD_sq * rlPD;
-            const auto f_df   = potential_.f_df(para.r0, lPD);
+            const auto f_df   = pot.f_df(para.r0, lPD, rsigma);
 
             MJOLNIR_LOG_DEBUG("f = ", f_df.first, ", df = ", f_df.second);
 
@@ -416,7 +429,7 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_force_and_energy(
             const auto cosPNC = dotPNC * rlPD * rlPNC;
             const auto theta  = std::acos(math::clamp<real_type>(cosPNC,-1,1));
 
-            const auto g_dg_theta = potential_.g_dg(para.theta0, theta);
+            const auto g_dg_theta = pot.g_dg(para.theta0, theta, delta, delta2, pi_over_2delta);
 
             MJOLNIR_LOG_DEBUG("g(theta) = ", g_dg_theta.first,
                              ", dg(theta) = ", g_dg_theta.second);
@@ -431,7 +444,7 @@ ProteinDNANonSpecificInteraction<traitsT>::calc_force_and_energy(
             const auto cosS3D = dotS3D * rlS3D * rlPD;
             const auto phi    = std::acos(math::clamp<real_type>(cosS3D,-1,1));
 
-            const auto g_dg_phi = potential_.g_dg(para.phi0, phi);
+            const auto g_dg_phi = pot.g_dg(para.phi0, phi, delta, delta2, pi_over_2delta);
 
             MJOLNIR_LOG_DEBUG("g(phi) = ", g_dg_phi.first,
                              ", dg(phi) = ", g_dg_phi.second);
