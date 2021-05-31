@@ -20,7 +20,7 @@ The detailed information can be found at https://mjolnir-md.github.io/Mjolnir/ .
 
 ### Capability
 
-- [x] Modern Langevin integrators, such as BAOAB and G-JF.
+- [x] Modern NVT/NPT Langevin integrators, such as BAOAB and G-JF.
 - [x] Langevin integrators with bond-length constraints based on g-BAOAB.
 - [x] Several simulation algorithms, such as simulated annealing.
 - [x] Support for all the well-known interactions (pair, bond, angle, dihedral) with many potential functions. (L-J, Debye-Hückel, harmonic, gaussian, worm-like chain, and more!)
