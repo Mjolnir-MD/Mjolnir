@@ -24,6 +24,7 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
     using neighbor_list_type = typename base_type::neighbor_list_type;
     using neighbor_type      = typename base_type::neighbor_type;
     using range_type         = typename base_type::range_type;
+    using parameter_list_type = typename base_type::parameter_list_type;
 
     static constexpr std::size_t  dim_size () {return 8;}
     static constexpr std::int64_t dim      () {return 8;}
@@ -67,16 +68,17 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 
     //XXX do NOT call this from parallel region.
     void initialize(neighbor_list_type& neighbors,
-                    const system_type& sys, const potential_type& pot) override
+                    const system_type& sys, const parameter_list_type& params) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
         constexpr std::int64_t d = dim();
 
-        MJOLNIR_LOG_INFO(pot.name(), " cutoff = ", pot.max_cutoff_length());
+        MJOLNIR_LOG_INFO(potential_type::name(), " cutoff = ", params.max_cutoff_length());
         MJOLNIR_LOG_INFO("dimension = ", d, 'x', d, 'x', d);
-        this->set_cutoff(pot.max_cutoff_length());
+
+        this->set_cutoff(params.max_cutoff_length());
 
         // initialize cell list
 #pragma omp parallel for
@@ -128,20 +130,20 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
             } // for y
         } // for x (in parallel)
 
-        this->make(neighbors, sys, pot);
+        this->make(neighbors, sys, params);
         return;
     }
 
     //XXX do NOT call this from parallel region
     void make(neighbor_list_type& neighbor_list,
-              const system_type& sys, const potential_type& pot) override
+              const system_type& sys, const parameter_list_type& params) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
         MJOLNIR_LOG_FUNCTION_DEBUG();
 
         // `participants` is a list that contains indices of particles that are
         // related to the potential.
-        const auto& participants = pot.participants();
+        const auto& participants = params.participants();
 
         neighbor_list.clear();
         if(index_by_cell_    .size() != participants.size() ||
@@ -189,7 +191,7 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         const real_type r_c  = cutoff_ * (1 + margin_);
         const real_type r_c2 = r_c * r_c;
 
-        const auto leading_participants = pot.leading_participants();
+        const auto leading_participants = params.leading_participants();
 
         assert(std::is_sorted(leading_participants.begin(), leading_participants.end()));
 
@@ -232,7 +234,7 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
                     for(auto pici : cell_list_[cidx].first)
                     {
                         const auto j = pici.first;
-                        if(!pot.has_interaction(i, j))
+                        if(!params.has_interaction(i, j))
                         {
                             continue;
                         }
@@ -244,7 +246,7 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
                         const auto& rj = sys.position(j);
                         if(math::length_sq(sys.adjust_direction(ri, rj)) < r_c2)
                         {
-                            partners.emplace_back(j, pot.prepare_params(i, j));
+                            partners.emplace_back(j, potential_type(params.prepare_params(i, j)));
                         }
                     }
                 }
@@ -279,7 +281,10 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
             total_neighbors += neighbors_threads_[th].size();
         }
 
-        principal_neighbors.resize(total_neighbors);
+        principal_neighbors.resize(total_neighbors, neighbor_type{
+                std::numeric_limits<std::size_t>::max(),
+                potential_type(potential_type::default_parameter())
+            });
         principal_ranges   .resize(sys.size(), 0);
 
 #pragma omp parallel for schedule(static, 1)
@@ -309,24 +314,24 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 
     //XXX do NOT call this from `parallel` region.
     bool reduce_margin(neighbor_list_type& neighbors, const real_type dmargin,
-        const system_type& sys, const potential_type& pot) override
+        const system_type& sys, const parameter_list_type& params) override
     {
         this->current_margin_ -= dmargin;
 
         if(this->current_margin_ < 0.)
         {
-            this->make(neighbors, sys, pot);
+            this->make(neighbors, sys, params);
             return true;
         }
         return false;
     }
     bool scale_margin(neighbor_list_type& neighbors, const real_type scale,
-        const system_type& sys, const potential_type& pot) override
+        const system_type& sys, const parameter_list_type& params) override
     {
         this->current_margin_ = (cutoff_ + current_margin_) * scale - cutoff_;
         if(this->current_margin_ < 0.)
         {
-            this->make(neighbors, sys, pot);
+            this->make(neighbors, sys, params);
             return true;
         }
         return false;
@@ -398,14 +403,14 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 
 namespace mjolnir
 {
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, DebyeHuckelPotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>>>;
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, DebyeHuckelPotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, DebyeHuckelPotential<double>>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, DebyeHuckelPotential<float >>;
 
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, ExcludedVolumePotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>>>;
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, ExcludedVolumePotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, ExcludedVolumePotential<double>>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, ExcludedVolumePotential<float >>;
 
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<OpenMPSimulatorTraits<double, UnlimitedBoundary>>>;
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<OpenMPSimulatorTraits<float,  UnlimitedBoundary>>>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<double>>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<float >>;
 
 }
 #endif // MJOLNIR_SEPARATE_BUILD
