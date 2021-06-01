@@ -32,7 +32,6 @@ class UnlimitedGridCellList final
 
     static constexpr std::size_t  dim_size()     {return 8u;}
     static constexpr std::int64_t dim()          {return 8; }
-    static constexpr std::size_t  total_size()   {return 512u;}
     static constexpr real_type    mesh_epsilon() {return 1e-6;}
 
     using particle_cell_idx_pair    = std::pair<std::size_t, std::size_t>;
