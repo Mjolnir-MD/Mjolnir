@@ -30,7 +30,7 @@ class HardCoreExcludedVolumePotential
     }
     static constexpr parameter_type default_parameter() noexcept
     {
-        return parameter_type{real_type(0.0), real_type(0.0)};
+        return parameter_type{real_type(0.0), real_type(0.0), real_type(0.0)};
     }
 
     static void set_cutoff_ratio(const real_type ratio)

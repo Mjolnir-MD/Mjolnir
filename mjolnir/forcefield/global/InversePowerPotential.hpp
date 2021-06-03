@@ -28,6 +28,11 @@ class InversePowerPotential
         return std::pow(2.0, 12.0 / n);
     }
 
+    static parameter_type default_parameter() noexcept
+    {
+        return std::make_tuple(real_type(0.0), real_type(0.0), real_type(0.0));
+    }
+
     static void set_cutoff_ratio(const real_type ratio, const integer_type n)
     {
         if(self_type::cutoff_ratio < ratio)
