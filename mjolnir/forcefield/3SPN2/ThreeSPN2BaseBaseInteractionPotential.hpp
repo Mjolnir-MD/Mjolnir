@@ -69,6 +69,15 @@ class ThreeSPN2BaseBaseInteractionPotential
     }
 
   public:
+    ThreeSPN2BaseBaseInteractionPotential() noexcept
+      : Si       (invalid()),
+        Sj       (invalid()),
+        Bi_next  (invalid()),
+        Bj_next  (invalid()),
+        cs_i_kind(cross_stack_kind::INVALID),
+        cs_j_kind(cross_stack_kind::INVALID),
+        bp_kind  (base_pair_kind::INVALID)
+    {}
 
     explicit ThreeSPN2BaseBaseInteractionPotential(const parameter_type& params) noexcept
       : Si       (params.Si),
