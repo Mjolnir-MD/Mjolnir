@@ -330,7 +330,7 @@ class ProteinDNANonSpecificParameterList final
         return false;
     }
 
-    exclusion_list_type const& exclusion_list() const noexcept {return exclusion_list_;}
+    exclusion_list_type const& exclusion_list() const noexcept override {return exclusion_list_;}
 
     real_type cutoff_ratio()      const noexcept {return cutoff_ratio_;}
 

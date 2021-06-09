@@ -294,7 +294,7 @@ class PWMcosParameterList
     }
     ~PWMcosParameterList() = default;
 
-    void initialize(const system_type& sys, const topology_type& topol) noexcept
+    void initialize(const system_type& sys, const topology_type& topol) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -303,7 +303,7 @@ class PWMcosParameterList
         return;
     }
 
-    void update(const system_type& sys, const topology_type& topol) noexcept
+    void update(const system_type& sys, const topology_type& topol) noexcept override
     {
         // set cutoff length
         this->max_cutoff_length_ = real_type(0);

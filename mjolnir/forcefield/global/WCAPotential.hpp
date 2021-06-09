@@ -6,7 +6,7 @@
 namespace mjolnir
 {
 
-template<typename T> struct System;
+template<typename T> class System;
 
 // Well-known WCA interaction with Lorentz-Berthelot combining rules.
 // This class contains sigmas and epsilons of the particles and calculates

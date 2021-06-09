@@ -6,7 +6,7 @@
 namespace mjolnir
 {
 
-template<typename T> struct System;
+template<typename T> class System;
 
 template<typename realT>
 class LennardJonesAttractivePotential

@@ -107,9 +107,8 @@ class iSoLFAttractivePotential
         constexpr bool
         operator()(const parameter_type& lhs, const parameter_type& rhs) const noexcept
         {
-            constexpr real_type rc = 1.12246204831;
-            return std::get<0>(lhs) * rc + std::get<1>(lhs) <
-                   std::get<0>(rhs) * rc + std::get<1>(rhs) ;
+            return std::get<0>(lhs) * 1.12246204831 + std::get<1>(lhs) <
+                   std::get<0>(rhs) * 1.12246204831 + std::get<1>(rhs) ;
         }
     };
 
@@ -173,7 +172,7 @@ class iSoLFAttractiveParameterList final
     }
     ~iSoLFAttractiveParameterList() = default;
 
-    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
+    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
     {
         const auto sgm1 = std::get<0>(parameters_[i]);
         const auto eps1 = std::get<1>(parameters_[i]);
@@ -195,7 +194,7 @@ class iSoLFAttractiveParameterList final
     real_type cutoff_ratio()   const noexcept {return std::numeric_limits<real_type>::infinity();}
     real_type coef_at_cutoff() const noexcept {return 0.0;}
 
-    void initialize(const system_type& sys, const topology_type& topol) noexcept
+    void initialize(const system_type& sys, const topology_type& topol) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -204,7 +203,7 @@ class iSoLFAttractiveParameterList final
         return;
     }
 
-    void update(const system_type& sys, const topology_type& topol) noexcept
+    void update(const system_type& sys, const topology_type& topol) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
