@@ -8,5 +8,6 @@
 #include "check_virial.hpp"
 #include "clear_system.hpp"
 #include "make_empty_input.hpp"
+#include "stub_potential.hpp"
 
 #endif// MJOLNIR_TEST_UTIL_UTILITY_HPP

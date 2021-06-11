@@ -1,0 +1,184 @@
+#ifndef MJOLNIR_TEST_UTIL_STUB_POTENTIAL_HPP
+#define MJOLNIR_TEST_UTIL_STUB_POTENTIAL_HPP
+#include <mjolnir/math/Vector.hpp>
+#include <mjolnir/core/System.hpp>
+#include <mjolnir/forcefield/global/ParameterList.hpp>
+
+namespace mjolnir
+{
+namespace test
+{
+
+template<typename realT>
+class StubPotential
+{
+  public:
+    using real_type      = realT;
+    using parameter_type = std::pair<std::size_t, std::size_t>;
+    using self_type      = StubPotential<real_type>;
+
+    static constexpr real_type default_cutoff() noexcept
+    {
+        return real_type(2.0);
+    }
+    static constexpr parameter_type default_parameter() noexcept
+    {
+        return parameter_type{0, 0};
+    }
+
+    static void set_cutoff_ratio(const real_type rc)
+    {
+        return;
+    }
+
+    static constexpr real_type cutoff_ratio   = real_type(1);
+    static constexpr real_type coef_at_cutoff = real_type(0);
+
+  public:
+
+    explicit StubPotential(const parameter_type& para) noexcept
+        : para_(para)
+    {}
+    ~StubPotential() = default;
+
+    real_type potential(const real_type) const noexcept
+    {
+        return 0.0;
+    }
+    real_type derivative(const real_type) const noexcept
+    {
+        return 0.0;
+    }
+
+    template<typename T>
+    void initialize(const System<T>&) noexcept {return;}
+
+    template<typename T>
+    void update(const System<T>&) noexcept {return;}
+
+    static const char* name() noexcept {return "Stub";}
+
+    parameter_type parameter()   const noexcept {return this->para_;}
+
+    real_type cutoff()  const noexcept
+    {
+        return 0.0;
+    }
+
+  public:
+
+    // To culculate cutoff distance, we need to find the maximum sigma in the
+    // existing parameters. But the list of parameters will be given in a variety
+    // of ways, like Lorentz-Bertherot rule, combination table, or another way
+    // of combination rules.
+    //     To find the maximum parameter, we need to provide a way to compare
+    // parameters. But the way depends on the functional form of a potential.
+    // So this comparator should be defined in a Potential class.
+    struct parameter_comparator
+    {
+        constexpr bool
+        operator()(const parameter_type& lhs, const parameter_type& rhs) const noexcept
+        {
+            return lhs.first < rhs.first;
+        }
+    };
+
+  private:
+
+    parameter_type para_;
+};
+template<typename realT>
+constexpr typename StubPotential<realT>::real_type StubPotential<realT>::cutoff_ratio;
+template<typename realT>
+constexpr typename StubPotential<realT>::real_type StubPotential<realT>::coef_at_cutoff;
+
+template<typename traitsT>
+struct StubParameterList
+    : public ParameterListBase<traitsT, StubPotential<typename traitsT::real_type>>
+{
+    using traits_type          = traitsT;
+    using real_type            = typename traits_type::real_type;
+    using potential_type       = StubPotential<real_type>;
+    using base_type            = ParameterListBase<traits_type, potential_type>;
+
+    using pair_parameter_type  = typename potential_type::parameter_type;
+
+    using system_type          = System<traits_type>;
+    using topology_type        = Topology;
+    using molecule_id_type     = typename topology_type::molecule_id_type;
+    using group_id_type        = typename topology_type::group_id_type;
+    using connection_kind_type = typename topology_type::connection_kind_type;
+    using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type    = IgnoreGroup   <group_id_type>;
+    using exclusion_list_type  = ExclusionList<traits_type>;
+
+    explicit StubParameterList(const real_type cutoff_ratio,
+        const std::vector<std::size_t>& parameters,
+        const std::map<connection_kind_type, std::size_t>& exclusions,
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+        : cutoff_(cutoff_ratio), participants_(parameters),
+          exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
+    {}
+
+    real_type max_cutoff_length() const noexcept override {return this->cutoff_;}
+
+    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
+    {
+        return pair_parameter_type{i, j};
+    }
+
+    void initialize(const system_type& sys, const topology_type& topol) noexcept override
+    {
+        this->update(sys, topol);
+        return;
+    }
+    void update(const system_type& sys, const topology_type& topol) noexcept override
+    {
+        // update exclusion list based on sys.topology()
+        exclusion_list_.make(sys, topol);
+        return;
+    }
+
+    std::vector<std::size_t> const& participants() const noexcept override
+    {
+        return this->participants_;
+    }
+    mjolnir::range<typename std::vector<std::size_t>::const_iterator>
+    leading_participants() const noexcept override
+    {
+        return mjolnir::make_range(participants_.begin(), std::prev(participants_.end()));
+    }
+    mjolnir::range<typename std::vector<std::size_t>::const_iterator>
+    possible_partners_of(const std::size_t participant_idx,
+                         const std::size_t /*particle_idx*/) const noexcept override
+    {
+        return mjolnir::make_range(participants_.begin() + participant_idx + 1,
+                                   participants_.end());
+    }
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept override
+    {
+        return (i < j);
+    }
+
+    std::string name() const {return "Stub";}
+
+    exclusion_list_type const& exclusion_list() const noexcept override
+    {
+        return exclusion_list_; // for testing
+    }
+
+    base_type* clone() const override
+    {
+        return new StubParameterList(*this);
+    }
+
+  private:
+
+    real_type cutoff_;
+    std::vector<std::size_t> participants_;
+    exclusion_list_type  exclusion_list_;
+};
+
+} // test
+} // mjolnir
+#endif// MJOLNIR_TEST_UTIL_CHECK_FORCE_HPP
