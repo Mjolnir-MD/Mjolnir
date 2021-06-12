@@ -6,6 +6,8 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
+#include <test/util/stub_potential.hpp>
+
 #include <mjolnir/util/empty.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/util/range.hpp>
@@ -17,72 +19,16 @@
 #include <numeric>
 #include <random>
 
-template<typename T>
-struct dummy_potential
-{
-    using real_type      = T;
-    using parameter_type = mjolnir::empty_t;
-    using pair_parameter_type = parameter_type;
-
-    using topology_type        = mjolnir::Topology;
-    using molecule_id_type     = typename topology_type::molecule_id_type;
-    using connection_kind_type = typename topology_type::connection_kind_type;
-
-    explicit dummy_potential(const real_type cutoff,
-                             const std::vector<std::size_t>& participants)
-        : cutoff_(cutoff), participants_(participants)
-    {}
-
-    real_type max_cutoff_length() const noexcept {return this->cutoff_;}
-
-    parameter_type prepare_params(std::size_t, std::size_t) const noexcept
-    {
-        return parameter_type{};
-    }
-
-    bool is_ignored_molecule(std::size_t, std::size_t) const {return false;}
-    bool is_ignored_group   (std::string, std::string) const {return false;}
-
-    std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within() const
-    {
-        return std::vector<std::pair<connection_kind_type, std::size_t>>{};
-    }
-
-    std::vector<std::size_t> const& participants() const noexcept
-    {
-        return this->participants_;
-    }
-    mjolnir::range<typename std::vector<std::size_t>::const_iterator>
-    leading_participants() const noexcept
-    {
-        return mjolnir::make_range(participants_.begin(), std::prev(participants_.end()));
-    }
-    mjolnir::range<typename std::vector<std::size_t>::const_iterator>
-    possible_partners_of(const std::size_t participant_idx,
-                         const std::size_t /*particle_idx*/) const noexcept
-    {
-        return mjolnir::make_range(participants_.begin() + participant_idx + 1,
-                          participants_.end());
-    }
-    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
-    {
-        return (i < j);
-    }
-
-    std::string name() const {return "dummy potential";}
-
-    real_type cutoff_;
-    std::vector<std::size_t> participants_;
-};
-
 BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary)
 {
+    namespace test = mjolnir::test;
     mjolnir::LoggerManager::set_default_logger("test_cell_list.log");
+
     using traits_type     = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
-    using potential_type  = dummy_potential<real_type>;
+    using potential_type  = test::StubPotential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -102,7 +48,10 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary)
     std::vector<std::size_t> participants(N);
     std::iota(participants.begin(), participants.end(), 0u);
 
-    dummy_potential<real_type> pot(cutoff, participants);
+    test::StubParameterList<traits_type> params(cutoff, participants, {},
+            typename test::StubParameterList<traits_type>::ignore_molecule_type("Nothing"),
+            typename test::StubParameterList<traits_type>::ignore_group_type   ({})
+            );
 
     mjolnir::System<traits_type> sys(N, boundary_type{});
     mjolnir::Topology topol(N);
@@ -123,11 +72,11 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary)
 
     BOOST_TEST(!vlist.valid());
 
-    vlist.initialize(sys, pot);
-    vlist.make(sys, pot);
+    vlist.initialize(sys, params);
+    vlist.make(sys, params);
     BOOST_TEST(vlist.valid());
 
-    for(const auto i : pot.leading_participants())
+    for(const auto i : params.leading_participants())
     {
         for(std::size_t j=i+1; j<N; ++j)
         {
@@ -154,13 +103,14 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary)
 
 BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial)
 {
+    namespace test = mjolnir::test;
     mjolnir::LoggerManager::set_default_logger("test_cell_list.log");
 
     using traits_type     = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
-    using potential_type  = dummy_potential<real_type>;
+    using potential_type  = test::StubPotential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -181,7 +131,10 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial)
     // [200 ... 699]
     std::iota(participants.begin(), participants.end(), 200u);
 
-    dummy_potential<real_type> pot(cutoff, participants);
+    test::StubParameterList<traits_type> params(cutoff, participants, {},
+            typename test::StubParameterList<traits_type>::ignore_molecule_type("Nothing"),
+            typename test::StubParameterList<traits_type>::ignore_group_type   ({})
+            );
 
     mjolnir::System<traits_type> sys(N, boundary_type{});
     mjolnir::Topology topol(N);
@@ -201,18 +154,18 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial)
 
     BOOST_TEST(!vlist.valid());
 
-    vlist.initialize(sys, pot);
-    vlist.make(sys, pot);
+    vlist.initialize(sys, params);
+    vlist.make(sys, params);
     BOOST_TEST(vlist.valid());
 
-    for(const auto i : pot.leading_participants())
+    for(const auto i : params.leading_participants())
     {
         const auto partners = vlist.partners(i);
 
         // if particle i is not related to the potential, it should not have
         // any interacting partners.
-        if(pot.participants().end() == std::find(
-            pot.participants().begin(), pot.participants().end(), i))
+        if(params.participants().end() == std::find(
+            params.participants().begin(), params.participants().end(), i))
         {
             BOOST_TEST(partners.size() == 0u);
             continue;
@@ -230,8 +183,8 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial)
                 const bool enough_distant = dist >= threshold;
 
                 // or not a participant
-                const bool is_participant = pot.participants().end() != std::find(
-                    pot.participants().begin(), pot.participants().end(), j);
+                const bool is_participant = params.participants().end() != std::find(
+                    params.participants().begin(), params.participants().end(), j);
 
                 const bool is_ok = enough_distant || (!is_participant);
                 BOOST_TEST(is_ok);
@@ -239,8 +192,8 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial)
             else
             {
                 // should be a participant
-                const bool found = pot.participants().end() != std::find(
-                    pot.participants().begin(), pot.participants().end(), j);
+                const bool found = params.participants().end() != std::find(
+                    params.participants().begin(), params.participants().end(), j);
                 BOOST_TEST(found);
 
                 // should be enough close (< threshold)
@@ -254,13 +207,14 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial)
 
 BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial_2)
 {
+    namespace test = mjolnir::test;
     mjolnir::LoggerManager::set_default_logger("test_cell_list.log");
 
     using traits_type     = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
-    using potential_type  = dummy_potential<real_type>;
+    using potential_type  = test::StubPotential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -283,7 +237,10 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial_2)
         participants.push_back(i*2);
     }
 
-    dummy_potential<real_type> pot(cutoff, participants);
+    test::StubParameterList<traits_type> params(cutoff, participants, {},
+            typename test::StubParameterList<traits_type>::ignore_molecule_type("Nothing"),
+            typename test::StubParameterList<traits_type>::ignore_group_type   ({})
+            );
 
     mjolnir::System<traits_type> sys(N, boundary_type{});
     mjolnir::Topology topol(N);
@@ -303,18 +260,18 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial_2)
 
     BOOST_TEST(!vlist.valid());
 
-    vlist.initialize(sys, pot);
-    vlist.make(sys, pot);
+    vlist.initialize(sys, params);
+    vlist.make(sys, params);
     BOOST_TEST(vlist.valid());
 
-    for(const auto i : pot.leading_participants())
+    for(const auto i : params.leading_participants())
     {
         const auto partners = vlist.partners(i);
 
         // if particle i is not related to the potential, it should not have
         // any interacting partners.
-        if(pot.participants().end() == std::find(
-            pot.participants().begin(), pot.participants().end(), i))
+        if(params.participants().end() == std::find(
+            params.participants().begin(), params.participants().end(), i))
         {
             BOOST_TEST(partners.size() == 0u);
             continue;
@@ -332,8 +289,8 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial_2)
                 const bool enough_distant = dist >= threshold;
 
                 // or not a participant
-                const bool is_participant = pot.participants().end() != std::find(
-                    pot.participants().begin(), pot.participants().end(), j);
+                const bool is_participant = params.participants().end() != std::find(
+                    params.participants().begin(), params.participants().end(), j);
 
                 const bool is_ok = enough_distant || (!is_participant);
                 BOOST_TEST(is_ok);
@@ -341,8 +298,8 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial_2)
             else
             {
                 // should be a participant
-                const bool found = pot.participants().end() != std::find(
-                    pot.participants().begin(), pot.participants().end(), j);
+                const bool found = params.participants().end() != std::find(
+                    params.participants().begin(), params.participants().end(), j);
                 BOOST_TEST(found);
 
                 // should be enough close (< threshold)
@@ -360,7 +317,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_clone)
 
     using traits_type     = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type       = typename traits_type::real_type;
-    using potential_type  = dummy_potential<real_type>;
+    using potential_type  = test::StubPotential<real_type>;
 
     mjolnir::SpatialPartition<traits_type, potential_type> vlist(mjolnir::make_unique<
         mjolnir::UnlimitedGridCellList<traits_type, potential_type>>(10.0));

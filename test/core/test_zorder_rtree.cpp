@@ -6,6 +6,8 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
+#include <test/util/stub_potential.hpp>
+
 #include <mjolnir/util/empty.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/util/range.hpp>
@@ -15,65 +17,6 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <random>
-
-template<typename T>
-struct dummy_potential
-{
-    using real_type      = T;
-    using parameter_type = mjolnir::empty_t;
-    using pair_parameter_type = parameter_type;
-
-    using topology_type        = mjolnir::Topology;
-    using molecule_id_type     = typename topology_type::molecule_id_type;
-    using connection_kind_type = typename topology_type::connection_kind_type;
-
-    explicit dummy_potential(const real_type cutoff,
-                             const std::vector<std::size_t>& participants)
-        : cutoff_(cutoff), participants_(participants)
-    {}
-
-    real_type max_cutoff_length() const noexcept {return this->cutoff_;}
-
-    parameter_type prepare_params(std::size_t, std::size_t) const noexcept
-    {
-        return parameter_type{};
-    }
-
-    bool is_ignored_molecule(std::size_t, std::size_t) const {return false;}
-    bool is_ignored_group   (std::string, std::string) const {return false;}
-
-    std::vector<std::pair<connection_kind_type, std::size_t>> ignore_within() const
-    {
-        return std::vector<std::pair<connection_kind_type, std::size_t>>{};
-    }
-
-    std::vector<std::size_t> const& participants() const noexcept
-    {
-        return this->participants_;
-    }
-
-    mjolnir::range<typename std::vector<std::size_t>::const_iterator>
-    leading_participants() const noexcept
-    {
-        return mjolnir::make_range(participants_.begin(), std::prev(participants_.end()));
-    }
-    mjolnir::range<typename std::vector<std::size_t>::const_iterator>
-    possible_partners_of(const std::size_t participant_idx,
-                         const std::size_t /*particle_idx*/) const noexcept
-    {
-        return mjolnir::make_range(participants_.begin() + participant_idx + 1,
-                                   participants_.end());
-    }
-    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
-    {
-        return (i < j);
-    }
-
-    std::string name() const {return "dummy potential";}
-
-    real_type cutoff_;
-    std::vector<std::size_t> participants_;
-};
 
 using traits_to_be_tested = std::tuple<
     mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>,
@@ -101,7 +44,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_full_interaction, traits_type, tr
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
-    using potential_type  = dummy_potential<real_type>;
+    using potential_type  = test::StubPotential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -121,7 +64,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_full_interaction, traits_type, tr
     std::vector<std::size_t> participants(N);
     std::iota(participants.begin(), participants.end(), 0u);
 
-    dummy_potential<real_type> pot(cutoff, participants);
+    test::StubParameterList<traits_type> params(cutoff, participants, {},
+            typename test::StubParameterList<traits_type>::ignore_molecule_type("Nothing"),
+            typename test::StubParameterList<traits_type>::ignore_group_type   ({})
+            );
 
     mjolnir::System<traits_type> sys(N, get_boundary<boundary_type>(
                 coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
@@ -176,7 +122,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction, traits_type,
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
-    using potential_type  = dummy_potential<real_type>;
+    using potential_type  = test::StubPotential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -197,7 +143,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction, traits_type,
     // [200 ... 699]
     std::iota(participants.begin(), participants.end(), 200u);
 
-    dummy_potential<real_type> pot(cutoff, participants);
+    test::StubParameterList<traits_type> params(cutoff, participants, {},
+            typename test::StubParameterList<traits_type>::ignore_molecule_type("Nothing"),
+            typename test::StubParameterList<traits_type>::ignore_group_type   ({})
+            );
 
     mjolnir::System<traits_type> sys(N, get_boundary<boundary_type>(
                 coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
@@ -275,7 +224,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction_incontiguous,
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
     using coordinate_type = typename traits_type::coordinate_type;
-    using potential_type  = dummy_potential<real_type>;
+    using potential_type  = test::StubPotential<real_type>;
 
     constexpr std::size_t N = 1000;
     constexpr double      L = 10.0;
@@ -298,7 +247,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction_incontiguous,
         participants.push_back(i * 2);
     }
 
-    dummy_potential<real_type> pot(cutoff, participants);
+    test::StubParameterList<traits_type> params(cutoff, participants, {},
+            typename test::StubParameterList<traits_type>::ignore_molecule_type("Nothing"),
+            typename test::StubParameterList<traits_type>::ignore_group_type   ({})
+            );
+
 
     mjolnir::System<traits_type> sys(N, get_boundary<boundary_type>(
                 coordinate_type(0.0, 0.0, 0.0), coordinate_type(L, L, L)));
@@ -374,7 +327,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_clone, traits_type, traits_to_be_
 {
     mjolnir::LoggerManager::set_default_logger("test_zorder_rtree.log");
     using real_type       = typename traits_type::real_type;
-    using potential_type  = dummy_potential<real_type>;
+    using potential_type  = test::StubPotential<real_type>;
 
     mjolnir::SpatialPartition<traits_type, potential_type> vlist(
         mjolnir::make_unique<mjolnir::ZorderRTree<traits_type, potential_type>>(1.0));
