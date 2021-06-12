@@ -113,8 +113,8 @@ struct ParameterList
     ParameterList(ParameterList&&)            = default;
     ParameterList& operator=(ParameterList&&) = default;
 
-    base_type&        ref() noexcept {return *ptr_;}
-    base_type const& cref() noexcept {return *ptr_;}
+    base_type&        ref() const noexcept {return *ptr_;}
+    base_type const& cref() const noexcept {return *ptr_;}
 
     void initialize(const system_type& sys, const topology_type& topol) noexcept
     {
