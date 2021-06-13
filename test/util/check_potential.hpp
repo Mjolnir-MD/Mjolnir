@@ -23,6 +23,7 @@ void check_potential(const Potential& pot,
         const typename Potential::real_type h,
         const std::size_t N)
 {
+    using typename real_type = Potential::real_type;
     const real_type dx = (x_max - x_min) / N;
 
     for(std::size_t i=0; i<N; ++i)
