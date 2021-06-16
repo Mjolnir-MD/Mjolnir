@@ -23,10 +23,10 @@ void check_potential(const Potential& pot,
         const typename Potential::real_type h,
         const std::size_t N)
 {
-    using typename real_type = Potential::real_type;
+    using real_type = typename Potential::real_type;
     const real_type dx = (x_max - x_min) / N;
 
-    for(std::size_t i=0; i<N; ++i)
+    for(std::size_t i=1; i<N; ++i)
     {
         const real_type x = x_min + i * dx;
         const real_type pot1 = pot.potential(x + h);
@@ -35,16 +35,7 @@ void check_potential(const Potential& pot,
 
         const real_type deri = pot.derivative(x);
 
-        if(std::abs(pot1 / pot2 - 1.0) < h)
-        {
-            // pot1 and pot2 are almost the same, thus dpot ~ 0.0.
-            // to avoid numerical error in dpot, here it checks `deri ~ 0.0`.
-            BOOST_TEST(deri == 0.0, boost::test_tools::tolerance(h));
-        }
-        else
-        {
-            BOOST_TEST(dpot == deri, boost::test_tools::tolerance(h));
-        }
+        BOOST_TEST(dpot == deri, boost::test_tools::tolerance(tol));
     }
 }
 
