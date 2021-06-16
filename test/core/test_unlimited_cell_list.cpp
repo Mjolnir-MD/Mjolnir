@@ -313,6 +313,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial_2)
 
 BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_clone)
 {
+    namespace test = mjolnir::test;
     mjolnir::LoggerManager::set_default_logger("test_cell_list.log");
 
     using traits_type     = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;

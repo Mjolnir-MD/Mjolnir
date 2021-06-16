@@ -101,6 +101,7 @@ BOOST_AUTO_TEST_CASE(test_CellList_PeriodicBoundary)
 
 BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_partial)
 {
+    namespace test = mjolnir::test;
     mjolnir::LoggerManager::set_default_logger("test_periodic_grid_cell_list.log");
     using traits_type     = mjolnir::SimulatorTraits<double, mjolnir::CuboidalPeriodicBoundary>;
     using real_type       = typename traits_type::real_type;
@@ -309,6 +310,7 @@ BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_partial_2)
 
 BOOST_AUTO_TEST_CASE(test_PeriodicGridCellList_clone)
 {
+    namespace test = mjolnir::test;
     mjolnir::LoggerManager::set_default_logger("test_periodic_grid_cell_list.log");
     using traits_type     = mjolnir::SimulatorTraits<double, mjolnir::CuboidalPeriodicBoundary>;
     using real_type       = typename traits_type::real_type;

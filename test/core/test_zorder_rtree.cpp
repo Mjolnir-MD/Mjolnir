@@ -40,6 +40,7 @@ get_boundary(const Coordinate& lower, const Coordinate& higher) noexcept
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_full_interaction, traits_type, traits_to_be_tested)
 {
+    namespace test = mjolnir::test;
     mjolnir::LoggerManager::set_default_logger("test_zorder_rtree.log");
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
@@ -87,11 +88,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_full_interaction, traits_type, tr
 
     BOOST_TEST(!vlist.valid());
 
-    vlist.initialize(sys, pot);
-    vlist.make(sys, pot);
+    vlist.initialize(sys, params);
+    vlist.make(sys, params);
     BOOST_TEST(vlist.valid());
 
-    for(const auto i : pot.leading_participants())
+    for(const auto i : params.leading_participants())
     {
         for(std::size_t j=i+1; j<N; ++j)
         {
@@ -118,6 +119,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_full_interaction, traits_type, tr
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction, traits_type, traits_to_be_tested)
 {
+    namespace test = mjolnir::test;
     mjolnir::LoggerManager::set_default_logger("test_zorder_rtree.log");
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
@@ -167,18 +169,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction, traits_type,
 
     BOOST_TEST(!vlist.valid());
 
-    vlist.initialize(sys, pot);
-    vlist.make(sys, pot);
+    vlist.initialize(sys, params);
+    vlist.make(sys, params);
     BOOST_TEST(vlist.valid());
 
-    for(const auto i : pot.leading_participants())
+    for(const auto i : params.leading_participants())
     {
         const auto partners = vlist.partners(i);
 
         // if particle i is not related to the potential, it should not have
         // any interacting partners.
-        if(pot.participants().end() == std::find(
-            pot.participants().begin(), pot.participants().end(), i))
+        if(params.participants().end() == std::find(
+            params.participants().begin(), params.participants().end(), i))
         {
             BOOST_TEST(partners.size() == 0u);
             continue;
@@ -196,8 +198,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction, traits_type,
                 const bool enough_distant = dist >= threshold;
 
                 // or not a participant
-                const bool is_participant = pot.participants().end() != std::find(
-                    pot.participants().begin(), pot.participants().end(), j);
+                const bool is_participant = params.participants().end() != std::find(
+                    params.participants().begin(), params.participants().end(), j);
 
                 const bool is_ok = enough_distant || (!is_participant);
                 BOOST_TEST(is_ok);
@@ -205,8 +207,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction, traits_type,
             else
             {
                 // should be a participant
-                const bool found = pot.participants().end() != std::find(
-                    pot.participants().begin(), pot.participants().end(), j);
+                const bool found = params.participants().end() != std::find(
+                    params.participants().begin(), params.participants().end(), j);
                 BOOST_TEST(found);
 
                 // should be enough close (< threshold)
@@ -220,6 +222,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction, traits_type,
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction_incontiguous, traits_type, traits_to_be_tested)
 {
+    namespace test = mjolnir::test;
     mjolnir::LoggerManager::set_default_logger("test_zorder_rtree.log");
     using real_type       = typename traits_type::real_type;
     using boundary_type   = typename traits_type::boundary_type;
@@ -272,18 +275,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction_incontiguous,
 
     BOOST_TEST(!vlist.valid());
 
-    vlist.initialize(sys, pot);
-    vlist.make(sys, pot);
+    vlist.initialize(sys, params);
+    vlist.make(sys, params);
     BOOST_TEST(vlist.valid());
 
-    for(const auto i : pot.leading_participants())
+    for(const auto i : params.leading_participants())
     {
         const auto partners = vlist.partners(i);
 
         // if particle i is not related to the potential, it should not have
         // any interacting partners.
-        if(pot.participants().end() == std::find(
-            pot.participants().begin(), pot.participants().end(), i))
+        if(params.participants().end() == std::find(
+            params.participants().begin(), params.participants().end(), i))
         {
             BOOST_TEST(partners.size() == 0u);
             continue;
@@ -301,8 +304,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction_incontiguous,
                 const bool enough_distant = dist >= threshold;
 
                 // or not a participant
-                const bool is_participant = pot.participants().end() != std::find(
-                    pot.participants().begin(), pot.participants().end(), j);
+                const bool is_participant = params.participants().end() != std::find(
+                    params.participants().begin(), params.participants().end(), j);
 
                 const bool is_ok = enough_distant || (!is_participant);
                 BOOST_TEST(is_ok);
@@ -310,8 +313,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction_incontiguous,
             else
             {
                 // should be a participant
-                const bool found = pot.participants().end() != std::find(
-                    pot.participants().begin(), pot.participants().end(), j);
+                const bool found = params.participants().end() != std::find(
+                    params.participants().begin(), params.participants().end(), j);
                 BOOST_TEST(found);
 
                 // should be enough close (< threshold)
@@ -325,6 +328,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction_incontiguous,
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_clone, traits_type, traits_to_be_tested)
 {
+    namespace test = mjolnir::test;
     mjolnir::LoggerManager::set_default_logger("test_zorder_rtree.log");
     using real_type       = typename traits_type::real_type;
     using potential_type  = test::StubPotential<real_type>;
