@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(Harmonic_double)
     const real_type x_min = 0.5 * r0;
     const real_type x_max = 1.5 * r0;
 
-    mjolnir::test::check_potential(harmonic, x_min, x_max, tol, h);
+    mjolnir::test::check_potential(harmonic, x_min, x_max, tol, h, N);
 }
 
 BOOST_AUTO_TEST_CASE(Harmonic_float)
@@ -43,5 +43,5 @@ BOOST_AUTO_TEST_CASE(Harmonic_float)
     const real_type x_min = 0.5 * r0;
     const real_type x_max = 1.5 * r0;
 
-    mjolnir::test::check_potential(harmonic, x_min, x_max, tol, h);
+    mjolnir::test::check_potential(harmonic, x_min, x_max, tol, h, N);
 }
