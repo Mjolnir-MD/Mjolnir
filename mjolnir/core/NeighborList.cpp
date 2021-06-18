@@ -6,4 +6,9 @@
 
 namespace mjolnir
 {
+template class NeighborList<empty_t>;
+template class NeighborList<float >;
+template class NeighborList<double>;
+template class NeighborList<std::pair<float , float >>;
+template class NeighborList<std::pair<double, double>>;
 } // mjolnir
