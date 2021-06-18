@@ -265,13 +265,5 @@ class NeighborList
     std::vector<std::size_t> ranges_;
 };
 
-#ifdef MJOLNIR_SEPARATE_BUILD
-extern template class NeighborList<empty_t>;
-extern template class NeighborList<float >;
-extern template class NeighborList<double>;
-extern template class NeighborList<std::pair<float , float >>;
-extern template class NeighborList<std::pair<double, double>>;
-#endif// MJOLNIR_SEPARATE_BUILD
-
 } // mjolnir
 #endif// MJOLNIR_NEIGHBOR_LIST_HPP
