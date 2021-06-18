@@ -12,68 +12,50 @@
 namespace mjolnir
 {
 
-// inverse power potential.
+// U = 1 / r^N
 template<typename realT>
 class InversePowerPotential
 {
   public:
 
-    using real_type      = realT;
-    using integer_type   = std::int32_t; // {sigma, epsilon, n}
-    using parameter_type = std::tuple<real_type, real_type, integer_type>;
-    using self_type      = InversePowerPotential<real_type>;
+    using real_type    = realT;
+    using integer_type = std::int32_t;
 
-    static real_type default_cutoff(integer_type n) noexcept
+    struct parameter_type
     {
-        return std::pow(2.0, 12.0 / n);
-    }
+        real_type sigma;
+    };
 
-    static parameter_type default_parameter() noexcept
+    static real_type default_cutoff(const integer_type n) noexcept
     {
-        return std::make_tuple(real_type(0.0), real_type(0.0), real_type(0.0));
+        return std::pow(2.0, 12 / n);
     }
-
-    static void set_cutoff_ratio(const real_type ratio, const integer_type n)
-    {
-        if(self_type::cutoff_ratio < ratio)
-        {
-            self_type::cutoff_ratio   = ratio;
-            self_type::coef_at_cutoff = std::pow(real_type(1) / ratio, n);
-        }
-        return;
-    }
-
-    static real_type cutoff_ratio;
-    static real_type coef_at_cutoff;
 
   public:
 
-    InversePowerPotential(const parameter_type& params)
-        : sigma_(std::get<0>(params)), epsilon_(std::get<1>(params)),
-          n_(std::get<2>(params))
+    InversePowerPotential(const real_type cutoff_ratio, const integer_type n,
+                          const real_type epsilon)
+        : n_(n), epsilon_(epsilon), cutoff_ratio_(cutoff_ratio),
+          coef_at_cutoff_(std::pow(real_type(1) / cutoff_ratio, n))
     {}
     ~InversePowerPotential() = default;
-    InversePowerPotential(const InversePowerPotential&) = default;
-    InversePowerPotential(InversePowerPotential&&)      = default;
-    InversePowerPotential& operator=(const InversePowerPotential&) = default;
-    InversePowerPotential& operator=(InversePowerPotential&&)      = default;
 
-    real_type potential(const real_type r) const noexcept
+    real_type potential(const real_type r, const parameter_type& params) const noexcept
     {
-        if(sigma_ * self_type::cutoff_ratio < r){return 0.0;}
+        if(params.sigma * cutoff_ratio_ < r) {return 0.0;}
 
-        const real_type d_r = sigma_ / r;
+        const real_type d_r = params.sigma / r;
         const real_type drn = std::pow(d_r, n_);
-        return this->epsilon_ * (drn - self_type::coef_at_cutoff);
+        return epsilon_ * (drn - coef_at_cutoff_);
     }
-    real_type derivative(const real_type r) const noexcept
+    real_type derivative(const real_type r, const parameter_type& params) const noexcept
     {
-        if(sigma_ * self_type::cutoff_ratio < r){return 0.0;}
+        if(params.sigma * cutoff_ratio_ < r) {return 0.0;}
 
         const real_type rinv = 1.0 / r;
-        const real_type d_r = sigma_ * rinv;
+        const real_type d_r = params.sigma * rinv;
         const real_type drn = std::pow(d_r, n_);
-        return -n_ * this->epsilon_ * drn * rinv;
+        return -n_ * epsilon_ * drn * rinv;
     }
 
     template<typename T>
@@ -82,35 +64,57 @@ class InversePowerPotential
     template<typename T>
     void update(const System<T>&) noexcept {return;}
 
-    real_type cutoff() const noexcept {return sigma_ * self_type::cutoff_ratio;}
-
     // ------------------------------------------------------------------------
     // used by Observer.
 
-    static const char* name() noexcept {return "ExcludedVolume";}
+    static const char* name() noexcept {return "InversePower";}
+
+    // It takes per-particle parameters and return the maximum cutoff length.
+    // CombinationRule normally uses this.
+    // Note that, pair-parameter and per-particle parameter can differ from
+    // each other. Lorentz-Bertherot uses the same parameter_type because it is
+    // for L-J and L-J-like potentials that has {sigma, epsilon} for each
+    // particle and also for each pair of particles.
+    template<typename InputIterator>
+    real_type max_cutoff(const InputIterator first, const InputIterator last) const noexcept
+    {
+        static_assert(std::is_same<
+                typename std::iterator_traits<InputIterator>::value_type,
+                parameter_type>::value, "");
+
+        if(first == last) {return 1;}
+
+        real_type max_sigma = 0;
+        for(auto iter = first; iter != last; ++iter)
+        {
+            const auto& parameter = *iter;
+            max_sigma = std::max(max_sigma, parameter.sigma);
+        }
+        return max_sigma * cutoff_ratio_;
+    }
+    // It returns absolute cutoff length using pair-parameter.
+    // `CombinationTable` uses this.
+    real_type absolute_cutoff(const parameter_type& params) const noexcept
+    {
+        return params.sigma * cutoff_ratio_;
+    }
 
     // ------------------------------------------------------------------------
     // the following accessers would be used in tests.
 
     real_type& epsilon()       noexcept {return this->epsilon_;}
     real_type  epsilon() const noexcept {return this->epsilon_;}
-    real_type& sigma()         noexcept {return this->sigma_;}
-    real_type  sigma()   const noexcept {return this->sigma_;}
 
     integer_type& n()       noexcept {return this->n_;}
     integer_type  n() const noexcept {return this->n_;}
 
   private:
 
-    real_type sigma_;
-    real_type epsilon_;
     integer_type n_;
+    real_type epsilon_;
+    real_type cutoff_ratio_;
+    real_type coef_at_cutoff_;
 };
-
-template<typename realT>
-typename InversePowerPotential<realT>::real_type InversePowerPotential<realT>::cutoff_ratio  = 0.0;
-template<typename realT>
-typename InversePowerPotential<realT>::real_type InversePowerPotential<realT>::coef_at_cutoff = 0.0;
 
 template<typename traitsT>
 class InversePowerParameterList
@@ -129,11 +133,14 @@ class InversePowerParameterList
     // This enables NeighborList to cache a value to calculate forces between
     // the particles, e.g. by having qi * qj for pair of particles i and j.
 
-    using integer_type         = typename potential_type::integer_type;
-    using parameter_type       = real_type; // sigma
+    using parameter_type       = typename potential_type::parameter_type;
     using pair_parameter_type  = typename potential_type::parameter_type;
     using container_type       = std::vector<parameter_type>;
-    static constexpr parameter_type default_parameter() {return real_type(0);}
+
+    static constexpr parameter_type default_parameter()
+    {
+        return parameter_type{real_type(0)};
+    }
 
     // topology stuff
     using system_type          = System<traits_type>;
@@ -147,13 +154,11 @@ class InversePowerParameterList
 
   public:
 
-    InversePowerParameterList(const real_type eps, const integer_type n,
-        const real_type cutoff_ratio,
+    InversePowerParameterList(
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-        :epsilon_(eps), n_(n), cutoff_ratio_(cutoff_ratio),
-         exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
+      : exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
@@ -177,43 +182,30 @@ class InversePowerParameterList
     // this value will be stored in NeighborList
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
     {
-        return std::make_tuple(parameters_[i] + parameters_[j], epsilon_, n_);
+        return pair_parameter_type{parameters_[i].sigma + parameters_[j].sigma};
     }
 
-    void initialize(const system_type& sys, const topology_type& topol) noexcept override
+    void initialize(const system_type& sys, const topology_type& topol,
+                    const potential_type& pot) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        this->update(sys, topol);
+        this->update(sys, topol, pot);
         return;
     }
 
     // nothing to be done if system parameter (e.g. temperature) do not changes
-    void update(const system_type& sys, const topology_type& topol) noexcept override
+    void update(const system_type& sys, const topology_type& topol,
+                const potential_type& pot) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        if(parameters_.empty())
-        {
-            // dummy value that does not screw up cell lists
-            this->max_cutoff_length_ = 1.0;
-        }
-        else
-        {
-            const auto max_iter =
-                std::max_element(parameters_.begin(), parameters_.end());
-            this->max_cutoff_length_ = potential_type(
-                std::make_tuple(*max_iter * 2, epsilon_, n_)).cutoff();
-        }
-
-        // update exclusion list based on sys.topology()
+        this->max_cutoff_length_ = pot.max_cutoff(parameters_.begin(), parameters_.end());
         exclusion_list_.make(sys, topol);
         return;
     }
-
-    real_type cutoff_ratio() const noexcept {return this->cutoff_ratio_;}
 
     real_type max_cutoff_length() const noexcept override
     {
@@ -264,12 +256,8 @@ class InversePowerParameterList
     // ------------------------------------------------------------------------
     // the following accessers would be used in tests.
 
-    real_type& epsilon()       noexcept {return this->epsilon_;}
-    real_type  epsilon() const noexcept {return this->epsilon_;}
-    integer_type& n()             noexcept {return this->n_;}
-    integer_type  n()       const noexcept {return this->n_;}
-    std::vector<real_type>&       parameters()       noexcept {return this->parameters_;}
-    std::vector<real_type> const& parameters() const noexcept {return this->parameters_;}
+    std::vector<parameter_type>&       parameters()       noexcept {return this->parameters_;}
+    std::vector<parameter_type> const& parameters() const noexcept {return this->parameters_;}
 
     base_type* clone() const override
     {
@@ -278,10 +266,6 @@ class InversePowerParameterList
 
   private:
 
-    real_type epsilon_;
-    integer_type n_;
-
-    real_type cutoff_ratio_;
     real_type max_cutoff_length_;
     std::vector<parameter_type> parameters_;
     std::vector<std::size_t>    participants_;

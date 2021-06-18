@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_WCA_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_WCA_POTENTIAL_HPP
+#include <algorithm>
 #include <utility>
 #include <cmath>
 
@@ -15,53 +16,43 @@ template<typename realT>
 class WCAPotential
 {
   public:
-    using real_type      = realT;
-    using parameter_type = std::pair<real_type, real_type>; // {sigma, epsilon}
-    using self_type      = WCAPotential<real_type>;
+    using real_type = realT;
+
+    struct parameter_type
+    {
+        real_type sigma;
+        real_type epsilon;
+    };
 
     static constexpr real_type default_cutoff() noexcept
     {
         return real_type(1.12246204831); // pow(2.0, 1.0 / 6.0)
     }
-    static constexpr parameter_type default_parameter() noexcept
-    {
-        return parameter_type{real_type(0), real_type(0)};
-    }
-
-    static void set_cutoff_ratio(const real_type) // does not have any effect.
-    {
-        return;
-    }
-
-    static constexpr real_type cutoff_ratio = real_type(1.12246204831);
-    static constexpr real_type coef_at_cutoff = real_type(0);
 
   public:
 
-    explicit WCAPotential(const parameter_type& params) noexcept
-        : sigma_(params.first), epsilon_(params.second)
-    {}
+    WCAPotential() noexcept {}
     ~WCAPotential() = default;
 
-    real_type potential(const real_type r) const noexcept
+    real_type potential(const real_type r, const parameter_type& params) const noexcept
     {
-        if(this->sigma_ * self_type::cutoff_ratio < r){return real_type(0);}
+        if(params.sigma * default_cutoff() < r){return real_type(0);}
 
-        const real_type r1s1 = sigma_ / r;
+        const real_type r1s1 = params.sigma / r;
         const real_type r3s3 = r1s1 * r1s1 * r1s1;
         const real_type r6s6 = r3s3 * r3s3;
-        return real_type(4) * this->epsilon_ * (r6s6 * (r6s6 - real_type(1)) + real_type(0.25));
+        return real_type(4) * params.epsilon * (r6s6 * (r6s6 - real_type(1)) + real_type(0.25));
     }
-    real_type derivative(const real_type r) const noexcept
+    real_type derivative(const real_type r, const parameter_type& params) const noexcept
     {
-        if(this->sigma_ * self_type::cutoff_ratio < r){return real_type(0);}
+        if(params.sigma * default_cutoff() < r){return real_type(0);}
 
         const real_type rinv = 1 / r;
-        const real_type r1s1 = sigma_ * rinv;
+        const real_type r1s1 = params.sigma * rinv;
         const real_type r3s3 = r1s1 * r1s1 * r1s1;
         const real_type r6s6 = r3s3 * r3s3;
 
-        return real_type(24) * this->epsilon_ * (r6s6 * (real_type(1) - 2 * r6s6)) * rinv;
+        return real_type(24) * params.epsilon * (r6s6 * (real_type(1) - 2 * r6s6)) * rinv;
     }
 
     template<typename T>
@@ -70,45 +61,35 @@ class WCAPotential
     template<typename T>
     void update(const System<T>&) noexcept {return;}
 
+    real_type cutoff_ratio()   const noexcept {return default_cutoff();}
+    real_type coef_at_cutoff() const noexcept {return real_type(0);}
+
     static const char* name() noexcept {return "WCA";}
 
-    real_type sigma()   const noexcept {return this->sigma_;}
-    real_type epsilon() const noexcept {return this->epsilon_;}
-
-    real_type cutoff()  const noexcept
+    template<typename InputIterator>
+    real_type max_cutoff(const InputIterator first, const InputIterator last) const noexcept
     {
-        return this->sigma_ * self_type::cutoff_ratio;
-    }
+        static_assert(std::is_same<
+                typename std::iterator_traits<InputIterator>::value_type,
+                parameter_type>::value, "");
 
-  public:
+        if(first == last) {return 1;}
 
-    // To culculate cutoff distance, we need to find the maximum sigma in the
-    // existing parameters. But the list of parameters will be given in a variety
-    // of ways, like Lorentz-Bertherot rule, combination table, or another way
-    // of combination rules.
-    //     To find the maximum parameter, we need to provide a way to compare
-    // parameters. But the way depends on the functional form of a potential.
-    // So this comparator should be defined in a Potential class.
-    struct parameter_comparator
-    {
-        constexpr bool
-        operator()(const parameter_type& lhs, const parameter_type& rhs) const noexcept
+        real_type max_sigma = 0;
+        for(auto iter = first; iter != last; ++iter)
         {
-            return lhs.first < rhs.first; // take larger sigma
+            const auto& parameter = *iter;
+            max_sigma = std::max(max_sigma, parameter.sigma);
         }
-    };
-
-  private:
-
-    real_type sigma_;
-    real_type epsilon_;
+        return max_sigma * default_cutoff();
+    }
+    // It returns absolute cutoff length using pair-parameter.
+    // `CombinationTable` uses this.
+    real_type absolute_cutoff(const parameter_type& params) const noexcept
+    {
+        return params.sigma * default_cutoff();
+    }
 };
-template<typename realT>
-constexpr typename WCAPotential<realT>::real_type WCAPotential<realT>::cutoff_ratio;
-template<typename realT>
-constexpr typename WCAPotential<realT>::real_type WCAPotential<realT>::coef_at_cutoff;
-
-
 } // mjolnir
 
 #ifdef MJOLNIR_SEPARATE_BUILD

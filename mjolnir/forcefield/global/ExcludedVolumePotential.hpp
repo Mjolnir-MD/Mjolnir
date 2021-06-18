@@ -27,39 +27,24 @@ template<typename realT>
 class ExcludedVolumePotential
 {
   public:
-    using real_type      = realT;
-    using parameter_type = std::pair<real_type, real_type>; // {sigma, epsilon}
-    using self_type      = ExcludedVolumePotential<real_type>;
+    using real_type = realT;
+
+    struct parameter_type
+    {
+        real_type sigma;
+    };
 
     static constexpr real_type default_cutoff() noexcept
     {
         return real_type(2.0);
     }
-    static constexpr parameter_type default_parameter() noexcept
-    {
-        return parameter_type{real_type(0.0), real_type(0.0)};
-    }
-
-    static void set_cutoff_ratio(const real_type ratio)
-    {
-        if(self_type::cutoff_ratio < ratio)
-        {
-            self_type::cutoff_ratio  = ratio;
-            self_type::coef_at_cutoff = std::pow(real_type(1) / ratio, 12);
-        }
-        return;
-    }
-
-    static real_type cutoff_ratio;
-    static real_type coef_at_cutoff;
 
   public:
 
-    ExcludedVolumePotential(const real_type sigma, const real_type eps) noexcept
-        : sigma_(sigma), epsilon_(eps)
-    {}
-    explicit ExcludedVolumePotential(const parameter_type& params) noexcept
-        : sigma_(params.first), epsilon_(params.second)
+    ExcludedVolumePotential(
+        const real_type cutoff, const real_type epsilon) noexcept
+        : epsilon_(epsilon), cutoff_ratio_(cutoff),
+          coef_at_cutoff_(std::pow(real_type(1) / cutoff, 12))
     {}
 
     ~ExcludedVolumePotential() = default;
@@ -68,26 +53,21 @@ class ExcludedVolumePotential
     ExcludedVolumePotential& operator=(const ExcludedVolumePotential&) = default;
     ExcludedVolumePotential& operator=(ExcludedVolumePotential&&)      = default;
 
-    real_type potential(const real_type r) const noexcept
+    real_type potential(const real_type r, const parameter_type& params) const noexcept
     {
-        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
-        MJOLNIR_LOG_FUNCTION_DEBUG();
+        if(params.sigma * this->cutoff_ratio_ < r){return 0;}
 
-        if(sigma_ * self_type::cutoff_ratio < r){return 0;}
-
-        const real_type d_r  = sigma_ / r;
+        const real_type d_r  = params.sigma / r;
         const real_type dr3  = d_r * d_r * d_r;
         const real_type dr6  = dr3 * dr3;
-        // correction by coef_at_cuttoff make energy 0 about the particle pair
-        // who's distance is over the cutoff range.
-        return this->epsilon_ * (dr6 * dr6 - self_type::coef_at_cutoff);
+        return this->epsilon_ * (dr6 * dr6 - this->coef_at_cutoff_);
     }
-    real_type derivative(const real_type r) const noexcept
+    real_type derivative(const real_type r, const parameter_type& params) const noexcept
     {
-        if(sigma_ * self_type::cutoff_ratio < r){return 0;}
+        if(params.sigma * this->cutoff_ratio_ < r){return 0;}
 
         const real_type rinv = real_type(1) / r;
-        const real_type d_r  = sigma_ * rinv;
+        const real_type d_r  = params.sigma * rinv;
         const real_type dr3  = d_r * d_r * d_r;
         const real_type dr6  = dr3 * dr3;
         return real_type(-12.0) * this->epsilon_ * dr6 * dr6 * rinv;
@@ -99,7 +79,37 @@ class ExcludedVolumePotential
     template<typename T>
     void update(const System<T>&) noexcept {return;}
 
-    real_type cutoff() const noexcept {return sigma_ * self_type::cutoff_ratio;}
+    // ------------------------------------------------------------------------
+
+    // It takes per-particle parameters and return the maximum cutoff length.
+    // CombinationRule normally uses this.
+    // Note that, pair-parameter and per-particle parameter can differ from
+    // each other. Lorentz-Bertherot uses the same parameter_type because it is
+    // for L-J and L-J-like potentials that has {sigma, epsilon} for each
+    // particle and also for each pair of particles.
+    template<typename InputIterator>
+    real_type max_cutoff(const InputIterator first, const InputIterator last) const noexcept
+    {
+        static_assert(std::is_same<
+                typename std::iterator_traits<InputIterator>::value_type,
+                parameter_type>::value, "");
+
+        if(first == last) {return 1;}
+
+        real_type max_sigma = 0;
+        for(auto iter = first; iter != last; ++iter)
+        {
+            const auto& parameter = *iter;
+            max_sigma = std::max(max_sigma, parameter.sigma);
+        }
+        return max_sigma * cutoff_ratio_;
+    }
+    // It returns absolute cutoff length using pair-parameter.
+    // `CombinationTable` uses this.
+    real_type absolute_cutoff(const parameter_type& params) const noexcept
+    {
+        return params.sigma * cutoff_ratio_;
+    }
 
     // ------------------------------------------------------------------------
     // used by Observer.
@@ -111,18 +121,16 @@ class ExcludedVolumePotential
 
     real_type& epsilon()       noexcept {return this->epsilon_;}
     real_type  epsilon() const noexcept {return this->epsilon_;}
-    real_type& sigma()         noexcept {return this->sigma_;}
-    real_type  sigma()   const noexcept {return this->sigma_;}
+
+    real_type cutoff_ratio()   const noexcept {return cutoff_ratio_;}
+    real_type coef_at_cutoff() const noexcept {return coef_at_cutoff_;}
 
   private:
 
-    real_type sigma_;
     real_type epsilon_;
+    real_type cutoff_ratio_;
+    real_type coef_at_cutoff_;
 };
-template<typename realT>
-typename ExcludedVolumePotential<realT>::real_type ExcludedVolumePotential<realT>::cutoff_ratio  = 0.0;
-template<typename realT>
-typename ExcludedVolumePotential<realT>::real_type ExcludedVolumePotential<realT>::coef_at_cutoff = 0.0;
 
 // Normally, this potential use the same epsilon value for all the pairs.
 // Moreover, this potential takes a "radius", not a "diameter", as a paraemter.
@@ -144,7 +152,7 @@ class ExcludedVolumeParameterList final
     // This enables NeighborList to cache a value to calculate forces between
     // the particles, e.g. by having qi * qj for pair of particles i and j.
 
-    using parameter_type       = real_type; // sigma
+    using parameter_type       = typename potential_type::parameter_type;
     using pair_parameter_type  = typename potential_type::parameter_type;
     using container_type       = std::vector<parameter_type>;
 
@@ -161,12 +169,10 @@ class ExcludedVolumeParameterList final
   public:
 
     ExcludedVolumeParameterList(
-        const real_type epsilon, const real_type cutoff_ratio,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-    : epsilon_(epsilon), cutoff_ratio_(cutoff_ratio),
-      exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
+    : exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
@@ -176,7 +182,7 @@ class ExcludedVolumeParameterList final
             this->participants_.push_back(idx);
             if(idx >= this->parameters_.size())
             {
-                this->parameters_.resize(idx+1, real_type(0));
+                this->parameters_.resize(idx+1, parameter_type{real_type(0)});
             }
             this->parameters_.at(idx) = idxp.second;
         }
@@ -185,7 +191,7 @@ class ExcludedVolumeParameterList final
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
     {
-        return pair_parameter_type{epsilon_, parameters_[i] + parameters_[j]};
+        return pair_parameter_type{parameters_[i].sigma + parameters_[j].sigma};
     }
 
     real_type max_cutoff_length() const noexcept override
@@ -193,34 +199,25 @@ class ExcludedVolumeParameterList final
         return this->max_cutoff_length_;
     }
 
-    void initialize(const system_type& sys, const topology_type& topol) noexcept override
+    void initialize(const system_type& sys, const topology_type& topol,
+                    const potential_type& pot) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        this->update(sys, topol); // calc parameters
+        this->update(sys, topol, pot); // calc parameters
         return;
     }
 
     // for temperature/ionic concentration changes...
-    void update(const system_type& sys, const topology_type& topol) noexcept override
+    void update(const system_type& sys, const topology_type& topol,
+                const potential_type& pot) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        if(parameters_.empty())
-        {
-            // dummy value that does not screw up cell lists
-            this->max_cutoff_length_ = 1.0;
-        }
-        else
-        {
-            const auto max_iter = std::max_element(parameters_.begin(), parameters_.end());
-            this->max_cutoff_length_ = potential_type(*max_iter * 2.0, epsilon_).cutoff();
-        }
-
-        // update exclusion list based on sys.topology()
-        exclusion_list_.make(sys, topol);
+        this->max_cutoff_length_ = pot.max_cutoff(parameters_.begin(), parameters_.end());
+        this->exclusion_list_.make(sys, topol);
         return;
     }
 
@@ -268,11 +265,8 @@ class ExcludedVolumeParameterList final
     // the following accessers would be used in tests.
 
     // access to the parameters.
-    std::vector<real_type>&       parameters()       noexcept {return parameters_;}
-    std::vector<real_type> const& parameters() const noexcept {return parameters_;}
-
-    real_type& epsilon()       noexcept {return epsilon_;}
-    real_type  epsilon() const noexcept {return epsilon_;}
+    std::vector<parameter_type>&       parameters()       noexcept {return parameters_;}
+    std::vector<parameter_type> const& parameters() const noexcept {return parameters_;}
 
     base_type* clone() const override
     {
@@ -281,14 +275,10 @@ class ExcludedVolumeParameterList final
 
   private:
 
-    real_type epsilon_;
-    real_type cutoff_ratio_; // relative to the debye length
-    real_type max_cutoff_length_;
-
-    container_type parameters_;
+    real_type                max_cutoff_length_;
+    container_type           parameters_;
     std::vector<std::size_t> participants_;
-
-    exclusion_list_type  exclusion_list_;
+    exclusion_list_type      exclusion_list_;
 };
 } // mjolnir
 

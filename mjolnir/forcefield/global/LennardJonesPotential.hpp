@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_LENNARD_JONES_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_LENNARD_JONES_POTENTIAL_HPP
+#include <algorithm>
 #include <utility>
 #include <cmath>
 
@@ -15,63 +16,50 @@ template<typename realT>
 class LennardJonesPotential
 {
   public:
-    using real_type      = realT;
-    using parameter_type = std::pair<real_type, real_type>; // {sigma, epsilon}
-    using self_type      = LennardJonesPotential<real_type>;
+    using real_type = realT;
+
+    struct parameter_type
+    {
+        real_type sigma;
+        real_type epsilon;
+    };
 
     static constexpr real_type default_cutoff() noexcept
     {
         return real_type(2.5);
     }
-    static constexpr parameter_type default_parameter() noexcept
-    {
-        return parameter_type{real_type(0), real_type(0)};
-    }
-
-    static void set_cutoff_ratio(const real_type ratio)
-    {
-        if(self_type::cutoff_ratio < ratio)
-        {
-            self_type::cutoff_ratio  = ratio;
-            self_type::coef_at_cutoff = std::pow(real_type(1) / ratio, 12)
-                                      - std::pow(real_type(1) / ratio, 6);
-        }
-        return;
-    }
-
-    static real_type cutoff_ratio;
-    static real_type coef_at_cutoff;
 
   public:
 
-    LennardJonesPotential(const real_type sigma, const real_type epsilon) noexcept
-        : sigma_(sigma), epsilon_(epsilon)
-    {}
-    explicit LennardJonesPotential(const parameter_type& params) noexcept
-        : sigma_(params.first), epsilon_(params.second)
+    explicit LennardJonesPotential(const real_type& cutoff_ratio) noexcept
+        : cutoff_ratio_(cutoff_ratio), coef_at_cutoff_(
+                std::pow(real_type(1) / cutoff_ratio, 12) -
+                std::pow(real_type(1) / cutoff_ratio,  6))
     {}
     ~LennardJonesPotential() = default;
 
-    real_type potential(const real_type r) const noexcept
+    real_type potential(const real_type r, const parameter_type& params) const noexcept
     {
-        if(this->sigma_ * self_type::cutoff_ratio < r){return real_type(0);}
+        if(params.sigma * this->cutoff_ratio_ < r){return real_type(0);}
 
-        const real_type sr1 = sigma_ / r;
+        const real_type sr1 = params.sigma / r;
         const real_type sr3 = sr1 * sr1 * sr1;
         const real_type sr6 = sr3 * sr3;
 
-        return real_type(4) * epsilon_ * (sr6 * (sr6 - real_type(1)) - self_type::coef_at_cutoff);
+        return real_type(4) * params.epsilon *
+                (sr6 * (sr6 - real_type(1)) - this->coef_at_cutoff_);
     }
-    real_type derivative(const real_type r) const noexcept
+    real_type derivative(const real_type r, const parameter_type& params) const noexcept
     {
-        if(this->sigma_ * self_type::cutoff_ratio < r){return real_type(0);}
+        if(params.sigma * this->cutoff_ratio_ < r){return real_type(0);}
 
         const real_type rinv = 1 / r;
-        const real_type sr1  = sigma_ * rinv;
+        const real_type sr1  = params.sigma * rinv;
         const real_type sr3  = sr1 * sr1 * sr1;
         const real_type sr6  = sr3 * sr3;
 
-        return real_type(24) * epsilon_ * sr6 * (real_type(1) - real_type(2) * sr6) * rinv;
+        return real_type(24) * params.epsilon *
+                sr6 * (real_type(1) - real_type(2) * sr6) * rinv;
     }
 
     template<typename T>
@@ -80,44 +68,46 @@ class LennardJonesPotential
     template<typename T>
     void update(const System<T>&) noexcept {return;}
 
+    real_type cutoff_ratio()   const noexcept {return cutoff_ratio_;}
+    real_type coef_at_cutoff() const noexcept {return coef_at_cutoff_;}
+
     static const char* name() noexcept {return "LennardJones";}
 
-    real_type sigma()   const noexcept {return this->sigma_;}
-    real_type epsilon() const noexcept {return this->epsilon_;}
-
-    real_type cutoff()  const noexcept
+    // It takes per-particle parameters and return the maximum cutoff length.
+    // CombinationRule normally uses this.
+    // Note that, pair-parameter and per-particle parameter can differ from
+    // each other. Lorentz-Bertherot uses the same parameter_type because it is
+    // for L-J and L-J-like potentials that has {sigma, epsilon} for each
+    // particle and also for each pair of particles.
+    template<typename InputIterator>
+    real_type max_cutoff(const InputIterator first, const InputIterator last) const noexcept
     {
-        return this->sigma_ * self_type::cutoff_ratio;
-    }
+        static_assert(std::is_same<
+                typename std::iterator_traits<InputIterator>::value_type,
+                parameter_type>::value, "");
 
-  public:
+        if(first == last) {return 1;}
 
-    // To culculate cutoff distance, we need to find the maximum sigma in the
-    // existing parameters. But the list of parameters will be given in a variety
-    // of ways, like Lorentz-Bertherot rule, combination table, or another way
-    // of combination rules.
-    //     To find the maximum parameter, we need to provide a way to compare
-    // parameters. But the way depends on the functional form of a potential.
-    // So this comparator should be defined in a Potential class.
-    struct parameter_comparator
-    {
-        constexpr bool
-        operator()(const parameter_type& lhs, const parameter_type& rhs) const noexcept
+        real_type max_sigma = 0;
+        for(auto iter = first; iter != last; ++iter)
         {
-            return lhs.first < rhs.first; // take larger sigma
+            const auto& parameter = *iter;
+            max_sigma = std::max(max_sigma, parameter.sigma);
         }
-    };
+        return max_sigma * cutoff_ratio_;
+    }
+    // It returns absolute cutoff length using pair-parameter.
+    // `CombinationTable` uses this.
+    real_type absolute_cutoff(const parameter_type& params) const noexcept
+    {
+        return params.sigma * cutoff_ratio_;
+    }
 
   private:
 
-    real_type sigma_;
-    real_type epsilon_;
+    real_type cutoff_ratio_;
+    real_type coef_at_cutoff_;
 };
-
-template<typename realT>
-typename LennardJonesPotential<realT>::real_type LennardJonesPotential<realT>::cutoff_ratio  = 0.0;
-template<typename realT>
-typename LennardJonesPotential<realT>::real_type LennardJonesPotential<realT>::coef_at_cutoff = 0.0;
 
 #ifdef MJOLNIR_SEPARATE_BUILD
 extern template class LennardJonesPotential<double>;

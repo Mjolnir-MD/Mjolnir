@@ -32,8 +32,10 @@ class GlobalPairInteraction<
 
   public:
 
-    GlobalPairInteraction(parameter_list_type&& para, partition_type&& part)
-        : parameters_(std::move(para)), partition_(std::move(part))
+    GlobalPairInteraction(potential_type&& pot, parameter_list_type&& para,
+                          partition_type&& part)
+        : potential_(std::move(pot)), parameters_(std::move(para)),
+          partition_(std::move(part))
     {}
     ~GlobalPairInteraction() override {}
 
@@ -44,7 +46,9 @@ class GlobalPairInteraction<
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
-        this->parameters_.initialize(sys, topol);
+
+        this->potential_ .initialize(sys);
+        this->parameters_.initialize(sys, topol, potential_);
         this->partition_ .initialize(sys, parameters_.cref());
     }
 
@@ -58,7 +62,8 @@ class GlobalPairInteraction<
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
 
-        this->parameters_.update(sys, topol);
+        this->potential_ .initialize(sys);
+        this->parameters_.update(sys, topol, potential_);
         this->partition_.initialize(sys, this->parameters_.cref());
     }
 
@@ -75,7 +80,7 @@ class GlobalPairInteraction<
 
     void calc_force(system_type& sys) const noexcept override
     {
-        const auto cutoff_ratio    = potential_type::cutoff_ratio;
+        const auto cutoff_ratio    = potential_.cutoff_ratio();
         const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
 
         const auto leading_participants = this->parameters_.leading_participants();
@@ -83,17 +88,17 @@ class GlobalPairInteraction<
         {
             for(const auto& ptnr : this->partition_.partners(i))
             {
-                const auto  j   = ptnr.index;
-                const auto& pot = ptnr.potential();
+                const auto  j    = ptnr.index;
+                const auto& para = ptnr.parameter();
 
                 const coordinate_type rij =
                     sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type l_sq = math::length_sq(rij);
 
-                const real_type sigma_sq = pot.sigma() * pot.sigma();
+                const real_type sigma_sq = para.sigma * para.sigma;
                 if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
 
-                const real_type epsilon = pot.epsilon();
+                const real_type epsilon = para.epsilon;
 
                 const real_type rcp_l_sq = 1 / l_sq;
                 const real_type s2l2 = sigma_sq * rcp_l_sq;
@@ -116,9 +121,9 @@ class GlobalPairInteraction<
     {
         real_type E(0);
 
-        const auto cutoff_ratio    = potential_type::cutoff_ratio;
+        const auto coef_at_cutoff  = potential_.coef_at_cutoff();
+        const auto cutoff_ratio    = potential_.cutoff_ratio();
         const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-        const auto coef_at_cutoff  = potential_type::coef_at_cutoff;
 
         const auto leading_participants = this->parameters_.leading_participants();
         for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
@@ -127,17 +132,17 @@ class GlobalPairInteraction<
 
             for(const auto& ptnr : this->partition_.partners(i))
             {
-                const auto  j   = ptnr.index;
-                const auto& pot = ptnr.potential();
+                const auto  j    = ptnr.index;
+                const auto& para = ptnr.parameter();
 
                 const coordinate_type rij =
                     sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type l_sq = math::length_sq(rij);
 
-                const real_type sigma_sq = pot.sigma() * pot.sigma();
+                const real_type sigma_sq = para.sigma * para.sigma;
                 if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
 
-                const real_type epsilon = pot.epsilon();
+                const real_type epsilon = para.epsilon;
 
                 const real_type s2l2 = sigma_sq / l_sq;
                 const real_type s6l6 = s2l2 * s2l2 * s2l2;
@@ -150,9 +155,9 @@ class GlobalPairInteraction<
 
     real_type calc_force_and_energy(system_type& sys) const noexcept override
     {
-        const auto cutoff_ratio    = potential_type::cutoff_ratio;
+        const auto coef_at_cutoff  = potential_.coef_at_cutoff();
+        const auto cutoff_ratio    = potential_.cutoff_ratio();
         const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-        const auto coef_at_cutoff  = potential_type::coef_at_cutoff;
 
         real_type energy = 0;
         const auto leading_participants = this->parameters_.leading_participants();
@@ -162,17 +167,17 @@ class GlobalPairInteraction<
 
             for(const auto& ptnr : this->partition_.partners(i))
             {
-                const auto  j   = ptnr.index;
-                const auto& pot = ptnr.potential();
+                const auto  j    = ptnr.index;
+                const auto& para = ptnr.parameter();
 
                 const coordinate_type rij =
                     sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type l_sq = math::length_sq(rij);
 
-                const real_type sigma_sq = pot.sigma() * pot.sigma();
+                const real_type sigma_sq = para.sigma * para.sigma;
                 if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
 
-                const real_type epsilon = pot.epsilon();
+                const real_type epsilon = para.epsilon;
 
                 const real_type rcp_l_sq = 1 / l_sq;
                 const real_type s2l2 = sigma_sq * rcp_l_sq;
@@ -197,14 +202,14 @@ class GlobalPairInteraction<
 
     base_type* clone() const override
     {
-        return new GlobalPairInteraction(
-                parameter_list_type(parameters_), partition_type(partition_));
+        return new GlobalPairInteraction(*this);
     }
 
   private:
 
+    potential_type      potential_;
     parameter_list_type parameters_;
-    partition_type partition_;
+    partition_type      partition_;
 };
 
 } // mjolnir
