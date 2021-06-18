@@ -80,7 +80,7 @@ void NaivePairCalculation<traitsT, potentialT>::make(
         {
             if(params.has_interaction(i, j)) // likely
             {
-                partners.emplace_back(j, potential_type(params.prepare_params(i, j)));
+                partners.emplace_back(j, params.prepare_params(i, j));
             }
         }
         neighbors.add_list_for(i, partners.begin(), partners.end());

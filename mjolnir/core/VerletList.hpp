@@ -123,7 +123,7 @@ void VerletList<traitsT, potentialT>::make(
             const auto& rj = sys.position(j);
             if(math::length_sq(sys.adjust_direction(ri, rj)) < rc2)
             {
-                partner.emplace_back(j, potential_type(params.prepare_params(i, j)));
+                partner.emplace_back(j, params.prepare_params(i, j));
             }
         }
         // because j is searched sequencially, sorting is not needed.

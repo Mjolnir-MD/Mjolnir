@@ -28,7 +28,7 @@ class SpatialPartitionBase
     using coordinate_type     = typename traits_type::coordinate_type;
 
     using parameter_list_type = ParameterListBase<traits_type, potential_type>;
-    using neighbor_list_type  = NeighborList<potential_type>;
+    using neighbor_list_type  = NeighborList<typename potential_type::parameter_type>;
     using neighbor_type       = typename neighbor_list_type::neighbor_type;
     using range_type          = typename neighbor_list_type::range_type;
 

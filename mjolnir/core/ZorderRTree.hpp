@@ -414,7 +414,7 @@ void ZorderRTree<traitsT, potentialT, MaxElem>::make(
                     if(math::length_sq(sys.adjust_direction(ri, rj)) < r_c2)
                     {
                         MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
-                        partner.emplace_back(j, potential_type(params.prepare_params(i, j)));
+                        partner.emplace_back(j, params.prepare_params(i, j));
                     }
                 }
             }
