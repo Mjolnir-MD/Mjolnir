@@ -84,8 +84,8 @@ BOOST_AUTO_TEST_CASE(test_NeighborList_with_parameter)
         for(std::size_t k=0; k<M; ++k)
         {
             BOOST_TEST(partners.at(k).index              == i + 1 + k);
-            BOOST_TEST(partners.at(k).potential().first  == i        );
-            BOOST_TEST(partners.at(k).potential().second == i + 1 + k);
+            BOOST_TEST(partners.at(k).parameter().first  == i        );
+            BOOST_TEST(partners.at(k).parameter().second == i + 1 + k);
         }
     }
 }

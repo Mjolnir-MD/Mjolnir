@@ -104,8 +104,8 @@ BOOST_AUTO_TEST_CASE(test_VerletList_UnlimitedBoundary_all)
         for(const auto& p_j : vlist.partners(i))
         {
             const std::size_t j = p_j.index;
-            BOOST_TEST(p_j.potential().parameter().first  == params.prepare_params(i, j).first);
-            BOOST_TEST(p_j.potential().parameter().second == params.prepare_params(i, j).second);
+            BOOST_TEST(p_j.parameter().i == params.prepare_params(i, j).i);
+            BOOST_TEST(p_j.parameter().j == params.prepare_params(i, j).j);
         }
     }
 }
