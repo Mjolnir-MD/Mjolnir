@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_index_offset_global_potential, T, test_types)
             ]
         )"_toml;
 
-        const auto parameter_list = mjolnir::read_lennard_jones_potential<traits_type>(v);
+        const auto parameter_list = mjolnir::read_lennard_jones_potential<traits_type>(v).second;
 
         BOOST_TEST(!parameter_list.exclusion_list().is_ignored_molecule(0, 0));
         BOOST_TEST(!parameter_list.exclusion_list().is_ignored_molecule(0, 1));
@@ -128,15 +128,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_index_offset_global_potential, T, test_types)
             mjolnir::LorentzBerthelotRule<traits_type, mjolnir::LennardJonesPotential<real_type>> const&>(
                 parameter_list.cref());
 
-        BOOST_TEST(lorentz_bertherot.parameters().at(  0).first  == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(lorentz_bertherot.parameters().at(  6).first  == real_type(  5.0), tolerance<real_type>());
-        BOOST_TEST(lorentz_bertherot.parameters().at(  9).first  == real_type(  7.0), tolerance<real_type>());
-        BOOST_TEST(lorentz_bertherot.parameters().at(200).first  == real_type(100.0), tolerance<real_type>());
+        BOOST_TEST(lorentz_bertherot.parameters().at(  0).sigma  == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(lorentz_bertherot.parameters().at(  6).sigma  == real_type(  5.0), tolerance<real_type>());
+        BOOST_TEST(lorentz_bertherot.parameters().at(  9).sigma  == real_type(  7.0), tolerance<real_type>());
+        BOOST_TEST(lorentz_bertherot.parameters().at(200).sigma  == real_type(100.0), tolerance<real_type>());
 
-        BOOST_TEST(lorentz_bertherot.parameters().at(  0).second == real_type(1.5), tolerance<real_type>());
-        BOOST_TEST(lorentz_bertherot.parameters().at(  6).second == real_type(0.5), tolerance<real_type>());
-        BOOST_TEST(lorentz_bertherot.parameters().at(  9).second == real_type(0.7), tolerance<real_type>());
-        BOOST_TEST(lorentz_bertherot.parameters().at(200).second == real_type(0.1), tolerance<real_type>());
+        BOOST_TEST(lorentz_bertherot.parameters().at(  0).epsilon == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(lorentz_bertherot.parameters().at(  6).epsilon == real_type(0.5), tolerance<real_type>());
+        BOOST_TEST(lorentz_bertherot.parameters().at(  9).epsilon == real_type(0.7), tolerance<real_type>());
+        BOOST_TEST(lorentz_bertherot.parameters().at(200).epsilon == real_type(0.1), tolerance<real_type>());
     }
 }
 
