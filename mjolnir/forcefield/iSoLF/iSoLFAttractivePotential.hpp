@@ -21,58 +21,52 @@ template<typename realT>
 class iSoLFAttractivePotential
 {
   public:
-    using real_type      = realT; // sigma, epsilon, omega
-    using parameter_type = std::tuple<real_type, real_type, real_type>;
-    using self_type      = iSoLFAttractivePotential<real_type>;
+    using real_type = realT;
+
+    struct parameter_type
+    {
+        real_type sigma;
+        real_type epsilon;
+        real_type omega;
+        real_type romega;
+    };
 
     static constexpr real_type default_cutoff() noexcept
     {
-        return std::numeric_limits<real_type>::infinity();;
-    }
-    static constexpr parameter_type default_parameter() noexcept
-    {
-        return parameter_type{real_type(0), real_type(0), real_type(0)};
-    }
-
-    static void set_cutoff_ratio(const real_type)
-    {
-        return;
+        return std::numeric_limits<real_type>::infinity();
     }
 
   public:
 
-    iSoLFAttractivePotential(const parameter_type& params) noexcept
-        : sigma_(std::get<0>(params)), epsilon_(std::get<1>(params)),
-          omega_(std::get<2>(params)), romega_(real_type(1) / std::get<2>(params))
-    {}
+    iSoLFAttractivePotential() noexcept {}
     ~iSoLFAttractivePotential() = default;
 
-    real_type potential(const real_type r) const noexcept
+    real_type potential(const real_type r, const parameter_type& params) const noexcept
     {
         constexpr real_type rc = 1.12246204831;
         constexpr real_type pi = math::constants<real_type>::pi();
 
-        const real_type r_sigma_rc = r - sigma_ * rc; // r - sqrt[6]{2} sigma
+        const real_type r_sigma_rc = r - params.sigma * rc; // r - sqrt[6]{2} sigma
 
-        if     (r_sigma_rc <= 0)    {return -epsilon_;}
-        else if(omega_ < r_sigma_rc){return 0;}
+        if     (r_sigma_rc <= 0)          {return -params.epsilon;}
+        else if(params.omega < r_sigma_rc){return 0;}
 
-        const real_type cosine = std::cos(pi * romega_ * r_sigma_rc);
+        const real_type cosine = std::cos(pi * params.romega * r_sigma_rc);
 
-        return -epsilon_ * cosine * cosine;
+        return -params.epsilon * cosine * cosine;
     }
-    real_type derivative(const real_type r) const noexcept
+    real_type derivative(const real_type r, const parameter_type& params) const noexcept
     {
         constexpr real_type rc = 1.12246204831;
         constexpr real_type pi = math::constants<real_type>::pi();
 
-        const real_type r_sigma_rc = r - sigma_ * rc; // r - sqrt[6]{2} sigma
+        const real_type r_sigma_rc = r - params.sigma * rc; // r - sqrt[6]{2} sigma
 
-        if (r_sigma_rc <= 0 || omega_ < r_sigma_rc) {return 0;}
+        if (r_sigma_rc <= 0 || params.omega < r_sigma_rc) {return 0;}
 
-        const real_type sine = std::sin(2 * pi * romega_ * r_sigma_rc);
+        const real_type sine = std::sin(2 * pi * params.romega * r_sigma_rc);
 
-        return epsilon_ * pi * romega_ * sine;
+        return params.epsilon * pi * params.romega * sine;
     }
 
     template<typename T>
@@ -81,43 +75,41 @@ class iSoLFAttractivePotential
     template<typename T>
     void update(const System<T>&) noexcept {return;}
 
-    static const char* name() noexcept {return "iSoLFAttractive";}
+    // ------------------------------------------------------------------------
 
-    real_type sigma()   const noexcept {return this->sigma_;}
-    real_type epsilon() const noexcept {return this->epsilon_;}
-    real_type omega()   const noexcept {return this->omega_;}
-
-    real_type cutoff()  const noexcept
+    // It takes per-particle parameters and return the maximum cutoff length.
+    // CombinationRule normally uses this.
+    // Note that, pair-parameter contains romega to avoid extraneous division,
+    // but the per-particle parameters does not have romega because it can be
+    // derived from omega.
+    template<typename InputIterator>
+    real_type max_cutoff(const InputIterator first, const InputIterator last) const noexcept
     {
-        constexpr real_type rc = 1.12246204831;
-        return sigma_ * rc + omega_;
+        if(first == last) {return 1;}
+        constexpr real_type rc = 1.12246204831; // sqrt[6]{2}
+
+        real_type max_sigma = 0;
+        real_type max_omega = 0;
+        for(auto iter = first; iter != last; ++iter)
+        {
+            const auto& parameter = *iter;
+            max_sigma = std::max(max_sigma, parameter.sigma);
+            max_omega = std::max(max_omega, parameter.omega);
+        }
+        return max_sigma * rc + max_omega;
+    }
+    // It returns absolute cutoff length using pair-parameter.
+    // `CombinationTable` uses this.
+    real_type absolute_cutoff(const parameter_type& params) const noexcept
+    {
+        constexpr real_type rc = 1.12246204831; // sqrt[6]{2}
+        return params.sigma * rc + params.omega;
     }
 
-  public:
+    static const char* name() noexcept {return "iSoLFAttractive";}
 
-    // To culculate cutoff distance, we need to find the maximum sigma in the
-    // existing parameters. But the list of parameters will be given in a variety
-    // of ways, like Lorentz-Bertherot rule, combination table, or another way
-    // of combination rules.
-    //     To find the maximum parameter, we need to provide a way to compare
-    // parameters. But the way depends on the functional form of a potential.
-    // So this comparator should be defined in a Potential class.
-    struct parameter_comparator
-    {
-        constexpr bool
-        operator()(const parameter_type& lhs, const parameter_type& rhs) const noexcept
-        {
-            return std::get<0>(lhs) * 1.12246204831 + std::get<1>(lhs) <
-                   std::get<0>(rhs) * 1.12246204831 + std::get<1>(rhs) ;
-        }
-    };
-
-  private:
-
-    real_type sigma_;
-    real_type epsilon_;
-    real_type omega_;
-    real_type romega_;
+    real_type cutoff_ratio()   const noexcept {return default_cutoff();}
+    real_type coef_at_cutoff() const noexcept {return 0.0;}
 };
 
 template<typename traitsT>
@@ -130,7 +122,12 @@ class iSoLFAttractiveParameterList final
     using potential_type       = iSoLFAttractivePotential<real_type>;
     using base_type            = ParameterListBase<traits_type, potential_type>;
 
-    using parameter_type       = std::tuple<real_type, real_type, real_type>; // sigma, epsilon, omega
+    struct parameter_type
+    {
+        real_type sigma;
+        real_type epsilon;
+        real_type omega;
+    };
     using pair_parameter_type  = typename potential_type::parameter_type;
     using container_type       = std::vector<parameter_type>;
 
@@ -174,61 +171,40 @@ class iSoLFAttractiveParameterList final
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
     {
-        const auto sgm1 = std::get<0>(parameters_[i]);
-        const auto eps1 = std::get<1>(parameters_[i]);
-        const auto omg1 = std::get<2>(parameters_[i]);
+        const auto sgm1 = parameters_[i].sigma;
+        const auto eps1 = parameters_[i].epsilon;
+        const auto omg1 = parameters_[i].omega;
 
-        const auto sgm2 = std::get<0>(parameters_[j]);
-        const auto eps2 = std::get<1>(parameters_[j]);
-        const auto omg2 = std::get<2>(parameters_[j]);
+        const auto sgm2 = parameters_[j].sigma;
+        const auto eps2 = parameters_[j].epsilon;
+        const auto omg2 = parameters_[j].omega;
 
-        return std::make_tuple((sgm1 + sgm2) / 2,
+        return pair_parameter_type{(sgm1 + sgm2) / 2,
                               ((eps1 == eps2) ? eps1 : std::sqrt(eps1 * eps2)),
-                               (omg1 + omg2) / 2);
+                               (omg1 + omg2) / 2, real_type(2) / (omg1 + omg2)};
     }
     real_type max_cutoff_length() const noexcept override
     {
         return this->max_cutoff_length_;
     }
 
-    real_type cutoff_ratio()   const noexcept {return std::numeric_limits<real_type>::infinity();}
-    real_type coef_at_cutoff() const noexcept {return 0.0;}
-
-    void initialize(const system_type& sys, const topology_type& topol) noexcept override
+    void initialize(const system_type& sys, const topology_type& topol,
+                    const potential_type& pot) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        this->update(sys, topol);
+        this->update(sys, topol, pot);
         return;
     }
 
-    void update(const system_type& sys, const topology_type& topol) noexcept override
+    void update(const system_type& sys, const topology_type& topol,
+                const potential_type& pot) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
-        constexpr real_type rc = 1.12246204831; // sqrt[6]{2}
 
-        if(this->parameters_.empty())
-        {
-            this->max_cutoff_length_ = 1.0;
-        }
-        else
-        {
-            const real_type max_sigma = std::get<0>(*std::max_element(
-                this->parameters_.cbegin(), this->parameters_.cend(),
-                [](const parameter_type& lhs, const parameter_type& rhs) noexcept {
-                    return std::get<0>(lhs) < std::get<0>(rhs);
-                }));
-            const real_type max_omega = std::get<2>(*std::max_element(
-                this->parameters_.cbegin(), this->parameters_.cend(),
-                [](const parameter_type& lhs, const parameter_type& rhs) noexcept {
-                    return std::get<2>(lhs) < std::get<2>(rhs);
-                }));
-
-            this->max_cutoff_length_ = max_sigma * rc + max_omega;
-        }
-        // update exclusion list based on sys.topology()
+        this->max_cutoff_length_ = pot.max_cutoff(parameters_.begin(), parameters_.end());
         exclusion_list_.make(sys, topol);
         return;
     }

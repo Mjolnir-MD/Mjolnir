@@ -2,8 +2,8 @@
 #define MJOLNIR_INPUT_READ_GLOBAL_INTERACTION_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/forcefield/global/GlobalPairInteraction.hpp>
-// #include <mjolnir/forcefield/global/GlobalPairLennardJonesInteraction.hpp>
-// #include <mjolnir/forcefield/global/GlobalPairExcludedVolumeInteraction.hpp>
+#include <mjolnir/forcefield/global/GlobalPairLennardJonesInteraction.hpp>
+#include <mjolnir/forcefield/global/GlobalPairExcludedVolumeInteraction.hpp>
 // #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseBaseInteraction.hpp>
 // #include <mjolnir/forcefield/PDNS/ProteinDNANonSpecificInteraction.hpp>
 // #include <mjolnir/forcefield/PWMcos/PWMcosInteraction.hpp>
@@ -121,28 +121,32 @@ read_global_pair_interaction(const toml::value& global)
                 std::move(pot_para.first), std::move(pot_para.second),
                 read_spatial_partition<traitsT, potential_t>(global));
     }
-//     else if(potential == "3SPN2ExcludedVolume")
-//     {
-//         MJOLNIR_LOG_NOTICE("-- potential function is 3SPN2ExcludedVolume.");
-//         using real_type     = typename traitsT::real_type;
-//         using potential_t   = ThreeSPN2ExcludedVolumePotential<real_type>;
-//         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-// 
-//         return make_unique<interaction_t>(
-//             read_3spn2_excluded_volume_potential<traitsT>(global),
-//             read_spatial_partition<traitsT, potential_t>(global));
-//     }
-//     else if(potential == "iSoLFAttractive")
-//     {
-//         MJOLNIR_LOG_NOTICE("-- potential function is iSoLFAttractive.");
-//         using real_type     = typename traitsT::real_type;
-//         using potential_t   = iSoLFAttractivePotential<real_type>;
-//         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
-// 
-//         return make_unique<interaction_t>(
-//             read_isolf_potential<traitsT>(global),
-//             read_spatial_partition<traitsT, potential_t>(global));
-//     }
+    else if(potential == "3SPN2ExcludedVolume")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is 3SPN2ExcludedVolume.");
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = ThreeSPN2ExcludedVolumePotential<real_type>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+
+        auto pot_para = read_3spn2_excluded_volume_potential<traitsT>(global);
+
+        return make_unique<interaction_t>(
+                std::move(pot_para.first), std::move(pot_para.second),
+                read_spatial_partition<traitsT, potential_t>(global));
+    }
+    else if(potential == "iSoLFAttractive")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is iSoLFAttractive.");
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = iSoLFAttractivePotential<real_type>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+
+        auto pot_para = read_isolf_potential<traitsT>(global);
+
+        return make_unique<interaction_t>(
+                std::move(pot_para.first), std::move(pot_para.second),
+                read_spatial_partition<traitsT, potential_t>(global));
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "

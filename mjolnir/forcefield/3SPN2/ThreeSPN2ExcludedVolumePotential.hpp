@@ -27,87 +27,108 @@ template<typename realT>
 class ThreeSPN2ExcludedVolumePotential
 {
   public:
-    using real_type      = realT;
-    using parameter_type = real_type; // sigma_ij
-    using self_type      = ThreeSPN2ExcludedVolumePotential<real_type>;
+    using real_type = realT;
+
+    struct parameter_type
+    {
+        real_type sigma;
+    };
 
     static constexpr real_type default_cutoff() noexcept
     {
         return real_type(1.0);
     }
-    static constexpr parameter_type default_parameter() noexcept
-    {
-        return real_type(0.0);
-    }
-
-    static real_type epsilon; // 1 in [kJ/mol]
-//     static real_type cutoff_ratio;   // 1 sigma
-//     static real_type coef_at_cutoff; // 0.0
 
   public:
 
-    explicit ThreeSPN2ExcludedVolumePotential(const parameter_type& params) noexcept
-        : sigma_(params)
-    {}
+    explicit ThreeSPN2ExcludedVolumePotential() noexcept {}
     ~ThreeSPN2ExcludedVolumePotential() = default;
 
-    real_type potential(const real_type r) const noexcept
+    real_type potential(const real_type r, const parameter_type& params) const noexcept
     {
-        if(sigma_ <= r){return 0;}
+        if(params.sigma <= r){return 0;}
 
-        const real_type r1s1   = sigma_ / r;
-        const real_type r3s3   = r1s1 * r1s1 * r1s1;
-        const real_type r6s6   = r3s3 * r3s3;
-        return epsilon * (r6s6 * (r6s6 - real_type(2)) + real_type(1));
+        const real_type r1s1 = params.sigma / r;
+        const real_type r3s3 = r1s1 * r1s1 * r1s1;
+        const real_type r6s6 = r3s3 * r3s3;
+        return this->epsilon_ * (r6s6 * (r6s6 - real_type(2)) + real_type(1));
     }
-    real_type derivative(const real_type r) const noexcept
+    real_type derivative(const real_type r, const parameter_type& params) const noexcept
     {
-        if(this->sigma_ <= r){return 0;}
+        if(params.sigma <= r){return 0;}
 
-        const real_type rinv   = 1 / r;
-        const real_type r1s1   = sigma_ * rinv;
-        const real_type r3s3   = r1s1 * r1s1 * r1s1;
-        const real_type r6s6   = r3s3 * r3s3;
-        return real_type(12) * epsilon * rinv * r6s6 * (real_type(1) - r6s6);
+        const real_type rinv = 1 / r;
+        const real_type r1s1 = params.sigma * rinv;
+        const real_type r3s3 = r1s1 * r1s1 * r1s1;
+        const real_type r6s6 = r3s3 * r3s3;
+        return real_type(12) * this->epsilon_ * rinv * r6s6 * (real_type(1) - r6s6);
     }
 
     template<typename T>
-    void initialize(const System<T>&) noexcept {return;}
+    void initialize(const System<T>& sys) noexcept
+    {
+        this->update(sys);
+        return;
+    }
 
     template<typename T>
-    void update(const System<T>&) noexcept {return;}
+    void update(const System<T>&) noexcept
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        MJOLNIR_LOG_INFO("checking units of parameters...");
+        this->epsilon_ = real_type(1); // [kJ/mol]
+
+        const auto& energy_unit = physics::constants<real_type>::energy_unit();
+        MJOLNIR_LOG_INFO("energy unit is ", energy_unit);
+        assert(energy_unit == "kJ/mol" || energy_unit == "kcal/mol");
+
+        if(energy_unit == "kcal/mol")
+        {
+            MJOLNIR_LOG_INFO("energy unit ([kcal/mol]) differs from the "
+                             "default, [kJ/mol]. converting by multiplying ",
+                             unit::constants<real_type>::J_to_cal());
+            // convert from kJ/mol to kcal/mol (/= 4.18)
+            this->epsilon_ *= unit::constants<real_type>::J_to_cal();
+        }
+        return;
+    }
+
+    template<typename InputIterator>
+    real_type max_cutoff(const InputIterator first, const InputIterator last) const noexcept
+    {
+        static_assert(std::is_same<
+                typename std::iterator_traits<InputIterator>::value_type,
+                parameter_type>::value, "");
+
+        if(first == last) {return 1;}
+
+        real_type max_sigma = 0;
+        for(auto iter = first; iter != last; ++iter)
+        {
+            const auto& parameter = *iter;
+            max_sigma = std::max(max_sigma, parameter.sigma);
+        }
+        return max_sigma;
+    }
+    // It returns absolute cutoff length using pair-parameter.
+    // `CombinationTable` uses this.
+    real_type absolute_cutoff(const parameter_type& params) const noexcept
+    {
+        return params.sigma;
+    }
 
     static const char* name() noexcept {return "3SPN2ExcludedVolume";}
 
-    real_type sigma()  const noexcept {return this->sigma_;}
-    real_type cutoff() const noexcept {return this->sigma_;}
-
-  public:
-
-    // To culculate cutoff distance, we need to find the maximum sigma in the
-    // existing parameters. But the list of parameters will be given in a variety
-    // of ways, like Lorentz-Bertherot rule, combination table, or another way
-    // of combination rules.
-    //     To find the maximum parameter, we need to provide a way to compare
-    // parameters. But the way depends on the functional form of a potential.
-    // So this comparator should be defined in a Potential class.
-    struct parameter_comparator
-    {
-        constexpr bool
-        operator()(const parameter_type& lhs, const parameter_type& rhs) const noexcept
-        {
-            return lhs < rhs;
-        }
-    };
+    real_type epsilon()        const noexcept {return this->epsilon_;}
+    real_type cutoff_ratio()   const noexcept {return real_type(1);}
+    real_type coef_at_cutoff() const noexcept {return real_type(0);}
 
   private:
 
-    real_type sigma_;
+    real_type epsilon_; // 1 in [kJ/mol]
 };
-
-template<typename realT>
-typename ThreeSPN2ExcludedVolumePotential<realT>::real_type
-ThreeSPN2ExcludedVolumePotential<realT>::epsilon;
 
 // ===========================================================================
 
@@ -142,8 +163,7 @@ class ThreeSPN2ExcludedVolumeParameterList final
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-        : epsilon_(params.epsilon),
-          sigma_P_(params.sigma_P), sigma_S_(params.sigma_S),
+        : sigma_P_(params.sigma_P), sigma_S_(params.sigma_S),
           sigma_A_(params.sigma_A), sigma_T_(params.sigma_T),
           sigma_G_(params.sigma_G), sigma_C_(params.sigma_C),
           exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
@@ -183,8 +203,8 @@ class ThreeSPN2ExcludedVolumeParameterList final
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
     {
-        return (this->sigma_of(this->parameters_[i]) +
-                this->sigma_of(this->parameters_[j])) * 0.5;
+        return pair_parameter_type{(this->sigma_of(this->parameters_[i]) +
+                                    this->sigma_of(this->parameters_[j])) * real_type(0.5)};
     }
 
     real_type max_cutoff_length() const noexcept override
@@ -192,7 +212,8 @@ class ThreeSPN2ExcludedVolumeParameterList final
         return this->cutoff_;
     }
 
-    void initialize(const system_type& sys, const topology_type& topol) noexcept override
+    void initialize(const system_type& sys, const topology_type& topol,
+                    const potential_type& pot) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -200,22 +221,7 @@ class ThreeSPN2ExcludedVolumeParameterList final
         if(!unit_converted_)
         {
             MJOLNIR_LOG_INFO("checking units of parameters...");
-
             // checking unit system and adjust parameters to it
-            const auto& energy_unit = physics::constants<real_type>::energy_unit();
-            MJOLNIR_LOG_INFO("energy unit is ", energy_unit);
-            assert(energy_unit == "kJ/mol" || energy_unit == "kcal/mol");
-
-            if(energy_unit == "kcal/mol")
-            {
-                MJOLNIR_LOG_INFO("energy unit ([kcal/mol]) differs from the "
-                                 "default, [kJ/mol]. converting by multiplying ",
-                                 unit::constants<real_type>::J_to_cal());
-
-                // convert from kJ/mol to kcal/mol (/= 4.18)
-                this->epsilon_ *= unit::constants<real_type>::J_to_cal();
-                ThreeSPN2ExcludedVolumePotential<real_type>::epsilon = epsilon_;
-            }
 
             const auto& length_unit = physics::constants<real_type>::length_unit();
             MJOLNIR_LOG_INFO("length unit is ", length_unit);
@@ -239,12 +245,13 @@ class ThreeSPN2ExcludedVolumeParameterList final
             }
             unit_converted_ = true;
         }
-        this->update(sys, topol);
+        this->update(sys, topol, pot);
         return;
     }
 
     // nothing to do when system parameters change.
-    void update(const system_type& sys, const topology_type& topol) noexcept override
+    void update(const system_type& sys, const topology_type& topol,
+                const potential_type&) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -406,7 +413,6 @@ class ThreeSPN2ExcludedVolumeParameterList final
   private:
 
     bool unit_converted_ = false;
-    real_type epsilon_; // [kJ/mol]
     real_type sigma_P_; // [angstrom]
     real_type sigma_S_;
     real_type sigma_A_;
