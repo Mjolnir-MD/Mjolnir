@@ -40,8 +40,8 @@ class PWMcosInteraction final : public GlobalInteractionBase<traitsT>
     using parameter_list_type = PWMcosParameterList<traits_type>;
 
   public:
-    PWMcosInteraction(parameter_list_type&& para, partition_type&& part)
-        : parameters_(std::move(para)), partition_(std::move(part))
+    PWMcosInteraction(potential_type&& pot, parameter_list_type&& para, partition_type&& part)
+        : potential_(std::move(pot)), parameters_(std::move(para)), partition_(std::move(part))
     {}
     ~PWMcosInteraction() {}
 
@@ -51,7 +51,8 @@ class PWMcosInteraction final : public GlobalInteractionBase<traitsT>
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is PWMcos");
 
-        this->parameters_.initialize(sys, topol);
+        this->potential_ .initialize(sys);
+        this->parameters_.initialize(sys, topol, this->potential_);
         this->partition_ .initialize(sys, this->parameters_);
         return;
     }
@@ -62,7 +63,8 @@ class PWMcosInteraction final : public GlobalInteractionBase<traitsT>
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is PWMcos");
 
-        this->parameters_.update(sys, topol);
+        this->potential_ .update(sys);
+        this->parameters_.update(sys, topol, this->potential_);
         this->partition_ .initialize(sys, this->parameters_);
         return;
     }
@@ -94,6 +96,7 @@ class PWMcosInteraction final : public GlobalInteractionBase<traitsT>
 
   private:
 
+    potential_type      potential_;
     parameter_list_type parameters_;
     partition_type partition_;
 };
@@ -132,30 +135,30 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
     const auto phi2         = parameters_.phi2();
     const auto pi_over_2phi = parameters_.pi_over_2phi();
 
-    for(const auto& para : parameters_.contacts())
+    for(const auto& contact : parameters_.contacts())
     {
-        const auto& PWM  = para.PWM;
-        const auto  Ca   = para.Ca;  // C-alpha (not a calcium!)
+        const auto& PWM  = contact.PWM;
+        const auto  Ca   = contact.Ca;  // C-alpha (not a calcium!)
         const auto& rCa  = sys.position(Ca);
 
-        const auto  CaN  = para.CaN; // N-term Ca (Cj-1)
-        const auto  CaC  = para.CaC; // C-term Ca (Cj+1)
+        const auto  CaN  = contact.CaN; // N-term Ca (Cj-1)
+        const auto  CaC  = contact.CaC; // C-term Ca (Cj+1)
 
         MJOLNIR_LOG_DEBUG("Calpha = ", Ca);
         for(const auto& ptnr : this->partition_.partners(Ca))
         {
-            const auto  B   = ptnr.index;          // DNA Base
-            const auto& pot = ptnr.potential();
-            const auto  S   = pot.S;  // corresponding Sugar
-            const auto  B5  = pot.B5; // Base (Bi-1)
-            const auto  B3  = pot.B3; // Base (Bi+1)
+            const auto  B    = ptnr.index;          // DNA Base
+            const auto& para = ptnr.parameter();
+            const auto  S    = para.S;  // corresponding Sugar
+            const auto  B5   = para.B5; // Base (Bi-1)
+            const auto  B3   = para.B3; // Base (Bi+1)
             MJOLNIR_LOG_DEBUG("Base = ", B);
 
             const auto& rB     = sys.position(B);
             const auto rBCa    = sys.adjust_direction(rB, rCa); // Bi -> Cj
             const auto lBCa_sq = math::length_sq(rBCa);
 
-            if(para.r_cut_sq < lBCa_sq) {continue;}
+            if(contact.r_cut_sq < lBCa_sq) {continue;}
             MJOLNIR_LOG_DEBUG("within the cutoff");
 
             // ----------------------------------------------------------------
@@ -163,7 +166,7 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
 
             const auto rlBCa = math::rsqrt(lBCa_sq);
             const auto  lBCa = lBCa_sq * rlBCa;
-            const auto  f_df = pot.f_df(para.r0, lBCa, rsigma);
+            const auto  f_df = potential_.f_df(contact.r0, lBCa, rsigma);
 
             // ----------------------------------------------------------------
             // calculates the theta1 term
@@ -174,7 +177,7 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
             const auto dot1   = math::dot_product(rBS, rBCa);
             const auto cos1   = dot1 * rlBS * rlBCa;
             const auto theta1 = std::acos(math::clamp<real_type>(cos1,-1,1));
-            const auto g_dg_1 = pot.g_dg(para.theta1_0, theta1, phi, phi2, pi_over_2phi);
+            const auto g_dg_1 = potential_.g_dg(contact.theta1_0, theta1, phi, phi2, pi_over_2phi);
 
             if(g_dg_1.first == 0 && g_dg_1.second == 0)
             {
@@ -192,7 +195,7 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
             const auto dot2   = math::dot_product(rB53, rBCa);
             const auto cos2   = dot2 * rlB53 * rlBCa;
             const auto theta2 = std::acos(math::clamp<real_type>(cos2,-1,1));
-            const auto g_dg_2 = pot.g_dg(para.theta2_0, theta2, phi, phi2, pi_over_2phi);
+            const auto g_dg_2 = potential_.g_dg(contact.theta2_0, theta2, phi, phi2, pi_over_2phi);
 
             if(g_dg_2.first == 0 && g_dg_2.second == 0)
             {
@@ -210,7 +213,7 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
             const auto dot3   = math::dot_product(rCCN, rBCa);
             const auto cos3   = dot3 * rlCCN * rlBCa;
             const auto theta3 = std::acos(math::clamp<real_type>(cos3,-1,1));
-            const auto g_dg_3 = pot.g_dg(para.theta3_0, theta3, phi, phi2, pi_over_2phi);
+            const auto g_dg_3 = potential_.g_dg(contact.theta3_0, theta3, phi, phi2, pi_over_2phi);
 
             if(g_dg_3.first == 0 && g_dg_3.second == 0)
             {
@@ -221,11 +224,11 @@ void PWMcosInteraction<traitsT>::calc_force(system_type& sys) const noexcept
             // ================================================================
             // calculates the force direction
 
-            const auto Bk    = static_cast<std::size_t>(pot.base);
+            const auto Bk    = static_cast<std::size_t>(para.base);
             const auto e_pwm = PWM[Bk];
 
-            const auto coef  = para.gamma   * energy_unit;
-            const auto shift = para.epsilon + energy_shift;
+            const auto coef  = contact.gamma   * energy_unit;
+            const auto shift = contact.epsilon + energy_shift;
 
             const auto factor = coef * (e_pwm + shift);
 
@@ -355,36 +358,36 @@ PWMcosInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
     const auto phi2         = parameters_.phi2();
     const auto pi_over_2phi = parameters_.pi_over_2phi();
 
-    for(const auto& para : parameters_.contacts())
+    for(const auto& contact : parameters_.contacts())
     {
-        const auto& PWM  = para.PWM;
+        const auto& PWM  = contact.PWM;
 
-        const auto  Ca  = para.Ca;  // C-alpha (not a calcium!)
+        const auto  Ca  = contact.Ca;  // C-alpha (not a calcium!)
         const auto& rCa = sys.position(Ca);
 
-        const auto  CaN = para.CaN; // N-term Ca (Cj-1)
-        const auto  CaC = para.CaC; // C-term Ca (Cj+1)
+        const auto  CaN = contact.CaN; // N-term Ca (Cj-1)
+        const auto  CaC = contact.CaC; // C-term Ca (Cj+1)
 
         for(const auto& ptnr : this->partition_.partners(Ca))
         {
-            const auto  B   = ptnr.index;          // DNA Base
-            const auto& pot = ptnr.potential();
-            const auto  S   = pot.S;  // corresponding Sugar
-            const auto  B5  = pot.B5; // Base (Bi-1)
-            const auto  B3  = pot.B3; // Base (Bi+1)
+            const auto  B    = ptnr.index;          // DNA Base
+            const auto& para = ptnr.parameter();
+            const auto  S    = para.S;  // corresponding Sugar
+            const auto  B5   = para.B5; // Base (Bi-1)
+            const auto  B3   = para.B3; // Base (Bi+1)
 
             const auto& rB     = sys.position(B);
             const auto rBCa    = sys.adjust_direction(rB, rCa); // Bi -> Cj
             const auto lBCa_sq = math::length_sq(rBCa);
 
-            if(para.r_cut_sq < lBCa_sq) {continue;}
+            if(contact.r_cut_sq < lBCa_sq) {continue;}
 
             // ----------------------------------------------------------------
             // calculates the distance term (f(r))
 
             const auto rlBCa = math::rsqrt(lBCa_sq);
             const auto  lBCa = lBCa_sq * rlBCa;
-            const auto     f = pot.f(para.r0, lBCa, rsigma);
+            const auto     f = potential_.f(contact.r0, lBCa, rsigma);
 
             // ----------------------------------------------------------------
             // calculates the theta1 term
@@ -395,7 +398,7 @@ PWMcosInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
             const auto dot1   = math::dot_product(rBS, rBCa);
             const auto cos1   = dot1 * rlBS * rlBCa;
             const auto theta1 = std::acos(math::clamp<real_type>(cos1,-1,1));
-            const auto g1     = pot.g(para.theta1_0, theta1, phi, phi2, pi_over_2phi);
+            const auto g1     = potential_.g(contact.theta1_0, theta1, phi, phi2, pi_over_2phi);
 
             if(g1 == 0) {continue;}
 
@@ -409,7 +412,7 @@ PWMcosInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
             const auto dot2   = math::dot_product(rB53, rBCa);
             const auto cos2   = dot2 * rlB53 * rlBCa;
             const auto theta2 = std::acos(math::clamp<real_type>(cos2,-1,1));
-            const auto g2     = pot.g(para.theta2_0, theta2, phi, phi2, pi_over_2phi);
+            const auto g2     = potential_.g(contact.theta2_0, theta2, phi, phi2, pi_over_2phi);
 
             if(g2 == 0) {continue;}
 
@@ -423,17 +426,17 @@ PWMcosInteraction<traitsT>::calc_energy(const system_type& sys) const noexcept
             const auto dot3   = math::dot_product(rCCN, rBCa);
             const auto cos3   = dot3 * rlCCN * rlBCa;
             const auto theta3 = std::acos(math::clamp<real_type>(cos3,-1,1));
-            const auto g3     = pot.g(para.theta3_0, theta3, phi, phi2, pi_over_2phi);
+            const auto g3     = potential_.g(contact.theta3_0, theta3, phi, phi2, pi_over_2phi);
 
             if(g3 == 0) {continue;}
 
             // ================================================================
             // calculates the force direction
 
-            const auto Bk    = static_cast<std::size_t>(pot.base);
+            const auto Bk    = static_cast<std::size_t>(para.base);
             const auto e_pwm = PWM[Bk];
-            const auto coef  = para.gamma   * energy_unit;
-            const auto shift = para.epsilon + energy_shift;
+            const auto coef  = contact.gamma   * energy_unit;
+            const auto shift = contact.epsilon + energy_shift;
 
             E += coef * (e_pwm + shift) * f * g1 * g2 * g3;
         }
@@ -477,31 +480,31 @@ PWMcosInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexce
     const auto pi_over_2phi = parameters_.pi_over_2phi();
 
     real_type energy = 0;
-    for(const auto& para : parameters_.contacts())
+    for(const auto& contact : parameters_.contacts())
     {
-        const auto& PWM  = para.PWM;
+        const auto& PWM  = contact.PWM;
 
-        const auto  Ca  = para.Ca;  // C-alpha (not a calcium!)
+        const auto  Ca  = contact.Ca;  // C-alpha (not a calcium!)
         const auto& rCa = sys.position(Ca);
 
-        const auto  CaN = para.CaN; // N-term Ca (Cj-1)
-        const auto  CaC = para.CaC; // C-term Ca (Cj+1)
+        const auto  CaN = contact.CaN; // N-term Ca (Cj-1)
+        const auto  CaC = contact.CaC; // C-term Ca (Cj+1)
 
         MJOLNIR_LOG_DEBUG("Calpha = ", Ca);
         for(const auto& ptnr : this->partition_.partners(Ca))
         {
-            const auto  B   = ptnr.index;          // DNA Base
-            const auto& pot = ptnr.potential();
-            const auto  S   = pot.S;  // corresponding Sugar
-            const auto  B5  = pot.B5; // Base (Bi-1)
-            const auto  B3  = pot.B3; // Base (Bi+1)
+            const auto  B    = ptnr.index;          // DNA Base
+            const auto& para = ptnr.parameter();
+            const auto  S    = para.S;  // corresponding Sugar
+            const auto  B5   = para.B5; // Base (Bi-1)
+            const auto  B3   = para.B3; // Base (Bi+1)
             MJOLNIR_LOG_DEBUG("Base = ", B);
 
             const auto& rB     = sys.position(B);
             const auto rBCa    = sys.adjust_direction(rB, rCa); // Bi -> Cj
             const auto lBCa_sq = math::length_sq(rBCa);
 
-            if(para.r_cut_sq < lBCa_sq) {continue;}
+            if(contact.r_cut_sq < lBCa_sq) {continue;}
             MJOLNIR_LOG_DEBUG("within the cutoff");
 
             // ----------------------------------------------------------------
@@ -509,7 +512,7 @@ PWMcosInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexce
 
             const auto rlBCa = math::rsqrt(lBCa_sq);
             const auto  lBCa = lBCa_sq * rlBCa;
-            const auto  f_df = pot.f_df(para.r0, lBCa, rsigma);
+            const auto  f_df = potential_.f_df(contact.r0, lBCa, rsigma);
 
             // ----------------------------------------------------------------
             // calculates the theta1 term
@@ -520,7 +523,7 @@ PWMcosInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexce
             const auto dot1   = math::dot_product(rBS, rBCa);
             const auto cos1   = dot1 * rlBS * rlBCa;
             const auto theta1 = std::acos(math::clamp<real_type>(cos1,-1,1));
-            const auto g_dg_1 = pot.g_dg(para.theta1_0, theta1, phi, phi2, pi_over_2phi);
+            const auto g_dg_1 = potential_.g_dg(contact.theta1_0, theta1, phi, phi2, pi_over_2phi);
 
             if(g_dg_1.first == 0 && g_dg_1.second == 0)
             {
@@ -538,7 +541,7 @@ PWMcosInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexce
             const auto dot2   = math::dot_product(rB53, rBCa);
             const auto cos2   = dot2 * rlB53 * rlBCa;
             const auto theta2 = std::acos(math::clamp<real_type>(cos2,-1,1));
-            const auto g_dg_2 = pot.g_dg(para.theta2_0, theta2, phi, phi2, pi_over_2phi);
+            const auto g_dg_2 = potential_.g_dg(contact.theta2_0, theta2, phi, phi2, pi_over_2phi);
 
             if(g_dg_2.first == 0 && g_dg_2.second == 0)
             {
@@ -556,7 +559,7 @@ PWMcosInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexce
             const auto dot3   = math::dot_product(rCCN, rBCa);
             const auto cos3   = dot3 * rlCCN * rlBCa;
             const auto theta3 = std::acos(math::clamp<real_type>(cos3,-1,1));
-            const auto g_dg_3 = pot.g_dg(para.theta3_0, theta3, phi, phi2, pi_over_2phi);
+            const auto g_dg_3 = potential_.g_dg(contact.theta3_0, theta3, phi, phi2, pi_over_2phi);
 
             if(g_dg_3.first == 0 && g_dg_3.second == 0)
             {
@@ -567,11 +570,11 @@ PWMcosInteraction<traitsT>::calc_force_and_energy(system_type& sys) const noexce
             // ================================================================
             // calculates the force direction
 
-            const auto Bk    = static_cast<std::size_t>(pot.base);
+            const auto Bk    = static_cast<std::size_t>(para.base);
             const auto e_pwm = PWM[Bk];
 
-            const auto coef  = para.gamma   * energy_unit;
-            const auto shift = para.epsilon + energy_shift;
+            const auto coef  = contact.gamma   * energy_unit;
+            const auto shift = contact.epsilon + energy_shift;
 
             const auto factor = coef * (e_pwm + shift);
 
