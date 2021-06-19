@@ -56,12 +56,14 @@ class ProteinDNANonSpecificPotential
     {
         return parameter_type{invalid()};
     }
+    static constexpr real_type default_cutoff()
+    {
+        return real_type(5.0);
+    }
 
   public:
 
-    explicit ProteinDNANonSpecificPotential(const parameter_type& para)
-        : S3(para.S3)
-    {}
+    ProteinDNANonSpecificPotential() {}
 
     std::pair<real_type, real_type>
     f_df(const real_type r0, const real_type r, const real_type rsigma) const noexcept
@@ -121,11 +123,13 @@ class ProteinDNANonSpecificPotential
         }
     }
 
+    template<typename T>
+    void initialize(const System<T>&) noexcept {return;}
+
+    template<typename T>
+    void update(const System<T>&) noexcept {return;}
+
     static const char* name() noexcept {return "PDNS";}
-
-  public: // XXX public
-
-    std::size_t S3;
 };
 
 template<typename traitsT>
@@ -233,16 +237,18 @@ class ProteinDNANonSpecificParameterList final
     }
     ~ProteinDNANonSpecificParameterList() = default;
 
-    void initialize(const system_type& sys, const topology_type& topol) noexcept override
+    void initialize(const system_type& sys, const topology_type& topol,
+                    const potential_type& pot) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        this->update(sys, topol);
+        this->update(sys, topol, pot);
         return;
     }
 
-    void update(const system_type& sys, const topology_type& topol) noexcept override
+    void update(const system_type& sys, const topology_type& topol,
+                const potential_type&) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
