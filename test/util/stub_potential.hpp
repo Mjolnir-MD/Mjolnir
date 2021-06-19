@@ -13,39 +13,28 @@ template<typename realT>
 class StubPotential
 {
   public:
-    using real_type      = realT;
-    using parameter_type = std::pair<std::size_t, std::size_t>;
-    using self_type      = StubPotential<real_type>;
+    using real_type = realT;
+    struct parameter_type
+    {
+        std::size_t i;
+        std::size_t j;
+    };
 
     static constexpr real_type default_cutoff() noexcept
     {
         return real_type(2.0);
     }
-    static constexpr parameter_type default_parameter() noexcept
-    {
-        return parameter_type{0, 0};
-    }
-
-    static void set_cutoff_ratio(const real_type rc)
-    {
-        return;
-    }
-
-    static constexpr real_type cutoff_ratio   = real_type(1);
-    static constexpr real_type coef_at_cutoff = real_type(0);
 
   public:
 
-    explicit StubPotential(const parameter_type& para) noexcept
-        : para_(para)
-    {}
+    StubPotential() noexcept {}
     ~StubPotential() = default;
 
-    real_type potential(const real_type) const noexcept
+    real_type potential(const real_type, const parameter_type&) const noexcept
     {
         return 0.0;
     }
-    real_type derivative(const real_type) const noexcept
+    real_type derivative(const real_type, const parameter_type&) const noexcept
     {
         return 0.0;
     }
@@ -56,41 +45,18 @@ class StubPotential
     template<typename T>
     void update(const System<T>&) noexcept {return;}
 
-    static const char* name() noexcept {return "Stub";}
-
-    parameter_type parameter()   const noexcept {return this->para_;}
-
-    real_type cutoff()  const noexcept
+    template<typename InputIterator>
+    real_type max_cutoff(const InputIterator, const InputIterator) const noexcept
     {
-        return 0.0;
+        return 2.0;
+    }
+    real_type absolute_cutoff(const parameter_type&) const noexcept
+    {
+        return 2.0;
     }
 
-  public:
-
-    // To culculate cutoff distance, we need to find the maximum sigma in the
-    // existing parameters. But the list of parameters will be given in a variety
-    // of ways, like Lorentz-Bertherot rule, combination table, or another way
-    // of combination rules.
-    //     To find the maximum parameter, we need to provide a way to compare
-    // parameters. But the way depends on the functional form of a potential.
-    // So this comparator should be defined in a Potential class.
-    struct parameter_comparator
-    {
-        constexpr bool
-        operator()(const parameter_type& lhs, const parameter_type& rhs) const noexcept
-        {
-            return lhs.first < rhs.first;
-        }
-    };
-
-  private:
-
-    parameter_type para_;
+    static const char* name() noexcept {return "Stub";}
 };
-template<typename realT>
-constexpr typename StubPotential<realT>::real_type StubPotential<realT>::cutoff_ratio;
-template<typename realT>
-constexpr typename StubPotential<realT>::real_type StubPotential<realT>::coef_at_cutoff;
 
 template<typename traitsT>
 struct StubParameterList
@@ -112,27 +78,29 @@ struct StubParameterList
     using ignore_group_type    = IgnoreGroup   <group_id_type>;
     using exclusion_list_type  = ExclusionList<traits_type>;
 
-    explicit StubParameterList(const real_type cutoff_ratio,
+    explicit StubParameterList(const double cutoff,
         const std::vector<std::size_t>& parameters,
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-        : cutoff_(cutoff_ratio), participants_(parameters),
+        : cutoff_(cutoff), participants_(parameters),
           exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {}
 
-    real_type max_cutoff_length() const noexcept override {return this->cutoff_;}
+    real_type max_cutoff_length() const noexcept override {return cutoff_;}
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
     {
         return pair_parameter_type{i, j};
     }
 
-    void initialize(const system_type& sys, const topology_type& topol) noexcept override
+    void initialize(const system_type& sys, const topology_type& topol,
+                    const potential_type& pot) noexcept override
     {
-        this->update(sys, topol);
+        this->update(sys, topol, pot);
         return;
     }
-    void update(const system_type& sys, const topology_type& topol) noexcept override
+    void update(const system_type& sys, const topology_type& topol,
+                const potential_type&) noexcept override
     {
         // update exclusion list based on sys.topology()
         exclusion_list_.make(sys, topol);
