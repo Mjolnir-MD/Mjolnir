@@ -45,10 +45,10 @@ class ThreeSPN2BaseBaseInteractionPotential
 
     struct parameter_type
     {
-        std::size_t    Si;
-        std::size_t    Sj;
-        std::size_t    Bi_next;
-        std::size_t    Bj_next;
+        std::size_t      Si;
+        std::size_t      Sj;
+        std::size_t      Bi_next;
+        std::size_t      Bj_next;
         cross_stack_kind cs_i_kind; // i and adjacent of j
         cross_stack_kind cs_j_kind; // j and adjacent of i
         base_pair_kind   bp_kind;
@@ -58,36 +58,10 @@ class ThreeSPN2BaseBaseInteractionPotential
     {
         return std::numeric_limits<std::size_t>::max();
     }
-    static constexpr parameter_type default_parameter() noexcept
-    {
-        return parameter_type{
-            invalid(), invalid(), invalid(), invalid(),
-            cross_stack_kind::INVALID,
-            cross_stack_kind::INVALID,
-            base_pair_kind::INVALID
-        };
-    }
 
   public:
-    ThreeSPN2BaseBaseInteractionPotential() noexcept
-      : Si       (invalid()),
-        Sj       (invalid()),
-        Bi_next  (invalid()),
-        Bj_next  (invalid()),
-        cs_i_kind(cross_stack_kind::INVALID),
-        cs_j_kind(cross_stack_kind::INVALID),
-        bp_kind  (base_pair_kind::INVALID)
-    {}
 
-    explicit ThreeSPN2BaseBaseInteractionPotential(const parameter_type& params) noexcept
-      : Si       (params.Si),
-        Sj       (params.Sj),
-        Bi_next  (params.Bi_next),
-        Bj_next  (params.Bj_next),
-        cs_i_kind(params.cs_i_kind),
-        cs_j_kind(params.cs_j_kind),
-        bp_kind  (params.bp_kind)
-    {}
+    ThreeSPN2BaseBaseInteractionPotential() noexcept {}
 
     real_type f(const real_type K,     const real_type pi_over_K,
                 const real_type theta, const real_type theta0) const noexcept
@@ -191,17 +165,13 @@ class ThreeSPN2BaseBaseInteractionPotential
         return 2 * alpha * epsilon * term * (real_type(1) - term);
     }
 
+    template<typename T>
+    void initialize(const System<T>&) noexcept {return;}
+
+    template<typename T>
+    void update(const System<T>&) noexcept {return;}
+
     static const char* name() noexcept {return "3SPN2BaseBase";}
-
-  public: // XXX public!! XXX
-
-    std::size_t    Si;
-    std::size_t    Sj;
-    std::size_t    Bi_next;
-    std::size_t    Bj_next;
-    cross_stack_kind cs_i_kind; // i and adjacent of j
-    cross_stack_kind cs_j_kind; // j and adjacent of i
-    base_pair_kind   bp_kind;
 };
 
 template<typename traitsT>
@@ -215,6 +185,7 @@ class ThreeSPN2BaseBaseInteractionParameterList
     using potential_type      = ThreeSPN2BaseBaseInteractionPotential<real_type>;
     using base_type           = ParameterListBase<traits_type, potential_type>;
     using pair_parameter_type = typename base_type::pair_parameter_type;
+    // pair_parameter_type = potential_type::parameter_type;
 
     // topology stuff
     using system_type          = typename base_type::system_type;
@@ -487,8 +458,8 @@ class ThreeSPN2BaseBaseInteractionParameterList
         }
     }
 
-
-    void initialize(const system_type& sys, const topology_type& topol) noexcept override
+    void initialize(const system_type& sys, const topology_type& topol,
+                    const potential_type& pot) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -549,12 +520,13 @@ class ThreeSPN2BaseBaseInteractionParameterList
             unit_converted = true;
         }
         // construct a exclusion list
-        this->update(sys, topol);
+        this->update(sys, topol, pot);
         return;
     }
 
     // nothing to do when system parameters change.
-    void update(const system_type& sys, const topology_type& topol) noexcept override
+    void update(const system_type& sys, const topology_type& topol,
+                const potential_type&) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
