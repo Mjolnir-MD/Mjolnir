@@ -45,8 +45,8 @@ class ThreeSPN2BaseBaseInteraction<
 
   public:
 
-    ThreeSPN2BaseBaseInteraction(parameter_list_type&& para, partition_type&& part)
-        : parameters_(std::move(para)), partition_(std::move(part))
+    ThreeSPN2BaseBaseInteraction(potential_type&& pot, parameter_list_type&& para, partition_type&& part)
+        : potential_(std::move(pot)), parameters_(std::move(para)), partition_(std::move(part))
     {}
     ~ThreeSPN2BaseBaseInteraction() override {}
 
@@ -55,7 +55,9 @@ class ThreeSPN2BaseBaseInteraction<
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
-        this->parameters_.initialize(sys, topol);
+
+        this->potential_ .initialize(sys);
+        this->parameters_.initialize(sys, topol, potential_);
         this->partition_ .initialize(sys, this->parameters_);
     }
 
@@ -64,7 +66,9 @@ class ThreeSPN2BaseBaseInteraction<
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
-        this->parameters_.update(sys, topol);
+
+        this->potential_ .update(sys);
+        this->parameters_.update(sys, topol, potential_);
         this->partition_ .initialize(sys, this->parameters_);
     }
 
@@ -95,9 +99,9 @@ class ThreeSPN2BaseBaseInteraction<
             const auto& rBi = sys.position(Bi);
             for(const auto& ptnr : this->partition_.partners(Bi))
             {
-                const auto  Bj  = ptnr.index;
-                const auto& pot = ptnr.potential();
-                const auto& rBj = sys.position(Bj);
+                const auto  Bj   = ptnr.index;
+                const auto& para = ptnr.parameter();
+                const auto& rBj  = sys.position(Bj);
 
                 const auto Bij = sys.adjust_direction(rBi, rBj); // Bi -> Bj
                 const auto lBij_sq = math::length_sq(Bij);
@@ -121,7 +125,7 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto Bij_reg =  rlBij * Bij;
                 const auto Bji_reg = -rlBij * Bij;
 
-                const auto bp_kind    = pot.bp_kind;
+                const auto bp_kind    = para.bp_kind;
                 const auto epsilon_bp = parameters_.epsilon(bp_kind);
                 const auto alpha_bp   = parameters_.alpha(bp_kind);
                 const auto r0_bp      = parameters_.r0(bp_kind);
@@ -133,7 +137,7 @@ class ThreeSPN2BaseBaseInteraction<
                 //        = 0                                     ... r0 <= r
                 //
                 {
-                    const auto dU_rep = pot.dU_rep(epsilon_bp, alpha_bp, lBij, r0_bp);
+                    const auto dU_rep = potential_.dU_rep(epsilon_bp, alpha_bp, lBij, r0_bp);
                     if(dU_rep != real_type(0))
                     {
                         // remember that F = -dU.
@@ -156,8 +160,8 @@ class ThreeSPN2BaseBaseInteraction<
                 //      \-.   ,-/
                 //    Bi o =(= o Bj
 
-                const auto   Si = pot.Si;
-                const auto   Sj = pot.Sj;
+                const auto   Si = para.Si;
+                const auto   Sj = para.Sj;
                 const auto& rSi = sys.position(Si);
                 const auto& rSj = sys.position(Sj);
 
@@ -188,8 +192,8 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto theta1_0     = parameters_.theta1_0(bp_kind);
                 const auto theta2_0     = parameters_.theta2_0(bp_kind);
 
-                const auto f1 = pot.f(K_BP, pi_over_K_BP, theta1, theta1_0);
-                const auto f2 = pot.f(K_BP, pi_over_K_BP, theta2, theta2_0);
+                const auto f1 = potential_.f(K_BP, pi_over_K_BP, theta1, theta1_0);
+                const auto f2 = potential_.f(K_BP, pi_over_K_BP, theta2, theta2_0);
 
                 if(f1 != real_type(0.0) && f2 != real_type(0.0))
                 {
@@ -200,8 +204,8 @@ class ThreeSPN2BaseBaseInteraction<
                     //    Bi o =(= o Bj
                     //         phi
 
-                    const auto df1 = pot.df(K_BP, pi_over_K_BP, theta1, theta1_0);
-                    const auto df2 = pot.df(K_BP, pi_over_K_BP, theta2, theta2_0);
+                    const auto df1 = potential_.df(K_BP, pi_over_K_BP, theta1, theta1_0);
+                    const auto df2 = potential_.df(K_BP, pi_over_K_BP, theta2, theta2_0);
 
                     const auto m = math::cross_product(-SBi, Bij);
                     const auto n = math::cross_product( Bij, SBj);
@@ -237,7 +241,7 @@ class ThreeSPN2BaseBaseInteraction<
                         auto f_Bi = math::make_coordinate<coordinate_type>(0,0,0);
                         auto f_Bj = math::make_coordinate<coordinate_type>(0,0,0);
 
-                        const auto U_dU_attr = pot.U_dU_attr(epsilon_bp, alpha_bp, lBij, r0_bp);
+                        const auto U_dU_attr = potential_.U_dU_attr(epsilon_bp, alpha_bp, lBij, r0_bp);
 
                         // --------------------------------------------------------
                         // calc dihedral term
@@ -345,8 +349,8 @@ class ThreeSPN2BaseBaseInteraction<
                 //  + f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
                 //
 
-                const auto Bi_next        = pot.Bi_next;
-                const auto Bj_next        = pot.Bj_next;
+                const auto Bi_next        = para.Bi_next;
+                const auto Bj_next        = para.Bj_next;
                 const bool Bi_next_exists = (Bi_next != potential_type::invalid());
                 const bool Bj_next_exists = (Bj_next != potential_type::invalid());
 
@@ -361,14 +365,14 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto cos_theta3 = math::dot_product(BSi_reg, BSj_reg);
                 const auto theta3     = std::acos(math::clamp<real_type>(cos_theta3, -1, 1));
                 const auto theta3_0   = parameters_.theta3_0(bp_kind);
-                const auto f3         = pot.f(K_BP, pi_over_K_BP, theta3, theta3_0);
+                const auto f3         = potential_.f(K_BP, pi_over_K_BP, theta3, theta3_0);
                 if(f3 == real_type(0))
                 {
                     // f(theta) == 0 means df(theta) is also zero.
                     // so here, both cross-stacking becomes zero. skip them.
                     continue;
                 }
-                const auto df3 = pot.df(K_BP, pi_over_K_BP, theta3, theta3_0);
+                const auto df3 = potential_.df(K_BP, pi_over_K_BP, theta3, theta3_0);
 
                 // ----------------------------------------------------------------
                 // force directions for dtheta3/dr
@@ -411,7 +415,7 @@ class ThreeSPN2BaseBaseInteraction<
                     // Hereafter, we use the notation illustrated above (excepting
                     // the index `Bj_next` that corresponds to Bj5).
 
-                    const auto cs_kind = pot.cs_i_kind;
+                    const auto cs_kind = para.cs_i_kind;
 
                     const auto epsilon_cs = parameters_.epsilon(cs_kind);
                     const auto alpha_cs   = parameters_.alpha(cs_kind);
@@ -428,14 +432,14 @@ class ThreeSPN2BaseBaseInteraction<
                         std::acos(math::clamp<real_type>(cos_theta_CS, -1, 1));
                     const auto theta_CS_0   = parameters_.thetaCS_0(cs_kind);
 
-                    const auto fCS  = pot.f(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
+                    const auto fCS  = potential_.f(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
                     // if f == 0, df is also zero. if fCS == 0, no force there
                     if(fCS != real_type(0))
                     {
-                        const auto dfCS  = pot.df(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
+                        const auto dfCS  = potential_.df(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
 
                         const auto lBj5i = lBj5i_sq * rlBj5i;
-                        const auto U_dU_attr = pot.U_dU_attr(epsilon_cs, alpha_cs, lBj5i, r0_cs);
+                        const auto U_dU_attr = potential_.U_dU_attr(epsilon_cs, alpha_cs, lBj5i, r0_cs);
                         const auto Bj5i_reg  = rlBj5i * Bj5i;
 
                         // --------------------------------------------------------
@@ -490,7 +494,7 @@ class ThreeSPN2BaseBaseInteraction<
                     // Hereafter, we use the notation illustrated above (excepting
                     // the index `Bi_next` that corresponds to Bi3).
 
-                    const auto cs_kind = pot.cs_j_kind;
+                    const auto cs_kind = para.cs_j_kind;
 
                     const auto epsilon_cs = parameters_.epsilon(cs_kind);
                     const auto alpha_cs   = parameters_.alpha(cs_kind);
@@ -507,13 +511,13 @@ class ThreeSPN2BaseBaseInteraction<
                         std::acos(math::clamp<real_type>(cos_theta_CS, -1, 1));
                     const auto theta_CS_0   = parameters_.thetaCS_0(cs_kind);
 
-                    const auto fCS = pot.f(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
+                    const auto fCS = potential_.f(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
                     // if f == 0, df is also zero. if fCS == 0, no force there
                     if(fCS != real_type(0))
                     {
-                        const auto dfCS  = pot.df(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
+                        const auto dfCS  = potential_.df(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
                         const auto lBi3j = lBi3j_sq * rlBi3j;
-                        const auto U_dU_attr = pot.U_dU_attr(epsilon_cs, alpha_cs, lBi3j, r0_cs);
+                        const auto U_dU_attr = potential_.U_dU_attr(epsilon_cs, alpha_cs, lBi3j, r0_cs);
                         const auto Bi3j_reg  = rlBi3j * Bi3j;
 
                         // --------------------------------------------------------
@@ -587,11 +591,11 @@ class ThreeSPN2BaseBaseInteraction<
 
             for(const auto& ptnr : this->partition_.partners(Bi))
             {
-                const auto  Bj  = ptnr.index;
-                const auto& pot = ptnr.potential();
-                const auto& rBj = sys.position(Bj);
+                const auto  Bj   = ptnr.index;
+                const auto& para = ptnr.parameter();
+                const auto& rBj  = sys.position(Bj);
 
-                const auto  bp_kind = pot.bp_kind;
+                const auto  bp_kind = para.bp_kind;
 
                 const auto Bij = sys.adjust_direction(rBi, rBj); // Bi -> Bj
 
@@ -623,7 +627,7 @@ class ThreeSPN2BaseBaseInteraction<
                 const real_type alpha_bp   = parameters_.alpha(bp_kind);
                 const real_type r0_bp      = parameters_.r0(bp_kind);
 
-                E += pot.U_rep(epsilon_bp, alpha_bp, lBij, r0_bp);
+                E += potential_.U_rep(epsilon_bp, alpha_bp, lBij, r0_bp);
 
                 // ----------------------------------------------------------------
                 // calc theta1 and 2
@@ -634,8 +638,8 @@ class ThreeSPN2BaseBaseInteraction<
                 //      \-.  ,-/
                 //    Bi o == o Bj
 
-                const auto   Si = pot.Si;
-                const auto   Sj = pot.Sj;
+                const auto   Si = para.Si;
+                const auto   Sj = para.Sj;
                 const auto& rSi = sys.position(Si);
                 const auto& rSj = sys.position(Sj);
 
@@ -670,8 +674,8 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto theta1_0     = parameters_.theta1_0(bp_kind);
                 const auto theta2_0     = parameters_.theta2_0(bp_kind);
 
-                const auto f1 = pot.f(K_BP, pi_over_K_BP, theta1, theta1_0);
-                const auto f2 = pot.f(K_BP, pi_over_K_BP, theta2, theta2_0);
+                const auto f1 = potential_.f(K_BP, pi_over_K_BP, theta1, theta1_0);
+                const auto f2 = potential_.f(K_BP, pi_over_K_BP, theta2, theta2_0);
 
                 if(f1 != real_type(0.0) && f2 != real_type(0.0)) // [[likely]]
                 {
@@ -708,7 +712,7 @@ class ThreeSPN2BaseBaseInteraction<
                     //
                     // XXX: Note that std::exp would be calculated only once because
                     //      the condition that requires exp differs.
-                    const auto U_attr = pot.U_attr(epsilon_bp, alpha_bp, lBij, r0_bp);
+                    const auto U_attr = potential_.U_attr(epsilon_bp, alpha_bp, lBij, r0_bp);
 
                     // ------------------------------------------------------------
                     // The second term of base-pairing
@@ -728,8 +732,8 @@ class ThreeSPN2BaseBaseInteraction<
                 //  3'    o -- o===o -- o     5'
                 //       Bj_next   Bj_next
 
-                const auto Bi_next        = pot.Bi_next;
-                const auto Bj_next        = pot.Bj_next;
+                const auto Bi_next        = para.Bi_next;
+                const auto Bj_next        = para.Bj_next;
                 const bool Bi_next_exists = (Bi_next != potential_type::invalid());
                 const bool Bj_next_exists = (Bj_next != potential_type::invalid());
 
@@ -742,7 +746,7 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto cos_theta3 = dot_SBiSBj * rlSBi * rlSBj;
                 const auto theta3     = std::acos(math::clamp<real_type>(cos_theta3, -1, 1));
                 const auto theta3_0   = parameters_.theta3_0(bp_kind);
-                const auto f3         = pot.f(K_BP, pi_over_K_BP, theta3, theta3_0);
+                const auto f3         = potential_.f(K_BP, pi_over_K_BP, theta3, theta3_0);
                 if(f3 == real_type(0))
                 {
                     continue; // both cross-stacking becomes zero. skip them.
@@ -769,7 +773,7 @@ class ThreeSPN2BaseBaseInteraction<
                     // Hereafter, we use the notation illustrated above (excepting
                     // the index `Bj_next` that corresponds to Bj5).
 
-                    const auto cs_kind    = pot.cs_i_kind;
+                    const auto cs_kind    = para.cs_i_kind;
                     const auto epsilon_cs = parameters_.epsilon(cs_kind);
                     const auto alpha_cs   = parameters_.alpha(cs_kind);
                     const auto r0_cs      = parameters_.r0(cs_kind);
@@ -786,11 +790,11 @@ class ThreeSPN2BaseBaseInteraction<
                             math::clamp<real_type>(cos_theta_CS, -1, 1));
                     const auto theta_CS_0   = parameters_.thetaCS_0(cs_kind);
 
-                    const auto fCS = pot.f(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
+                    const auto fCS = potential_.f(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
                     if(fCS != real_type(0))
                     {
                         const auto lBj5i  = lBj5i_sq * rlBj5i;
-                        const auto U_attr = pot.U_attr(epsilon_cs, alpha_cs, lBj5i, r0_cs);
+                        const auto U_attr = potential_.U_attr(epsilon_cs, alpha_cs, lBj5i, r0_cs);
                         E += f3 * fCS * U_attr;
                     }
                 }
@@ -811,7 +815,7 @@ class ThreeSPN2BaseBaseInteraction<
                     // Hereafter, we use the notation illustrated above (excepting
                     // the index `Bi_next` that corresponds to Bi3).
 
-                    const auto cs_kind    = pot.cs_j_kind;
+                    const auto cs_kind    = para.cs_j_kind;
                     const auto epsilon_cs = parameters_.epsilon(cs_kind);
                     const auto alpha_cs   = parameters_.alpha(cs_kind);
                     const auto r0_cs      = parameters_.r0(cs_kind);
@@ -828,11 +832,11 @@ class ThreeSPN2BaseBaseInteraction<
                             math::clamp<real_type>(cos_theta_CS, -1, 1));
                     const auto theta_CS_0   = parameters_.thetaCS_0(cs_kind);
 
-                    const auto fCS = pot.f(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
+                    const auto fCS = potential_.f(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
                     if(fCS != real_type(0))
                     {
                         const auto lBi3j  = lBi3j_sq * rlBi3j;
-                        const auto U_attr = pot.U_attr(epsilon_cs, alpha_cs, lBi3j, r0_cs);
+                        const auto U_attr = potential_.U_attr(epsilon_cs, alpha_cs, lBi3j, r0_cs);
                         E += f3 * fCS * U_attr;
                     }
                 }
@@ -859,7 +863,7 @@ class ThreeSPN2BaseBaseInteraction<
             for(const auto& ptnr : this->partition_.partners(Bi))
             {
                 const auto  Bj  = ptnr.index;
-                const auto& pot = ptnr.potential();
+                const auto& para = ptnr.parameter();
                 const auto& rBj = sys.position(Bj);
 
                 const auto Bij = sys.adjust_direction(rBi, rBj); // Bi -> Bj
@@ -884,7 +888,7 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto Bij_reg =  rlBij * Bij;
                 const auto Bji_reg = -rlBij * Bij;
 
-                const auto bp_kind    = pot.bp_kind;
+                const auto bp_kind    = para.bp_kind;
                 const auto epsilon_bp = parameters_.epsilon(bp_kind);
                 const auto alpha_bp   = parameters_.alpha(bp_kind);
                 const auto r0_bp      = parameters_.r0(bp_kind);
@@ -896,8 +900,8 @@ class ThreeSPN2BaseBaseInteraction<
                 //        = 0                                     ... r0 <= r
                 //
                 {
-                    energy += pot.U_rep(epsilon_bp, alpha_bp, lBij, r0_bp);
-                    const auto dU_rep = pot.dU_rep(epsilon_bp, alpha_bp, lBij, r0_bp);
+                    energy += potential_.U_rep(epsilon_bp, alpha_bp, lBij, r0_bp);
+                    const auto dU_rep = potential_.dU_rep(epsilon_bp, alpha_bp, lBij, r0_bp);
                     if(dU_rep != real_type(0))
                     {
                         // remember that F = -dU.
@@ -919,8 +923,8 @@ class ThreeSPN2BaseBaseInteraction<
                 //      \-.   ,-/
                 //    Bi o =(= o Bj
 
-                const auto   Si = pot.Si;
-                const auto   Sj = pot.Sj;
+                const auto   Si = para.Si;
+                const auto   Sj = para.Sj;
                 const auto& rSi = sys.position(Si);
                 const auto& rSj = sys.position(Sj);
 
@@ -951,8 +955,8 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto theta1_0     = parameters_.theta1_0(bp_kind);
                 const auto theta2_0     = parameters_.theta2_0(bp_kind);
 
-                const auto f1 = pot.f(K_BP, pi_over_K_BP, theta1, theta1_0);
-                const auto f2 = pot.f(K_BP, pi_over_K_BP, theta2, theta2_0);
+                const auto f1 = potential_.f(K_BP, pi_over_K_BP, theta1, theta1_0);
+                const auto f2 = potential_.f(K_BP, pi_over_K_BP, theta2, theta2_0);
 
                 if(f1 != real_type(0.0) && f2 != real_type(0.0))
                 {
@@ -963,8 +967,8 @@ class ThreeSPN2BaseBaseInteraction<
                     //    Bi o =(= o Bj
                     //         phi
 
-                    const auto df1 = pot.df(K_BP, pi_over_K_BP, theta1, theta1_0);
-                    const auto df2 = pot.df(K_BP, pi_over_K_BP, theta2, theta2_0);
+                    const auto df1 = potential_.df(K_BP, pi_over_K_BP, theta1, theta1_0);
+                    const auto df2 = potential_.df(K_BP, pi_over_K_BP, theta2, theta2_0);
 
                     const auto m = math::cross_product(-SBi, Bij);
                     const auto n = math::cross_product( Bij, SBj);
@@ -1000,7 +1004,7 @@ class ThreeSPN2BaseBaseInteraction<
                         auto f_Bi = math::make_coordinate<coordinate_type>(0,0,0);
                         auto f_Bj = math::make_coordinate<coordinate_type>(0,0,0);
 
-                        const auto U_dU_attr = pot.U_dU_attr(epsilon_bp, alpha_bp, lBij, r0_bp);
+                        const auto U_dU_attr = potential_.U_dU_attr(epsilon_bp, alpha_bp, lBij, r0_bp);
 
                         energy += 0.5 * (1 + cos_dphi) * f1 * f2 * U_dU_attr.first;
 
@@ -1109,8 +1113,8 @@ class ThreeSPN2BaseBaseInteraction<
                 //  + f(theta_3) f(theta_CS)  dU_attr/drij          drij/dr
                 //
 
-                const auto Bi_next        = pot.Bi_next;
-                const auto Bj_next        = pot.Bj_next;
+                const auto Bi_next        = para.Bi_next;
+                const auto Bj_next        = para.Bj_next;
                 const bool Bi_next_exists = (Bi_next != potential_type::invalid());
                 const bool Bj_next_exists = (Bj_next != potential_type::invalid());
 
@@ -1125,14 +1129,14 @@ class ThreeSPN2BaseBaseInteraction<
                 const auto cos_theta3 = math::dot_product(BSi_reg, BSj_reg);
                 const auto theta3     = std::acos(math::clamp<real_type>(cos_theta3, -1, 1));
                 const auto theta3_0   = parameters_.theta3_0(bp_kind);
-                const auto f3         = pot.f(K_BP, pi_over_K_BP, theta3, theta3_0);
+                const auto f3         = potential_.f(K_BP, pi_over_K_BP, theta3, theta3_0);
                 if(f3 == real_type(0))
                 {
                     // f(theta) == 0 means df(theta) is also zero.
                     // so here, both cross-stacking becomes zero. skip them.
                     continue;
                 }
-                const auto df3 = pot.df(K_BP, pi_over_K_BP, theta3, theta3_0);
+                const auto df3 = potential_.df(K_BP, pi_over_K_BP, theta3, theta3_0);
 
                 // ----------------------------------------------------------------
                 // force directions for dtheta3/dr
@@ -1175,7 +1179,7 @@ class ThreeSPN2BaseBaseInteraction<
                     // Hereafter, we use the notation illustrated above (excepting
                     // the index `Bj_next` that corresponds to Bj5).
 
-                    const auto cs_kind = pot.cs_i_kind;
+                    const auto cs_kind = para.cs_i_kind;
 
                     const auto epsilon_cs = parameters_.epsilon(cs_kind);
                     const auto alpha_cs   = parameters_.alpha(cs_kind);
@@ -1192,14 +1196,14 @@ class ThreeSPN2BaseBaseInteraction<
                         std::acos(math::clamp<real_type>(cos_theta_CS, -1, 1));
                     const auto theta_CS_0   = parameters_.thetaCS_0(cs_kind);
 
-                    const auto fCS  = pot.f(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
+                    const auto fCS  = potential_.f(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
                     // if f == 0, df is also zero. if fCS == 0, no force there
                     if(fCS != real_type(0))
                     {
-                        const auto dfCS  = pot.df(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
+                        const auto dfCS  = potential_.df(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
 
                         const auto lBj5i = lBj5i_sq * rlBj5i;
-                        const auto U_dU_attr = pot.U_dU_attr(epsilon_cs, alpha_cs, lBj5i, r0_cs);
+                        const auto U_dU_attr = potential_.U_dU_attr(epsilon_cs, alpha_cs, lBj5i, r0_cs);
                         const auto Bj5i_reg  = rlBj5i * Bj5i;
 
                         energy += f3 * fCS * U_dU_attr.first;
@@ -1256,7 +1260,7 @@ class ThreeSPN2BaseBaseInteraction<
                     // Hereafter, we use the notation illustrated above (excepting
                     // the index `Bi_next` that corresponds to Bi3).
 
-                    const auto cs_kind = pot.cs_j_kind;
+                    const auto cs_kind = para.cs_j_kind;
 
                     const auto epsilon_cs = parameters_.epsilon(cs_kind);
                     const auto alpha_cs   = parameters_.alpha(cs_kind);
@@ -1273,13 +1277,13 @@ class ThreeSPN2BaseBaseInteraction<
                         std::acos(math::clamp<real_type>(cos_theta_CS, -1, 1));
                     const auto theta_CS_0   = parameters_.thetaCS_0(cs_kind);
 
-                    const auto fCS = pot.f(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
+                    const auto fCS = potential_.f(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
                     // if f == 0, df is also zero. if fCS == 0, no force there
                     if(fCS != real_type(0))
                     {
-                        const auto dfCS  = pot.df(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
+                        const auto dfCS  = potential_.df(K_CS, pi_over_K_CS, theta_CS, theta_CS_0);
                         const auto lBi3j = lBi3j_sq * rlBi3j;
-                        const auto U_dU_attr = pot.U_dU_attr(epsilon_cs, alpha_cs, lBi3j, r0_cs);
+                        const auto U_dU_attr = potential_.U_dU_attr(epsilon_cs, alpha_cs, lBi3j, r0_cs);
                         const auto Bi3j_reg  = rlBi3j * Bi3j;
 
                         energy += f3 * fCS * U_dU_attr.first;
@@ -1350,8 +1354,9 @@ class ThreeSPN2BaseBaseInteraction<
 
   private:
 
+    potential_type      potential_;
     parameter_list_type parameters_;
-    partition_type partition_;
+    partition_type      partition_;
 };
 
 } // mjolnir

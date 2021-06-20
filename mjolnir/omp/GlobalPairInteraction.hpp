@@ -29,8 +29,10 @@ class GlobalPairInteraction<
     GlobalPairInteraction()  = default;
     ~GlobalPairInteraction() override {}
 
-    GlobalPairInteraction(parameter_list_type&& para, partition_type&& part)
-        : parameters_(std::move(para)), partition_(std::move(part))
+    GlobalPairInteraction(potential_type&& pot, parameter_list_type&& para,
+                          partition_type&& part)
+        : potential_(std::move(pot)), parameters_(std::move(para)),
+          partition_(std::move(part))
     {}
 
     /*! @brief initialize spatial partition (e.g. CellList)                   *
@@ -40,8 +42,10 @@ class GlobalPairInteraction<
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
-        this->parameters_.initialize(sys, topol);
-        this->partition_ .initialize(sys, this->parameters_.cref());
+
+        this->potential_ .initialize(sys);
+        this->parameters_.initialize(sys, topol, potential_);
+        this->partition_ .initialize(sys, parameters_.cref());
     }
 
     /*! @brief update parameters (e.g. temperature, ionic strength, ...)  *
@@ -53,9 +57,10 @@ class GlobalPairInteraction<
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is ", this->name());
-        this->parameters_.update(sys, topol);
-        // potential update may change the cutoff length!
-        this->partition_.initialize(sys, this->parameters_.cref());
+
+        this->potential_ .update(sys);
+        this->parameters_.update(sys, topol, potential_);
+        this->partition_ .initialize(sys, this->parameters_.cref());
     }
 
     void reduce_margin(const real_type dmargin, const system_type& sys) override
@@ -75,24 +80,24 @@ class GlobalPairInteraction<
 #pragma omp parallel for
         for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
         {
+            const std::size_t thread_id = omp_get_thread_num();
             const auto i = leading_participants[idx];
             for(const auto& ptnr : this->partition_.partners(i))
             {
-                const auto  j   = ptnr.index;
-                const auto& pot = ptnr.potential();
+                const auto  j    = ptnr.index;
+                const auto& para = ptnr.parameter();
 
                 const coordinate_type rij =
                     sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type l2 = math::length_sq(rij); // |rij|^2
                 const real_type rl = math::rsqrt(l2);      // 1 / |rij|
                 const real_type l  = l2 * rl;              // |rij|^2 / |rij|
-                const real_type f_mag = pot.derivative(l);
+                const real_type f_mag = potential_.derivative(l, para);
 
                 // if length exceeds cutoff, potential returns just 0.
                 if(f_mag == 0.0){continue;}
 
                 const coordinate_type f = rij * (f_mag * rl);
-                const std::size_t thread_id = omp_get_thread_num();
                 sys.force_thread(thread_id, i) += f;
                 sys.force_thread(thread_id, j) -= f;
 
@@ -111,12 +116,12 @@ class GlobalPairInteraction<
             const auto i = leading_participants[idx];
             for(const auto& ptnr : this->partition_.partners(i))
             {
-                const auto  j   = ptnr.index;
-                const auto& pot = ptnr.potential();
+                const auto  j    = ptnr.index;
+                const auto& para = ptnr.parameter();
 
                 const real_type l = math::length(
                     sys.adjust_direction(sys.position(i), sys.position(j)));
-                E += pot.potential(l);
+                E += potential_.potential(l, para);
             }
         }
         return E;
@@ -129,26 +134,26 @@ class GlobalPairInteraction<
 #pragma omp parallel for reduction(+:energy)
         for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
         {
+            const std::size_t thread_id = omp_get_thread_num();
             const auto i = leading_participants[idx];
             for(const auto& ptnr : this->partition_.partners(i))
             {
-                const auto  j   = ptnr.index;
-                const auto& pot = ptnr.potential();
+                const auto  j    = ptnr.index;
+                const auto& para = ptnr.parameter();
 
                 const coordinate_type rij =
                     sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type l2 = math::length_sq(rij); // |rij|^2
                 const real_type rl = math::rsqrt(l2);      // 1 / |rij|
                 const real_type l  = l2 * rl;              // |rij|^2 / |rij|
-                const real_type f_mag = pot.derivative(l);
+                const real_type f_mag = potential_.derivative(l, para);
 
                 // if length exceeds cutoff, potential returns just 0.
                 if(f_mag == 0.0){continue;}
 
-                energy += pot.potential(l);
+                energy += potential_.potential(l, para);
 
                 const coordinate_type f = rij * (f_mag * rl);
-                const std::size_t thread_id = omp_get_thread_num();
                 sys.force_thread(thread_id, i) += f;
                 sys.force_thread(thread_id, j) -= f;
 
@@ -169,8 +174,9 @@ class GlobalPairInteraction<
 
   private:
 
+    potential_type      potential_;
     parameter_list_type parameters_;
-    partition_type partition_;
+    partition_type      partition_;
 };
 
 } // mjolnir

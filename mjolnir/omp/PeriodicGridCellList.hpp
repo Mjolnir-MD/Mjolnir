@@ -255,7 +255,7 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
                         const auto& rj = sys.position(j);
                         if(math::length_sq(sys.adjust_direction(ri, rj)) < r_c2)
                         {
-                            partners.emplace_back(j, potential_type(params.prepare_params(i, j)));
+                            partners.emplace_back(j, params.prepare_params(i, j));
                         }
                     }
                 }
@@ -292,7 +292,7 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 
         principal_neighbors.resize(total_neighbors, neighbor_type{
                 std::numeric_limits<std::size_t>::max(),
-                potential_type(potential_type::default_parameter())
+                typename potential_type::parameter_type{}
             });
         principal_ranges   .resize(sys.size(), 0);
 
