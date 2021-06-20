@@ -78,7 +78,9 @@ class PWMcosPotential
         std::uint32_t S, B5, B3;
 
         parameter_type(): base(base_kind::X),
-            S(invalid()), B5(invalid()), B3(invalid())
+            S (std::numeric_limits<std::uint32_t>::max()),
+            B5(std::numeric_limits<std::uint32_t>::max()),
+            B3(std::numeric_limits<std::uint32_t>::max())
         {}
         parameter_type(const base_kind     b,  const std::uint32_t s,
                        const std::uint32_t b5, const std::uint32_t b3)
