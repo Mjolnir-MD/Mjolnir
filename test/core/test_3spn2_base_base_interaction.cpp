@@ -113,13 +113,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_numerical_diff,
         //
         constexpr auto invalid = potential_type::invalid();
 
+        potential_type      potential;
         parameter_list_type parameter_list(ParameterSet{}, {
                 {1, parameter_type{bases.at(0), 0, 0, invalid, invalid}},
                 {3, parameter_type{bases.at(1), 1, 2, invalid, invalid}}
             }, {}, ignore_molecule_type("Nothing"), ignore_group_type({})
         );
 
-        interaction_type interaction(parameter_list_type(parameter_list),
+        interaction_type interaction(potential_type{},
+            parameter_list_type(parameter_list),
             mjolnir::SpatialPartition<traits_type, potential_type>(
                 mjolnir::make_unique<partition_type>()));
 
@@ -132,7 +134,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_numerical_diff,
         topol.add_connection(2, 3, "bond");
         topol.construct_molecules();
 
-        parameter_list.initialize(sys, topol);
+        parameter_list.initialize(sys, topol, potential);
         interaction.initialize(sys, topol);
 
         const auto bp_kind      = parameter_list.bp_kind (bases.at(0), bases.at(1));
@@ -325,6 +327,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
 
         constexpr auto invalid = potential_type::invalid();
 
+        potential_type potential;
         parameter_list_type parameter_list(ParameterSet{}, {
                 {1, parameter_type{bases.at(0), 0, 0, 4, invalid}},
                 {9, parameter_type{bases.at(1), 3, 8, invalid, 6}},
@@ -333,7 +336,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
             }, {}, ignore_molecule_type("Nothing"), ignore_group_type({})
         );
 
-        interaction_type interaction(parameter_list_type(parameter_list),
+        interaction_type interaction(potential_type{},
+            parameter_list_type(parameter_list),
             mjolnir::SpatialPartition<traits_type, potential_type>(
                 mjolnir::make_unique<partition_type>()));
 
@@ -368,7 +372,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
 
         topol.construct_molecules();
 
-        parameter_list.initialize(sys, topol);
+        parameter_list.initialize(sys, topol, potential);
         interaction.initialize(sys, topol);
 
         const auto bp_kind      = parameter_list.bp_kind (bases.at(0), bases.at(1));
