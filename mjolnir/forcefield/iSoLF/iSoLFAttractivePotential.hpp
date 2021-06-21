@@ -51,7 +51,7 @@ class iSoLFAttractivePotential
         if     (r_sigma_rc <= 0)          {return -params.epsilon;}
         else if(params.omega < r_sigma_rc){return 0;}
 
-        const real_type cosine = std::cos(pi * params.romega * r_sigma_rc);
+        const real_type cosine = std::cos(pi * params.romega * r_sigma_rc * real_type(0.5));
 
         return -params.epsilon * cosine * cosine;
     }
@@ -64,9 +64,9 @@ class iSoLFAttractivePotential
 
         if (r_sigma_rc <= 0 || params.omega < r_sigma_rc) {return 0;}
 
-        const real_type sine = std::sin(2 * pi * params.romega * r_sigma_rc);
+        const real_type sine = std::sin(pi * params.romega * r_sigma_rc);
 
-        return params.epsilon * pi * params.romega * sine;
+        return params.epsilon * pi * params.romega * sine * real_type(0.5);
     }
 
     template<typename T>
