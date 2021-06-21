@@ -6,84 +6,50 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
+#include <test/util/utility.hpp>
 #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
-#include <mjolnir/core/BoundaryCondition.hpp>
-#include <mjolnir/core/SimulatorTraits.hpp>
 
 BOOST_AUTO_TEST_CASE(EXV_double)
 {
-    mjolnir::LoggerManager::set_default_logger(
-            "test_excluded_volume_potential.log");
+    using real_type = double;
+    using potential_type = mjolnir::ExcludedVolumePotential<real_type>;
+    using parameter_type = potential_type::parameter_type;
 
-    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type   = typename traits_type::real_type;
-    using molecule_id_type = mjolnir::Topology::molecule_id_type;
-    using group_id_type    = mjolnir::Topology::group_id_type;
     constexpr std::size_t N = 10000;
     constexpr real_type   h = 1e-6;
+    constexpr real_type tol = 1e-6;
 
     const real_type sigma   = 3.0;
     const real_type epsilon = 1.0;
-    mjolnir::ExcludedVolumePotential<traits_type> exv{
-        epsilon, mjolnir::ExcludedVolumePotential<traits_type>::default_cutoff(),
-        {{0, sigma}, {1, sigma}}, {},
-        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
-        mjolnir::IgnoreGroup   <group_id_type   >({})
-    };
+
+    potential_type potential(/*cutoff = */ 2.5, epsilon);
 
     const real_type x_min = 0.8 * sigma;
-    const real_type x_max = exv.cutoff_ratio() * sigma;
-    const real_type dx = (x_max - x_min) / N;
+    const real_type x_max = potential.cutoff_ratio() * sigma;
 
-    for(std::size_t i=0; i<N; ++i)
-    {
-        const real_type x    = x_min + i * dx;
-        const real_type pot1 = exv.potential(0, 1, x + h);
-        const real_type pot2 = exv.potential(0, 1, x - h);
-        const real_type dpot = (pot1 - pot2) / (2 * h);
-        const real_type deri = exv.derivative(0, 1, x);
-
-        BOOST_TEST(dpot == deri, boost::test_tools::tolerance(h));
-    }
+    mjolnir::test::check_potential(potential, parameter_type{sigma},
+                                   x_min, x_max, tol, h, N);
 }
 
 BOOST_AUTO_TEST_CASE(EXV_float)
 {
-    mjolnir::LoggerManager::set_default_logger(
-            "test_excluded_volume_potential.log");
+    using real_type = float;
+    using potential_type = mjolnir::ExcludedVolumePotential<real_type>;
+    using parameter_type = potential_type::parameter_type;
 
-    using traits_type = mjolnir::SimulatorTraits<float, mjolnir::UnlimitedBoundary>;
-    using real_type   = typename traits_type::real_type;
-    using molecule_id_type = mjolnir::Topology::molecule_id_type;
-    using group_id_type    = mjolnir::Topology::group_id_type;
     constexpr static std::size_t N = 1000;
-    constexpr static real_type   h = 0.002;
-    constexpr static real_type tol = 0.005;
+    constexpr static real_type   h = 0.002f;
+    constexpr static real_type tol = 0.005f;
 
-    const real_type sigma   = 3.0;
-    const real_type epsilon = 1.0;
+    const real_type sigma   = 3.0f;
+    const real_type epsilon = 1.0f;
 
-    mjolnir::ExcludedVolumePotential<traits_type> exv{
-        epsilon, mjolnir::ExcludedVolumePotential<traits_type>::default_cutoff(),
-        {{0, sigma}, {1, sigma}}, {},
-        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
-        mjolnir::IgnoreGroup   <group_id_type   >({})
-    };
-    const real_type cutoff = exv.cutoff_ratio();
+    potential_type potential(/*cutoff = */ 2.5f, epsilon);
 
-    const real_type x_min = 0.8f   * sigma;
-    const real_type x_max = cutoff * sigma;
-    const real_type dx = (x_max - x_min) / N;
+    const real_type x_min = 0.8f * sigma;
+    const real_type x_max = potential.cutoff_ratio() * sigma;
 
-    for(std::size_t i=0; i<N; ++i)
-    {
-        const real_type x    = x_min + i * dx;
-        const real_type pot1 = exv.potential(0, 1, x + h);
-        const real_type pot2 = exv.potential(0, 1, x - h);
-        const real_type dpot = (pot1 - pot2) / (2 * h);
-        const real_type deri = exv.derivative(0, 1, x);
-
-        BOOST_TEST(dpot == deri, boost::test_tools::tolerance(tol));
-    }
+    mjolnir::test::check_potential(potential, parameter_type{sigma},
+                                   x_min, x_max, tol, h, N);
 }
 

@@ -6,83 +6,55 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
+#include <test/util/utility.hpp>
 #include <mjolnir/forcefield/global/HardCoreExcludedVolumePotential.hpp>
 
 BOOST_AUTO_TEST_CASE(HCEXV_double)
 {
-    mjolnir::LoggerManager::set_default_logger("test_hard_core_excluded_volume_potential.log");
-
-    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type   = typename traits_type::real_type;
-    using molecule_id_type = mjolnir::Topology::molecule_id_type;
-    using group_id_type    = mjolnir::Topology::group_id_type;
-    using potential_type   = mjolnir::HardCoreExcludedVolumePotential<traits_type>;
-    using parameter_type   = potential_type::parameter_type;
+    using real_type = double;
+    using potential_type = mjolnir::HardCoreExcludedVolumePotential<real_type>;
+    using parameter_type = potential_type::parameter_type;
 
     constexpr static std::size_t N = 10000;
     constexpr static real_type   h = 1e-6;
+    constexpr static real_type tol = 1e-6;
 
     const real_type epsilon = 1.0;
-    const real_type hard_core_radius = 10.0;
+    const real_type hard_core_radius    = 10.0;
     const real_type soft_shell_thickness = 3.0;
-    const parameter_type param{hard_core_radius, soft_shell_thickness};
-    potential_type hdexv{
-      epsilon, potential_type::default_cutoff(), {{0, param}, {1, param}}, {},
-      mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
-      mjolnir::IgnoreGroup<group_id_type>({})
-    };
 
-    const real_type x_min = 0.8 * soft_shell_thickness + hard_core_radius * 2;
-    const real_type x_max = hdexv.cutoff_ratio() * soft_shell_thickness + hard_core_radius * 2;
-    const real_type dx = (x_max - x_min) / N;
+    potential_type potential(2.0, epsilon);
 
-    for(std::size_t i=0; i<N; ++i)
-    {
-      const real_type x = x_min + i * dx;
-      const real_type pot1 = hdexv.potential(0, 1, x + h);
-      const real_type pot2 = hdexv.potential(0, 1, x - h);
-      const real_type dpot = (pot1 - pot2) / (2 * h);
-      const real_type deri = hdexv.derivative(0, 1, x);
+    const parameter_type params{soft_shell_thickness, hard_core_radius};
 
-      BOOST_TEST(dpot == deri, boost::test_tools::tolerance(h));
-    }
+    const real_type x_min = 0.8 * soft_shell_thickness + hard_core_radius;
+    const real_type x_max = potential.absolute_cutoff(params);
+
+    mjolnir::test::check_potential(potential, params,
+                                   x_min, x_max, tol, h, N);
 }
 
 BOOST_AUTO_TEST_CASE(HCEXV_float)
 {
-    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type   = typename traits_type::real_type;
-    using molecule_id_type = mjolnir::Topology::molecule_id_type;
-    using group_id_type    = mjolnir::Topology::group_id_type;
-    using potential_type   = mjolnir::HardCoreExcludedVolumePotential<traits_type>;
-    using parameter_type   = potential_type::parameter_type;
+    using real_type = float;
+    using potential_type = mjolnir::HardCoreExcludedVolumePotential<real_type>;
+    using parameter_type = potential_type::parameter_type;
 
     constexpr static std::size_t N = 1000;
-    constexpr static real_type   h = 0.002f;
-    constexpr static real_type tol = 0.005f;
+    constexpr static real_type   h = 0.001f;
+    constexpr static real_type tol = 0.002f;
 
-    const real_type epsilon = 1.0;
-    const real_type hard_core_radius = 10.0;
-    const real_type soft_shell_thickness = 3.0;
-    const parameter_type param{hard_core_radius, soft_shell_thickness};
-    potential_type hdexv{
-      epsilon, potential_type::default_cutoff(), {{0, param}, {1, param}}, {},
-      mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
-      mjolnir::IgnoreGroup<group_id_type>({})
-    };
+    const real_type epsilon = 1.0f;
+    const real_type hard_core_radius    = 10.0f;
+    const real_type soft_shell_thickness = 3.0f;
 
-    const real_type x_min = 0.8 * soft_shell_thickness + hard_core_radius * 2;
-    const real_type x_max = hdexv.cutoff_ratio() * soft_shell_thickness + hard_core_radius * 2;
-    const real_type dx = (x_max - x_min) / N;
+    potential_type potential(2.0f, epsilon);
 
-    for(std::size_t i=0; i<N; ++i)
-    {
-      const real_type x = x_min + i * dx;
-      const real_type pot1 = hdexv.potential(0, 1, x + h);
-      const real_type pot2 = hdexv.potential(0, 1, x - h);
-      const real_type dpot = (pot1 - pot2) / (2 * h);
-      const real_type deri = hdexv.derivative(0, 1, x);
+    const parameter_type params{soft_shell_thickness, hard_core_radius};
 
-      BOOST_TEST(dpot == deri, boost::test_tools::tolerance(tol));
-    }
+    const real_type x_min = 0.8f * soft_shell_thickness + hard_core_radius;
+    const real_type x_max = potential.absolute_cutoff(params);
+
+    mjolnir::test::check_potential(potential, params,
+                                   x_min, x_max, tol, h, N);
 }

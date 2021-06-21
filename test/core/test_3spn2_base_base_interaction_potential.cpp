@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(f_3SPN2_BaseBaseInteraction_double,
     using potential_type = mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>;
     using parameter_list_type = mjolnir::ThreeSPN2BaseBaseInteractionParameterList<traits_type>;
     using parameter_type = typename parameter_list_type::parameter_type;
-    using base_kind = mjolnir::parameter_3SPN2::base_kind  ;
+    using base_kind      = mjolnir::parameter_3SPN2::base_kind  ;
 
     {
         using unit_type = mjolnir::unit::constants<real_type>;
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(f_3SPN2_BaseBaseInteraction_double,
 
     const auto K         = parameter_list.K_BP();
     const auto pi_over_K = parameter_list.pi_over_K_BP();
-    const auto potential = potential_type(parameter_list.prepare_params(1, 3));
+    const potential_type potential;
 
     for(std::size_t i=0; i<N; ++i)
     {
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(U_rep_3SPN2_BaseBaseInteraction_double,
     const auto epsilon = parameter_list.epsilon(base_pair_kind::AT);
     const auto r0      = parameter_list.r0     (base_pair_kind::AT);
 
-    const auto potential = potential_type(parameter_list.prepare_params(1, 3));
+    potential_type potential;
 
     for(std::size_t i=0; i<N; ++i)
     {
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(U_attr_3SPN2_BaseBaseInteraction_double,
     const auto epsilon = parameter_list.epsilon(base_pair_kind::AT);
     const auto r0      = parameter_list.r0     (base_pair_kind::AT);
 
-    const auto potential = potential_type(parameter_list.prepare_params(1, 3));
+    potential_type potential;
 
     for(std::size_t i=0; i<N; ++i)
     {
@@ -302,7 +302,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(U_dU_attr_3SPN2_BaseBaseInteraction_double,
         parameter_list_type::ignore_group_type({})
         );
 
-    const auto potential = potential_type(parameter_list.prepare_params(1, 3));
+    potential_type potential;
 
     for(const auto bp : {base_pair_kind::AT, base_pair_kind::TA,
                          base_pair_kind::GC, base_pair_kind::CG})
