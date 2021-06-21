@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_GLOBAL_PARAMETER_LIST_HPP
 #define MJOLNIR_GLOBAL_PARAMETER_LIST_HPP
+#include <mjolnir/util/empty.hpp>
 #include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
 #include <vector>
@@ -487,6 +488,127 @@ struct CombinationTable final
     table_type               table_;
     std::vector<std::size_t> participants_;
     container_type           parameters_;
+    exclusion_list_type      exclusion_list_;
+};
+
+// ----------------------------------------------------------------------------
+// for potentials that do not have any parameter.
+// The potential::parameter_type should be mjolnir::empty_t.
+
+template<typename traitsT, typename potentialT>
+class EmptyCombinationRule final
+    : public ParameterListBase<traitsT, potentialT>
+{
+  public:
+    using traits_type           = traitsT;
+    using potential_type        = potentialT;
+    using base_type             = ParameterListBase<traits_type, potential_type>;
+    using real_type             = typename traits_type::real_type;
+    using pair_parameter_type   = typename potential_type::parameter_type;
+
+    static_assert(std::is_same<pair_parameter_type, empty_t>::value, "");
+
+    // topology stuff
+    using system_type           = System<traits_type>;
+    using topology_type         = Topology;
+    using molecule_id_type      = typename topology_type::molecule_id_type;
+    using group_id_type         = typename topology_type::group_id_type;
+    using connection_kind_type  = typename topology_type::connection_kind_type;
+    using ignore_molecule_type  = IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type     = IgnoreGroup   <group_id_type>;
+    using exclusion_list_type   = ExclusionList <traits_type>;
+
+  public:
+
+    EmptyCombinationRule(
+        const std::vector<std::size_t>& participants,
+        const std::map<connection_kind_type, std::size_t>& exclusions,
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+      : participants_(participants),
+        exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
+    {}
+
+    EmptyCombinationRule(const EmptyCombinationRule&) = default;
+    EmptyCombinationRule(EmptyCombinationRule&&) = default;
+    EmptyCombinationRule& operator=(const EmptyCombinationRule&) = default;
+    EmptyCombinationRule& operator=(EmptyCombinationRule&&) = default;
+    ~EmptyCombinationRule() override {}
+
+    pair_parameter_type prepare_params(std::size_t, std::size_t) const noexcept override
+    {
+        return empty_t{};
+    }
+
+    void initialize(const system_type& sys, const topology_type& topol,
+                    const potential_type& pot) noexcept override
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        this->update(sys, topol, pot);
+        return;
+    }
+
+    void update(const system_type& sys, const topology_type& topol,
+                const potential_type& pot) noexcept override
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        this->max_cutoff_length_ = pot.absolute_cutoff(empty_t{});
+        this->exclusion_list_.make(sys, topol);
+        return;
+    }
+
+    real_type max_cutoff_length() const noexcept override {return max_cutoff_length_;}
+
+    // -----------------------------------------------------------------------
+    // Here, the default implementation uses Newton's 3rd law to reduce
+    // calculation. For an interacting pair (i, j), forces applied to i and j
+    // are equal in magnitude and opposite in direction. So, if a pair (i, j) is
+    // listed, (j, i) is not needed.
+    //     See implementation of VerletList, CellList and GlobalPairInteraction
+    // for more details about the usage of these functions.
+    //
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept override
+    {
+        // if not excluded, the pair has interaction.
+        return (i < j) && !exclusion_list_.is_excluded(i, j);
+    }
+    std::vector<std::size_t> const& participants() const noexcept override
+    {
+        return this->participants_;
+    }
+    range<typename std::vector<std::size_t>::const_iterator>
+    leading_participants() const noexcept override
+    {
+        return make_range(participants_.begin(), std::prev(participants_.end()));
+    }
+    range<typename std::vector<std::size_t>::const_iterator>
+    possible_partners_of(const std::size_t participant_idx,
+                         const std::size_t /*particle_idx*/) const noexcept override
+    {
+        return make_range(participants_.begin() + participant_idx + 1,
+                          participants_.end());
+    }
+
+    base_type* clone() const override
+    {
+        return new EmptyCombinationRule(*this);
+    }
+
+    // ------------------------------------------------------------------------
+    // the following accessers would be used in tests.
+
+    exclusion_list_type const& exclusion_list() const noexcept override
+    {
+        return exclusion_list_;
+    }
+
+  private:
+
+    real_type                max_cutoff_length_;
+    std::vector<std::size_t> participants_;
     exclusion_list_type      exclusion_list_;
 };
 
