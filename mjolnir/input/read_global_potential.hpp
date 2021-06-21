@@ -7,6 +7,7 @@
 #include <mjolnir/forcefield/global/InversePowerPotential.hpp>
 #include <mjolnir/forcefield/global/HardCoreExcludedVolumePotential.hpp>
 #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
+#include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/forcefield/global/LennardJonesAttractivePotential.hpp>
 #include <mjolnir/forcefield/global/WCAPotential.hpp>
 #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
@@ -469,6 +470,58 @@ read_lennard_jones_potential(const toml::value& global)
                 )));
     }
 }
+
+template<typename traitsT>
+std::pair<UniformLennardJonesPotential<typename traitsT::real_type>,
+    ParameterList<traitsT, UniformLennardJonesPotential<typename traitsT::real_type>>
+    >
+read_uniform_lennard_jones_potential(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+
+    using real_type      = typename traitsT::real_type;
+    using potential_type = UniformLennardJonesPotential<real_type>;
+
+    const real_type cutoff = toml::find_or<real_type>(global, "cutoff",
+            potential_type::default_cutoff());
+    MJOLNIR_LOG_INFO("relative cutoff = ", cutoff);
+
+    const real_type sigma   = toml::find<real_type>(global, "sigma");
+    const real_type epsilon = toml::find<real_type>(global, "epsilon");
+
+    using parameter_list = EmptyCombinationRule<traitsT, potential_type>;
+    // [[forcefield.global]]
+    // interaciton = "Pair"
+    // potential = "UniformLennardJones"
+    // sigma = 3.0
+    // epsilon = 1.0
+    // parameters = [
+    //     {index = 0, sigma = 1.0, epsilon = 0.2},
+    //     # ...
+    // ]
+    const auto& ps = toml::find<toml::array>(global, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+
+    std::vector<std::size_t> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        const auto idx = find_parameter<std::size_t>(param, env, "index") +
+                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
+        params.push_back(idx);
+        MJOLNIR_LOG_INFO("idx = ", idx);
+    }
+    return std::make_pair(potential_type(cutoff, sigma, epsilon),
+        ParameterList<traitsT, potential_type>(
+            make_unique<parameter_list>(
+                std::move(params), read_ignore_particles_within(global),
+                read_ignored_molecule(global), read_ignored_group(global)
+            )));
+}
+
 
 template<typename traitsT>
 std::pair<WCAPotential<typename traitsT::real_type>,

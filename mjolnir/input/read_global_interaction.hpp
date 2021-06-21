@@ -95,6 +95,19 @@ read_global_pair_interaction(const toml::value& global)
                 std::move(pot_para.first), std::move(pot_para.second),
                 read_spatial_partition<traitsT, potential_t>(global));
     }
+    else if(potential == "UniformLennardJones")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is uniform Lennard-Jones.");
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = UniformLennardJonesPotential<real_type>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+
+        auto pot_para = read_uniform_lennard_jones_potential<traitsT>(global);
+
+        return make_unique<interaction_t>(
+                std::move(pot_para.first), std::move(pot_para.second),
+                read_spatial_partition<traitsT, potential_t>(global));
+    }
     else if(potential == "LennardJonesAttractive")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is the attractive part of Lennard-Jones.");
