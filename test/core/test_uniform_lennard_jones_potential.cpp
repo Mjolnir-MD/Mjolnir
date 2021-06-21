@@ -5,76 +5,50 @@
 #else
 #include <boost/test/included/unit_test.hpp>
 #endif
+
+#include <test/util/check_potential.hpp>
 #include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
-#include <mjolnir/util/make_unique.hpp>
 
 BOOST_AUTO_TEST_CASE(UniformLennardJones_double)
 {
-    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type   = typename traits_type::real_type;
-    using molecule_id_type = mjolnir::Topology::molecule_id_type;
-    using group_id_type    = mjolnir::Topology::group_id_type;
+    using real_type = double;
+    using potential_type = mjolnir::UniformLennardJonesPotential<real_type>;
+    using parameter_type = potential_type::parameter_type;
+
     constexpr std::size_t N = 10000;
     constexpr real_type   h = 1e-6;
+    constexpr real_type tol = 1e-6;
 
-    constexpr real_type sigma   = 3.0;
-    constexpr real_type epsilon = 1.0;
-    mjolnir::UniformLennardJonesPotential<traits_type> lj{
-        sigma, epsilon,
-        mjolnir::UniformLennardJonesPotential<traits_type>::default_cutoff(), {}, {},
-        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
-        mjolnir::IgnoreGroup   <group_id_type   >({})
-    };
-    const real_type cutoff = lj.cutoff_ratio();
+    const real_type sigma   = 3.0;
+    const real_type epsilon = 1.0;
+
+    potential_type potential(/*cutoff = */ 2.5, sigma, epsilon);
 
     const real_type x_min = 0.8 * sigma;
-    const real_type x_max = cutoff * sigma;
-    const real_type dx = (x_max - x_min) / N;
+    const real_type x_max = potential.cutoff_ratio() * sigma;
 
-    for(std::size_t i=0; i<N; ++i)
-    {
-        const real_type x    = x_min + i * dx;
-        const real_type pot1 = lj.potential(0, 1, x + h);
-        const real_type pot2 = lj.potential(0, 1, x - h);
-        const real_type dpot = (pot1 - pot2) / (2 * h);
-        const real_type deri = lj.derivative(0, 1, x);
-
-        BOOST_TEST(dpot == deri, boost::test_tools::tolerance(h));
-    }
+    mjolnir::test::check_potential(potential, parameter_type{},
+                                   x_min, x_max, tol, h, N);
 }
 
 BOOST_AUTO_TEST_CASE(UniformLennardJones_float)
 {
-    using traits_type = mjolnir::SimulatorTraits<float, mjolnir::UnlimitedBoundary>;
-    using real_type   = typename traits_type::real_type;
-    using molecule_id_type = mjolnir::Topology::molecule_id_type;
-    using group_id_type    = mjolnir::Topology::group_id_type;
+    using real_type = float;
+    using potential_type = mjolnir::UniformLennardJonesPotential<real_type>;
+    using parameter_type = potential_type::parameter_type;
+
     constexpr std::size_t N = 1000;
-    constexpr real_type   h = 0.002;
-    constexpr real_type tol = 0.005;
+    constexpr real_type   h = 0.002f;
+    constexpr real_type tol = 0.005f;
 
-    constexpr real_type sigma   = 3.0;
-    constexpr real_type epsilon = 1.0;
-    mjolnir::UniformLennardJonesPotential<traits_type> lj{
-        sigma, epsilon,
-        mjolnir::UniformLennardJonesPotential<traits_type>::default_cutoff(), {}, {},
-        mjolnir::IgnoreMolecule<molecule_id_type>("Nothing"),
-        mjolnir::IgnoreGroup   <group_id_type   >({})
-    };
-    const real_type cutoff = lj.cutoff_ratio();
+    const real_type sigma   = 3.0f;
+    const real_type epsilon = 1.0f;
 
-    const real_type x_min = 0.8 * sigma;
-    const real_type x_max = cutoff * sigma;
-    const real_type dx = (x_max - x_min) / N;
+    potential_type potential(/*cutoff = */ 2.5f, sigma, epsilon);
 
-    for(std::size_t i=0; i<N; ++i)
-    {
-        const real_type x    = x_min + i * dx;
-        const real_type pot1 = lj.potential(0, 1, x + h);
-        const real_type pot2 = lj.potential(0, 1, x - h);
-        const real_type dpot = (pot1 - pot2) / (2 * h);
-        const real_type deri = lj.derivative(0, 1, x);
+    const real_type x_min = 0.8f * sigma;
+    const real_type x_max = potential.cutoff_ratio() * sigma;
 
-        BOOST_TEST(dpot == deri, boost::test_tools::tolerance(tol));
-    }
+    mjolnir::test::check_potential(potential, parameter_type{},
+                                   x_min, x_max, tol, h, N);
 }
