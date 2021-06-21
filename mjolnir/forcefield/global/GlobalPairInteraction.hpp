@@ -98,6 +98,11 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
     parameter_list_type const& parameters() const noexcept {return parameters_.cref();}
     parameter_list_type &      parameters()       noexcept {return parameters_.cref();}
 
+    potential_type const& potential() const noexcept {return potential_;}
+    potential_type&       potential()       noexcept {return potential_;}
+
+    partition_type const& partition() const noexcept {return partition_;}
+
     // deep-copy through the base class, GlobalInteractionBase*
     base_type* clone() const override
     {
