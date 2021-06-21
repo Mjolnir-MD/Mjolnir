@@ -114,19 +114,21 @@ class HardCoreExcludedVolumePotential
 
         if(first == last) {return 1;}
 
-        real_type max_sigma = 0;
+        real_type max_sigma  = 0;
+        real_type max_radius = 0;
         for(auto iter = first; iter != last; ++iter)
         {
             const auto& parameter = *iter;
-            max_sigma = std::max(max_sigma, parameter.sigma);
+            max_sigma  = std::max(max_sigma, parameter.sigma);
+            max_radius = std::max(max_radius, parameter.radius);
         }
-        return max_sigma * cutoff_ratio_;
+        return max_sigma * cutoff_ratio_ + max_radius;
     }
     // It returns absolute cutoff length using pair-parameter.
     // `CombinationTable` uses this.
     real_type absolute_cutoff(const parameter_type& params) const noexcept
     {
-        return params.sigma * cutoff_ratio_;
+        return params.sigma * cutoff_ratio_ + params.radius;
     }
 
   private:
