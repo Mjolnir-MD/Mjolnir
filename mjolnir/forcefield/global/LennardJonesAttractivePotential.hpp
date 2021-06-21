@@ -107,6 +107,8 @@ class LennardJonesAttractivePotential
         return params.sigma * cutoff_ratio_;
     }
 
+    real_type cutoff_ratio() const noexcept {return cutoff_ratio_;}
+
   private:
 
     real_type cutoff_ratio_;
