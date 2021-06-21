@@ -32,10 +32,14 @@ void check_force_and_energy(System<traitsT> ref,
 
     System<traitsT> sys(ref);
 
+    ref.preprocess_forces();
     interaction.calc_force(ref);
+    ref.postprocess_forces();
     const auto ref_ene = interaction.calc_energy(ref);
 
+    sys.preprocess_forces();
     const auto ene = interaction.calc_force_and_energy(sys);
+    sys.postprocess_forces();
 
     BOOST_TEST(ref_ene == ene, boost::test_tools::tolerance(tol));
 
