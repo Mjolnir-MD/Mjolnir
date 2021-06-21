@@ -31,7 +31,7 @@ class ExcludedVolumePotential
 
     struct parameter_type
     {
-        real_type sigma;
+        real_type radius;
     };
 
     static constexpr real_type default_cutoff() noexcept
@@ -55,19 +55,19 @@ class ExcludedVolumePotential
 
     real_type potential(const real_type r, const parameter_type& params) const noexcept
     {
-        if(params.sigma * this->cutoff_ratio_ < r){return 0;}
+        if(params.radius * this->cutoff_ratio_ < r){return 0;}
 
-        const real_type d_r  = params.sigma / r;
+        const real_type d_r  = params.radius / r;
         const real_type dr3  = d_r * d_r * d_r;
         const real_type dr6  = dr3 * dr3;
         return this->epsilon_ * (dr6 * dr6 - this->coef_at_cutoff_);
     }
     real_type derivative(const real_type r, const parameter_type& params) const noexcept
     {
-        if(params.sigma * this->cutoff_ratio_ < r){return 0;}
+        if(params.radius * this->cutoff_ratio_ < r){return 0;}
 
         const real_type rinv = real_type(1) / r;
-        const real_type d_r  = params.sigma * rinv;
+        const real_type d_r  = params.radius * rinv;
         const real_type dr3  = d_r * d_r * d_r;
         const real_type dr6  = dr3 * dr3;
         return real_type(-12.0) * this->epsilon_ * dr6 * dr6 * rinv;
@@ -96,19 +96,19 @@ class ExcludedVolumePotential
 
         if(first == last) {return 1;}
 
-        real_type max_sigma = 0;
+        real_type max_radius = 0;
         for(auto iter = first; iter != last; ++iter)
         {
             const auto& parameter = *iter;
-            max_sigma = std::max(max_sigma, parameter.sigma);
+            max_radius = std::max(max_radius, parameter.radius);
         }
-        return max_sigma * cutoff_ratio_;
+        return max_radius * cutoff_ratio_;
     }
     // It returns absolute cutoff length using pair-parameter.
     // `CombinationTable` uses this.
     real_type absolute_cutoff(const parameter_type& params) const noexcept
     {
-        return params.sigma * cutoff_ratio_;
+        return params.radius * cutoff_ratio_;
     }
 
     // ------------------------------------------------------------------------
@@ -191,7 +191,7 @@ class ExcludedVolumeParameterList final
 
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
     {
-        return pair_parameter_type{parameters_[i].sigma + parameters_[j].sigma};
+        return pair_parameter_type{parameters_[i].radius + parameters_[j].radius};
     }
 
     real_type max_cutoff_length() const noexcept override

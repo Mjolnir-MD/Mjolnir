@@ -97,7 +97,7 @@ class GlobalPairInteraction<
                     sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type l_sq = math::length_sq(rij);
 
-                const real_type sigma_sq = para.sigma * para.sigma;
+                const real_type sigma_sq = para.radius * para.radius;
                 if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
 
                 const real_type rcp_l_sq = real_type(1) / l_sq;
@@ -139,7 +139,7 @@ class GlobalPairInteraction<
                     sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type l_sq = math::length_sq(rij);
 
-                const real_type sigma_sq = para.sigma * para.sigma;
+                const real_type sigma_sq = para.radius * para.radius;
                 if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
 
                 const real_type s2l2 = sigma_sq / l_sq;
@@ -173,7 +173,7 @@ class GlobalPairInteraction<
                     sys.adjust_direction(sys.position(i), sys.position(j));
                 const real_type l_sq = math::length_sq(rij);
 
-                const real_type sigma_sq = para.sigma * para.sigma;
+                const real_type sigma_sq = para.radius * para.radius;
                 if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
 
                 const real_type rcp_l_sq = real_type(1) / l_sq;
