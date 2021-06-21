@@ -90,6 +90,9 @@ class ProteinDNANonSpecificInteraction final : public GlobalInteractionBase<trai
     parameter_list_type const& parameters() const noexcept {return parameters_;}
     parameter_list_type&       parameters()       noexcept {return parameters_;}
 
+    potential_type const& potential() const noexcept {return potential_;}
+    potential_type&       potential()       noexcept {return potential_;}
+
     base_type* clone() const override
     {
         return new ProteinDNANonSpecificInteraction(*this);
