@@ -60,7 +60,8 @@ void check_potential(const Potential& pot,
 
         const real_type deri = pot.derivative(x, para);
 
-        BOOST_TEST_MESSAGE("x = " << x);
+        BOOST_TEST_MESSAGE("x = " << x << ", V(x+h) = " << pot1 << ", V(x-h) = " << pot2
+                           << ", dV/h = " << dpot << ", dV/dx = " << deri);
         BOOST_TEST(dpot == deri, boost::test_tools::tolerance(tol));
     }
 }
