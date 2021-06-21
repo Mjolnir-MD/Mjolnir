@@ -6,6 +6,7 @@
 #include "check_force.hpp"
 #include "check_force_and_energy.hpp"
 #include "check_virial.hpp"
+#include "check_potential.hpp"
 #include "clear_system.hpp"
 #include "make_empty_input.hpp"
 #include "stub_potential.hpp"
