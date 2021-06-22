@@ -108,6 +108,8 @@ class InversePowerPotential
     integer_type& n()       noexcept {return this->n_;}
     integer_type  n() const noexcept {return this->n_;}
 
+    real_type  cutoff_ratio() const noexcept {return this->cutoff_ratio_;}
+
   private:
 
     integer_type n_;

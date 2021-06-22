@@ -131,6 +131,9 @@ class HardCoreExcludedVolumePotential
         return params.sigma * cutoff_ratio_ + params.radius;
     }
 
+    real_type epsilon() const noexcept {return epsilon_;}
+    real_type cutoff_ratio() const noexcept {return cutoff_ratio_;}
+
   private:
 
     real_type epsilon_;

@@ -332,8 +332,8 @@ class DebyeHuckelParameterList final
     // the following accessers would be used in tests.
 
     // access to the parameters.
-    std::vector<parameter_type>&       charges()       noexcept {return parameters_;}
-    std::vector<parameter_type> const& charges() const noexcept {return parameters_;}
+    std::vector<parameter_type>&       parameters()       noexcept {return parameters_;}
+    std::vector<parameter_type> const& parameters() const noexcept {return parameters_;}
 
     base_type* clone() const override
     {
