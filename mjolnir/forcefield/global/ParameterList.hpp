@@ -524,7 +524,13 @@ class EmptyCombinationRule final
         const std::vector<std::size_t>& participants,
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-      : participants_(participants),
+      : participants_should_be_updated_(false), participants_(participants),
+        exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
+    {}
+    EmptyCombinationRule(
+        const std::map<connection_kind_type, std::size_t>& exclusions,
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+      : participants_should_be_updated_ (true),
         exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {}
 
@@ -545,6 +551,13 @@ class EmptyCombinationRule final
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
+        if(participants_should_be_updated_)
+        {
+            participants_.resize(sys.size());
+            std::iota(participants_.begin(), participants_.end(), 0);
+
+            participants_should_be_updated_ = false;
+        }
         this->update(sys, topol, pot);
         return;
     }
@@ -607,6 +620,7 @@ class EmptyCombinationRule final
 
   private:
 
+    bool                     participants_should_be_updated_;
     real_type                max_cutoff_length_;
     std::vector<std::size_t> participants_;
     exclusion_list_type      exclusion_list_;

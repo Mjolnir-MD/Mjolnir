@@ -386,9 +386,9 @@ read_hard_core_excluded_volume_potential(const toml::value& global)
         const auto idx = find_parameter<std::size_t>(param, env, "index") +
                          find_parameter_or<std::int64_t>(param, env, "offset", 0);
 
-        const auto core_radius =
+        const auto core_radius = // hard core radius
             find_parameter<real_type>(param, env, "core_radius");
-        const auto soft_shell_thickness =
+        const auto soft_shell_thickness = // sigma
             find_parameter<real_type>(param, env, "soft_shell_thickness");
 
         params.emplace_back(idx, parameter_type{soft_shell_thickness, core_radius});
@@ -500,6 +500,16 @@ read_uniform_lennard_jones_potential(const toml::value& global)
     //     {index = 0, sigma = 1.0, epsilon = 0.2},
     //     # ...
     // ]
+
+    if( ! global.contains("parameters"))
+    {
+        return std::make_pair(potential_type(cutoff, sigma, epsilon),
+            ParameterList<traitsT, potential_type>(
+                make_unique<parameter_list>(
+                    read_ignore_particles_within(global),
+                    read_ignored_molecule(global), read_ignored_group(global)
+                )));
+    }
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
