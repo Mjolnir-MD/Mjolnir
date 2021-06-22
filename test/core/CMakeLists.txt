@@ -93,12 +93,12 @@ set(TEST_NAMES
     test_read_debye_huckel_potential
     test_read_lennard_jones_potential
     test_read_uniform_lennard_jones_potential
-    test_read_excluded_volume_wall_potential
     test_read_lennard_jones_attractive_potential
     test_read_tabulated_lennard_jones_attractive_potential
     test_read_wca_potential
     test_read_tabulated_wca_potential
     test_read_isolf_potential
+    test_read_excluded_volume_wall_potential
     test_read_lennard_jones_wall_potential
     test_read_implicit_membrane_potential
     test_read_uniform_potential
