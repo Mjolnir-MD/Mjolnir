@@ -97,6 +97,16 @@ class System
             math::Y(this->velocity(i)) = rng.gaussian(0, vel_coef);
             math::Z(this->velocity(i)) = rng.gaussian(0, vel_coef);
         }
+
+        // generate random force for dynamic variables
+        for(auto& kv : this->variables_)
+        {
+            auto& var = kv.second;
+            if( ! is_finite(var.v)) // not initialized
+            {
+                var.v = rng.gaussian(0, std::sqrt(kBT / var.m));
+            }
+        }
         MJOLNIR_LOG_NOTICE("done.");
         return;
     }
@@ -213,7 +223,7 @@ class System
     bool           velocity_initialized_, force_initialized_;
     boundary_type  boundary_;
     attribute_type attributes_;
-    variables_type dynamic_variables_;
+    variables_type variables_;
     matrix33_type  virial_;
 
     std::size_t                  num_particles_;
