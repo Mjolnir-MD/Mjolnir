@@ -39,6 +39,7 @@ class System
     struct dynamic_variable
     {
         real_type x, v, f;
+        real_type m, gamma; // gamma is zero if the dynamics is newtonian
     };
     using variables_type = std::map<std::string, dynamic_variable>;
 
