@@ -35,11 +35,17 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     template<typename T>
     using cache_aligned_allocator = aligned_allocator<T, cache_alignment>;
 
+    struct dynamic_variable
+    {
+        real_type x, v, f;
+    };
+    using variables_type = std::map<std::string, dynamic_variable>;
+
   public:
 
     System(const std::size_t num_particles, const boundary_type& bound)
         : velocity_initialized_(false), force_initialized_(false),
-          boundary_(bound), attributes_(),
+          boundary_(bound), attributes_{}, variables_{},
           virial_(0,0,0, 0,0,0, 0,0,0),
           virial_threads_(omp_get_max_threads(),
                           matrix33_type(0,0,0, 0,0,0, 0,0,0)),
@@ -228,6 +234,12 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     bool   has_attribute(const std::string& key) const {return attributes_.count(key) == 1;}
     attribute_type const& attributes() const noexcept {return attributes_;}
 
+    // dynamic variables in a system.
+    dynamic_varialbe  variable(const std::string& key) const {return variables_.at(key);}
+    dynamic_varialbe& variable(const std::string& key)       {return variables_[key];}
+    bool          has_variable(const std::string& key) const {return variables_.count(key) == 1;}
+    variables_type const& variables() const noexcept {return variables_;}
+
     bool  velocity_initialized() const noexcept {return velocity_initialized_;}
     bool& velocity_initialized()       noexcept {return velocity_initialized_;}
 
@@ -243,6 +255,7 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     bool           velocity_initialized_, force_initialized_;
     boundary_type  boundary_;
     attribute_type attributes_;
+    variables_type dynamic_variables_;
 
     matrix33_type  virial_;
     std::vector<matrix33_type, cache_aligned_allocator<matrix33_type>> virial_threads_;
