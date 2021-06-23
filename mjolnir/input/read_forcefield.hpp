@@ -2,6 +2,7 @@
 #define MJOLNIR_INPUT_READ_FORCEFIELD_HPP
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/ForceField.hpp>
+#include <mjolnir/forcefield/hybrid/HybridForceField.hpp>
 #include <mjolnir/forcefield/MultipleBasin/MultipleBasinForceField.hpp>
 #include <mjolnir/forcefield/MultipleBasin/MultipleBasin2BasinUnit.hpp>
 #include <mjolnir/forcefield/MultipleBasin/MultipleBasin3BasinUnit.hpp>
@@ -392,6 +393,53 @@ read_multiple_basin_forcefield(const toml::value& root, const toml::value& simul
             read_forcefield_elements(common), std::move(con), std::move(units));
 }
 
+template<typename traitsT>
+std::unique_ptr<ForceFieldBase<traitsT>>
+read_hybrid_forcefield(const toml::value& root, const toml::value& simulator)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using namespace mjolnir::literals::string_literals;
+    using real_type = typename traitsT::real_type;
+
+    // Hybrid Forcefield V is defined as
+    //
+    // V = lambda * V1 + (1 - lambda) * V2
+    //
+    // ```toml
+    // [simulator]
+    // forcefields.type   = "Hybrid"
+    // forcefields.lambda = 0.1
+    //
+    // # first one will automatically be V1
+    // [[forcefields]]
+    // [[forcefields.local]]
+    // interaction = "BondLength"
+    // # ...
+    //
+    // # second one will automatically be V2
+    // [[forcefields]]
+    // [[forcefields.local]]
+    // interaction = "BondLength"
+    // # ...
+    // ```
+
+    if(root.at("forcefields").as_array().size() < 2)
+    {
+        MJOLNIR_LOG_ERROR("Hybrid ForceField requires 2 forcefields but only 1 is provided");
+        throw_exception<std::runtime_error>("[error] Hybrid Forcefield require 2 forcefields");
+    }
+    else if(root.at("forcefields").as_array().size() < 2)
+    {
+        MJOLNIR_LOG_WARN("Hybrid ForceField requires 2 forcefields but more than 2 are provided.");
+        MJOLNIR_LOG_WARN("The first and second ones are used, but the others will be ignored");
+    }
+    return make_unique<HybridForceField<traitsT>>(
+            toml::find<real_type>(simulator, "forcefields", "lambda"),
+            read_default_forcefield<traitsT>(root, 0),
+            read_default_forcefield<traitsT>(root, 1)
+        );
+}
 
 template<typename traitsT>
 std::unique_ptr<ForceFieldBase<traitsT>>
@@ -408,13 +456,18 @@ read_forcefield(const toml::value& root, const toml::value& simulator)
     {
         return read_multiple_basin_forcefield<traitsT>(root, simulator);
     }
+    else if(simulator.at("forcefields").at("type").as_string() == "Hybrid")
+    {
+        return read_hybrid_forcefield<traitsT>(root, simulator);
+    }
     else
     {
         throw std::runtime_error(toml::format_error("mjolnir::read_forcefield: "
             "unknown forcefield type", simulator.at("forcefields").at("type"),
             "here", {"expected one of the following: ",
                 "- \"MultipleBasin\": Multiple Basin forcefield.",
-                "- (nothing)      : In case of normal forcefield, you don't need this field."
+                "- \"Hybrid\"       : lambda * V1 + (1 - lambda) * V2.",
+                "- (nothing)        : In case of normal forcefield, you don't need this field."
             }));
     }
 }
