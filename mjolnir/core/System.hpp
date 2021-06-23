@@ -209,6 +209,7 @@ class System
     dynamic_varialbe& variable(const std::string& key)       {return variables_[key];}
     bool          has_variable(const std::string& key) const {return variables_.count(key) == 1;}
     variables_type const& variables() const noexcept {return variables_;}
+    variables_type&       variables()       noexcept {return variables_;}
 
     bool  velocity_initialized() const noexcept {return velocity_initialized_;}
     bool& velocity_initialized()       noexcept {return velocity_initialized_;}
