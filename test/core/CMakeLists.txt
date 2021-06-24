@@ -27,6 +27,7 @@ set(TEST_NAMES
     test_3spn2_bond_potential
     test_3spn2_base_stacking_potential
     test_3spn2_base_base_interaction_potential
+    test_3spn2_excluded_volume_potential
     test_lennard_jones_potential
     test_uniform_lennard_jones_potential
     test_lennard_jones_attractive_potential
