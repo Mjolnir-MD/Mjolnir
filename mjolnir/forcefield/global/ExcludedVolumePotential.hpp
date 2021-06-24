@@ -102,7 +102,7 @@ class ExcludedVolumePotential
             const auto& parameter = *iter;
             max_radius = std::max(max_radius, parameter.radius);
         }
-        return max_radius * cutoff_ratio_;
+        return max_radius * 2 * cutoff_ratio_;
     }
     // It returns absolute cutoff length using pair-parameter.
     // `CombinationTable` uses this.
