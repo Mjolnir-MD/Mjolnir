@@ -90,7 +90,7 @@ class InversePowerPotential
             const auto& parameter = *iter;
             max_sigma = std::max(max_sigma, parameter.sigma);
         }
-        return max_sigma * cutoff_ratio_;
+        return max_sigma * 2 * cutoff_ratio_;
     }
     // It returns absolute cutoff length using pair-parameter.
     // `CombinationTable` uses this.

@@ -122,7 +122,7 @@ class HardCoreExcludedVolumePotential
             max_sigma  = std::max(max_sigma, parameter.sigma);
             max_radius = std::max(max_radius, parameter.radius);
         }
-        return max_sigma * cutoff_ratio_ + max_radius;
+        return max_sigma * 2 * cutoff_ratio_ + max_radius * 2;
     }
     // It returns absolute cutoff length using pair-parameter.
     // `CombinationTable` uses this.
