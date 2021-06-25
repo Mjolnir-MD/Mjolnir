@@ -163,12 +163,12 @@ class HybridForceField : public ForceFieldBase<traitsT>
     forcefield_type ff_2_;
 };
 
-// #ifdef MJOLNIR_SEPARATE_BUILD
-// extern template class HybridForceField<SimulatorTraits<double, UnlimitedBoundary       >>;
-// extern template class HybridForceField<SimulatorTraits<float,  UnlimitedBoundary       >>;
-// extern template class HybridForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-// extern template class HybridForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
-// #endif
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class HybridForceField<SimulatorTraits<double, UnlimitedBoundary       >>;
+extern template class HybridForceField<SimulatorTraits<float,  UnlimitedBoundary       >>;
+extern template class HybridForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class HybridForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+#endif
 
 } // mjolnir
 #endif// MJOLNIR_CORE_MULTIPLE_BASIN_FORCE_FIELD_HPP
