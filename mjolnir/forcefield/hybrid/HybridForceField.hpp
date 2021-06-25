@@ -120,6 +120,11 @@ class HybridForceField : public ForceFieldBase<traitsT>
     // number of chains, so it should not be problematic (but need to be refactored)
     topology_type const& topology() const noexcept override {return ff_1_->topology();}
 
+    real_type lambda() const noexcept {return lambda_;}
+
+    forcefield_type const& ff1() const noexcept {return ff_1_;}
+    forcefield_type const& ff2() const noexcept {return ff_2_;}
+
     // -----------------------------------------------------------------------
     // energy output format
 
