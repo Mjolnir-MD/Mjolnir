@@ -424,16 +424,13 @@ read_hybrid_forcefield(const toml::value& root, const toml::value& simulator)
     // # ...
     // ```
 
-    if(root.at("forcefields").as_array().size() < 2)
+    const auto num_ff = root.at("forcefields").as_array().size();
+    if(num_ff != 2)
     {
-        MJOLNIR_LOG_ERROR("Hybrid ForceField requires 2 forcefields but only 1 is provided");
+        MJOLNIR_LOG_ERROR("Hybrid ForceField requires 2 forcefields but ", num_ff, " is provided");
         throw_exception<std::runtime_error>("[error] Hybrid Forcefield require 2 forcefields");
     }
-    else if(root.at("forcefields").as_array().size() < 2)
-    {
-        MJOLNIR_LOG_WARN("Hybrid ForceField requires 2 forcefields but more than 2 are provided.");
-        MJOLNIR_LOG_WARN("The first and second ones are used, but the others will be ignored");
-    }
+
     return make_unique<HybridForceField<traitsT>>(
             toml::find<real_type>(simulator, "forcefields", "lambda"),
             read_default_forcefield<traitsT>(root, 0),
