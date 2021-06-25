@@ -6,8 +6,8 @@
 
 namespace mjolnir
 {
-template class PWMcosPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
-template class PWMcosPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
-template class PWMcosPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-template class PWMcosPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+template class PWMcosParameterList<SimulatorTraits<double, UnlimitedBoundary>       >;
+template class PWMcosParameterList<SimulatorTraits<float,  UnlimitedBoundary>       >;
+template class PWMcosParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+template class PWMcosParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir

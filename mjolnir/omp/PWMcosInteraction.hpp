@@ -32,13 +32,14 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
     using system_type     = typename base_type::system_type;
     using topology_type   = typename base_type::topology_type;
     using boundary_type   = typename base_type::boundary_type;
-    using potential_type  = PWMcosPotential<traits_type>;
+    using potential_type  = PWMcosPotential<real_type>;
     using partition_type  = SpatialPartition<traits_type, potential_type>;
+    using parameter_list_type = PWMcosParameterList<traits_type>;
 
   public:
 
-    PWMcosInteraction(potential_type&& pot, partition_type&& part)
-        : potential_(std::move(pot)), partition_(std::move(part))
+    PWMcosInteraction(potential_type&& pot, parameter_list_type&& para, partition_type&& part)
+        : potential_(std::move(pot)), parameters_(std::move(para)), partition_(std::move(part))
     {}
     ~PWMcosInteraction() {}
 
@@ -48,8 +49,9 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is PWMcos");
 
-        this->potential_.initialize(sys, topol);
-        this->partition_.initialize(sys, this->potential_);
+        this->potential_ .initialize(sys);
+        this->parameters_.initialize(sys, topol, this->potential_);
+        this->partition_ .initialize(sys, this->parameters_);
         return;
     }
 
@@ -59,19 +61,20 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is PWMcos");
 
-        this->potential_.update(sys, topol);
-        this->partition_.initialize(sys, this->potential_);
+        this->potential_ .update(sys);
+        this->parameters_.update(sys, topol, this->potential_);
+        this->partition_ .initialize(sys, this->parameters_);
         return;
     }
 
     void reduce_margin(const real_type dmargin, const system_type& sys) override
     {
-        this->partition_.reduce_margin(dmargin, sys, this->potential_);
+        this->partition_.reduce_margin(dmargin, sys, this->parameters_);
         return ;
     }
     void scale_margin(const real_type scale, const system_type& sys) override
     {
-        this->partition_.scale_margin(scale, sys, this->potential_);
+        this->partition_.scale_margin(scale, sys, this->parameters_);
         return ;
     }
 
@@ -100,37 +103,43 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
         constexpr auto abs_tol = math::abs_tolerance<real_type>();
 
-        const auto energy_unit  = potential_.energy_unit();  // overall coefficient
-        const auto energy_shift = potential_.energy_shift(); // overall energy shift
+        const auto energy_unit  = parameters_.energy_unit();  // overall coefficient
+        const auto energy_shift = parameters_.energy_shift(); // overall energy shift
+
+        const auto rsigma       = parameters_.rsigma();
+        const auto phi          = parameters_.phi();
+        const auto phi2         = parameters_.phi2();
+        const auto pi_over_2phi = parameters_.pi_over_2phi();
 
 #pragma omp parallel for
-        for(std::size_t i=0; i < this->potential_.contacts().size(); ++i)
+        for(std::size_t i=0; i < this->parameters_.contacts().size(); ++i)
         {
             const auto thread_id = omp_get_thread_num();
 
-            const auto& para = potential_.contacts()[i];
-            const auto& PWM  = para.PWM;
+            const auto& contact = parameters_.contacts()[i];
+            const auto& PWM  = contact.PWM;
 
-            const auto  Ca  = para.Ca;  // C-alpha (not a calcium!)
+            const auto  Ca  = contact.Ca;  // C-alpha (not a calcium!)
             const auto& rCa = sys.position(Ca);
 
-            const auto  CaN = para.CaN; // N-term Ca (Cj-1)
-            const auto  CaC = para.CaC; // C-term Ca (Cj+1)
+            const auto  CaN = contact.CaN; // N-term Ca (Cj-1)
+            const auto  CaC = contact.CaC; // C-term Ca (Cj+1)
 
             MJOLNIR_LOG_DEBUG("Calpha = ", Ca);
             for(const auto& ptnr : this->partition_.partners(Ca))
             {
                 const auto  B  = ptnr.index;          // DNA Base
-                const auto  S  = ptnr.parameter().S;  // corresponding Sugar
-                const auto  B5 = ptnr.parameter().B5; // Base (Bi-1)
-                const auto  B3 = ptnr.parameter().B3; // Base (Bi+1)
+                const auto& para = ptnr.parameter();
+                const auto  S  = para.S;  // corresponding Sugar
+                const auto  B5 = para.B5; // Base (Bi-1)
+                const auto  B3 = para.B3; // Base (Bi+1)
                 MJOLNIR_LOG_DEBUG("Base = ", B);
 
                 const auto& rB     = sys.position(B);
                 const auto rBCa    = sys.adjust_direction(rB, rCa); // Bi -> Cj
                 const auto lBCa_sq = math::length_sq(rBCa);
 
-                if(para.r_cut_sq < lBCa_sq) {continue;}
+                if(contact.r_cut_sq < lBCa_sq) {continue;}
                 MJOLNIR_LOG_DEBUG("within the cutoff");
 
                 // ----------------------------------------------------------------
@@ -138,7 +147,7 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
                 const auto rlBCa = math::rsqrt(lBCa_sq);
                 const auto  lBCa = lBCa_sq * rlBCa;
-                const auto  f_df = potential_.f_df(para.r0, lBCa);
+                const auto  f_df = potential_.f_df(contact.r0, lBCa, rsigma);
 
                 // ----------------------------------------------------------------
                 // calculates the theta1 term
@@ -149,7 +158,7 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const auto dot1   = math::dot_product(rBS, rBCa);
                 const auto cos1   = dot1 * rlBS * rlBCa;
                 const auto theta1 = std::acos(math::clamp<real_type>(cos1,-1,1));
-                const auto g_dg_1 = potential_.g_dg(para.theta1_0, theta1);
+                const auto g_dg_1 = potential_.g_dg(contact.theta1_0, theta1, phi, phi2, pi_over_2phi);
 
                 if(g_dg_1.first == 0 && g_dg_1.second == 0)
                 {
@@ -167,7 +176,7 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const auto dot2   = math::dot_product(rB53, rBCa);
                 const auto cos2   = dot2 * rlB53 * rlBCa;
                 const auto theta2 = std::acos(math::clamp<real_type>(cos2,-1,1));
-                const auto g_dg_2 = potential_.g_dg(para.theta2_0, theta2);
+                const auto g_dg_2 = potential_.g_dg(contact.theta2_0, theta2, phi, phi2, pi_over_2phi);
 
                 if(g_dg_2.first == 0 && g_dg_2.second == 0)
                 {
@@ -185,7 +194,7 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const auto dot3   = math::dot_product(rCCN, rBCa);
                 const auto cos3   = dot3 * rlCCN * rlBCa;
                 const auto theta3 = std::acos(math::clamp<real_type>(cos3,-1,1));
-                const auto g_dg_3 = potential_.g_dg(para.theta3_0, theta3);
+                const auto g_dg_3 = potential_.g_dg(contact.theta3_0, theta3, phi, phi2, pi_over_2phi);
 
                 if(g_dg_3.first == 0 && g_dg_3.second == 0)
                 {
@@ -196,11 +205,11 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 // ================================================================
                 // calculates the force direction
 
-                const auto Bk    = static_cast<std::size_t>(ptnr.parameter().base);
+                const auto Bk    = static_cast<std::size_t>(para.base);
                 const auto e_pwm = PWM[Bk];
 
-                const auto coef  = para.gamma   * energy_unit;
-                const auto shift = para.epsilon + energy_shift;
+                const auto coef  = contact.gamma   * energy_unit;
+                const auto shift = contact.epsilon + energy_shift;
 
                 const auto factor = coef * (e_pwm + shift);
 
@@ -314,42 +323,48 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
     real_type calc_energy(const system_type& sys) const noexcept override
     {
-        const auto energy_unit  = potential_.energy_unit();  // overall coefficient
-        const auto energy_shift = potential_.energy_shift(); // overall energy shift
+        const auto energy_unit  = parameters_.energy_unit();  // overall coefficient
+        const auto energy_shift = parameters_.energy_shift(); // overall energy shift
 
         real_type E = 0.0;
 
-#pragma omp parallel for reduction(+:E)
-        for(std::size_t i=0; i < this->potential_.contacts().size(); ++i)
-        {
-            const auto& para = potential_.contacts()[i];
-            const auto& PWM  = para.PWM;
+        const auto rsigma       = parameters_.rsigma();
+        const auto phi          = parameters_.phi();
+        const auto phi2         = parameters_.phi2();
+        const auto pi_over_2phi = parameters_.pi_over_2phi();
 
-            const auto  Ca  = para.Ca;  // C-alpha (not a calcium!)
+#pragma omp parallel for reduction(+:E)
+        for(std::size_t i=0; i < this->parameters_.contacts().size(); ++i)
+        {
+            const auto& contact = parameters_.contacts()[i];
+            const auto& PWM  = contact.PWM;
+
+            const auto  Ca  = contact.Ca;  // C-alpha (not a calcium!)
             const auto& rCa = sys.position(Ca);
 
-            const auto  CaN = para.CaN; // N-term Ca (Cj-1)
-            const auto  CaC = para.CaC; // C-term Ca (Cj+1)
+            const auto  CaN = contact.CaN; // N-term Ca (Cj-1)
+            const auto  CaC = contact.CaC; // C-term Ca (Cj+1)
 
             for(const auto& ptnr : this->partition_.partners(Ca))
             {
                 const auto  B  = ptnr.index;          // DNA Base
-                const auto  S  = ptnr.parameter().S;  // corresponding Sugar
-                const auto  B5 = ptnr.parameter().B5; // Base (Bi-1)
-                const auto  B3 = ptnr.parameter().B3; // Base (Bi+1)
+                const auto& para = ptnr.parameter();
+                const auto  S  = para.S;  // corresponding Sugar
+                const auto  B5 = para.B5; // Base (Bi-1)
+                const auto  B3 = para.B3; // Base (Bi+1)
 
                 const auto& rB     = sys.position(B);
                 const auto rBCa    = sys.adjust_direction(rB, rCa); // Bi -> Cj
                 const auto lBCa_sq = math::length_sq(rBCa);
 
-                if(para.r_cut_sq < lBCa_sq) {continue;}
+                if(contact.r_cut_sq < lBCa_sq) {continue;}
 
                 // ----------------------------------------------------------------
                 // calculates the distance term (f(r))
 
                 const auto rlBCa = math::rsqrt(lBCa_sq);
                 const auto  lBCa = lBCa_sq * rlBCa;
-                const auto     f = potential_.f(para.r0, lBCa);
+                const auto     f = potential_.f(contact.r0, lBCa, rsigma);
 
                 // ----------------------------------------------------------------
                 // calculates the theta1 term
@@ -360,7 +375,7 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const auto dot1   = math::dot_product(rBS, rBCa);
                 const auto cos1   = dot1 * rlBS * rlBCa;
                 const auto theta1 = std::acos(math::clamp<real_type>(cos1,-1,1));
-                const auto g1     = potential_.g(para.theta1_0, theta1);
+                const auto g1     = potential_.g(contact.theta1_0, theta1, phi, phi2, pi_over_2phi);
 
                 if(g1 == 0) {continue;}
 
@@ -374,7 +389,7 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const auto dot2   = math::dot_product(rB53, rBCa);
                 const auto cos2   = dot2 * rlB53 * rlBCa;
                 const auto theta2 = std::acos(math::clamp<real_type>(cos2,-1,1));
-                const auto g2     = potential_.g(para.theta2_0, theta2);
+                const auto g2     = potential_.g(contact.theta2_0, theta2, phi, phi2, pi_over_2phi);
 
                 if(g2 == 0) {continue;}
 
@@ -388,17 +403,17 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const auto dot3   = math::dot_product(rCCN, rBCa);
                 const auto cos3   = dot3 * rlCCN * rlBCa;
                 const auto theta3 = std::acos(math::clamp<real_type>(cos3,-1,1));
-                const auto g3     = potential_.g(para.theta3_0, theta3);
+                const auto g3     = potential_.g(contact.theta3_0, theta3, phi, phi2, pi_over_2phi);
 
                 if(g3 == 0) {continue;}
 
                 // ================================================================
                 // calculates the force direction
 
-                const auto Bk    = static_cast<std::size_t>(ptnr.parameter().base);
+                const auto Bk    = static_cast<std::size_t>(para.base);
                 const auto e_pwm = PWM[Bk];
-                const auto coef  = para.gamma   * energy_unit;
-                const auto shift = para.epsilon + energy_shift;
+                const auto coef  = contact.gamma   * energy_unit;
+                const auto shift = contact.epsilon + energy_shift;
 
                 E += coef * (e_pwm + shift) * f * g1 * g2 * g3;
             }
@@ -431,38 +446,44 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
         constexpr auto abs_tol = math::abs_tolerance<real_type>();
 
-        const auto energy_unit  = potential_.energy_unit();  // overall coefficient
-        const auto energy_shift = potential_.energy_shift(); // overall energy shift
+        const auto energy_unit  = parameters_.energy_unit();  // overall coefficient
+        const auto energy_shift = parameters_.energy_shift(); // overall energy shift
+
+        const auto rsigma       = parameters_.rsigma();
+        const auto phi          = parameters_.phi();
+        const auto phi2         = parameters_.phi2();
+        const auto pi_over_2phi = parameters_.pi_over_2phi();
 
         real_type energy = 0;
 #pragma omp parallel for reduction(+:energy)
-        for(std::size_t i=0; i < this->potential_.contacts().size(); ++i)
+        for(std::size_t i=0; i < this->parameters_.contacts().size(); ++i)
         {
             const auto thread_id = omp_get_thread_num();
 
-            const auto& para = potential_.contacts()[i];
-            const auto& PWM  = para.PWM;
+            const auto& contact = parameters_.contacts()[i];
+            const auto& PWM  = contact.PWM;
 
-            const auto  Ca  = para.Ca;  // C-alpha (not a calcium!)
+            const auto  Ca  = contact.Ca;  // C-alpha (not a calcium!)
             const auto& rCa = sys.position(Ca);
 
-            const auto  CaN = para.CaN; // N-term Ca (Cj-1)
-            const auto  CaC = para.CaC; // C-term Ca (Cj+1)
+            const auto  CaN = contact.CaN; // N-term Ca (Cj-1)
+            const auto  CaC = contact.CaC; // C-term Ca (Cj+1)
 
             MJOLNIR_LOG_DEBUG("Calpha = ", Ca);
             for(const auto& ptnr : this->partition_.partners(Ca))
             {
                 const auto  B  = ptnr.index;          // DNA Base
-                const auto  S  = ptnr.parameter().S;  // corresponding Sugar
-                const auto  B5 = ptnr.parameter().B5; // Base (Bi-1)
-                const auto  B3 = ptnr.parameter().B3; // Base (Bi+1)
+                const auto& para = ptnr.parameter();
+                const auto  S  = para.S;  // corresponding Sugar
+                const auto  B5 = para.B5; // Base (Bi-1)
+                const auto  B3 = para.B3; // Base (Bi+1)
                 MJOLNIR_LOG_DEBUG("Base = ", B);
 
                 const auto& rB     = sys.position(B);
                 const auto rBCa    = sys.adjust_direction(rB, rCa); // Bi -> Cj
                 const auto lBCa_sq = math::length_sq(rBCa);
 
-                if(para.r_cut_sq < lBCa_sq) {continue;}
+                if(contact.r_cut_sq < lBCa_sq) {continue;}
                 MJOLNIR_LOG_DEBUG("within the cutoff");
 
                 // ----------------------------------------------------------------
@@ -470,7 +491,7 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
                 const auto rlBCa = math::rsqrt(lBCa_sq);
                 const auto  lBCa = lBCa_sq * rlBCa;
-                const auto  f_df = potential_.f_df(para.r0, lBCa);
+                const auto  f_df = potential_.f_df(contact.r0, lBCa, rsigma);
 
                 // ----------------------------------------------------------------
                 // calculates the theta1 term
@@ -481,7 +502,7 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const auto dot1   = math::dot_product(rBS, rBCa);
                 const auto cos1   = dot1 * rlBS * rlBCa;
                 const auto theta1 = std::acos(math::clamp<real_type>(cos1,-1,1));
-                const auto g_dg_1 = potential_.g_dg(para.theta1_0, theta1);
+                const auto g_dg_1 = potential_.g_dg(contact.theta1_0, theta1, phi, phi2, pi_over_2phi);
 
                 if(g_dg_1.first == 0 && g_dg_1.second == 0)
                 {
@@ -499,7 +520,7 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const auto dot2   = math::dot_product(rB53, rBCa);
                 const auto cos2   = dot2 * rlB53 * rlBCa;
                 const auto theta2 = std::acos(math::clamp<real_type>(cos2,-1,1));
-                const auto g_dg_2 = potential_.g_dg(para.theta2_0, theta2);
+                const auto g_dg_2 = potential_.g_dg(contact.theta2_0, theta2, phi, phi2, pi_over_2phi);
 
                 if(g_dg_2.first == 0 && g_dg_2.second == 0)
                 {
@@ -517,7 +538,7 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const auto dot3   = math::dot_product(rCCN, rBCa);
                 const auto cos3   = dot3 * rlCCN * rlBCa;
                 const auto theta3 = std::acos(math::clamp<real_type>(cos3,-1,1));
-                const auto g_dg_3 = potential_.g_dg(para.theta3_0, theta3);
+                const auto g_dg_3 = potential_.g_dg(contact.theta3_0, theta3, phi, phi2, pi_over_2phi);
 
                 if(g_dg_3.first == 0 && g_dg_3.second == 0)
                 {
@@ -528,11 +549,11 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 // ================================================================
                 // calculates the force direction
 
-                const auto Bk    = static_cast<std::size_t>(ptnr.parameter().base);
+                const auto Bk    = static_cast<std::size_t>(para.base);
                 const auto e_pwm = PWM[Bk];
 
-                const auto coef  = para.gamma   * energy_unit;
-                const auto shift = para.epsilon + energy_shift;
+                const auto coef  = contact.gamma   * energy_unit;
+                const auto shift = contact.epsilon + energy_shift;
 
                 const auto factor = coef * (e_pwm + shift);
                 energy += factor * f_df.first * g_dg_1.first *
@@ -646,19 +667,19 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
     std::string name() const override {return "PWMcosInteraction";}
 
-    potential_type const& potential() const noexcept {return potential_;}
-    potential_type&       potential()       noexcept {return potential_;}
+    parameter_list_type const& parameters() const noexcept {return parameters_;}
+    parameter_list_type&       parameters()       noexcept {return parameters_;}
 
     base_type* clone() const override
     {
-        return new PWMcosInteraction(
-                potential_type(potential_), partition_type(partition_));
+        return new PWMcosInteraction(*this);
     }
 
   private:
 
-    potential_type potential_;
-    partition_type partition_;
+    potential_type      potential_;
+    parameter_list_type parameters_;
+    partition_type      partition_;
 };
 
 } // mjolnir

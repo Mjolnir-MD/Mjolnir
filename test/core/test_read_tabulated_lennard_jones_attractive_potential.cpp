@@ -24,6 +24,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_tabulated_lennard_jones_attractive_noenv, T, 
 
     using real_type = T;
     using traits_type = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    using potential_type = mjolnir::LennardJonesAttractivePotential<real_type>;
     {
         using namespace toml::literals;
         const auto v = u8R"(
@@ -47,9 +48,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_tabulated_lennard_jones_attractive_noenv, T, 
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_tabulated_lennard_jones_attractive_potential<traits_type>(v);
+        const auto pot_para = mjolnir::read_lennard_jones_attractive_potential<traits_type>(v);
+        const auto& para = dynamic_cast<
+            mjolnir::CombinationTable<traits_type, potential_type> const&
+            >(pot_para.second.cref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -57,39 +61,39 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_tabulated_lennard_jones_attractive_noenv, T, 
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 0));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 1));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(1, 1));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(0, 0));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(0, 1));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(1, 1));
 
-        BOOST_TEST(pot.participants().size() ==   7u);
-        BOOST_TEST(pot.participants().at(0)  ==   0u);
-        BOOST_TEST(pot.participants().at(1)  ==   1u);
-        BOOST_TEST(pot.participants().at(2)  ==   2u);
-        BOOST_TEST(pot.participants().at(3)  ==   3u);
-        BOOST_TEST(pot.participants().at(4)  ==   5u);
-        BOOST_TEST(pot.participants().at(5)  ==   7u);
-        BOOST_TEST(pot.participants().at(6)  == 100u);
+        BOOST_TEST(para.participants().size() ==   7u);
+        BOOST_TEST(para.participants().at(0)  ==   0u);
+        BOOST_TEST(para.participants().at(1)  ==   1u);
+        BOOST_TEST(para.participants().at(2)  ==   2u);
+        BOOST_TEST(para.participants().at(3)  ==   3u);
+        BOOST_TEST(para.participants().at(4)  ==   5u);
+        BOOST_TEST(para.participants().at(5)  ==   7u);
+        BOOST_TEST(para.participants().at(6)  == 100u);
 
-        BOOST_TEST(pot.parameters().at(  0)  == "A", tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  1)  == "B", tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  2)  == "A", tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  3)  == "B", tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  5)  == "A", tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  7)  == "B", tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(100)  == "A", tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  0)  == "A", tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  1)  == "B", tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  2)  == "A", tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  3)  == "B", tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  5)  == "A", tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  7)  == "B", tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(100)  == "A", tolerance<real_type>());
 
-        const auto para_AA = pot.prepare_params(0, 2);
-        const auto para_AB = pot.prepare_params(0, 1);
-        const auto para_BA = pot.prepare_params(1, 2);
-        const auto para_BB = pot.prepare_params(1, 3);
+        const auto para_AA = para.prepare_params(0, 2);
+        const auto para_AB = para.prepare_params(0, 1);
+        const auto para_BA = para.prepare_params(1, 2);
+        const auto para_BB = para.prepare_params(1, 3);
 
-        BOOST_TEST(para_AA.first  == 1.0, tolerance<real_type>());
-        BOOST_TEST(para_AA.second == 0.5, tolerance<real_type>());
-        BOOST_TEST(para_AB.first  == 2.0, tolerance<real_type>());
-        BOOST_TEST(para_AB.second == 1.5, tolerance<real_type>());
-        BOOST_TEST(para_BA.first  == 2.0, tolerance<real_type>());
-        BOOST_TEST(para_BA.second == 1.5, tolerance<real_type>());
-        BOOST_TEST(para_BB.first  == 3.0, tolerance<real_type>());
-        BOOST_TEST(para_BB.second == 2.5, tolerance<real_type>());
+        BOOST_TEST(para_AA.sigma   == 1.0, tolerance<real_type>());
+        BOOST_TEST(para_AA.epsilon == 0.5, tolerance<real_type>());
+        BOOST_TEST(para_AB.sigma   == 2.0, tolerance<real_type>());
+        BOOST_TEST(para_AB.epsilon == 1.5, tolerance<real_type>());
+        BOOST_TEST(para_BA.sigma   == 2.0, tolerance<real_type>());
+        BOOST_TEST(para_BA.epsilon == 1.5, tolerance<real_type>());
+        BOOST_TEST(para_BB.sigma   == 3.0, tolerance<real_type>());
+        BOOST_TEST(para_BB.epsilon == 2.5, tolerance<real_type>());
     }
 }

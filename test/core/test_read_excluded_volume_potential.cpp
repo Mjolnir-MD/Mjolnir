@@ -43,9 +43,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_noenv, T, test_types)
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_excluded_volume_potential<traits_type>(v);
+        const auto pot_para = mjolnir::read_excluded_volume_potential<traits_type>(v);
+        const auto& pot  = pot_para.first;
+        const auto& para = dynamic_cast<mjolnir::ExcludedVolumeParameterList<traits_type> const&>(pot_para.second.cref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -53,20 +55,20 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_noenv, T, test_types)
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST(pot.participants().size() ==   6u);
-        BOOST_TEST(pot.participants().at(0)  ==   0u);
-        BOOST_TEST(pot.participants().at(1)  ==   1u);
-        BOOST_TEST(pot.participants().at(2)  ==   3u);
-        BOOST_TEST(pot.participants().at(3)  ==   5u);
-        BOOST_TEST(pot.participants().at(4)  ==   7u);
-        BOOST_TEST(pot.participants().at(5)  == 100u);
+        BOOST_TEST(para.participants().size() ==   6u);
+        BOOST_TEST(para.participants().at(0)  ==   0u);
+        BOOST_TEST(para.participants().at(1)  ==   1u);
+        BOOST_TEST(para.participants().at(2)  ==   3u);
+        BOOST_TEST(para.participants().at(3)  ==   5u);
+        BOOST_TEST(para.participants().at(4)  ==   7u);
+        BOOST_TEST(para.participants().at(5)  == 100u);
 
-        BOOST_TEST(pot.parameters().at(  0)  == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  1)  == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  3)  == real_type(  3.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  5)  == real_type(  5.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  7)  == real_type(  7.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(100)  == real_type(100.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  0).radius == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  1).radius == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  3).radius == real_type(  3.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  5).radius == real_type(  5.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  7).radius == real_type(  7.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(100).radius == real_type(100.0), tolerance<real_type>());
 
         BOOST_TEST(pot.epsilon() == real_type(3.14), tolerance<real_type>());
     }
@@ -98,9 +100,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_env, T, test_types)
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_excluded_volume_potential<traits_type>(v);
+        const auto pot_para = mjolnir::read_excluded_volume_potential<traits_type>(v);
+        const auto& pot  = pot_para.first;
+        const auto& para = dynamic_cast<mjolnir::ExcludedVolumeParameterList<traits_type> const&>(pot_para.second.cref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -108,20 +112,20 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_env, T, test_types)
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST(pot.participants().size() ==   6u);
-        BOOST_TEST(pot.participants().at(0)  ==   0u);
-        BOOST_TEST(pot.participants().at(1)  ==   1u);
-        BOOST_TEST(pot.participants().at(2)  ==   3u);
-        BOOST_TEST(pot.participants().at(3)  ==   5u);
-        BOOST_TEST(pot.participants().at(4)  ==   7u);
-        BOOST_TEST(pot.participants().at(5)  == 100u);
+        BOOST_TEST(para.participants().size() ==   6u);
+        BOOST_TEST(para.participants().at(0)  ==   0u);
+        BOOST_TEST(para.participants().at(1)  ==   1u);
+        BOOST_TEST(para.participants().at(2)  ==   3u);
+        BOOST_TEST(para.participants().at(3)  ==   5u);
+        BOOST_TEST(para.participants().at(4)  ==   7u);
+        BOOST_TEST(para.participants().at(5)  == 100u);
 
-        BOOST_TEST(pot.parameters().at(  0)  == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  1)  == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  3)  == real_type(  3.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  5)  == real_type(  5.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(  7)  == real_type(  7.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(100)  == real_type(100.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  0).radius  == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  1).radius  == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  3).radius  == real_type(  3.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  5).radius  == real_type(  5.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  7).radius  == real_type(  7.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(100).radius  == real_type(100.0), tolerance<real_type>());
 
         BOOST_TEST(pot.epsilon() == real_type(3.14), tolerance<real_type>());
     }
@@ -145,9 +149,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_ignore_self, T, test_types)
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_excluded_volume_potential<traits_type>(v);
+        const auto pot_para = mjolnir::read_excluded_volume_potential<traits_type>(v);
+        const auto& para = dynamic_cast<mjolnir::ExcludedVolumeParameterList<traits_type> const&>(pot_para.second.cref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -155,14 +160,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_ignore_self, T, test_types)
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST( pot.exclusion_list().is_ignored_molecule(0, 0));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 1));
-        BOOST_TEST( pot.exclusion_list().is_ignored_molecule(1, 1));
+        BOOST_TEST( para.exclusion_list().is_ignored_molecule(0, 0));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(0, 1));
+        BOOST_TEST( para.exclusion_list().is_ignored_molecule(1, 1));
 
         // by default, no group is ignored
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein1", "protein1"));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein1", "protein2"));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein2", "protein2"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein1", "protein1"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein1", "protein2"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein2", "protein2"));
     }
 }
 
@@ -184,9 +189,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_ignore_others, T, test_types)
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_excluded_volume_potential<traits_type>(v);
+        const auto pot_para = mjolnir::read_excluded_volume_potential<traits_type>(v);
+        const auto& para = dynamic_cast<mjolnir::ExcludedVolumeParameterList<traits_type> const&>(pot_para.second.cref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -194,14 +200,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_ignore_others, T, test_types)
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 0));
-        BOOST_TEST( pot.exclusion_list().is_ignored_molecule(0, 1));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(1, 1));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(0, 0));
+        BOOST_TEST( para.exclusion_list().is_ignored_molecule(0, 1));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(1, 1));
 
         // by default, no group is ignored
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein1", "protein1"));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein1", "protein2"));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein2", "protein2"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein1", "protein1"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein1", "protein2"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein2", "protein2"));
     }
 }
 
@@ -227,9 +233,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_ignore_group, T, test_types)
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_excluded_volume_potential<traits_type>(v);
+        const auto pot_para = mjolnir::read_excluded_volume_potential<traits_type>(v);
+        const auto& para = dynamic_cast<mjolnir::ExcludedVolumeParameterList<traits_type> const&>(pot_para.second.cref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -237,20 +244,20 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_excluded_volume_ignore_group, T, test_types)
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 0));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 1));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(1, 1));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(0, 0));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(0, 1));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(1, 1));
 
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein1", "protein1"));
-        BOOST_TEST( pot.exclusion_list().is_ignored_group("protein1", "protein2"));
-        BOOST_TEST( pot.exclusion_list().is_ignored_group("protein1", "protein3"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein1", "protein1"));
+        BOOST_TEST( para.exclusion_list().is_ignored_group("protein1", "protein2"));
+        BOOST_TEST( para.exclusion_list().is_ignored_group("protein1", "protein3"));
 
-        BOOST_TEST( pot.exclusion_list().is_ignored_group("protein2", "protein1"));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein2", "protein2"));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein2", "protein3"));
+        BOOST_TEST( para.exclusion_list().is_ignored_group("protein2", "protein1"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein2", "protein2"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein2", "protein3"));
 
-        BOOST_TEST( pot.exclusion_list().is_ignored_group("protein3", "protein1"));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein3", "protein2"));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein3", "protein3"));
+        BOOST_TEST( para.exclusion_list().is_ignored_group("protein3", "protein1"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein3", "protein2"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein3", "protein3"));
     }
 }
