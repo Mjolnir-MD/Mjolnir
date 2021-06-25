@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_FORCEFIELD_3SPN2_BASE_BASE_POTENTIAL_HPP
 #define MJOLNIR_FORCEFIELD_3SPN2_BASE_BASE_POTENTIAL_HPP
+#include <mjolnir/forcefield/global/ParameterList.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2Common.hpp>
 #include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
@@ -32,14 +33,170 @@ namespace mjolnir
 //
 // Note: an identifier starts with a digit is not allowed in C++ standard.
 //       see N3337 2.11 for detail. So `3SPN2BaseBaseInteraction` is not a valid name.
-template<typename traitsT>
+
+template<typename realT>
 class ThreeSPN2BaseBaseInteractionPotential
 {
   public:
-    using traits_type      = traitsT;
-    using real_type        = typename traits_type::real_type;
-    using system_type      = System<traits_type>;
-    using self_type        = ThreeSPN2BaseBaseInteractionPotential<traits_type>;
+    using real_type        = realT;
+    using base_kind        = parameter_3SPN2::base_kind;
+    using base_pair_kind   = parameter_3SPN2::base_pair_kind;
+    using cross_stack_kind = parameter_3SPN2::cross_stack_kind;
+
+    struct parameter_type
+    {
+        std::size_t      Si;
+        std::size_t      Sj;
+        std::size_t      Bi_next;
+        std::size_t      Bj_next;
+        cross_stack_kind cs_i_kind; // i and adjacent of j
+        cross_stack_kind cs_j_kind; // j and adjacent of i
+        base_pair_kind   bp_kind;
+    };
+
+    static constexpr std::size_t invalid() noexcept
+    {
+        return std::numeric_limits<std::size_t>::max();
+    }
+
+  public:
+
+    ThreeSPN2BaseBaseInteractionPotential() noexcept {}
+
+    real_type f(const real_type K,     const real_type pi_over_K,
+                const real_type theta, const real_type theta0) const noexcept
+    {
+        const auto dtheta     = theta - theta0;
+        const auto abs_dtheta = std::abs(dtheta);
+        if(abs_dtheta < pi_over_K * 0.5)
+        {
+            return 1.0;
+        }
+        else if(abs_dtheta < pi_over_K)
+        {
+            const auto cos_Kdtheta = std::cos(K * dtheta);
+            return 1.0 - cos_Kdtheta * cos_Kdtheta;
+        }
+        else
+        {
+            return 0.0;
+        }
+    }
+
+    real_type df(const real_type K,     const real_type pi_over_K,
+                 const real_type theta, const real_type theta0) const noexcept
+    {
+        const auto dtheta     = theta - theta0;
+        const auto abs_dtheta = std::abs(dtheta);
+
+        if(abs_dtheta < pi_over_K * 0.5)
+        {
+            return 0.0;
+        }
+        else if(abs_dtheta < pi_over_K)
+        {
+            return K * std::sin(2 * K * dtheta);
+        }
+        else
+        {
+            return 0.0;
+        }
+    }
+
+    real_type U_attr(const real_type epsilon, const real_type alpha,
+                     const real_type r,       const real_type r0) const noexcept
+    {
+        // --------------------------------------------------------
+        // U_m^attr =
+        //   -e                             ... (dBij <= dBij0)
+        //   -e + e * (1 - exp(-a(r-r0)))^2 ... (otherwise)
+        //
+        if(r <= r0)
+        {
+            return -epsilon;
+        }
+        else
+        {
+            const auto term = real_type(1) - std::exp(-alpha * (r - r0));
+            return epsilon * (term * term - real_type(1));
+        }
+    }
+
+    real_type dU_attr(const real_type epsilon, const real_type alpha,
+                      const real_type r,       const real_type r0) const noexcept
+    {
+        // --------------------------------------------------------
+        // dU_m^attr / dr =
+        //   0                                 ... (dBij <= dBij0)
+        //   2ae(1-exp(-a(r-r0)))exp(-a(r-r0)) ... (otherwise)
+        //
+        if(r <= r0) {return real_type(0);}
+        const auto term = std::exp(-alpha * (r - r0));
+        return 2 * alpha * epsilon * term * (real_type(1) - term);
+    }
+
+    std::pair<real_type, real_type> U_dU_attr(
+            const real_type epsilon, const real_type alpha,
+            const real_type r,       const real_type r0) const noexcept
+    {
+        if(r <= r0)
+        {
+            return std::make_pair(-epsilon, 0.0);
+        }
+
+        const auto term1 = std::exp(-alpha * (r - r0));
+        const auto term2 = real_type(1) - term1;
+        return std::make_pair(epsilon * (term2 * term2 - real_type(1)),
+                              2 * alpha * epsilon * term1 * term2);
+    }
+
+    real_type U_rep(const real_type epsilon, const real_type alpha,
+                    const real_type r,       const real_type r0) const noexcept
+    {
+        if(r0 < r) {return real_type(0);}
+        const auto term = real_type(1) - std::exp(-alpha * (r - r0));
+        return epsilon * term * term;
+    }
+    real_type dU_rep(const real_type epsilon, const real_type alpha,
+                     const real_type r,       const real_type r0) const noexcept
+    {
+        if(r0 < r) {return real_type(0);}
+        const auto term = std::exp(-alpha * (r - r0));
+        return 2 * alpha * epsilon * term * (real_type(1) - term);
+    }
+
+    template<typename T>
+    void initialize(const System<T>&) noexcept {return;}
+
+    template<typename T>
+    void update(const System<T>&) noexcept {return;}
+
+    static const char* name() noexcept {return "3SPN2BaseBase";}
+};
+
+template<typename traitsT>
+class ThreeSPN2BaseBaseInteractionParameterList
+    : public ParameterListBase<traitsT,
+        ThreeSPN2BaseBaseInteractionPotential<typename traitsT::real_type>>
+{
+  public:
+    using traits_type         = traitsT;
+    using real_type           = typename traits_type::real_type;
+    using potential_type      = ThreeSPN2BaseBaseInteractionPotential<real_type>;
+    using base_type           = ParameterListBase<traits_type, potential_type>;
+    using pair_parameter_type = typename base_type::pair_parameter_type;
+    // pair_parameter_type = potential_type::parameter_type;
+
+    // topology stuff
+    using system_type          = typename base_type::system_type;
+    using topology_type        = typename base_type::topology_type;
+    using molecule_id_type     = typename base_type::molecule_id_type;
+    using group_id_type        = typename base_type::group_id_type;
+    using connection_kind_type = typename base_type::connection_kind_type;
+    using ignore_molecule_type = typename base_type::ignore_molecule_type;
+    using ignore_group_type    = typename base_type::ignore_group_type;
+    using exclusion_list_type  = typename base_type::exclusion_list_type;
+
     using base_kind        = parameter_3SPN2::base_kind;
     using base_pair_kind   = parameter_3SPN2::base_pair_kind;
     using cross_stack_kind = parameter_3SPN2::cross_stack_kind;
@@ -50,43 +207,12 @@ class ThreeSPN2BaseBaseInteractionPotential
         std::size_t nucleotide_index; // index in a strand.
         std::size_t S_idx, B3_idx, B5_idx;
     };
-    struct pair_parameter_type
-    {
-        std::size_t    Si;
-        std::size_t    Sj;
-        std::size_t    Bi_next;
-        std::size_t    Bj_next;
-        cross_stack_kind cs_i_kind; // i and adjacent of j
-        cross_stack_kind cs_j_kind; // j and adjacent of i
-        base_pair_kind   bp_kind;
-    };
     using container_type = std::vector<parameter_type>;
-
-    // topology stuff
-    using topology_type        = Topology;
-    using molecule_id_type     = typename topology_type::molecule_id_type;
-    using group_id_type        = typename topology_type::group_id_type;
-    using connection_kind_type = typename topology_type::connection_kind_type;
-    using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
-    using ignore_group_type    = IgnoreGroup   <group_id_type>;
-    using exclusion_list_type  = ExclusionList <traits_type>;
-
-    static constexpr std::size_t invalid() noexcept
-    {
-        return std::numeric_limits<std::size_t>::max();
-    }
-
-    static constexpr parameter_type default_parameter() noexcept
-    {
-        return parameter_type{
-            base_kind::X, invalid(), invalid(), invalid(), invalid()
-        };
-    }
 
   public:
 
     template<typename ParameterSet>
-    ThreeSPN2BaseBaseInteractionPotential(ParameterSet para_set,
+    ThreeSPN2BaseBaseInteractionParameterList(ParameterSet para_set,
         const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
         const std::map<connection_kind_type, std::size_t>&         exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
@@ -150,16 +276,19 @@ class ThreeSPN2BaseBaseInteractionPotential
             this->participants_.push_back(idx);
             if(idx >= this->parameters_.size())
             {
-                this->parameters_.resize(idx+1, default_parameter());
+                this->parameters_.resize(idx+1, parameter_type{base_kind::X,
+                        potential_type::invalid(), potential_type::invalid(),
+                        potential_type::invalid(), potential_type::invalid()
+                    });
             }
             this->parameters_.at(idx) = idxp.second;
         }
     }
-    ~ThreeSPN2BaseBaseInteractionPotential() = default;
-    ThreeSPN2BaseBaseInteractionPotential(const ThreeSPN2BaseBaseInteractionPotential&) = default;
-    ThreeSPN2BaseBaseInteractionPotential(ThreeSPN2BaseBaseInteractionPotential&&) = default;
-    ThreeSPN2BaseBaseInteractionPotential& operator=(const ThreeSPN2BaseBaseInteractionPotential&) = default;
-    ThreeSPN2BaseBaseInteractionPotential& operator=(ThreeSPN2BaseBaseInteractionPotential&&) = default;
+    ~ThreeSPN2BaseBaseInteractionParameterList() override {}
+    ThreeSPN2BaseBaseInteractionParameterList(const ThreeSPN2BaseBaseInteractionParameterList&) = default;
+    ThreeSPN2BaseBaseInteractionParameterList(ThreeSPN2BaseBaseInteractionParameterList&&)      = default;
+    ThreeSPN2BaseBaseInteractionParameterList& operator=(const ThreeSPN2BaseBaseInteractionParameterList&) = default;
+    ThreeSPN2BaseBaseInteractionParameterList& operator=(ThreeSPN2BaseBaseInteractionParameterList&&)      = default;
 
     base_pair_kind bp_kind(const base_kind lhs, const base_kind rhs) const noexcept
     {
@@ -191,7 +320,7 @@ class ThreeSPN2BaseBaseInteractionPotential
         return static_cast<cross_stack_kind>((lhs_u8 << 2 | rhs_u8) + 16u);
     }
 
-    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
+    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
     {
         const auto& para_i = this->parameters_[i];
         const auto& para_j = this->parameters_[j];
@@ -212,7 +341,7 @@ class ThreeSPN2BaseBaseInteractionPotential
 
         cross_stack_kind cs_i_kind = cross_stack_kind::INVALID;
         cross_stack_kind cs_j_kind = cross_stack_kind::INVALID;
-        if(Bj_next != self_type::invalid())
+        if(Bj_next != potential_type::invalid())
         {
             const auto& Bj_next_para = this->parameters_[Bj_next];
             // contact between i and the adjacent of j
@@ -220,7 +349,7 @@ class ThreeSPN2BaseBaseInteractionPotential
                 this->cs5_kind(para_i.base, Bj_next_para.base) :
                 this->cs3_kind(para_i.base, Bj_next_para.base) ;
         }
-        if(Bi_next != self_type::invalid())
+        if(Bi_next != potential_type::invalid())
         {
             const auto& Bi_next_para = this->parameters_[Bi_next];
             // contact between i and the adjacent of j
@@ -329,81 +458,8 @@ class ThreeSPN2BaseBaseInteractionPotential
         }
     }
 
-    real_type f(const base_pair_kind,
-                const real_type theta, const real_type theta0) const noexcept
-    {
-        return this->f_impl(K_BP_, pi_over_K_BP_, theta, theta0);
-    }
-    real_type f(const cross_stack_kind,
-                const real_type theta, const real_type theta0) const noexcept
-    {
-        return this->f_impl(K_CS_, pi_over_K_CS_, theta, theta0);
-    }
-    real_type df(const base_pair_kind,
-                 const real_type theta, const real_type theta0) const noexcept
-    {
-        return this->df_impl(K_BP_, pi_over_K_BP_, theta, theta0);
-    }
-    real_type df(const cross_stack_kind,
-                 const real_type theta, const real_type theta0) const noexcept
-    {
-        return this->df_impl(K_CS_, pi_over_K_CS_, theta, theta0);
-    }
-
-    real_type U_rep(const base_pair_kind bp, const real_type r) const noexcept
-    {
-        return this->U_rep_impl(this->epsilon(bp), this->alpha(bp), r, this->r0(bp));
-    }
-    real_type U_rep(const cross_stack_kind cs, const real_type r) const noexcept
-    {
-        return this->U_rep_impl(this->epsilon(cs), this->alpha(cs), r, this->r0(cs));
-    }
-    real_type dU_rep(const base_pair_kind bp, const real_type r) const noexcept
-    {
-        return this->dU_rep_impl(this->epsilon(bp), this->alpha(bp), r, this->r0(bp));
-    }
-    real_type dU_rep(const cross_stack_kind cs, const real_type r) const noexcept
-    {
-        return this->dU_rep_impl(this->epsilon(cs), this->alpha(cs), r, this->r0(cs));
-    }
-
-    real_type U_attr(const base_pair_kind bp, const real_type r) const noexcept
-    {
-        return this->U_attr_impl(this->epsilon(bp), this->alpha(bp), r, this->r0(bp));
-    }
-    real_type U_attr(const cross_stack_kind cs, const real_type r) const noexcept
-    {
-        return this->U_attr_impl(this->epsilon(cs), this->alpha(cs), r, this->r0(cs));
-    }
-    real_type dU_attr(const base_pair_kind bp, const real_type r) const noexcept
-    {
-        return this->dU_attr_impl(this->epsilon(bp), this->alpha(bp), r, this->r0(bp));
-    }
-    real_type dU_attr(const cross_stack_kind cs, const real_type r) const noexcept
-    {
-        return this->dU_attr_impl(this->epsilon(cs), this->alpha(cs), r, this->r0(cs));
-    }
-
-    std::pair<real_type, real_type>
-    U_dU_attr(const base_pair_kind bp, const real_type r) const noexcept
-    {
-        return this->U_and_dU_attr_impl(this->epsilon(bp), this->alpha(bp), r, this->r0(bp));
-    }
-    std::pair<real_type, real_type>
-    U_dU_attr(const cross_stack_kind cs, const real_type r) const noexcept
-    {
-        return this->U_and_dU_attr_impl(this->epsilon(cs), this->alpha(cs), r, this->r0(cs));
-    }
-
-    real_type cutoff_sq() const noexcept {return this->cutoff_sq_;}
-    real_type cutoff()    const noexcept {return this->cutoff_;}
-
-    real_type max_cutoff_length() const noexcept
-    {
-        return this->cutoff_;
-    }
-
-    void initialize(const system_type& sys, const topology_type& topol) noexcept
+    void initialize(const system_type& sys, const topology_type& topol,
+                    const potential_type& pot) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -464,12 +520,13 @@ class ThreeSPN2BaseBaseInteractionPotential
             unit_converted = true;
         }
         // construct a exclusion list
-        this->update(sys, topol);
+        this->update(sys, topol, pot);
         return;
     }
 
     // nothing to do when system parameters change.
-    void update(const system_type& sys, const topology_type& topol) noexcept
+    void update(const system_type& sys, const topology_type& topol,
+                const potential_type&) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -481,22 +538,30 @@ class ThreeSPN2BaseBaseInteractionPotential
     // -----------------------------------------------------------------------
     // for spatial partitions
 
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
+    real_type max_cutoff_length() const noexcept override
+    {
+        return this->cutoff_;
+    }
+
+    std::vector<std::size_t> const& participants() const noexcept override
+    {
+        return participants_;
+    }
 
     range<typename std::vector<std::size_t>::const_iterator>
-    leading_participants() const noexcept
+    leading_participants() const noexcept override
     {
         return make_range(participants_.begin(), std::prev(participants_.end()));
     }
     range<typename std::vector<std::size_t>::const_iterator>
     possible_partners_of(const std::size_t participant_idx,
-                         const std::size_t /*particle_idx*/) const noexcept
+                         const std::size_t /*particle_idx*/) const noexcept override
     {
         return make_range(participants_.begin() + participant_idx + 1, participants_.end());
     }
 
     // to check bases has base-pairing interaction.
-    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept override
     {
         if(j <= i || exclusion_list_.is_excluded(i, j))
         {
@@ -512,11 +577,15 @@ class ThreeSPN2BaseBaseInteractionPotential
         }
     }
 
-    exclusion_list_type const& exclusion_list() const noexcept {return exclusion_list_;}
+    exclusion_list_type const& exclusion_list() const noexcept override
+    {
+        return exclusion_list_;
+    }
 
-    // ------------------------------------------------------------------------
-    // used by Observer.
-    static const char* name() noexcept {return "ThreeSPN2BaseBaseIntearction";}
+    base_type* clone() const override
+    {
+        return new ThreeSPN2BaseBaseInteractionParameterList(*this);
+    }
 
     // ------------------------------------------------------------------------
     // the following accessers would be used in tests.
@@ -525,107 +594,9 @@ class ThreeSPN2BaseBaseInteractionPotential
     std::vector<parameter_type>&       parameters()       noexcept {return parameters_;}
     std::vector<parameter_type> const& parameters() const noexcept {return parameters_;}
 
-  private:
+    real_type cutoff_sq() const noexcept {return this->cutoff_sq_;}
+    real_type cutoff()    const noexcept {return this->cutoff_;}
 
-    real_type f_impl(const real_type K,     const real_type pi_over_K,
-                     const real_type theta, const real_type theta0) const noexcept
-    {
-        const auto dtheta     = theta - theta0;
-        const auto abs_dtheta = std::abs(dtheta);
-        if(abs_dtheta < pi_over_K * 0.5)
-        {
-            return 1.0;
-        }
-        else if(abs_dtheta < pi_over_K)
-        {
-            const auto cos_Kdtheta = std::cos(K * dtheta);
-            return 1.0 - cos_Kdtheta * cos_Kdtheta;
-        }
-        else
-        {
-            return 0.0;
-        }
-    }
-    real_type df_impl(const real_type K,     const real_type pi_over_K,
-                      const real_type theta, const real_type theta0) const noexcept
-    {
-        const auto dtheta     = theta - theta0;
-        const auto abs_dtheta = std::abs(dtheta);
-
-        if(abs_dtheta < pi_over_K * 0.5)
-        {
-            return 0.0;
-        }
-        else if(abs_dtheta < pi_over_K)
-        {
-            return K * std::sin(2 * K * dtheta);
-        }
-        else
-        {
-            return 0.0;
-        }
-    }
-
-    real_type U_attr_impl(const real_type epsilon, const real_type alpha,
-                          const real_type r,       const real_type r0) const noexcept
-    {
-        // --------------------------------------------------------
-        // U_m^attr =
-        //   -e                             ... (dBij <= dBij0)
-        //   -e + e * (1 - exp(-a(r-r0)))^2 ... (otherwise)
-        //
-        if(r <= r0)
-        {
-            return -epsilon;
-        }
-        else
-        {
-            const auto term = real_type(1) - std::exp(-alpha * (r - r0));
-            return epsilon * (term * term - real_type(1));
-        }
-    }
-    real_type dU_attr_impl(const real_type epsilon, const real_type alpha,
-                           const real_type r,       const real_type r0) const noexcept
-    {
-        // --------------------------------------------------------
-        // dU_m^attr / dr =
-        //   0                                 ... (dBij <= dBij0)
-        //   2ae(1-exp(-a(r-r0)))exp(-a(r-r0)) ... (otherwise)
-        //
-        if(r <= r0) {return real_type(0);}
-        const auto term = std::exp(-alpha * (r - r0));
-        return 2 * alpha * epsilon * term * (real_type(1) - term);
-    }
-
-    std::pair<real_type, real_type> U_and_dU_attr_impl(
-            const real_type epsilon, const real_type alpha,
-            const real_type r,       const real_type r0) const noexcept
-    {
-        if(r <= r0)
-        {
-            return std::make_pair(-epsilon, 0.0);
-        }
-
-        const auto term1 = std::exp(-alpha * (r - r0));
-        const auto term2 = real_type(1) - term1;
-        return std::make_pair(epsilon * (term2 * term2 - real_type(1)),
-                              2 * alpha * epsilon * term1 * term2);
-    }
-
-    real_type U_rep_impl(const real_type epsilon, const real_type alpha,
-                         const real_type r,       const real_type r0) const noexcept
-    {
-        if(r0 < r) {return real_type(0);}
-        const auto term = real_type(1) - std::exp(-alpha * (r - r0));
-        return epsilon * term * term;
-    }
-    real_type dU_rep_impl(const real_type epsilon, const real_type alpha,
-                          const real_type r,       const real_type r0) const noexcept
-    {
-        if(r0 < r) {return real_type(0);}
-        const auto term = std::exp(-alpha * (r - r0));
-        return 2 * alpha * epsilon * term * (real_type(1) - term);
-    }
 
   private:
 
@@ -855,10 +826,10 @@ struct ThreeSPN2CBaseBaseGlobalPotentialParameter
 
 namespace mjolnir
 {
-extern template class ThreeSPN2BaseBaseInteractionPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
-extern template class ThreeSPN2BaseBaseInteractionPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
-extern template class ThreeSPN2BaseBaseInteractionPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-extern template class ThreeSPN2BaseBaseInteractionPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+extern template class ThreeSPN2BaseBaseInteractionParameterList<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ThreeSPN2BaseBaseInteractionParameterList<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ThreeSPN2BaseBaseInteractionParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ThreeSPN2BaseBaseInteractionParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 

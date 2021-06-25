@@ -28,19 +28,20 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BasePairIntearction_numerical_diff)
     using system_type       = mjolnir::System<traits_type>;
     using topology_type     = mjolnir::Topology;
 
-    using potential_type       = mjolnir::ThreeSPN2BaseBaseInteractionPotential<traits_type>;
+    using potential_type       = mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>;
     using interaction_type     = mjolnir::ThreeSPN2BaseBaseInteraction<traits_type>;
-    using base_kind            = typename potential_type::base_kind;
-    using parameter_type       = typename potential_type::parameter_type;
-    using ignore_group_type    = typename potential_type::ignore_group_type;
-    using ignore_molecule_type = typename potential_type::ignore_molecule_type;
+    using parameter_list_type  = mjolnir::ThreeSPN2BaseBaseInteractionParameterList<traits_type>;
+    using base_kind            = typename parameter_list_type::base_kind;
+    using parameter_type       = typename parameter_list_type::parameter_type;
+    using ignore_group_type    = typename parameter_list_type::ignore_group_type;
+    using ignore_molecule_type = typename parameter_list_type::ignore_molecule_type;
     using partition_type       = mjolnir::VerletList<traits_type, potential_type>;
 
-    using sequential_traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using sequential_system_type      = mjolnir::System<sequential_traits_type>;
-    using sequential_interaction_type = mjolnir::ThreeSPN2BaseBaseInteraction<sequential_traits_type>;
-    using sequential_potential_type   = mjolnir::ThreeSPN2BaseBaseInteractionPotential<sequential_traits_type>;
-    using sequential_partition_type   = mjolnir::VerletList<sequential_traits_type, sequential_potential_type>;
+    using sequential_traits_type         = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using sequential_system_type         = mjolnir::System<sequential_traits_type>;
+    using sequential_interaction_type    = mjolnir::ThreeSPN2BaseBaseInteraction<sequential_traits_type>;
+    using sequential_parameter_list_type = mjolnir::ThreeSPN2BaseBaseInteractionParameterList<sequential_traits_type>;
+    using sequential_partition_type      = mjolnir::VerletList<sequential_traits_type, potential_type>;
 
     constexpr real_type pi = mjolnir::math::constants<real_type>::pi();
 
@@ -112,26 +113,26 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BasePairIntearction_numerical_diff)
         //
         constexpr auto invalid = potential_type::invalid();
 
-        potential_type potential(
+        parameter_list_type parameter_list(
             mjolnir::ThreeSPN2BaseBaseGlobalPotentialParameter<real_type>{}, {
                 {1, parameter_type{bases.at(0), 0, 0, invalid, invalid}},
                 {3, parameter_type{bases.at(1), 1, 2, invalid, invalid}}
             }, {}, ignore_molecule_type("Nothing"), ignore_group_type({})
         );
-        sequential_potential_type seq_potential(
+        sequential_parameter_list_type seq_parameter_list(
             mjolnir::ThreeSPN2BaseBaseGlobalPotentialParameter<real_type>{}, {
-                {1, sequential_potential_type::parameter_type{bases.at(0), 0, 0, invalid, invalid}},
-                {3, sequential_potential_type::parameter_type{bases.at(1), 1, 2, invalid, invalid}}
+                {1, sequential_parameter_list_type::parameter_type{bases.at(0), 0, 0, invalid, invalid}},
+                {3, sequential_parameter_list_type::parameter_type{bases.at(1), 1, 2, invalid, invalid}}
             }, {}, ignore_molecule_type("Nothing"), ignore_group_type({})
         );
 
-        interaction_type interaction(potential_type(potential),
+        interaction_type interaction(potential_type{}, parameter_list_type(parameter_list),
             mjolnir::SpatialPartition<traits_type, potential_type>(
                 mjolnir::make_unique<partition_type>()));
 
-        sequential_interaction_type seq_interaction(
-            sequential_potential_type(seq_potential),
-            mjolnir::SpatialPartition<sequential_traits_type, sequential_potential_type>(
+        sequential_interaction_type seq_interaction(potential_type{},
+            sequential_parameter_list_type(seq_parameter_list),
+            mjolnir::SpatialPartition<sequential_traits_type, potential_type>(
                 mjolnir::make_unique<sequential_partition_type>()));
 
         system_type                sys(4, boundary_type{});
@@ -152,17 +153,19 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2BasePairIntearction_numerical_diff)
             sys.name(i)  = "DNA";
             sys.group(i) = "DNA";
         }
-        potential  .initialize(sys, topol);
         interaction.initialize(sys, topol);
-
-        seq_potential  .initialize(seq_sys, topol);
         seq_interaction.initialize(seq_sys, topol);
 
-        const auto bp_kind      = potential.bp_kind (bases.at(0), bases.at(1));
-        const auto rbp_0        = potential.r0(bp_kind);
-        const auto theta1_0     = potential.theta1_0(bp_kind);
-        const auto theta2_0     = potential.theta2_0(bp_kind);
-        const auto pi_over_K_BP = potential.pi_over_K_BP();
+        // paramter_lists in the interactions will be initialized via
+        // interaction.initialize(), but parameter_list here will not.
+        potential_type pot;
+        parameter_list.initialize(sys, topol, pot);
+
+        const auto bp_kind      = parameter_list.bp_kind (bases.at(0), bases.at(1));
+        const auto rbp_0        = parameter_list.r0(bp_kind);
+        const auto theta1_0     = parameter_list.theta1_0(bp_kind);
+        const auto theta2_0     = parameter_list.theta2_0(bp_kind);
+        const auto pi_over_K_BP = parameter_list.pi_over_K_BP();
 
         for(const auto rbp  : {rbp_0 - 0.2, rbp_0 + 0.5})
         {
@@ -335,20 +338,21 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2CrossStackingIntearction_numerical_diff)
     using system_type       = mjolnir::System<traits_type>;
     using topology_type     = mjolnir::Topology;
 
-    using potential_type    = mjolnir::ThreeSPN2BaseBaseInteractionPotential<traits_type>;
-    using base_kind         = typename potential_type::base_kind;
-    using parameter_type    = typename potential_type::parameter_type;
+    using potential_type      = mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>;
+    using parameter_list_type = mjolnir::ThreeSPN2BaseBaseInteractionParameterList<traits_type>;
+    using base_kind           = typename parameter_list_type::base_kind;
+    using parameter_type      = typename parameter_list_type::parameter_type;
     using partition_type      = mjolnir::VerletList<traits_type, potential_type>;
 
     using interaction_type     = mjolnir::ThreeSPN2BaseBaseInteraction<traits_type>;
-    using ignore_group_type    = typename potential_type::ignore_group_type;
-    using ignore_molecule_type = typename potential_type::ignore_molecule_type;
+    using ignore_group_type    = typename parameter_list_type::ignore_group_type;
+    using ignore_molecule_type = typename parameter_list_type::ignore_molecule_type;
 
-    using sequential_traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using sequential_system_type      = mjolnir::System<sequential_traits_type>;
-    using sequential_interaction_type = mjolnir::ThreeSPN2BaseBaseInteraction<sequential_traits_type>;
-    using sequential_potential_type   = mjolnir::ThreeSPN2BaseBaseInteractionPotential<sequential_traits_type>;
-    using sequential_partition_type   = mjolnir::VerletList<sequential_traits_type, sequential_potential_type>;
+    using sequential_traits_type         = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using sequential_system_type         = mjolnir::System<sequential_traits_type>;
+    using sequential_interaction_type    = mjolnir::ThreeSPN2BaseBaseInteraction<sequential_traits_type>;
+    using sequential_parameter_list_type = mjolnir::ThreeSPN2BaseBaseInteractionParameterList<sequential_traits_type>;
+    using sequential_partition_type      = mjolnir::VerletList<sequential_traits_type, potential_type>;
 
     constexpr real_type pi = mjolnir::math::constants<real_type>::pi();
 
@@ -436,29 +440,30 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2CrossStackingIntearction_numerical_diff)
 
         constexpr auto invalid = potential_type::invalid();
 
-        potential_type potential(mjolnir::ThreeSPN2BaseBaseGlobalPotentialParameter<real_type>{}, {
+        parameter_list_type parameter_list(mjolnir::ThreeSPN2BaseBaseGlobalPotentialParameter<real_type>{}, {
                 {1, parameter_type{bases.at(0), 0, 0, 4, invalid}},
                 {9, parameter_type{bases.at(1), 3, 8, invalid, 6}},
                 {4, parameter_type{bases.at(2), 1, 3, invalid, 1}},
                 {6, parameter_type{bases.at(3), 2, 5, 9, invalid}},
             }, {}, ignore_molecule_type("Nothing"), ignore_group_type({})
         );
-        sequential_potential_type seq_potential(
+        sequential_parameter_list_type seq_parameter_list(
             mjolnir::ThreeSPN2BaseBaseGlobalPotentialParameter<real_type>{}, {
-                {1, sequential_potential_type::parameter_type{bases.at(0), 0, 0, 4, invalid}},
-                {9, sequential_potential_type::parameter_type{bases.at(1), 3, 8, invalid, 6}},
-                {4, sequential_potential_type::parameter_type{bases.at(2), 1, 3, invalid, 1}},
-                {6, sequential_potential_type::parameter_type{bases.at(3), 2, 5, 9, invalid}},
+                {1, sequential_parameter_list_type::parameter_type{bases.at(0), 0, 0, 4, invalid}},
+                {9, sequential_parameter_list_type::parameter_type{bases.at(1), 3, 8, invalid, 6}},
+                {4, sequential_parameter_list_type::parameter_type{bases.at(2), 1, 3, invalid, 1}},
+                {6, sequential_parameter_list_type::parameter_type{bases.at(3), 2, 5, 9, invalid}},
             }, {}, ignore_molecule_type("Nothing"), ignore_group_type({})
         );
 
-        interaction_type interaction(potential_type(potential),
+        interaction_type interaction(potential_type{},
+            parameter_list_type(parameter_list),
             mjolnir::SpatialPartition<traits_type, potential_type>(
                 mjolnir::make_unique<partition_type>()));
 
-        sequential_interaction_type seq_interaction(
-            sequential_potential_type(seq_potential),
-            mjolnir::SpatialPartition<sequential_traits_type, sequential_potential_type>(
+        sequential_interaction_type seq_interaction(potential_type{},
+            sequential_parameter_list_type(seq_parameter_list),
+            mjolnir::SpatialPartition<sequential_traits_type, potential_type>(
                 mjolnir::make_unique<sequential_partition_type>()));
 
         system_type sys(10, boundary_type{});
@@ -501,26 +506,30 @@ BOOST_AUTO_TEST_CASE(ThreeSPN2CrossStackingIntearction_numerical_diff)
             sys.name(i)  = "DNA";
             sys.group(i) = "DNA";
         }
-        potential  .initialize(sys, topol);
+
         interaction.initialize(sys, topol);
-        seq_potential  .initialize(seq_sys, topol);
         seq_interaction.initialize(seq_sys, topol);
 
-        const auto bp_kind      = potential.bp_kind (bases.at(0), bases.at(1));
-        const auto cs_i_kind    = potential.cs5_kind(bases.at(0), bases.at(3));
-        const auto cs_j_kind    = potential.cs3_kind(bases.at(1), bases.at(2));
+        // paramter_lists in the interactions will be initialized via
+        // interaction.initialize(), but parameter_list here will not.
+        potential_type pot;
+        parameter_list.initialize(sys, topol, pot);
 
-        const auto rbp          = potential.r0(bp_kind) + 0.2;
-        const auto rcs_i_0      = potential.r0(cs_i_kind);
-        const auto rcs_j_0      = potential.r0(cs_j_kind);
-        const auto theta1       = potential.theta1_0(bp_kind);
-        const auto theta2       = potential.theta2_0(bp_kind);
-        const auto theta3_0     = potential.theta3_0(bp_kind);
-        const auto thetaCS_i_0  = potential.thetaCS_0(cs_i_kind);
-        const auto thetaCS_j_0  = potential.thetaCS_0(cs_j_kind);
+        const auto bp_kind      = parameter_list.bp_kind (bases.at(0), bases.at(1));
+        const auto cs_i_kind    = parameter_list.cs5_kind(bases.at(0), bases.at(3));
+        const auto cs_j_kind    = parameter_list.cs3_kind(bases.at(1), bases.at(2));
 
-        const auto pi_over_K_BP = potential.pi_over_K_BP();
-        const auto pi_over_K_CS = potential.pi_over_K_CS();
+        const auto rbp          = parameter_list.r0(bp_kind) + 0.2;
+        const auto rcs_i_0      = parameter_list.r0(cs_i_kind);
+        const auto rcs_j_0      = parameter_list.r0(cs_j_kind);
+        const auto theta1       = parameter_list.theta1_0(bp_kind);
+        const auto theta2       = parameter_list.theta2_0(bp_kind);
+        const auto theta3_0     = parameter_list.theta3_0(bp_kind);
+        const auto thetaCS_i_0  = parameter_list.thetaCS_0(cs_i_kind);
+        const auto thetaCS_j_0  = parameter_list.thetaCS_0(cs_j_kind);
+
+        const auto pi_over_K_BP = parameter_list.pi_over_K_BP();
+        const auto pi_over_K_CS = parameter_list.pi_over_K_CS();
 
         for(const auto rcsi : {rcs_i_0 - 0.2, rcs_i_0 + 0.5})
         {

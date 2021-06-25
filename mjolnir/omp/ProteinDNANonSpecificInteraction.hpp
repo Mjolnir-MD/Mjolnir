@@ -32,13 +32,14 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
     using system_type     = typename base_type::system_type;
     using topology_type   = typename base_type::topology_type;
     using boundary_type   = typename base_type::boundary_type;
-    using potential_type  = ProteinDNANonSpecificPotential<traits_type>;
+    using potential_type  = ProteinDNANonSpecificPotential<real_type>;
     using partition_type  = SpatialPartition<traits_type, potential_type>;
+    using parameter_list_type = ProteinDNANonSpecificParameterList<traits_type>;
 
   public:
 
-    ProteinDNANonSpecificInteraction(potential_type&& pot, partition_type&& part)
-        : potential_(std::move(pot)), partition_(std::move(part))
+    ProteinDNANonSpecificInteraction(potential_type&& pot, parameter_list_type&& para, partition_type&& part)
+        : potential_(std::move(pot)), parameters_(std::move(para)), partition_(std::move(part))
     {}
     ~ProteinDNANonSpecificInteraction() {}
 
@@ -48,8 +49,9 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is PDNS");
 
-        this->potential_.initialize(sys, topol);
-        this->partition_.initialize(sys, this->potential_);
+        this->potential_ .initialize(sys);
+        this->parameters_.initialize(sys, topol, this->potential_);
+        this->partition_ .initialize(sys, this->parameters_);
         return;
     }
 
@@ -59,19 +61,20 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         MJOLNIR_LOG_FUNCTION();
         MJOLNIR_LOG_INFO("potential is PDNS");
 
-        this->potential_.update(sys, topol);
-        this->partition_.initialize(sys, this->potential_);
+        this->potential_ .update(sys);
+        this->parameters_.update(sys, topol, this->potential_);
+        this->partition_ .initialize(sys, this->parameters_);
         return;
     }
 
     void reduce_margin(const real_type dmargin, const system_type& sys) override
     {
-        this->partition_.reduce_margin(dmargin, sys, this->potential_);
+        this->partition_.reduce_margin(dmargin, sys, this->parameters_);
         return ;
     }
     void scale_margin(const real_type scale, const system_type& sys) override
     {
-        this->partition_.scale_margin(scale, sys, this->potential_);
+        this->partition_.scale_margin(scale, sys, this->parameters_);
         return ;
     }
 
@@ -86,20 +89,26 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         // But this interaction is named as P-D ns, so here it uses `P` for protein
         // and `D` for DNA.
 
-#pragma omp parallel for
-        for(std::size_t i=0; i < this->potential_.contacts().size(); ++i)
-        {
-            const auto& para = potential_.contacts()[i];
+        const auto rsigma         = parameters_.rsigma();
+        const auto delta          = parameters_.delta();
+        const auto delta2         = parameters_.delta2();
+        const auto pi_over_2delta = parameters_.pi_over_2delta();
 
-            const auto  P  = para.P;
+#pragma omp parallel for
+        for(std::size_t i=0; i < this->parameters_.contacts().size(); ++i)
+        {
+            const auto& contact = parameters_.contacts()[i];
+
+            const auto  P  = contact.P;
             const auto& rP = sys.position(P);
             for(const auto& ptnr : this->partition_.partners(P))
             {
-                const auto  D  = ptnr.index;  // DNA phosphate
-                const auto  S3 = ptnr.parameter().S3; // 3' Sugar
-                const auto& rD = sys.position(D);
+                const auto  D    = ptnr.index;  // DNA phosphate
+                const auto& para = ptnr.parameter();
+                const auto  S3   = para.S3; // 3' Sugar
+                const auto& rD   = sys.position(D);
 
-                MJOLNIR_LOG_DEBUG("protein = ", P, ", DNA = ", D, ", r0 = ", para.r0);
+                MJOLNIR_LOG_DEBUG("protein = ", P, ", DNA = ", D, ", r0 = ", contact.r0);
 
                 //  PC          S5'    |
                 //    o         o--o B | theta is an angle formed by the vector
@@ -114,28 +123,28 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
                 const auto rPD    = sys.adjust_direction(rP, rD); // PRO -> DNA
                 const auto lPD_sq = math::length_sq(rPD);
-                if(para.r_cut_sq < lPD_sq)
+                if(contact.r_cut_sq < lPD_sq)
                 {
                     continue;
                 }
                 const auto rlPD   = math::rsqrt(lPD_sq);
                 const auto  lPD   = lPD_sq * rlPD;
-                const auto f_df   = potential_.f_df(para.r0, lPD);
+                const auto f_df   = potential_.f_df(contact.r0, lPD, rsigma);
 
                 MJOLNIR_LOG_DEBUG("f = ", f_df.first, ", df = ", f_df.second);
 
                 // ----------------------------------------------------------------
                 // calculates the angle part (theta)
 
-                const auto& rPC   = sys.position(para.PC);
-                const auto& rPN   = sys.position(para.PN);
+                const auto& rPC   = sys.position(contact.PC);
+                const auto& rPN   = sys.position(contact.PN);
                 const auto rPNC   = sys.adjust_direction(rPN, rPC); // PN -> PC
                 const auto rlPNC  = math::rlength(rPNC);
                 const auto dotPNC = math::dot_product(rPNC, rPD);
                 const auto cosPNC = dotPNC * rlPD * rlPNC;
                 const auto theta  = std::acos(math::clamp<real_type>(cosPNC,-1,1));
 
-                const auto g_dg_theta = potential_.g_dg(para.theta0, theta);
+                const auto g_dg_theta = potential_.g_dg(contact.theta0, theta, delta, delta2, pi_over_2delta);
 
                 MJOLNIR_LOG_DEBUG("g(theta) = ", g_dg_theta.first,
                                  ", dg(theta) = ", g_dg_theta.second);
@@ -150,7 +159,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const auto cosS3D = dotS3D * rlS3D * rlPD;
                 const auto phi    = std::acos(math::clamp<real_type>(cosS3D,-1,1));
 
-                const auto g_dg_phi = potential_.g_dg(para.phi0, phi);
+                const auto g_dg_phi = potential_.g_dg(contact.phi0, phi, delta, delta2, pi_over_2delta);
 
                 MJOLNIR_LOG_DEBUG("g(phi) = ", g_dg_phi.first,
                                  ", dg(phi) = ", g_dg_phi.second);
@@ -162,7 +171,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 // =    k [df(r)  g(theta)  g(phi) dr/dr     +
                 //          f(r) dg(theta)  g(phi) dtheta/dr +
                 //          f(r)  g(theta) dg(phi) dphi/dr   ]
-                const auto k = para.k;
+                const auto k = contact.k;
                 const auto thread_id = omp_get_thread_num();
 
                 auto f_P  = math::make_coordinate<coordinate_type>(0,0,0);
@@ -231,8 +240,8 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 sys.force_thread(thread_id, P)       += f_P;
                 sys.force_thread(thread_id, D)       += f_D;
                 sys.force_thread(thread_id, S3)      += f_S3;
-                sys.force_thread(thread_id, para.PN) += f_PN;
-                sys.force_thread(thread_id, para.PC) += f_PC;
+                sys.force_thread(thread_id, contact.PN) += f_PN;
+                sys.force_thread(thread_id, contact.PC) += f_PC;
 
                 sys.virial_thread(thread_id) +=
                     math::tensor_product(rP,       f_P) +
@@ -253,18 +262,24 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         // But this interaction is named as P-D ns, so here it uses `P` for protein
         // and `D` for DNA.
 
+        const auto rsigma         = parameters_.rsigma();
+        const auto delta          = parameters_.delta();
+        const auto delta2         = parameters_.delta2();
+        const auto pi_over_2delta = parameters_.pi_over_2delta();
+
         real_type E = 0.0;
 #pragma omp parallel for reduction(+:E)
-        for(std::size_t i=0; i < this->potential_.contacts().size(); ++i)
+        for(std::size_t i=0; i < this->parameters_.contacts().size(); ++i)
         {
-            const auto& para = potential_.contacts()[i];
+            const auto& contact = parameters_.contacts()[i];
 
-            const auto  P  = para.P;
+            const auto  P  = contact.P;
             const auto& rP = sys.position(P);
             for(const auto& ptnr : this->partition_.partners(P))
             {
                 const auto  D  = ptnr.index;  // DNA phosphate
-                const auto  S3 = ptnr.parameter().S3; // 3' Sugar
+                const auto& para = ptnr.parameter();
+                const auto  S3 = para.S3; // 3' Sugar
                 const auto& rD = sys.position(D);
 
                 //  PC          S5'    |
@@ -280,25 +295,25 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
                 const auto rPD    = sys.adjust_direction(rP, rD); // PRO -> DNA
                 const auto lPD_sq = math::length_sq(rPD);
-                if(para.r_cut_sq < lPD_sq)
+                if(contact.r_cut_sq < lPD_sq)
                 {
                     continue;
                 }
                 const auto rlPD   = math::rsqrt(lPD_sq);
                 const auto  lPD   = lPD_sq * rlPD;
-                const auto f      = potential_.f(para.r0, lPD);
+                const auto f      = potential_.f(contact.r0, lPD, rsigma);
 
                 // ----------------------------------------------------------------
                 // calculates the angle part (theta)
 
-                const auto& rPC    = sys.position(para.PC);
-                const auto& rPN    = sys.position(para.PN);
+                const auto& rPC    = sys.position(contact.PC);
+                const auto& rPN    = sys.position(contact.PN);
                 const auto rPNC    = sys.adjust_direction(rPN, rPC); // PN -> PC
                 const auto rlPNC   = math::rlength(rPNC);
                 const auto dotPNC  = math::dot_product(rPNC, rPD);
                 const auto cosPNC  = dotPNC * rlPD * rlPNC;
                 const auto theta   = std::acos(math::clamp<real_type>(cosPNC,-1,1));
-                const auto g_theta = potential_.g(para.theta0, theta);
+                const auto g_theta = potential_.g(contact.theta0, theta, delta, delta2, pi_over_2delta);
 
                 if(g_theta == real_type(0)) {continue;}
 
@@ -311,16 +326,16 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const auto dotS3D = math::dot_product(rPD, rS3D);
                 const auto cosS3D = dotS3D * rlS3D * rlPD;
                 const auto phi    = std::acos(math::clamp<real_type>(cosS3D,-1,1));
-                const auto g_phi  = potential_.g(para.phi0, phi);
+                const auto g_phi  = potential_.g(contact.phi0, phi, delta, delta2, pi_over_2delta);
 
                 if(g_phi == real_type(0)) {continue;}
 
                 // ----------------------------------------------------------------
                 // calculate energy
 
-                const auto k = para.k;
+                const auto k = contact.k;
 
-                MJOLNIR_LOG_DEBUG("protein = ", P, ", DNA = ", D, ", r0 = ", para.r0);
+                MJOLNIR_LOG_DEBUG("protein = ", P, ", DNA = ", D, ", r0 = ", contact.r0);
 
                 E += k * f * g_theta * g_phi;
             }
@@ -338,21 +353,27 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         // But this interaction is named as P-D ns, so here it uses `P` for protein
         // and `D` for DNA.
 
+        const auto rsigma         = parameters_.rsigma();
+        const auto delta          = parameters_.delta();
+        const auto delta2         = parameters_.delta2();
+        const auto pi_over_2delta = parameters_.pi_over_2delta();
+
         real_type energy = 0;
 #pragma omp parallel for reduction(+:energy)
-        for(std::size_t i=0; i < this->potential_.contacts().size(); ++i)
+        for(std::size_t i=0; i < this->parameters_.contacts().size(); ++i)
         {
-            const auto& para = potential_.contacts()[i];
+            const auto& contact = parameters_.contacts()[i];
 
-            const auto  P  = para.P;
+            const auto  P  = contact.P;
             const auto& rP = sys.position(P);
             for(const auto& ptnr : this->partition_.partners(P))
             {
                 const auto  D  = ptnr.index;  // DNA phosphate
-                const auto  S3 = ptnr.parameter().S3; // 3' Sugar
+                const auto& para = ptnr.parameter();
+                const auto  S3 = para.S3; // 3' Sugar
                 const auto& rD = sys.position(D);
 
-                MJOLNIR_LOG_DEBUG("protein = ", P, ", DNA = ", D, ", r0 = ", para.r0);
+                MJOLNIR_LOG_DEBUG("protein = ", P, ", DNA = ", D, ", r0 = ", contact.r0);
 
                 //  PC          S5'    |
                 //    o         o--o B | theta is an angle formed by the vector
@@ -367,28 +388,28 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
                 const auto rPD    = sys.adjust_direction(rP, rD); // PRO -> DNA
                 const auto lPD_sq = math::length_sq(rPD);
-                if(para.r_cut_sq < lPD_sq)
+                if(contact.r_cut_sq < lPD_sq)
                 {
                     continue;
                 }
                 const auto rlPD   = math::rsqrt(lPD_sq);
                 const auto  lPD   = lPD_sq * rlPD;
-                const auto f_df   = potential_.f_df(para.r0, lPD);
+                const auto f_df   = potential_.f_df(contact.r0, lPD, rsigma);
 
                 MJOLNIR_LOG_DEBUG("f = ", f_df.first, ", df = ", f_df.second);
 
                 // ----------------------------------------------------------------
                 // calculates the angle part (theta)
 
-                const auto& rPC   = sys.position(para.PC);
-                const auto& rPN   = sys.position(para.PN);
+                const auto& rPC   = sys.position(contact.PC);
+                const auto& rPN   = sys.position(contact.PN);
                 const auto rPNC   = sys.adjust_direction(rPN, rPC); // PN -> PC
                 const auto rlPNC  = math::rlength(rPNC);
                 const auto dotPNC = math::dot_product(rPNC, rPD);
                 const auto cosPNC = dotPNC * rlPD * rlPNC;
                 const auto theta  = std::acos(math::clamp<real_type>(cosPNC,-1,1));
 
-                const auto g_dg_theta = potential_.g_dg(para.theta0, theta);
+                const auto g_dg_theta = potential_.g_dg(contact.theta0, theta, delta, delta2, pi_over_2delta);
 
                 MJOLNIR_LOG_DEBUG("g(theta) = ", g_dg_theta.first,
                                  ", dg(theta) = ", g_dg_theta.second);
@@ -403,7 +424,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 const auto cosS3D = dotS3D * rlS3D * rlPD;
                 const auto phi    = std::acos(math::clamp<real_type>(cosS3D,-1,1));
 
-                const auto g_dg_phi = potential_.g_dg(para.phi0, phi);
+                const auto g_dg_phi = potential_.g_dg(contact.phi0, phi, delta, delta2, pi_over_2delta);
 
                 MJOLNIR_LOG_DEBUG("g(phi) = ", g_dg_phi.first,
                                  ", dg(phi) = ", g_dg_phi.second);
@@ -415,7 +436,7 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 // =    k [df(r)  g(theta)  g(phi) dr/dr     +
                 //          f(r) dg(theta)  g(phi) dtheta/dr +
                 //          f(r)  g(theta) dg(phi) dphi/dr   ]
-                const auto k = para.k;
+                const auto k = contact.k;
                 const auto thread_id = omp_get_thread_num();
 
                 auto f_P  = math::make_coordinate<coordinate_type>(0,0,0);
@@ -486,8 +507,8 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
                 sys.force_thread(thread_id, P)       += f_P;
                 sys.force_thread(thread_id, D)       += f_D;
                 sys.force_thread(thread_id, S3)      += f_S3;
-                sys.force_thread(thread_id, para.PN) += f_PN;
-                sys.force_thread(thread_id, para.PC) += f_PC;
+                sys.force_thread(thread_id, contact.PN) += f_PN;
+                sys.force_thread(thread_id, contact.PC) += f_PC;
 
                 sys.virial_thread(thread_id) +=
                     math::tensor_product(rP,       f_P) +
@@ -500,22 +521,21 @@ class ProteinDNANonSpecificInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         return energy;
     }
 
-
     std::string name() const override {return "PDNSInteraction";}
 
-    potential_type const& potential() const noexcept {return potential_;}
-    potential_type&       potential()       noexcept {return potential_;}
+    parameter_list_type const& parameters() const noexcept {return parameters_;}
+    parameter_list_type&       parameters()       noexcept {return parameters_;}
 
     base_type* clone() const override
     {
-        return new ProteinDNANonSpecificInteraction(
-                potential_type(potential_), partition_type(partition_));
+        return new ProteinDNANonSpecificInteraction(*this);
     }
 
   private:
 
-    potential_type potential_;
-    partition_type partition_;
+    potential_type      potential_;
+    parameter_list_type parameters_;
+    partition_type      partition_;
 };
 } // mjolnir
 

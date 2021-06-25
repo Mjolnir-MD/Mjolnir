@@ -44,53 +44,53 @@ BOOST_AUTO_TEST_CASE(read_pdns_interaction)
             >(base.get()); // check the expected type is contained
         BOOST_TEST(static_cast<bool>(derv));
 
-        const auto& pot = derv->potential();
+        const auto& para = derv->parameters();
 
-        BOOST_TEST_REQUIRE(pot.cutoff_ratio() == 10.0);
+        BOOST_TEST_REQUIRE(para.cutoff_ratio() == 10.0);
 
-        const auto nil = mjolnir::ProteinDNANonSpecificPotential<traits_type>::invalid();
+        const auto nil = mjolnir::ProteinDNANonSpecificParameterList<traits_type>::invalid();
 
-        BOOST_TEST_REQUIRE(pot.proteins().size() == 3u);
-        BOOST_TEST_REQUIRE(pot.proteins().at(0) == 10u);
-        BOOST_TEST_REQUIRE(pot.proteins().at(1) == 11u);
-        BOOST_TEST_REQUIRE(pot.proteins().at(2) == 12u);
-        BOOST_TEST_REQUIRE(pot.parameters().at(pot.proteins().at(0)).S3 == nil);
-        BOOST_TEST_REQUIRE(pot.parameters().at(pot.proteins().at(1)).S3 == nil);
-        BOOST_TEST_REQUIRE(pot.parameters().at(pot.proteins().at(2)).S3 == nil);
+        BOOST_TEST_REQUIRE(para.proteins().size() == 3u);
+        BOOST_TEST_REQUIRE(para.proteins().at(0) == 10u);
+        BOOST_TEST_REQUIRE(para.proteins().at(1) == 11u);
+        BOOST_TEST_REQUIRE(para.proteins().at(2) == 12u);
+        BOOST_TEST_REQUIRE(para.parameters().at(para.proteins().at(0)).S3 == nil);
+        BOOST_TEST_REQUIRE(para.parameters().at(para.proteins().at(1)).S3 == nil);
+        BOOST_TEST_REQUIRE(para.parameters().at(para.proteins().at(2)).S3 == nil);
 
-        BOOST_TEST_REQUIRE(pot.dnas().size() == 3u);
-        BOOST_TEST_REQUIRE(pot.dnas().at(0) == 1u);
-        BOOST_TEST_REQUIRE(pot.dnas().at(1) == 4u);
-        BOOST_TEST_REQUIRE(pot.dnas().at(2) == 7u);
-        BOOST_TEST_REQUIRE(pot.parameters().at(pot.dnas().at(0)).S3 == 0u);
-        BOOST_TEST_REQUIRE(pot.parameters().at(pot.dnas().at(1)).S3 == 3u);
-        BOOST_TEST_REQUIRE(pot.parameters().at(pot.dnas().at(2)).S3 == 6u);
+        BOOST_TEST_REQUIRE(para.dnas().size() == 3u);
+        BOOST_TEST_REQUIRE(para.dnas().at(0) == 1u);
+        BOOST_TEST_REQUIRE(para.dnas().at(1) == 4u);
+        BOOST_TEST_REQUIRE(para.dnas().at(2) == 7u);
+        BOOST_TEST_REQUIRE(para.parameters().at(para.dnas().at(0)).S3 == 0u);
+        BOOST_TEST_REQUIRE(para.parameters().at(para.dnas().at(1)).S3 == 3u);
+        BOOST_TEST_REQUIRE(para.parameters().at(para.dnas().at(2)).S3 == 6u);
 
-        BOOST_TEST_REQUIRE(pot.contacts().size()   == 3u);
-        BOOST_TEST_REQUIRE(pot.contacts().at(0).P  == 10u);
-        BOOST_TEST_REQUIRE(pot.contacts().at(1).P  == 11u);
-        BOOST_TEST_REQUIRE(pot.contacts().at(2).P  == 12u);
-        BOOST_TEST_REQUIRE(pot.contacts().at(0).PN == 9u);
-        BOOST_TEST_REQUIRE(pot.contacts().at(1).PN == 10u);
-        BOOST_TEST_REQUIRE(pot.contacts().at(2).PN == 11u);
-        BOOST_TEST_REQUIRE(pot.contacts().at(0).PC == 11u);
-        BOOST_TEST_REQUIRE(pot.contacts().at(1).PC == 12u);
-        BOOST_TEST_REQUIRE(pot.contacts().at(2).PC == 13u);
+        BOOST_TEST_REQUIRE(para.contacts().size()   == 3u);
+        BOOST_TEST_REQUIRE(para.contacts().at(0).P  == 10u);
+        BOOST_TEST_REQUIRE(para.contacts().at(1).P  == 11u);
+        BOOST_TEST_REQUIRE(para.contacts().at(2).P  == 12u);
+        BOOST_TEST_REQUIRE(para.contacts().at(0).PN == 9u);
+        BOOST_TEST_REQUIRE(para.contacts().at(1).PN == 10u);
+        BOOST_TEST_REQUIRE(para.contacts().at(2).PN == 11u);
+        BOOST_TEST_REQUIRE(para.contacts().at(0).PC == 11u);
+        BOOST_TEST_REQUIRE(para.contacts().at(1).PC == 12u);
+        BOOST_TEST_REQUIRE(para.contacts().at(2).PC == 13u);
 
-        BOOST_TEST_REQUIRE(pot.contacts().at(0).k == -6.0);
-        BOOST_TEST_REQUIRE(pot.contacts().at(1).k == -6.0);
-        BOOST_TEST_REQUIRE(pot.contacts().at(2).k == -6.0);
+        BOOST_TEST_REQUIRE(para.contacts().at(0).k == -6.0);
+        BOOST_TEST_REQUIRE(para.contacts().at(1).k == -6.0);
+        BOOST_TEST_REQUIRE(para.contacts().at(2).k == -6.0);
 
-        BOOST_TEST_REQUIRE(pot.contacts().at(0).r0 == 5.1);
-        BOOST_TEST_REQUIRE(pot.contacts().at(1).r0 == 5.2);
-        BOOST_TEST_REQUIRE(pot.contacts().at(2).r0 == 5.3);
+        BOOST_TEST_REQUIRE(para.contacts().at(0).r0 == 5.1);
+        BOOST_TEST_REQUIRE(para.contacts().at(1).r0 == 5.2);
+        BOOST_TEST_REQUIRE(para.contacts().at(2).r0 == 5.3);
 
-        BOOST_TEST_REQUIRE(pot.contacts().at(0).theta0 == 1.5);
-        BOOST_TEST_REQUIRE(pot.contacts().at(1).theta0 == 1.6);
-        BOOST_TEST_REQUIRE(pot.contacts().at(2).theta0 == 1.7);
+        BOOST_TEST_REQUIRE(para.contacts().at(0).theta0 == 1.5);
+        BOOST_TEST_REQUIRE(para.contacts().at(1).theta0 == 1.6);
+        BOOST_TEST_REQUIRE(para.contacts().at(2).theta0 == 1.7);
 
-        BOOST_TEST_REQUIRE(pot.contacts().at(0).phi0 == 2.0);
-        BOOST_TEST_REQUIRE(pot.contacts().at(1).phi0 == 2.1);
-        BOOST_TEST_REQUIRE(pot.contacts().at(2).phi0 == 2.2);
+        BOOST_TEST_REQUIRE(para.contacts().at(0).phi0 == 2.0);
+        BOOST_TEST_REQUIRE(para.contacts().at(1).phi0 == 2.1);
+        BOOST_TEST_REQUIRE(para.contacts().at(2).phi0 == 2.2);
     }
 }

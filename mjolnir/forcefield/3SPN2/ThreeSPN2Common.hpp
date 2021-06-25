@@ -16,7 +16,7 @@ enum class bead_kind: std::uint8_t
 
 // X is for default parameter
 enum class base_kind       : std::uint8_t {A=0, T=1, G=2, C=3, X};
-enum class base_pair_kind  : std::uint8_t {AT, TA, GC, CG};
+enum class base_pair_kind  : std::uint8_t {AT, TA, GC, CG, INVALID};
 enum class base_stack_kind : std::uint8_t
 {
     AA =  0, AT =  1, AG =  2, AC =  3,

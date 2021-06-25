@@ -6,8 +6,8 @@
 
 namespace mjolnir
 {
-template class iSoLFAttractivePotential<SimulatorTraits<double, UnlimitedBoundary>       >;
-template class iSoLFAttractivePotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
-template class iSoLFAttractivePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-template class iSoLFAttractivePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+template class iSoLFAttractiveParameterList<SimulatorTraits<double, UnlimitedBoundary>       >;
+template class iSoLFAttractiveParameterList<SimulatorTraits<float,  UnlimitedBoundary>       >;
+template class iSoLFAttractiveParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+template class iSoLFAttractiveParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir

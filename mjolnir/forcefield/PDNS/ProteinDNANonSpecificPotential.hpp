@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_FORCEFIELD_PDNS_PROTEIN_DNA_NON_SPECIFIC_POTENTIAL_HPP
 #define MJOLNIR_FORCEFIELD_PDNS_PROTEIN_DNA_NON_SPECIFIC_POTENTIAL_HPP
+#include <mjolnir/forcefield/global/ParameterList.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/core/Unit.hpp>
@@ -35,14 +36,114 @@ namespace mjolnir
 //
 // XXX one particle on protein can have multiple contact direction.
 
-template<typename traitsT>
+template<typename realT>
 class ProteinDNANonSpecificPotential
 {
   public:
-    using traits_type = traitsT;
-    using real_type   = typename traits_type::real_type;
-    using system_type = System<traits_type>;
-    using self_type   = ProteinDNANonSpecificPotential<traits_type>;
+
+    using real_type = realT;
+
+    struct parameter_type
+    {
+        std::size_t S3;
+    };
+
+    static constexpr std::size_t invalid() noexcept
+    {
+        return std::numeric_limits<std::size_t>::max();
+    }
+    static constexpr parameter_type default_parameter() noexcept
+    {
+        return parameter_type{invalid()};
+    }
+    static constexpr real_type default_cutoff()
+    {
+        return real_type(5.0);
+    }
+
+  public:
+
+    ProteinDNANonSpecificPotential() {}
+
+    std::pair<real_type, real_type>
+    f_df(const real_type r0, const real_type r, const real_type rsigma) const noexcept
+    {
+        const real_type dr_sigma = (r - r0) * rsigma;
+        const real_type term     = std::exp(real_type(-0.5) * dr_sigma * dr_sigma);
+
+        return std::make_pair(term, -dr_sigma * rsigma * term);
+    }
+
+    std::pair<real_type, real_type>
+    g_dg(const real_type theta0, const real_type theta, const real_type delta,
+         const real_type delta2, const real_type pi_over_2delta) const noexcept
+    {
+        const real_type dtheta     = theta - theta0;
+        const real_type abs_dtheta = std::abs(dtheta);
+        if(abs_dtheta < delta)
+        {
+            return std::make_pair(real_type(1), real_type(0));
+        }
+        else if(abs_dtheta < delta2)
+        {
+            const real_type c = std::cos(dtheta * pi_over_2delta);
+            const real_type s = std::sin(dtheta * pi_over_2delta);
+            return std::make_pair(1 - c * c, 2 * s * c * pi_over_2delta);
+        }
+        else
+        {
+            return std::make_pair(real_type(0), real_type(0));
+        }
+    }
+
+    real_type f(const real_type r0, const real_type r, const real_type rsigma) const noexcept
+    {
+        const real_type dr_sigma = (r - r0) * rsigma;
+
+        return std::exp(real_type(-0.5) * dr_sigma * dr_sigma);
+    }
+    real_type g(const real_type theta0, const real_type theta,
+                const real_type delta,  const real_type delta2,
+                const real_type pi_over_2delta) const noexcept
+    {
+        const real_type dtheta     = theta - theta0;
+        const real_type abs_dtheta = std::abs(dtheta);
+        if(abs_dtheta < delta)
+        {
+            return 1;
+        }
+        else if(abs_dtheta < delta2)
+        {
+            const real_type term = std::cos(dtheta * pi_over_2delta);
+            return real_type(1) - term * term;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    template<typename T>
+    void initialize(const System<T>&) noexcept {return;}
+
+    template<typename T>
+    void update(const System<T>&) noexcept {return;}
+
+    static const char* name() noexcept {return "PDNS";}
+};
+
+template<typename traitsT>
+class ProteinDNANonSpecificParameterList final
+    : public ParameterListBase<traitsT,
+        ProteinDNANonSpecificPotential<typename traitsT::real_type>>
+{
+  public:
+    using traits_type         = traitsT;
+    using real_type           = typename traits_type::real_type;
+    using system_type         = System<traits_type>;
+    using potential_type      = ProteinDNANonSpecificPotential<real_type>;
+    using pair_parameter_type = typename potential_type::parameter_type;
+    using base_type           = ParameterListBase<traits_type, potential_type>;
 
     struct contact_parameter_type
     {
@@ -58,10 +159,7 @@ class ProteinDNANonSpecificPotential
     {
         std::uint32_t S3; // if a particle is a protein, set `invalid()`
     };
-    struct pair_parameter_type
-    {
-        std::uint32_t S3;
-    };
+
     using container_type = std::vector<parameter_type>;
 
     // topology stuff
@@ -85,13 +183,14 @@ class ProteinDNANonSpecificPotential
 
   public:
 
-    ProteinDNANonSpecificPotential(const real_type sigma,
+    ProteinDNANonSpecificParameterList(const real_type sigma,
         const real_type delta, const real_type cutoff_ratio,
         const std::vector<contact_parameter_type>&         contacts,
         const std::vector<dna_index_type>&                 dnas,
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-        : sigma_(sigma), delta_(delta), delta2_(delta * 2),
+        : sigma_(sigma), rsigma_(real_type(1) / sigma),
+          delta_(delta), delta2_(delta * 2),
           pi_over_2delta_(math::constants<real_type>::pi() * 0.5 / delta),
           cutoff_ratio_(cutoff_ratio), max_cutoff_length_(0),
           contacts_(contacts),
@@ -136,86 +235,41 @@ class ProteinDNANonSpecificPotential
             std::unique(proteins_.begin(), proteins_.end());
         proteins_.erase(uniq_proteins, proteins_.end());
     }
-    ~ProteinDNANonSpecificPotential() = default;
+    ~ProteinDNANonSpecificParameterList() = default;
 
-    void initialize(const system_type& sys, const topology_type& topol) noexcept
+    void initialize(const system_type& sys, const topology_type& topol,
+                    const potential_type& pot) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        // set cutoff length
-
-        this->max_cutoff_length_ = real_type(0);
-        for(auto& para : this->contacts_)
-        {
-            para.r_cut    = para.r0 + cutoff_ratio_ * sigma_;
-            para.r_cut_sq = para.r_cut * para.r_cut;
-
-            this->max_cutoff_length_ = std::max(max_cutoff_length_, para.r_cut);
-        }
-
-        this->update(sys, topol);
+        this->update(sys, topol, pot);
         return;
     }
 
-    void update(const system_type& sys, const topology_type& topol) noexcept
+    void update(const system_type& sys, const topology_type& topol,
+                const potential_type&) noexcept override
     {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        if( ! this->contacts_.empty())
+        {
+            this->max_cutoff_length_ = real_type(0);
+            for(auto& para : this->contacts_)
+            {
+                para.r_cut    = para.r0 + cutoff_ratio_ * sigma_;
+                para.r_cut_sq = para.r_cut * para.r_cut;
+
+                this->max_cutoff_length_ = std::max(max_cutoff_length_, para.r_cut);
+            }
+        }
+        else
+        {
+            this->max_cutoff_length_ = real_type(1.0);
+        }
         exclusion_list_.make(sys, topol);
         return;
-    }
-
-    std::pair<real_type, real_type>
-    f_df(const real_type r0, const real_type r) const noexcept
-    {
-        const real_type rsigma   = real_type(1) / this->sigma_;
-        const real_type dr_sigma = (r - r0) * rsigma;
-        const real_type term     = std::exp(real_type(-0.5) * dr_sigma * dr_sigma);
-
-        return std::make_pair(term, -dr_sigma * rsigma * term);
-    }
-    std::pair<real_type, real_type>
-    g_dg(const real_type theta0, const real_type theta) const noexcept
-    {
-        const real_type dtheta     = theta - theta0;
-        const real_type abs_dtheta = std::abs(dtheta);
-        if(abs_dtheta < this->delta_)
-        {
-            return std::make_pair(real_type(1), real_type(0));
-        }
-        else if(abs_dtheta < this->delta2_)
-        {
-            const real_type c = std::cos(dtheta * pi_over_2delta_);
-            const real_type s = std::sin(dtheta * pi_over_2delta_);
-            return std::make_pair(1 - c * c, 2 * s * c * pi_over_2delta_);
-        }
-        else
-        {
-            return std::make_pair(real_type(0), real_type(0));
-        }
-    }
-
-    real_type f(const real_type r0, const real_type r) const noexcept
-    {
-        const real_type dr_sigma = (r - r0) / this->sigma_;
-        return std::exp(real_type(-0.5) * dr_sigma * dr_sigma);
-    }
-    real_type g(const real_type theta0, const real_type theta) const noexcept
-    {
-        const real_type dtheta     = theta - theta0;
-        const real_type abs_dtheta = std::abs(dtheta);
-        if(abs_dtheta < this->delta_)
-        {
-            return 1;
-        }
-        else if(abs_dtheta < this->delta2_)
-        {
-            const real_type term = std::cos(dtheta * pi_over_2delta_);
-            return real_type(1) - term * term;
-        }
-        else
-        {
-            return 0;
-        }
     }
 
     std::vector<contact_parameter_type> const& contacts() const noexcept
@@ -223,11 +277,22 @@ class ProteinDNANonSpecificPotential
         return contacts_;
     }
 
+    real_type sigma()          const noexcept {return sigma_;}
+    real_type rsigma()         const noexcept {return rsigma_;}
+    real_type delta()          const noexcept {return delta_;}
+    real_type delta2()         const noexcept {return delta2_;}
+    real_type pi_over_2delta() const noexcept {return pi_over_2delta_;}
+
     // -----------------------------------------------------------------------
     // for NeighborList
 
+    real_type max_cutoff_length() const noexcept override
+    {
+        return this->max_cutoff_length_;
+    }
+
     pair_parameter_type
-    prepare_params(const std::size_t i, const std::size_t j) const noexcept
+    prepare_params(std::size_t i, std::size_t j) const noexcept override
     {
         assert(this->parameters_.at(i).S3 == invalid());
         assert(this->parameters_.at(j).S3 != invalid());
@@ -235,25 +300,26 @@ class ProteinDNANonSpecificPotential
     }
 
     // {PRO-Ca} U {DNA-P}
-    std::vector<std::size_t> const& participants() const noexcept
+    std::vector<std::size_t> const& participants() const noexcept override
     {
         return participants_;
     }
     // {Pro-Ca}
-    std::vector<std::size_t> const& leading_participants() const noexcept
+    range<typename std::vector<std::size_t>::const_iterator>
+    leading_participants() const noexcept override
     {
-        return this->proteins_;
+        return make_range(proteins_.begin(), proteins_.end());
     }
     // {DNA-P}
-    std::vector<std::size_t> const&
+    range<typename std::vector<std::size_t>::const_iterator>
     possible_partners_of(const std::size_t /*participant_idx*/,
-                         const std::size_t /*particle_idx*/) const noexcept
+                         const std::size_t /*particle_idx*/) const noexcept override
     {
-        return this->dnas_;
+        return make_range(dnas_.begin(), dnas_.end());
     }
 
     // to check bases has base-pairing interaction.
-    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept override
     {
         if(exclusion_list_.is_excluded(i, j))
         {
@@ -270,10 +336,9 @@ class ProteinDNANonSpecificPotential
         return false;
     }
 
-    exclusion_list_type const& exclusion_list() const noexcept {return exclusion_list_;}
+    exclusion_list_type const& exclusion_list() const noexcept override {return exclusion_list_;}
 
     real_type cutoff_ratio()      const noexcept {return cutoff_ratio_;}
-    real_type max_cutoff_length() const noexcept {return this->max_cutoff_length_;}
 
     // ------------------------------------------------------------------------
     // used by Observer.
@@ -295,9 +360,14 @@ class ProteinDNANonSpecificPotential
         return proteins_;
     }
 
+    base_type* clone() const override
+    {
+        return new ProteinDNANonSpecificParameterList(*this);
+    }
+
   private:
 
-    real_type sigma_, delta_, delta2_, pi_over_2delta_;
+    real_type sigma_, rsigma_, delta_, delta2_, pi_over_2delta_;
     real_type cutoff_ratio_, max_cutoff_length_;
     std::vector<std::size_t> participants_;          // all participants
     std::vector<std::size_t> proteins_;              // indices of protein
@@ -316,10 +386,10 @@ class ProteinDNANonSpecificPotential
 
 namespace mjolnir
 {
-extern template class ProteinDNANonSpecificPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
-extern template class ProteinDNANonSpecificPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
-extern template class ProteinDNANonSpecificPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-extern template class ProteinDNANonSpecificPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+extern template class ProteinDNANonSpecificParameterList<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class ProteinDNANonSpecificParameterList<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class ProteinDNANonSpecificParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class ProteinDNANonSpecificParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 

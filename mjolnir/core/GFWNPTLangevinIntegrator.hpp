@@ -378,9 +378,7 @@ class GFWNPTLangevinIntegrator
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             const auto m = sys.mass(i);
-            const auto r = sys.position(i);
             const auto v = sys.velocity(i);
-            const auto f = sys.force(i);
 
             // here the original form is a tensor product. but the diagonal term
             // of the tensor product (cij = ai * bj) becomes hadamard product

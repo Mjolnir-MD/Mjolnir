@@ -6,8 +6,8 @@
 
 namespace mjolnir
 {
-template class ThreeSPN2BaseBaseInteractionPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
-template class ThreeSPN2BaseBaseInteractionPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
-template class ThreeSPN2BaseBaseInteractionPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-template class ThreeSPN2BaseBaseInteractionPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+template class ThreeSPN2BaseBaseInteractionParameterList<SimulatorTraits<double, UnlimitedBoundary>       >;
+template class ThreeSPN2BaseBaseInteractionParameterList<SimulatorTraits<float,  UnlimitedBoundary>       >;
+template class ThreeSPN2BaseBaseInteractionParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+template class ThreeSPN2BaseBaseInteractionParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir
