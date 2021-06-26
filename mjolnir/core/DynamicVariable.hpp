@@ -1,6 +1,8 @@
 #ifndef MJOLNIR_CORE_DYNAMIC_VARIABLE_HPP
 #define MJOLNIR_CORE_DYNAMIC_VARIABLE_HPP
 #include <mjolnir/util/make_unique.hpp>
+#include <mjolnir/util/is_finite.hpp>
+#include <limits>
 #include <memory>
 
 //
@@ -19,9 +21,14 @@ struct DynamicVariableBase
     real_type m, gamma;
     real_type lower, upper;
 
+    DynamicVariableBase(real_type x_, real_type v_, real_type f_,
+                        real_type m_, real_type gamma_,
+                        real_type lower_, real_type upper_)
+        : x(x_), v(v_), f(f_), m(m_), gamma(gamma_), lower(lower_), upper(upper_)
+    {}
     virtual ~DynamicVariableBase() = default;
-    virtual void update(real_type x, real_type v, real_type f) noexcept;
-    virtual DynamicVariableBase<real_type>* clone() const;
+    virtual void update(real_type x, real_type v, real_type f) noexcept = 0;
+    virtual DynamicVariableBase<real_type>* clone() const = 0;
 };
 
 // It makes `DynamicVariable`s copyable and easier to handle.
@@ -43,6 +50,7 @@ struct DynamicVariable
     DynamicVariable& operator=(const DynamicVariable& other)
     {
         this->resource_.reset(other.resource_->clone());
+        return *this;
     }
     DynamicVariable(DynamicVariable&&) = default;
     DynamicVariable& operator=(DynamicVariable&&) = default;
@@ -71,9 +79,9 @@ struct DefaultDynamicVariable : public DynamicVariableBase<realT>
 
     DefaultDynamicVariable(const real_type x, const real_type v, const real_type f,
                            const real_type m, const real_type gamma)
-        : base_type(x, v, f, m, gamma,
+        : base_type{x, v, f, m, gamma,
                     -std::numeric_limits<real_type>::infinity(),
-                     std::numeric_limits<real_type>::infinity())
+                     std::numeric_limits<real_type>::infinity()}
     {}
     ~DefaultDynamicVariable() override = default;
 
@@ -106,8 +114,8 @@ struct PeriodicDynamicVariable : public DynamicVariableBase<realT>
     void update(real_type x, real_type v, real_type f) noexcept override
     {
         this->x = x;
-        if      (this->x <  this->lower) {this->x += (this->uppper - this->lower);}
-        else if (this->upper <= this->x) {this->x -= (this->uppper - this->lower);}
+        if      (this->x <  this->lower) {this->x += (this->upper - this->lower);}
+        else if (this->upper <= this->x) {this->x -= (this->upper - this->lower);}
         this->v = v;
         this->f = f;
         return;
@@ -156,6 +164,19 @@ struct RepulsiveDynamicVariable : public DynamicVariableBase<realT>
         return new RepulsiveDynamicVariable(*this);
     }
 };
+
+#ifdef MJOLNIR_SEPARATE_BUILD
+extern template class DynamicVariableBase<double>;
+extern template class DynamicVariableBase<float >;
+extern template class DynamicVariable<double>;
+extern template class DynamicVariable<float >;
+extern template class DefaultDynamicVariable<double>;
+extern template class DefaultDynamicVariable<float >;
+extern template class PeriodicDynamicVariable<double>;
+extern template class PeriodicDynamicVariable<float >;
+extern template class RepulsiveDynamicVariable<double>;
+extern template class RepulsiveDynamicVariable<float >;
+#endif
 
 } // mjolnir
 #endif// MJOLNIR_CORE_DYNAMIC_VARIABLE_HPP
