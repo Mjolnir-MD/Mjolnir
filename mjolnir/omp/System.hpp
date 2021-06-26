@@ -96,9 +96,9 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
         for(auto& kv : this->variables_)
         {
             auto& var = kv.second;
-            if( ! is_finite(var.v)) // not initialized
+            if( ! is_finite(var.v())) // not initialized
             {
-                var.v = rng.gaussian(0, std::sqrt(kBT / var.m));
+                var.update(var.x(), rng.gaussian(0, std::sqrt(kBT / var.m())), var.f());
             }
         }
         MJOLNIR_LOG_NOTICE("done.");
@@ -242,8 +242,8 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     attribute_type const& attributes() const noexcept {return attributes_;}
 
     // dynamic variables in a system.
-    dynamic_varialbe_type const& variable(const std::string& key) const {return variables_.at(key);}
-    dynamic_varialbe_type&       variable(const std::string& key)       {return variables_[key];}
+    dynamic_variable_type const& variable(const std::string& key) const {return variables_.at(key);}
+    dynamic_variable_type&       variable(const std::string& key)       {return variables_[key];}
     bool          has_variable(const std::string& key) const {return variables_.count(key) == 1;}
     variables_type const& variables() const noexcept {return variables_;}
     variables_type&       variables()       noexcept {return variables_;}

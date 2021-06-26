@@ -100,9 +100,9 @@ class System
         for(auto& kv : this->variables_)
         {
             auto& var = kv.second;
-            if( ! is_finite(var.v)) // not initialized
+            if( ! is_finite(var.v())) // not initialized
             {
-                var.v = rng.gaussian(0, std::sqrt(kBT / var.m));
+                var.update(var.x(), rng.gaussian(0, std::sqrt(kBT / var.m())), var.f());
             }
         }
         MJOLNIR_LOG_NOTICE("done.");
