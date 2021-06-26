@@ -43,6 +43,7 @@ struct DynamicVariable
     {
         static_assert(std::is_base_of<DynamicVariableBase<realT>, DynVar>::value, "");
     }
+    DynamicVariable(): resource_(nullptr) {}
 
     DynamicVariable(const DynamicVariable& other)
         : resource_(other.resource_->clone())
