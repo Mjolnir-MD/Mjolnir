@@ -3,7 +3,6 @@
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/forcefield/global/GlobalPairInteraction.hpp>
 #include <mjolnir/forcefield/global/GlobalPairLennardJonesInteraction.hpp>
-#include <mjolnir/forcefield/global/GlobalPairUniformLennardJonesInteraction.hpp>
 #include <mjolnir/forcefield/global/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseBaseInteraction.hpp>
 #include <mjolnir/forcefield/PDNS/ProteinDNANonSpecificInteraction.hpp>
@@ -34,126 +33,132 @@ read_global_pair_interaction(const toml::value& global)
     if(potential == "ExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Excluded Volume.");
-        using potential_t   = ExcludedVolumePotential<traitsT>;
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = ExcludedVolumePotential<real_type>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
+        auto pot_para = read_excluded_volume_potential<traitsT>(global);
+
         return make_unique<interaction_t>(
-            read_excluded_volume_potential<traitsT>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+                std::move(pot_para.first), std::move(pot_para.second),
+                read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "InversePower")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Inverse Power.");
-        using potential_t   = InversePowerPotential<traitsT>;
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = InversePowerPotential<real_type>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
+        auto pot_para = read_inverse_power_potential<traitsT>(global);
+
         return make_unique<interaction_t>(
-            read_inverse_power_potential<traitsT>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+                std::move(pot_para.first), std::move(pot_para.second),
+                read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "HardCoreExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Hard Core Excluded Volume.");
-        using potential_t   = HardCoreExcludedVolumePotential<traitsT>;
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = HardCoreExcludedVolumePotential<real_type>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
+        auto pot_para = read_hard_core_excluded_volume_potential<traitsT>(global);
+
         return make_unique<interaction_t>(
-            read_hard_core_excluded_volume_potential<traitsT>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+                std::move(pot_para.first), std::move(pot_para.second),
+                read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "DebyeHuckel")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Debye-Huckel.");
-        using potential_t   = DebyeHuckelPotential<traitsT>;
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = DebyeHuckelPotential<real_type>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
+        auto pot_para = read_debye_huckel_potential<traitsT>(global);
+
         return make_unique<interaction_t>(
-            read_debye_huckel_potential<traitsT>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+                std::move(pot_para.first), std::move(pot_para.second),
+                read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "LennardJones")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Lennard-Jones.");
-        using potential_t   = LennardJonesPotential<traitsT>;
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = LennardJonesPotential<real_type>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
+        auto pot_para = read_lennard_jones_potential<traitsT>(global);
+
         return make_unique<interaction_t>(
-            read_lennard_jones_potential<traitsT>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+                std::move(pot_para.first), std::move(pot_para.second),
+                read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "UniformLennardJones")
     {
-        MJOLNIR_LOG_NOTICE("-- potential function is Uniform Lennard-Jones.");
-        using potential_t   = UniformLennardJonesPotential<traitsT>;
+        MJOLNIR_LOG_NOTICE("-- potential function is uniform Lennard-Jones.");
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = UniformLennardJonesPotential<real_type>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
+        auto pot_para = read_uniform_lennard_jones_potential<traitsT>(global);
+
         return make_unique<interaction_t>(
-            read_uniform_lennard_jones_potential<traitsT>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+                std::move(pot_para.first), std::move(pot_para.second),
+                read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "LennardJonesAttractive")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is the attractive part of Lennard-Jones.");
-        if(global.contains("table"))
-        {
-            using potential_t   = TabulatedLennardJonesAttractivePotential<traitsT>;
-            using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = LennardJonesAttractivePotential<real_type>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
-            return make_unique<interaction_t>(
-                read_tabulated_lennard_jones_attractive_potential<traitsT>(global),
-                read_spatial_partition<traitsT, potential_t>(global));
-        }
-        else
-        {
-            using potential_t   = LennardJonesAttractivePotential<traitsT>;
-            using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+        auto pot_para = read_lennard_jones_attractive_potential<traitsT>(global);
 
-            return make_unique<interaction_t>(
-                read_lennard_jones_attractive_potential<traitsT>(global),
+        return make_unique<interaction_t>(
+                std::move(pot_para.first), std::move(pot_para.second),
                 read_spatial_partition<traitsT, potential_t>(global));
-        }
     }
     else if(potential == "WCA")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is WCA.");
-        if(global.contains("table"))
-        {
-            using potential_t   = TabulatedWCAPotential<traitsT>;
-            using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = WCAPotential<real_type>;
+        using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
-            return make_unique<interaction_t>(
-                read_tabulated_wca_potential<traitsT>(global),
-                read_spatial_partition<traitsT, potential_t>(global));
-        }
-        else
-        {
-            using potential_t   = WCAPotential<traitsT>;
-            using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
+        auto pot_para = read_wca_potential<traitsT>(global);
 
-            return make_unique<interaction_t>(
-                read_wca_potential<traitsT>(global),
+        return make_unique<interaction_t>(
+                std::move(pot_para.first), std::move(pot_para.second),
                 read_spatial_partition<traitsT, potential_t>(global));
-        }
     }
     else if(potential == "3SPN2ExcludedVolume")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is 3SPN2ExcludedVolume.");
-        using potential_t   = ThreeSPN2ExcludedVolumePotential<traitsT>;
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = ThreeSPN2ExcludedVolumePotential<real_type>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
+        auto pot_para = read_3spn2_excluded_volume_potential<traitsT>(global);
+
         return make_unique<interaction_t>(
-            read_3spn2_excluded_volume_potential<traitsT>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+                std::move(pot_para.first), std::move(pot_para.second),
+                read_spatial_partition<traitsT, potential_t>(global));
     }
     else if(potential == "iSoLFAttractive")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is iSoLFAttractive.");
-        using potential_t   = iSoLFAttractivePotential<traitsT>;
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = iSoLFAttractivePotential<real_type>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
+        auto pot_para = read_isolf_potential<traitsT>(global);
+
         return make_unique<interaction_t>(
-            read_isolf_potential<traitsT>(global),
-            read_spatial_partition<traitsT, potential_t>(global));
+                std::move(pot_para.first), std::move(pot_para.second),
+                read_spatial_partition<traitsT, potential_t>(global));
     }
     else
     {
@@ -181,10 +186,11 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type           = typename traitsT::real_type;
-    using base_kind           = parameter_3SPN2::base_kind;
-    using potential_type      = ThreeSPN2BaseBaseInteractionPotential<traitsT>;
-    using parameter_type      = typename potential_type::parameter_type;
+    using real_type      = typename traitsT::real_type;
+    using base_kind      = parameter_3SPN2::base_kind;
+    using parameter_list = ThreeSPN2BaseBaseInteractionParameterList<traitsT>;
+    using potential_type = ThreeSPN2BaseBaseInteractionPotential<real_type>;
+    using parameter_type = typename parameter_list::parameter_type;
 
     // [[forcefields.global]]
     // interaction = "3SPN2BaseBase"
@@ -278,25 +284,21 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
     const auto pot = toml::find<std::string>(global, "potential");
     if(pot == "3SPN2")
     {
-        ThreeSPN2BaseBaseGlobalPotentialParameter<real_type> para_3SPN2;
-        potential_type potential(para_3SPN2, std::move(params),
-            read_ignore_particles_within(global),
-            read_ignored_molecule(global), read_ignored_group(global));
-
         return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(
-                std::move(potential),
-                read_spatial_partition<traitsT, potential_type>(global));
+            potential_type{},
+            parameter_list(ThreeSPN2BaseBaseGlobalPotentialParameter<real_type>{},
+                std::move(params), read_ignore_particles_within(global),
+                read_ignored_molecule(global), read_ignored_group(global)),
+            read_spatial_partition<traitsT, potential_type>(global));
     }
     else if(pot == "3SPN2C")
     {
-        ThreeSPN2CBaseBaseGlobalPotentialParameter<real_type> para_3SPN2C;
-        potential_type potential(para_3SPN2C, std::move(params),
-            read_ignore_particles_within(global),
-            read_ignored_molecule(global), read_ignored_group(global));
-
         return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(
-                std::move(potential),
-                read_spatial_partition<traitsT, potential_type>(global));
+            potential_type{},
+            parameter_list(ThreeSPN2CBaseBaseGlobalPotentialParameter<real_type>{},
+                std::move(params), read_ignore_particles_within(global),
+                read_ignored_molecule(global), read_ignored_group(global)),
+            read_spatial_partition<traitsT, potential_type>(global));
     }
     else
     {
@@ -319,10 +321,11 @@ read_pdns_interaction(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using potential_type         = ProteinDNANonSpecificPotential<traitsT>;
-    using real_type              = typename potential_type::real_type;
-    using contact_parameter_type = typename potential_type::contact_parameter_type;
-    using dna_index_type         = typename potential_type::dna_index_type;
+    using real_type           = typename traitsT::real_type;
+    using parameter_list_type = ProteinDNANonSpecificParameterList<traitsT>;
+    using contact_parameter_type = typename parameter_list_type::contact_parameter_type;
+    using dna_index_type         = typename parameter_list_type::dna_index_type;
+    using potential_type = ProteinDNANonSpecificPotential<real_type>;
 
     // ```toml
     // [[forcefields.global]]
@@ -402,8 +405,8 @@ read_pdns_interaction(const toml::value& global)
                 }));
         }
     }
-    return make_unique<ProteinDNANonSpecificInteraction<traitsT>>(
-        potential_type(sgm, dlt, cutoff, std::move(contacts), std::move(dnas),
+    return make_unique<ProteinDNANonSpecificInteraction<traitsT>>(potential_type{},
+        parameter_list_type(sgm, dlt, cutoff, std::move(contacts), std::move(dnas),
             read_ignore_particles_within(global), read_ignored_molecule(global),
             read_ignored_group(global)),
         read_spatial_partition<traitsT, potential_type>(global));
@@ -418,11 +421,12 @@ read_pwmcos_interaction(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using potential_type         = PWMcosPotential<traitsT>;
-    using real_type              = typename potential_type::real_type;
-    using contact_parameter_type = typename potential_type::contact_parameter_type;
-    using dna_parameter_type     = typename potential_type::dna_parameter_type;
-    using base_kind              = typename potential_type::base_kind;
+    using real_type              = typename traitsT::real_type;
+    using parameter_list_type    = PWMcosParameterList<traitsT>;
+    using contact_parameter_type = typename parameter_list_type::contact_parameter_type;
+    using dna_parameter_type     = typename parameter_list_type::dna_parameter_type;
+    using base_kind              = typename parameter_list_type::base_kind;
+    using potential_type         = PWMcosPotential<real_type>;
 
     // ```toml
     // [[forcefields.global]]
@@ -540,14 +544,13 @@ read_pwmcos_interaction(const toml::value& global)
                 }));
         }
     }
-    return make_unique<PWMcosInteraction<traitsT>>(
-        potential_type(sgm, phi, Eunit, Eshift, cutoff,
+    return make_unique<PWMcosInteraction<traitsT>>(potential_type{},
+        parameter_list_type(sgm, phi, Eunit, Eshift, cutoff,
             std::move(contacts), std::move(dnas),
             read_ignore_particles_within(global), read_ignored_molecule(global),
             read_ignored_group(global)),
         read_spatial_partition<traitsT, potential_type>(global));
 }
-
 
 // ----------------------------------------------------------------------------
 // general read_global_interaction function
@@ -588,26 +591,28 @@ read_global_interaction(const toml::value& global)
             toml::find<toml::value>(global, "interaction"), "here", {
             "expected value is one of the following.",
             "- \"Pair\"         : well-known pair interaction depends only on the distance",
-            "- \"3SPN2BaseBase\": Base pair and cross stacking interaction for 3SPN2 DNA model"
+            "- \"3SPN2BaseBase\": Base pair and cross stacking interaction for 3SPN2 DNA model",
+            "- \"PDNS\"         : direction-dependent contact to represent hydrogen bond",
+            "- \"PWMcos\"       : direction-dependent contact to reproduce DNA sequeucne-specific interaction"
             }));
     }
 }
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_global_interaction(const toml::value& global);
-extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_global_interaction(const toml::value& global);
-extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_interaction(const toml::value& global);
-extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_global_interaction(const toml::value& global);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_global_interaction(const toml::value&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_global_interaction(const toml::value&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_interaction(const toml::value&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_global_interaction(const toml::value&);
 
-extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_global_3spn2_base_base_interaction(const toml::value& global);
-extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_global_3spn2_base_base_interaction(const toml::value& global);
-extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_3spn2_base_base_interaction(const toml::value& global);
-extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_global_3spn2_base_base_interaction(const toml::value& global);
+// extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_global_3spn2_base_base_interaction(const toml::value&);
+// extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_global_3spn2_base_base_interaction(const toml::value&);
+// extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_3spn2_base_base_interaction(const toml::value&);
+// extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_global_3spn2_base_base_interaction(const toml::value&);
 
-extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_global_pair_interaction(const toml::value& global);
-extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_global_pair_interaction(const toml::value& global);
-extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_pair_interaction(const toml::value& global);
-extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_global_pair_interaction(const toml::value& global);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_global_pair_interaction(const toml::value&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_global_pair_interaction(const toml::value&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_pair_interaction(const toml::value&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_global_pair_interaction(const toml::value&);
 #endif
 
 } // mjolnir

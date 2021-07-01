@@ -13,15 +13,16 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename PotentialT, std::size_t MaxElem = 8>
-class ZorderRTree final : public SpatialPartitionBase<traitsT, PotentialT>
+template<typename traitsT, typename potentialT, std::size_t MaxElem = 8>
+class ZorderRTree final
+    : public SpatialPartitionBase<traitsT, potentialT>
 {
     static_assert(MaxElem > 1, "MaxElem > 1");
 
   public:
-    using traits_type        = traitsT;
-    using potential_type     = PotentialT;
-    using base_type          = SpatialPartitionBase<traits_type, potential_type>;
+    using traits_type         = traitsT;
+    using potential_type      = potentialT;
+    using base_type           = SpatialPartitionBase<traits_type, potential_type>;
 
     using system_type        = typename base_type::system_type;
     using boundary_type      = typename base_type::boundary_type;
@@ -30,6 +31,7 @@ class ZorderRTree final : public SpatialPartitionBase<traitsT, PotentialT>
     using neighbor_list_type = typename base_type::neighbor_list_type;
     using neighbor_type      = typename base_type::neighbor_type;
     using range_type         = typename base_type::range_type;
+    using parameter_list_type = typename base_type::parameter_list_type;
 
     struct AABB
     {
@@ -62,8 +64,8 @@ class ZorderRTree final : public SpatialPartitionBase<traitsT, PotentialT>
         return current_margin_ >= 0.0;
     }
 
-    void initialize(neighbor_list_type& neighbors,
-                    const system_type& sys, const potential_type& pot) override
+    void initialize(neighbor_list_type& neighbors, const system_type& sys,
+                    const parameter_list_type& params) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -75,36 +77,36 @@ class ZorderRTree final : public SpatialPartitionBase<traitsT, PotentialT>
                              " parallel simulation.");
         }
 
-        const real_type max_cutoff = pot.max_cutoff_length();
+        const real_type max_cutoff = params.max_cutoff_length();
         this->set_cutoff(max_cutoff);
 
-        MJOLNIR_LOG_INFO(pot.name(), " cutoff = ", max_cutoff);
+        MJOLNIR_LOG_INFO(potential_type::name(), " cutoff = ", max_cutoff);
 
-        this->make(neighbors, sys, pot);
+        this->make(neighbors, sys, params);
         return;
     }
 
-    void make(neighbor_list_type& neighbors,
-              const system_type& sys, const potential_type& pot) override;
+    void make(neighbor_list_type& neighbors, const system_type& sys,
+              const parameter_list_type& params) override;
 
     bool reduce_margin(neighbor_list_type& neighbors, const real_type dmargin,
-                       const system_type& sys, const potential_type& pot) override
+                       const system_type& sys, const parameter_list_type& params) override
     {
         this->current_margin_ -= dmargin;
         if(this->current_margin_ < 0)
         {
-            this->make(neighbors, sys, pot);
+            this->make(neighbors, sys, params);
             return true;
         }
         return false;
     }
     bool scale_margin(neighbor_list_type& neighbors, const real_type scale,
-                const system_type& sys, const potential_type& pot) override
+                const system_type& sys, const parameter_list_type& params) override
     {
         this->current_margin_ = (cutoff_ + current_margin_) * scale - cutoff_;
         if(this->current_margin_ < 0)
         {
-            this->make(neighbors, sys, pot);
+            this->make(neighbors, sys, params);
             return true;
         }
         return false;
@@ -233,7 +235,7 @@ class ZorderRTree final : public SpatialPartitionBase<traitsT, PotentialT>
         return;
     }
 
-    void diagnosis(const system_type& sys, const potential_type& pot) const;
+    void diagnosis(const system_type& sys, const parameter_list_type& params) const;
 
   private:
 
@@ -243,9 +245,10 @@ class ZorderRTree final : public SpatialPartitionBase<traitsT, PotentialT>
     std::vector<Node> tree_;
 };
 
-template<typename traitsT, typename PotentialT, std::size_t MaxElem>
-void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbors,
-        const system_type& sys, const potential_type& pot)
+template<typename traitsT, typename potentialT, std::size_t MaxElem>
+void ZorderRTree<traitsT, potentialT, MaxElem>::make(
+        neighbor_list_type& neighbors, const system_type& sys,
+        const parameter_list_type& params)
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
@@ -254,7 +257,7 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbo
 
     // `participants` is a list that contains indices of particles that are
     // related to the potential.
-    const auto& participants = pot.participants();
+    const auto& participants = params.participants();
 
     neighbors.clear();
     tree_.clear();
@@ -367,7 +370,7 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbo
         tree_.push_back(node);
     }
 
-//     this->diagnosis(sys, pot);
+//     this->diagnosis(sys, params);
 
     // ------------------------------------------------------------------------
     // construct NeighborList
@@ -377,7 +380,7 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbo
     const real_type r_c  = cutoff_ * (1. + margin_);
     const real_type r_c2 = r_c * r_c;
 
-    const auto leading_participants = pot.leading_participants();
+    const auto leading_participants = params.leading_participants();
 
     std::vector<std::size_t> next_node;
     std::vector<neighbor_type> partner;
@@ -399,7 +402,7 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbo
                 for(const auto& j : node.children)
                 {
                     MJOLNIR_LOG_DEBUG("looking particle (", i, ", ", j, ")");
-                    if( ! pot.has_interaction(i, j))
+                    if( ! params.has_interaction(i, j))
                     {
                         continue;
                     }
@@ -411,7 +414,7 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbo
                     if(math::length_sq(sys.adjust_direction(ri, rj)) < r_c2)
                     {
                         MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
-                        partner.emplace_back(j, pot.prepare_params(i, j));
+                        partner.emplace_back(j, params.prepare_params(i, j));
                     }
                 }
             }
@@ -444,9 +447,9 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::make(neighbor_list_type& neighbo
     return ;
 }
 
-template<typename traitsT, typename PotentialT, std::size_t MaxElem>
-void ZorderRTree<traitsT, PotentialT, MaxElem>::diagnosis(
-        const system_type& sys, const potential_type& pot) const
+template<typename traitsT, typename potentialT, std::size_t MaxElem>
+void ZorderRTree<traitsT, potentialT, MaxElem>::diagnosis(
+        const system_type& sys, const parameter_list_type& params) const
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
@@ -496,7 +499,7 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::diagnosis(
         }
     }
 
-    for(const auto& p : pot.participants())
+    for(const auto& p : params.participants())
     {
         if( ! found.at(p))
         {
@@ -508,38 +511,31 @@ void ZorderRTree<traitsT, PotentialT, MaxElem>::diagnosis(
 
 } // mjolnir
 
-#ifdef MJOLNIR_SEPARATE_BUILD
-#include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
-#include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
-#include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
-#include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
-
-namespace mjolnir
-{
-extern template class ZorderRTree<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-extern template class ZorderRTree<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-
-extern template class ZorderRTree<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-extern template class ZorderRTree<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-
-extern template class ZorderRTree<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-extern template class ZorderRTree<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-
-extern template class ZorderRTree<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-extern template class ZorderRTree<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-
-extern template class ZorderRTree<SimulatorTraits<double, UnlimitedBoundary>, DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
-extern template class ZorderRTree<SimulatorTraits<float,  UnlimitedBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
-
-extern template class ZorderRTree<SimulatorTraits<double, UnlimitedBoundary>, ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>>>;
-extern template class ZorderRTree<SimulatorTraits<float,  UnlimitedBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
-
-extern template class ZorderRTree<SimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
-extern template class ZorderRTree<SimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
-
-extern template class ZorderRTree<SimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
-extern template class ZorderRTree<SimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
-}
-#endif // SEPARATE_BUILD
+// #ifdef MJOLNIR_SEPARATE_BUILD
+// #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
+// #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
+// #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
+//
+// namespace mjolnir
+// {
+// // extern template class ZorderRTree<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+// // extern template class ZorderRTree<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
+// //
+// // extern template class ZorderRTree<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+// // extern template class ZorderRTree<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
+// //
+// // extern template class ZorderRTree<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+// // extern template class ZorderRTree<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
+// //
+// // extern template class ZorderRTree<SimulatorTraits<double, UnlimitedBoundary>, DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+// // extern template class ZorderRTree<SimulatorTraits<float,  UnlimitedBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
+// //
+// // extern template class ZorderRTree<SimulatorTraits<double, UnlimitedBoundary>, ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+// // extern template class ZorderRTree<SimulatorTraits<float,  UnlimitedBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
+// //
+// // extern template class ZorderRTree<SimulatorTraits<double, UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>>>;
+// // extern template class ZorderRTree<SimulatorTraits<float,  UnlimitedBoundary>, LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>>>;
+// }
+// #endif // SEPARATE_BUILD
 
 #endif /* MJOLNIR_CORE_ZORDER_R_TREE_HPP */

@@ -117,42 +117,35 @@ read_spatial_partition(const toml::value& global)
 
 } // mjolnir
 
-#ifdef MJOLNIR_SEPARATE_BUILD
-
-#include <mjolnir/core/SimulatorTraits.hpp>
-
-#include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
-#include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
-#include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
-#include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
-
-namespace mjolnir
-{
-// D-H
-extern template SpatialPartition<SimulatorTraits<double, UnlimitedBoundary>       , DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       >        > read_spatial_partition(const toml::value&);
-extern template SpatialPartition<SimulatorTraits<float,  UnlimitedBoundary>       , DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       >        > read_spatial_partition(const toml::value&);
-extern template SpatialPartition<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>        > read_spatial_partition(const toml::value&);
-extern template SpatialPartition<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>        > read_spatial_partition(const toml::value&);
-
-// EXV
-extern template SpatialPartition<SimulatorTraits<double, UnlimitedBoundary>       , ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       >     > read_spatial_partition(const toml::value&);
-extern template SpatialPartition<SimulatorTraits<float,  UnlimitedBoundary>       , ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       >     > read_spatial_partition(const toml::value&);
-extern template SpatialPartition<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>     > read_spatial_partition(const toml::value&);
-extern template SpatialPartition<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>     > read_spatial_partition(const toml::value&);
-
-// L-J
-extern template SpatialPartition<SimulatorTraits<double, UnlimitedBoundary>       , LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       >       > read_spatial_partition(const toml::value&);
-extern template SpatialPartition<SimulatorTraits<float,  UnlimitedBoundary>       , LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       >       > read_spatial_partition(const toml::value&);
-extern template SpatialPartition<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>       > read_spatial_partition(const toml::value&);
-extern template SpatialPartition<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>       > read_spatial_partition(const toml::value&);
-
-// UL-J
-extern template SpatialPartition<SimulatorTraits<double, UnlimitedBoundary>       , UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       >> read_spatial_partition(const toml::value&);
-extern template SpatialPartition<SimulatorTraits<float,  UnlimitedBoundary>       , UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       >> read_spatial_partition(const toml::value&);
-extern template SpatialPartition<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&);
-extern template SpatialPartition<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_spatial_partition(const toml::value&);
-
-}
-#endif
+// #ifdef MJOLNIR_SEPARATE_BUILD
+// 
+// #include <mjolnir/core/SimulatorTraits.hpp>
+// 
+// #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
+// #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
+// #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
+// 
+// namespace mjolnir
+// {
+// // D-H
+// extern template SpatialPartition<SimulatorTraits<double, UnlimitedBoundary>       , DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       >        > read_spatial_partition(const toml::value&);
+// extern template SpatialPartition<SimulatorTraits<float,  UnlimitedBoundary>       , DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       >        > read_spatial_partition(const toml::value&);
+// extern template SpatialPartition<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>        > read_spatial_partition(const toml::value&);
+// extern template SpatialPartition<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>        > read_spatial_partition(const toml::value&);
+// 
+// // EXV
+// extern template SpatialPartition<SimulatorTraits<double, UnlimitedBoundary>       , ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       >     > read_spatial_partition(const toml::value&);
+// extern template SpatialPartition<SimulatorTraits<float,  UnlimitedBoundary>       , ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       >     > read_spatial_partition(const toml::value&);
+// extern template SpatialPartition<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>     > read_spatial_partition(const toml::value&);
+// extern template SpatialPartition<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>     > read_spatial_partition(const toml::value&);
+// 
+// // L-J
+// extern template SpatialPartition<SimulatorTraits<double, UnlimitedBoundary>       , LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       >       > read_spatial_partition(const toml::value&);
+// extern template SpatialPartition<SimulatorTraits<float,  UnlimitedBoundary>       , LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       >       > read_spatial_partition(const toml::value&);
+// extern template SpatialPartition<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>       > read_spatial_partition(const toml::value&);
+// extern template SpatialPartition<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>       > read_spatial_partition(const toml::value&);
+// 
+// }
+// #endif
 
 #endif// MJOLNIR_READ_SPATIAL_PARTITION

@@ -15,21 +15,23 @@ namespace mjolnir
 // XXX: almost same as UnlimitedGridCellList.
 // the difference between UnlimitedGridCellList is only the number of cells.
 // PeriodicGridCellList can optimize the number of cells using boundary size.
-template<typename traitsT, typename PotentialT>
-class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, PotentialT>
+template<typename traitsT, typename potentialT>
+class PeriodicGridCellList final
+    : public SpatialPartitionBase<traitsT, potentialT>
 {
   public:
-    using traits_type        = traitsT;
-    using potential_type     = PotentialT;
-    using base_type          = SpatialPartitionBase<traits_type, potential_type>;
+    using traits_type         = traitsT;
+    using potential_type      = potentialT;
+    using base_type           = SpatialPartitionBase<traits_type, potential_type>;
 
-    using system_type        = typename base_type::system_type;
-    using boundary_type      = typename base_type::boundary_type;
-    using real_type          = typename base_type::real_type;
-    using coordinate_type    = typename base_type::coordinate_type;
-    using neighbor_list_type = typename base_type::neighbor_list_type;
-    using neighbor_type      = typename base_type::neighbor_type;
-    using range_type         = typename base_type::range_type;
+    using system_type         = typename base_type::system_type;
+    using boundary_type       = typename base_type::boundary_type;
+    using real_type           = typename base_type::real_type;
+    using coordinate_type     = typename base_type::coordinate_type;
+    using neighbor_list_type  = typename base_type::neighbor_list_type;
+    using neighbor_type       = typename base_type::neighbor_type;
+    using range_type          = typename base_type::range_type;
+    using parameter_list_type = typename base_type::parameter_list_type;
 
     static constexpr real_type mesh_epsilon() {return 1e-6;}
 
@@ -62,16 +64,16 @@ class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, Potentia
         return current_margin_ >= 0.0;
     }
 
-    void initialize(neighbor_list_type& neighbors,
-                    const system_type& sys, const potential_type& pot) override
+    void initialize(neighbor_list_type& neighbors, const system_type& sys,
+                    const parameter_list_type& params) override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        const real_type max_cutoff = pot.max_cutoff_length();
+        const real_type max_cutoff = params.max_cutoff_length();
         this->set_cutoff(max_cutoff);
 
-        MJOLNIR_LOG_INFO(pot.name(), " cutoff = ", max_cutoff);
+        MJOLNIR_LOG_INFO(potential_type::name(), " cutoff = ", max_cutoff);
 
         this->lower_bound_ = sys.boundary().lower_bound();
         this->system_size_ = sys.boundary().width();
@@ -89,30 +91,30 @@ class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, Potentia
         this->r_z_ = real_type(1) / (math::Z(this->system_size_) / this->dim_z_);
 
         // construct neighbor list using cells
-        this->make(neighbors, sys, pot);
+        this->make(neighbors, sys, params);
         return;
     }
-    void make(neighbor_list_type& neighbors,
-              const system_type& sys, const potential_type& pot) override;
+    void make(neighbor_list_type& neighbors, const system_type& sys,
+              const parameter_list_type& params) override;
 
     bool reduce_margin(neighbor_list_type& neighbors, const real_type dmargin,
-                       const system_type& sys, const potential_type& pot) override
+                       const system_type& sys, const parameter_list_type& params) override
     {
         this->current_margin_ -= dmargin;
         if(this->current_margin_ < 0)
         {
-            this->make(neighbors, sys, pot);
+            this->make(neighbors, sys, params);
             return true;
         }
         return false;
     }
     bool scale_margin(neighbor_list_type& neighbors, const real_type scale,
-                const system_type& sys, const potential_type& pot) override
+                const system_type& sys, const parameter_list_type& params) override
     {
         this->current_margin_ = (cutoff_ + current_margin_) * scale - cutoff_;
         if(this->current_margin_ < 0)
         {
-            this->make(neighbors, sys, pot);
+            this->make(neighbors, sys, params);
             return true;
         }
         return false;
@@ -194,8 +196,9 @@ class PeriodicGridCellList final : public SpatialPartitionBase<traitsT, Potentia
 };
 
 template<typename traitsT, typename potentialT>
-void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbors,
-        const system_type& sys, const potential_type& pot)
+void PeriodicGridCellList<traitsT, potentialT>::make(
+        neighbor_list_type& neighbors, const system_type& sys,
+        const parameter_list_type& params)
 {
     MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
     MJOLNIR_LOG_FUNCTION_DEBUG();
@@ -221,7 +224,7 @@ void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbo
             this->system_size_ = current_system_size;
 
             // reset `r_x_`s using cutoff length
-            this->set_cutoff(pot.max_cutoff_length());
+            this->set_cutoff(params.max_cutoff_length());
 
             const auto dim_x = std::max<std::size_t>(3, std::floor(math::X(system_size_) * r_x_));
             const auto dim_y = std::max<std::size_t>(3, std::floor(math::Y(system_size_) * r_y_));
@@ -252,7 +255,7 @@ void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbo
 
     // `participants` is a list that contains indices of particles that are
     // related to the potential.
-    const auto& participants = pot.participants();
+    const auto& participants = params.participants();
 
     neighbors.clear();
     index_by_cell_.resize(participants.size());
@@ -293,7 +296,7 @@ void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbo
     const real_type r_c  = cutoff_ * (1. + margin_);
     const real_type r_c2 = r_c * r_c;
 
-    const auto leading_participants = pot.leading_participants();
+    const auto leading_participants = params.leading_participants();
 
     std::vector<neighbor_type> partner;
     for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
@@ -314,7 +317,7 @@ void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbo
             {
                 const auto j = pici.first;
                 MJOLNIR_LOG_DEBUG("looking particle", j);
-                if(!pot.has_interaction(i, j))
+                if(!params.has_interaction(i, j))
                 {
                     continue;
                 }
@@ -326,7 +329,7 @@ void PeriodicGridCellList<traitsT, potentialT>::make(neighbor_list_type& neighbo
                 if(math::length_sq(sys.adjust_direction(ri, rj)) < r_c2)
                 {
                     MJOLNIR_LOG_DEBUG("add index", j, "to verlet list", i);
-                    partner.emplace_back(j, pot.prepare_params(i, j));
+                    partner.emplace_back(j, params.prepare_params(i, j));
                 }
             }
         }
@@ -435,26 +438,22 @@ void PeriodicGridCellList<traitsT, potentialT>::construct_cells(
 
 } // mjolnir
 
-#ifdef MJOLNIR_SEPARATE_BUILD
-#include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
-#include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
-#include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
-#include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
-
-namespace mjolnir
-{
-extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-
-extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-
-extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-
-extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-}
-#endif // SEPARATE_BUILD
+// #ifdef MJOLNIR_SEPARATE_BUILD
+// #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
+// #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
+// #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
+//
+// namespace mjolnir
+// {
+// extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+// extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
+//
+// extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+// extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
+//
+// extern template class PeriodicGridCellList<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
+// extern template class PeriodicGridCellList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
+// }
+// #endif // SEPARATE_BUILD
 
 #endif /* MJOLNIR_PERIODIC_GRID_CELL_LIST */

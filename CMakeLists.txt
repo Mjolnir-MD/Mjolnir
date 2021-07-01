@@ -195,7 +195,7 @@ endif()
 
 option(BUILD_INTEGRATION_TEST "\
 build integration test that does not run automatically \
-because it takes relatively long time" ON)
+because it takes relatively long time" OFF)
 
 option(BUILD_UNIT_TEST "build unit tests" ON)
 
