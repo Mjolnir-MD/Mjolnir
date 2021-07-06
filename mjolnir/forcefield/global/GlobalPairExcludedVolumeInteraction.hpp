@@ -78,7 +78,8 @@ class GlobalPairInteraction<
         return;
     }
 
-    void calc_force(system_type& sys) const noexcept override
+    template<bool NeedVirial>
+    void calc_force_and_virial_impl(system_type& sys) const noexcept
     {
         const auto cutoff_ratio    = potential_.cutoff_ratio();
         const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
@@ -110,11 +111,57 @@ class GlobalPairInteraction<
                 sys.force(i) += f;
                 sys.force(j) -= f;
 
-                // rij * Fj = (rj - ri) * Fj = (ri - rj) * Fi
+                if(NeedVirial)
+                {
+                    // rij * Fj = (rj - ri) * Fj = (ri - rj) * Fi
+                    sys.virial() += math::tensor_product(rij, -f);
+                }
+            }
+        }
+        return ;
+    }
+    void calc_force (system_type& sys)        const noexcept override
+    {
+        const auto cutoff_ratio    = potential_.cutoff_ratio();
+        const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
+
+        const auto epsilon12 = potential_.epsilon() * 12;
+
+        const auto leading_participants = this->parameters_.leading_participants();
+        for(const std::size_t i : leading_participants)
+        {
+            for(const auto& ptnr : this->partition_.partners(i))
+            {
+                const auto  j    = ptnr.index;
+                const auto& para = ptnr.parameter();
+
+                const coordinate_type rij =
+                    sys.adjust_direction(sys.position(i), sys.position(j));
+                const real_type l_sq = math::length_sq(rij);
+
+                const real_type sigma_sq = para.radius * para.radius;
+                if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
+
+                const real_type rcp_l_sq = real_type(1) / l_sq;
+                const real_type s2l2     = sigma_sq * rcp_l_sq;
+                const real_type s6l6     = s2l2 * s2l2 * s2l2;
+
+                const coordinate_type f = rij *
+                    (-epsilon12 * s6l6 * s6l6 * rcp_l_sq);
+
+                sys.force(i) += f;
+                sys.force(j) -= f;
+
                 sys.virial() += math::tensor_product(rij, -f);
             }
         }
         return ;
+        return;
+    }
+    void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        this->template calc_force_and_virial_impl<true>(sys);
+        return;
     }
 
     real_type calc_energy(const system_type& sys) const noexcept override

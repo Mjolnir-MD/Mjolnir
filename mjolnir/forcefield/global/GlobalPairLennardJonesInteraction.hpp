@@ -78,7 +78,8 @@ class GlobalPairInteraction<
         return;
     }
 
-    void calc_force(system_type& sys) const noexcept override
+    template<bool NeedVirial>
+    void calc_force_and_virial_impl(system_type& sys) const noexcept
     {
         const auto cutoff_ratio    = potential_.cutoff_ratio();
         const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
@@ -110,12 +111,24 @@ class GlobalPairInteraction<
                 sys.force(i) += f;
                 sys.force(j) -= f;
 
-                // rij * Fj = (rj - ri) * Fj = (ri - rj) * Fi
-                sys.virial() += math::tensor_product(rij, -f);
+                if(NeedVirial)
+                {
+                    // rij * Fj = (rj - ri) * Fj = (ri - rj) * Fi
+                    sys.virial() += math::tensor_product(rij, -f);
+                }
             }
         }
         return ;
     }
+    void calc_force (system_type& sys)        const noexcept override
+    {
+        this->template calc_force_and_virial_impl<false>(sys);
+    }
+    void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        this->template calc_force_and_virial_impl<true>(sys);
+    }
+
 
     real_type calc_energy(const system_type& sys) const noexcept override
     {
