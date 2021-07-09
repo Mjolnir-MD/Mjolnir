@@ -76,36 +76,15 @@ class GlobalPairInteraction<
 
     void calc_force (system_type& sys) const noexcept override
     {
-        const auto leading_participants = this->parameters_.leading_participants();
-#pragma omp parallel for
-        for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
-        {
-            const std::size_t thread_id = omp_get_thread_num();
-            const auto i = leading_participants[idx];
-            for(const auto& ptnr : this->partition_.partners(i))
-            {
-                const auto  j    = ptnr.index;
-                const auto& para = ptnr.parameter();
-
-                const coordinate_type rij =
-                    sys.adjust_direction(sys.position(i), sys.position(j));
-                const real_type l2 = math::length_sq(rij); // |rij|^2
-                const real_type rl = math::rsqrt(l2);      // 1 / |rij|
-                const real_type l  = l2 * rl;              // |rij|^2 / |rij|
-                const real_type f_mag = potential_.derivative(l, para);
-
-                // if length exceeds cutoff, potential returns just 0.
-                if(f_mag == 0.0){continue;}
-
-                const coordinate_type f = rij * (f_mag * rl);
-                sys.force_thread(thread_id, i) += f;
-                sys.force_thread(thread_id, j) -= f;
-
-                sys.virial_thread(thread_id) += math::tensor_product(rij, -f);
-            }
-        }
+        this->template calc_force_and_virial_impl<false>(sys);
         return ;
     }
+    void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        this->template calc_force_and_virial_impl<true>(sys);
+        return ;
+    }
+
     real_type calc_energy(const system_type& sys) const noexcept override
     {
         real_type E = 0.0;
@@ -171,6 +150,44 @@ class GlobalPairInteraction<
         return new GlobalPairInteraction(*this);
     }
 
+  private:
+
+    template<bool NeedVirial>
+    void calc_force_and_virial_impl(system_type& sys) const noexcept override
+    {
+        const auto leading_participants = this->parameters_.leading_participants();
+#pragma omp parallel for
+        for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
+        {
+            const std::size_t thread_id = omp_get_thread_num();
+            const auto i = leading_participants[idx];
+            for(const auto& ptnr : this->partition_.partners(i))
+            {
+                const auto  j    = ptnr.index;
+                const auto& para = ptnr.parameter();
+
+                const coordinate_type rij =
+                    sys.adjust_direction(sys.position(i), sys.position(j));
+                const real_type l2 = math::length_sq(rij); // |rij|^2
+                const real_type rl = math::rsqrt(l2);      // 1 / |rij|
+                const real_type l  = l2 * rl;              // |rij|^2 / |rij|
+                const real_type f_mag = potential_.derivative(l, para);
+
+                // if length exceeds cutoff, potential returns just 0.
+                if(f_mag == 0.0){continue;}
+
+                const coordinate_type f = rij * (f_mag * rl);
+                sys.force_thread(thread_id, i) += f;
+                sys.force_thread(thread_id, j) -= f;
+
+                if(NeedVirial)
+                {
+                    sys.virial_thread(thread_id) += math::tensor_product(rij, -f);
+                }
+            }
+        }
+        return ;
+    }
 
   private:
 
