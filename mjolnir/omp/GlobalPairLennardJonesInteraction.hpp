@@ -179,7 +179,7 @@ class GlobalPairInteraction<
   private:
 
     template<bool NeedVirial>
-    void calc_force_and_virial_impl(system_type& sys) const noexcept override
+    void calc_force_and_virial_impl(system_type& sys) const noexcept
     {
         const auto cutoff_ratio    = potential_.cutoff_ratio();
         const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;

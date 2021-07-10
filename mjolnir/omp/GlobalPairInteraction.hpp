@@ -153,7 +153,7 @@ class GlobalPairInteraction<
   private:
 
     template<bool NeedVirial>
-    void calc_force_and_virial_impl(system_type& sys) const noexcept override
+    void calc_force_and_virial_impl(system_type& sys) const noexcept
     {
         const auto leading_participants = this->parameters_.leading_participants();
 #pragma omp parallel for
