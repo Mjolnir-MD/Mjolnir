@@ -446,7 +446,10 @@ class ThreeSPN2BaseBaseInteraction<
                         sys.force_thread(thread_id, Bi) += F;
                         sys.force_thread(thread_id, Bj) -= F;
 
-                        sys.virial_thread(thread_id) += math::tensor_product(Bij, -F); // (Bj - Bi) * Fj
+                        if(NeedVirial)
+                        {
+                            sys.virial_thread(thread_id) += math::tensor_product(Bij, -F); // (Bj - Bi) * Fj
+                        }
                     }
                 }
 

@@ -465,7 +465,10 @@ ThreeSPN2BaseBaseInteraction<traitsT>::calc_force_energy_virial_impl(system_type
                     sys.force(Bi) += F;
                     sys.force(Bj) -= F;
 
-                    sys.virial() += math::tensor_product(Bij, -F); // (Bj - Bi) * Fj
+                    if(NeedVirial)
+                    {
+                        sys.virial() += math::tensor_product(Bij, -F); // (Bj - Bi) * Fj
+                    }
                 }
             }
 
