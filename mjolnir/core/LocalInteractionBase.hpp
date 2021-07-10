@@ -29,6 +29,7 @@ class LocalInteractionBase
     virtual void  scale_margin(const real_type, const system_type&) = 0;
 
     virtual void      calc_force (system_type&)           const noexcept = 0;
+    virtual void      calc_force_and_virial(system_type&) const noexcept = 0;
     virtual real_type calc_energy(const system_type&)     const noexcept = 0;
     virtual real_type calc_force_and_energy(system_type&) const noexcept = 0;
 
