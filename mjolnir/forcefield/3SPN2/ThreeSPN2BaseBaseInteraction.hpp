@@ -95,7 +95,7 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
     real_type calc_energy(const system_type& sys)     const noexcept override;
     real_type calc_force_and_energy(system_type& sys) const noexcept override
     {
-        return this->template calc_force_energy_virial_impl<true, false>(sys);
+        return this->template calc_force_energy_virial_impl<true, true>(sys);
     }
 
     std::string name() const override {return "3SPN2BaseBase";}
