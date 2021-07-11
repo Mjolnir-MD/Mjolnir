@@ -49,35 +49,20 @@ class ContactInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
     {}
     ~ContactInteraction() override {}
 
-    void      calc_force (system_type& sys)       const noexcept override
+    void calc_force(system_type& sys) const noexcept override
     {
-#pragma omp parallel for
-        for(std::size_t i=0; i<active_contacts_.size(); ++i)
-        {
-            const auto& idxp = this->potentials[active_contacts_[i]];
-
-            const std::size_t idx0 = idxp.first[0];
-            const std::size_t idx1 = idxp.first[1];
-
-            const auto dpos =
-                sys.adjust_direction(sys.position(idx0), sys.position(idx1));
-
-            const real_type len2 = math::length_sq(dpos); // l^2
-            const real_type rlen = math::rsqrt(len2);     // 1/l
-            const real_type force = -1 * idxp.second.derivative(len2 * rlen);
-            // here, L^2 * (1 / L) = L.
-
-            const coordinate_type f = dpos * (force * rlen);
-
-            const std::size_t thread_id = omp_get_thread_num();
-            sys.force_thread(thread_id, idx0) -= f;
-            sys.force_thread(thread_id, idx1) += f;
-
-            sys.virial_thread(thread_id) = math::tensor_product(dpos, f);
-        }
+        this->template calc_force_energy_virial_impl<false, false>(sys);
         return;
     }
-
+    void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        this->template calc_force_energy_virial_impl<false, true>(sys);
+        return;
+    }
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        return this->template calc_force_energy_virial_impl<true, true>(sys);
+    }
     real_type calc_energy(const system_type& sys) const noexcept override
     {
         real_type E = 0.0;
@@ -91,36 +76,6 @@ class ContactInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         return E;
     }
 
-    real_type calc_force_and_energy(system_type& sys) const noexcept override
-    {
-        real_type E = 0.0;
-#pragma omp parallel for reduction(+:E)
-        for(std::size_t i=0; i<active_contacts_.size(); ++i)
-        {
-            const auto& idxp = this->potentials[active_contacts_[i]];
-
-            const std::size_t idx0 = idxp.first[0];
-            const std::size_t idx1 = idxp.first[1];
-
-            const auto dpos =
-                sys.adjust_direction(sys.position(idx0), sys.position(idx1));
-
-            const real_type len2 = math::length_sq(dpos); // l^2
-            const real_type rlen = math::rsqrt(len2);     // 1/l
-            const real_type len  = len2 * rlen;
-            const real_type force = -1 * idxp.second.derivative(len);
-            E += idxp.second.potential(len);
-
-            const coordinate_type f = dpos * (force * rlen);
-
-            const std::size_t thread_id = omp_get_thread_num();
-            sys.force_thread(thread_id, idx0) -= f;
-            sys.force_thread(thread_id, idx1) += f;
-
-            sys.virial_thread(thread_id) = math::tensor_product(dpos, f);
-        }
-        return E;
-    }
 
     void initialize(const system_type& sys) override
     {
@@ -222,6 +177,43 @@ class ContactInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
         return;
     }
 
+    template<bool NeedEnergy, bool NeedVirial>
+    real_type calc_force_energy_virial_impl(system_type& sys) const noexcept
+    {
+        real_type E = 0.0;
+#pragma omp parallel for reduction(+:E)
+        for(std::size_t i=0; i<active_contacts_.size(); ++i)
+        {
+            const auto& idxp = this->potentials[active_contacts_[i]];
+
+            const std::size_t idx0 = idxp.first[0];
+            const std::size_t idx1 = idxp.first[1];
+
+            const auto dpos =
+                sys.adjust_direction(sys.position(idx0), sys.position(idx1));
+
+            const real_type len2 = math::length_sq(dpos); // l^2
+            const real_type rlen = math::rsqrt(len2);     // 1/l
+            const real_type len  = len2 * rlen;
+            const real_type force = -1 * idxp.second.derivative(len);
+
+            if(NeedEnergy)
+            {
+                E += idxp.second.potential(len);
+            }
+            const coordinate_type f = dpos * (force * rlen);
+
+            const std::size_t thread_id = omp_get_thread_num();
+            sys.force_thread(thread_id, idx0) -= f;
+            sys.force_thread(thread_id, idx1) += f;
+
+            if(NeedVirial)
+            {
+                sys.virial_thread(thread_id) = math::tensor_product(dpos, f);
+            }
+        }
+        return E;
+    }
   private:
     connection_kind_type kind_;
     container_type potentials;
