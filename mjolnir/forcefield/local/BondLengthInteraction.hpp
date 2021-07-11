@@ -51,8 +51,10 @@ class BondLengthInteraction final : public LocalInteractionBase<traitsT>
     {}
     ~BondLengthInteraction() override {}
 
-    void      calc_force (system_type&)           const noexcept override;
     real_type calc_energy(const system_type&)     const noexcept override;
+
+    void      calc_force           (system_type&) const noexcept override;
+    void      calc_force_and_virial(system_type&) const noexcept override;
     real_type calc_force_and_energy(system_type&) const noexcept override;
 
     void initialize(const system_type& sys) override
@@ -107,7 +109,45 @@ class BondLengthInteraction final : public LocalInteractionBase<traitsT>
 };
 
 template<typename traitsT, typename potentialT>
+typename BondLengthInteraction<traitsT, potentialT>::real_type
+BondLengthInteraction<traitsT, potentialT>::calc_energy(
+        const system_type& sys) const noexcept
+{
+    real_type E = 0.;
+    for(const auto& idxp : this->potentials_)
+    {
+        E += idxp.second.potential(math::length(sys.adjust_direction(
+                sys.position(idxp.first[0]), sys.position(idxp.first[1]))));
+    }
+    return E;
+}
+
+template<typename traitsT, typename potentialT>
 void BondLengthInteraction<traitsT, potentialT>::calc_force(
+        system_type& sys) const noexcept
+{
+    for(const auto& idxp : this->potentials_)
+    {
+        const std::size_t idx0 = idxp.first[0];
+        const std::size_t idx1 = idxp.first[1];
+
+        const auto dpos = // from r0 -> r1 = r1 - r0
+            sys.adjust_direction(sys.position(idx0), sys.position(idx1));
+
+        const real_type len2 = math::length_sq(dpos); // l^2
+        const real_type rlen = math::rsqrt(len2);     // 1/l
+        const real_type force = -1 * idxp.second.derivative(len2 * rlen);
+        // here, L^2 * (1 / L) = L.
+
+        const coordinate_type f = dpos * (force * rlen);
+        sys.force(idx0) -= f;
+        sys.force(idx1) += f;
+    }
+    return;
+}
+
+template<typename traitsT, typename potentialT>
+void BondLengthInteraction<traitsT, potentialT>::calc_force_and_virial(
         system_type& sys) const noexcept
 {
     for(const auto& idxp : this->potentials_)
@@ -130,20 +170,6 @@ void BondLengthInteraction<traitsT, potentialT>::calc_force(
         sys.virial() += math::tensor_product(dpos, f);
     }
     return;
-}
-
-template<typename traitsT, typename potentialT>
-typename BondLengthInteraction<traitsT, potentialT>::real_type
-BondLengthInteraction<traitsT, potentialT>::calc_energy(
-        const system_type& sys) const noexcept
-{
-    real_type E = 0.;
-    for(const auto& idxp : this->potentials_)
-    {
-        E += idxp.second.potential(math::length(sys.adjust_direction(
-                sys.position(idxp.first[0]), sys.position(idxp.first[1]))));
-    }
-    return E;
 }
 
 template<typename traitsT, typename potentialT>

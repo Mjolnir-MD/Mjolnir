@@ -59,34 +59,21 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
     {}
     ~ContactInteraction() override {}
 
-    void      calc_force (system_type&)       const noexcept override;
     real_type calc_energy(const system_type&) const noexcept override;
+
+    void calc_force(system_type& sys) const noexcept override
+    {
+        this->template calc_force_energy_virial_impl<false, false>(sys);
+        return;
+    }
+    void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        this->template calc_force_energy_virial_impl<false, true>(sys);
+        return;
+    }
     real_type calc_force_and_energy(system_type& sys) const noexcept override
     {
-        real_type energy = 0;
-        for(const std::size_t active_contact : active_contacts_)
-        {
-            const auto& idxp = this->potentials_[active_contact];
-
-            const std::size_t idx0 = idxp.first[0];
-            const std::size_t idx1 = idxp.first[1];
-
-            const auto dpos = // r0 -> r1 = r1 - r0
-                sys.adjust_direction(sys.position(idx0), sys.position(idx1));
-
-            const real_type len2 = math::length_sq(dpos); // l^2
-            const real_type rlen = math::rsqrt(len2);     // 1/l
-            const real_type len  = len2 * rlen;
-            const real_type force = -1 * idxp.second.derivative(len);
-            energy += idxp.second.potential(len);
-
-            const coordinate_type f = dpos * (force * rlen);
-            sys.force(idx0) -= f;
-            sys.force(idx1) += f;
-
-            sys.virial() += math::tensor_product(dpos, f);
-        }
-        return energy;
+        return this->template calc_force_energy_virial_impl<true, true>(sys);
     }
 
     void initialize(const system_type& sys) override
@@ -185,6 +172,9 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
         return;
     }
 
+    template<bool NeedEnergy, bool NeedVirial>
+    real_type calc_force_energy_virial_impl(system_type& sys) const noexcept;
+
   private:
     connection_kind_type kind_;
     container_type potentials_;
@@ -204,9 +194,12 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
 };
 
 template<typename traitsT, typename potentialT>
-void ContactInteraction<traitsT, potentialT>::calc_force(
+template<bool NeedEnergy, bool NeedVirial>
+typename ContactInteraction<traitsT, potentialT>::real_type
+ContactInteraction<traitsT, potentialT>::calc_force_energy_virial_impl(
         system_type& sys) const noexcept
 {
+    real_type energy = 0;
     for(const std::size_t active_contact : active_contacts_)
     {
         const auto& idxp = this->potentials_[active_contact];
@@ -214,21 +207,29 @@ void ContactInteraction<traitsT, potentialT>::calc_force(
         const std::size_t idx0 = idxp.first[0];
         const std::size_t idx1 = idxp.first[1];
 
-        const auto dpos =
+        const auto dpos = // r0 -> r1 = r1 - r0
             sys.adjust_direction(sys.position(idx0), sys.position(idx1));
 
         const real_type len2 = math::length_sq(dpos); // l^2
         const real_type rlen = math::rsqrt(len2);     // 1/l
-        const real_type force = -1 * idxp.second.derivative(len2 * rlen);
-        // here, L^2 * (1 / L) = L.
+        const real_type len  = len2 * rlen;
+        const real_type force = -1 * idxp.second.derivative(len);
+
+        if(NeedEnergy)
+        {
+            energy += idxp.second.potential(len);
+        }
 
         const coordinate_type f = dpos * (force * rlen);
         sys.force(idx0) -= f;
         sys.force(idx1) += f;
 
-        sys.virial() += math::tensor_product(dpos, f);
+        if(NeedVirial)
+        {
+            sys.virial() += math::tensor_product(dpos, f);
+        }
     }
-    return;
+    return energy;
 }
 
 template<typename traitsT, typename potentialT>
