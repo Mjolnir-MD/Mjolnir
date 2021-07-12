@@ -107,6 +107,25 @@ class ExternalForceField
         }
         return;
     }
+    void calc_force_and_virial(system_type& sys) const noexcept
+    {
+        if( ! this->interactions_.empty())
+        {
+            MJOLNIR_GET_DEFAULT_LOGGER();
+            MJOLNIR_LOG_FUNCTION();
+            MJOLNIR_LOG_WARNING("External forcefield does not support virial");
+            MJOLNIR_LOG_WARNING("Since pressure (and virial) is the derivative "
+                "of the free energy with respect to the system volume, virial "
+                "contribution of external forcefields generally depends on the "
+                "absolute coordinate is not well defined.");
+        }
+        for(const auto& item : this->interactions_)
+        {
+            item->calc_force(sys);
+        }
+        return;
+    }
+
     real_type calc_energy(const system_type& sys) const noexcept
     {
         real_type energy = 0.0;
