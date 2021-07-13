@@ -244,16 +244,20 @@ BOOST_AUTO_TEST_CASE(OpenMP_ThreeSPN2BaseStackingInteraction)
         for(std::size_t idx=0; idx<sys.size(); ++idx)
         {
             sys.force(idx) = coord_type(0.0, 0.0, 0.0);
+            seq_sys.force(idx) = coord_type(0.0, 0.0, 0.0);
         }
         for(std::size_t i=0; i<3; ++i)
         {
             for(std::size_t j=0; j<3; ++j)
             {
                 sys.virial()(i, j) = real_type(0.0);
+                seq_sys.virial()(i, j) = real_type(0.0);
             }
         }
         const auto energy     = interaction.calc_force_and_energy(sys);
         sys.postprocess_forces();
+        const auto ref_energy = seq_interaction.calc_force_and_energy(seq_sys);
+        seq_sys.postprocess_forces();
 
         for(std::size_t i=0; i<sys.size(); ++i)
         {
@@ -264,8 +268,9 @@ BOOST_AUTO_TEST_CASE(OpenMP_ThreeSPN2BaseStackingInteraction)
             BOOST_TEST(mjolnir::math::Z(seq_sys.force(i)) == mjolnir::math::Z(sys.force(i)),
                        boost::test_tools::tolerance(tol));
         }
-        BOOST_TEST(interaction.calc_energy(sys) == energy,
-                   boost::test_tools::tolerance(tol));
+        BOOST_TEST(ref_energy == energy, boost::test_tools::tolerance(tol));
+        BOOST_TEST(interaction.calc_energy(sys) == energy, boost::test_tools::tolerance(tol));
+
         for(std::size_t i=0; i<9; ++i)
         {
             BOOST_TEST(sys.virial()[i] == seq_sys.virial()[i], boost::test_tools::tolerance(tol));
