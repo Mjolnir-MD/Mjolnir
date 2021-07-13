@@ -4,6 +4,7 @@
 #include "apply_random_perturbation.hpp"
 #include "apply_random_rotation.hpp"
 #include "check_force.hpp"
+#include "check_force_and_virial.hpp"
 #include "check_force_and_energy.hpp"
 #include "check_virial.hpp"
 #include "check_potential.hpp"
