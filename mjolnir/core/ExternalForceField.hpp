@@ -199,7 +199,7 @@ class ExternalForceField
 
     std::vector<std::size_t> fmt_widths_;
     container_type interactions_;
-    bool already_warned_about_virial_;
+    mutable bool already_warned_about_virial_;
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD
