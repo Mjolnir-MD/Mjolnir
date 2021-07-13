@@ -41,7 +41,10 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using topology_type   = Topology;
+    using coordinate_container_type =
+        typename system_type::coordinate_container_type;
 
     using local_forcefield_type      = LocalForceField<traits_type>;
     using global_forcefield_type     = GlobalForceField<traits_type>;
