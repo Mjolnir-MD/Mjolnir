@@ -45,8 +45,8 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_numerical_differentiation)
         system_type sys(2, boundary_type{});
         test::clear_everything(sys);
 
-        sys.at(0).position = coordinate_type( 0.0,  0.0,  0.0);
-        sys.at(1).position = coordinate_type(10.0,  0.0,  0.0);
+        sys.position(0) = coordinate_type( 0.0,  0.0,  0.0);
+        sys.position(1) = coordinate_type(10.0,  0.0,  0.0);
 
         interaction.initialize(sys);
 

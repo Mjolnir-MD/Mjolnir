@@ -59,8 +59,8 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary)
     std::mt19937 mt(123456789);
     for(std::size_t i=0; i < N; ++i)
     {
-        sys.at(i).mass     = 1.0;
-        sys.at(i).position = distribute_particle(mt, L);
+        sys.mass(i)     = 1.0;
+        sys.position(i) = distribute_particle(mt, L);
     }
     topol.construct_molecules();
 
@@ -142,8 +142,8 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial)
     std::mt19937 mt(123456789);
     for(std::size_t i=0; i < N; ++i)
     {
-        sys.at(i).mass     = 1.0;
-        sys.at(i).position = distribute_particle(mt, L);
+        sys.mass(i)     = 1.0;
+        sys.position(i) = distribute_particle(mt, L);
     }
     topol.construct_molecules();
 
@@ -248,8 +248,8 @@ BOOST_AUTO_TEST_CASE(test_CellList_UnlimitedBoundary_partial_2)
     std::mt19937 mt(123456789);
     for(std::size_t i=0; i < N; ++i)
     {
-        sys.at(i).mass     = 1.0;
-        sys.at(i).position = distribute_particle(mt, L);
+        sys.mass(i)     = 1.0;
+        sys.position(i) = distribute_particle(mt, L);
     }
     topol.construct_molecules();
 
