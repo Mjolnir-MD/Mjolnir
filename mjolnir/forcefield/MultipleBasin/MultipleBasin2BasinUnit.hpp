@@ -132,14 +132,13 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         sys.preprocess_forces();
         const auto V_1 = this->calc_force_and_energy_basin1(sys) + dV1_;
         sys.postprocess_forces();
-        {
-            // save the current forces to force_buffer_.
-            // force_buffer is zero-cleared (at the end of this function),
-            // so the forces in the system will be zero-cleared after this.
-            using std::swap;
-            swap(this->force_buffer1_,  sys.forces());
-            swap(this->virial_buffer1_, sys.virial());
-        }
+
+        // save the current forces to force_buffer_.
+        // force_buffer is zero-cleared (at the end of this function),
+        // so the forces in the system will be zero-cleared after this.
+        swap(this->force_buffer1_,  sys.forces());
+        swap(this->virial_buffer1_, sys.virial());
+
         sys.preprocess_forces();
         const auto V_2 = this->calc_force_and_energy_basin2(sys) + dV2_;
         sys.postprocess_forces();
