@@ -161,6 +161,7 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
         const auto V_1 = this->calc_force_and_energy_basin1(sys) + dV1_;
         sys.postprocess_forces();
 
+        // clear system
         swap(this->force_buffer1_,  sys.forces());
         swap(this->virial_buffer1_, sys.virial());
 
@@ -211,6 +212,11 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
         virial_buffer1_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         virial_buffer2_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
+        return ;
+    }
+    void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        this->calc_force(sys);
         return ;
     }
     real_type calc_energy(const system_type& sys) const noexcept override
