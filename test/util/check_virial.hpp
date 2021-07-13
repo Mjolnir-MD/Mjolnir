@@ -34,7 +34,7 @@ void check_virial(System<traitsT>& sys,
             sys.force(idx) = math::make_coordinate<coordinate_type>(0,0,0);
         }
         sys.preprocess_forces();
-        interaction.calc_force(sys);
+        interaction.calc_force_and_virial(sys);
         sys.postprocess_forces();
 
         matrix33_type vir(0,0,0, 0,0,0, 0,0,0);
