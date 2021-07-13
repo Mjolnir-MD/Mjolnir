@@ -98,7 +98,12 @@ class GFWNPTLangevinIntegrator
         const auto h_cell = sys.boundary().width();
         this->P_ins_ = this->calc_pressure(sys, h_cell);
 
+        MJOLNIR_LOG_NOTICE("pressure = ", this->P_ins_);
+
         sys.attribute("volume") = X(h_cell) * Y(h_cell) * Z(h_cell);
+        sys.attribute("pres_xx") = X(this->P_ins_);
+        sys.attribute("pres_yy") = Y(this->P_ins_);
+        sys.attribute("pres_zz") = Z(this->P_ins_);
 
         return;
     }
@@ -289,6 +294,10 @@ class GFWNPTLangevinIntegrator
         // using just updated velocities and virial from `calc_force`
 
         this->P_ins_ = this->calc_pressure(sys, h_cell);
+
+        sys.attribute("pres_xx") = X(this->P_ins_);
+        sys.attribute("pres_yy") = Y(this->P_ins_);
+        sys.attribute("pres_zz") = Z(this->P_ins_);
 
         P_diff = P_ins_ - P_ref_;
 
