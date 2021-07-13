@@ -113,8 +113,8 @@ class ExternalForceField
         {
             MJOLNIR_GET_DEFAULT_LOGGER();
             MJOLNIR_LOG_FUNCTION();
-            MJOLNIR_LOG_WARNING("External forcefield does not support virial");
-            MJOLNIR_LOG_WARNING("Since pressure (and virial) is the derivative "
+            MJOLNIR_LOG_WARN("External forcefield does not support virial");
+            MJOLNIR_LOG_WARN("Since pressure (and virial) is the derivative "
                 "of the free energy with respect to the system volume, virial "
                 "contribution of external forcefields generally depends on the "
                 "absolute coordinate is not well defined.");
