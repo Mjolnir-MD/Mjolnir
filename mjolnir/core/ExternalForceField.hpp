@@ -68,6 +68,7 @@ class ExternalForceField
             MJOLNIR_LOG_INFO("initializing ", item->name());
             item->initialize(sys);
         }
+        already_warned_about_virial_ = false;
         return;
     }
 
@@ -109,7 +110,7 @@ class ExternalForceField
     }
     void calc_force_and_virial(system_type& sys) const noexcept
     {
-        if( ! this->interactions_.empty())
+        if( ! this->interactions_.empty() && ! already_warned_about_virial_)
         {
             MJOLNIR_GET_DEFAULT_LOGGER();
             MJOLNIR_LOG_FUNCTION();
@@ -118,6 +119,7 @@ class ExternalForceField
                 "of the free energy with respect to the system volume, virial "
                 "contribution of external forcefields generally depends on the "
                 "absolute coordinate is not well defined.");
+            already_warned_about_virial_ = true;
         }
         for(const auto& item : this->interactions_)
         {
@@ -197,6 +199,7 @@ class ExternalForceField
 
     std::vector<std::size_t> fmt_widths_;
     container_type interactions_;
+    bool already_warned_about_virial_;
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD
