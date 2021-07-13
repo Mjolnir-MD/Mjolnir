@@ -1,0 +1,15 @@
+{
+  "name": "Mjolnir documentation",
+  "short_name": "Mjolnir documentation",
+  "start_url": "/Mjolnir/",
+  "scope": "/Mjolnir/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/Mjolnir/favicon.svg",
+      "sizes": "512x512"
+    }
+  ]
+}

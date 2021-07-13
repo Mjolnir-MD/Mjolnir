@@ -1,0 +1,150 @@
+<!doctype html><html lang=ja><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="A simple polymer model #  前回に続いて、今度は局所的な相互作用の設定方法を、簡単なポリマーのシミュレーションを通して説明します。
+今回は100個の粒子を調和振動子ポテンシャルで繋げてみます。 簡単のため、初めは繋がっていない粒子に非局所的な相互作用はないとします。
+[files] and [units] #  前回と同様、細々とした設定を先に済ませてしまいましょう。
+まずは、出力ファイルの名前とフォーマットを決めます。
+[files] output.prefix = &#34;polymer-model&#34; output.path = &#34;./&#34; output.format = &#34;xyz&#34; 他に何が設定できるかは、Referenceのfilesを見てください。
+単位は、kcal/molとangstromにします。
+[units] length = &#34;angstrom&#34; energy = &#34;kcal/mol&#34; 他に何が設定できるかは、Referenceのunitsを見てください。
+[simulator] #  ここもほぼ前回と同じです。
+ですが、今回は全ての粒子が繋がっていて、遠くに離れていく心配がないので、周期境界条件をなくしてみましょう。
+[simulator] type = &#34;MolecularDynamics&#34; precision = &#34;double&#34; boundary_type = &#34;Unlimited&#34; # No periodic boundary seed = 123456789 delta_t = 0.01 total_step = 1_000_000 save_step = 1_000 integrator.type = &#34;BAOABLangevin&#34; integrator."><meta name=theme-color content="#FFFFFF"><meta property="og:title" content="A simple polymer model"><meta property="og:description" content="A simple polymer model #  前回に続いて、今度は局所的な相互作用の設定方法を、簡単なポリマーのシミュレーションを通して説明します。
+今回は100個の粒子を調和振動子ポテンシャルで繋げてみます。 簡単のため、初めは繋がっていない粒子に非局所的な相互作用はないとします。
+[files] and [units] #  前回と同様、細々とした設定を先に済ませてしまいましょう。
+まずは、出力ファイルの名前とフォーマットを決めます。
+[files] output.prefix = &#34;polymer-model&#34; output.path = &#34;./&#34; output.format = &#34;xyz&#34; 他に何が設定できるかは、Referenceのfilesを見てください。
+単位は、kcal/molとangstromにします。
+[units] length = &#34;angstrom&#34; energy = &#34;kcal/mol&#34; 他に何が設定できるかは、Referenceのunitsを見てください。
+[simulator] #  ここもほぼ前回と同じです。
+ですが、今回は全ての粒子が繋がっていて、遠くに離れていく心配がないので、周期境界条件をなくしてみましょう。
+[simulator] type = &#34;MolecularDynamics&#34; precision = &#34;double&#34; boundary_type = &#34;Unlimited&#34; # No periodic boundary seed = 123456789 delta_t = 0.01 total_step = 1_000_000 save_step = 1_000 integrator.type = &#34;BAOABLangevin&#34; integrator."><meta property="og:type" content="article"><meta property="og:url" content="http://mjolnir-md.github.io/Mjolnir/ja/docs/tutorial/polymer-model/"><meta property="article:section" content="docs"><title>A simple polymer model | Mjolnir documentation</title><link rel=manifest href=/Mjolnir/manifest.json><link rel=icon href=/Mjolnir/favicon.png type=image/x-icon><link rel=alternate hreflang=en href=http://mjolnir-md.github.io/Mjolnir/docs/tutorial/polymer-model/ title="A simple polymer model"><link rel=stylesheet href=/Mjolnir/book.min.d08be657f4d0d61b509ac06e1059e92fd1c66f15535a6bd4cee27e19935f34ae.css integrity="sha256-0IvmV/TQ1htQmsBuEFnpL9HGbxVTWmvUzuJ+GZNfNK4="><script defer src=/Mjolnir/ja.search.min.a483c99640d51f27c8a945e75933a4d9b32ec0c4223e303e7452778c34c44f8d.js integrity="sha256-pIPJlkDVHyfIqUXnWTOk2bMuwMQiPjA+dFJ3jDTET40="></script></head><body><input type=checkbox class="hidden toggle" id=menu-control>
+<input type=checkbox class="hidden toggle" id=toc-control><main class="container flex"><aside class=book-menu><nav><h2 class=book-brand><a href=/Mjolnir/ja><span>Mjolnir documentation</span></a></h2><div class=book-search><input type=text id=book-search-input placeholder=検索 aria-label=検索 maxlength=64 data-hotkeys=s/><div class="book-search-spinner hidden"></div><ul id=book-search-results></ul></div><ul><li><a href=/Mjolnir/ja/docs/installation/>Installation</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/>Reference</a><ul><li><a href=/Mjolnir/ja/docs/reference/files/>Files</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/units/>Units</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/simulators/ class=collapsed>Simulators</a></li><li><a href=/Mjolnir/ja/docs/reference/integrators/ class=collapsed>Integrators</a></li><li><a href=/Mjolnir/ja/docs/reference/system/>System</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/ class=collapsed>ForceFields</a></li></ul></li><li><a href=/Mjolnir/ja/docs/tutorial/ class=collapsed>Tutorial</a><ul><li><a href=/Mjolnir/ja/docs/tutorial/lennard-jones/>The Lennard-Jones fluid</a></li><li><a href=/Mjolnir/ja/docs/tutorial/polymer-model/ class=active>A simple polymer model</a></li></ul></li><li><a href=/Mjolnir/ja/docs/developersguide/>Developer's Guide</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/glossary/>Glossary</a><ul></ul></li></ul><ul><li><a href=https://github.com/Mjolnir-MD/Mjolnir target=_blank rel=noopener>GitHub</a></li></ul></nav><script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script></aside><div class=book-page><header class=book-header><div class="flex align-center justify-between"><label for=menu-control><img src=/Mjolnir/svg/menu.svg class=book-icon alt=Menu></label>
+<strong>A simple polymer model</strong>
+<label for=toc-control><img src=/Mjolnir/svg/toc.svg class=book-icon alt="Table of Contents"></label></div><aside class="hidden clearfix"><nav id=TableOfContents><ul><li><a href=#a-simple-polymer-model>A simple polymer model</a><ul><li><a href=#files-and-units><code>[files]</code> and <code>[units]</code></a></li><li><a href=#simulator><code>[simulator]</code></a></li><li><a href=#systems><code>[[systems]]</code></a></li><li><a href=#forcefields><code>[[forcefields]]</code></a></li><li><a href=#simulation>Simulation</a></li><li><a href=#conclusion>Conclusion</a></li></ul></li></ul></nav></aside></header><article class=markdown><h1 id=a-simple-polymer-model>A simple polymer model
+<a class=anchor href=#a-simple-polymer-model>#</a></h1><p><a href=/Mjolnir/ja/docs/tutorial/lennard-jones/>前回</a>に続いて、今度は局所的な相互作用の設定方法を、簡単なポリマーのシミュレーションを通して説明します。</p><p>今回は100個の粒子を調和振動子ポテンシャルで繋げてみます。
+簡単のため、初めは繋がっていない粒子に非局所的な相互作用はないとします。</p><h2 id=files-and-units><code>[files]</code> and <code>[units]</code>
+<a class=anchor href=#files-and-units>#</a></h2><p>前回と同様、細々とした設定を先に済ませてしまいましょう。</p><p>まずは、出力ファイルの名前とフォーマットを決めます。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[files]
+output.prefix = <span style=color:#f1fa8c>&#34;polymer-model&#34;</span>
+output.path   = <span style=color:#f1fa8c>&#34;./&#34;</span>
+output.format = <span style=color:#f1fa8c>&#34;xyz&#34;</span>
+</code></pre></div><p>他に何が設定できるかは、<a href=http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/files/>Referenceのfiles</a>を見てください。</p><p>単位は、<code>kcal/mol</code>と<code>angstrom</code>にします。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[units]
+length = <span style=color:#f1fa8c>&#34;angstrom&#34;</span>
+energy = <span style=color:#f1fa8c>&#34;kcal/mol&#34;</span>
+</code></pre></div><p>他に何が設定できるかは、<a href=http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/units/>Referenceのunits</a>を見てください。</p><h2 id=simulator><code>[simulator]</code>
+<a class=anchor href=#simulator>#</a></h2><p>ここもほぼ<a href=/Mjolnir/ja/docs/tutorial/lennard-jones/>前回</a>と同じです。</p><p>ですが、今回は全ての粒子が繋がっていて、遠くに離れていく心配がないので、周期境界条件をなくしてみましょう。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[simulator]
+type          = <span style=color:#f1fa8c>&#34;MolecularDynamics&#34;</span>
+precision     = <span style=color:#f1fa8c>&#34;double&#34;</span>
+boundary_type = <span style=color:#f1fa8c>&#34;Unlimited&#34;</span> <span style=color:#6272a4># No periodic boundary</span>
+seed          = <span style=color:#bd93f9>123456789</span>
+delta_t       = <span style=color:#bd93f9>0.01</span>
+total_step    = <span style=color:#bd93f9>1_000_000</span>
+save_step     =     <span style=color:#bd93f9>1_000</span>
+integrator.type = <span style=color:#f1fa8c>&#34;BAOABLangevin&#34;</span>
+integrator.gammas = [
+    {index =  <span style=color:#bd93f9>0</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+    {index =  <span style=color:#bd93f9>1</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+    {index =  <span style=color:#bd93f9>2</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+    <span style=color:#6272a4># ...</span>
+    {index = <span style=color:#bd93f9>99</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+]
+</code></pre></div><p>他に何が設定できるかは、<a href=http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/simulators/>ReferenceのSimulator</a>を見てください。</p><h2 id=systems><code>[[systems]]</code>
+<a class=anchor href=#systems>#</a></h2><p><a href=/Mjolnir/ja/docs/tutorial/lennard-jones/>前回</a>と違い周期境界条件を適用しないことにしたので、<code>boundary_shape</code>を指定する必要はありません。</p><p>今回は、最初は伸び切った直線のコンフォメーションからシミュレーションを始めます。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[[systems]]
+attributes.temperature = <span style=color:#bd93f9>300.0</span> <span style=color:#6272a4># K</span>
+particles = [
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>2.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>4.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>5.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>6.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>7.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>8.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+    <span style=color:#6272a4># 続く...</span>
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [<span style=color:#bd93f9>99.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+]
+</code></pre></div><p>他に何が設定できるかは、<a href=http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/system/>ReferenceのSystems</a>を見てください。</p><h2 id=forcefields><code>[[forcefields]]</code>
+<a class=anchor href=#forcefields>#</a></h2><p>最後に、力場のパラメータを設定します。</p><p>今回は結合長ポテンシャルを設定します。
+これは局所的な（最初に指定したペアの間のみで働く）相互作用なので、定義するのは<code>[[forcefields.local]]</code>です。</p><p>相互作用の種類は結合長なので<code>BondLength</code>、ポテンシャル関数は調和振動子なので<code>Harmonic</code>です。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[[forcefields]]
+[[forcefields.local]]
+interaction = <span style=color:#f1fa8c>&#34;BondLength&#34;</span>
+potential   = <span style=color:#f1fa8c>&#34;Harmonic&#34;</span>
+topology    = <span style=color:#f1fa8c>&#34;bond&#34;</span>
+</code></pre></div><p><code>topology</code>というのは、あとで説明しますが、局所的な相互作用と非局所的な相互作用の間をうまく取り持つためのラベルです。
+今回は必要ないので、適当な名前で埋めておきます。</p><p>さて、では隣り合う粒子の間にポテンシャルを適用していきましょう。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[[forcefields]]
+[[forcefields.local]]
+interaction = <span style=color:#f1fa8c>&#34;BondLength&#34;</span>
+potential   = <span style=color:#f1fa8c>&#34;Harmonic&#34;</span>
+topology    = <span style=color:#f1fa8c>&#34;bond&#34;</span>
+parameters  = [
+    {indices = [ <span style=color:#bd93f9>0</span>, <span style=color:#bd93f9>1</span>], v0 = <span style=color:#bd93f9>1.0</span>, k = <span style=color:#bd93f9>10.0</span>},
+    {indices = [ <span style=color:#bd93f9>1</span>, <span style=color:#bd93f9>2</span>], v0 = <span style=color:#bd93f9>1.0</span>, k = <span style=color:#bd93f9>10.0</span>},
+    {indices = [ <span style=color:#bd93f9>2</span>, <span style=color:#bd93f9>3</span>], v0 = <span style=color:#bd93f9>1.0</span>, k = <span style=color:#bd93f9>10.0</span>},
+    <span style=color:#6272a4># ...</span>
+    {indices = [<span style=color:#bd93f9>98</span>,<span style=color:#bd93f9>99</span>], v0 = <span style=color:#bd93f9>1.0</span>, k = <span style=color:#bd93f9>10.0</span>},
+]
+</code></pre></div><p>これで力場のパラメータは全部です。</p><p>他に何が設定できるかは、<a href=http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/forcefields/>ReferenceのForceFields</a>を見てください。</p><h2 id=simulation>Simulation
+<a class=anchor href=#simulation>#</a></h2><p>お疲れ様でした！　これで入力ファイルは全部です。
+このファイルをコンパイルしたmjolnirに渡せば、以下のようなログが出て、計算が始まります。</p><p>前回より粒子数が少ないので、すぐに終わるはずです。</p><pre><code class=language-console data-lang=console>$ ./bin/mjolnir polymer-model.toml
+reading input file...
+-- reading and parsing toml file `polymer-model.toml` ...  successfully parsed.
+-- the log file is `./polymer-model.log`
+-- mjolnir version v1.22.0-dev (06d5ede6)
+-- compiled using /usr/bin/g++-10
+-- input_path is ./
+-- expanding include files ...
+-- done.
+-- precision is double
+-- Boundary Condition is Unlimited
+-- execute on single core
+-- energy unit is [kcal/mol]
+-- length unit is [angstrom]
+-- Integrator is BAOABLangevin.
+-- Simulator type is MolecularDynamics.
+-- total step is 1000000
+-- save step is 1000
+-- checkpoint step is 1000
+-- reading 0th system ...
+-- 100 particles are found.
+-- output file prefix is `./polymer-model`
+-- output xyz format.
+-- LocalForceField (x1) found
+-- reading 0th [[forcefields.local]]
+-- Bond Length interaction found.
+-- -- potential function is Harmonic.
+-- -- 99 interactions are found.
+-- seed is 123456789
+done.
+initializing simulator...
+-- generating velocity with T = 300...
+-- done.
+done.
+start running simulation
+  8.2%|████                                              | 10.5 seconds remaining
+</code></pre><p>計算が終われば、以下のようなファイルが出力されているはずです。</p><pre><code class=language-console data-lang=console>$ ls polymer-model*
+polymer-model.toml
+polymer-model.ene
+polymer-model.log
+polymer-model_rng.msg
+polymer-model_system.msg
+polymer-model_position.xyz
+polymer-model_velocity.xyz
+</code></pre><p><code>.msg</code>ファイルはシミュレーションを再開するためのリスタート用ファイルで、そのフォーマットは<a href=https://msgpack.org/ja.html>MsgPack</a>です。</p><p><code>.ene</code>ファイルはエネルギーなどの値が単純なテキストベースで書かれており、<code>gnuplot</code>などで簡単にプロットすることができます。</p><pre><code class=language-console data-lang=console>$ head polymer-model.ene
+# unit of length : angstrom, unit of energy : kcal/mol
+# timestep  BondLength:Harmonic  kinetic_energy attribute:temperature
+0                      0.000000      96.956625            300.000000
+1000                  56.910239      86.124451            300.000000
+2000                  51.497857      85.960034            300.000000
+3000                  44.394914      90.433666            300.000000
+4000                  50.774066      89.091169            300.000000
+5000                  46.749105     104.594276            300.000000
+6000                  34.130104      86.045558            300.000000
+7000                  39.505721      84.893861            300.000000
+</code></pre><p><code>polymer-model_position.xyz</code>が位置のトラジェクトリです。
+これをVMDなどに渡すことで、トラジェクトリを見ることができます。</p><h2 id=conclusion>Conclusion
+<a class=anchor href=#conclusion>#</a></h2><p>このチュートリアルは以上です。</p><p><code>BondLength</code>を設定する二つの粒子の番号を直接指定しました。
+これはなにも連続した二粒子である必要はなく、好きな粒子のペアに相互作用をかけることができます。
+最初と最後の粒子を繋いで環状にすることも、一つ飛ばしで繋いで角度をつけることもできます。</p><p>局所的な相互作用は他にも、結合角、二面角などが知られています。
+Mjolnirはこれらを同様の形でサポートしているので、興味のある組み合わせを試してみてください。</p><p>それらの設定方法は、<a href=http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/forcefields/local/>ReferenceのLocalForceField</a>を見てください。</p></article><footer class=book-footer><div class="flex flex-wrap justify-between"><div class=book-languages tabindex=0 aria-haspopup=true><ul><li class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</li></ul><ul class=book-languages-list><li><a href=http://mjolnir-md.github.io/Mjolnir/docs/tutorial/polymer-model/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+English</a></li><li class=active><a href=http://mjolnir-md.github.io/Mjolnir/ja/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</a></li></ul></div></div></footer><div class=book-comments></div><label for=menu-control class="hidden book-menu-overlay"></label></div><aside class=book-toc><nav id=TableOfContents><ul><li><a href=#a-simple-polymer-model>A simple polymer model</a><ul><li><a href=#files-and-units><code>[files]</code> and <code>[units]</code></a></li><li><a href=#simulator><code>[simulator]</code></a></li><li><a href=#systems><code>[[systems]]</code></a></li><li><a href=#forcefields><code>[[forcefields]]</code></a></li><li><a href=#simulation>Simulation</a></li><li><a href=#conclusion>Conclusion</a></li></ul></li></ul></nav></aside></main></body></html>

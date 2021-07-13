@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Tutorial on Mjolnir documentation</title><link>http://mjolnir-md.github.io/Mjolnir/ja/docs/tutorial/</link><description>Recent content in Tutorial on Mjolnir documentation</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="http://mjolnir-md.github.io/Mjolnir/ja/docs/tutorial/index.xml" rel="self" type="application/rss+xml"/><item><title>The Lennard-Jones fluid</title><link>http://mjolnir-md.github.io/Mjolnir/ja/docs/tutorial/lennard-jones/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://mjolnir-md.github.io/Mjolnir/ja/docs/tutorial/lennard-jones/</guid><description>The Lennard-Jones fluid # 簡単な例として、Lennard-Jonesポテンシャルで相互作用する粒子のシミュレーションをしてみましょう。 あまり時間がかかるシミュレーションにしたくないので、8x8x8の512粒子の系を考えることにします。 特に具体的な何かの原子をシミュレーションしたいというわけではないので、パラメータは適当に決めていきます。
+このシミュレーションに必要なものは、大まかに
+どのような方法でシミュレーションするか 初期構造 ポテンシャルのパラメータ です。lennard-jones.tomlというファイルを作って、この順に実際に入力を書いていきましょう。
+[files] and [units] # 具体的な設定を埋めていく前に、細々とした設定を先に済ませておきます。
+まず、出力ファイルの名前とフォーマットを決めましょう。 名前はそのままlennard-jonesに、出力先はカレントディレクトリ、フォーマットはxyzにします。
+[files] output.prefix = &amp;#34;lennard-jones&amp;#34; output.path = &amp;#34;./&amp;#34; output.format = &amp;#34;xyz&amp;#34; 他に何が設定できるかは、Referenceのfilesを見てください。
+今後の入力で使う数値の単位系も決めないといけません。 ここでは、エネルギーの単位はkcal/mol、長さの単位はangstromにします。
+[units] length = &amp;#34;angstrom&amp;#34; energy = &amp;#34;kcal/mol&amp;#34; 他に何が設定できるかは、Referenceのunitsを見てください。
+[simulator] and other general properties # さて、一般的な部分の設定は済ませたので、いよいよシミュレーションをどのように行うかを設定します。
+まず、今から行うのは普通の分子動力学シミュレーションなので、方法はMolecularDynamicsです。 浮動小数点数の型には倍精度を、境界条件にはPeirodicを適用します。 それと、乱数シードを適当に決めておいてください。
+[simulator] type = &amp;#34;MolecularDynamics&amp;#34; precision = &amp;#34;double&amp;#34; boundary_type = &amp;#34;Periodic&amp;#34; seed = 123456789 あとは、時間発展をどうやって、どの程度行うかを決めます。
+ここでは、ランジュバン方程式の時間積分法のうち、比較的最近提案されたBAOAB Langevin integratorを使うことにしましょう。 ここでは摩擦係数を粒子ごとに設定することができますが、今回は均質な系にするので、とりあえず全部1にしてしまいましょう。</description></item><item><title>A simple polymer model</title><link>http://mjolnir-md.github.io/Mjolnir/ja/docs/tutorial/polymer-model/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://mjolnir-md.github.io/Mjolnir/ja/docs/tutorial/polymer-model/</guid><description>A simple polymer model # 前回に続いて、今度は局所的な相互作用の設定方法を、簡単なポリマーのシミュレーションを通して説明します。
+今回は100個の粒子を調和振動子ポテンシャルで繋げてみます。 簡単のため、初めは繋がっていない粒子に非局所的な相互作用はないとします。
+[files] and [units] # 前回と同様、細々とした設定を先に済ませてしまいましょう。
+まずは、出力ファイルの名前とフォーマットを決めます。
+[files] output.prefix = &amp;#34;polymer-model&amp;#34; output.path = &amp;#34;./&amp;#34; output.format = &amp;#34;xyz&amp;#34; 他に何が設定できるかは、Referenceのfilesを見てください。
+単位は、kcal/molとangstromにします。
+[units] length = &amp;#34;angstrom&amp;#34; energy = &amp;#34;kcal/mol&amp;#34; 他に何が設定できるかは、Referenceのunitsを見てください。
+[simulator] # ここもほぼ前回と同じです。
+ですが、今回は全ての粒子が繋がっていて、遠くに離れていく心配がないので、周期境界条件をなくしてみましょう。
+[simulator] type = &amp;#34;MolecularDynamics&amp;#34; precision = &amp;#34;double&amp;#34; boundary_type = &amp;#34;Unlimited&amp;#34; # No periodic boundary seed = 123456789 delta_t = 0.01 total_step = 1_000_000 save_step = 1_000 integrator.type = &amp;#34;BAOABLangevin&amp;#34; integrator.</description></item></channel></rss>

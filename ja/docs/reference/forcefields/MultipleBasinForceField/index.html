@@ -1,0 +1,95 @@
+<!doctype html><html lang=ja><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="MultipleBasinForceField #  MultipleBasin モデルによって、複数の異なる力場をスムースにつなげることができます。
+粗視化モデルでタンパク質の構造変化を実現するための、力場の強制変更よりも自然な方法として、以下の文献で提案されました。
+ Kei-ichi Okazaki, Nobuyasu Koga, Shoji Takada, Jose N. Onuchic, and Peter G. Wolynes PNAS (2006)  Mjolnirはこれを一般化した形で実装しており、任意の力場を利用できます。
+このモデルでは、以下の形で定義された行列の最小固有値として定義される   \( V_{MB} \)  がかかります。
+ \[\begin{pmatrix} V_1 + \Delta V_1 & \Delta \\ \Delta & V_2 + \Delta V_2 \end{pmatrix} \begin{pmatrix} c_1 \\ c_2 \end{pmatrix} = V_{MB} \begin{pmatrix} c_1 \\ c_2 \end{pmatrix}\]  固有ベクトルの成分は、それぞれの状態の重みと解釈できます。反応座標として、デフォルトで以下の値が出力されます。
+ \[\chi = \log\left(\frac{c_2}{c_1}\right)\]   \( 0 < \Delta \)  の場合、この値が非数になることに注意してください。これを避けるため、Mjolnirでは \(\Delta\)  が常に負の値として読み込まれます。  \( V_{MB} \)  は  \( \Delta^2 \)  にしか依存しないため、 \( \Delta \)  の符号は結果に影響しません。"><meta name=theme-color content="#FFFFFF"><meta property="og:title" content="MultipleBasin"><meta property="og:description" content="MultipleBasinForceField #  MultipleBasin モデルによって、複数の異なる力場をスムースにつなげることができます。
+粗視化モデルでタンパク質の構造変化を実現するための、力場の強制変更よりも自然な方法として、以下の文献で提案されました。
+ Kei-ichi Okazaki, Nobuyasu Koga, Shoji Takada, Jose N. Onuchic, and Peter G. Wolynes PNAS (2006)  Mjolnirはこれを一般化した形で実装しており、任意の力場を利用できます。
+このモデルでは、以下の形で定義された行列の最小固有値として定義される   \( V_{MB} \)  がかかります。
+ \[\begin{pmatrix} V_1 + \Delta V_1 & \Delta \\ \Delta & V_2 + \Delta V_2 \end{pmatrix} \begin{pmatrix} c_1 \\ c_2 \end{pmatrix} = V_{MB} \begin{pmatrix} c_1 \\ c_2 \end{pmatrix}\]  固有ベクトルの成分は、それぞれの状態の重みと解釈できます。反応座標として、デフォルトで以下の値が出力されます。
+ \[\chi = \log\left(\frac{c_2}{c_1}\right)\]   \( 0 < \Delta \)  の場合、この値が非数になることに注意してください。これを避けるため、Mjolnirでは \(\Delta\)  が常に負の値として読み込まれます。  \( V_{MB} \)  は  \( \Delta^2 \)  にしか依存しないため、 \( \Delta \)  の符号は結果に影響しません。"><meta property="og:type" content="article"><meta property="og:url" content="http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/forcefields/MultipleBasinForceField/"><meta property="article:section" content="docs"><title>MultipleBasin | Mjolnir documentation</title><link rel=manifest href=/Mjolnir/manifest.json><link rel=icon href=/Mjolnir/favicon.png type=image/x-icon><link rel=alternate hreflang=en href=http://mjolnir-md.github.io/Mjolnir/docs/reference/forcefields/MultipleBasinForceField/ title=MultipleBasin><link rel=stylesheet href=/Mjolnir/book.min.d08be657f4d0d61b509ac06e1059e92fd1c66f15535a6bd4cee27e19935f34ae.css integrity="sha256-0IvmV/TQ1htQmsBuEFnpL9HGbxVTWmvUzuJ+GZNfNK4="><script defer src=/Mjolnir/ja.search.min.a483c99640d51f27c8a945e75933a4d9b32ec0c4223e303e7452778c34c44f8d.js integrity="sha256-pIPJlkDVHyfIqUXnWTOk2bMuwMQiPjA+dFJ3jDTET40="></script></head><body><input type=checkbox class="hidden toggle" id=menu-control>
+<input type=checkbox class="hidden toggle" id=toc-control><main class="container flex"><aside class=book-menu><nav><h2 class=book-brand><a href=/Mjolnir/ja><span>Mjolnir documentation</span></a></h2><div class=book-search><input type=text id=book-search-input placeholder=検索 aria-label=検索 maxlength=64 data-hotkeys=s/><div class="book-search-spinner hidden"></div><ul id=book-search-results></ul></div><ul><li><a href=/Mjolnir/ja/docs/installation/>Installation</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/>Reference</a><ul><li><a href=/Mjolnir/ja/docs/reference/files/>Files</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/units/>Units</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/simulators/ class=collapsed>Simulators</a></li><li><a href=/Mjolnir/ja/docs/reference/integrators/ class=collapsed>Integrators</a></li><li><a href=/Mjolnir/ja/docs/reference/system/>System</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/ class=collapsed>ForceFields</a><ul><li><a href=/Mjolnir/ja/docs/reference/forcefields/local/ class=collapsed>Local</a></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/global/ class=collapsed>Global</a></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/external/ class=collapsed>External</a></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/constraint/>Constraint</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/MultipleBasinForceField/ class=active>MultipleBasin</a></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/HybridForceField/>HybridForceField</a></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/Topology/>Topology</a></li></ul></li></ul></li><li><a href=/Mjolnir/ja/docs/tutorial/ class=collapsed>Tutorial</a></li><li><a href=/Mjolnir/ja/docs/developersguide/>Developer's Guide</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/glossary/>Glossary</a><ul></ul></li></ul><ul><li><a href=https://github.com/Mjolnir-MD/Mjolnir target=_blank rel=noopener>GitHub</a></li></ul></nav><script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script></aside><div class=book-page><header class=book-header><div class="flex align-center justify-between"><label for=menu-control><img src=/Mjolnir/svg/menu.svg class=book-icon alt=Menu></label>
+<strong>MultipleBasin</strong>
+<label for=toc-control><img src=/Mjolnir/svg/toc.svg class=book-icon alt="Table of Contents"></label></div><aside class="hidden clearfix"><nav id=TableOfContents><ul><li><a href=#multiplebasinforcefield>MultipleBasinForceField</a><ul><li><a href=#例>例</a></li><li><a href=#note-for-aicg2-forcefields>Note for AICG2+ forcefields</a></li><li><a href=#aicg2力場で用いる時の注意>AICG2+力場で用いる時の注意</a><ul><li><a href=#結合長ポテンシャルへの補正>結合長ポテンシャルへの補正</a></li><li><a href=#コンタクトポテンシャルへの補正>コンタクトポテンシャルへの補正</a></li></ul></li></ul></li></ul></nav></aside></header><article class=markdown><h1 id=multiplebasinforcefield>MultipleBasinForceField
+<a class=anchor href=#multiplebasinforcefield>#</a></h1><p>MultipleBasin モデルによって、複数の異なる力場をスムースにつなげることができます。</p><p>粗視化モデルでタンパク質の構造変化を実現するための、力場の強制変更よりも自然な方法として、以下の文献で提案されました。</p><ul><li>Kei-ichi Okazaki, Nobuyasu Koga, Shoji Takada, Jose N. Onuchic, and Peter G. Wolynes PNAS (2006)</li></ul><p>Mjolnirはこれを一般化した形で実装しており、任意の力場を利用できます。</p><p>このモデルでは、以下の形で定義された行列の最小固有値として定義される
+<link rel=stylesheet href=/Mjolnir/katex/katex.min.css><script defer src=/Mjolnir/katex/katex.min.js></script><script defer src=/Mjolnir/katex/auto-render.min.js onload=renderMathInElement(document.body)></script><span>\( V_{MB} \)</span>
+がかかります。</p><span>\[\begin{pmatrix}
+V_1 + \Delta V_1 & \Delta \\
+\Delta & V_2 + \Delta V_2
+\end{pmatrix}
+\begin{pmatrix}
+c_1 \\ c_2
+\end{pmatrix}
+= V_{MB}
+\begin{pmatrix}
+c_1 \\ c_2
+\end{pmatrix}\]</span><p>固有ベクトルの成分は、それぞれの状態の重みと解釈できます。反応座標として、デフォルトで以下の値が出力されます。</p><span>\[\chi = \log\left(\frac{c_2}{c_1}\right)\]</span><p><span>\( 0 &lt; \Delta \)</span>
+の場合、この値が非数になることに注意してください。これを避けるため、Mjolnirでは<span>
+\(\Delta\)</span>
+が常に負の値として読み込まれます。
+<span>\( V_{MB} \)</span>
+は <span>\( \Delta^2 \)</span>
+にしか依存しないため、<span>
+\( \Delta \)</span>
+の符号は結果に影響しません。</p><p>3つの異なる力場をつなげる際には、以下の形になります。</p><span>\[\begin{pmatrix}
+V_1 + \Delta V_1 & \Delta_{12} & \Delta_{13} \\
+\Delta_{21} & V_2 + \Delta V_2 & \Delta_{23} \\
+\Delta_{31} & \Delta_{32} & V_3 + \Delta V_3 \\
+\end{pmatrix}
+\begin{pmatrix}
+c_1 \\ c_2 \\ c_3
+\end{pmatrix}
+= V_{MB}
+\begin{pmatrix}
+c_1 \\ c_2 \\ c_3
+\end{pmatrix}\]</span><p>ここで、<span>
+\(\Delta_{ij} = \Delta_{ji}\)</span>
+です。</p><p>現在、Mjolnirは力場の数が2つまたは3つの場合のみをサポートしています。
+さらに、異なるトポロジーを持つ力場同士のMultipleBasinはサポートしていません。</p><h2 id=例>例
+<a class=anchor href=#%e4%be%8b>#</a></h2><p>まず、繋ぎ合わせるための複数種類の力場を設定し、名前をつけます。
+この時、<code>"common"</code>という名前の力場はMultipleBasinに含まれず常に適用されるようになることに注意してください。</p><p>その後、<code>[simulator]</code>でMultipleBasinを利用することを宣言し、力場の名前と、カップリングパラメータを指定します。</p><p>独立に構造変化を起こす複数のタンパク質をサポートする場合などのために、複数のMultipleBasinを並行して定義できるようになっています。
+<code>simulator.forcefields.units</code>で必要な数のMultipleBasinを定義してください。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[simulator]
+type          = <span style=color:#f1fa8c>&#34;MolecularDynamics&#34;</span>
+boundary_type = <span style=color:#f1fa8c>&#34;Unlimited&#34;</span>
+precision     = <span style=color:#f1fa8c>&#34;double&#34;</span>
+delta_t       = <span style=color:#bd93f9>0.1</span>
+total_step    = <span style=color:#bd93f9>1000000</span>
+save_step     =   <span style=color:#bd93f9>1_000</span>
+seed          = <span style=color:#bd93f9>2859805901</span>
+integrator.type = <span style=color:#f1fa8c>&#34;BAOABLangevin&#34;</span>
+integrator.gammas = [
+    <span style=color:#6272a4># ...</span>
+]
+forcefields.type = <span style=color:#f1fa8c>&#34;MultipleBasin&#34;</span>
+forcefields.units = [
+{basins = [<span style=color:#f1fa8c>&#34;open&#34;</span>, <span style=color:#f1fa8c>&#34;close&#34;</span>], dVs = [<span style=color:#bd93f9>0.0</span>, <span style=color:#bd93f9>-12.0</span>], delta = <span style=color:#bd93f9>150.0</span>},
+]
+<span style=color:#6272a4># ...</span>
+
+[[forcefields]]
+name = <span style=color:#f1fa8c>&#34;open&#34;</span>
+[[forcefields.local]]
+<span style=color:#6272a4># ...</span>
+
+[[forcefields]]
+name = <span style=color:#f1fa8c>&#34;close&#34;</span>
+[[forcefields.local]]
+<span style=color:#6272a4># ...</span>
+
+[[forcefields]]
+name = <span style=color:#f1fa8c>&#34;common&#34;</span>
+[[forcefields.local]]
+<span style=color:#6272a4># ...</span>
+</code></pre></div><h2 id=note-for-aicg2-forcefields>Note for AICG2+ forcefields
+<a class=anchor href=#note-for-aicg2-forcefields>#</a></h2><p>When AICG2+ is used with MultipleBasin, you may need to modify AICG2+ parameters slightly.
+In such a case, we will have several reference structures for the same protein.
+The native bond lengthes, bond angles, dihedral angles, and native contact distances could be different between reference structures and some of the native contacts could be defined only in one reference structure.</p><h2 id=aicg2力場で用いる時の注意>AICG2+力場で用いる時の注意
+<a class=anchor href=#aicg2%e5%8a%9b%e5%a0%b4%e3%81%a7%e7%94%a8%e3%81%84%e3%82%8b%e6%99%82%e3%81%ae%e6%b3%a8%e6%84%8f>#</a></h2><p>AICG2+力場を用いる際は、結合長とコンタクトの扱いに注意が必要です。</p><h3 id=結合長ポテンシャルへの補正>結合長ポテンシャルへの補正
+<a class=anchor href=#%e7%b5%90%e5%90%88%e9%95%b7%e3%83%9d%e3%83%86%e3%83%b3%e3%82%b7%e3%83%a3%e3%83%ab%e3%81%b8%e3%81%ae%e8%a3%9c%e6%ad%a3>#</a></h3><p>遷移状態のエネルギーを上げすぎないように、自然長が大きく違う場合、以下の形でポテンシャルの係数を補正します。</p><span>\[K'_{bond} = K_{bond} \times \mathrm{min}\left(1, \frac{E_{max}}{K_b(b_i^{(1)} - b_i^{(2)})^2}\right)\]</span><p>通常、<span>
+\( E_{max} \)</span>
+の値は100 kcal/molが用いられます。</p><h3 id=コンタクトポテンシャルへの補正>コンタクトポテンシャルへの補正
+<a class=anchor href=#%e3%82%b3%e3%83%b3%e3%82%bf%e3%82%af%e3%83%88%e3%83%9d%e3%83%86%e3%83%b3%e3%82%b7%e3%83%a3%e3%83%ab%e3%81%b8%e3%81%ae%e8%a3%9c%e6%ad%a3>#</a></h3><p>また、GoContactは引力項と斥力項に分割され、最も短い参照距離を持つコンタクトの斥力項を全ての力場で共有します。</p><ul><li>もしある粒子のペアが全ての参照構造でコンタクトを持っていた場合、斥力項のうち最も距離の短いものが全てに適用されます。引力項はそれぞれのものが用いられます。</li><li>もしある粒子のペアが一部の参照構造でのみコンタクトを持っていた場合、斥力項のうち最も距離の短いものがコンタクトを持っていなかった参照構造由来のポテンシャルにも適用されます。</li><li>もしある粒子のペアがどの参照構造でもコンタクトを持っていない場合、補正の必要はありません。</li></ul></article><footer class=book-footer><div class="flex flex-wrap justify-between"><div class=book-languages tabindex=0 aria-haspopup=true><ul><li class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</li></ul><ul class=book-languages-list><li><a href=http://mjolnir-md.github.io/Mjolnir/docs/reference/forcefields/MultipleBasinForceField/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+English</a></li><li class=active><a href=http://mjolnir-md.github.io/Mjolnir/ja/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</a></li></ul></div></div></footer><div class=book-comments></div><label for=menu-control class="hidden book-menu-overlay"></label></div><aside class=book-toc><nav id=TableOfContents><ul><li><a href=#multiplebasinforcefield>MultipleBasinForceField</a><ul><li><a href=#例>例</a></li><li><a href=#note-for-aicg2-forcefields>Note for AICG2+ forcefields</a></li><li><a href=#aicg2力場で用いる時の注意>AICG2+力場で用いる時の注意</a><ul><li><a href=#結合長ポテンシャルへの補正>結合長ポテンシャルへの補正</a></li><li><a href=#コンタクトポテンシャルへの補正>コンタクトポテンシャルへの補正</a></li></ul></li></ul></li></ul></nav></aside></main></body></html>

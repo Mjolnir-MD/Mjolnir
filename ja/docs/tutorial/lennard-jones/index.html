@@ -1,0 +1,194 @@
+<!doctype html><html lang=ja><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="The Lennard-Jones fluid #  簡単な例として、Lennard-Jonesポテンシャルで相互作用する粒子のシミュレーションをしてみましょう。 あまり時間がかかるシミュレーションにしたくないので、8x8x8の512粒子の系を考えることにします。 特に具体的な何かの原子をシミュレーションしたいというわけではないので、パラメータは適当に決めていきます。
+このシミュレーションに必要なものは、大まかに
+ どのような方法でシミュレーションするか 初期構造 ポテンシャルのパラメータ  です。lennard-jones.tomlというファイルを作って、この順に実際に入力を書いていきましょう。
+[files] and [units] #  具体的な設定を埋めていく前に、細々とした設定を先に済ませておきます。
+まず、出力ファイルの名前とフォーマットを決めましょう。 名前はそのままlennard-jonesに、出力先はカレントディレクトリ、フォーマットはxyzにします。
+[files] output.prefix = &#34;lennard-jones&#34; output.path = &#34;./&#34; output.format = &#34;xyz&#34; 他に何が設定できるかは、Referenceのfilesを見てください。
+今後の入力で使う数値の単位系も決めないといけません。 ここでは、エネルギーの単位はkcal/mol、長さの単位はangstromにします。
+[units] length = &#34;angstrom&#34; energy = &#34;kcal/mol&#34; 他に何が設定できるかは、Referenceのunitsを見てください。
+[simulator] and other general properties #  さて、一般的な部分の設定は済ませたので、いよいよシミュレーションをどのように行うかを設定します。
+まず、今から行うのは普通の分子動力学シミュレーションなので、方法はMolecularDynamicsです。 浮動小数点数の型には倍精度を、境界条件にはPeirodicを適用します。 それと、乱数シードを適当に決めておいてください。
+[simulator] type = &#34;MolecularDynamics&#34; precision = &#34;double&#34; boundary_type = &#34;Periodic&#34; seed = 123456789 あとは、時間発展をどうやって、どの程度行うかを決めます。
+ここでは、ランジュバン方程式の時間積分法のうち、比較的最近提案されたBAOAB Langevin integratorを使うことにしましょう。 ここでは摩擦係数を粒子ごとに設定することができますが、今回は均質な系にするので、とりあえず全部1にしてしまいましょう。"><meta name=theme-color content="#FFFFFF"><meta property="og:title" content="The Lennard-Jones fluid"><meta property="og:description" content="The Lennard-Jones fluid #  簡単な例として、Lennard-Jonesポテンシャルで相互作用する粒子のシミュレーションをしてみましょう。 あまり時間がかかるシミュレーションにしたくないので、8x8x8の512粒子の系を考えることにします。 特に具体的な何かの原子をシミュレーションしたいというわけではないので、パラメータは適当に決めていきます。
+このシミュレーションに必要なものは、大まかに
+ どのような方法でシミュレーションするか 初期構造 ポテンシャルのパラメータ  です。lennard-jones.tomlというファイルを作って、この順に実際に入力を書いていきましょう。
+[files] and [units] #  具体的な設定を埋めていく前に、細々とした設定を先に済ませておきます。
+まず、出力ファイルの名前とフォーマットを決めましょう。 名前はそのままlennard-jonesに、出力先はカレントディレクトリ、フォーマットはxyzにします。
+[files] output.prefix = &#34;lennard-jones&#34; output.path = &#34;./&#34; output.format = &#34;xyz&#34; 他に何が設定できるかは、Referenceのfilesを見てください。
+今後の入力で使う数値の単位系も決めないといけません。 ここでは、エネルギーの単位はkcal/mol、長さの単位はangstromにします。
+[units] length = &#34;angstrom&#34; energy = &#34;kcal/mol&#34; 他に何が設定できるかは、Referenceのunitsを見てください。
+[simulator] and other general properties #  さて、一般的な部分の設定は済ませたので、いよいよシミュレーションをどのように行うかを設定します。
+まず、今から行うのは普通の分子動力学シミュレーションなので、方法はMolecularDynamicsです。 浮動小数点数の型には倍精度を、境界条件にはPeirodicを適用します。 それと、乱数シードを適当に決めておいてください。
+[simulator] type = &#34;MolecularDynamics&#34; precision = &#34;double&#34; boundary_type = &#34;Periodic&#34; seed = 123456789 あとは、時間発展をどうやって、どの程度行うかを決めます。
+ここでは、ランジュバン方程式の時間積分法のうち、比較的最近提案されたBAOAB Langevin integratorを使うことにしましょう。 ここでは摩擦係数を粒子ごとに設定することができますが、今回は均質な系にするので、とりあえず全部1にしてしまいましょう。"><meta property="og:type" content="article"><meta property="og:url" content="http://mjolnir-md.github.io/Mjolnir/ja/docs/tutorial/lennard-jones/"><meta property="article:section" content="docs"><title>The Lennard-Jones fluid | Mjolnir documentation</title><link rel=manifest href=/Mjolnir/manifest.json><link rel=icon href=/Mjolnir/favicon.png type=image/x-icon><link rel=alternate hreflang=en href=http://mjolnir-md.github.io/Mjolnir/docs/tutorial/lennard-jones/ title="The Lennard-Jones fluid"><link rel=stylesheet href=/Mjolnir/book.min.d08be657f4d0d61b509ac06e1059e92fd1c66f15535a6bd4cee27e19935f34ae.css integrity="sha256-0IvmV/TQ1htQmsBuEFnpL9HGbxVTWmvUzuJ+GZNfNK4="><script defer src=/Mjolnir/ja.search.min.a483c99640d51f27c8a945e75933a4d9b32ec0c4223e303e7452778c34c44f8d.js integrity="sha256-pIPJlkDVHyfIqUXnWTOk2bMuwMQiPjA+dFJ3jDTET40="></script></head><body><input type=checkbox class="hidden toggle" id=menu-control>
+<input type=checkbox class="hidden toggle" id=toc-control><main class="container flex"><aside class=book-menu><nav><h2 class=book-brand><a href=/Mjolnir/ja><span>Mjolnir documentation</span></a></h2><div class=book-search><input type=text id=book-search-input placeholder=検索 aria-label=検索 maxlength=64 data-hotkeys=s/><div class="book-search-spinner hidden"></div><ul id=book-search-results></ul></div><ul><li><a href=/Mjolnir/ja/docs/installation/>Installation</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/>Reference</a><ul><li><a href=/Mjolnir/ja/docs/reference/files/>Files</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/units/>Units</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/simulators/ class=collapsed>Simulators</a></li><li><a href=/Mjolnir/ja/docs/reference/integrators/ class=collapsed>Integrators</a></li><li><a href=/Mjolnir/ja/docs/reference/system/>System</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/ class=collapsed>ForceFields</a></li></ul></li><li><a href=/Mjolnir/ja/docs/tutorial/ class=collapsed>Tutorial</a><ul><li><a href=/Mjolnir/ja/docs/tutorial/lennard-jones/ class=active>The Lennard-Jones fluid</a></li><li><a href=/Mjolnir/ja/docs/tutorial/polymer-model/>A simple polymer model</a></li></ul></li><li><a href=/Mjolnir/ja/docs/developersguide/>Developer's Guide</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/glossary/>Glossary</a><ul></ul></li></ul><ul><li><a href=https://github.com/Mjolnir-MD/Mjolnir target=_blank rel=noopener>GitHub</a></li></ul></nav><script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script></aside><div class=book-page><header class=book-header><div class="flex align-center justify-between"><label for=menu-control><img src=/Mjolnir/svg/menu.svg class=book-icon alt=Menu></label>
+<strong>The Lennard-Jones fluid</strong>
+<label for=toc-control><img src=/Mjolnir/svg/toc.svg class=book-icon alt="Table of Contents"></label></div><aside class="hidden clearfix"><nav id=TableOfContents><ul><li><a href=#the-lennard-jones-fluid>The Lennard-Jones fluid</a><ul><li><a href=#files-and-units><code>[files]</code> and <code>[units]</code></a></li><li><a href=#simulator-and-other-general-properties><code>[simulator]</code> and other general properties</a></li><li><a href=#systems><code>[[systems]]</code></a></li><li><a href=#forcefields><code>[[forcefields]]</code></a></li><li><a href=#simulation>Simulation</a></li><li><a href=#conclusion>Conclusion</a></li></ul></li></ul></nav></aside></header><article class=markdown><h1 id=the-lennard-jones-fluid>The Lennard-Jones fluid
+<a class=anchor href=#the-lennard-jones-fluid>#</a></h1><p>簡単な例として、Lennard-Jonesポテンシャルで相互作用する粒子のシミュレーションをしてみましょう。
+あまり時間がかかるシミュレーションにしたくないので、8x8x8の512粒子の系を考えることにします。
+特に具体的な何かの原子をシミュレーションしたいというわけではないので、パラメータは適当に決めていきます。</p><p>このシミュレーションに必要なものは、大まかに</p><ol><li>どのような方法でシミュレーションするか</li><li>初期構造</li><li>ポテンシャルのパラメータ</li></ol><p>です。<code>lennard-jones.toml</code>というファイルを作って、この順に実際に入力を書いていきましょう。</p><h2 id=files-and-units><code>[files]</code> and <code>[units]</code>
+<a class=anchor href=#files-and-units>#</a></h2><p>具体的な設定を埋めていく前に、細々とした設定を先に済ませておきます。</p><p>まず、出力ファイルの名前とフォーマットを決めましょう。
+名前はそのまま<code>lennard-jones</code>に、出力先はカレントディレクトリ、フォーマットは<a href=https://en.wikipedia.org/wiki/XYZ_file_format>xyz</a>にします。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[files]
+output.prefix = <span style=color:#f1fa8c>&#34;lennard-jones&#34;</span>
+output.path   = <span style=color:#f1fa8c>&#34;./&#34;</span>
+output.format = <span style=color:#f1fa8c>&#34;xyz&#34;</span>
+</code></pre></div><p>他に何が設定できるかは、<a href=http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/files/>Referenceのfiles</a>を見てください。</p><p>今後の入力で使う数値の単位系も決めないといけません。
+ここでは、エネルギーの単位は<code>kcal/mol</code>、長さの単位は<code>angstrom</code>にします。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[units]
+length = <span style=color:#f1fa8c>&#34;angstrom&#34;</span>
+energy = <span style=color:#f1fa8c>&#34;kcal/mol&#34;</span>
+</code></pre></div><p>他に何が設定できるかは、<a href=http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/units/>Referenceのunits</a>を見てください。</p><h2 id=simulator-and-other-general-properties><code>[simulator]</code> and other general properties
+<a class=anchor href=#simulator-and-other-general-properties>#</a></h2><p>さて、一般的な部分の設定は済ませたので、いよいよシミュレーションをどのように行うかを設定します。</p><p>まず、今から行うのは普通の分子動力学シミュレーションなので、方法は<code>MolecularDynamics</code>です。
+浮動小数点数の型には倍精度を、境界条件には<code>Peirodic</code>を適用します。
+それと、乱数シードを適当に決めておいてください。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[simulator]
+type          = <span style=color:#f1fa8c>&#34;MolecularDynamics&#34;</span>
+precision     = <span style=color:#f1fa8c>&#34;double&#34;</span>
+boundary_type = <span style=color:#f1fa8c>&#34;Periodic&#34;</span>
+seed          = <span style=color:#bd93f9>123456789</span>
+</code></pre></div><p>あとは、時間発展をどうやって、どの程度行うかを決めます。</p><p>ここでは、ランジュバン方程式の時間積分法のうち、比較的最近提案されたBAOAB Langevin integratorを使うことにしましょう。
+ここでは摩擦係数を粒子ごとに設定することができますが、今回は均質な系にするので、とりあえず全部1にしてしまいましょう。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[simulator]
+type          = <span style=color:#f1fa8c>&#34;MolecularDynamics&#34;</span>
+precision     = <span style=color:#f1fa8c>&#34;double&#34;</span>
+boundary_type = <span style=color:#f1fa8c>&#34;Periodic&#34;</span>
+seed          = <span style=color:#bd93f9>123456789</span>
+delta_t       = <span style=color:#bd93f9>0.01</span>
+total_step    = <span style=color:#bd93f9>100_000</span>
+save_step     =     <span style=color:#bd93f9>100</span>
+integrator.type = <span style=color:#f1fa8c>&#34;BAOABLangevin&#34;</span>
+integrator.gammas = [
+    {index =   <span style=color:#bd93f9>0</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+    {index =   <span style=color:#bd93f9>1</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+    {index =   <span style=color:#bd93f9>2</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+    <span style=color:#6272a4># ...</span>
+    {index = <span style=color:#bd93f9>511</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+]
+</code></pre></div><p>ちょっと大変ですが、エディタのマクロを使ったり、適当なスクリプトを書いてしまえばすぐです。</p><p>他に何が設定できるかは、<a href=http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/simulators/>Referenceのsimulator</a>を見てください。</p><h2 id=systems><code>[[systems]]</code>
+<a class=anchor href=#systems>#</a></h2><p>続いて粒子の初期構造と、系全体のパラメータを設定しましょう。</p><p>まず、ランジュバン動力学で使う系の温度と、周期境界条件で使う境界の大きさを指定します。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[[systems]]
+attributes.temperature = <span style=color:#bd93f9>300.0</span> <span style=color:#6272a4># K</span>
+boundary_shape.lower  = [ <span style=color:#bd93f9>0.0</span>,  <span style=color:#bd93f9>0.0</span>,  <span style=color:#bd93f9>0.0</span>]
+boundary_shape.upper  = [<span style=color:#bd93f9>16.0</span>, <span style=color:#bd93f9>16.0</span>, <span style=color:#bd93f9>16.0</span>]
+</code></pre></div><p>簡単に済ませたいので、粒子は格子状に並べることにします。
+初期構造であまりにもエネルギーが高くなっては困るので、粒子の半径を1Åにして、距離2Åで並べていくことにしましょうか。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[[systems]]
+attributes.temperature = <span style=color:#bd93f9>300.0</span> <span style=color:#6272a4># K</span>
+boundary_shape.lower  = [ <span style=color:#bd93f9>0.0</span>,  <span style=color:#bd93f9>0.0</span>,  <span style=color:#bd93f9>0.0</span>]
+boundary_shape.upper  = [<span style=color:#bd93f9>16.0</span>, <span style=color:#bd93f9>16.0</span>, <span style=color:#bd93f9>16.0</span>]
+particles = [
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>5.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>7.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>9.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [<span style=color:#bd93f9>11.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [<span style=color:#bd93f9>13.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [<span style=color:#bd93f9>15.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>5.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>7.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>9.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [<span style=color:#bd93f9>11.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [<span style=color:#bd93f9>13.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [<span style=color:#bd93f9>15.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    <span style=color:#6272a4># 続く...</span>
+]
+</code></pre></div><p>他に何が設定できるかは、<a href=http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/system/>ReferenceのSystems</a>を見てください。</p><h2 id=forcefields><code>[[forcefields]]</code>
+<a class=anchor href=#forcefields>#</a></h2><p>最後に、力場のパラメータを設定して終わりです。</p><p>Lennard-Jonesは非局所的な相互作用であり、かつ外力ではないので、<code>global</code>な相互作用に属します。
+まずは<code>[[forcefields.global]]</code>を定義しましょう。
+そしてそこに、二体間相互作用であることと、ポテンシャル関数としてLennard-Jonesを使うことを指定します。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[[forcefields]]
+[[forcefields.global]]
+interaction = <span style=color:#f1fa8c>&#34;Pair&#34;</span>
+potential   = <span style=color:#f1fa8c>&#34;LennardJones&#34;</span>
+</code></pre></div><p>続いて、計算の効率化のための空間分割法について設定します。
+今回は、系が小さいのでCell Listでは速度が出ないかも知れません。
+とりあえず、単純にリストを構築して一定時間使いまわすだけのVerletListにしておきます。</p><p>近距離ペアリストによる高速化では、カットオフ距離からマージンを取って少し離れた粒子までをリストに入れておき、粒子が移動した距離に応じてマージンを減らして、リストを再構築するまでの時間を自動的に計算します。
+そのために、このマージンをどの程度にするかも決めなければなりません。
+相互作用と系がどの程度密かに依存しますが、今回は適当に決めます。
+これは計算結果に影響しない（計算が終わるまでの時間には影響します）ので、適当でも構いません。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[[forcefields]]
+[[forcefields.global]]
+interaction = <span style=color:#f1fa8c>&#34;Pair&#34;</span>
+potential   = <span style=color:#f1fa8c>&#34;LennardJones&#34;</span>
+spatial_partition.type = <span style=color:#f1fa8c>&#34;VerletList&#34;</span>
+spatial_partition.margin = <span style=color:#bd93f9>0.25</span>
+</code></pre></div><p>最後に、各粒子のパラメータを設定していきます。
+二つの粒子の間にかかるポテンシャルのパラメータは、<a href=https://ja.wikipedia.org/wiki/%E3%83%AD%E3%83%BC%E3%83%AC%E3%83%B3%E3%83%84-%E3%83%99%E3%83%AB%E3%83%86%E3%83%AD%E5%89%87>Lorentz-Berthelot則</a>によって決まります。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[[forcefields]]
+[[forcefields.global]]
+interaction = <span style=color:#f1fa8c>&#34;Pair&#34;</span>
+potential   = <span style=color:#f1fa8c>&#34;LennardJones&#34;</span>
+spatial_partition.type = <span style=color:#f1fa8c>&#34;VerletList&#34;</span>
+spatial_partition.margin = <span style=color:#bd93f9>0.25</span>
+parameters = [
+    {index =   <span style=color:#bd93f9>0</span>, sigma = <span style=color:#bd93f9>2.0</span>, epsilon = <span style=color:#bd93f9>1.0</span>},
+    {index =   <span style=color:#bd93f9>1</span>, sigma = <span style=color:#bd93f9>2.0</span>, epsilon = <span style=color:#bd93f9>1.0</span>},
+    {index =   <span style=color:#bd93f9>2</span>, sigma = <span style=color:#bd93f9>2.0</span>, epsilon = <span style=color:#bd93f9>1.0</span>},
+    <span style=color:#6272a4># ...</span>
+    {index = <span style=color:#bd93f9>511</span>, sigma = <span style=color:#bd93f9>2.0</span>, epsilon = <span style=color:#bd93f9>1.0</span>},
+]
+
+</code></pre></div><p>他に何が設定できるかは、<a href=http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/forcefields/>ReferenceのForceFields</a>を見てください。</p><h2 id=simulation>Simulation
+<a class=anchor href=#simulation>#</a></h2><p>お疲れ様でした！　これで入力ファイルは全部です。
+このファイルをコンパイルしたmjolnirに渡せば、以下のようなログが出て、計算が始まります。
+コンピュータによりますが、数分で終わるはずです。</p><pre><code class=language-console data-lang=console>$ ./bin/mjolnir lennard-jones.toml
+reading input file...
+-- reading and parsing toml file `lennard-jones.toml` ...  successfully parsed.
+-- the log file is `./lennard-jones.log`
+-- mjolnir version v1.22.0
+-- compiled using /usr/bin/g++-10
+-- input_path is ./
+-- expanding include files ...
+-- done.
+-- precision is double
+-- Boundary Condition is Periodic. The shape is cuboid.
+-- execute on single core
+-- energy unit is [kcal/mol]
+-- length unit is [angstrom]
+-- Integrator is BAOABLangevin.
+-- Simulator type is MolecularDynamics.
+-- total step is 100000
+-- save step is 100
+-- checkpoint step is 100
+-- reading 0th system ...
+-- 512 particles are found.
+-- output file prefix is `./lennard-jones`
+-- output xyz format.
+-- GlobalForceField (x1) found
+-- reading 0th [[forcefields.global]]
+-- Pair interaction found.
+-- -- potential function is Lennard-Jones.
+-- -- Spatial Partition is VerletList with relative margin = 0.25
+-- No `ignore.group` is provided. All the groups are taken into account.
+-- No `ignore.molecule` is provided. All the molecules are taken into account.
+-- seed is 123456789
+done.
+initializing simulator...
+-- generating velocity with T = 300...
+-- done.
+done.
+start running simulation
+ 14.1%|███████                                           | 56.0 seconds remaining
+</code></pre><p>計算が終われば、以下のようなファイルが出力されているはずです。</p><pre><code class=language-console data-lang=console>$ ls lennard-jones*
+lennard-jones.toml
+lennard-jones.log
+lennard-jones_velocity.xyz
+lennard-jones_system.msg
+lennard-jones_rng.msg
+lennard-jones_position.xyz
+lennard-jones.ene
+</code></pre><p><code>.msg</code>ファイルはシミュレーションを再開するためのリスタート用ファイルで、そのフォーマットは<a href=https://msgpack.org/ja.html>MsgPack</a>です。</p><p><code>.ene</code>ファイルはエネルギーなどの値が単純なテキストベースで書かれており、<code>gnuplot</code>などで簡単にプロットすることができます。</p><pre><code class=language-console data-lang=console>$ head lennard-jones.ene
+# unit of length : angstrom, unit of energy : kcal/mol
+# timestep  GlobalPairLennardJones  kinetic_energy attribute:temperature
+0                     -1704.786330     453.454993            300.000000
+100                   -2579.996798     812.198804            300.000000
+200                   -2787.935537     554.446648            300.000000
+300                   -2909.224864     473.619251            300.000000
+400                   -2913.189150     453.464065            300.000000
+500                   -2964.234777     463.400579            300.000000
+600                   -2988.270454     462.704726            300.000000
+700                   -2960.111833     458.723132            300.000000
+</code></pre><p><code>lennard-jones_position.xyz</code>が位置のトラジェクトリです。
+これをVMDなどに渡すことで、トラジェクトリを見ることができます。</p><h2 id=conclusion>Conclusion
+<a class=anchor href=#conclusion>#</a></h2><p>このチュートリアルは以上です。</p><p>入力ファイルの書き方を少し冗長だと思った人もいるかもしれません。
+しかし、必要なパラメータを全て陽に指定できるということは、逆に簡単に好きなパラメータでシミュレーションを走らせることができるということでもあります。
+このチュートリアルも、興味がある人はパラメータを一部変えてみて、例えば一つの粒子だけをとんでもなく大きくしたりして、何が起きるか観察して楽しんでみてください。</p></article><footer class=book-footer><div class="flex flex-wrap justify-between"><div class=book-languages tabindex=0 aria-haspopup=true><ul><li class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</li></ul><ul class=book-languages-list><li><a href=http://mjolnir-md.github.io/Mjolnir/docs/tutorial/lennard-jones/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+English</a></li><li class=active><a href=http://mjolnir-md.github.io/Mjolnir/ja/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</a></li></ul></div></div></footer><div class=book-comments></div><label for=menu-control class="hidden book-menu-overlay"></label></div><aside class=book-toc><nav id=TableOfContents><ul><li><a href=#the-lennard-jones-fluid>The Lennard-Jones fluid</a><ul><li><a href=#files-and-units><code>[files]</code> and <code>[units]</code></a></li><li><a href=#simulator-and-other-general-properties><code>[simulator]</code> and other general properties</a></li><li><a href=#systems><code>[[systems]]</code></a></li><li><a href=#forcefields><code>[[forcefields]]</code></a></li><li><a href=#simulation>Simulation</a></li><li><a href=#conclusion>Conclusion</a></li></ul></li></ul></nav></aside></main></body></html>

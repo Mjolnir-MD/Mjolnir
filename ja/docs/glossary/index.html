@@ -1,0 +1,47 @@
+<!doctype html><html lang=ja><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Glossary #  Mjolnirのコードで使われる単語の用法を説明します。
+Simulator #  シミュレーション全体のプロトコルです。
+普通のMDシミュレーションなら指定された回数だけ時間積分を行います。
+Simulated Annealingをする際は、時間ステップに応じて系の温度を変えます。
+時刻に応じて力場を変更するシミュレーションでは、複数の力場を管理し、適切な タイミングで入れ替えます。
+実際の力や時間積分の計算は、Simulatorが管理する別のコンポーネントが行います。
+System #  シミュレーションされる粒子の一群です。
+粒子の他に、境界条件や系のパラメータ（温度など）、Topologyも管理します。
+Topology #  どの粒子とどの粒子がどのような相互作用で繋がっているかを表すグラフです。
+ForceFieldにおいて、結合している粒子には斥力をかけない、というような設定を するために存在します。
+Integrator #  ForceFieldに計算させた力の値を使って、時間積分を行います。
+ForceField #  力場のことを指します。具体的には、PotentialとInteractionの組み合わせです。
+local, global, externalの3種類があります。
+LocalForceField #  あらかじめ決まった特定の粒子の間に働く力場です。
+結合長ポテンシャルや結合角ポテンシャル、二面角ポテンシャルなどが代表的です。
+GlobalForceField #  （電荷などのパラメータを持つ）全ての粒子の間に働く力場です。
+分子間力ポテンシャル、静電ポテンシャルなどが代表的です。
+ExternalForceField #  外力場との相互作用です。これのみが系全体の並進や回転を生じさせます。
+空間中の特定の点へのアンカーや、系全体を覆う箱などが代表的です。
+Interaction #  力場を構成する要素の一つです。ForceFieldはInteractionとPotentialから成ります。
+どの粒子に力がかかるかを管理し、またPotentialを使って力の向きと大きさを計算します。
+以下のような力場があるとき、
+  \[U(\theta) = k(\theta-\theta_0)^2,\]  実際にかかる力は
+ \[\nabla_i U(\theta) = \color{red}(\nabla_i \theta) \color{black} \frac{dU}{d\theta}\]  となります。この赤色の部分を実装したものがInteractionです。"><meta name=theme-color content="#FFFFFF"><meta property="og:title" content="Glossary"><meta property="og:description" content><meta property="og:type" content="website"><meta property="og:url" content="http://mjolnir-md.github.io/Mjolnir/ja/docs/glossary/"><title>Glossary | Mjolnir documentation</title><link rel=manifest href=/Mjolnir/manifest.json><link rel=icon href=/Mjolnir/favicon.png type=image/x-icon><link rel=alternate hreflang=en href=http://mjolnir-md.github.io/Mjolnir/docs/glossary/ title=Glossary><link rel=stylesheet href=/Mjolnir/book.min.d08be657f4d0d61b509ac06e1059e92fd1c66f15535a6bd4cee27e19935f34ae.css integrity="sha256-0IvmV/TQ1htQmsBuEFnpL9HGbxVTWmvUzuJ+GZNfNK4="><script defer src=/Mjolnir/ja.search.min.a483c99640d51f27c8a945e75933a4d9b32ec0c4223e303e7452778c34c44f8d.js integrity="sha256-pIPJlkDVHyfIqUXnWTOk2bMuwMQiPjA+dFJ3jDTET40="></script><link rel=alternate type=application/rss+xml href=http://mjolnir-md.github.io/Mjolnir/ja/docs/glossary/index.xml title="Mjolnir documentation"></head><body><input type=checkbox class="hidden toggle" id=menu-control>
+<input type=checkbox class="hidden toggle" id=toc-control><main class="container flex"><aside class=book-menu><nav><h2 class=book-brand><a href=/Mjolnir/ja><span>Mjolnir documentation</span></a></h2><div class=book-search><input type=text id=book-search-input placeholder=検索 aria-label=検索 maxlength=64 data-hotkeys=s/><div class="book-search-spinner hidden"></div><ul id=book-search-results></ul></div><ul><li><a href=/Mjolnir/ja/docs/installation/>Installation</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/>Reference</a><ul><li><a href=/Mjolnir/ja/docs/reference/files/>Files</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/units/>Units</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/simulators/ class=collapsed>Simulators</a></li><li><a href=/Mjolnir/ja/docs/reference/integrators/ class=collapsed>Integrators</a></li><li><a href=/Mjolnir/ja/docs/reference/system/>System</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/ class=collapsed>ForceFields</a></li></ul></li><li><a href=/Mjolnir/ja/docs/tutorial/ class=collapsed>Tutorial</a></li><li><a href=/Mjolnir/ja/docs/developersguide/>Developer's Guide</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/glossary/ class=active>Glossary</a><ul></ul></li></ul><ul><li><a href=https://github.com/Mjolnir-MD/Mjolnir target=_blank rel=noopener>GitHub</a></li></ul></nav><script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script></aside><div class=book-page><header class=book-header><div class="flex align-center justify-between"><label for=menu-control><img src=/Mjolnir/svg/menu.svg class=book-icon alt=Menu></label>
+<strong>Glossary</strong>
+<label for=toc-control><img src=/Mjolnir/svg/toc.svg class=book-icon alt="Table of Contents"></label></div><aside class="hidden clearfix"><nav id=TableOfContents><ul><li><a href=#glossary>Glossary</a><ul><li><a href=#simulator>Simulator</a></li><li><a href=#system>System</a></li><li><a href=#topology>Topology</a></li><li><a href=#integrator>Integrator</a></li><li><a href=#forcefield>ForceField</a><ul><li><a href=#localforcefield>LocalForceField</a></li><li><a href=#globalforcefield>GlobalForceField</a></li><li><a href=#externalforcefield>ExternalForceField</a></li><li><a href=#interaction>Interaction</a></li><li><a href=#potential>Potential</a></li></ul></li><li><a href=#observer>Observer</a></li><li><a href=#traits>Traits</a></li></ul></li></ul></nav></aside></header><article class=markdown><h1 id=glossary>Glossary
+<a class=anchor href=#glossary>#</a></h1><p>Mjolnirのコードで使われる単語の用法を説明します。</p><h2 id=simulator>Simulator
+<a class=anchor href=#simulator>#</a></h2><p>シミュレーション全体のプロトコルです。</p><p>普通のMDシミュレーションなら指定された回数だけ時間積分を行います。</p><p>Simulated Annealingをする際は、時間ステップに応じて系の温度を変えます。</p><p>時刻に応じて力場を変更するシミュレーションでは、複数の力場を管理し、適切な
+タイミングで入れ替えます。</p><p>実際の力や時間積分の計算は、Simulatorが管理する別のコンポーネントが行います。</p><h2 id=system>System
+<a class=anchor href=#system>#</a></h2><p>シミュレーションされる粒子の一群です。</p><p>粒子の他に、境界条件や系のパラメータ（温度など）、Topologyも管理します。</p><h2 id=topology>Topology
+<a class=anchor href=#topology>#</a></h2><p>どの粒子とどの粒子がどのような相互作用で繋がっているかを表すグラフです。</p><p>ForceFieldにおいて、結合している粒子には斥力をかけない、というような設定を
+するために存在します。</p><h2 id=integrator>Integrator
+<a class=anchor href=#integrator>#</a></h2><p>ForceFieldに計算させた力の値を使って、時間積分を行います。</p><h2 id=forcefield>ForceField
+<a class=anchor href=#forcefield>#</a></h2><p>力場のことを指します。具体的には、PotentialとInteractionの組み合わせです。</p><p>local, global, externalの3種類があります。</p><h3 id=localforcefield>LocalForceField
+<a class=anchor href=#localforcefield>#</a></h3><p>あらかじめ決まった特定の粒子の間に働く力場です。</p><p>結合長ポテンシャルや結合角ポテンシャル、二面角ポテンシャルなどが代表的です。</p><h3 id=globalforcefield>GlobalForceField
+<a class=anchor href=#globalforcefield>#</a></h3><p>（電荷などのパラメータを持つ）全ての粒子の間に働く力場です。</p><p>分子間力ポテンシャル、静電ポテンシャルなどが代表的です。</p><h3 id=externalforcefield>ExternalForceField
+<a class=anchor href=#externalforcefield>#</a></h3><p>外力場との相互作用です。これのみが系全体の並進や回転を生じさせます。</p><p>空間中の特定の点へのアンカーや、系全体を覆う箱などが代表的です。</p><h3 id=interaction>Interaction
+<a class=anchor href=#interaction>#</a></h3><p>力場を構成する要素の一つです。ForceFieldはInteractionとPotentialから成ります。</p><p>どの粒子に力がかかるかを管理し、またPotentialを使って力の向きと大きさを計算します。</p><p>以下のような力場があるとき、</p><link rel=stylesheet href=/Mjolnir/katex/katex.min.css><script defer src=/Mjolnir/katex/katex.min.js></script><script defer src=/Mjolnir/katex/auto-render.min.js onload=renderMathInElement(document.body)></script><span>\[U(\theta) = k(\theta-\theta_0)^2,\]</span><p>実際にかかる力は</p><span>\[\nabla_i U(\theta) = \color{red}(\nabla_i \theta) \color{black} \frac{dU}{d\theta}\]</span><p>となります。この赤色の部分を実装したものがInteractionです。</p><h3 id=potential>Potential
+<a class=anchor href=#potential>#</a></h3><p>力場を構成する要素の一つです。ForceFieldはInteractionとPotentialから成ります。</p><p>ポテンシャル関数に関連するパラメータを管理し、ポテンシャル関数そのものと、その微分を計算します。</p><p>以下のような力場があるとき、</p><span>\[U(\theta) = k (\theta - \theta_0)^2,\]</span><p>実際にかかる力は</p><span>\[\nabla_i U(\theta) = (\nabla_i \theta) \color{red} \frac{dU}{d\theta}\]</span><p>となります。この赤色の部分を実装したものがPotentialです。</p><h2 id=observer>Observer
+<a class=anchor href=#observer>#</a></h2><p>エネルギーや粒子の位置、速度をファイルに出力します。</p><h2 id=traits>Traits
+<a class=anchor href=#traits>#</a></h2><p>どのような種類のシミュレーションを行うかを決めるタグ型です。</p><p>例えば、OpenMPのときにのみ必要なコードは<code>OpenMPSimulatorTraits</code>によって特殊化
+されます。特殊化されなかったコードは、コンパイラが自動的に通常通りのコードを
+使ってくれます。これによって実装の手間が省けています。</p></article><footer class=book-footer><div class="flex flex-wrap justify-between"><div class=book-languages tabindex=0 aria-haspopup=true><ul><li class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</li></ul><ul class=book-languages-list><li><a href=http://mjolnir-md.github.io/Mjolnir/docs/glossary/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+English</a></li><li class=active><a href=http://mjolnir-md.github.io/Mjolnir/ja/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</a></li></ul></div></div></footer><div class=book-comments></div><label for=menu-control class="hidden book-menu-overlay"></label></div><aside class=book-toc><nav id=TableOfContents><ul><li><a href=#glossary>Glossary</a><ul><li><a href=#simulator>Simulator</a></li><li><a href=#system>System</a></li><li><a href=#topology>Topology</a></li><li><a href=#integrator>Integrator</a></li><li><a href=#forcefield>ForceField</a><ul><li><a href=#localforcefield>LocalForceField</a></li><li><a href=#globalforcefield>GlobalForceField</a></li><li><a href=#externalforcefield>ExternalForceField</a></li><li><a href=#interaction>Interaction</a></li><li><a href=#potential>Potential</a></li></ul></li><li><a href=#observer>Observer</a></li><li><a href=#traits>Traits</a></li></ul></li></ul></nav></aside></main></body></html>

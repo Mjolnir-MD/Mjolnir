@@ -1,0 +1,175 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="The Lennard-Jones fluid #  As a simple example, we will run a molecular dynamics simulation of particles interacting via Lennard-Jones potential. We want to make the system small so that the simulation does not takes long time, we put only 512 particles. Also, our goal is not a simulation of a specific atom but just to run a simulation, so we keep parameters simple.
+We need the following information to run a simulation."><meta name=theme-color content="#FFFFFF"><meta property="og:title" content="The Lennard-Jones fluid"><meta property="og:description" content="The Lennard-Jones fluid #  As a simple example, we will run a molecular dynamics simulation of particles interacting via Lennard-Jones potential. We want to make the system small so that the simulation does not takes long time, we put only 512 particles. Also, our goal is not a simulation of a specific atom but just to run a simulation, so we keep parameters simple.
+We need the following information to run a simulation."><meta property="og:type" content="article"><meta property="og:url" content="http://mjolnir-md.github.io/Mjolnir/docs/tutorial/lennard-jones/"><meta property="article:section" content="docs"><title>The Lennard-Jones fluid | Mjolnir documentation</title><link rel=manifest href=/Mjolnir/manifest.json><link rel=icon href=/Mjolnir/favicon.png type=image/x-icon><link rel=alternate hreflang=ja href=http://mjolnir-md.github.io/Mjolnir/ja/docs/tutorial/lennard-jones/ title="The Lennard-Jones fluid"><link rel=stylesheet href=/Mjolnir/book.min.d08be657f4d0d61b509ac06e1059e92fd1c66f15535a6bd4cee27e19935f34ae.css integrity="sha256-0IvmV/TQ1htQmsBuEFnpL9HGbxVTWmvUzuJ+GZNfNK4="><script defer src=/Mjolnir/en.search.min.8e76420dae40536ef4e44ced0bf6c37ba3bed8445cf1ef9b4e240fc62b5dcd51.js integrity="sha256-jnZCDa5AU2705EztC/bDe6O+2ERc8e+bTiQPxitdzVE="></script></head><body><input type=checkbox class="hidden toggle" id=menu-control>
+<input type=checkbox class="hidden toggle" id=toc-control><main class="container flex"><aside class=book-menu><nav><h2 class=book-brand><a href=/Mjolnir><span>Mjolnir documentation</span></a></h2><div class=book-search><input type=text id=book-search-input placeholder=Search aria-label=Search maxlength=64 data-hotkeys=s/><div class="book-search-spinner hidden"></div><ul id=book-search-results></ul></div><ul><li><a href=/Mjolnir/docs/installation/>Installation</a><ul></ul></li><li><a href=/Mjolnir/docs/reference/>Reference</a><ul><li><a href=/Mjolnir/docs/reference/files/>Files</a><ul></ul></li><li><a href=/Mjolnir/docs/reference/units/>Units</a><ul></ul></li><li><a href=/Mjolnir/docs/reference/simulators/ class=collapsed>Simulators</a></li><li><a href=/Mjolnir/docs/reference/integrators/ class=collapsed>Integrators</a></li><li><a href=/Mjolnir/docs/reference/system/>System</a><ul></ul></li><li><a href=/Mjolnir/docs/reference/forcefields/ class=collapsed>ForceFields</a></li></ul></li><li><a href=/Mjolnir/docs/tutorial/ class=collapsed>Tutorial</a><ul><li><a href=/Mjolnir/docs/tutorial/lennard-jones/ class=active>The Lennard-Jones fluid</a></li><li><a href=/Mjolnir/docs/tutorial/polymer-model/>A simple polymer model</a></li></ul></li><li><a href=/Mjolnir/docs/developersguide/>Developer's Guide</a><ul></ul></li><li><a href=/Mjolnir/docs/glossary/>Glossary</a><ul></ul></li></ul><ul><li><a href=https://github.com/Mjolnir-MD/Mjolnir target=_blank rel=noopener>GitHub</a></li></ul></nav><script>(function(){var a=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script></aside><div class=book-page><header class=book-header><div class="flex align-center justify-between"><label for=menu-control><img src=/Mjolnir/svg/menu.svg class=book-icon alt=Menu></label>
+<strong>The Lennard-Jones fluid</strong>
+<label for=toc-control><img src=/Mjolnir/svg/toc.svg class=book-icon alt="Table of Contents"></label></div><aside class="hidden clearfix"><nav id=TableOfContents><ul><li><a href=#the-lennard-jones-fluid>The Lennard-Jones fluid</a><ul><li><a href=#files-and-units><code>[files]</code> and <code>[units]</code></a></li><li><a href=#simulator-and-other-general-properties><code>[simulator]</code> and other general properties</a></li><li><a href=#systems><code>[[systems]]</code></a></li><li><a href=#forcefields><code>[[forcefields]]</code></a></li><li><a href=#simulation>Simulation</a></li><li><a href=#conclusion>Conclusion</a></li></ul></li></ul></nav></aside></header><article class=markdown><h1 id=the-lennard-jones-fluid>The Lennard-Jones fluid
+<a class=anchor href=#the-lennard-jones-fluid>#</a></h1><p>As a simple example, we will run a molecular dynamics simulation of particles interacting via Lennard-Jones potential.
+We want to make the system small so that the simulation does not takes long time, we put only 512 particles.
+Also, our goal is not a simulation of a specific atom but just to run a simulation, so we keep parameters simple.</p><p>We need the following information to run a simulation.</p><ol><li>Simulation method</li><li>Initial configuration</li><li>Forcefield parameters</li></ol><p>We will write those information and save it in an input file named <code>lennard-jones.toml</code>.</p><h2 id=files-and-units><code>[files]</code> and <code>[units]</code>
+<a class=anchor href=#files-and-units>#</a></h2><p>First of all, we will define the output file name and format.
+To make it simple, we use <a href=https://en.wikipedia.org/wiki/XYZ_file_format>xyz</a> format.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[files]
+output.prefix = <span style=color:#f1fa8c>&#34;lennard-jones&#34;</span>
+output.path   = <span style=color:#f1fa8c>&#34;./&#34;</span>
+output.format = <span style=color:#f1fa8c>&#34;xyz&#34;</span>
+</code></pre></div><p>To see the complete list of available options, see <a href=http://mjolnir-md.github.io/Mjolnir/docs/reference/files/>files section in the reference.</a></p><p>Also, we need to define unit system to be used.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[units]
+length = <span style=color:#f1fa8c>&#34;angstrom&#34;</span>
+energy = <span style=color:#f1fa8c>&#34;kcal/mol&#34;</span>
+</code></pre></div><p>To see the complete list of available options, see <a href=http://mjolnir-md.github.io/Mjolnir/docs/reference/units/>units section in the reference.</a></p><h2 id=simulator-and-other-general-properties><code>[simulator]</code> and other general properties
+<a class=anchor href=#simulator-and-other-general-properties>#</a></h2><p>We have defined general settings, so next we will define the simulation method.</p><p>We will perform normal molecular dynamics simulation, so the type of simulator is <code>MolecularDynamics</code>.
+We will apply the periodic boundary conditions so that the simulated particles are enclosed in a box.
+And, while the simulation, we use double precision floating point.
+We also need to set the seed of random number generator.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[simulator]
+type          = <span style=color:#f1fa8c>&#34;MolecularDynamics&#34;</span>
+precision     = <span style=color:#f1fa8c>&#34;double&#34;</span>
+boundary_type = <span style=color:#f1fa8c>&#34;Periodic&#34;</span>
+seed          = <span style=color:#bd93f9>123456789</span>
+</code></pre></div><p>The integrator is also needed.
+Here, we use BAOAB-type Langevin integrator that is introduced relatively recently.
+We can set the friction coefficient one by one, but for now, we just set 1 for all the particles.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[simulator]
+type          = <span style=color:#f1fa8c>&#34;MolecularDynamics&#34;</span>
+precision     = <span style=color:#f1fa8c>&#34;double&#34;</span>
+boundary_type = <span style=color:#f1fa8c>&#34;Periodic&#34;</span>
+seed          = <span style=color:#bd93f9>123456789</span>
+delta_t       = <span style=color:#bd93f9>0.01</span>
+total_step    = <span style=color:#bd93f9>100_000</span>
+save_step     =     <span style=color:#bd93f9>100</span>
+integrator.type = <span style=color:#f1fa8c>&#34;BAOABLangevin&#34;</span>
+integrator.gammas = [
+    {index =   <span style=color:#bd93f9>0</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+    {index =   <span style=color:#bd93f9>1</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+    {index =   <span style=color:#bd93f9>2</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+    <span style=color:#6272a4># ...</span>
+    {index = <span style=color:#bd93f9>511</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+]
+</code></pre></div><p>It is a hard work. But keyboard macro supported by the editor or a simple script can help you to generate it.</p><p>To see the complete list of available options, see <a href=http://mjolnir-md.github.io/Mjolnir/docs/reference/simulators/>Simulator section in the reference.</a></p><h2 id=systems><code>[[systems]]</code>
+<a class=anchor href=#systems>#</a></h2><p>To run a simulation, we need a reasonable initial configuration.
+Initial configuration is defined in <code>[[systems]]</code>.</p><p>First, we will define a general parameter.
+The temperature of the system and the shape of periodic boundary.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[[systems]]
+attributes.temperature = <span style=color:#bd93f9>300.0</span> <span style=color:#6272a4># K</span>
+boundary_shape.lower  = [ <span style=color:#bd93f9>0.0</span>,  <span style=color:#bd93f9>0.0</span>,  <span style=color:#bd93f9>0.0</span>]
+boundary_shape.upper  = [<span style=color:#bd93f9>16.0</span>, <span style=color:#bd93f9>16.0</span>, <span style=color:#bd93f9>16.0</span>]
+</code></pre></div><p>To avoid collisions, we put particles on grid points separating them by 2 angstroms, assuming they have radius of 1 angstrom..</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[[systems]]
+attributes.temperature = <span style=color:#bd93f9>300.0</span> <span style=color:#6272a4># K</span>
+boundary_shape.lower  = [ <span style=color:#bd93f9>0.0</span>,  <span style=color:#bd93f9>0.0</span>,  <span style=color:#bd93f9>0.0</span>]
+boundary_shape.upper  = [<span style=color:#bd93f9>16.0</span>, <span style=color:#bd93f9>16.0</span>, <span style=color:#bd93f9>16.0</span>]
+particles = [
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>5.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>7.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>9.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [<span style=color:#bd93f9>11.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [<span style=color:#bd93f9>13.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [<span style=color:#bd93f9>15.000</span>, <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>1.000</span>]},
+
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>5.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>7.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>9.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [<span style=color:#bd93f9>11.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [<span style=color:#bd93f9>13.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    {mass = <span style=color:#bd93f9>1.0</span>, position = [<span style=color:#bd93f9>15.000</span>, <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>1.000</span>]},
+    <span style=color:#6272a4># 続く...</span>
+]
+</code></pre></div><p>To see the complete list of available options, see <a href=http://mjolnir-md.github.io/Mjolnir/docs/reference/system/>Systems section in the reference.</a></p><h2 id=forcefields><code>[[forcefields]]</code>
+<a class=anchor href=#forcefields>#</a></h2><p>Finally, we will define forcefield parameters.</p><p>Lennard-Jones interaction is applied to all the pair of particles, so it is non-local interaction.
+To distinguish from external force field, we call it as a global interaction.
+So first define a <code>[[forcefields.global]]</code> under the <code>[[forcefields]]</code> table and specify the interaction type and the potential function.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[[forcefields]]
+[[forcefields.global]]
+interaction = <span style=color:#f1fa8c>&#34;Pair&#34;</span>
+potential   = <span style=color:#f1fa8c>&#34;LennardJones&#34;</span>
+</code></pre></div><p>Next, we will specify the spatial partitioning method.
+In this example, our system could be too small to construct an efficient cell list.
+So we use raw <a href=https://en.wikipedia.org/wiki/Verlet_list>Verlet list</a>.</p><p>Verlet list takes a margin to reduce the computational cost without changing the simulation result.
+By taking particles that is a bit distant from cutoff region account, the list can be reused until a particle that is not registered in a list comes into the cutoff region.</p><p>The <code>margin</code> is defined relative to the cutoff length.
+To tune it, we need to run several short simulations with varying margin.
+But since this does not change the trajectory, any value is basically okay (if the simulation doesn&rsquo;t take too long time).</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[[forcefields]]
+[[forcefields.global]]
+interaction = <span style=color:#f1fa8c>&#34;Pair&#34;</span>
+potential   = <span style=color:#f1fa8c>&#34;LennardJones&#34;</span>
+spatial_partition.type = <span style=color:#f1fa8c>&#34;VerletList&#34;</span>
+spatial_partition.margin = <span style=color:#bd93f9>0.25</span>
+</code></pre></div><p>And of course, we need a forcefield parameter for each particle.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml>[[forcefields]]
+[[forcefields.global]]
+interaction = <span style=color:#f1fa8c>&#34;Pair&#34;</span>
+potential   = <span style=color:#f1fa8c>&#34;LennardJones&#34;</span>
+spatial_partition.type = <span style=color:#f1fa8c>&#34;VerletList&#34;</span>
+spatial_partition.margin = <span style=color:#bd93f9>0.25</span>
+parameters = [
+    {index =   <span style=color:#bd93f9>0</span>, sigma = <span style=color:#bd93f9>2.0</span>, epsilon = <span style=color:#bd93f9>1.0</span>},
+    {index =   <span style=color:#bd93f9>1</span>, sigma = <span style=color:#bd93f9>2.0</span>, epsilon = <span style=color:#bd93f9>1.0</span>},
+    {index =   <span style=color:#bd93f9>2</span>, sigma = <span style=color:#bd93f9>2.0</span>, epsilon = <span style=color:#bd93f9>1.0</span>},
+    <span style=color:#6272a4># ...</span>
+    {index = <span style=color:#bd93f9>511</span>, sigma = <span style=color:#bd93f9>2.0</span>, epsilon = <span style=color:#bd93f9>1.0</span>},
+]
+</code></pre></div><p>The actual parameter for each pair or particles is calculated according to the Lorentz-Berthelot combining rule.</p><p>To see the complete list of available options, see <a href=http://mjolnir-md.github.io/Mjolnir/docs/reference/forcefields/>ForceFields section in the reference.</a></p><h2 id=simulation>Simulation
+<a class=anchor href=#simulation>#</a></h2><p>Congratulations! All the required information is written in the input file.
+By passing the input file to mjolnir, it runs the simulation.
+It takes a few minutes, depending on the machine you are using.</p><pre><code class=language-console data-lang=console>$ ./bin/mjolnir lennard-jones.toml
+reading input file...
+-- reading and parsing toml file `lennard-jones.toml` ...  successfully parsed.
+-- the log file is `./lennard-jones.log`
+-- mjolnir version v1.22.0
+-- compiled using /usr/bin/g++-10
+-- input_path is ./
+-- expanding include files ...
+-- done.
+-- precision is double
+-- Boundary Condition is Periodic. The shape is cuboid.
+-- execute on single core
+-- energy unit is [kcal/mol]
+-- length unit is [angstrom]
+-- Integrator is BAOABLangevin.
+-- Simulator type is MolecularDynamics.
+-- total step is 100000
+-- save step is 100
+-- checkpoint step is 100
+-- reading 0th system ...
+-- 512 particles are found.
+-- output file prefix is `./lennard-jones`
+-- output xyz format.
+-- GlobalForceField (x1) found
+-- reading 0th [[forcefields.global]]
+-- Pair interaction found.
+-- -- potential function is Lennard-Jones.
+-- -- Spatial Partition is VerletList with relative margin = 0.25
+-- No `ignore.group` is provided. All the groups are taken into account.
+-- No `ignore.molecule` is provided. All the molecules are taken into account.
+-- seed is 123456789
+done.
+initializing simulator...
+-- generating velocity with T = 300...
+-- done.
+done.
+start running simulation
+ 14.1%|███████                                           | 56.0 seconds remaining
+</code></pre><p>You will find the following files after the simulation is complete.</p><pre><code class=language-console data-lang=console>$ ls lennard-jones*
+lennard-jones.toml
+lennard-jones.log
+lennard-jones.ene
+lennard-jones_position.xyz
+lennard-jones_velocity.xyz
+lennard-jones_system.msg
+lennard-jones_rng.msg
+</code></pre><p>The <code>.msg</code> files are for restarting simulation. The format is <a href=https://msgpack.org>MsgPack</a>.</p><p>The <code>.ene</code> file has the value of energies and other physical quantities in a simple ASCII format, and you can easily visualize it by using gnuplot or other software or a library.</p><pre><code class=language-console data-lang=console>$ head lennard-jones.ene
+# unit of length : angstrom, unit of energy : kcal/mol
+# timestep  GlobalPairLennardJones  kinetic_energy attribute:temperature
+0                     -1704.786330     453.454993            300.000000
+100                   -2579.996798     812.198804            300.000000
+200                   -2787.935537     554.446648            300.000000
+300                   -2909.224864     473.619251            300.000000
+400                   -2913.189150     453.464065            300.000000
+500                   -2964.234777     463.400579            300.000000
+600                   -2988.270454     462.704726            300.000000
+700                   -2960.111833     458.723132            300.000000
+</code></pre><p><code>lennard-jones_position.xyz</code> contains the trajectory.
+You can visualize it by passing the file to a VMD or molecular viewer.</p><h2 id=conclusion>Conclusion
+<a class=anchor href=#conclusion>#</a></h2><p>This tutorial is over.</p><p>You might feel the input file is too explicit.
+But, it allows you to easily change the forcefield parameter one by one.
+You can increase the size of one particular particle, or mix different-sized particles.
+If you are interested, have fun with it.</p></article><footer class=book-footer><div class="flex flex-wrap justify-between"><div class=book-languages tabindex=0 aria-haspopup=true><ul><li class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+English</li></ul><ul class=book-languages-list><li class=active><a href=http://mjolnir-md.github.io/Mjolnir/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+English</a></li><li><a href=http://mjolnir-md.github.io/Mjolnir/ja/docs/tutorial/lennard-jones/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</a></li></ul></div></div></footer><div class=book-comments></div><label for=menu-control class="hidden book-menu-overlay"></label></div><aside class=book-toc><nav id=TableOfContents><ul><li><a href=#the-lennard-jones-fluid>The Lennard-Jones fluid</a><ul><li><a href=#files-and-units><code>[files]</code> and <code>[units]</code></a></li><li><a href=#simulator-and-other-general-properties><code>[simulator]</code> and other general properties</a></li><li><a href=#systems><code>[[systems]]</code></a></li><li><a href=#forcefields><code>[[forcefields]]</code></a></li><li><a href=#simulation>Simulation</a></li><li><a href=#conclusion>Conclusion</a></li></ul></li></ul></nav></aside></main></body></html>
