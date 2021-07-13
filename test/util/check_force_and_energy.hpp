@@ -49,6 +49,24 @@ void check_force_and_energy(System<traitsT> ref,
         BOOST_TEST(math::Y(sys.force(idx)) == math::Y(ref.force(idx)), boost::test_tools::tolerance(tol));
         BOOST_TEST(math::Z(sys.force(idx)) == math::Z(ref.force(idx)), boost::test_tools::tolerance(tol));
     }
+
+    // ------------------------------------------------------------------------
+    // check virial is calculated in calc_force_and_energy
+
+    for(std::size_t i=0; i<ref.size(); ++i)
+    {
+        ref.force(i) = math::make_coordinate<coordinate_type>(0,0,0);
+    }
+    for(std::size_t i=0; i<9; ++i)
+    {
+        // check calc_force does not calculate virial
+        BOOST_TEST_REQUIRE(ref.virial()[i] == 0.0, boost::test_tools::tolerance(tol));
+    }
+
+    ref.preprocess_forces();
+    interaction.calc_force_and_virial(ref);
+    ref.postprocess_forces();
+
     for(std::size_t i=0; i<9; ++i)
     {
         BOOST_TEST(sys.virial()[i] == ref.virial()[i], boost::test_tools::tolerance(tol));
