@@ -206,6 +206,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_numerical_diff,
 
             test::check_force (sys, interaction, tol, dr);
             test::check_virial(sys, interaction, tol);
+            test::check_force_and_virial(sys, interaction, tol);
             test::check_force_and_energy(sys, interaction, tol);
 
         } // theta2
@@ -587,86 +588,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
 
             constexpr real_type tol = 1e-4;
             constexpr real_type dr  = 1e-5;
-            for(const std::size_t idx : {0, 1, 8, 9, 4, 6})
-            {
-                {
-                    // ----------------------------------------------------------------
-                    // reset positions
-                    sys = init;
-
-                    // calc U(x-dx)
-                    const auto E0 = interaction.calc_energy(sys);
-
-                    mjolnir::math::X(sys.position(idx)) += dr;
-
-                    // calc F(x)
-                    interaction.calc_force(sys);
-
-                    mjolnir::math::X(sys.position(idx)) += dr;
-
-                    // calc U(x+dx)
-                    const auto E1 = interaction.calc_energy(sys);
-
-                    // central difference
-                    const auto dE = (E1 - E0) * 0.5;
-
-                    BOOST_TEST(-dE / dr == mjolnir::math::X(sys.force(idx)),
-                               boost::test_tools::tolerance(tol));
-                }
-                {
-                    // ----------------------------------------------------------------
-                    // reset positions
-                    sys = init;
-
-                    // calc U(x-dx)
-                    const auto E0 = interaction.calc_energy(sys);
-
-                    mjolnir::math::Y(sys.position(idx)) += dr;
-
-                    // calc F(x)
-                    interaction.calc_force(sys);
-
-                    mjolnir::math::Y(sys.position(idx)) += dr;
-
-                    // calc U(x+dx)
-                    const auto E1 = interaction.calc_energy(sys);
-
-                    // central difference
-                    const auto dE = (E1 - E0) * 0.5;
-
-                    BOOST_TEST(-dE / dr == mjolnir::math::Y(sys.force(idx)),
-                               boost::test_tools::tolerance(tol));
-                }
-                {
-                    // ----------------------------------------------------------------
-                    // reset positions
-                    sys = init;
-
-                    // calc U(x-dx)
-                    const auto E0 = interaction.calc_energy(sys);
-
-                    mjolnir::math::Z(sys.position(idx)) += dr;
-
-                    // calc F(x)
-                    interaction.calc_force(sys);
-
-                    mjolnir::math::Z(sys.position(idx)) += dr;
-
-                    // calc U(x+dx)
-                    const auto E1 = interaction.calc_energy(sys);
-
-                    // central difference
-                    const auto dE = (E1 - E0) * 0.5;
-
-                    BOOST_TEST(-dE / dr == mjolnir::math::Z(sys.force(idx)),
-                               boost::test_tools::tolerance(tol));
-                }
-            }
-
+            test::check_force (sys, interaction, tol, dr);
             // -----------------------------------------------------------------
             // check virial
 
             test::check_virial(sys, interaction, tol);
+            test::check_force_and_virial(sys, interaction, tol);
             test::check_force_and_energy(sys, interaction, tol);
 
         } // thetaCS_j

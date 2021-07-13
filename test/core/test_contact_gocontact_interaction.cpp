@@ -55,6 +55,7 @@ BOOST_AUTO_TEST_CASE(ContactGoContact_numerical_difference)
 
         test::check_force(sys, interaction, tol, dr);
         test::check_virial(sys, interaction, tol);
+        test::check_force_and_virial(sys, interaction, tol);
         test::check_force_and_energy(sys, interaction, tol);
     }
 }

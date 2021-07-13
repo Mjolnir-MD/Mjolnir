@@ -109,17 +109,8 @@ BOOST_AUTO_TEST_CASE(DirectionalContactInteraction_numerical_diff)
 
                 test::check_force(sys, interaction, tol, dx);
                 test::check_virial(sys, interaction, tol);
+                test::check_force_and_virial(sys, interaction, tol);
                 test::check_force_and_energy(sys, interaction, tol);
-
-                sys.force(0) = coord_type(0.0, 0.0, 0.0);
-                sys.force(1) = coord_type(0.0, 0.0, 0.0);
-                sys.force(2) = coord_type(0.0, 0.0, 0.0);
-                sys.force(3) = coord_type(0.0, 0.0, 0.0);
-
-                const auto total_f = sys.force(0) + sys.force(1) + sys.force(2) + sys.force(3);
-                BOOST_TEST_REQUIRE(mjolnir::math::X(total_f) == 0.0, boost::test_tools::tolerance(tol));
-                BOOST_TEST_REQUIRE(mjolnir::math::Y(total_f) == 0.0, boost::test_tools::tolerance(tol));
-                BOOST_TEST_REQUIRE(mjolnir::math::Z(total_f) == 0.0, boost::test_tools::tolerance(tol));
             }
         }
     }

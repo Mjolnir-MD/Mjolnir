@@ -143,6 +143,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BaseStackingInteraction_numerical_diff,
 
                     test::check_force(sys, interaction, tol, dr);
                     test::check_virial(sys, interaction, tol);
+                    test::check_force_and_virial(sys, interaction, tol);
                     test::check_force_and_energy(sys, interaction, tol);
                 } // perturbation
             } // theta
