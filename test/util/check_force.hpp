@@ -165,6 +165,8 @@ void check_force(const System<traitsT>& init,
     {
         BOOST_TEST_REQUIRE(init.virial()[i] == real_type(0));
     }
+
+    check_net_force(sys, interaction, tol);
 }
 
 } // test
