@@ -108,23 +108,76 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
         loc_common_.initialize(sys);
         glo_common_.initialize(sys, this->topol_);
         ext_common_.initialize(sys);
+
+        // -------------------------------------------------------------------
+        // initialize buffers
+
+        this->force_buffer_.resize(sys.size());
+        for(auto& fb : force_buffer_)
+        {
+            fb = math::make_coordinate<coordinate_type>(0, 0, 0);
+        }
+        this->virial_buffer_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+
         return;
     }
 
     void calc_force(system_type& sys) const noexcept override
     {
+        using std::swap;
+
         for(const auto& unit : this->units_)
         {
             unit->calc_force(sys);
         }
+
+        swap(this->force_buffer_,  sys.forces());
+        swap(this->virial_buffer_, sys.virial());
+
         sys.preprocess_forces();
         loc_common_.calc_force(sys);
         glo_common_.calc_force(sys);
         ext_common_.calc_force(sys);
         sys.postprocess_forces();
+
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            sys.force(i) += force_buffer_[i]; // restore other force
+            force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+        }
+        sys.virial() += virial_buffer_;
+        this->virial_buffer_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         return ;
     }
 
+    void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        using std::swap;
+
+        for(const auto& unit : this->units_)
+        {
+            unit->calc_force_and_virial(sys);
+        }
+
+        swap(this->force_buffer_,  sys.forces());
+        swap(this->virial_buffer_, sys.virial());
+
+        sys.preprocess_forces();
+        loc_common_.calc_force_and_virial(sys);
+        glo_common_.calc_force_and_virial(sys);
+        ext_common_.calc_force_and_virial(sys);
+        sys.postprocess_forces();
+
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            sys.force(i) += force_buffer_[i]; // restore other force
+            force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+        }
+        sys.virial() += virial_buffer_;
+        this->virial_buffer_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+
+        return ;
+    }
     real_type calc_energy(const system_type& sys) const noexcept override
     {
         real_type E = real_type(0.0);
@@ -234,6 +287,9 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
     external_forcefield_type ext_common_;
 
     constraint_forcefield_type constraint_;
+
+    mutable coordinate_container_type force_buffer_;
+    mutable matrix33_type            virial_buffer_;
 
     std::vector<multiple_basin_unit_type> units_;
 };
