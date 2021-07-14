@@ -1,7 +1,6 @@
 #ifndef MJOLNIR_CORE_SYSTEM_HPP
 #define MJOLNIR_CORE_SYSTEM_HPP
 #include <mjolnir/core/Unit.hpp>
-#include <mjolnir/core/Particle.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
