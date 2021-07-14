@@ -38,8 +38,10 @@ class System
     using coordinate_container_type    = std::vector<coordinate_type>;
     using string_container_type        = std::vector<std::string>;
 
+    // ------------------------------------------------------------------------
     using dynamic_variable_type = DynamicVariable<real_type>;
-    using variables_type = std::map<std::string, dynamic_variable_type>;
+    using variable_key_type = std::string;
+    using variables_type = std::map<variable_key_type, dynamic_variable_type>;
 
   public:
 
@@ -203,9 +205,9 @@ class System
     attribute_type const& attributes() const noexcept {return attributes_;}
 
     // dynamic variables in a system.
-    dynamic_variable_type const& variable(const std::string& key) const {return variables_.at(key);}
-    dynamic_variable_type&       variable(const std::string& key)       {return variables_[key];}
-    bool          has_variable(const std::string& key) const {return variables_.count(key) == 1;}
+    dynamic_variable_type const& variable(const variable_key_type& key) const {return variables_.at(key);}
+    dynamic_variable_type&       variable(const variable_key_type& key)       {return variables_[key];}
+    bool                     has_variable(const variable_key_type& key) const {return variables_.count(key) == 1;}
     variables_type const& variables() const noexcept {return variables_;}
     variables_type&       variables()       noexcept {return variables_;}
 
