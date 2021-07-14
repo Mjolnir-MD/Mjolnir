@@ -36,7 +36,8 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     using cache_aligned_allocator = aligned_allocator<T, cache_alignment>;
 
     using dynamic_variable_type = DynamicVariable<real_type>;
-    using variables_type = std::map<std::string, dynamic_variable_type>;
+    using variable_key_type = std::string;
+    using variables_type = std::map<variable_key_type, dynamic_variable_type>;
 
   public:
 
