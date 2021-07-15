@@ -4,6 +4,7 @@
 #include <mjolnir/util/is_finite.hpp>
 #include <limits>
 #include <memory>
+#include <string>
 
 //
 // Dynamic variable is a (non-) physical parameter in a system that has
@@ -29,6 +30,7 @@ struct DynamicVariableBase
     virtual ~DynamicVariableBase() = default;
     virtual void update(real_type x, real_type v, real_type f) noexcept = 0;
     virtual DynamicVariableBase<real_type>* clone() const = 0;
+    virtual std::string type() const = 0;
 };
 
 // It makes `DynamicVariable`s copyable and easier to handle.
@@ -62,6 +64,10 @@ struct DynamicVariable
     real_type f()     const noexcept {return resource_->f_;}
     real_type m()     const noexcept {return resource_->m_;}
     real_type gamma() const noexcept {return resource_->gamma_;}
+    real_type lower() const noexcept {return resource_->lower_;}
+    real_type upper() const noexcept {return resource_->upper_;}
+
+    std::string type() const {return resource_->type();}
 
     void update(real_type x, real_type v, real_type f) const noexcept
     {
@@ -97,6 +103,7 @@ struct DefaultDynamicVariable : public DynamicVariableBase<realT>
     {
         return new DefaultDynamicVariable(*this);
     }
+    std::string type() const override {return "Default";}
 };
 
 template<typename realT>
@@ -125,6 +132,7 @@ struct PeriodicDynamicVariable : public DynamicVariableBase<realT>
     {
         return new PeriodicDynamicVariable(*this);
     }
+    std::string type() const override {return "Periodic";}
 };
 
 template<typename realT>
@@ -164,6 +172,7 @@ struct RepulsiveDynamicVariable : public DynamicVariableBase<realT>
     {
         return new RepulsiveDynamicVariable(*this);
     }
+    std::string type() const override {return "Repulsive";}
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD
