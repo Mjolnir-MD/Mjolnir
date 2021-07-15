@@ -92,56 +92,56 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
 
     system_type sys(4, boundary_type{});
 
-    sys.at(0).mass = 1.0;
-    sys.at(1).mass = 1.0;
-    sys.at(2).mass = 1.0;
-    sys.at(3).mass = 1.0;
-    sys.at(0).rmass = 1.0;
-    sys.at(1).rmass = 1.0;
-    sys.at(2).rmass = 1.0;
-    sys.at(3).rmass = 1.0;
+    sys.mass(0) = 1.0;
+    sys.mass(1) = 1.0;
+    sys.mass(2) = 1.0;
+    sys.mass(3) = 1.0;
+    sys.rmass(0) = 1.0;
+    sys.rmass(1) = 1.0;
+    sys.rmass(2) = 1.0;
+    sys.rmass(3) = 1.0;
 
-    sys.at(0).position = pos1;
-    sys.at(1).position = pos2;
-    sys.at(2).position = pos3;
-    sys.at(3).position = coord_type(0,0,0);
-    sys.at(0).velocity = coord_type(0,0,0);
-    sys.at(1).velocity = coord_type(0,0,0);
-    sys.at(2).velocity = coord_type(0,0,0);
-    sys.at(3).velocity = coord_type(0,0,0);
-    sys.at(0).force    = coord_type(0,0,0);
-    sys.at(1).force    = coord_type(0,0,0);
-    sys.at(2).force    = coord_type(0,0,0);
-    sys.at(3).force    = coord_type(0,0,0);
+    sys.position(0) = pos1;
+    sys.position(1) = pos2;
+    sys.position(2) = pos3;
+    sys.position(3) = coord_type(0,0,0);
+    sys.velocity(0) = coord_type(0,0,0);
+    sys.velocity(1) = coord_type(0,0,0);
+    sys.velocity(2) = coord_type(0,0,0);
+    sys.velocity(3) = coord_type(0,0,0);
+    sys.force(0)    = coord_type(0,0,0);
+    sys.force(1)    = coord_type(0,0,0);
+    sys.force(2)    = coord_type(0,0,0);
+    sys.force(3)    = coord_type(0,0,0);
 
-    sys.at(0).name  = "X";
-    sys.at(1).name  = "X";
-    sys.at(2).name  = "X";
-    sys.at(3).name  = "X";
-    sys.at(0).group = "NONE";
-    sys.at(1).group = "NONE";
-    sys.at(2).group = "NONE";
-    sys.at(3).group = "NONE";
+    sys.name(0)  = "X";
+    sys.name(1)  = "X";
+    sys.name(2)  = "X";
+    sys.name(3)  = "X";
+    sys.group(0) = "NONE";
+    sys.group(1) = "NONE";
+    sys.group(2) = "NONE";
+    sys.group(3) = "NONE";
 
     const real_type dtheta = mjolnir::math::constants<real_type>::pi() / 1800.0;
     for(int i = -1800; i < 1800; ++i)
     {
-        BOOST_TEST(mjolnir::math::length(sys[0].position - pos1) == 0.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(mjolnir::math::length(sys[1].position - pos2) == 0.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(mjolnir::math::length(sys[2].position - pos3) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(mjolnir::math::length(sys.position(0) - pos1) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(mjolnir::math::length(sys.position(1) - pos2) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(mjolnir::math::length(sys.position(2) - pos3) == 0.0, boost::test_tools::tolerance(tol));
 
-        BOOST_TEST(mjolnir::math::length(sys[0].velocity) == 0.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(mjolnir::math::length(sys[1].velocity) == 0.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(mjolnir::math::length(sys[2].velocity) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(mjolnir::math::length(sys.velocity(0)) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(mjolnir::math::length(sys.velocity(1)) == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(mjolnir::math::length(sys.velocity(2)) == 0.0, boost::test_tools::tolerance(tol));
 
-        sys[0].force = coord_type(0,0,0);
-        sys[1].force = coord_type(0,0,0);
-        sys[2].force = coord_type(0,0,0);
-        sys[3].force = coord_type(0,0,0);
+        sys.force(0) = coord_type(0,0,0);
+        sys.force(1) = coord_type(0,0,0);
+        sys.force(2) = coord_type(0,0,0);
+        sys.force(3) = coord_type(0,0,0);
 
         const real_type theta = i * dtheta;
         const coord_type pos4(std::cos(theta), -std::sin(theta), 0e0);
-        sys[3].position = pos4;
+        sys.position(3) = pos4;
 
         const real_type deriv = potential.derivative(theta);
         const real_type coef = std::abs(deriv);
@@ -150,12 +150,12 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
 
         // magnitude
         // if radius == 1e0, then force strength is equal to dV.
-        BOOST_TEST(mjolnir::math::length(sys[1].position - sys[0].position) == 1e0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(mjolnir::math::length(sys[2].position - sys[1].position) == 1e0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(mjolnir::math::length(sys[3].position - sys[2].position) == 1e0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(mjolnir::math::length(sys.position(1) - sys.position(0)) == 1e0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(mjolnir::math::length(sys.position(2) - sys.position(1)) == 1e0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(mjolnir::math::length(sys.position(3) - sys.position(2)) == 1e0, boost::test_tools::tolerance(tol));
 
-        const real_type force_strength1 = mjolnir::math::length(sys[0].force);
-        const real_type force_strength3 = mjolnir::math::length(sys[3].force);
+        const real_type force_strength1 = mjolnir::math::length(sys.force(0));
+        const real_type force_strength3 = mjolnir::math::length(sys.force(3));
         if(i == 1200)
         {
             BOOST_TEST(coef            == 0.0, boost::test_tools::tolerance(tol));
@@ -169,30 +169,30 @@ BOOST_AUTO_TEST_CASE(DihedralAngle_force)
         }
 
         // force applied to center particle is equal to sum of others
-        const coord_type sum = sys[0].force + sys[1].force + sys[2].force + sys[3].force;
+        const coord_type sum = sys.force(0) + sys.force(1) + sys.force(2) + sys.force(3);
         BOOST_TEST(mjolnir::math::length(sum) == 0.0, boost::test_tools::tolerance(tol));
 
         // direction
         if(i == 1200) // most stable point
         {
-            BOOST_TEST(mjolnir::math::length(sys[0].force) == 0.0, boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::length(sys[1].force) == 0.0, boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::length(sys[2].force) == 0.0, boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::length(sys[3].force) == 0.0, boost::test_tools::tolerance(tol));
+            BOOST_TEST(mjolnir::math::length(sys.force(0)) == 0.0, boost::test_tools::tolerance(tol));
+            BOOST_TEST(mjolnir::math::length(sys.force(1)) == 0.0, boost::test_tools::tolerance(tol));
+            BOOST_TEST(mjolnir::math::length(sys.force(2)) == 0.0, boost::test_tools::tolerance(tol));
+            BOOST_TEST(mjolnir::math::length(sys.force(3)) == 0.0, boost::test_tools::tolerance(tol));
         }
         else
         {
             // perpendicular to radius vector
-            const real_type normal1 = mjolnir::math::dot_product(sys[0].force, sys[0].position - sys[1].position);
-            const real_type normal4 = mjolnir::math::dot_product(sys[3].force, sys[2].position - sys[3].position);
+            const real_type normal1 = mjolnir::math::dot_product(sys.force(0), sys.position(0) - sys.position(1));
+            const real_type normal4 = mjolnir::math::dot_product(sys.force(3), sys.position(2) - sys.position(3));
             BOOST_TEST(normal1 == 0.0, boost::test_tools::tolerance(tol));
             BOOST_TEST(normal4 == 0.0, boost::test_tools::tolerance(tol));
         }
 
         // perpendicular to z axis
-        BOOST_TEST(sys[0].force[2] == 0.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(sys[1].force[2] == 0.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(sys[2].force[2] == 0.0, boost::test_tools::tolerance(tol));
-        BOOST_TEST(sys[3].force[2] == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(0)[2] == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(1)[2] == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(2)[2] == 0.0, boost::test_tools::tolerance(tol));
+        BOOST_TEST(sys.force(3)[2] == 0.0, boost::test_tools::tolerance(tol));
     }
 }

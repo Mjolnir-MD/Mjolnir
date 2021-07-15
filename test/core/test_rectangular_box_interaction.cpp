@@ -44,8 +44,8 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_Harmonic)
     for(int i = 0; i < 10000; ++i)
     {
         test::clear_everything(sys);
-        sys.at(0).position = coordinate_type( 1.0,  9.0,  1.0);
-        sys.at(1).position = coordinate_type( 9.0,  1.0,  9.0);
+        sys.position(0) = coordinate_type( 1.0,  9.0,  1.0);
+        sys.position(1) = coordinate_type( 9.0,  1.0,  9.0);
 
         test::apply_random_perturbation(sys, mt, 0.01);
 

@@ -1,7 +1,6 @@
 #ifndef MJOLNIR_CORE_SYSTEM_HPP
 #define MJOLNIR_CORE_SYSTEM_HPP
 #include <mjolnir/core/Unit.hpp>
-#include <mjolnir/core/Particle.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
@@ -27,10 +26,6 @@ class System
     using topology_type   = Topology;
     using attribute_type  = std::map<std::string, real_type>;
     using rng_type        = RandomNumberGenerator<traits_type>;
-
-    using particle_type            = Particle<real_type, coordinate_type>;
-    using particle_view_type       = ParticleView<real_type, coordinate_type>;
-    using particle_const_view_type = ParticleConstView<real_type, coordinate_type>;
 
     using real_container_type          = std::vector<real_type>;
     using coordinate_container_type    = std::vector<coordinate_type>;
@@ -107,39 +102,6 @@ class System
     }
 
     std::size_t size() const noexcept {return num_particles_;}
-
-    particle_view_type operator[](std::size_t i) noexcept
-    {
-        return particle_view_type{
-            masses_[i],    rmasses_[i],
-            positions_[i], velocities_[i], forces_[i],
-            names_[i],     groups_[i]
-        };
-    }
-    particle_const_view_type operator[](std::size_t i) const noexcept
-    {
-        return particle_const_view_type{
-            masses_[i],    rmasses_[i],
-            positions_[i], velocities_[i], forces_[i],
-            names_[i],     groups_[i]
-        };
-    }
-    particle_view_type at(std::size_t i)
-    {
-        return particle_view_type{
-            masses_.at(i),    rmasses_.at(i),
-            positions_.at(i), velocities_.at(i), forces_.at(i),
-            names_.at(i),     groups_.at(i)
-        };
-    }
-    particle_const_view_type at(std::size_t i) const
-    {
-        return particle_const_view_type{
-            masses_.at(i),    rmasses_.at(i),
-            positions_.at(i), velocities_.at(i), forces_.at(i),
-            names_.at(i),     groups_.at(i)
-        };
-    }
 
     // When parallelizing a code, forces are often calculated separately in
     // several computational units, like cores, nodes, gpu devices, etc. To
