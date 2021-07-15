@@ -17,14 +17,14 @@ struct DynamicVariableBase
 {
     using real_type = realT;
 
-    real_type x, v, f;
-    real_type m, gamma;
-    real_type lower, upper;
+    real_type x_, v_, f_;
+    real_type m_, gamma_;
+    real_type lower_, upper_;
 
-    DynamicVariableBase(real_type x_, real_type v_, real_type f_,
-                        real_type m_, real_type gamma_,
-                        real_type lower_, real_type upper_)
-        : x(x_), v(v_), f(f_), m(m_), gamma(gamma_), lower(lower_), upper(upper_)
+    DynamicVariableBase(real_type x, real_type v, real_type f,
+                        real_type m, real_type gamma,
+                        real_type lower, real_type upper)
+        : x_(x), v_(v), f_(f), m_(m), gamma_(gamma), lower_(lower), upper_(upper)
     {}
     virtual ~DynamicVariableBase() = default;
     virtual void update(real_type x, real_type v, real_type f) noexcept = 0;
@@ -39,7 +39,7 @@ struct DynamicVariable
 
     template<typename DynVar>
     explicit DynamicVariable(DynVar&& dynvar)
-        : resource_(make_unique<DynamicVariableBase<real_type>>(std::forward<DynVar>(dynvar)))
+        : resource_(make_unique<DynVar>(std::forward<DynVar>(dynvar)))
     {
         static_assert(std::is_base_of<DynamicVariableBase<realT>, DynVar>::value, "");
     }
@@ -57,11 +57,11 @@ struct DynamicVariable
     DynamicVariable& operator=(DynamicVariable&&) = default;
     ~DynamicVariable() = default;
 
-    real_type x() const noexcept {return resource_->x;}
-    real_type v() const noexcept {return resource_->v;}
-    real_type f() const noexcept {return resource_->f;}
-    real_type m() const noexcept {return resource_->m;}
-    real_type gamma() const noexcept {return resource_->gamma;}
+    real_type x()     const noexcept {return resource_->x_;}
+    real_type v()     const noexcept {return resource_->v_;}
+    real_type f()     const noexcept {return resource_->f_;}
+    real_type m()     const noexcept {return resource_->m_;}
+    real_type gamma() const noexcept {return resource_->gamma_;}
 
     void update(real_type x, real_type v, real_type f) const noexcept
     {
@@ -88,9 +88,9 @@ struct DefaultDynamicVariable : public DynamicVariableBase<realT>
 
     void update(real_type x, real_type v, real_type f) noexcept override
     {
-        this->x = x;
-        this->v = v;
-        this->f = f;
+        this->x_ = x;
+        this->v_ = v;
+        this->f_ = f;
         return;
     }
     DynamicVariableBase<real_type>* clone() const override
@@ -114,11 +114,11 @@ struct PeriodicDynamicVariable : public DynamicVariableBase<realT>
 
     void update(real_type x, real_type v, real_type f) noexcept override
     {
-        this->x = x;
-        if      (this->x <  this->lower) {this->x += (this->upper - this->lower);}
-        else if (this->upper <= this->x) {this->x -= (this->upper - this->lower);}
-        this->v = v;
-        this->f = f;
+        this->x_ = x;
+        if      (this->x_ <  this->lower_) {this->x_ += (this->upper_ - this->lower_);}
+        else if (this->upper_ <= this->x_) {this->x_ -= (this->upper_ - this->lower_);}
+        this->v_ = v;
+        this->f_ = f;
         return;
     }
     DynamicVariableBase<real_type>* clone() const override
@@ -142,22 +142,22 @@ struct RepulsiveDynamicVariable : public DynamicVariableBase<realT>
 
     void update(real_type x, real_type v, real_type f) noexcept override
     {
-        if(x < this->lower)
+        if(x < this->lower_)
         {
-            this->x = 2 * this->lower - x; // lower + (lower - x)
-            this->v = -v;
+            this->x_ = 2 * this->lower_ - x; // lower + (lower - x)
+            this->v_ = -v;
         }
-        else if (this->upper < x)
+        else if (this->upper_ < x)
         {
-            this->x = 2 * this->upper - x; // upper - (x - upper)
-            this->v = -v;
+            this->x_ = 2 * this->upper_ - x; // upper - (x - upper)
+            this->v_ = -v;
         }
         else
         {
-            this->x = x;
-            this->v = v;
+            this->x_ = x;
+            this->v_ = v;
         }
-        this->f = f;
+        this->f_ = f;
         return;
     }
     DynamicVariableBase<real_type>* clone() const override
