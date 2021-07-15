@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.27.0
+
+### Added
+
+- Hybrid Forcefield
+
+### Changed
+
+- refactoring: separate combination rule from global potentials
+
 ## 1.26.0
 
 ### Added

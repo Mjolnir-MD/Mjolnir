@@ -22,9 +22,6 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     using rng_type        = RandomNumberGenerator<traits_type>;
 
     using string_type              = std::string;
-    using particle_type            = Particle<real_type, coordinate_type>;
-    using particle_view_type       = ParticleView<real_type, coordinate_type>;
-    using particle_const_view_type = ParticleConstView<real_type, coordinate_type>;
 
     using real_container_type          = std::vector<real_type>;
     using coordinate_container_type    = std::vector<coordinate_type>;
@@ -120,39 +117,6 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     }
 
     std::size_t size() const noexcept {return num_particles_;}
-
-    particle_view_type operator[](std::size_t i) noexcept
-    {
-        return particle_view_type{
-            masses_[i],    rmasses_[i],
-            positions_[i], velocities_[i], forces_main_[i],
-            names_[i],     groups_[i]
-        };
-    }
-    particle_const_view_type operator[](std::size_t i) const noexcept
-    {
-        return particle_const_view_type{
-            masses_[i],    rmasses_[i],
-            positions_[i], velocities_[i], forces_main_[i],
-            names_[i],     groups_[i]
-        };
-    }
-    particle_view_type at(std::size_t i)
-    {
-        return particle_view_type{
-            masses_.at(i),    rmasses_.at(i),
-            positions_.at(i), velocities_.at(i), forces_main_.at(i),
-            names_.at(i),     groups_.at(i)
-        };
-    }
-    particle_const_view_type at(std::size_t i) const
-    {
-        return particle_const_view_type{
-            masses_.at(i),    rmasses_.at(i),
-            positions_.at(i), velocities_.at(i), forces_main_.at(i),
-            names_.at(i),     groups_.at(i)
-        };
-    }
 
     real_type  mass (std::size_t i) const noexcept {return masses_[i];}
     real_type& mass (std::size_t i)       noexcept {return masses_[i];}

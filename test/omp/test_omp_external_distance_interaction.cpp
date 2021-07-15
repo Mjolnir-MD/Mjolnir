@@ -160,22 +160,22 @@ BOOST_AUTO_TEST_CASE(omp_ExternalDistance_calc_force_and_energy)
 
     system_type sys(2, boundary_type{});
 
-    sys.at(0).mass  = 1.0;
-    sys.at(1).mass  = 1.0;
-    sys.at(0).rmass = 1.0;
-    sys.at(1).rmass = 1.0;
+    sys.mass(0)  = 1.0;
+    sys.mass(1)  = 1.0;
+    sys.rmass(0) = 1.0;
+    sys.rmass(1) = 1.0;
 
-    sys.at(0).position = coordinate_type( 0.0, 0.0, 1.0);
-    sys.at(1).position = coordinate_type( 0.0, 0.0, 1.0);
-    sys.at(0).velocity = coordinate_type( 0.0, 0.0, 0.0);
-    sys.at(1).velocity = coordinate_type( 0.0, 0.0, 0.0);
-    sys.at(0).force    = coordinate_type( 0.0, 0.0, 0.0);
-    sys.at(1).force    = coordinate_type( 0.0, 0.0, 0.0);
+    sys.position(0) = coordinate_type( 0.0, 0.0, 1.0);
+    sys.position(1) = coordinate_type( 0.0, 0.0, 1.0);
+    sys.velocity(0) = coordinate_type( 0.0, 0.0, 0.0);
+    sys.velocity(1) = coordinate_type( 0.0, 0.0, 0.0);
+    sys.force(0)    = coordinate_type( 0.0, 0.0, 0.0);
+    sys.force(1)    = coordinate_type( 0.0, 0.0, 0.0);
 
-    sys.at(0).name  = "X";
-    sys.at(1).name  = "X";
-    sys.at(0).group = "NONE";
-    sys.at(1).group = "NONE";
+    sys.name(0)  = "X";
+    sys.name(1)  = "X";
+    sys.group(0) = "NONE";
+    sys.group(1) = "NONE";
 
     std::mt19937 mt(123456789);
     std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
@@ -183,8 +183,8 @@ BOOST_AUTO_TEST_CASE(omp_ExternalDistance_calc_force_and_energy)
 
     for(int i = 0; i < 10000; ++i)
     {
-        sys.at(0).position = coordinate_type(0.0, 0.0, 1.0);
-        sys.at(1).position = coordinate_type(0.0, 0.0, 1.0);
+        sys.position(0) = coordinate_type(0.0, 0.0, 1.0);
+        sys.position(1) = coordinate_type(0.0, 0.0, 1.0);
 
         // move particles a bit, randomly. and reset forces.
         for(std::size_t idx=0; idx<sys.size(); ++idx)

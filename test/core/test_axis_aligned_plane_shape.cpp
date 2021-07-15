@@ -143,11 +143,10 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_neighbors_unlimited)
     system_type sys(1000, boundary_type{});
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        auto p = sys[i];
-        p.mass     = 0.0;
-        p.position = coord_type(uni(mt), uni(mt), uni(mt));
-        p.velocity = coord_type(0, 0, 0);
-        p.force    = coord_type(0, 0, 0);
+        sys.mass(i)     = 0.0;
+        sys.position(i) = coord_type(uni(mt), uni(mt), uni(mt));
+        sys.velocity(i) = coord_type(0, 0, 0);
+        sys.force(i)    = coord_type(0, 0, 0);
     }
 
     dummy_potential<double> dummy; dummy.cutoff = 1.0; dummy.N = 1000;
@@ -159,16 +158,16 @@ BOOST_AUTO_TEST_CASE(AxisAlignedPlane_neighbors_unlimited)
 
     for(std::size_t i : neighbors)
     {
-        if(std::abs(sys.at(i).position[2]) > 1.0)
+        if(std::abs(sys.position(i)[2]) > 1.0)
         {
-            std::cerr << i << ", " << sys.at(i).position[2] << std::endl;
+            std::cerr << i << ", " << sys.position(i)[2] << std::endl;
         }
-        BOOST_TEST(std::abs(sys.at(i).position[2]) <= 1.0);
+        BOOST_TEST(std::abs(sys.position(i)[2]) <= 1.0);
     }
 
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        if(std::abs(sys.at(i).position[2]) > 1.0){continue;}
+        if(std::abs(sys.position(i)[2]) > 1.0){continue;}
         const bool found =
             std::find(neighbors.begin(), neighbors.end(), i) != neighbors.end();
         BOOST_TEST(found);

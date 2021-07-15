@@ -54,3 +54,7 @@ A set of constraints. Since it affects on the topology, it is defined as a force
 ## [MultipleBasinForceField]({{<relref "MultipleBasinForceField.md">}})
 
 A special meta-forcefield that allows to concatenate two or more forcefields smoothly.
+
+## [HybridForceField]({{<relref "HybridForceField.md">}})
+
+A meta-forcefield that is a linear combination of two different forcefields.

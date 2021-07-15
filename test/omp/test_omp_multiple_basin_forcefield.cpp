@@ -64,22 +64,22 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_2Basin_numerical_difference)
     {
         system_type sys(2, boundary_type{});
 
-        sys.at(0).mass  = 1.0;
-        sys.at(1).mass  = 1.0;
-        sys.at(0).rmass = 1.0;
-        sys.at(1).rmass = 1.0;
+        sys.mass(0)  = 1.0;
+        sys.mass(1)  = 1.0;
+        sys.rmass(0) = 1.0;
+        sys.rmass(1) = 1.0;
 
-        sys.at(0).position = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
-        sys.at(1).position = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
-        sys.at(0).velocity = coord_type( 0.0, 0.0, 0.0);
-        sys.at(1).velocity = coord_type( 0.0, 0.0, 0.0);
-        sys.at(0).force    = coord_type( 0.0, 0.0, 0.0);
-        sys.at(1).force    = coord_type( 0.0, 0.0, 0.0);
+        sys.position(0) = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
+        sys.position(1) = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
+        sys.velocity(0) = coord_type( 0.0, 0.0, 0.0);
+        sys.velocity(1) = coord_type( 0.0, 0.0, 0.0);
+        sys.force(0)    = coord_type( 0.0, 0.0, 0.0);
+        sys.force(1)    = coord_type( 0.0, 0.0, 0.0);
 
-        sys.at(0).name  = "X";
-        sys.at(1).name  = "X";
-        sys.at(0).group = "TEST";
-        sys.at(1).group = "TEST";
+        sys.name(0)  = "X";
+        sys.name(1)  = "X";
+        sys.group(0) = "TEST";
+        sys.group(1) = "TEST";
 
         const auto init = sys;
 
@@ -357,22 +357,22 @@ BOOST_AUTO_TEST_CASE(MultipleBasin_3Basin_numerical_difference)
     {
         system_type sys(2, boundary_type{});
 
-        sys.at(0).mass  = 1.0;
-        sys.at(1).mass  = 1.0;
-        sys.at(0).rmass = 1.0;
-        sys.at(1).rmass = 1.0;
+        sys.mass(0)  = 1.0;
+        sys.mass(1)  = 1.0;
+        sys.rmass(0) = 1.0;
+        sys.rmass(1) = 1.0;
 
-        sys.at(0).position = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
-        sys.at(1).position = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
-        sys.at(0).velocity = coord_type( 0.0, 0.0, 0.0);
-        sys.at(1).velocity = coord_type( 0.0, 0.0, 0.0);
-        sys.at(0).force    = coord_type( 0.0, 0.0, 0.0);
-        sys.at(1).force    = coord_type( 0.0, 0.0, 0.0);
+        sys.position(0) = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
+        sys.position(1) = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
+        sys.velocity(0) = coord_type( 0.0, 0.0, 0.0);
+        sys.velocity(1) = coord_type( 0.0, 0.0, 0.0);
+        sys.force(0)    = coord_type( 0.0, 0.0, 0.0);
+        sys.force(1)    = coord_type( 0.0, 0.0, 0.0);
 
-        sys.at(0).name  = "X";
-        sys.at(1).name  = "X";
-        sys.at(0).group = "TEST";
-        sys.at(1).group = "TEST";
+        sys.name(0)  = "X";
+        sys.name(1)  = "X";
+        sys.group(0) = "TEST";
+        sys.group(1) = "TEST";
 
         const auto init = sys;
 

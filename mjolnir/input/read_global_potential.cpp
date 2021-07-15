@@ -6,53 +6,48 @@
 
 namespace mjolnir
 {
-template ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_excluded_volume_potential(const toml::value& global);
-template ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_excluded_volume_potential(const toml::value& global);
-template ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_excluded_volume_potential(const toml::value& global);
-template ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_excluded_volume_potential(const toml::value& global);
+template std::pair<ExcludedVolumePotential<double>, ParameterList<SimulatorTraits<double, UnlimitedBoundary>       , ExcludedVolumePotential<double>>> read_excluded_volume_potential(const toml::value&);
+template std::pair<ExcludedVolumePotential<float >, ParameterList<SimulatorTraits<float,  UnlimitedBoundary>       , ExcludedVolumePotential<float >>> read_excluded_volume_potential(const toml::value&);
+template std::pair<ExcludedVolumePotential<double>, ParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<double>>> read_excluded_volume_potential(const toml::value&);
+template std::pair<ExcludedVolumePotential<float >, ParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<float >>> read_excluded_volume_potential(const toml::value&);
 
-template InversePowerPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_inverse_power_potential(const toml::value&);
-template InversePowerPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_inverse_power_potential(const toml::value&);
-template InversePowerPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_inverse_power_potential(const toml::value&);
-template InversePowerPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_inverse_power_potential(const toml::value&);
+template std::pair<InversePowerPotential<double>, ParameterList<SimulatorTraits<double, UnlimitedBoundary>       , InversePowerPotential<double>>> read_inverse_power_potential(const toml::value&);
+template std::pair<InversePowerPotential<float >, ParameterList<SimulatorTraits<float,  UnlimitedBoundary>       , InversePowerPotential<float >>> read_inverse_power_potential(const toml::value&);
+template std::pair<InversePowerPotential<double>, ParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>, InversePowerPotential<double>>> read_inverse_power_potential(const toml::value&);
+template std::pair<InversePowerPotential<float >, ParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, InversePowerPotential<float >>> read_inverse_power_potential(const toml::value&);
 
-template HardCoreExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_hard_core_excluded_volume_potential(const toml::value& global);
-template HardCoreExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_hard_core_excluded_volume_potential(const toml::value& global);
-template HardCoreExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_hard_core_excluded_volume_potential(const toml::value& global);
-template HardCoreExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_hard_core_excluded_volume_potential(const toml::value& global);
+template std::pair<HardCoreExcludedVolumePotential<double>, ParameterList<SimulatorTraits<double, UnlimitedBoundary>       , HardCoreExcludedVolumePotential<double>>> read_hard_core_excluded_volume_potential(const toml::value&);
+template std::pair<HardCoreExcludedVolumePotential<float >, ParameterList<SimulatorTraits<float,  UnlimitedBoundary>       , HardCoreExcludedVolumePotential<float >>> read_hard_core_excluded_volume_potential(const toml::value&);
+template std::pair<HardCoreExcludedVolumePotential<double>, ParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>, HardCoreExcludedVolumePotential<double>>> read_hard_core_excluded_volume_potential(const toml::value&);
+template std::pair<HardCoreExcludedVolumePotential<float >, ParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, HardCoreExcludedVolumePotential<float >>> read_hard_core_excluded_volume_potential(const toml::value&);
 
-template LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_lennard_jones_potential(const toml::value& global);
-template LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_lennard_jones_potential(const toml::value& global);
-template LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_lennard_jones_potential(const toml::value& global);
-template LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_lennard_jones_potential(const toml::value& global);
+template std::pair<LennardJonesPotential<double>, ParameterList<SimulatorTraits<double, UnlimitedBoundary>       , LennardJonesPotential<double>>> read_lennard_jones_potential(const toml::value&);
+template std::pair<LennardJonesPotential<float >, ParameterList<SimulatorTraits<float,  UnlimitedBoundary>       , LennardJonesPotential<float >>> read_lennard_jones_potential(const toml::value&);
+template std::pair<LennardJonesPotential<double>, ParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<double>>> read_lennard_jones_potential(const toml::value&);
+template std::pair<LennardJonesPotential<float >, ParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<float >>> read_lennard_jones_potential(const toml::value&);
 
-template UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_uniform_lennard_jones_potential(const toml::value& global);
-template UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_uniform_lennard_jones_potential(const toml::value& global);
-template UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_uniform_lennard_jones_potential(const toml::value& global);
-template UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_uniform_lennard_jones_potential(const toml::value& global);
+template std::pair<LennardJonesAttractivePotential<double>, ParameterList<SimulatorTraits<double, UnlimitedBoundary>       , LennardJonesAttractivePotential<double>>> read_lennard_jones_attractive_potential(const toml::value&);
+template std::pair<LennardJonesAttractivePotential<float >, ParameterList<SimulatorTraits<float,  UnlimitedBoundary>       , LennardJonesAttractivePotential<float >>> read_lennard_jones_attractive_potential(const toml::value&);
+template std::pair<LennardJonesAttractivePotential<double>, ParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesAttractivePotential<double>>> read_lennard_jones_attractive_potential(const toml::value&);
+template std::pair<LennardJonesAttractivePotential<float >, ParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesAttractivePotential<float >>> read_lennard_jones_attractive_potential(const toml::value&);
 
-template LennardJonesAttractivePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_lennard_jones_attractive_potential(const toml::value& global);
-template LennardJonesAttractivePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_lennard_jones_attractive_potential(const toml::value& global);
-template LennardJonesAttractivePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_lennard_jones_attractive_potential(const toml::value& global);
-template LennardJonesAttractivePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_lennard_jones_attractive_potential(const toml::value& global);
+template std::pair<WCAPotential<double>, ParameterList<SimulatorTraits<double, UnlimitedBoundary>       , WCAPotential<double>>> read_wca_potential(const toml::value&);
+template std::pair<WCAPotential<float >, ParameterList<SimulatorTraits<float,  UnlimitedBoundary>       , WCAPotential<float >>> read_wca_potential(const toml::value&);
+template std::pair<WCAPotential<double>, ParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>, WCAPotential<double>>> read_wca_potential(const toml::value&);
+template std::pair<WCAPotential<float >, ParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, WCAPotential<float >>> read_wca_potential(const toml::value&);
 
-template WCAPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_wca_potential(const toml::value& global);
-template WCAPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_wca_potential(const toml::value& global);
-template WCAPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_wca_potential(const toml::value& global);
-template WCAPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_wca_potential(const toml::value& global);
+template std::pair<DebyeHuckelPotential<double>, ParameterList<SimulatorTraits<double, UnlimitedBoundary>       , DebyeHuckelPotential<double>>> read_debye_huckel_potential(const toml::value&);
+template std::pair<DebyeHuckelPotential<float >, ParameterList<SimulatorTraits<float,  UnlimitedBoundary>       , DebyeHuckelPotential<float >>> read_debye_huckel_potential(const toml::value&);
+template std::pair<DebyeHuckelPotential<double>, ParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<double>>> read_debye_huckel_potential(const toml::value&);
+template std::pair<DebyeHuckelPotential<float >, ParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<float >>> read_debye_huckel_potential(const toml::value&);
 
-template DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       > read_debye_huckel_potential(const toml::value& global);
-template DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_debye_huckel_potential(const toml::value& global);
-template DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_debye_huckel_potential(const toml::value& global);
-template DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_debye_huckel_potential(const toml::value& global);
+template std::pair<ThreeSPN2ExcludedVolumePotential<double>, ParameterList<SimulatorTraits<double, UnlimitedBoundary>       , ThreeSPN2ExcludedVolumePotential<double>>> read_3spn2_excluded_volume_potential(const toml::value&);
+template std::pair<ThreeSPN2ExcludedVolumePotential<float >, ParameterList<SimulatorTraits<float,  UnlimitedBoundary>       , ThreeSPN2ExcludedVolumePotential<float >>> read_3spn2_excluded_volume_potential(const toml::value&);
+template std::pair<ThreeSPN2ExcludedVolumePotential<double>, ParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>, ThreeSPN2ExcludedVolumePotential<double>>> read_3spn2_excluded_volume_potential(const toml::value&);
+template std::pair<ThreeSPN2ExcludedVolumePotential<float >, ParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ThreeSPN2ExcludedVolumePotential<float >>> read_3spn2_excluded_volume_potential(const toml::value&);
 
-template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_3spn2_excluded_volume_potential(const toml::value& global);
-template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_3spn2_excluded_volume_potential(const toml::value& global);
-template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_3spn2_excluded_volume_potential(const toml::value& global);
-template ThreeSPN2ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_3spn2_excluded_volume_potential(const toml::value& global);
-
-template iSoLFAttractivePotential<SimulatorTraits<double, UnlimitedBoundary>       > read_isolf_potential(const toml::value& global);
-template iSoLFAttractivePotential<SimulatorTraits<float,  UnlimitedBoundary>       > read_isolf_potential(const toml::value& global);
-template iSoLFAttractivePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>> read_isolf_potential(const toml::value& global);
-template iSoLFAttractivePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>> read_isolf_potential(const toml::value& global);
+template std::pair<iSoLFAttractivePotential<double>, ParameterList<SimulatorTraits<double, UnlimitedBoundary>       , iSoLFAttractivePotential<double>>> read_isolf_potential(const toml::value&);
+template std::pair<iSoLFAttractivePotential<float >, ParameterList<SimulatorTraits<float,  UnlimitedBoundary>       , iSoLFAttractivePotential<float >>> read_isolf_potential(const toml::value&);
+template std::pair<iSoLFAttractivePotential<double>, ParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>, iSoLFAttractivePotential<double>>> read_isolf_potential(const toml::value&);
+template std::pair<iSoLFAttractivePotential<float >, ParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>, iSoLFAttractivePotential<float >>> read_isolf_potential(const toml::value&);
 }

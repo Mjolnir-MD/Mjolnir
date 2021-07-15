@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_FORCEFIELD_PWMCOS_PWMCOS_POTENTIAL_HPP
 #define MJOLNIR_FORCEFIELD_PWMCOS_PWMCOS_POTENTIAL_HPP
+#include <mjolnir/forcefield/global/ParameterList.hpp>
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/core/Unit.hpp>
@@ -63,15 +64,129 @@ operator<<(std::basic_ostream<charT, traits>& os, const base_kind bk)
 }
 } // parameter_PWMcos
 
-template<typename traitsT>
+template<typename realT>
 class PWMcosPotential
 {
   public:
-    using traits_type = traitsT;
-    using real_type   = typename traits_type::real_type;
-    using system_type = System<traitsT>;
-    using self_type   = PWMcosPotential<traits_type>;
-    using base_kind   = parameter_PWMcos::base_kind;
+
+    using base_kind = parameter_PWMcos::base_kind;
+    using real_type = realT;
+
+    struct parameter_type
+    {
+        base_kind     base;
+        std::uint32_t S, B5, B3;
+
+        parameter_type(): base(base_kind::X),
+            S (std::numeric_limits<std::uint32_t>::max()),
+            B5(std::numeric_limits<std::uint32_t>::max()),
+            B3(std::numeric_limits<std::uint32_t>::max())
+        {}
+        parameter_type(const base_kind     b,  const std::uint32_t s,
+                       const std::uint32_t b5, const std::uint32_t b3)
+            noexcept : base(b), S(s), B5(b5), B3(b3)
+        {}
+        parameter_type(const parameter_type&) = default;
+        parameter_type(parameter_type&&)      = default;
+        parameter_type& operator=(const parameter_type&) = default;
+        parameter_type& operator=(parameter_type&&)      = default;
+    };
+
+    static constexpr std::size_t invalid() noexcept
+    {
+        return std::numeric_limits<std::size_t>::max();
+    }
+    static constexpr parameter_type default_parameter() noexcept
+    {
+        return parameter_type{invalid()};
+    }
+    static constexpr real_type default_cutoff() noexcept
+    {
+        return real_type(5.0);
+    }
+  public:
+
+    PWMcosPotential() noexcept {}
+
+    std::pair<real_type, real_type>
+    f_df(const real_type r0, const real_type r, const real_type rsigma) const noexcept
+    {
+        const real_type dr_sigma = (r - r0) * rsigma;
+        const real_type term     = std::exp(real_type(-0.5) * dr_sigma * dr_sigma);
+
+        return std::make_pair(term, -dr_sigma * rsigma * term);
+    }
+    std::pair<real_type, real_type>
+    g_dg(const real_type theta0, const real_type theta,
+         const real_type phi,    const real_type phi2,
+         const real_type pi_over_2phi) const noexcept
+    {
+        const real_type dtheta     = theta - theta0;
+        const real_type abs_dtheta = std::abs(dtheta);
+        if(abs_dtheta < phi)
+        {
+            return std::make_pair(real_type(1), real_type(0));
+        }
+        else if(abs_dtheta < phi2)
+        {
+            const real_type c = std::cos(dtheta * pi_over_2phi);
+            const real_type s = std::sin(dtheta * pi_over_2phi);
+            return std::make_pair(1 - c * c, 2 * s * c * pi_over_2phi);
+        }
+        else
+        {
+            return std::make_pair(real_type(0), real_type(0));
+        }
+    }
+
+    real_type f(const real_type r0, const real_type r, const real_type rsigma) const noexcept
+    {
+        const real_type dr_sigma = (r - r0) * rsigma;
+        return std::exp(real_type(-0.5) * dr_sigma * dr_sigma);
+    }
+    real_type g(const real_type theta0, const real_type theta,
+                const real_type phi,    const real_type phi2,
+                const real_type pi_over_2phi) const noexcept
+    {
+        const real_type dtheta     = theta - theta0;
+        const real_type abs_dtheta = std::abs(dtheta);
+        if(abs_dtheta < phi)
+        {
+            return 1;
+        }
+        else if(abs_dtheta < phi2)
+        {
+            const real_type term = std::cos(dtheta * pi_over_2phi);
+            return real_type(1) - term * term;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    template<typename T>
+    void initialize(const System<T>&) noexcept {return;}
+
+    template<typename T>
+    void update(const System<T>&) noexcept {return;}
+
+    static const char* name() noexcept {return "PWMcos";}
+};
+
+template<typename traitsT>
+class PWMcosParameterList
+    : public ParameterListBase<traitsT, PWMcosPotential<typename traitsT::real_type>>
+{
+  public:
+    using traits_type         = traitsT;
+    using real_type           = typename traits_type::real_type;
+    using system_type         = System<traitsT>;
+    using self_type           = PWMcosParameterList<traits_type>;
+    using base_kind           = parameter_PWMcos::base_kind;
+    using potential_type      = PWMcosPotential<real_type>;
+    using pair_parameter_type = typename potential_type::parameter_type;
+    using base_type           = ParameterListBase<traits_type, potential_type>;
 
     struct contact_parameter_type
     {
@@ -102,24 +217,7 @@ class PWMcosPotential
     {
         std::uint32_t dna_index;
     };
-    struct pair_parameter_type
-    {
-        base_kind     base;
-        std::uint32_t S, B5, B3;
 
-        pair_parameter_type(): base(base_kind::X),
-            S(invalid()), B5(invalid()), B3(invalid())
-        {}
-        ~pair_parameter_type() = default;
-        pair_parameter_type(const base_kind     b,  const std::uint32_t s,
-                            const std::uint32_t b5, const std::uint32_t b3)
-            noexcept : base(b), S(s), B5(b5), B3(b3)
-        {}
-        pair_parameter_type(const pair_parameter_type&) = default;
-        pair_parameter_type(pair_parameter_type&&)      = default;
-        pair_parameter_type& operator=(const pair_parameter_type&) = default;
-        pair_parameter_type& operator=(pair_parameter_type&&)      = default;
-    };
     using container_type = std::vector<parameter_type>;
 
     // topology stuff
@@ -143,14 +241,14 @@ class PWMcosPotential
 
   public:
 
-    PWMcosPotential(const real_type sigma, const real_type phi,
+    PWMcosParameterList(const real_type sigma, const real_type phi,
         const real_type energy_unit, const real_type energy_shift,
         const real_type cutoff_ratio,
         const std::vector<contact_parameter_type>&         contacts,
         const std::vector<dna_parameter_type>&             dnas,
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-        : sigma_(sigma), phi_(phi), phi2_(phi * 2),
+        : sigma_(sigma), rsigma_(real_type(1) / sigma), phi_(phi), phi2_(phi * 2),
           pi_over_2phi_(math::constants<real_type>::pi() * 0.5 / phi),
           energy_unit_(energy_unit),   energy_shift_(energy_shift),
           cutoff_ratio_(cutoff_ratio), max_cutoff_length_(0),
@@ -198,15 +296,22 @@ class PWMcosPotential
             std::unique(proteins_.begin(), proteins_.end());
         proteins_.erase(uniq_proteins, proteins_.end());
     }
-    ~PWMcosPotential() = default;
+    ~PWMcosParameterList() = default;
 
-    void initialize(const system_type& sys, const topology_type& topol) noexcept
+    void initialize(const system_type& sys, const topology_type& topol,
+                    const potential_type& pot) noexcept override
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
 
-        // set cutoff length
+        this->update(sys, topol, pot);
+        return;
+    }
 
+    void update(const system_type& sys, const topology_type& topol,
+                const potential_type&) noexcept override
+    {
+        // set cutoff length
         this->max_cutoff_length_ = real_type(0);
         for(auto& para : this->contacts_)
         {
@@ -215,76 +320,19 @@ class PWMcosPotential
             this->max_cutoff_length_ = std::max(max_cutoff_length_, r_cut);
         }
 
-        this->update(sys, topol);
-        return;
-    }
-
-    void update(const system_type& sys, const topology_type& topol) noexcept
-    {
         // update exclusion list based on sys.topology()
         exclusion_list_.make(sys, topol);
         return;
     }
 
-    std::pair<real_type, real_type>
-    f_df(const real_type r0, const real_type r) const noexcept
-    {
-        const real_type rsigma   = real_type(1) / this->sigma_;
-        const real_type dr_sigma = (r - r0) * rsigma;
-        const real_type term     = std::exp(real_type(-0.5) * dr_sigma * dr_sigma);
-
-        return std::make_pair(term, -dr_sigma * rsigma * term);
-    }
-    std::pair<real_type, real_type>
-    g_dg(const real_type theta0, const real_type theta) const noexcept
-    {
-        const real_type dtheta     = theta - theta0;
-        const real_type abs_dtheta = std::abs(dtheta);
-        if(abs_dtheta < this->phi_)
-        {
-            return std::make_pair(real_type(1), real_type(0));
-        }
-        else if(abs_dtheta < this->phi2_)
-        {
-            const real_type c = std::cos(dtheta * pi_over_2phi_);
-            const real_type s = std::sin(dtheta * pi_over_2phi_);
-            return std::make_pair(1 - c * c, 2 * s * c * pi_over_2phi_);
-        }
-        else
-        {
-            return std::make_pair(real_type(0), real_type(0));
-        }
-    }
-
-    real_type f(const real_type r0, const real_type r) const noexcept
-    {
-        const real_type dr_sigma = (r - r0) / this->sigma_;
-        return std::exp(real_type(-0.5) * dr_sigma * dr_sigma);
-    }
-    real_type g(const real_type theta0, const real_type theta) const noexcept
-    {
-        const real_type dtheta     = theta - theta0;
-        const real_type abs_dtheta = std::abs(dtheta);
-        if(abs_dtheta < this->phi_)
-        {
-            return 1;
-        }
-        else if(abs_dtheta < this->phi2_)
-        {
-            const real_type term = std::cos(dtheta * pi_over_2phi_);
-            return real_type(1) - term * term;
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
     real_type energy_shift() const noexcept {return energy_shift_;}
     real_type energy_unit()  const noexcept {return energy_unit_;}
 
-    real_type sigma() const noexcept {return sigma_;}
-    real_type phi()   const noexcept {return phi_;}
+    real_type sigma()        const noexcept {return sigma_;}
+    real_type rsigma()       const noexcept {return rsigma_;}
+    real_type phi()          const noexcept {return phi_;}
+    real_type phi2()         const noexcept {return phi2_;}
+    real_type pi_over_2phi() const noexcept {return pi_over_2phi_;}
 
     std::vector<contact_parameter_type> const& contacts() const noexcept
     {
@@ -295,37 +343,38 @@ class PWMcosPotential
     // for NeighborList
 
     pair_parameter_type
-    prepare_params(const std::size_t i, const std::size_t j) const noexcept
+    prepare_params(const std::size_t i, const std::size_t j) const noexcept override
     {
         // should be {protein, dna}
         assert(this->parameters_.at(i).dna_index == invalid());
         assert(this->parameters_.at(j).dna_index != invalid());
         const auto& d = this->dna_params_[this->parameters_.at(j).dna_index];
 
-
         return pair_parameter_type{d.base, d.S, d.B5, d.B3};
     }
 
     // {PRO-Ca} U {DNA-B}
-    std::vector<std::size_t> const& participants() const noexcept
+    std::vector<std::size_t> const&
+    participants() const noexcept override
     {
         return participants_;
     }
     // {Pro-Ca}
-    std::vector<std::size_t> const& leading_participants() const noexcept
+    range<typename std::vector<std::size_t>::const_iterator>
+    leading_participants() const noexcept override
     {
-        return this->proteins_;
+        return make_range(this->proteins_.begin(), proteins_.end());
     }
     // {DNA-B}
-    std::vector<std::size_t> const&
+    range<typename std::vector<std::size_t>::const_iterator>
     possible_partners_of(const std::size_t /*participant_idx*/,
-                         const std::size_t /*particle_idx*/) const noexcept
+                         const std::size_t /*particle_idx*/) const noexcept override
     {
-        return this->dnas_;
+        return make_range(this->dnas_.begin(), this->dnas_.end());
     }
 
     // to check bases has base-pairing interaction.
-    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept override
     {
         if(exclusion_list_.is_excluded(i, j))
         {
@@ -342,10 +391,15 @@ class PWMcosPotential
         return false;
     }
 
-    exclusion_list_type const& exclusion_list() const noexcept {return exclusion_list_;}
+    exclusion_list_type const& exclusion_list() const noexcept override {return exclusion_list_;}
 
     real_type cutoff_ratio()      const noexcept {return cutoff_ratio_;}
-    real_type max_cutoff_length() const noexcept {return this->max_cutoff_length_;}
+    real_type max_cutoff_length() const noexcept override {return this->max_cutoff_length_;}
+
+    base_type* clone() const override
+    {
+        return new PWMcosParameterList(*this);
+    }
 
     // ------------------------------------------------------------------------
     // used by Observer.
@@ -369,7 +423,7 @@ class PWMcosPotential
 
   private:
 
-    real_type sigma_, phi_, phi2_, pi_over_2phi_;
+    real_type sigma_, rsigma_, phi_, phi2_, pi_over_2phi_;
     real_type energy_unit_, energy_shift_;
     real_type cutoff_ratio_, max_cutoff_length_;
     std::vector<std::size_t>            participants_; // all participants
@@ -389,10 +443,10 @@ class PWMcosPotential
 
 namespace mjolnir
 {
-extern template class PWMcosPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
-extern template class PWMcosPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
-extern template class PWMcosPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-extern template class PWMcosPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+extern template class PWMcosParameterList<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class PWMcosParameterList<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class PWMcosParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class PWMcosParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
