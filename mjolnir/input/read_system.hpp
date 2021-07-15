@@ -101,6 +101,7 @@ read_system(const toml::value& root, const std::size_t N)
 
     MJOLNIR_LOG_NOTICE("reading ", format_nth(N), " system ...");
 
+    // ------------------------------------------------------------------------
     // check [[systems]] has `file_name = "checkpoint.msg"`.
     // If `file_name` has `.msg` file, load system status from the file.
     if(systems.at(N).contains("file_name"))
@@ -131,13 +132,20 @@ read_system(const toml::value& root, const std::size_t N)
         }
     }
 
+    // ------------------------------------------------------------------------
+    // `[[systems]]` does not have "checkpoint.msg". It should have all the
+    // settings. read it.
+
     const auto system = read_table_from_file(systems.at(N), "systems");
 
-    check_keys_available(system, {"boundary_shape"_s, "attributes"_s, "particles"_s});
+    check_keys_available(system, {"boundary_shape"_s, "attributes"_s, "dynamic_variables"_s, "particles"_s});
 
     const auto& particles = toml::find<toml::array>(system, "particles");
 
     System<traitsT> sys(particles.size(), read_boundary<traitsT>(system));
+
+    // -----------------------------------------------------------------------
+    // read attributes and dynamic variables
 
     for(const auto& attr : toml::find<toml::table>(system, "attributes"))
     {
@@ -146,11 +154,58 @@ read_system(const toml::value& root, const std::size_t N)
         MJOLNIR_LOG_INFO("attribute.", attr.first, " = ", attribute);
     }
 
+    if(system.contains("dynamic_variables"))
+    {
+        for(const auto& dynvar : toml::find<toml::table>(system, "dynamic_variables"))
+        {
+            const auto& var = dynvar.second;
+
+            const auto x = toml::find   <real_type>(var, "x");
+            const auto m = toml::find   <real_type>(var, "m");
+            const auto v = toml::find_or<real_type>(var, "v", real_type(0.0));
+            const auto f = toml::find_or<real_type>(var, "f", real_type(0.0));
+            const auto g = toml::find_or<real_type>(var, "gamma", real_type(0.0));
+
+            if(var.contains("boundary"))
+            {
+                const auto& boundary = toml::find<std::string>(var, "boundary");
+                const auto lower = toml::find<real_type>(var, "lower");
+                const auto upper = toml::find<real_type>(var, "upper");
+
+                if(boundary == "Periodic")
+                {
+                    sys.variable(dynvar.first) = DynamicVariable<real_type>(
+                        PeriodicDynamicVariable<real_type>(x, v, f, m, g, lower, upper));
+                }
+                else if(boundary == "Repulsive")
+                {
+                    sys.variable(dynvar.first) = DynamicVariable<real_type>(
+                        RepulsiveDynamicVariable<real_type>(x, v, f, m, g, lower, upper));
+                }
+                else
+                {
+                    MJOLNIR_LOG_ERROR("unknown boundary setting: ", boundary);
+                    throw_exception<std::runtime_error>("[error] mjolnir::read_system: "
+                        "available boundaries of dynvar are: \"Periodic\" or \"Repulsive\"");
+                }
+            }
+            else
+            {
+                sys.variable(dynvar.first) = DynamicVariable<real_type>(
+                            DefaultDynamicVariable<real_type>(x, v, f, m, g));
+            }
+            MJOLNIR_LOG_INFO("dynvar.", dynvar.first, ".m = ", m, " .x = ", x, " .v = ", v, " .f = ", f);
+        }
+    }
+
     // if there is no particle, return.
     if(particles.empty())
     {
         return sys;
     }
+
+    // -----------------------------------------------------------------------
+    // prepare for reading particles ...
 
     {
         // if the first particle has velocity, mjolnir assumes that velocity is
