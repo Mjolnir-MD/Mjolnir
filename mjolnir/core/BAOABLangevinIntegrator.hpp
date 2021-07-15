@@ -197,13 +197,11 @@ BAOABLangevinIntegrator<traitsT>::step(
 
         const auto& param = params_for_dynvar_.at(key);
 
-        real_type next_v = var.v() + halfdt_ * var.f() / var.m();
-        real_type next_x = var.x() + halfdt_ * var.v();
-        next_v *= param.exp_gamma_dt;
-        next_v += param.noise_coeff * rng.gaussian();
-        next_x += halfdt_ * var.v();
-
-        var.update(next_x, next_v, real_type(0));
+        var.update(var.x(), var.v() + halfdt_ * var.f() / var.m(), real_type(0)); // B
+        var.update(var.x() + halfdt_ * var.v(), var.v(), var.f());        // A
+        var.update(var.x(), var.v() * param.exp_gamma_dt +
+                            param.noise_coeff * rng.gaussian(), var.f()); // O
+        var.update(var.x() + halfdt_ * var.v(), var.v(), var.f());        // A
     }
     sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
