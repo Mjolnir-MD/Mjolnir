@@ -362,7 +362,14 @@ class MsgPackSaver
 
             // string -> map<8>{type, x, v, f, m, gamma, lower, upper}
             to_msgpack(key);
-            buffer_.push_back(std::uint8_t(0x88));
+            if(var.type() == "Default")
+            {
+                buffer_.push_back(std::uint8_t(0x86));
+            }
+            else
+            {
+                buffer_.push_back(std::uint8_t(0x88));
+            }
 
             to_msgpack("type"_s);  to_msgpack(var.type());
             to_msgpack("x"_s);     to_msgpack(var.x());
@@ -370,8 +377,21 @@ class MsgPackSaver
             to_msgpack("f"_s);     to_msgpack(var.f());
             to_msgpack("m"_s);     to_msgpack(var.m());
             to_msgpack("gamma"_s); to_msgpack(var.gamma());
-            to_msgpack("lower"_s); to_msgpack(var.lower());
-            to_msgpack("upper"_s); to_msgpack(var.upper());
+
+            // Since default dynvar does not have boundary, it returns [-inf, inf]
+            // as the lower and upper boundary. Msgpack can contain inf and nan
+            // values of floating point, because it contains float/double as the
+            // corresponding IEEE 754 format. All's right with the world.
+            //     However, JSON cannot handle inf. People normally do not edit
+            // msgpack itself, because it is a binary file, but might edit json
+            // converted from msgpack. In that case, saving [-inf, inf] becomes
+            // a problem. To avoid this, we omit lower/upper in the case of
+            // default dynamic variables.
+            if(var.type() != "Default")
+            {
+                to_msgpack("lower"_s); to_msgpack(var.lower());
+                to_msgpack("upper"_s); to_msgpack(var.upper());
+            }
         }
         return ;
     }

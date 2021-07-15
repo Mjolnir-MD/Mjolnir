@@ -345,13 +345,12 @@ class MsgPackLoader
         {
             const auto key = this->from_msgpack<std::string>(file, filename);
 
-            // 8-element map
+            // 8 or 6-element map
             const auto tag = detail::read_bytes_as<std::uint8_t>(file);
-            if(tag != 0x88)
+            if(tag != 0x88 && tag != 0x86)
             {
                 MJOLNIR_LOG_ERROR("invalid format in `dynamic_variables` part of the .msg file.");
-                MJOLNIR_LOG_ERROR("expected map-like type tag ", 0x88,
-                                  "(0x88), but got ", std::uint32_t(tag));
+                MJOLNIR_LOG_ERROR("expected map-like type tag (0x88 or 0x86), but got ", std::uint32_t(tag));
             }
 
             this->check_msgpack_key(file, filename, "type");
@@ -367,10 +366,16 @@ class MsgPackLoader
             const auto m = this->from_msgpack<real_type>(file, filename);
             this->check_msgpack_key(file, filename, "gamma");
             const auto gamma = this->from_msgpack<real_type>(file, filename);
-            this->check_msgpack_key(file, filename, "lower");
-            const auto lower = this->from_msgpack<real_type>(file, filename);
-            this->check_msgpack_key(file, filename, "upper");
-            const auto upper = this->from_msgpack<real_type>(file, filename);
+
+            auto lower = -std::numeric_limits<real_type>::infinity();
+            auto upper =  std::numeric_limits<real_type>::infinity();
+            if(tag == 0x88)
+            {
+                this->check_msgpack_key(file, filename, "lower");
+                lower = this->from_msgpack<real_type>(file, filename);
+                this->check_msgpack_key(file, filename, "upper");
+                upper = this->from_msgpack<real_type>(file, filename);
+            }
 
             if(type == "Default")
             {
