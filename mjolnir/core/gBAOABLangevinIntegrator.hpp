@@ -103,8 +103,10 @@ class gBAOABLangevinIntegrator
         const auto& constraint_ff = ff->constraint();
         const auto& constraints   = constraint_ff.constraints();
 
+        const auto max_iteration = constraint_ff.max_iteration();
+
         std::size_t rattle_step = 0;
-        while(rattle_step < constraint_ff.max_iteration())
+        while(rattle_step < max_iteration)
         {
             bool corrected = false;
             for(std::size_t i=0; i<constraints.size(); ++i)
@@ -147,7 +149,7 @@ class gBAOABLangevinIntegrator
             ++rattle_step;
         }
 
-        if(constraint_ff.max_iteration() <= rattle_step)
+        if(max_iteration != 0 && max_iteration <= rattle_step)
         {
             MJOLNIR_GET_DEFAULT_LOGGER();
             MJOLNIR_LOG_FUNCTION();
@@ -162,8 +164,10 @@ class gBAOABLangevinIntegrator
         const auto& constraint_ff = ff->constraint();
         const auto& constraints   = constraint_ff.constraints();
 
+        const auto max_iteration = constraint_ff.max_iteration();
+
         std::size_t rattle_step = 0;
-        while(rattle_step < constraint_ff.max_iteration())
+        while(rattle_step < max_iteration)
         {
             bool corrected = false;
             for(std::size_t i=0; i<constraints.size(); ++i)
@@ -196,7 +200,7 @@ class gBAOABLangevinIntegrator
             ++rattle_step;
         }
 
-        if(constraint_ff.max_iteration() <= rattle_step)
+        if(max_iteration != 0 && max_iteration <= rattle_step)
         {
             MJOLNIR_GET_DEFAULT_LOGGER();
             MJOLNIR_LOG_FUNCTION();
