@@ -3,6 +3,7 @@
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/core/ForceField.hpp>
 #include <mjolnir/forcefield/hybrid/HybridForceField.hpp>
+#include <mjolnir/forcefield/hybrid/DynamicHybridForceField.hpp>
 #include <mjolnir/forcefield/MultipleBasin/MultipleBasinForceField.hpp>
 #include <mjolnir/forcefield/MultipleBasin/MultipleBasin2BasinUnit.hpp>
 #include <mjolnir/forcefield/MultipleBasin/MultipleBasin3BasinUnit.hpp>
@@ -431,11 +432,42 @@ read_hybrid_forcefield(const toml::value& root, const toml::value& simulator)
         throw_exception<std::runtime_error>("[error] Hybrid Forcefield require 2 forcefields");
     }
 
-    return make_unique<HybridForceField<traitsT>>(
-            toml::find<real_type>(simulator, "forcefields", "lambda"),
-            read_default_forcefield<traitsT>(root, 0),
-            read_default_forcefield<traitsT>(root, 1)
-        );
+    const auto& forcefields = simulator.at("forcefields");
+    if( ! forcefields.contains("lambda"))
+    {
+        MJOLNIR_LOG_ERROR("Hybrid ForceField requires lambda value");
+        throw_exception<std::runtime_error>("[error] Hybrid Forcefield requires lambda value");
+    }
+
+    if(forcefields.at("lambda").is_floating())
+    {
+        return make_unique<HybridForceField<traitsT>>(
+                toml::find<real_type>(simulator, "forcefields", "lambda"),
+                read_default_forcefield<traitsT>(root, 0),
+                read_default_forcefield<traitsT>(root, 1)
+            );
+    }
+    else if(toml::find<std::string>(forcefields, "lambda") == "dynamic")
+    {
+        // considering umbrella sampling (could be replaced)
+        const auto k  = toml::find_or<real_type>(forcefields, "k_lambda", 0.0);
+        const auto v0 = toml::find_or<real_type>(forcefields, "v0_lambda", 0.0);
+
+        return make_unique<DynamicHybridForceField<traitsT>>(k, v0,
+                read_default_forcefield<traitsT>(root, 0),
+                read_default_forcefield<traitsT>(root, 1)
+            );
+    }
+    else
+    {
+        throw std::runtime_error(toml::format_error("mjolnir::read_hybrid_forcefield: "
+            "unknown lambda type", simulator.at("forcefields").at("lambda"),
+            "here", {"expected one of the following: ",
+                "- (real type): a constant lambda works as `lambda * V1 + (1 - lambda) * V2`.",
+                "- \"dynamic\": lambda also moves as a dynamic variable."
+            }));
+
+    }
 }
 
 template<typename traitsT>
