@@ -32,6 +32,7 @@ class ForceFieldBase
 
     virtual void calc_force(system_type& sys) const noexcept = 0;
     virtual real_type calc_energy(const system_type& sys) const noexcept = 0;
+    virtual real_type calc_force_and_energy(system_type& sys) const noexcept = 0;
 
     // format names of all the interactions for .ene file. must not contain '\n'.
     virtual void format_energy_name(std::string&) const = 0;

@@ -46,6 +46,7 @@ class MultipleBasinUnitBase
 
     virtual void      calc_force (      system_type&) const noexcept = 0;
     virtual real_type calc_energy(const system_type&) const noexcept = 0;
+    virtual real_type calc_force_and_energy(system_type&) const noexcept = 0;
 
     // update system parameters (e.g. temperature, ionic_strength, etc.)
     virtual void update(const system_type&, const topology_type&) = 0;

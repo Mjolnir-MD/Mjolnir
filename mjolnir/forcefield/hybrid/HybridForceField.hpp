@@ -90,6 +90,30 @@ class HybridForceField : public ForceFieldBase<traitsT>
                (real_type(1) - lambda_) * ff_2_->calc_energy(sys);
     }
 
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        using std::swap;
+
+        sys.preprocess_forces();
+        const auto V1 = this->ff_1_->calc_force_and_energy(sys);
+        sys.postprocess_forces();
+
+        swap(this->force_buffer_, sys.forces());
+
+        sys.preprocess_forces();
+        const auto V2 = this->ff_2_->calc_force_and_energy(sys);
+        sys.postprocess_forces();
+
+        const real_type one_minus_lambda = real_type(1) - this->lambda_;
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            sys.force(i) *= one_minus_lambda;
+            sys.force(i) += lambda_ * force_buffer_[i];
+            force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+        }
+        return lambda_ * V1 + one_minus_lambda * V2;
+    }
+
     void update(const system_type& sys) override
     {
         this->ff_1_->update(sys);

@@ -140,6 +140,14 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
 
     void calc_force(system_type& sys) const noexcept override
     {
+        // force calculation itself requires energy calculation. the cost of
+        // calculating energy value that is not used is ignorable
+        this->calc_force_and_energy(sys);
+        return ;
+    }
+
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
         using std::swap;
         // -------------------------------------------------------------------
         // save the current force that is not in this MB unit.
@@ -211,7 +219,7 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
         virial_buffer1_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         virial_buffer2_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
-        return ;
+        return V_MB;
     }
     real_type calc_energy(const system_type& sys) const noexcept override
     {

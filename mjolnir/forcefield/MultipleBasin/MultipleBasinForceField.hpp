@@ -139,6 +139,20 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
         return E;
     }
 
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        real_type E = real_type(0.0);
+
+        for(const auto& unit : this->units_)
+        {
+            E += unit->calc_force_and_energy(sys);
+        }
+        E += loc_common_.calc_force_and_energy(sys);
+        E += glo_common_.calc_force_and_energy(sys);
+        E += ext_common_.calc_force_and_energy(sys);
+        return E;
+    }
+
     void update(const system_type& sys) override
     {
         // update parameters (e.g. temperature). TODO: topologies?
