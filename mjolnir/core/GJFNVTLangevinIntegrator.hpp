@@ -133,8 +133,8 @@ class GJFNVTLangevinIntegrator
             dynvar_params_type param;
             param.alpha    = var.m() * var.gamma();
             param.beta     = std::sqrt(2 * param.alpha * kBT * dt_);
-            param.b        = 1.0 / (1.0 + param.alpha * dt_ * 0.5 / var.m());
-            param.vel_coef = 1.0 - param.alpha * param.b * dt_ / var.m();
+            param.b        = real_type(1) / (real_type(1) + param.alpha * dt_ / (2 * var.m()));
+            param.vel_coef = real_type(1) - param.alpha * param.b * dt_ / var.m();
             param.noise    = real_type(0); // initialized later
             params_for_dynvar_[key] = param;
         }
@@ -217,8 +217,8 @@ GJFNVTLangevinIntegrator<traitsT>::step(const real_type time,
         auto& param = params_for_dynvar_.at(key);
         auto& var = kv.second;
 
-        const auto next_x = var.x() + param.b * dt_ * var.v() +
-            0.5 / var.m() * (halfdt_ * var.f() + param.noise);
+        const auto next_x = var.x() + param.b * dt_ * (var.v() +
+            0.5 / var.m() * (halfdt_ * var.f() + param.noise));
 
         param.noise = rng.gaussian() * param.beta / var.m();
 
