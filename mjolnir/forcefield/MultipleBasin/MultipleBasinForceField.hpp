@@ -153,22 +153,22 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
         return ;
     }
 
-    void calc_force_and_virial(system_type& sys) const noexcept override
+    void calc_force_virial(system_type& sys) const noexcept override
     {
         using std::swap;
 
         for(const auto& unit : this->units_)
         {
-            unit->calc_force_and_virial(sys);
+            unit->calc_force_virial(sys);
         }
 
         swap(this->force_buffer_,  sys.forces());
         swap(this->virial_buffer_, sys.virial());
 
         sys.preprocess_forces();
-        loc_common_.calc_force_and_virial(sys);
-        glo_common_.calc_force_and_virial(sys);
-        ext_common_.calc_force_and_virial(sys);
+        loc_common_.calc_force_virial(sys);
+        glo_common_.calc_force_virial(sys);
+        ext_common_.calc_force_virial(sys);
         sys.postprocess_forces();
 
         for(std::size_t i=0; i<sys.size(); ++i)

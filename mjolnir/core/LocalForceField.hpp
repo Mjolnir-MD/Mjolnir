@@ -116,11 +116,11 @@ class LocalForceField
         }
         return;
     }
-    void calc_force_and_virial(system_type& sys) const noexcept
+    void calc_force_virial(system_type& sys) const noexcept
     {
         for(const auto& item : this->interactions_)
         {
-            item->calc_force_and_virial(sys);
+            item->calc_force_virial(sys);
         }
         return;
     }

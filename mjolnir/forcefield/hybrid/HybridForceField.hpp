@@ -85,7 +85,7 @@ class HybridForceField : public ForceFieldBase<traitsT>
         }
         return ;
     }
-    void calc_force_and_virial(system_type& sys) const noexcept override
+    void calc_force_virial(system_type& sys) const noexcept override
     {
         using std::swap;
 

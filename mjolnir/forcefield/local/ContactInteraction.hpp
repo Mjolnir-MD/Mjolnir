@@ -66,7 +66,7 @@ class ContactInteraction final : public LocalInteractionBase<traitsT>
         this->template calc_force_energy_virial_impl<false, false>(sys);
         return;
     }
-    void calc_force_and_virial(system_type& sys) const noexcept override
+    void calc_force_virial(system_type& sys) const noexcept override
     {
         this->template calc_force_energy_virial_impl<false, true>(sys);
         return;

@@ -108,7 +108,7 @@ class ExternalForceField
         }
         return;
     }
-    void calc_force_and_virial(system_type& sys) const noexcept
+    void calc_force_virial(system_type& sys) const noexcept
     {
         if( ! this->interactions_.empty() && ! already_warned_about_virial_)
         {

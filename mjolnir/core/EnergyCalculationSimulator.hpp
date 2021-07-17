@@ -73,7 +73,7 @@ inline void EnergyCalculationSimulator<traitsT>::initialize()
 
     this->ff_->initialize(this->sys_);
 
-    this->ff_->calc_force_and_virial(this->sys_);
+    this->ff_->calc_force_virial(this->sys_);
 
     auto Pins = this->sys_.virial();
     for(std::size_t i=0; i<sys_.size(); ++i)
@@ -98,7 +98,7 @@ inline void EnergyCalculationSimulator<traitsT>::initialize()
 template<typename traitsT>
 inline bool EnergyCalculationSimulator<traitsT>::step()
 {
-    this->ff_->calc_force_and_virial(this->sys_);
+    this->ff_->calc_force_virial(this->sys_);
 
     auto Pins = this->sys_.virial();
     for(std::size_t i=0; i<sys_.size(); ++i)

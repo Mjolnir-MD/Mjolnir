@@ -54,7 +54,7 @@ class BondLengthInteraction final : public LocalInteractionBase<traitsT>
     real_type calc_energy(const system_type&)     const noexcept override;
 
     void      calc_force           (system_type&) const noexcept override;
-    void      calc_force_and_virial(system_type&) const noexcept override;
+    void      calc_force_virial(system_type&) const noexcept override;
     real_type calc_force_and_energy(system_type&) const noexcept override;
 
     void initialize(const system_type& sys) override
@@ -147,7 +147,7 @@ void BondLengthInteraction<traitsT, potentialT>::calc_force(
 }
 
 template<typename traitsT, typename potentialT>
-void BondLengthInteraction<traitsT, potentialT>::calc_force_and_virial(
+void BondLengthInteraction<traitsT, potentialT>::calc_force_virial(
         system_type& sys) const noexcept
 {
     for(const auto& idxp : this->potentials_)

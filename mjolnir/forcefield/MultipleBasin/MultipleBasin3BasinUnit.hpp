@@ -214,7 +214,7 @@ class MultipleBasin3BasinUnit final: public MultipleBasinUnitBase<traitsT>
 
         return ;
     }
-    void calc_force_and_virial(system_type& sys) const noexcept override
+    void calc_force_virial(system_type& sys) const noexcept override
     {
         this->calc_force(sys);
         return ;
