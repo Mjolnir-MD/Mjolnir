@@ -31,7 +31,7 @@ class ForceFieldBase
     virtual void  scale_margin(const real_type scale,   const system_type& sys) = 0;
 
     virtual void calc_force(system_type& sys) const noexcept = 0;
-    virtual void calc_force_virial(system_type& sys) const noexcept = 0;
+    virtual void calc_force_and_virial(system_type& sys) const noexcept = 0;
     virtual real_type calc_energy(const system_type& sys) const noexcept = 0;
 
     // format names of all the interactions for .ene file. must not contain '\n'.

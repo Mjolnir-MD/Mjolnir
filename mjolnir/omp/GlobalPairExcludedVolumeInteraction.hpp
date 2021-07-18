@@ -76,11 +76,11 @@ class GlobalPairInteraction<
 
     void calc_force(system_type& sys) const noexcept override
     {
-        this->template calc_force_virial_impl<false>(sys);
+        this->template calc_force_and_virial_impl<false>(sys);
     }
-    void calc_force_virial(system_type& sys) const noexcept override
+    void calc_force_and_virial(system_type& sys) const noexcept override
     {
-        this->template calc_force_virial_impl<true>(sys);
+        this->template calc_force_and_virial_impl<true>(sys);
     }
     real_type calc_energy(const system_type& sys) const noexcept override
     {
@@ -183,7 +183,7 @@ class GlobalPairInteraction<
   private:
 
     template<bool NeedVirial>
-    void calc_force_virial_impl(system_type& sys) const noexcept
+    void calc_force_and_virial_impl(system_type& sys) const noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
         MJOLNIR_LOG_FUNCTION_DEBUG();

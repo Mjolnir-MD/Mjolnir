@@ -169,7 +169,7 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         virial_buffer1_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         return ;
     }
-    void calc_force_virial(system_type& sys) const noexcept override
+    void calc_force_and_virial(system_type& sys) const noexcept override
     {
         // since calc_force_and_energy also calculates virial, it is easier to
         // use the same function

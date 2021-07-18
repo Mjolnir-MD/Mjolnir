@@ -107,12 +107,12 @@ class ForceField final : public ForceFieldBase<traitsT>
         sys.postprocess_forces();
         return;
     }
-    void calc_force_virial(system_type& sys) const noexcept override
+    void calc_force_and_virial(system_type& sys) const noexcept override
     {
         sys.preprocess_forces();
-        local_   .calc_force_virial(sys);
-        global_  .calc_force_virial(sys);
-        external_.calc_force_virial(sys);
+        local_   .calc_force_and_virial(sys);
+        global_  .calc_force_and_virial(sys);
+        external_.calc_force_and_virial(sys);
         sys.postprocess_forces();
         return;
     }

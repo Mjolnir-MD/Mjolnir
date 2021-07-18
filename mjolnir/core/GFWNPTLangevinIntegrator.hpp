@@ -92,7 +92,7 @@ class GFWNPTLangevinIntegrator
             sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
         sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
-        ff->calc_force_virial(sys);
+        ff->calc_force_and_virial(sys);
 
         // calculate the current pressure using the force calculated here
         const auto h_cell = sys.boundary().width();
@@ -269,7 +269,7 @@ class GFWNPTLangevinIntegrator
                                       std::sqrt(max_displacement_sq_2);
         ff->reduce_margin(2 * max_displacement, sys);
 
-        ff->calc_force_virial(sys);
+        ff->calc_force_and_virial(sys);
 
         // --------------------------------------------------------------------
         // update particle velocities
