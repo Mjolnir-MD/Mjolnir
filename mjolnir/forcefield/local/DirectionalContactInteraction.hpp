@@ -61,6 +61,10 @@ class DirectionalContactInteraction final : public LocalInteractionBase<traitsT>
     {
         return this->template calc_force_energy_virial_impl<true, true>(sys);
     }
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
+    {
+        return this->template calc_force_energy_virial_impl<true, true>(sys);
+    }
 
     void initialize(const system_type& sys) override
     {

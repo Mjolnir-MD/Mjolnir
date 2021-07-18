@@ -93,6 +93,10 @@ class ThreeSPN2BaseStackingInteraction<
     {
         return this->template calc_force_energy_virial_impl<true, true>(sys);
     }
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
+    {
+        return this->template calc_force_energy_virial_impl<true, true>(sys);
+    }
 
     real_type calc_energy(const system_type& sys) const noexcept override
     {
