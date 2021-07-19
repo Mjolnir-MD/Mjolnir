@@ -88,6 +88,14 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
         this->template calc_force_energy_virial_impl<false, true>(sys);
         return;
     }
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        return this->template calc_force_energy_virial_impl<true, false>(sys);
+    }
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
+    {
+        return this->template calc_force_energy_virial_impl<true, true>(sys);
+    }
 
     real_type calc_energy(const system_type& sys) const noexcept override
     {
@@ -187,11 +195,6 @@ class PWMcosInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
             }
         }
         return E;
-    }
-
-    real_type calc_force_and_energy(system_type& sys) const noexcept override
-    {
-        return this->template calc_force_energy_virial_impl<true, true>(sys);
     }
 
     std::string name() const override {return "PWMcosInteraction";}

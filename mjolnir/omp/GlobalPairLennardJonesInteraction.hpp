@@ -86,6 +86,14 @@ class GlobalPairInteraction<
         this->template calc_force_and_virial_impl<true>(sys);
         return ;
     }
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        return this->template calc_force_virial_energy_impl<false>(sys);
+    }
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
+    {
+        return this->template calc_force_virial_energy_impl<true>(sys);
+    }
 
     real_type calc_energy(const system_type& sys) const noexcept override
     {
@@ -122,52 +130,6 @@ class GlobalPairInteraction<
         }
         return E;
     }
-
-    real_type calc_force_and_energy(system_type& sys) const noexcept override
-    {
-        const auto coef_at_cutoff  = potential_.coef_at_cutoff();
-        const auto cutoff_ratio    = potential_.cutoff_ratio();
-        const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-
-        real_type energy = 0;
-        const auto leading_participants = this->parameters_.leading_participants();
-#pragma omp parallel for reduction(+:energy)
-        for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
-        {
-            const std::size_t thread_id = omp_get_thread_num();
-            const auto i = leading_participants[idx];
-            for(const auto& ptnr : this->partition_.partners(i))
-            {
-                const auto  j    = ptnr.index;
-                const auto& para = ptnr.parameter();
-
-                const coordinate_type rij =
-                    sys.adjust_direction(sys.position(i), sys.position(j));
-                const real_type l_sq = math::length_sq(rij);
-
-                const real_type sigma_sq = para.sigma * para.sigma;
-                if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
-
-                const real_type epsilon = para.epsilon;
-
-                const real_type rcp_l_sq = 1 / l_sq;
-                const real_type s2l2 = sigma_sq * rcp_l_sq;
-                const real_type s6l6 = s2l2 * s2l2 * s2l2;
-
-                energy += 4 * epsilon * (s6l6 * s6l6 - s6l6 - coef_at_cutoff);
-
-                const coordinate_type f = rij *
-                    (24 * epsilon * (s6l6 - 2 * s6l6 * s6l6) * rcp_l_sq);
-
-                sys.force_thread(thread_id, i) += f;
-                sys.force_thread(thread_id, j) -= f;
-
-                sys.virial_thread(thread_id) += math::tensor_product(rij, -f);
-            }
-        }
-        return energy;
-    }
-
 
     std::string name() const override {return "GlobalPairLennardJones";}
 
@@ -221,6 +183,54 @@ class GlobalPairInteraction<
             }
         }
         return ;
+    }
+    template<bool NeedVirial>
+    real_type calc_force_virial_energy_impl(system_type& sys) const noexcept
+    {
+        const auto coef_at_cutoff  = potential_.coef_at_cutoff();
+        const auto cutoff_ratio    = potential_.cutoff_ratio();
+        const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
+
+        real_type energy = 0;
+        const auto leading_participants = this->parameters_.leading_participants();
+#pragma omp parallel for reduction(+:energy)
+        for(std::size_t idx=0; idx < leading_participants.size(); ++idx)
+        {
+            const std::size_t thread_id = omp_get_thread_num();
+            const auto i = leading_participants[idx];
+            for(const auto& ptnr : this->partition_.partners(i))
+            {
+                const auto  j    = ptnr.index;
+                const auto& para = ptnr.parameter();
+
+                const coordinate_type rij =
+                    sys.adjust_direction(sys.position(i), sys.position(j));
+                const real_type l_sq = math::length_sq(rij);
+
+                const real_type sigma_sq = para.sigma * para.sigma;
+                if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
+
+                const real_type epsilon = para.epsilon;
+
+                const real_type rcp_l_sq = 1 / l_sq;
+                const real_type s2l2 = sigma_sq * rcp_l_sq;
+                const real_type s6l6 = s2l2 * s2l2 * s2l2;
+
+                energy += 4 * epsilon * (s6l6 * s6l6 - s6l6 - coef_at_cutoff);
+
+                const coordinate_type f = rij *
+                    (24 * epsilon * (s6l6 - 2 * s6l6 * s6l6) * rcp_l_sq);
+
+                sys.force_thread(thread_id, i) += f;
+                sys.force_thread(thread_id, j) -= f;
+
+                if(NeedVirial)
+                {
+                    sys.virial_thread(thread_id) += math::tensor_product(rij, -f);
+                }
+            }
+        }
+        return energy;
     }
 
   private:
