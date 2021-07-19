@@ -88,14 +88,24 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
 
     void calc_force (system_type& sys)        const noexcept override
     {
-        this->template calc_force_and_virial_impl<false>(sys);
+        this->template calc_force_virial_energy_impl<false, false>(sys);
+        return;
     }
     void calc_force_and_virial(system_type& sys) const noexcept override
     {
-        this->template calc_force_and_virial_impl<true>(sys);
+        this->template calc_force_virial_energy_impl<false, true>(sys);
+        return;
     }
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        return this->template calc_force_virial_energy_impl<true, false>(sys);
+    }
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
+    {
+        return this->template calc_force_virial_energy_impl<true, true>(sys);
+    }
+
     real_type calc_energy(const system_type&)     const noexcept override;
-    real_type calc_force_and_energy(system_type&) const noexcept override;
 
     std::string name() const override
     {
@@ -118,8 +128,8 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
 
   private:
 
-    template<bool NeedVirial>
-    void calc_force_and_virial_impl(system_type& sys) const noexcept;
+    template<bool NeedEnergy, bool NeedVirial>
+    real_type calc_force_virial_energy_impl(system_type& sys) const noexcept;
 
   private:
 
@@ -136,10 +146,12 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
 };
 
 template<typename traitsT, typename potT>
-template<bool NeedVirial>
-void GlobalPairInteraction<traitsT, potT>::calc_force_and_virial_impl(
+template<bool NeedEnergy, bool NeedVirial>
+GlobalPairInteraction<traitsT, potT>::real_type
+GlobalPairInteraction<traitsT, potT>::calc_force_virial_energy_impl(
         system_type& sys) const noexcept
 {
+    real_type energy = 0.0;
     const auto leading_participants = this->parameters_.leading_participants();
     for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
     {
@@ -149,7 +161,7 @@ void GlobalPairInteraction<traitsT, potT>::calc_force_and_virial_impl(
             const auto  j    = ptnr.index;
             const auto& para = ptnr.parameter();
 
-            const auto rij = // ri -> rj = rj - ri
+            const auto rij =
                 sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type l2 = math::length_sq(rij); // |rij|^2
             const real_type rl = math::rsqrt(l2);      // 1 / |rij|
@@ -163,14 +175,17 @@ void GlobalPairInteraction<traitsT, potT>::calc_force_and_virial_impl(
             sys.force(i) += f;
             sys.force(j) -= f;
 
-            if(NeedVirial)
+            if(NeedVirial) // (rj - ri) * Fj = (ri - rj) * Fi
             {
-                // (rj - ri) * Fj = (ri - rj) * Fi
                 sys.virial() += math::tensor_product(rij, -f);
+            }
+            if(NeedEnergy)
+            {
+                energy += potential_.potential(l, para);
             }
         }
     }
-    return ;
+    return energy;
 }
 
 template<typename traitsT, typename potT>
@@ -196,44 +211,6 @@ GlobalPairInteraction<traitsT, potT>::calc_energy(
     }
     return E;
 }
-
-template<typename traitsT, typename potT>
-typename GlobalPairInteraction<traitsT, potT>::real_type
-GlobalPairInteraction<traitsT, potT>::calc_force_and_energy(
-        system_type& sys) const noexcept
-{
-    real_type energy = 0.0;
-    const auto leading_participants = this->parameters_.leading_participants();
-    for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
-    {
-        const auto i = leading_participants[idx];
-        for(const auto& ptnr : this->partition_.partners(i))
-        {
-            const auto  j    = ptnr.index;
-            const auto& para = ptnr.parameter();
-
-            const auto rij =
-                sys.adjust_direction(sys.position(i), sys.position(j));
-            const real_type l2 = math::length_sq(rij); // |rij|^2
-            const real_type rl = math::rsqrt(l2);      // 1 / |rij|
-            const real_type l  = l2 * rl;              // |rij|^2 / |rij|
-            const real_type f_mag = potential_.derivative(l, para);
-
-            // if length exceeds cutoff, potential returns just 0.
-            if(f_mag == 0.0){continue;}
-
-            energy += potential_.potential(l, para);
-            const coordinate_type f = rij * (f_mag * rl);
-            sys.force(i) += f;
-            sys.force(j) -= f;
-
-            // (rj - ri) * Fj = (ri - rj) * Fi
-            sys.virial() += math::tensor_product(rij, -f);
-        }
-    }
-    return energy;
-}
-
 
 } // mjolnir
 

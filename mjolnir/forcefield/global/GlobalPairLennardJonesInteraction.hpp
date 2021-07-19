@@ -78,57 +78,22 @@ class GlobalPairInteraction<
         return;
     }
 
-    template<bool NeedVirial>
-    void calc_force_and_virial_impl(system_type& sys) const noexcept
-    {
-        const auto cutoff_ratio    = potential_.cutoff_ratio();
-        const auto cutoff_ratio_sq = cutoff_ratio * cutoff_ratio;
-
-        const auto leading_participants = this->parameters_.leading_participants();
-        for(const std::size_t i : leading_participants)
-        {
-            for(const auto& ptnr : this->partition_.partners(i))
-            {
-                const auto  j    = ptnr.index;
-                const auto& para = ptnr.parameter();
-
-                const coordinate_type rij =
-                    sys.adjust_direction(sys.position(i), sys.position(j));
-                const real_type l_sq = math::length_sq(rij);
-
-                const real_type sigma_sq = para.sigma * para.sigma;
-                if(sigma_sq * cutoff_ratio_sq < l_sq) {continue;}
-
-                const real_type epsilon = para.epsilon;
-
-                const real_type rcp_l_sq = 1 / l_sq;
-                const real_type s2l2 = sigma_sq * rcp_l_sq;
-                const real_type s6l6 = s2l2 * s2l2 * s2l2;
-
-                const coordinate_type f = rij *
-                    (24 * epsilon * (s6l6 - 2 * s6l6 * s6l6) * rcp_l_sq);
-
-                sys.force(i) += f;
-                sys.force(j) -= f;
-
-                if(NeedVirial)
-                {
-                    // rij * Fj = (rj - ri) * Fj = (ri - rj) * Fi
-                    sys.virial() += math::tensor_product(rij, -f);
-                }
-            }
-        }
-        return ;
-    }
     void calc_force (system_type& sys)        const noexcept override
     {
-        this->template calc_force_and_virial_impl<false>(sys);
+        this->template calc_force_virial_energy_impl<false, false>(sys);
     }
     void calc_force_and_virial(system_type& sys) const noexcept override
     {
-        this->template calc_force_and_virial_impl<true>(sys);
+        this->template calc_force_virial_energy_impl<false, true>(sys);
     }
-
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        return calc_force_virial_energy_impl<true, false>(sys);
+    }
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
+    {
+        return calc_force_virial_energy_impl<true, true>(sys);
+    }
 
     real_type calc_energy(const system_type& sys) const noexcept override
     {
@@ -166,7 +131,22 @@ class GlobalPairInteraction<
         return E;
     }
 
-    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    std::string name() const override {return "GlobalPairLennardJones";}
+
+    potential_type const& potential() const noexcept {return potential_;}
+    potential_type&       potential()       noexcept {return potential_;}
+
+    partition_type const& partition() const noexcept {return partition_;}
+
+    base_type* clone() const override
+    {
+        return new GlobalPairInteraction(*this);
+    }
+
+  private:
+
+    template<bool NeedEnergy, bool NeedVirial>
+    real_type calc_force_virial_energy_impl(system_type& sys) const noexcept
     {
         const auto coef_at_cutoff  = potential_.coef_at_cutoff();
         const auto cutoff_ratio    = potential_.cutoff_ratio();
@@ -196,32 +176,27 @@ class GlobalPairInteraction<
                 const real_type s2l2 = sigma_sq * rcp_l_sq;
                 const real_type s6l6 = s2l2 * s2l2 * s2l2;
 
-                energy += 4 * epsilon * (s6l6 * s6l6 - s6l6 - coef_at_cutoff);
-
                 const coordinate_type f = rij *
                     (24 * epsilon * (s6l6 - 2 * s6l6 * s6l6) * rcp_l_sq);
 
                 sys.force(i) += f;
                 sys.force(j) -= f;
 
-                // rij * Fj = (rj - ri) * Fj = (ri - rj) * Fi
-                sys.virial() += math::tensor_product(rij, -f);
+                if(NeedEnergy)
+                {
+                    energy += 4 * epsilon * (s6l6 * s6l6 - s6l6 - coef_at_cutoff);
+                }
+
+                if(NeedVirial)
+                {
+                    // rij * Fj = (rj - ri) * Fj = (ri - rj) * Fi
+                    sys.virial() += math::tensor_product(rij, -f);
+                }
             }
         }
         return energy;
     }
 
-    std::string name() const override {return "GlobalPairLennardJones";}
-
-    potential_type const& potential() const noexcept {return potential_;}
-    potential_type&       potential()       noexcept {return potential_;}
-
-    partition_type const& partition() const noexcept {return partition_;}
-
-    base_type* clone() const override
-    {
-        return new GlobalPairInteraction(*this);
-    }
 
   private:
 
