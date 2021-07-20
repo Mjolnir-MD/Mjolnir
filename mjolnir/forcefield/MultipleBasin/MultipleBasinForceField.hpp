@@ -135,7 +135,6 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
         }
 
         swap(this->force_buffer_,  sys.forces());
-        swap(this->virial_buffer_, sys.virial());
 
         sys.preprocess_forces();
         loc_common_.calc_force(sys);
@@ -148,8 +147,6 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
             sys.force(i) += force_buffer_[i]; // restore other force
             force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
-        sys.virial() += virial_buffer_;
-        this->virial_buffer_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         return ;
     }
 
