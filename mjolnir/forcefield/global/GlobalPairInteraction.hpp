@@ -147,7 +147,7 @@ class GlobalPairInteraction final : public GlobalInteractionBase<traitsT>
 
 template<typename traitsT, typename potT>
 template<bool NeedEnergy, bool NeedVirial>
-GlobalPairInteraction<traitsT, potT>::real_type
+typename GlobalPairInteraction<traitsT, potT>::real_type
 GlobalPairInteraction<traitsT, potT>::calc_force_virial_energy_impl(
         system_type& sys) const noexcept
 {
