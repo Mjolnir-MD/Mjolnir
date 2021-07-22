@@ -163,7 +163,7 @@ class GlobalPairInteraction<
     }
 
     template<bool NeedVirial>
-    real_type calc_force_virial_energy_impl(system_type& sys) const noexcept override
+    real_type calc_force_virial_energy_impl(system_type& sys) const noexcept
     {
         real_type energy = 0.0;
         const auto leading_participants = this->parameters_.leading_participants();

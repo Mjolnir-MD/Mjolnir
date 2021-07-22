@@ -191,7 +191,7 @@ class GlobalPairInteraction<
     }
 
     template<bool NeedVirial>
-    real_type calc_force_virial_energy_impl(system_type& sys) const noexcept override
+    real_type calc_force_virial_energy_impl(system_type& sys) const noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
         MJOLNIR_LOG_FUNCTION_DEBUG();
