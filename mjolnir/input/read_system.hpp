@@ -158,6 +158,7 @@ read_system(const toml::value& root, const std::size_t N)
     {
         for(const auto& dynvar : toml::find<toml::table>(system, "dynamic_variables"))
         {
+            MJOLNIR_LOG_INFO("a dynamic varaible ", dynvar.first, " found");
             const auto& var = dynvar.second;
 
             const auto x = toml::find   <real_type>(var, "x");
@@ -174,11 +175,13 @@ read_system(const toml::value& root, const std::size_t N)
 
                 if(boundary == "Periodic")
                 {
+                    MJOLNIR_LOG_INFO("boundary is periodic");
                     sys.variable(dynvar.first) = DynamicVariable<real_type>(
                         PeriodicDynamicVariable<real_type>(x, v, f, m, g, lower, upper));
                 }
                 else if(boundary == "Repulsive")
                 {
+                    MJOLNIR_LOG_INFO("boundary is repulsive");
                     sys.variable(dynvar.first) = DynamicVariable<real_type>(
                         RepulsiveDynamicVariable<real_type>(x, v, f, m, g, lower, upper));
                 }
@@ -191,6 +194,7 @@ read_system(const toml::value& root, const std::size_t N)
             }
             else
             {
+                MJOLNIR_LOG_INFO("no boundary");
                 sys.variable(dynvar.first) = DynamicVariable<real_type>(
                             DefaultDynamicVariable<real_type>(x, v, f, m, g));
             }
