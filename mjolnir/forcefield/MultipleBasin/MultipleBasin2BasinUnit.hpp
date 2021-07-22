@@ -380,7 +380,7 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         energy += ext1_.calc_force_virial_energy(sys);
         return energy;
     }
-    real_type calc_force_and_energy_basin2(system_type& sys) const
+    real_type calc_force_virial_energy_basin2(system_type& sys) const
     {
         real_type energy = 0;
         energy += loc2_.calc_force_virial_energy(sys);
