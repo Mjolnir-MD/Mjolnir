@@ -67,7 +67,8 @@ template<typename traitsT, typename Interaction>
 void check_force(const System<traitsT>& init,
                  const Interaction& interaction,
                  const typename traitsT::real_type tol,
-                 const typename traitsT::real_type dr)
+                 const typename traitsT::real_type dr,
+                 const bool zero_net_force = true) // sum of external force (e.g. wall potential) is non-zero
 {
     using real_type = typename traitsT::real_type;
 
@@ -166,7 +167,10 @@ void check_force(const System<traitsT>& init,
         BOOST_TEST_REQUIRE(init.virial()[i] == real_type(0));
     }
 
-    check_net_force(sys, interaction, tol);
+    if(zero_net_force)
+    {
+        check_net_force(sys, interaction, tol);
+    }
 }
 
 } // test

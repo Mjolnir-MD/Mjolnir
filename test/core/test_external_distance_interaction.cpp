@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(ExternalDistanceInteraction_numerical_difference)
         constexpr real_type tol = 1e-4;
         constexpr real_type dr  = 1e-5;
 
-        test::check_force(sys, interaction, tol, dr);
+        test::check_force(sys, interaction, tol, dr, false);
         test::check_force_and_energy(sys, interaction, tol);
     }
 }
