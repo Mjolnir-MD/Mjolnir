@@ -147,6 +147,7 @@ BOOST_AUTO_TEST_CASE(PDNS_Interaction)
         test::check_virial(sys, interaction, tol);
         test::check_force_and_virial(sys, interaction, tol);
         test::check_force_and_energy(sys, interaction, tol);
+        test::check_force_energy_virial(sys, interaction, tol);
 
     } // theta2
     } // theta1

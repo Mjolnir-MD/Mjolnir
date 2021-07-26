@@ -208,6 +208,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2BasePairIntearction_numerical_diff,
             test::check_virial(sys, interaction, tol);
             test::check_force_and_virial(sys, interaction, tol);
             test::check_force_and_energy(sys, interaction, tol);
+            test::check_force_energy_virial(sys, interaction, tol);
 
         } // theta2
         } // theta1
@@ -595,6 +596,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ThreeSPN2CrossStackingIntearction_numerical_diff,
             test::check_virial(sys, interaction, tol);
             test::check_force_and_virial(sys, interaction, tol);
             test::check_force_and_energy(sys, interaction, tol);
+            test::check_force_energy_virial(sys, interaction, tol);
 
         } // thetaCS_j
         } // thetaCS_i

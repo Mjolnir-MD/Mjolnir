@@ -102,7 +102,7 @@ void check_force_energy_virial(System<traitsT> ref,
         BOOST_TEST(math::Z(sys.force(idx)) == math::Z(ref.force(idx)), boost::test_tools::tolerance(tol));
     }
 
-    check_virial_in_force_and_energy(sys, interaction, tol);
+    check_virial_in_force_energy_virial(sys, interaction, tol);
 
     return;
 }
