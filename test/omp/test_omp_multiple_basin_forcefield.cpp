@@ -70,8 +70,8 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_2Basin_numerical_difference)
 
         test::clear_everything(sys);
 
-        sys.at(0).position = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
-        sys.at(1).position = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
+        sys.position(0) = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
+        sys.position(1) = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
 
         forcefield.initialize(sys); // don't forget this
 
@@ -314,8 +314,8 @@ BOOST_AUTO_TEST_CASE(MultipleBasin_3Basin_numerical_difference)
 
         test::clear_everything(sys);
 
-        sys.at(0).position = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
-        sys.at(1).position = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
+        sys.position(0) = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
+        sys.position(1) = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
 
         forcefield.initialize(sys); // don't forget this
 

@@ -441,7 +441,7 @@ integratorT read_integrator(const toml::value& sim)
                                       " based on the Velocity Verlet",
             "- \"BAOABLangevin\"      : well-known BAOAB Langevin Integrator",
             "- \"g-BAOABLangevin\"    : geodesic BAOAB Langevin Integrator",
-            "- \"GJWNPTLangevin\"     : BAOAB-type NPT Langevin Integrator",
+            "- \"GFWNPTLangevin\"     : BAOAB-type NPT Langevin Integrator",
             "- \"G-JFLangevin\"       : Verlet-type Langevin Integrator by G-J&F"
             }));
     }

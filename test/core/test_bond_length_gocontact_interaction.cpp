@@ -40,8 +40,8 @@ BOOST_AUTO_TEST_CASE(BondLengthGoContact_numerical_difference)
         system_type sys(2, boundary_type{});
         test::clear_everything(sys);
 
-        sys.at(0).position = coord_type( 0.0, 0.0, 0.0);
-        sys.at(1).position = coord_type( 1.0, 1.0, 1.0);
+        sys.position(0) = coord_type( 0.0, 0.0, 0.0);
+        sys.position(1) = coord_type( 1.0, 1.0, 1.0);
 
         test::apply_random_rotation(sys, mt);
         test::apply_random_perturbation(sys, mt, 0.01);
@@ -73,20 +73,20 @@ BOOST_AUTO_TEST_CASE(BondLengthGoContactInteraction)
     const coord_type pos2(0.0, 0.0, 0.0);
     system_type sys(2, boundary_type{});
 
-    sys.at(0).mass     = 1.0;
-    sys.at(1).mass     = 1.0;
-    sys.at(0).rmass    = 1.0;
-    sys.at(1).rmass    = 1.0;
-    sys.at(0).position = pos1;
-    sys.at(1).position = pos2;
-    sys.at(0).velocity = coord_type(0,0,0);
-    sys.at(1).velocity = coord_type(0,0,0);
-    sys.at(0).force    = coord_type(0,0,0);
-    sys.at(1).force    = coord_type(0,0,0);
-    sys.at(0).name     = "X";
-    sys.at(1).name     = "X";
-    sys.at(0).group    = "NONE";
-    sys.at(1).group    = "NONE";
+    sys.mass(0)     = 1.0;
+    sys.mass(1)     = 1.0;
+    sys.rmass(0)    = 1.0;
+    sys.rmass(1)    = 1.0;
+    sys.position(0) = pos1;
+    sys.position(1) = pos2;
+    sys.velocity(0) = coord_type(0,0,0);
+    sys.velocity(1) = coord_type(0,0,0);
+    sys.force(0)    = coord_type(0,0,0);
+    sys.force(1)    = coord_type(0,0,0);
+    sys.name(0)     = "X";
+    sys.name(1)     = "X";
+    sys.group(0)    = "NONE";
+    sys.group(1)    = "NONE";
 
     const real_type k(1.0);
     const real_type native(1.0);
