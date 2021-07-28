@@ -196,8 +196,6 @@ BondLengthInteraction<traitsT, potentialT>::calc_force_and_energy(
         const coordinate_type f = dpos * (force * rlen);
         sys.force(idx0) -= f;
         sys.force(idx1) += f;
-
-        sys.virial() += math::tensor_product(dpos, f);
     }
     return energy;
 }

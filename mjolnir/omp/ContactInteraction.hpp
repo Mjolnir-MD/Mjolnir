@@ -61,7 +61,7 @@ class ContactInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
     }
     real_type calc_force_and_energy(system_type& sys) const noexcept override
     {
-        return this->template calc_force_energy_virial_impl<true, true>(sys);
+        return this->template calc_force_energy_virial_impl<true, false>(sys);
     }
     real_type calc_force_virial_energy(system_type& sys) const noexcept override
     {
