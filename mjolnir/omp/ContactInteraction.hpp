@@ -214,7 +214,7 @@ class ContactInteraction<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 
             if(NeedVirial)
             {
-                sys.virial_thread(thread_id) = math::tensor_product(dpos, f);
+                sys.virial_thread(thread_id) += math::tensor_product(dpos, f);
             }
         }
         return E;
