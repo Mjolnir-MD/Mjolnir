@@ -6,6 +6,8 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
+#include <test/util/utility.hpp>
+
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
@@ -18,22 +20,26 @@
 
 BOOST_AUTO_TEST_CASE(OpenMP_ThreeSPN2BaseStackingInteraction)
 {
+    namespace test = mjolnir::test;
+
     mjolnir::LoggerManager::set_default_logger(
             "test_omp_3spn2_base_stacking_interaction.log");
 
-    using traits_type      = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type        = traits_type::real_type;
-    using coord_type       = traits_type::coordinate_type;
-    using boundary_type    = traits_type::boundary_type;
-    using system_type      = mjolnir::System<traits_type>;
+    using seq_traits_type = mjolnir::SimulatorTraits      <double, mjolnir::UnlimitedBoundary>;
+    using omp_traits_type = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
 
-    using interaction_type = mjolnir::ThreeSPN2BaseStackingInteraction<traits_type>;
-    using potential_type   = mjolnir::ThreeSPN2BaseStackingPotential<real_type>;
-    using base_stack_kind  = typename potential_type::base_stack_kind;
+    using real_type       = typename omp_traits_type::real_type;
+    using coordinate_type = typename omp_traits_type::coordinate_type;
+    using boundary_type   = typename omp_traits_type::boundary_type;
 
-    using sequential_traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using sequential_system_type      = mjolnir::System<sequential_traits_type>;
-    using sequential_interaction_type = mjolnir::ThreeSPN2BaseStackingInteraction<sequential_traits_type>;
+    using seq_system_type = mjolnir::System<seq_traits_type>;
+    using omp_system_type = mjolnir::System<omp_traits_type>;
+
+    using potential_type  = mjolnir::ThreeSPN2BaseStackingPotential<real_type>;
+    using base_stack_kind = typename potential_type::base_stack_kind;
+
+    using omp_interaction_type = mjolnir::ThreeSPN2BaseStackingInteraction<omp_traits_type>;
+    using seq_interaction_type = mjolnir::ThreeSPN2BaseStackingInteraction<seq_traits_type>;
 
     using ParameterSet = mjolnir::ThreeSPN2BaseStackingPotentialParameter<real_type>;
     {
@@ -73,54 +79,36 @@ BOOST_AUTO_TEST_CASE(OpenMP_ThreeSPN2BaseStackingInteraction)
     //  2. pi/2K < theta < pi/K
     //  3. pi/K  < theta
 
-    std::mt19937 mt(123456789);
-    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
-    constexpr real_type pi = mjolnir::math::constants<real_type>::pi();
+    std::mt19937 rng(123456789);
 
     const auto bs_kind = base_stack_kind::AA;
 
     potential_type   potential(ParameterSet{});
-    interaction_type interaction("none",
+    omp_interaction_type omp_interaction("none",
             std::vector<std::pair<std::array<std::size_t, 3>, base_stack_kind>>{
                 { {{0, 1, 2}}, bs_kind }
             }, potential_type(potential), {});
-    sequential_interaction_type seq_interaction("none",
+    seq_interaction_type seq_interaction("none",
             std::vector<std::pair<std::array<std::size_t, 3>, base_stack_kind>>{
                 { {{0, 1, 2}}, bs_kind }
             }, potential_type(potential), {});
 
-    system_type                sys(3, boundary_type{});
-    sequential_system_type seq_sys(3, boundary_type{});
+    omp_system_type omp_sys(3, boundary_type{});
+    seq_system_type seq_sys(3, boundary_type{});
 
-    sys.mass(0) = 1.0;
-    sys.mass(1) = 1.0;
-    sys.mass(2) = 1.0;
+    test::clear_everything(omp_sys);
+    test::clear_everything(seq_sys);
 
-    sys.rmass(0) = 1.0;
-    sys.rmass(1) = 1.0;
-    sys.rmass(2) = 1.0;
+    omp_sys.name(0)  = "Si";
+    omp_sys.name(1)  = "Bi";
+    omp_sys.name(2)  = "Bj";
+    omp_sys.group(0) = "DNA";
+    omp_sys.group(1) = "DNA";
+    omp_sys.group(2) = "DNA";
 
-    sys.position(0) = coord_type(0.0, 0.0, 0.0);
-    sys.position(1) = coord_type(0.0, 0.0, 0.0);
-    sys.position(2) = coord_type(0.0, 0.0, 0.0);
+    potential.initialize(omp_sys);
 
-    sys.velocity(0) = coord_type(0.0, 0.0, 0.0);
-    sys.velocity(1) = coord_type(0.0, 0.0, 0.0);
-    sys.velocity(2) = coord_type(0.0, 0.0, 0.0);
-
-    sys.force(0)    = coord_type(0.0, 0.0, 0.0);
-    sys.force(1)    = coord_type(0.0, 0.0, 0.0);
-    sys.force(2)    = coord_type(0.0, 0.0, 0.0);
-
-    sys.name(0)  = "Si";
-    sys.name(1)  = "Bi";
-    sys.name(2)  = "Bj";
-    sys.group(0) = "DNA";
-    sys.group(1) = "DNA";
-    sys.group(2) = "DNA";
-
-    potential.initialize(sys);
-    interaction.initialize(sys);
+    omp_interaction.initialize(omp_sys);
     seq_interaction.initialize(seq_sys);
 
     const auto theta0    = potential.theta_0(bs_kind);
@@ -149,134 +137,26 @@ BOOST_AUTO_TEST_CASE(OpenMP_ThreeSPN2BaseStackingInteraction)
         //  Bi      Si
         //
 
-        sys.position(0) = coord_type(4.0, 0.0, 0.0); // Si
-        sys.position(1) = coord_type(0.0, 0.0, 0.0); // Bi
-        sys.position(2) = coord_type(r * std::cos(theta), r * std::sin(theta), 0.0); // Bj
-        sys.force(0) = coord_type(0.0, 0.0, 0.0);
-        sys.force(1) = coord_type(0.0, 0.0, 0.0);
-        sys.force(2) = coord_type(0.0, 0.0, 0.0);
+        omp_sys.position(0) = coordinate_type(4.0, 0.0, 0.0); // Si
+        omp_sys.position(1) = coordinate_type(0.0, 0.0, 0.0); // Bi
+        omp_sys.position(2) = coordinate_type(r * std::cos(theta), r * std::sin(theta), 0.0); // Bj
 
-        // ... and then rotate random direction to remove special axis
-        //
-        // Do this thousand times with different random numbers!
-        {
-            using matrix33_type = typename traits_type::matrix33_type;
+        test::apply_random_rotation(omp_sys, rng);
+        test::apply_random_perturbation(omp_sys, rng, 0.01);
+        test::clear_force(omp_sys);
+        test::clear_force(seq_sys);
 
-            const auto rot_x = uni(mt) * pi;
-            const auto rot_y = uni(mt) * pi;
-            const auto rot_z = uni(mt) * pi;
-
-            matrix33_type rotm_x(1.0,             0.0,              0.0,
-                                 0.0, std::cos(rot_x), -std::sin(rot_x),
-                                 0.0, std::sin(rot_x),  std::cos(rot_x));
-            matrix33_type rotm_y( std::cos(rot_y), 0.0,  std::sin(rot_y),
-                                              0.0, 1.0,              0.0,
-                                 -std::sin(rot_y), 0.0,  std::cos(rot_y));
-            matrix33_type rotm_z(std::cos(rot_z), -std::sin(rot_z), 0.0,
-                                 std::sin(rot_z),  std::cos(rot_z), 0.0,
-                                             0.0,              0.0, 1.0);
-
-            const matrix33_type rotm = rotm_x * rotm_y * rotm_z;
-            sys.position(0) = rotm * sys.position(0);
-            sys.position(1) = rotm * sys.position(1);
-            sys.position(2) = rotm * sys.position(2);
-
-            BOOST_TEST(mjolnir::math::length(sys.position(0)) == 4.0,
-                       boost::test_tools::tolerance(1e-6));
-            BOOST_TEST(mjolnir::math::length(sys.position(1)) == 0.0,
-                       boost::test_tools::tolerance(1e-6));
-            BOOST_TEST(mjolnir::math::length(sys.position(2)) == r,
-                       boost::test_tools::tolerance(1e-6));
-        }
-
-        sys.position(0) += coord_type(0.01 * uni(mt), 0.01 * uni(mt), 0.01 * uni(mt));
-        sys.position(1) += coord_type(0.01 * uni(mt), 0.01 * uni(mt), 0.01 * uni(mt));
-        sys.position(2) += coord_type(0.01 * uni(mt), 0.01 * uni(mt), 0.01 * uni(mt));
-        sys.force(0)    = coord_type(0.0, 0.0, 0.0);
-        sys.force(1)    = coord_type(0.0, 0.0, 0.0);
-        sys.force(2)    = coord_type(0.0, 0.0, 0.0);
-
-        seq_sys.position(0) = sys.position(0);
-        seq_sys.position(1) = sys.position(1);
-        seq_sys.position(2) = sys.position(2);
-        seq_sys.force(0)    = coord_type(0.0, 0.0, 0.0);
-        seq_sys.force(1)    = coord_type(0.0, 0.0, 0.0);
-        seq_sys.force(2)    = coord_type(0.0, 0.0, 0.0);
-
-        for(std::size_t i=0; i<3; ++i)
-        {
-            for(std::size_t j=0; j<3; ++j)
-            {
-                sys    .virial()(i, j) = real_type(0.0);
-                seq_sys.virial()(i, j) = real_type(0.0);
-            }
-        }
+        seq_sys.position(0) = omp_sys.position(0);
+        seq_sys.position(1) = omp_sys.position(1);
+        seq_sys.position(2) = omp_sys.position(2);
 
         constexpr real_type tol = 1e-4;
 
-        // calculate forces with openmp
-        interaction.calc_force(sys);
-        sys.postprocess_forces();
-
-        // calculate forces without openmp
-        seq_interaction.calc_force(seq_sys);
-
-        // check the values are the same
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            BOOST_TEST(mjolnir::math::X(seq_sys.force(i)) == mjolnir::math::X(sys.force(i)),
-                       boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Y(seq_sys.force(i)) == mjolnir::math::Y(sys.force(i)),
-                       boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Z(seq_sys.force(i)) == mjolnir::math::Z(sys.force(i)),
-                       boost::test_tools::tolerance(tol));
-        }
-        BOOST_TEST(interaction.calc_energy(sys) == seq_interaction.calc_energy(seq_sys),
-                   boost::test_tools::tolerance(tol));
-
-        // check the virials are the same
-        for(std::size_t i=0; i<9; ++i)
-        {
-            BOOST_TEST(sys.virial()[i] == seq_sys.virial()[i], boost::test_tools::tolerance(tol));
-        }
-
-        // check calc_force_and_energy
-        for(std::size_t idx=0; idx<sys.size(); ++idx)
-        {
-            sys.force(idx) = coord_type(0.0, 0.0, 0.0);
-            seq_sys.force(idx) = coord_type(0.0, 0.0, 0.0);
-        }
-        for(std::size_t i=0; i<3; ++i)
-        {
-            for(std::size_t j=0; j<3; ++j)
-            {
-                sys.virial()(i, j) = real_type(0.0);
-                seq_sys.virial()(i, j) = real_type(0.0);
-            }
-        }
-        const auto energy     = interaction.calc_force_and_energy(sys);
-        sys.postprocess_forces();
-        const auto ref_energy = seq_interaction.calc_force_and_energy(seq_sys);
-        seq_sys.postprocess_forces();
-
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            BOOST_TEST(mjolnir::math::X(seq_sys.force(i)) == mjolnir::math::X(sys.force(i)),
-                       boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Y(seq_sys.force(i)) == mjolnir::math::Y(sys.force(i)),
-                       boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Z(seq_sys.force(i)) == mjolnir::math::Z(sys.force(i)),
-                       boost::test_tools::tolerance(tol));
-        }
-        BOOST_TEST(ref_energy == energy, boost::test_tools::tolerance(tol));
-        BOOST_TEST(interaction.calc_energy(sys) == energy, boost::test_tools::tolerance(tol));
-
-        for(std::size_t i=0; i<9; ++i)
-        {
-            BOOST_TEST(sys.virial()[i] == seq_sys.virial()[i], boost::test_tools::tolerance(tol));
-        }
-
-
+        test::check_force_consistency              (omp_sys, omp_interaction, seq_sys, seq_interaction, tol);
+        test::check_force_and_energy_consistency   (omp_sys, omp_interaction, seq_sys, seq_interaction, tol);
+        test::check_force_and_virial_consistency   (omp_sys, omp_interaction, seq_sys, seq_interaction, tol);
+        test::check_force_energy_virial_consistency(omp_sys, omp_interaction, seq_sys, seq_interaction, tol);
+        test::check_energy_consistency             (omp_sys, omp_interaction, seq_sys, seq_interaction, tol);
     } // perturbation
     } // theta
     } // r
