@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_TEST_UTIL_CHECK_FORCE_AND_ENERGY_HPP
-#define MJOLNIR_TEST_UTIL_CHECK_FORCE_AND_ENERGY_HPP
+#ifndef MJOLNIR_TEST_UTIL_CHECK_FORCE_ENERGY_VIRIAL_HPP
+#define MJOLNIR_TEST_UTIL_CHECK_FORCE_ENERGY_VIRIAL_HPP
 #include <mjolnir/math/Vector.hpp>
 #include <mjolnir/core/System.hpp>
 
@@ -21,9 +21,9 @@ namespace test
 // This checks the consistency between `calc_force` and `calc_force_and_energy`.
 
 template<typename traitsT, typename Interaction>
-void check_force_and_energy(System<traitsT> ref,
-                            const Interaction& interaction,
-                            const typename traitsT::real_type tol)
+void check_force_energy_virial(System<traitsT> ref,
+                               const Interaction& interaction,
+                               const typename traitsT::real_type tol)
 {
     using coordinate_type = typename traitsT::coordinate_type;
     using matrix33_type   = typename traitsT::matrix33_type;
@@ -42,11 +42,8 @@ void check_force_and_energy(System<traitsT> ref,
     const auto ref_ene = interaction.calc_energy(ref);
 
     sys.preprocess_forces();
-    const auto ene = interaction.calc_force_and_energy(sys);
+    const auto ene = interaction.calc_force_virial_energy(sys);
     sys.postprocess_forces();
-
-    // ------------------------------------------------------------------------
-    // energy, forces are the same. virial is not calculated
 
     BOOST_TEST(ref_ene == ene, boost::test_tools::tolerance(tol));
 
@@ -56,9 +53,26 @@ void check_force_and_energy(System<traitsT> ref,
         BOOST_TEST(math::Y(sys.force(idx)) == math::Y(ref.force(idx)), boost::test_tools::tolerance(tol));
         BOOST_TEST(math::Z(sys.force(idx)) == math::Z(ref.force(idx)), boost::test_tools::tolerance(tol));
     }
-    for(std::size_t i=0; i<9; ++i)
+
+    // external forcefield does not support virial because they depends absolute
+    // coordinate
+    if(std::is_base_of< LocalInteractionBase<traitsT>, Interaction>::value ||
+       std::is_base_of<GlobalInteractionBase<traitsT>, Interaction>::value)
     {
-        BOOST_TEST(sys.virial()[i] == 0.0, boost::test_tools::tolerance(tol));
+        for(std::size_t i=0; i<ref.size(); ++i)
+        {
+            ref.force(i) = math::make_coordinate<coordinate_type>(0,0,0);
+        }
+        ref.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+
+        // calc virial
+        interaction.calc_force_and_virial(ref);
+
+        // compare ref virial with calc_force_energy_virial
+        for(std::size_t i=0; i<9; ++i)
+        {
+            BOOST_TEST(sys.virial()[i] == ref.virial()[i], boost::test_tools::tolerance(tol));
+        }
     }
 
     return;

@@ -112,6 +112,19 @@ class GlobalForceField
         }
         return;
     }
+    void calc_force_and_virial(system_type& sys) const noexcept
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+        MJOLNIR_LOG_FUNCTION_DEBUG();
+
+        for(const auto& item : this->interactions_)
+        {
+            MJOLNIR_LOG_DEBUG("interaction name is ", item->name());
+            item->calc_force_and_virial(sys);
+        }
+        return;
+    }
+
     real_type calc_energy(const system_type& sys) const noexcept
     {
         real_type energy = 0.;
@@ -127,6 +140,15 @@ class GlobalForceField
         for(const auto& item : this->interactions_)
         {
             energy += item->calc_force_and_energy(sys);
+        }
+        return energy;
+    }
+    real_type calc_force_virial_energy(system_type& sys) const noexcept
+    {
+        real_type energy = 0.;
+        for(const auto& item : this->interactions_)
+        {
+            energy += item->calc_force_virial_energy(sys);
         }
         return energy;
     }

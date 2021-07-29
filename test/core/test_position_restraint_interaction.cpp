@@ -45,8 +45,8 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_numerical_differentiation)
         system_type sys(2, boundary_type{});
         test::clear_everything(sys);
 
-        sys.at(0).position = coordinate_type( 0.0,  0.0,  0.0);
-        sys.at(1).position = coordinate_type(10.0,  0.0,  0.0);
+        sys.position(0) = coordinate_type( 0.0,  0.0,  0.0);
+        sys.position(1) = coordinate_type(10.0,  0.0,  0.0);
 
         interaction.initialize(sys);
 
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(PositionRestraint_numerical_differentiation)
 
         constexpr real_type tol = 1e-3;
         constexpr real_type dr  = 1e-4;
-        test::check_force(sys, interaction, tol, dr);
+        test::check_force(sys, interaction, tol, dr, false);
         test::check_force_and_energy(sys, interaction, tol);
     }
 }

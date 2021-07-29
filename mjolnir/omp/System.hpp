@@ -22,9 +22,6 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     using rng_type        = RandomNumberGenerator<traits_type>;
 
     using string_type              = std::string;
-    using particle_type            = Particle<real_type, coordinate_type>;
-    using particle_view_type       = ParticleView<real_type, coordinate_type>;
-    using particle_const_view_type = ParticleConstView<real_type, coordinate_type>;
 
     using real_container_type          = std::vector<real_type>;
     using coordinate_container_type    = std::vector<coordinate_type>;
@@ -35,11 +32,15 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     template<typename T>
     using cache_aligned_allocator = aligned_allocator<T, cache_alignment>;
 
+    using dynamic_variable_type = DynamicVariable<real_type>;
+    using variable_key_type = std::string;
+    using variables_type = std::map<variable_key_type, dynamic_variable_type>;
+
   public:
 
     System(const std::size_t num_particles, const boundary_type& bound)
         : velocity_initialized_(false), force_initialized_(false),
-          boundary_(bound), attributes_(),
+          boundary_(bound), attributes_{}, variables_{},
           virial_(0,0,0, 0,0,0, 0,0,0),
           virial_threads_(omp_get_max_threads(),
                           matrix33_type(0,0,0, 0,0,0, 0,0,0)),
@@ -88,6 +89,16 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
             math::Y(this->velocity(i)) = rng.gaussian(0, vel_coef);
             math::Z(this->velocity(i)) = rng.gaussian(0, vel_coef);
         }
+
+        // generate random force for dynamic variables
+        for(auto& kv : this->variables_)
+        {
+            auto& var = kv.second;
+            if( ! is_finite(var.v())) // not initialized
+            {
+                var.update(var.x(), rng.gaussian(0, std::sqrt(kBT / var.m())), var.f());
+            }
+        }
         MJOLNIR_LOG_NOTICE("done.");
         return;
     }
@@ -106,39 +117,6 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     }
 
     std::size_t size() const noexcept {return num_particles_;}
-
-    particle_view_type operator[](std::size_t i) noexcept
-    {
-        return particle_view_type{
-            masses_[i],    rmasses_[i],
-            positions_[i], velocities_[i], forces_main_[i],
-            names_[i],     groups_[i]
-        };
-    }
-    particle_const_view_type operator[](std::size_t i) const noexcept
-    {
-        return particle_const_view_type{
-            masses_[i],    rmasses_[i],
-            positions_[i], velocities_[i], forces_main_[i],
-            names_[i],     groups_[i]
-        };
-    }
-    particle_view_type at(std::size_t i)
-    {
-        return particle_view_type{
-            masses_.at(i),    rmasses_.at(i),
-            positions_.at(i), velocities_.at(i), forces_main_.at(i),
-            names_.at(i),     groups_.at(i)
-        };
-    }
-    particle_const_view_type at(std::size_t i) const
-    {
-        return particle_const_view_type{
-            masses_.at(i),    rmasses_.at(i),
-            positions_.at(i), velocities_.at(i), forces_main_.at(i),
-            names_.at(i),     groups_.at(i)
-        };
-    }
 
     real_type  mass (std::size_t i) const noexcept {return masses_[i];}
     real_type& mass (std::size_t i)       noexcept {return masses_[i];}
@@ -228,6 +206,13 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     bool   has_attribute(const std::string& key) const {return attributes_.count(key) == 1;}
     attribute_type const& attributes() const noexcept {return attributes_;}
 
+    // dynamic variables in a system.
+    dynamic_variable_type const& variable(const std::string& key) const {return variables_.at(key);}
+    dynamic_variable_type&       variable(const std::string& key)       {return variables_[key];}
+    bool          has_variable(const std::string& key) const {return variables_.count(key) == 1;}
+    variables_type const& variables() const noexcept {return variables_;}
+    variables_type&       variables()       noexcept {return variables_;}
+
     bool  velocity_initialized() const noexcept {return velocity_initialized_;}
     bool& velocity_initialized()       noexcept {return velocity_initialized_;}
 
@@ -243,6 +228,7 @@ class System<OpenMPSimulatorTraits<realT, boundaryT>>
     bool           velocity_initialized_, force_initialized_;
     boundary_type  boundary_;
     attribute_type attributes_;
+    variables_type variables_;
 
     matrix33_type  virial_;
     std::vector<matrix33_type, cache_aligned_allocator<matrix33_type>> virial_threads_;

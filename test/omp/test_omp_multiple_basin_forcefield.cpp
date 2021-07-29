@@ -6,6 +6,8 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
+#include <test/util/utility.hpp>
+
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
@@ -20,6 +22,8 @@
 
 BOOST_AUTO_TEST_CASE(omp_MultipleBasin_2Basin_numerical_difference)
 {
+    namespace test = mjolnir::test;
+
     mjolnir::LoggerManager::set_default_logger("test_omp_multiple_basin_forcefield.log");
     using traits_type      = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type        = traits_type::real_type;
@@ -64,110 +68,25 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_2Basin_numerical_difference)
     {
         system_type sys(2, boundary_type{});
 
-        sys.at(0).mass  = 1.0;
-        sys.at(1).mass  = 1.0;
-        sys.at(0).rmass = 1.0;
-        sys.at(1).rmass = 1.0;
+        test::clear_everything(sys);
 
-        sys.at(0).position = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
-        sys.at(1).position = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
-        sys.at(0).velocity = coord_type( 0.0, 0.0, 0.0);
-        sys.at(1).velocity = coord_type( 0.0, 0.0, 0.0);
-        sys.at(0).force    = coord_type( 0.0, 0.0, 0.0);
-        sys.at(1).force    = coord_type( 0.0, 0.0, 0.0);
+        sys.position(0) = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
+        sys.position(1) = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
 
-        sys.at(0).name  = "X";
-        sys.at(1).name  = "X";
-        sys.at(0).group = "TEST";
-        sys.at(1).group = "TEST";
-
-        const auto init = sys;
-
-        forcefield.initialize(init); // don't forget this
+        forcefield.initialize(sys); // don't forget this
 
         constexpr real_type tol = 1e-4;
         constexpr real_type dr  = 1e-5;
-        for(std::size_t idx=0; idx<2; ++idx)
-        {
-            {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
 
-                // calc U(x-dx)
-                const auto E0 = forcefield.calc_energy(sys);
-
-                mjolnir::math::X(sys.position(idx)) += dr;
-
-                // calc F(x)
-                forcefield.calc_force(sys);
-
-                mjolnir::math::X(sys.position(idx)) += dr;
-
-                // calc U(x+dx)
-                const auto E1 = forcefield.calc_energy(sys);
-
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
-
-                BOOST_TEST(-dE == dr * mjolnir::math::X(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
-            }
-            {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
-
-                // calc U(x-dx)
-                const auto E0 = forcefield.calc_energy(sys);
-
-                mjolnir::math::Y(sys.position(idx)) += dr;
-
-                // calc F(x)
-                forcefield.calc_force(sys);
-
-                mjolnir::math::Y(sys.position(idx)) += dr;
-
-                // calc U(x+dx)
-                const auto E1 = forcefield.calc_energy(sys);
-
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
-
-                BOOST_TEST(-dE == dr * mjolnir::math::Y(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
-            }
-            {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
-
-                // calc U(x-dx)
-                const auto E0 = forcefield.calc_energy(sys);
-
-                mjolnir::math::Z(sys.position(idx)) += dr;
-
-                // calc F(x)
-                forcefield.calc_force(sys);
-
-                mjolnir::math::Z(sys.position(idx)) += dr;
-
-                // calc U(x+dx)
-                const auto E1 = forcefield.calc_energy(sys);
-
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
-
-                BOOST_TEST(-dE == dr * mjolnir::math::Z(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
-            }
-        }
+        test::check_force(sys, forcefield, tol, dr);
     }
 }
 
 // check difference of forces
 BOOST_AUTO_TEST_CASE(omp_MultipleBasin_2Basin_consistency)
 {
+    namespace test = mjolnir::test;
+
     mjolnir::LoggerManager::set_default_logger("test_omp_multiple_basin_forcefield.log");
     using traits_type      = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type        = traits_type::real_type;
@@ -253,29 +172,17 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_2Basin_consistency)
         system_type         sys_openmp (Nparticle, boundary_type{});
         default_system_type sys_default(Nparticle, boundary_type{});
 
+        test::clear_everything(sys_openmp);
+        test::clear_everything(sys_default);
+
         for(std::size_t j=0; j<Nparticle; ++j)
         {
             const coord_type pos(j * 1.0 + 0.01 * uni(mt),
                                  j * 1.0 + 0.01 * uni(mt),
                                  j * 1.0 + 0.01 * uni(mt));
 
-            sys_openmp.mass    (j) = 1.0;
-            sys_openmp.rmass   (j) = 1.0;
             sys_openmp.position(j) = pos;
-            sys_openmp.velocity(j) = coord_type( 0.0, 0.0, 0.0);
-            sys_openmp.force   (j) = coord_type( 0.0, 0.0, 0.0);
-            sys_openmp.name    (j) = "X";
-            sys_openmp.group   (j) = "TEST";
-
-            // --------------------------------------------------------------
-
-            sys_default.mass    (j) = 1.0;
-            sys_default.rmass   (j) = 1.0;
             sys_default.position(j) = pos;
-            sys_default.velocity(j) = coord_type( 0.0, 0.0, 0.0);
-            sys_default.force   (j) = coord_type( 0.0, 0.0, 0.0);
-            sys_default.name    (j) = "X";
-            sys_default.group   (j) = "TEST";
         }
 
         ff_openmp .initialize(sys_openmp ); // don't forget this
@@ -283,7 +190,13 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_2Basin_consistency)
 
         constexpr real_type tol = 1e-4;
 
-        ff_openmp .calc_force(sys_openmp );
+        // --------------------------------------------------------------------
+        // check_force
+
+        sys_openmp.preprocess_forces();
+        ff_openmp .calc_force(sys_openmp);
+        sys_openmp.postprocess_forces();
+
         ff_default.calc_force(sys_default);
 
         for(std::size_t j=0; j<Nparticle; ++j)
@@ -299,16 +212,58 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_2Basin_consistency)
                        boost::test_tools::tolerance(tol));
         }
         // check the virials are the same
-        for(std::size_t i=0; i<9; ++i)
+        for(std::size_t j=0; j<9; ++j)
         {
-            BOOST_TEST(sys_default.virial()[i] == sys_openmp.virial()[i], boost::test_tools::tolerance(tol));
+            BOOST_TEST(sys_default.virial()[j] == sys_openmp.virial()[j], boost::test_tools::tolerance(tol));
         }
 
+        // --------------------------------------------------------------------
+        // check_force_and_virial
+
+        test::clear_force(sys_openmp);
+        test::clear_force(sys_default);
+
+        sys_openmp.preprocess_forces();
+        ff_openmp .calc_force_and_virial(sys_openmp);
+        sys_openmp.postprocess_forces();
+
+        ff_default.calc_force_and_virial(sys_default);
+
+        for(std::size_t j=0; j<Nparticle; ++j)
+        {
+            using namespace mjolnir::math;
+            BOOST_TEST(X(sys_default.force(j)) == X(sys_openmp.force(j)),
+                       boost::test_tools::tolerance(tol));
+
+            BOOST_TEST(Y(sys_default.force(j)) == Y(sys_openmp.force(j)),
+                       boost::test_tools::tolerance(tol));
+
+            BOOST_TEST(Z(sys_default.force(j)) == Z(sys_openmp.force(j)),
+                       boost::test_tools::tolerance(tol));
+        }
+        // check the virials are the same
+        for(std::size_t j=0; j<9; ++j)
+        {
+            BOOST_TEST(sys_default.virial()[j] == sys_openmp.virial()[j], boost::test_tools::tolerance(tol));
+        }
+
+        // --------------------------------------------------------------------
+        // check_energy
+
+        test::clear_force(sys_openmp);
+        test::clear_force(sys_default);
+
+        const auto omp_ene = ff_openmp .calc_energy(sys_openmp);
+        const auto seq_ene = ff_default.calc_energy(sys_default);
+
+        BOOST_TEST(omp_ene == seq_ene, boost::test_tools::tolerance(tol));
     }
 }
 
 BOOST_AUTO_TEST_CASE(MultipleBasin_3Basin_numerical_difference)
 {
+    namespace test = mjolnir::test;
+
     mjolnir::LoggerManager::set_default_logger("test_omp_multiple_basin_forcefield.log");
     using traits_type      = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type        = traits_type::real_type;
@@ -357,110 +312,24 @@ BOOST_AUTO_TEST_CASE(MultipleBasin_3Basin_numerical_difference)
     {
         system_type sys(2, boundary_type{});
 
-        sys.at(0).mass  = 1.0;
-        sys.at(1).mass  = 1.0;
-        sys.at(0).rmass = 1.0;
-        sys.at(1).rmass = 1.0;
+        test::clear_everything(sys);
 
-        sys.at(0).position = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
-        sys.at(1).position = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
-        sys.at(0).velocity = coord_type( 0.0, 0.0, 0.0);
-        sys.at(1).velocity = coord_type( 0.0, 0.0, 0.0);
-        sys.at(0).force    = coord_type( 0.0, 0.0, 0.0);
-        sys.at(1).force    = coord_type( 0.0, 0.0, 0.0);
+        sys.position(0) = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
+        sys.position(1) = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
 
-        sys.at(0).name  = "X";
-        sys.at(1).name  = "X";
-        sys.at(0).group = "TEST";
-        sys.at(1).group = "TEST";
-
-        const auto init = sys;
-
-        forcefield.initialize(init); // don't forget this
+        forcefield.initialize(sys); // don't forget this
 
         constexpr real_type tol = 1e-4;
         constexpr real_type dr  = 1e-5;
-        for(std::size_t idx=0; idx<2; ++idx)
-        {
-            {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
-
-                // calc U(x-dx)
-                const auto E0 = forcefield.calc_energy(sys);
-
-                mjolnir::math::X(sys.position(idx)) += dr;
-
-                // calc F(x)
-                forcefield.calc_force(sys);
-
-                mjolnir::math::X(sys.position(idx)) += dr;
-
-                // calc U(x+dx)
-                const auto E1 = forcefield.calc_energy(sys);
-
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
-
-                BOOST_TEST(-dE == dr * mjolnir::math::X(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
-            }
-            {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
-
-                // calc U(x-dx)
-                const auto E0 = forcefield.calc_energy(sys);
-
-                mjolnir::math::Y(sys.position(idx)) += dr;
-
-                // calc F(x)
-                forcefield.calc_force(sys);
-
-                mjolnir::math::Y(sys.position(idx)) += dr;
-
-                // calc U(x+dx)
-                const auto E1 = forcefield.calc_energy(sys);
-
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
-
-                BOOST_TEST(-dE == dr * mjolnir::math::Y(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
-            }
-            {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
-
-                // calc U(x-dx)
-                const auto E0 = forcefield.calc_energy(sys);
-
-                mjolnir::math::Z(sys.position(idx)) += dr;
-
-                // calc F(x)
-                forcefield.calc_force(sys);
-
-                mjolnir::math::Z(sys.position(idx)) += dr;
-
-                // calc U(x+dx)
-                const auto E1 = forcefield.calc_energy(sys);
-
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
-
-                BOOST_TEST(-dE == dr * mjolnir::math::Z(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
-            }
-        }
+        test::check_force(sys, forcefield, tol, dr);
     }
 }
 
 // check difference of forces
 BOOST_AUTO_TEST_CASE(omp_MultipleBasin_3Basin_consistency)
 {
+    namespace test = mjolnir::test;
+
     mjolnir::LoggerManager::set_default_logger("test_omp_multiple_basin_forcefield.log");
     using traits_type      = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type        = traits_type::real_type;
@@ -554,29 +423,17 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_3Basin_consistency)
         system_type         sys_openmp (Nparticle, boundary_type{});
         default_system_type sys_default(Nparticle, boundary_type{});
 
+        test::clear_everything(sys_openmp);
+        test::clear_everything(sys_default);
+
         for(std::size_t j=0; j<Nparticle; ++j)
         {
             const coord_type pos(j * 1.0 + 0.01 * uni(mt),
                                  j * 1.0 + 0.01 * uni(mt),
                                  j * 1.0 + 0.01 * uni(mt));
 
-            sys_openmp.mass    (j) = 1.0;
-            sys_openmp.rmass   (j) = 1.0;
-            sys_openmp.position(j) = pos;
-            sys_openmp.velocity(j) = coord_type( 0.0, 0.0, 0.0);
-            sys_openmp.force   (j) = coord_type( 0.0, 0.0, 0.0);
-            sys_openmp.name    (j) = "X";
-            sys_openmp.group   (j) = "TEST";
-
-            // --------------------------------------------------------------
-
-            sys_default.mass    (j) = 1.0;
-            sys_default.rmass   (j) = 1.0;
+            sys_openmp .position(j) = pos;
             sys_default.position(j) = pos;
-            sys_default.velocity(j) = coord_type( 0.0, 0.0, 0.0);
-            sys_default.force   (j) = coord_type( 0.0, 0.0, 0.0);
-            sys_default.name    (j) = "X";
-            sys_default.group   (j) = "TEST";
         }
 
         ff_openmp .initialize(sys_openmp ); // don't forget this
@@ -584,7 +441,13 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_3Basin_consistency)
 
         constexpr real_type tol = 1e-4;
 
-        ff_openmp .calc_force(sys_openmp );
+        // --------------------------------------------------------------------
+        // check_force
+
+        sys_openmp.preprocess_forces();
+        ff_openmp .calc_force(sys_openmp);
+        sys_openmp.postprocess_forces();
+
         ff_default.calc_force(sys_default);
 
         for(std::size_t j=0; j<Nparticle; ++j)
@@ -600,12 +463,50 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_3Basin_consistency)
                        boost::test_tools::tolerance(tol));
         }
         // check the virials are the same
-        for(std::size_t i=0; i<9; ++i)
+        for(std::size_t j=0; j<9; ++j)
         {
-            BOOST_TEST(sys_default.virial()[i] == sys_openmp.virial()[i], boost::test_tools::tolerance(tol));
+            BOOST_TEST(sys_default.virial()[j] == sys_openmp.virial()[j], boost::test_tools::tolerance(tol));
         }
 
+        // --------------------------------------------------------------------
+        // check_force_and_virial
 
+        test::clear_force(sys_openmp);
+        test::clear_force(sys_default);
+
+        sys_openmp.preprocess_forces();
+        ff_openmp .calc_force_and_virial(sys_openmp);
+        sys_openmp.postprocess_forces();
+
+        ff_default.calc_force_and_virial(sys_default);
+
+        for(std::size_t j=0; j<Nparticle; ++j)
+        {
+            using namespace mjolnir::math;
+            BOOST_TEST(X(sys_default.force(j)) == X(sys_openmp.force(j)),
+                       boost::test_tools::tolerance(tol));
+
+            BOOST_TEST(Y(sys_default.force(j)) == Y(sys_openmp.force(j)),
+                       boost::test_tools::tolerance(tol));
+
+            BOOST_TEST(Z(sys_default.force(j)) == Z(sys_openmp.force(j)),
+                       boost::test_tools::tolerance(tol));
+        }
+        // check the virials are the same
+        for(std::size_t j=0; j<9; ++j)
+        {
+            BOOST_TEST(sys_default.virial()[j] == sys_openmp.virial()[j], boost::test_tools::tolerance(tol));
+        }
+
+        // --------------------------------------------------------------------
+        // check_energy
+
+        test::clear_force(sys_openmp);
+        test::clear_force(sys_default);
+
+        const auto omp_ene = ff_openmp .calc_energy(sys_openmp);
+        const auto seq_ene = ff_default.calc_energy(sys_default);
+
+        BOOST_TEST(omp_ene == seq_ene, boost::test_tools::tolerance(tol));
     }
 }
-

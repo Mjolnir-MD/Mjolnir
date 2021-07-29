@@ -27,6 +27,7 @@ class GJFNVTLangevinIntegrator
     using forcefield_type = std::unique_ptr<ForceFieldBase<traitsT>>;
     using rng_type        = RandomNumberGenerator<traits_type>;
     using remover_type    = SystemMotionRemover<traits_type>;
+    using variable_key_type = typename system_type::variable_key_type;
 
   public:
 
@@ -41,7 +42,7 @@ class GJFNVTLangevinIntegrator
     {}
     ~GJFNVTLangevinIntegrator() = default;
 
-    void initialize(system_type& sys, forcefield_type& ff, rng_type&)
+    void initialize(system_type& sys, forcefield_type& ff, rng_type& rng)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -63,8 +64,26 @@ class GJFNVTLangevinIntegrator
             {
                 sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
             }
+            for(auto& kv : sys.variables())
+            {
+                auto& var = kv.second;
+                var.update(var.x(), var.v(), real_type(0));
+            }
             sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
             ff->calc_force(sys);
+        }
+
+        // generate the first noise terms
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            this->noise_[i] = this->gen_R(rng) * betas_[i] * sys.rmass(i);
+        }
+        for(const auto& kv : sys.variables())
+        {
+            const auto& key = kv.first;
+            const auto& var = kv.second;
+            auto& param = params_for_dynvar_.at(key);
+            param.noise = rng.gaussian() * param.beta / var.m();
         }
         return;
     }
@@ -92,7 +111,6 @@ class GJFNVTLangevinIntegrator
 
     void reset_parameters(const system_type& sys) noexcept
     {
-        alphas_   .resize(sys.size());
         betas_    .resize(sys.size());
         bs_       .resize(sys.size());
         vel_coefs_.resize(sys.size());
@@ -105,6 +123,20 @@ class GJFNVTLangevinIntegrator
             this->bs_.at(i)    = 1.0 / (1.0 + alpha * dt_ * 0.5 / m);
             this->betas_.at(i) = std::sqrt(2 * alpha * kBT * dt_);
             this->vel_coefs_.at(i) = 1.0 - alpha * bs_.at(i) * dt_ / m;
+        }
+
+        for(const auto& kv : sys.variables())
+        {
+            const auto& key = kv.first;
+            const auto& var = kv.second;
+
+            dynvar_params_type param;
+            param.alpha    = var.m() * var.gamma();
+            param.beta     = std::sqrt(2 * param.alpha * kBT * dt_);
+            param.b        = real_type(1) / (real_type(1) + param.alpha * dt_ / (2 * var.m()));
+            param.vel_coef = real_type(1) - param.alpha * param.b * dt_ / var.m();
+            param.noise    = real_type(0); // initialized later
+            params_for_dynvar_[key] = param;
         }
         return;
     }
@@ -129,6 +161,16 @@ class GJFNVTLangevinIntegrator
     std::vector<coordinate_type> noise_;
 
     remover_type remover_;
+
+    struct dynvar_params_type
+    {
+        real_type alpha; // m * gamma
+        real_type beta;
+        real_type b;
+        real_type vel_coef;
+        real_type noise;
+    };
+    std::map<variable_key_type, dynvar_params_type> params_for_dynvar_;
 };
 
 template<typename traitsT>
@@ -139,11 +181,13 @@ GJFNVTLangevinIntegrator<traitsT>::step(const real_type time,
     real_type largest_disp2(0);
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        const auto rm = sys.rmass(i);  // reciprocal mass
+        const auto rm  = sys.rmass(i);  // reciprocal mass
+        const auto r2m = real_type(0.5) * rm; // 1 / 2m
+
         auto&       p = sys.position(i);
         auto&       v = sys.velocity(i);
         auto&       f = sys.force(i);
-        auto&    beta = this->noise_[i];
+        auto&    beta = this->noise_[i]; // TODO: refactor
         const auto& b = this->bs_[i];
 
         // beta^(n+1) = N(0, sqrt(2alpha kBT dt))
@@ -152,14 +196,14 @@ GJFNVTLangevinIntegrator<traitsT>::step(const real_type time,
         // f^(n+1)    = -dU/dr|r^(n+1)
         // v^(n+1)    = (1 - alpha*b*dt/m) * v^(n+1/2) + dt/2m f^(n+1) + beta^(n+1) / 2m
 
+        const auto dp = (b * dt_) * (v + r2m * (halfdt_ * f + beta));
+
+        p  = sys.adjust_position(p + dp);
+
         beta = this->gen_R(rng) * betas_[i] * rm;
-        v   += ((dt_ * rm) * f + beta) * real_type(0.5);
+        v += ((dt_ * rm) * f + beta) * real_type(0.5);
 
-        const auto dp = (b * dt_) * v;
-
-        p   += dp;
-        p    = sys.adjust_position(p);
-        v   *= vel_coefs_[i];
+        v *= vel_coefs_[i];
 
         // reset force
         f = math::make_coordinate<coordinate_type>(0, 0, 0);
@@ -167,6 +211,24 @@ GJFNVTLangevinIntegrator<traitsT>::step(const real_type time,
         // collect largest displacement
         largest_disp2 = std::max(largest_disp2, math::length_sq(dp));
     }
+    for(auto& kv : sys.variables()) // assume there are only a few dynvars
+    {
+        const auto& key = kv.first;
+        auto& param = params_for_dynvar_.at(key);
+        auto& var = kv.second;
+
+        const auto next_x = var.x() + param.b * dt_ * (var.v() +
+            0.5 / var.m() * (halfdt_ * var.f() + param.noise));
+
+        param.noise = rng.gaussian() * param.beta / var.m();
+
+        real_type next_v = var.v() +
+            (dt_ / var.m() * var.f() + param.noise) * real_type(0.5);
+        next_v *= param.vel_coef;
+
+        var.update(next_x, next_v, real_type(0));
+    }
+
     sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
     // update neighbor list; reduce margin, reconstruct the list if needed
@@ -181,6 +243,17 @@ GJFNVTLangevinIntegrator<traitsT>::step(const real_type time,
         const auto& beta = this->noise_[i];
 
         v += ((dt_ * rm) * f + beta) * real_type(0.5);
+    }
+    for(auto& kv : sys.variables()) // assume there are only a few dynvars
+    {
+        const auto& key = kv.first;
+        const auto& param = params_for_dynvar_.at(key);
+        auto& var = kv.second;
+
+        const auto next_v = var.v() + real_type(0.5) *
+            (dt_ / var.m() * var.f() + param.noise);
+
+        var.update(var.x(), next_v, var.f());
     }
 
     // remove net rotation/translation

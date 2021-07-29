@@ -106,12 +106,6 @@ name = "common"
 # ...
 ```
 
-## Note for AICG2+ forcefields
-
-When AICG2+ is used with MultipleBasin, you may need to modify AICG2+ parameters slightly.
-In such a case, we will have several reference structures for the same protein.
-The native bond lengthes, bond angles, dihedral angles, and native contact distances could be different between reference structures and some of the native contacts could be defined only in one reference structure.
-
 ## AICG2+力場で用いる時の注意
 
 AICG2+力場を用いる際は、結合長とコンタクトの扱いに注意が必要です。

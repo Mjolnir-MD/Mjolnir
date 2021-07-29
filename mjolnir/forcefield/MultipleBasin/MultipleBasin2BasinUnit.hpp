@@ -115,6 +115,68 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
 
     void calc_force(system_type& sys) const noexcept override
     {
+        // after calculating the force, almost all the terms needed to calculate
+        // the energy value are calculated. the cost is ignorable.
+        this->calc_force_and_energy(sys);
+        return;
+    }
+
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        using std::swap;
+        // -------------------------------------------------------------------
+        // save the current force that is not in this MB unit.
+        // the currently saved forces and virial comes from other MB unit
+        // (common part is calculated later). Later we rescale the forces,
+        // so we need to put the current force to other, safe space to avoid
+        // incorrect scaling.
+
+        swap(this->force_buffer0_,  sys.forces());
+
+        // -------------------------------------------------------------------
+        // calc force of V_MB.
+
+        sys.preprocess_forces();
+        const auto V_1 = this->calc_force_and_energy_basin1(sys) + dV1_;
+        sys.postprocess_forces();
+
+        // save the current forces to force_buffer_.
+        // force_buffer is zero-cleared (at the end of this function),
+        // so the forces in the system will be zero-cleared after this.
+        swap(this->force_buffer1_,  sys.forces());
+
+        sys.preprocess_forces();
+        const auto V_2 = this->calc_force_and_energy_basin2(sys) + dV2_;
+        sys.postprocess_forces();
+
+        const auto V_diff = V_1 - V_2;
+        const auto sqrtD  = std::sqrt(V_diff * V_diff + 4 * delta_sq_);
+        const auto coef   = V_diff / sqrtD;
+
+        // F_V_MB = 1/2 [1 - Vdiff / sqrt(Vdiff^2 + 4 delta^2)] * F_V_1 +
+        //          1/2 [1 + Vdiff / sqrt(Vdiff^2 + 4 delta^2)] * F_V_2
+
+        const auto coef1 = real_type(0.5) * (real_type(1) - coef);
+        const auto coef2 = real_type(0.5) * (real_type(1) + coef);
+
+        // here, sys.forces has forces of basin2. force_buffer has forces of V1.
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            sys.force(i) *= coef2;                     // scale MB V2
+            sys.force(i) += coef1 * force_buffer1_[i]; // add scaled MB V1
+            sys.force(i) += force_buffer0_[i];         // restore other force
+            force_buffer0_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+            force_buffer1_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+        }
+        return (V_1 + V_2 - sqrtD) / 2;
+    }
+    void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        this->calc_force_virial_energy(sys);
+        return;
+    }
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
+    {
         using std::swap;
         // -------------------------------------------------------------------
         // save the current force that is not in this MB unit.
@@ -130,22 +192,22 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         // calc force of V_MB.
 
         sys.preprocess_forces();
-        const auto V_1 = this->calc_force_and_energy_basin1(sys) + dV1_;
+        const auto V_1 = this->calc_force_virial_energy_basin1(sys) + dV1_;
         sys.postprocess_forces();
-        {
-            // save the current forces to force_buffer_.
-            // force_buffer is zero-cleared (at the end of this function),
-            // so the forces in the system will be zero-cleared after this.
-            using std::swap;
-            swap(this->force_buffer1_,  sys.forces());
-            swap(this->virial_buffer1_, sys.virial());
-        }
+
+        // save the current forces to force_buffer_.
+        // force_buffer is zero-cleared (at the end of this function),
+        // so the forces in the system will be zero-cleared after this.
+        swap(this->force_buffer1_,  sys.forces());
+        swap(this->virial_buffer1_, sys.virial());
+
         sys.preprocess_forces();
-        const auto V_2 = this->calc_force_and_energy_basin2(sys) + dV2_;
+        const auto V_2 = this->calc_force_virial_energy_basin2(sys) + dV2_;
         sys.postprocess_forces();
 
         const auto V_diff = V_1 - V_2;
-        const auto coef   = V_diff / std::sqrt(V_diff * V_diff + 4 * delta_sq_);
+        const auto sqrtD  = std::sqrt(V_diff * V_diff + 4 * delta_sq_);
+        const auto coef   = V_diff / sqrtD;
 
         // F_V_MB = 1/2 [1 - Vdiff / sqrt(Vdiff^2 + 4 delta^2)] * F_V_1 +
         //          1/2 [1 + Vdiff / sqrt(Vdiff^2 + 4 delta^2)] * F_V_2
@@ -168,8 +230,10 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
 
         virial_buffer0_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         virial_buffer1_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
-        return ;
+
+        return (V_1 + V_2 - sqrtD) / 2;
     }
+
     real_type calc_energy(const system_type& sys) const noexcept override
     {
         // -------------------------------------------------------------------
@@ -320,6 +384,23 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         energy += loc2_.calc_force_and_energy(sys);
         energy += glo2_.calc_force_and_energy(sys);
         energy += ext2_.calc_force_and_energy(sys);
+        return energy;
+    }
+
+    real_type calc_force_virial_energy_basin1(system_type& sys) const
+    {
+        real_type energy = 0;
+        energy += loc1_.calc_force_virial_energy(sys);
+        energy += glo1_.calc_force_virial_energy(sys);
+        energy += ext1_.calc_force_virial_energy(sys);
+        return energy;
+    }
+    real_type calc_force_virial_energy_basin2(system_type& sys) const
+    {
+        real_type energy = 0;
+        energy += loc2_.calc_force_virial_energy(sys);
+        energy += glo2_.calc_force_virial_energy(sys);
+        energy += ext2_.calc_force_virial_energy(sys);
         return energy;
     }
 

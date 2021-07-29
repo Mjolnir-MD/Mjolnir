@@ -15,7 +15,7 @@ jobs:
         with:
           submodules: true
       - name: Install
-        run: sudo apt-get install libboost-all-dev
+        run: sudo apt-get install libboost-test-dev
 
       - name: Configure
         run: |

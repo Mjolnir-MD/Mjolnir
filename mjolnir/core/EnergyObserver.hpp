@@ -45,10 +45,16 @@ class EnergyObserver final : public ObserverBase<traitsT>
         ff->format_energy_name(names); // write into it
         ofs << names;
 
-        ofs << " kinetic_energy             Pxx             Pyy             Pzz";
+        ofs << " kinetic_energy";
         for(const auto& attr : sys.attributes())
         {
             ofs << " attribute:" << attr.first;
+        }
+        for(const auto& dynvar : sys.variables())
+        {
+            ofs << " dynamic_var:" << dynvar.first << ".pos";
+            ofs << " dynamic_var:" << dynvar.first << ".vel";
+            ofs << " dynamic_var:" << dynvar.first << ".force";
         }
         ofs << '\n';
         return;
@@ -65,10 +71,16 @@ class EnergyObserver final : public ObserverBase<traitsT>
         ff->format_energy_name(names); // write into it
         ofs << names;
 
-        ofs << " kinetic_energy             Pxx             Pyy             Pzz";
+        ofs << " kinetic_energy";
         for(const auto& attr : sys.attributes())
         {
             ofs << " attribute:" << attr.first;
+        }
+        for(const auto& dynvar : sys.variables())
+        {
+            ofs << " dynamic_var:" << dynvar.first << ".pos";
+            ofs << " dynamic_var:" << dynvar.first << ".vel";
+            ofs << " dynamic_var:" << dynvar.first << ".force";
         }
         ofs << '\n';
         return;
@@ -94,13 +106,9 @@ class EnergyObserver final : public ObserverBase<traitsT>
             is_ok = false;
         }
 
-        real_type Ek(0), Px(0), Py(0), Pz(0);
-        std::tie(Ek, Px, Py, Pz) = this->calc_energy_and_pressure(sys);
+        const real_type Ek = this->calc_kinetic_energy(sys);
 
         ofs << std::setw(14) << std::right << std::fixed << Ek;
-        ofs << std::setw(16) << std::right << std::setprecision(8) << std::scientific << Px;
-        ofs << std::setw(16) << std::right << std::setprecision(8) << std::scientific << Py;
-        ofs << std::setw(16) << std::right << std::setprecision(8) << std::scientific << Pz;
         if(!is_finite(Ek))
         {
             MJOLNIR_GET_DEFAULT_LOGGER();
@@ -119,6 +127,21 @@ class EnergyObserver final : public ObserverBase<traitsT>
             ofs << ' ' << std::setw(10 + attr.first.size()) << std::right
                 << std::fixed << attr.second;
         }
+        for(const auto& dynvar : sys.variables())
+        {
+            if(!is_finite(dynvar.second.x()))
+            {
+                MJOLNIR_GET_DEFAULT_LOGGER();
+                MJOLNIR_LOG_ERROR(dynvar.first, " becomes NaN.");
+                is_ok = false;
+            }
+            ofs << ' ' << std::setw(12 + 3 + dynvar.first.size()) << std::right
+                << std::fixed << dynvar.second.x();
+            ofs << ' ' << std::setw(12 + 3 + dynvar.first.size()) << std::right
+                << std::fixed << dynvar.second.v();
+            ofs << ' ' << std::setw(12 + 5 + dynvar.first.size()) << std::right
+                << std::fixed << dynvar.second.f();
+        }
         ofs << std::endl; // flush before throwing an exception
 
         if(!is_ok)
@@ -136,17 +159,9 @@ class EnergyObserver final : public ObserverBase<traitsT>
 
   private:
 
-    std::tuple<real_type, real_type, real_type, real_type>
-    calc_energy_and_pressure(const system_type& sys)
+    real_type calc_kinetic_energy(const system_type& sys)
     {
-        const auto cell_width = sys.boundary().width();
-        const auto volume = math::X(cell_width) * math::Y(cell_width) * math::Z(cell_width);
-        const auto rvolume = real_type(1) / volume;
-
         real_type Ek(0);
-        real_type Px(sys.virial()(0, 0));
-        real_type Py(sys.virial()(1, 1));
-        real_type Pz(sys.virial()(2, 2));
 
         for(std::size_t i=0; i<sys.size(); ++i)
         {
@@ -154,15 +169,9 @@ class EnergyObserver final : public ObserverBase<traitsT>
             const auto& v = sys.velocity(i);
 
             Ek += math::length_sq(v) * m;
-            Px += m * math::X(v) * math::X(v);
-            Py += m * math::Y(v) * math::Y(v);
-            Pz += m * math::Z(v) * math::Z(v);
         }
         Ek *= 0.5;
-        Px *= rvolume;
-        Py *= rvolume;
-        Pz *= rvolume;
-        return std::make_tuple(Ek, Px, Py, Pz);
+        return Ek;
     }
 
     void clear_file(const std::string& fname) const

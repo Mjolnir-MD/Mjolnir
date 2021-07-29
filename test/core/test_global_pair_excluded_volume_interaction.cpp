@@ -84,7 +84,9 @@ BOOST_AUTO_TEST_CASE(GlobalPairExcludedVolumeInteraction_numeric_limits)
 
         test::check_force(sys, interaction, tol, dr);
         test::check_virial(sys, interaction, tol);
+        test::check_force_and_virial(sys, interaction, tol);
         test::check_force_and_energy(sys, interaction, tol);
+        test::check_force_energy_virial(sys, interaction, tol);
     }
 }
 

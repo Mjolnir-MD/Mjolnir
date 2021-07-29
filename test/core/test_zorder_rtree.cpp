@@ -77,8 +77,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_full_interaction, traits_type, tr
     std::mt19937 mt(123456789);
     for(std::size_t i=0; i < N; ++i)
     {
-        sys.at(i).mass     = 1.0;
-        sys.at(i).position = distribute_particle(mt, L);
+        sys.mass(i)     = 1.0;
+        sys.position(i) = distribute_particle(mt, L);
     }
     topol.construct_molecules();
 
@@ -157,8 +157,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction, traits_type,
     std::mt19937 mt(123456789);
     for(std::size_t i=0; i < N; ++i)
     {
-        sys.at(i).mass     = 1.0;
-        sys.at(i).position = distribute_particle(mt, L);
+        sys.mass(i)     = 1.0;
+        sys.position(i) = distribute_particle(mt, L);
     }
     topol.construct_molecules();
 
@@ -263,8 +263,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_ZorderRTree_partial_interaction_incontiguous,
     std::mt19937 mt(123456789);
     for(std::size_t i=0; i < N; ++i)
     {
-        sys.at(i).mass     = 1.0;
-        sys.at(i).position = distribute_particle(mt, L);
+        sys.mass(i)     = 1.0;
+        sys.position(i) = distribute_particle(mt, L);
     }
     topol.construct_molecules();
 

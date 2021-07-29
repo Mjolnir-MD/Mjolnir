@@ -42,8 +42,8 @@ BOOST_AUTO_TEST_CASE(Contact_numerical_difference)
         system_type sys(2, boundary_type{});
         test::clear_everything(sys);
 
-        sys.at(0).position = coord_type( 0.0, 0.0, 0.0);
-        sys.at(1).position = coord_type( 1.0, 1.0, 1.0);
+        sys.position(0) = coord_type( 0.0, 0.0, 0.0);
+        sys.position(1) = coord_type( 1.0, 1.0, 1.0);
 
         test::apply_random_rotation(sys, mt);
         test::apply_random_perturbation(sys, mt, 0.01);
@@ -53,6 +53,8 @@ BOOST_AUTO_TEST_CASE(Contact_numerical_difference)
 
         test::check_force(sys, interaction, tol, dr);
         test::check_virial(sys, interaction, tol);
+        test::check_force_and_virial(sys, interaction, tol);
         test::check_force_and_energy(sys, interaction, tol);
+        test::check_force_energy_virial(sys, interaction, tol);
     }
 }

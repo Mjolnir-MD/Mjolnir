@@ -22,6 +22,7 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using rng_type        = RandomNumberGenerator<traits_type>;
     using remover_type    = SystemMotionRemover<traits_type>;
+    using variable_key_type = typename system_type::variable_key_type;
 
   public:
 
@@ -59,19 +60,32 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             {
                 sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
             }
-
-            ff->calc_force(sys);
-
-#pragma omp parallel for
-            for(std::size_t i=0; i<sys.size(); ++i)
+            for(auto& kv : sys.variables())
             {
-                const auto  rmass = sys.rmass(i);
-                const auto& force = sys.force(i);
-
-                sqrt_gamma_over_mass_[i] = std::sqrt(gammas_[i] * rmass);
-                acceleration_[i]         = force * rmass +
-                    this->gen_gaussian_vec(rng, this->noise_coef_ * sqrt_gamma_over_mass_[i]);
+                auto& var = kv.second;
+                var.update(var.x(), var.v(), real_type(0));
             }
+            ff->calc_force(sys);
+        }
+
+        // here we can assume that forces are initialized.
+
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            const auto  rmass = sys.rmass(i);
+            const auto& force = sys.force(i);
+
+            acceleration_[i] = force * rmass +
+                this->gen_gaussian_vec(rng, this->noise_coef_ * sqrt_gamma_over_mass_[i]);
+        }
+        for(const auto& kv : sys.variables())
+        {
+            const auto& key = kv.first;
+            const auto& var = kv.second;
+            auto& param = params_for_dynvar_.at(key);
+
+            param.accel = var.f() / var.m() +
+                this->noise_coef_ * param.sqrt_gamma_over_mass * rng.gaussian();
         }
         return;
     }
@@ -107,6 +121,22 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
             largest_disp2 = std::max(largest_disp2, math::length_sq(displacement));
         }
+        for(auto& kv : sys.variables())
+        {
+            const auto& key = kv.first;
+            auto&       var = kv.second;
+
+            const auto& param = params_for_dynvar_.at(key);
+
+            const real_type one_minus_gamma_dt_over_2 = real_type(1) - param.gamma_dt_over_2;
+
+            const auto next_x = var.x() + dt_ * one_minus_gamma_dt_over_2 * var.v() + halfdt2_ * param.accel;
+            const auto next_v = var.v() * one_minus_gamma_dt_over_2 * (one_minus_gamma_dt_over_2 *
+                                          one_minus_gamma_dt_over_2 + param.gamma_dt_over_2) +
+                               (halfdt_ * one_minus_gamma_dt_over_2) * param.accel;
+
+            var.update(next_x, next_v, real_type(0));
+        }
 
         // This function parallelize itself inside. `parallel` block is not
         // needed here to parallelize it.
@@ -124,6 +154,19 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
 
             a  = f * rm + gen_gaussian_vec(rng, noise_coef_ * sqrt_gamma_over_mass_[i]);
             v += halfdt_ * (1 - gammas_[i] * halfdt_) * a;
+        }
+
+        for(auto& kv : sys.variables())
+        {
+            const auto& key = kv.first;
+            auto&       var = kv.second;
+
+            auto& param = params_for_dynvar_.at(key);
+            param.accel = var.f() / var.m() +
+                noise_coef_ * param.sqrt_gamma_over_mass * rng.gaussian();
+
+            const auto next_v = var.v() + halfdt_ * (1 - var.gamma() * halfdt_) * param.accel;
+            var.update(var.x(), next_v, var.f());
         }
 
         remover_.remove(sys);
@@ -149,6 +192,24 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         this->temperature_ = sys.attribute("temperature");
         this->noise_coef_  = std::sqrt(2 * physics::constants<real_type>::kB() *
                                        this->temperature_ / dt_);
+
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            sqrt_gamma_over_mass_[i] = std::sqrt(gammas_[i] * sys.rmass(i));
+        }
+
+        for(const auto& kv : sys.variables())
+        {
+            const auto& key = kv.first;
+            const auto& var = kv.second;
+
+            // force is not initialized yet
+            dynvar_params param;
+            param.accel                = real_type(0);
+            param.gamma_dt_over_2      = var.gamma() * halfdt_;
+            param.sqrt_gamma_over_mass = std::sqrt(var.gamma() / var.m());
+            params_for_dynvar_[key] = param;
+        }
     }
 
     std::vector<real_type> const& parameters() const noexcept {return gammas_;}
@@ -175,6 +236,15 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     std::vector<coordinate_type> acceleration_;
 
     remover_type remover_;
+
+    // {acceleration, gamma dt / 2, 1 - gamma dt / 2, sqrt(gamma / m)}
+    struct dynvar_params
+    {
+        real_type accel;
+        real_type gamma_dt_over_2;
+        real_type sqrt_gamma_over_mass;
+    };
+    std::map<variable_key_type, dynvar_params> params_for_dynvar_;
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD

@@ -1,11 +1,7 @@
-#ifndef MJOLNIR_TEST_UTIL_CHECK_FORCE_AND_ENERGY_HPP
-#define MJOLNIR_TEST_UTIL_CHECK_FORCE_AND_ENERGY_HPP
+#ifndef MJOLNIR_TEST_UTIL_CHECK_FORCE_AND_VIRIAL_HPP
+#define MJOLNIR_TEST_UTIL_CHECK_FORCE_AND_VIRIAL_HPP
 #include <mjolnir/math/Vector.hpp>
 #include <mjolnir/core/System.hpp>
-
-#include <mjolnir/core/LocalInteractionBase.hpp>
-#include <mjolnir/core/GlobalInteractionBase.hpp>
-#include <type_traits>
 
 #ifdef BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -18,10 +14,11 @@ namespace mjolnir
 namespace test
 {
 
-// This checks the consistency between `calc_force` and `calc_force_and_energy`.
+// This checks the consistency of forces between `calc_force` and
+// `calc_force_and_virial`.
 
 template<typename traitsT, typename Interaction>
-void check_force_and_energy(System<traitsT> ref,
+void check_force_and_virial(System<traitsT> ref,
                             const Interaction& interaction,
                             const typename traitsT::real_type tol)
 {
@@ -39,16 +36,10 @@ void check_force_and_energy(System<traitsT> ref,
     ref.preprocess_forces();
     interaction.calc_force(ref);
     ref.postprocess_forces();
-    const auto ref_ene = interaction.calc_energy(ref);
 
     sys.preprocess_forces();
-    const auto ene = interaction.calc_force_and_energy(sys);
+    interaction.calc_force_and_virial(sys);
     sys.postprocess_forces();
-
-    // ------------------------------------------------------------------------
-    // energy, forces are the same. virial is not calculated
-
-    BOOST_TEST(ref_ene == ene, boost::test_tools::tolerance(tol));
 
     for(std::size_t idx=0; idx<sys.size(); ++idx)
     {
@@ -56,12 +47,6 @@ void check_force_and_energy(System<traitsT> ref,
         BOOST_TEST(math::Y(sys.force(idx)) == math::Y(ref.force(idx)), boost::test_tools::tolerance(tol));
         BOOST_TEST(math::Z(sys.force(idx)) == math::Z(ref.force(idx)), boost::test_tools::tolerance(tol));
     }
-    for(std::size_t i=0; i<9; ++i)
-    {
-        BOOST_TEST(sys.virial()[i] == 0.0, boost::test_tools::tolerance(tol));
-    }
-
-    return;
 }
 
 } // test

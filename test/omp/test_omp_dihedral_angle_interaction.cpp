@@ -6,163 +6,81 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
+#include <test/util/utility.hpp>
+
 #include <mjolnir/math/math.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/forcefield/local/PeriodicGaussianPotential.hpp>
 #include <mjolnir/omp/System.hpp>
-#include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/DihedralAngleInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 BOOST_AUTO_TEST_CASE(omp_DihedralAngle_calc_force)
 {
+    namespace test = mjolnir::test;
+
     constexpr double tol = 1e-8;
     mjolnir::LoggerManager::set_default_logger("test_omp_dihedral_angle_interaction.log");
 
-    using traits_type      = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type        = typename traits_type::real_type;
-    using coordinate_type  = typename traits_type::coordinate_type;
-    using boundary_type    = typename traits_type::boundary_type;
-    using system_type      = mjolnir::System<traits_type>;
-    using potential_type   = mjolnir::PeriodicGaussianPotential<real_type>;
-    using interaction_type = mjolnir::DihedralAngleInteraction<traits_type, potential_type>;
-    using rng_type         = mjolnir::RandomNumberGenerator<traits_type>;
+    using seq_traits_type  = mjolnir::SimulatorTraits      <double, mjolnir::UnlimitedBoundary>;
+    using omp_traits_type  = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
 
-    using sequencial_system_type      = mjolnir::System<
-        mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>>;
-    using sequencial_interaction_type = mjolnir::DihedralAngleInteraction<
-        mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>, potential_type>;
+    using real_type        = typename omp_traits_type::real_type;
+    using coordinate_type  = typename omp_traits_type::coordinate_type;
+    using boundary_type    = typename omp_traits_type::boundary_type;
+
+    using potential_type   = mjolnir::PeriodicGaussianPotential<real_type>;
+
+    using omp_system_type      = mjolnir::System<omp_traits_type>;
+    using omp_interaction_type = mjolnir::DihedralAngleInteraction<omp_traits_type, potential_type>;
+
+    using seq_system_type      = mjolnir::System<seq_traits_type>;
+    using seq_interaction_type = mjolnir::DihedralAngleInteraction<seq_traits_type, potential_type>;
 
     const int max_number_of_threads = omp_get_max_threads();
     BOOST_TEST_WARN(max_number_of_threads > 2);
     BOOST_TEST_MESSAGE("maximum number of threads = " << omp_get_max_threads());
+
+    std::mt19937 rng(123456789);
 
     for(int num_thread=1; num_thread<=max_number_of_threads; ++num_thread)
     {
         omp_set_num_threads(num_thread);
         BOOST_TEST_MESSAGE("maximum number of threads = " << omp_get_max_threads());
 
-        potential_type   potential(/* k = */-100.0, /*sigma = */ 3.1415 * 0.5,
-                                   /* native angle = */ -3.1415 * 0.5);
-        interaction_type interaction(/*topol = */"none", {
-                {std::array<std::size_t, 4>{{0, 1, 2, 3}}, potential},
-                {std::array<std::size_t, 4>{{1, 2, 3, 4}}, potential},
-                {std::array<std::size_t, 4>{{2, 3, 4, 5}}, potential},
-                {std::array<std::size_t, 4>{{3, 4, 5, 6}}, potential},
-                {std::array<std::size_t, 4>{{4, 5, 6, 7}}, potential},
-                {std::array<std::size_t, 4>{{5, 6, 7, 8}}, potential},
-                {std::array<std::size_t, 4>{{6, 7, 8, 9}}, potential}
-            });
+        omp_system_type omp_sys(10, boundary_type{});
+        test::clear_everything(omp_sys);
 
-        sequencial_interaction_type seq_interaction("none", {
-                {std::array<std::size_t, 4>{{0, 1, 2, 3}}, potential},
-                {std::array<std::size_t, 4>{{1, 2, 3, 4}}, potential},
-                {std::array<std::size_t, 4>{{2, 3, 4, 5}}, potential},
-                {std::array<std::size_t, 4>{{3, 4, 5, 6}}, potential},
-                {std::array<std::size_t, 4>{{4, 5, 6, 7}}, potential},
-                {std::array<std::size_t, 4>{{5, 6, 7, 8}}, potential},
-                {std::array<std::size_t, 4>{{6, 7, 8, 9}}, potential}
-            });
+        omp_sys.position(0) = mjolnir::math::make_coordinate<coordinate_type>( 0.0,  0.0,  0.0);
+        omp_sys.position(1) = mjolnir::math::make_coordinate<coordinate_type>( 0.0,  5.0,  0.0);
+        omp_sys.position(2) = mjolnir::math::make_coordinate<coordinate_type>( 5.0,  5.0,  0.0);
+        omp_sys.position(3) = mjolnir::math::make_coordinate<coordinate_type>( 5.0,  5.0,  5.0);
+        omp_sys.position(4) = mjolnir::math::make_coordinate<coordinate_type>( 5.0, 10.0,  5.0);
+        omp_sys.position(5) = mjolnir::math::make_coordinate<coordinate_type>(10.0, 10.0,  5.0);
+        omp_sys.position(6) = mjolnir::math::make_coordinate<coordinate_type>(10.0, 10.0, 10.0);
+        omp_sys.position(7) = mjolnir::math::make_coordinate<coordinate_type>(10.0, 15.0, 10.0);
+        omp_sys.position(8) = mjolnir::math::make_coordinate<coordinate_type>(15.0, 15.0, 10.0);
+        omp_sys.position(9) = mjolnir::math::make_coordinate<coordinate_type>(15.0, 15.0, 15.0);
 
-        rng_type    rng(123456789);
-        system_type sys(10, boundary_type{});
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            sys.mass(i)     = 1.0;
-            sys.velocity(i) = mjolnir::math::make_coordinate<coordinate_type>(0, 0, 0);
-            sys.force(i)    = mjolnir::math::make_coordinate<coordinate_type>(0, 0, 0);
-            sys.name(i)     = "X";
-            sys.group(i)    = "TEST";
-        }
-
-        sys.position(0) = mjolnir::math::make_coordinate<coordinate_type>( 0.0,  0.0,  0.0);
-        sys.position(1) = mjolnir::math::make_coordinate<coordinate_type>( 0.0,  5.0,  0.0);
-        sys.position(2) = mjolnir::math::make_coordinate<coordinate_type>( 5.0,  5.0,  0.0);
-        sys.position(3) = mjolnir::math::make_coordinate<coordinate_type>( 5.0,  5.0,  5.0);
-        sys.position(4) = mjolnir::math::make_coordinate<coordinate_type>( 5.0, 10.0,  5.0);
-        sys.position(5) = mjolnir::math::make_coordinate<coordinate_type>(10.0, 10.0,  5.0);
-        sys.position(6) = mjolnir::math::make_coordinate<coordinate_type>(10.0, 10.0, 10.0);
-        sys.position(7) = mjolnir::math::make_coordinate<coordinate_type>(10.0, 15.0, 10.0);
-        sys.position(8) = mjolnir::math::make_coordinate<coordinate_type>(15.0, 15.0, 10.0);
-        sys.position(9) = mjolnir::math::make_coordinate<coordinate_type>(15.0, 15.0, 15.0);
-
-        // add perturbation
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            mjolnir::math::X(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
-            mjolnir::math::Y(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
-            mjolnir::math::Z(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
-        }
+        test::apply_random_perturbation(omp_sys, rng, 0.1);
 
         // init sequential one with the same coordinates
-        sequencial_system_type seq_sys(10, boundary_type{});
-        for(std::size_t i=0; i<sys.size(); ++i)
+        seq_system_type seq_sys(10, boundary_type{});
+        for(std::size_t i=0; i<seq_sys.size(); ++i)
         {
-            seq_sys.mass(i)     = sys.mass(i);
-            seq_sys.position(i) = sys.position(i);
-            seq_sys.velocity(i) = sys.velocity(i);
-            seq_sys.force(i)    = sys.force(i);
-            seq_sys.name(i)     = sys.name(i);
-            seq_sys.group(i)    = sys.group(i);
+            seq_sys.mass(i)     = omp_sys.mass(i);
+            seq_sys.position(i) = omp_sys.position(i);
+            seq_sys.velocity(i) = omp_sys.velocity(i);
+            seq_sys.force(i)    = omp_sys.force(i);
+            seq_sys.name(i)     = omp_sys.name(i);
+            seq_sys.group(i)    = omp_sys.group(i);
         }
-
-        // calculate forces with openmp
-        interaction.calc_force(sys);
-        sys.postprocess_forces();
-
-        // calculate forces without openmp
-        seq_interaction.calc_force(seq_sys);
-
-        // check the values are the same
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            BOOST_TEST(mjolnir::math::X(seq_sys.force(i)) == mjolnir::math::X(sys.force(i)),
-                       boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Y(seq_sys.force(i)) == mjolnir::math::Y(sys.force(i)),
-                       boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Z(seq_sys.force(i)) == mjolnir::math::Z(sys.force(i)),
-                       boost::test_tools::tolerance(tol));
-        }
-
-        BOOST_TEST(interaction.calc_energy(sys) == seq_interaction.calc_energy(seq_sys),
-                   boost::test_tools::tolerance(tol));
-
-        // check the virials are the same
-        for(std::size_t i=0; i<9; ++i)
-        {
-            BOOST_TEST(sys.virial()[i] == seq_sys.virial()[i], boost::test_tools::tolerance(tol));
-        }
-
-    }
-}
-
-BOOST_AUTO_TEST_CASE(omp_DihedralAngle_calc_force_and_energy)
-{
-    constexpr double tol = 1e-8;
-    mjolnir::LoggerManager::set_default_logger("test_omp_dihedral_angle_interaction.log");
-
-    using traits_type      = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type        = typename traits_type::real_type;
-    using coordinate_type  = typename traits_type::coordinate_type;
-    using boundary_type    = typename traits_type::boundary_type;
-    using system_type      = mjolnir::System<traits_type>;
-    using potential_type   = mjolnir::PeriodicGaussianPotential<real_type>;
-    using interaction_type = mjolnir::DihedralAngleInteraction<traits_type, potential_type>;
-    using rng_type         = mjolnir::RandomNumberGenerator<traits_type>;
-
-    const int max_number_of_threads = omp_get_max_threads();
-    BOOST_TEST_WARN(max_number_of_threads > 2);
-    BOOST_TEST_MESSAGE("maximum number of threads = " << omp_get_max_threads());
-
-    for(int num_thread=1; num_thread<=max_number_of_threads; ++num_thread)
-    {
-        omp_set_num_threads(num_thread);
-        BOOST_TEST_MESSAGE("maximum number of threads = " << omp_get_max_threads());
 
         potential_type   potential(/* k = */-100.0, /*sigma = */ 3.1415 * 0.5,
                                    /* native angle = */ -3.1415 * 0.5);
-        interaction_type interaction(/*topol = */"none", {
+
+        omp_interaction_type omp_interaction(/*topol = */"none", {
                 {std::array<std::size_t, 4>{{0, 1, 2, 3}}, potential},
                 {std::array<std::size_t, 4>{{1, 2, 3, 4}}, potential},
                 {std::array<std::size_t, 4>{{2, 3, 4, 5}}, potential},
@@ -172,52 +90,23 @@ BOOST_AUTO_TEST_CASE(omp_DihedralAngle_calc_force_and_energy)
                 {std::array<std::size_t, 4>{{6, 7, 8, 9}}, potential}
             });
 
-        rng_type    rng(123456789);
-        system_type sys(10, boundary_type{});
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            sys.mass(i)     = 1.0;
-            sys.velocity(i) = mjolnir::math::make_coordinate<coordinate_type>(0, 0, 0);
-            sys.force(i)    = mjolnir::math::make_coordinate<coordinate_type>(0, 0, 0);
-            sys.name(i)     = "X";
-            sys.group(i)    = "TEST";
-        }
+        seq_interaction_type seq_interaction("none", {
+                {std::array<std::size_t, 4>{{0, 1, 2, 3}}, potential},
+                {std::array<std::size_t, 4>{{1, 2, 3, 4}}, potential},
+                {std::array<std::size_t, 4>{{2, 3, 4, 5}}, potential},
+                {std::array<std::size_t, 4>{{3, 4, 5, 6}}, potential},
+                {std::array<std::size_t, 4>{{4, 5, 6, 7}}, potential},
+                {std::array<std::size_t, 4>{{5, 6, 7, 8}}, potential},
+                {std::array<std::size_t, 4>{{6, 7, 8, 9}}, potential}
+            });
 
-        sys.position(0) = mjolnir::math::make_coordinate<coordinate_type>( 0.0,  0.0,  0.0);
-        sys.position(1) = mjolnir::math::make_coordinate<coordinate_type>( 0.0,  5.0,  0.0);
-        sys.position(2) = mjolnir::math::make_coordinate<coordinate_type>( 5.0,  5.0,  0.0);
-        sys.position(3) = mjolnir::math::make_coordinate<coordinate_type>( 5.0,  5.0,  5.0);
-        sys.position(4) = mjolnir::math::make_coordinate<coordinate_type>( 5.0, 10.0,  5.0);
-        sys.position(5) = mjolnir::math::make_coordinate<coordinate_type>(10.0, 10.0,  5.0);
-        sys.position(6) = mjolnir::math::make_coordinate<coordinate_type>(10.0, 10.0, 10.0);
-        sys.position(7) = mjolnir::math::make_coordinate<coordinate_type>(10.0, 15.0, 10.0);
-        sys.position(8) = mjolnir::math::make_coordinate<coordinate_type>(15.0, 15.0, 10.0);
-        sys.position(9) = mjolnir::math::make_coordinate<coordinate_type>(15.0, 15.0, 15.0);
+        omp_interaction.initialize(omp_sys);
+        seq_interaction.initialize(seq_sys);
 
-        // add perturbation
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            mjolnir::math::X(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
-            mjolnir::math::Y(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
-            mjolnir::math::Z(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
-        }
-
-        auto ref_sys = sys;
-
-        // calculate forces with openmp
-        const auto ref_ene = interaction.calc_energy(ref_sys);
-        interaction.calc_force(ref_sys);
-        ref_sys.postprocess_forces();
-
-        const auto ene = interaction.calc_force_and_energy(sys);
-        sys.postprocess_forces();
-
-        BOOST_TEST(ene == ref_ene, boost::test_tools::tolerance(tol));
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            BOOST_TEST(mjolnir::math::X(ref_sys.force(i)) == mjolnir::math::X(sys.force(i)), boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Y(ref_sys.force(i)) == mjolnir::math::Y(sys.force(i)), boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Z(ref_sys.force(i)) == mjolnir::math::Z(sys.force(i)), boost::test_tools::tolerance(tol));
-        }
+        test::check_force_consistency              (omp_sys, omp_interaction, seq_sys, seq_interaction, tol);
+        test::check_force_and_energy_consistency   (omp_sys, omp_interaction, seq_sys, seq_interaction, tol);
+        test::check_force_and_virial_consistency   (omp_sys, omp_interaction, seq_sys, seq_interaction, tol);
+        test::check_force_energy_virial_consistency(omp_sys, omp_interaction, seq_sys, seq_interaction, tol);
+        test::check_energy_consistency             (omp_sys, omp_interaction, seq_sys, seq_interaction, tol);
     }
 }
