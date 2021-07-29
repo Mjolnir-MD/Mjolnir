@@ -35,6 +35,7 @@ class GFWNPTLangevinIntegrator
     using system_type     = System<traits_type>;
     using forcefield_type = std::unique_ptr<ForceFieldBase<traitsT>>;
     using rng_type        = RandomNumberGenerator<traits_type>;
+    using variable_key_type = typename system_type::variable_key_type;
 
   public:
 
@@ -86,12 +87,19 @@ class GFWNPTLangevinIntegrator
         // calculate parameters for each particles
         this->update(sys);
 
-        // calculate force
+        // clear forces before calc_force
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
         sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+
+        // calculate force
+        for(auto& kv : sys.variables())
+        {
+            auto& var = kv.second;
+            var.update(var.x(), var.v(), real_type(0));
+        }
         ff->calc_force_and_virial(sys);
 
         // calculate the current pressure using the force calculated here
@@ -171,6 +179,15 @@ class GFWNPTLangevinIntegrator
         }
 
         // --------------------------------------------------------------------
+        // update dynvar velocities (dynvar does not depend on cell)
+
+        for(auto& kv : sys.variables())
+        {
+            auto& var = kv.second;
+            var.update(var.x(), var.v() + halfdt_ * var.f() / var.m(), real_type(0));
+        }
+
+        // --------------------------------------------------------------------
         // update cell size, volume and inverse cell matrix
 
         h_cell  += halfdt_ * v_cell_;
@@ -202,6 +219,14 @@ class GFWNPTLangevinIntegrator
                 sys.position(i) = sys.boundary().adjust_position(new_pos);
             }
         }
+        // --------------------------------------------------------------------
+        // update dynvar positions (dynvar does not depend on cell)
+
+        for(auto& kv : sys.variables())
+        {
+            auto& var = kv.second;
+            var.update(var.x() + halfdt_ * var.v(), var.v(), var.f());
+        }
 
         // --------------------------------------------------------------------
         // update cell velocity (ornstein-Uhlenbeck)
@@ -227,8 +252,19 @@ class GFWNPTLangevinIntegrator
         }
 
         // --------------------------------------------------------------------
-        // update particle positions
+        // update dynvar velocity (Ornstein-Uhlenbeck)
 
+        for(auto& kv : sys.variables())
+        {
+            auto& var = kv.second;
+            const auto& param = params_for_dynvar_.at(kv.first);
+            const auto next_v = var.v() * param.exp_gamma_dt +
+                param.noise_coeff * rng.gaussian();
+            var.update(var.x(), next_v, var.f());
+        }
+
+        // --------------------------------------------------------------------
+        // update particle positions
 
         real_type max_displacement_sq_2 = 0;
         {
@@ -248,6 +284,15 @@ class GFWNPTLangevinIntegrator
 
                 sys.position(i) = sys.boundary().adjust_position(new_pos);
             }
+        }
+
+        // --------------------------------------------------------------------
+        // update dynvar positions (dynvar does not depend on cell)
+
+        for(auto& kv : sys.variables())
+        {
+            auto& var = kv.second;
+            var.update(var.x() + halfdt_ * var.v(), var.v(), var.f());
         }
 
         // --------------------------------------------------------------------
@@ -287,6 +332,15 @@ class GFWNPTLangevinIntegrator
                                           sys.force(i) * sys.rmass(i),
                                           v_over_h, coef_S);
             }
+        }
+
+        // --------------------------------------------------------------------
+        // update dynvar velocities (dynvar does not depend on cell)
+
+        for(auto& kv : sys.variables())
+        {
+            auto& var = kv.second;
+            var.update(var.x(), var.v() + halfdt_ * var.f() / var.m(), var.f());
         }
 
         // --------------------------------------------------------------------
@@ -372,6 +426,20 @@ class GFWNPTLangevinIntegrator
             this->noise_coeff_ .at(i) = std::sqrt(
                     kBT * (1 - std::exp(2 * gamma_dt)) * sys.rmass(i));
         }
+
+        for(const auto& kv : sys.variables())
+        {
+            const auto& key = kv.first;
+            const auto& var = kv.second;
+
+            // force is not initialized yet
+            dynvar_params param;
+            param.exp_gamma_dt = std::exp(-var.gamma() * this->dt_);
+            param.noise_coeff  = std::sqrt(kBT *
+                    (real_type(1) - std::exp(-2 * var.gamma() * this->dt_)) /
+                    var.m());
+            params_for_dynvar_[key] = param;
+        }
         return;
     }
 
@@ -451,6 +519,13 @@ class GFWNPTLangevinIntegrator
     std::vector<real_type> gammas_;
     std::vector<real_type> exp_gamma_dt_;
     std::vector<real_type> noise_coeff_;
+
+    struct dynvar_params
+    {
+        real_type exp_gamma_dt;
+        real_type noise_coeff;
+    };
+    std::map<variable_key_type, dynvar_params> params_for_dynvar_;
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD

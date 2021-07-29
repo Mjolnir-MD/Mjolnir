@@ -24,7 +24,7 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using rng_type         = RandomNumberGenerator<traits_type>;
     using remover_type     = SystemMotionRemover<traits_type>;
-
+    using variable_key_type = typename system_type::variable_key_type;
     using coordinate_container_type = std::vector<coordinate_type>;
 
   public:
@@ -67,6 +67,12 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             {
                 system.force(i) = math::make_coordinate<coordinate_type>(0,0,0);
             }
+            for(auto& kv : system.variables())
+            {
+                auto& var = kv.second;
+                var.update(var.x(), var.v(), real_type(0));
+            }
+
             ff->calc_force(system);
         }
 
@@ -118,6 +124,12 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         }
         correct_velocity(sys, ff);
 
+        for(auto& kv : sys.variables())
+        {
+            auto& var = kv.second;
+            var.update(var.x(), var.v() + halfdt_ * var.f() / var.m(), var.f());
+        }
+
         // A step
         for(std::size_t correction_step=0; correction_step<correction_iter_num_; ++correction_step)
         {
@@ -129,6 +141,11 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             }
             correct_coordinate(sys, ff);
             correct_velocity(sys, ff);
+        }
+        for(auto& kv : sys.variables())
+        {
+            auto& var = kv.second;
+            var.update(var.x() + halfdt_ * var.v(), var.v(), var.f());
         }
 
         // O step
@@ -140,6 +157,16 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         }
         correct_velocity(sys, ff);
 
+        for(auto& kv : sys.variables())
+        {
+            const auto& param = params_for_dynvar_.at(kv.first);
+            auto& var = kv.second;
+
+            const real_type next_v = var.v() * param.exp_gamma_dt +
+                param.noise_coeff * rng.gaussian();
+            var.update(var.x(), next_v, var.f());
+        }
+
         // A step
         for(std::size_t correction_step=0; correction_step<correction_iter_num_; ++correction_step)
         {
@@ -152,6 +179,12 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             correct_coordinate(sys, ff);
             correct_velocity(sys, ff);
         }
+        for(auto& kv : sys.variables())
+        {
+            auto& var = kv.second;
+            var.update(var.x() + halfdt_ * var.v(), var.v(), var.f());
+        }
+
         // update neighbor list; reduce margin, reconstruct the list if needed;
         real_type largest_disp2(0.0);
 #pragma omp parallel for reduction(max:largest_disp2)
@@ -177,6 +210,12 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             sys.velocity(i) += this->halfdt_ * sys.rmass(i) * sys.force(i);
         }
         correct_velocity(sys, ff);
+
+        for(auto& kv : sys.variables())
+        {
+            auto& var = kv.second;
+            var.update(var.x(), var.v() + halfdt_ * var.f() / var.m(), var.f());
+        }
 
         remover_.remove(sys);
 
@@ -218,6 +257,20 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             this->exp_gamma_dt_.at(i) = std::exp(gamma_dt);
             this->noise_coeff_ .at(i) = std::sqrt(
                     kBT * (1 - std::exp(2 * gamma_dt)) * sys.rmass(i));
+        }
+
+        for(const auto& kv : sys.variables())
+        {
+            const auto& key = kv.first;
+            const auto& var = kv.second;
+
+            // force is not initialized yet
+            dynvar_params param;
+            param.exp_gamma_dt = std::exp(-var.gamma() * this->dt_);
+            param.noise_coeff  = std::sqrt(kBT *
+                    (real_type(1) - std::exp(-2 * var.gamma() * this->dt_)) /
+                    var.m());
+            params_for_dynvar_[key] = param;
         }
         return;
     };
@@ -302,7 +355,7 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         }
 
 
-        if(constraint_ff.max_iteration() <= rattle_step)
+        if(constraint_ff.max_iteration() != 0 && constraint_ff.max_iteration() <= rattle_step)
         {
             MJOLNIR_GET_DEFAULT_LOGGER();
             MJOLNIR_LOG_FUNCTION();
@@ -367,7 +420,7 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             ++rattle_step;
         }
 
-        if(constraint_ff.max_iteration() <= rattle_step)
+        if(constraint_ff.max_iteration() != 0 && constraint_ff.max_iteration() <= rattle_step)
         {
             MJOLNIR_GET_DEFAULT_LOGGER();
             MJOLNIR_LOG_FUNCTION();
@@ -407,6 +460,13 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     std::vector<coordinate_container_type,
                 aligned_allocator<coordinate_container_type, 64>
         > dvelocity_threads_;
+
+    struct dynvar_params
+    {
+        real_type exp_gamma_dt;
+        real_type noise_coeff;
+    };
+    std::map<variable_key_type, dynvar_params> params_for_dynvar_;
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD

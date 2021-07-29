@@ -115,6 +115,14 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
 
     void calc_force(system_type& sys) const noexcept override
     {
+        // after calculating the force, almost all the terms needed to calculate
+        // the energy value are calculated. the cost is ignorable.
+        this->calc_force_and_energy(sys);
+        return;
+    }
+
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
         using std::swap;
         // -------------------------------------------------------------------
         // save the current force that is not in this MB unit.
@@ -142,7 +150,8 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         sys.postprocess_forces();
 
         const auto V_diff = V_1 - V_2;
-        const auto coef   = V_diff / std::sqrt(V_diff * V_diff + 4 * delta_sq_);
+        const auto sqrtD  = std::sqrt(V_diff * V_diff + 4 * delta_sq_);
+        const auto coef   = V_diff / sqrtD;
 
         // F_V_MB = 1/2 [1 - Vdiff / sqrt(Vdiff^2 + 4 delta^2)] * F_V_1 +
         //          1/2 [1 + Vdiff / sqrt(Vdiff^2 + 4 delta^2)] * F_V_2
@@ -159,9 +168,14 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
             force_buffer0_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
             force_buffer1_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
-        return ;
+        return (V_1 + V_2 - sqrtD) / 2;
     }
     void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        this->calc_force_virial_energy(sys);
+        return;
+    }
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
     {
         using std::swap;
         // -------------------------------------------------------------------
@@ -192,7 +206,8 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         sys.postprocess_forces();
 
         const auto V_diff = V_1 - V_2;
-        const auto coef   = V_diff / std::sqrt(V_diff * V_diff + 4 * delta_sq_);
+        const auto sqrtD  = std::sqrt(V_diff * V_diff + 4 * delta_sq_);
+        const auto coef   = V_diff / sqrtD;
 
         // F_V_MB = 1/2 [1 - Vdiff / sqrt(Vdiff^2 + 4 delta^2)] * F_V_1 +
         //          1/2 [1 + Vdiff / sqrt(Vdiff^2 + 4 delta^2)] * F_V_2
@@ -216,7 +231,7 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         virial_buffer0_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         virial_buffer1_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
-        return ;
+        return (V_1 + V_2 - sqrtD) / 2;
     }
 
     real_type calc_energy(const system_type& sys) const noexcept override

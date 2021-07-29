@@ -123,6 +123,27 @@ class ForceField final : public ForceFieldBase<traitsT>
             external_.calc_energy(sys);
     }
 
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        real_type energy(0);
+        sys.preprocess_forces();
+        energy += local_   .calc_force_and_energy(sys);
+        energy += global_  .calc_force_and_energy(sys);
+        energy += external_.calc_force_and_energy(sys);
+        sys.postprocess_forces();
+        return energy;
+    }
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
+    {
+        real_type energy(0);
+        sys.preprocess_forces();
+        energy += local_   .calc_force_virial_energy(sys);
+        energy += global_  .calc_force_virial_energy(sys);
+        energy += external_.calc_force_virial_energy(sys);
+        sys.postprocess_forces();
+        return energy;
+    }
+
     void format_energy_name(std::string& fmt) const override
     {
         local_   .format_energy_name(fmt);

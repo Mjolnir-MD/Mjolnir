@@ -24,6 +24,7 @@ class GJFNVTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using rng_type        = RandomNumberGenerator<traits_type>;
     using remover_type    = SystemMotionRemover<traits_type>;
+    using variable_key_type = typename system_type::variable_key_type;
 
   public:
 
@@ -38,7 +39,7 @@ class GJFNVTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     {}
     ~GJFNVTLangevinIntegrator() = default;
 
-    void initialize(system_type& sys, forcefield_type& ff, rng_type&)
+    void initialize(system_type& sys, forcefield_type& ff, rng_type& rng)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -61,7 +62,25 @@ class GJFNVTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             {
                 sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
             }
+            for(auto& kv : sys.variables())
+            {
+                auto& var = kv.second;
+                var.update(var.x(), var.v(), real_type(0));
+            }
             ff->calc_force(sys);
+        }
+
+        // generate the first noise terms
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            this->noise_[i] = this->gen_R(rng) * betas_[i] * sys.rmass(i);
+        }
+        for(const auto& kv : sys.variables())
+        {
+            const auto& key = kv.first;
+            const auto& var = kv.second;
+            auto& param = params_for_dynvar_.at(key);
+            param.noise = rng.gaussian() * param.beta / var.m();
         }
         return;
     }
@@ -100,6 +119,23 @@ class GJFNVTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             // collect largest displacement
             largest_disp2 = std::max(largest_disp2, math::length_sq(dp));
         }
+        for(auto& kv : sys.variables()) // assume there are only a few dynvars
+        {
+            const auto& key = kv.first;
+            auto& param = params_for_dynvar_.at(key);
+            auto& var = kv.second;
+
+            const auto next_x = var.x() + param.b * dt_ * (var.v() +
+                0.5 / var.m() * (halfdt_ * var.f() + param.noise));
+
+            param.noise = rng.gaussian() * param.beta / var.m();
+
+            real_type next_v = var.v() +
+                (dt_ / var.m() * var.f() + param.noise) * real_type(0.5);
+            next_v *= param.vel_coef;
+
+            var.update(next_x, next_v, real_type(0));
+        }
 
         // update neighbor list; reduce margin, reconstruct the list if needed
         ff->reduce_margin(2 * std::sqrt(largest_disp2), sys);
@@ -114,6 +150,17 @@ class GJFNVTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             const auto& beta = this->noise_[i];
 
             v += ((dt_ * rm) * f + beta) * real_type(0.5);
+        }
+        for(auto& kv : sys.variables()) // assume there are only a few dynvars
+        {
+            const auto& key = kv.first;
+            const auto& param = params_for_dynvar_.at(key);
+            auto& var = kv.second;
+
+            const auto next_v = var.v() + real_type(0.5) *
+                (dt_ / var.m() * var.f() + param.noise);
+
+            var.update(var.x(), next_v, var.f());
         }
 
         // remove net rotation/translation
@@ -157,6 +204,20 @@ class GJFNVTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             this->betas_.at(i) = std::sqrt(2 * alpha * kBT * dt_);
             this->vel_coefs_.at(i) = 1.0 - alpha * bs_.at(i) * dt_ / m;
         }
+
+        for(const auto& kv : sys.variables())
+        {
+            const auto& key = kv.first;
+            const auto& var = kv.second;
+
+            dynvar_params_type param;
+            param.alpha    = var.m() * var.gamma();
+            param.beta     = std::sqrt(2 * param.alpha * kBT * dt_);
+            param.b        = 1.0 / (1.0 + param.alpha * dt_ * 0.5 / var.m());
+            param.vel_coef = 1.0 - param.alpha * param.b * dt_ / var.m();
+            param.noise    = real_type(0); // initialized later
+            params_for_dynvar_[key] = param;
+        }
         return;
     }
 
@@ -180,6 +241,16 @@ class GJFNVTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     std::vector<coordinate_type> noise_;
 
     remover_type remover_;
+
+    struct dynvar_params_type
+    {
+        real_type alpha; // m * gamma
+        real_type beta;
+        real_type b;
+        real_type vel_coef;
+        real_type noise;
+    };
+    std::map<variable_key_type, dynvar_params_type> params_for_dynvar_;
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD

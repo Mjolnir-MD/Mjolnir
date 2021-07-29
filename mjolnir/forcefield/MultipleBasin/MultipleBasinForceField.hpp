@@ -178,6 +178,63 @@ class MultipleBasinForceField : public ForceFieldBase<traitsT>
 
         return ;
     }
+
+    real_type calc_force_and_energy(system_type& sys) const noexcept override
+    {
+        using std::swap;
+
+        real_type energy(0);
+        for(const auto& unit : this->units_)
+        {
+            energy += unit->calc_force_and_energy(sys);
+        }
+
+        swap(this->force_buffer_,  sys.forces());
+
+        sys.preprocess_forces();
+        energy += loc_common_.calc_force_and_energy(sys);
+        energy += glo_common_.calc_force_and_energy(sys);
+        energy += ext_common_.calc_force_and_energy(sys);
+        sys.postprocess_forces();
+
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            sys.force(i) += force_buffer_[i]; // restore other force
+            force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+        }
+        return energy;
+    }
+
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
+    {
+        using std::swap;
+
+        real_type energy(0);
+        for(const auto& unit : this->units_)
+        {
+            energy += unit->calc_force_virial_energy(sys);
+        }
+
+        swap(this->force_buffer_,  sys.forces());
+        swap(this->virial_buffer_, sys.virial());
+
+        sys.preprocess_forces();
+        energy += loc_common_.calc_force_virial_energy(sys);
+        energy += glo_common_.calc_force_virial_energy(sys);
+        energy += ext_common_.calc_force_virial_energy(sys);
+        sys.postprocess_forces();
+
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            sys.force(i) += force_buffer_[i]; // restore other force
+            force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+        }
+        sys.virial() += virial_buffer_;
+        this->virial_buffer_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+
+        return energy;
+    }
+
     real_type calc_energy(const system_type& sys) const noexcept override
     {
         real_type E = real_type(0.0);

@@ -1,5 +1,6 @@
 set(mjolnir_core_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/System.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/DynamicVariable.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/RandomNumberGenerator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/BAOABLangevinIntegrator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/gBAOABLangevinIntegrator.cpp"
