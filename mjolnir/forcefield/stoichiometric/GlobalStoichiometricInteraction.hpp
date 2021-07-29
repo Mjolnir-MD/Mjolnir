@@ -43,7 +43,7 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
         real_type epsilon,
         std::size_t coefa, std::size_t coefb)
         : potential_(std::move(pot)), partition_(std::move(part)),
-          epsilon_(epsilon), coefa_(coefa), coefb_(coefb)
+          epsilon_(epsilon), coefa_(coefa), coefb_(coefb), inv_coefa_(1./coefa), inv_coefb_(1./coefb)
     {
         const std::size_t participants_a_num = potential_.participants_a_num();
         const std::size_t participants_b_num = potential_.participants_b_num();
@@ -169,6 +169,8 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
     real_type      epsilon_;
     std::size_t    coefa_;
     std::size_t    coefb_;
+    real_type      inv_coefa_;
+    real_type      inv_coefb_;
 
     // -----------------------------------------------------------------------
     // Variable for mapping system index to buffering index
@@ -249,25 +251,27 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
 
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
-        const auto& partner            = partner_buffer_a_  [idx_a];
-        const auto& pot_buff_range     = pot_buffer_range_a_[idx_a];
-        real_type&  pots_partial_sum_a = pots_partial_sum_a_[idx_a];
+        const auto&     partner            = partner_buffer_a_  [idx_a];
+        const auto&     pot_buff_range     = pot_buffer_range_a_[idx_a];
+        const real_type pots_sum_a         = pots_sum_a_        [idx_a];
+        const real_type pots_sum_a_coefb   = pots_sum_a*inv_coefb_;
+        real_type&      pots_partial_sum_a = pots_partial_sum_a_[idx_a];
 
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
-            const index_type j          = partner[ptnr_idx].index;
-            const index_type idx_b      = idx_buffer_map_[j];
-            const real_type  pots_sum_a = pots_sum_a_[idx_a];
-            const real_type  pots_sum_b = pots_sum_b_[idx_b];
+            const index_type j                = partner[ptnr_idx].index;
+            const index_type idx_b            = idx_buffer_map_[j];
+            const real_type  pots_sum_b       = pots_sum_b_[idx_b];
+            const real_type  pots_sum_b_coefa = pots_sum_b*inv_coefa_;
 
-            if(std::max(pots_sum_a, pots_sum_b) <= 1.0){ continue; }
+            if(std::max(pots_sum_a_coefb, pots_sum_b_coefa) <= 1.0){ continue; }
 
             const real_type  pot_buff_ab = pot_buff_range[ptnr_idx];
-            if(pots_sum_a < pots_sum_b)
+            if(pots_sum_a_coefb < pots_sum_b_coefa)
             {
                 pots_partial_sum_b_[idx_b] += pot_buff_ab;
             }
-            else // pots_sum_a >= pots_sum_b
+            else // pots_sum_a / coefb >= pots_sum_b / coefa
             {
                 pots_partial_sum_a += pot_buff_ab;
             }
@@ -287,8 +291,9 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
         const coordinate_type& derivs_sum_a       = derivs_sum_a_      [idx_a];
         const real_type        pots_partial_sum_a = pots_partial_sum_a_[idx_a];
         const real_type        inv_pots_sum_a     = 1.0 / pots_sum_a;
-        const real_type        ep_pots_sum_a      = epsilon_ * inv_pots_sum_a;
-        const real_type        ep_pots_sum_a2     = ep_pots_sum_a * inv_pots_sum_a;
+        const real_type        coefb_pots_sum_a   = coefb_ * inv_pots_sum_a;
+        const real_type        ep_coefb_pots_sum_a  = epsilon_ * coefb_pots_sum_a;
+        const real_type        ep_coefb_pots_sum_a2 = ep_coefb_pots_sum_a * inv_pots_sum_a;
 
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
@@ -297,57 +302,57 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
             const real_type        pot_buff_ab   = potential_buff_range [ptnr_idx];
             const coordinate_type& deriv_buff_ab = derivative_buff_range[ptnr_idx];
             const real_type        pots_sum_b    = pots_sum_b_[idx_b];
-            const coordinate_type& derivs_sum_b  = derivs_sum_b_[idx_b];
+            const real_type        inv_pots_sum_b   = 1.0 / pots_sum_b;
+            const real_type        coefa_pots_sum_b = coefa_ * inv_pots_sum_b;
+            const coordinate_type& derivs_sum_b     = derivs_sum_b_[idx_b];
 
-            if(pots_sum_a <= 1.0)
+            if(1.0 <= coefb_pots_sum_a) // pots_sum_a / coefb <= 1.0 case
             {
-                if(pots_sum_b <= 1.0)
+                if(1.0 <= coefa_pots_sum_b) // pots_sum_b / coefa <= 1.0 case
                 {
                     // force from distance part derivation
                     const coordinate_type force = epsilon_ * deriv_buff_ab;
                     sys.force(i) -= force;
                     sys.force(j) += force;
                 }
-                else //pots_sum_a < pots_sum_b
+                else // pots_sum_a / coefb < pots_sum_b / coefa
                 {
-                    const real_type inv_pots_sum_b = 1.0 / pots_sum_b;
-                    const real_type ep_pots_sum_b  = epsilon_ * inv_pots_sum_b;
-                    const real_type ep_pots_sum_b2 = ep_pots_sum_b * inv_pots_sum_b;
+                    const real_type ep_coefa_pots_sum_b  = epsilon_ * coefa_pots_sum_b;
+                    const real_type ep_coefa_pots_sum_b2 = ep_coefa_pots_sum_b * inv_pots_sum_b;
 
                     // force from distance part derivation
-                    sys.force(i) -= ep_pots_sum_b * deriv_buff_ab;
-                    sys.force(j) += ep_pots_sum_b * deriv_buff_ab;
+                    sys.force(i) -= ep_coefa_pots_sum_b * deriv_buff_ab;
+                    sys.force(j) += ep_coefa_pots_sum_b * deriv_buff_ab;
 
                     // force from valence part derivation
-                    sys.force(j) += ep_pots_sum_b2 * derivs_sum_b * pot_buff_ab;
+                    sys.force(j) += ep_coefa_pots_sum_b2 * derivs_sum_b * pot_buff_ab;
                 }
             }
-            else // 1.0 < pots_sum_a_case
+            else // 1.0 < pots_sum_a / coefb case
             {
                 // force from depends on valece part
-                if(pots_sum_b <= pots_sum_a)
+                if(coefb_pots_sum_a <= coefa_pots_sum_b) // pots_sum_b / coefa <= pots_sum_a / coefb
                 {
                     // force from distance part derivation
-                    sys.force(i) -= ep_pots_sum_a * deriv_buff_ab;
-                    sys.force(j) += ep_pots_sum_a * deriv_buff_ab;
+                    sys.force(i) -= ep_coefb_pots_sum_a * deriv_buff_ab;
+                    sys.force(j) += ep_coefb_pots_sum_a * deriv_buff_ab;
 
                     // force from valence part derivation
-                    sys.force(i) += ep_pots_sum_a2 * derivs_sum_a * pot_buff_ab;
+                    sys.force(i) += ep_coefb_pots_sum_a2 * derivs_sum_a * pot_buff_ab;
                 }
-                else // pots_sum_a < pots_sum_b
+                else // pots_sum_a / coefb < pots_sum_b / coefa
                 {
-                    const real_type inv_pots_sum_b = 1.0 / pots_sum_b;
-                    const real_type ep_pots_sum_b  = epsilon_ * inv_pots_sum_b;
-                    const real_type ep_pots_sum_b2 = ep_pots_sum_b * inv_pots_sum_b;
+                    const real_type ep_coefa_pots_sum_b  = epsilon_* coefa_pots_sum_b;
+                    const real_type ep_coefa_pots_sum_b2 = ep_coefa_pots_sum_b * inv_pots_sum_b;
 
                     // force from distance part derivation
-                    sys.force(i) -= ep_pots_sum_b * deriv_buff_ab;
-                    sys.force(j) += ep_pots_sum_b * deriv_buff_ab;
+                    sys.force(i) -= ep_coefa_pots_sum_b * deriv_buff_ab;
+                    sys.force(j) += ep_coefa_pots_sum_b * deriv_buff_ab;
                     // force from valence part derivation
-                    sys.force(j) += ep_pots_sum_b2 * derivs_sum_b * pot_buff_ab;
+                    sys.force(j) += ep_coefa_pots_sum_b2 * derivs_sum_b * pot_buff_ab;
                 }
                 // force from depends on valence part
-                sys.force(j) -= ep_pots_sum_a2 * deriv_buff_ab * pots_partial_sum_a;
+                sys.force(j) -= ep_coefb_pots_sum_a2 * deriv_buff_ab * pots_partial_sum_a;
             }
         }
 
@@ -357,14 +362,16 @@ void GlobalStoichiometricInteraction<traitsT>::calc_force(system_type& sys) cons
             const index_type k          = partner[ptnr_idx].index;
             const index_type idx_d      = idx_buffer_map_[k];
             const real_type  pots_sum_d = pots_sum_b_[idx_d];
-            if(1.0 < pots_sum_d)
+            const real_type  inv_pots_sum_d   = 1.0 / pots_sum_d;
+            const real_type  coefa_pots_sum_d = coefa_ * inv_pots_sum_d;
+
+            if(coefa_pots_sum_d < 1.0)
             {
-                const real_type        inv_pots_sum_d = 1.0 / pots_sum_d;
-                const real_type        ep_pots_sum_d  = epsilon_ * inv_pots_sum_d;
-                const real_type        ep_pots_sum_d2 = ep_pots_sum_d * inv_pots_sum_d;
+                const real_type        ep_coefa_pots_sum_d  = epsilon_ * coefa_pots_sum_d;
+                const real_type        ep_coefa_pots_sum_d2 = ep_coefa_pots_sum_d * inv_pots_sum_d;
                 const coordinate_type& deriv_buff_ad  = derivative_buff_range[ptnr_idx];
 
-                sys.force(i) += ep_pots_sum_d2 * deriv_buff_ad * pots_partial_sum_b_[idx_d];
+                sys.force(i) += ep_coefa_pots_sum_d2 * deriv_buff_ad * pots_partial_sum_b_[idx_d];
             }
         }
     }
@@ -389,7 +396,7 @@ GlobalStoichiometricInteraction<traitsT>::calc_energy(const system_type& sys) co
 
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
-        const index_type   i = participants_a[idx_a];
+        const index_type i  = participants_a[idx_a];
 
         const auto& partner   = partner_buffer_a_  [idx_a];
         const auto& pot_range = pot_buffer_range_a_[idx_a];
@@ -424,14 +431,15 @@ GlobalStoichiometricInteraction<traitsT>::calc_energy(const system_type& sys) co
             const index_type j            = partner[ptnr_idx].index;
             const index_type idx_b        = idx_buffer_map_[j];
             const real_type  pot_buff_ab  = pots_buff_a[ptnr_idx];
-            const real_type  max_pots_sum  = std::max(pots_sum_a_[idx_a], pots_sum_b_[idx_b]);
-            if(max_pots_sum <= 1.0)
+            const real_type  max_normalized_contact_order =
+                std::max(pots_sum_a_[idx_a]*inv_coefb_, pots_sum_b_[idx_b]*inv_coefa_);
+            if(max_normalized_contact_order <= 1.0)
             {
                 retval += pot_buff_ab;
             }
             else
             {
-                retval += pot_buff_ab / max_pots_sum;
+                retval += pot_buff_ab / max_normalized_contact_order;
             }
         }
     }
@@ -495,25 +503,27 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
 
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
-        const auto& partner            = partner_buffer_a_  [idx_a];
-        const auto& pot_buff_range     = pot_buffer_range_a_[idx_a];
-        real_type&  pots_partial_sum_a = pots_partial_sum_a_[idx_a];
+        const auto&      partner            = partner_buffer_a_  [idx_a];
+        const auto&      pot_buff_range     = pot_buffer_range_a_[idx_a];
+        const real_type  pots_sum_a         = pots_sum_a_[idx_a];
+        const real_type  pots_sum_a_coefb   = pots_sum_a*inv_coefb_;
+        real_type&       pots_partial_sum_a = pots_partial_sum_a_[idx_a];
 
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
-            const index_type j          = partner[ptnr_idx].index;
-            const index_type idx_b      = idx_buffer_map_[j];
-            const real_type  pots_sum_a = pots_sum_a_[idx_a];
-            const real_type  pots_sum_b = pots_sum_b_[idx_b];
+            const index_type j                = partner[ptnr_idx].index;
+            const index_type idx_b            = idx_buffer_map_[j];
+            const real_type  pots_sum_b       = pots_sum_b_[idx_b];
+            const real_type  pots_sum_b_coefa = pots_sum_b*inv_coefa_;
 
-            if(std::max(pots_sum_a, pots_sum_b) <= 1.0){ continue; }
+            if(std::max(pots_sum_a_coefb, pots_sum_b_coefa) <= 1.0){ continue; }
 
             const real_type pot_buff_ab = pot_buff_range[ptnr_idx];
-            if(pots_sum_a < pots_sum_b)
+            if(pots_sum_a_coefb < pots_sum_b_coefa)
             {
                 pots_partial_sum_b_[idx_b] += pot_buff_ab;
             }
-            else // pots_sum_a >= pots_sum_b
+            else // pots_sum_a / coefb >= pots_sum_b / coefa
             {
                 pots_partial_sum_a += pot_buff_ab;
             }
@@ -533,8 +543,9 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
         const coordinate_type& derivs_sum_a       = derivs_sum_a_      [idx_a];
         const real_type        pots_partial_sum_a = pots_partial_sum_a_[idx_a];
         const real_type        inv_pots_sum_a     = 1.0 / pots_sum_a;
-        const real_type        ep_pots_sum_a      = epsilon_ * inv_pots_sum_a;
-        const real_type        ep_pots_sum_a2     = ep_pots_sum_a * inv_pots_sum_a;
+        const real_type        coefb_pots_sum_a   = coefa_ * inv_pots_sum_a;
+        const real_type        ep_coefb_pots_sum_a  = epsilon_ * coefb_pots_sum_a;
+        const real_type        ep_coefb_pots_sum_a2 = ep_coefb_pots_sum_a * inv_pots_sum_a;
 
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
@@ -543,74 +554,75 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
             const real_type        pot_buff_ab   = potential_buff_range [ptnr_idx];
             const coordinate_type& deriv_buff_ab = derivative_buff_range[ptnr_idx];
             const real_type        pots_sum_b    = pots_sum_b_  [idx_b];
-            const coordinate_type& derivs_sum_b  = derivs_sum_b_[idx_b];
+            const real_type        inv_pots_sum_b   = 1.0 / pots_sum_b;
+            const real_type        coefa_pots_sum_b = coefa_ * inv_pots_sum_b;
+            const coordinate_type& derivs_sum_b     = derivs_sum_b_[idx_b];
 
-            if(pots_sum_a <= 1.0)
+            if(1.0 <= coefb_pots_sum_a) // pots_sum_a / coefb <= 1.0 case
             {
-                if(pots_sum_b <= 1.0)
+                if(1.0 <= coefa_pots_sum_b) // pots_sum_b / coefa <= 1.0 case
                 {
                     // force from distance part dirivation
                     const coordinate_type force = epsilon_ * deriv_buff_ab;
                     sys.force(i) -= force;
                     sys.force(j) += force;
                 }
-                else // pots_sum_a < pots_sum_b case
+                else // pots_sum_a / coefb < pots_sum_b / coefa case
                 {
-                    const real_type inv_pots_sum_b = 1.0 / pots_sum_b;
-                    const real_type ep_pots_sum_b  = epsilon_ * inv_pots_sum_b;
-                    const real_type ep_pots_sum_b2 = ep_pots_sum_b * inv_pots_sum_b;
+                    const real_type ep_coefa_pots_sum_b  = epsilon_ * coefa_pots_sum_b;
+                    const real_type ep_coefa_pots_sum_b2 = ep_coefa_pots_sum_b * inv_pots_sum_b;
 
                     // force from distance part derivation
-                    sys.force(i) -= ep_pots_sum_b * deriv_buff_ab;
-                    sys.force(j) += ep_pots_sum_b * deriv_buff_ab;
+                    sys.force(i) -= ep_coefa_pots_sum_b * deriv_buff_ab;
+                    sys.force(j) += ep_coefa_pots_sum_b * deriv_buff_ab;
 
                     // force from valence part derivation
-                    sys.force(j) += ep_pots_sum_b2 * derivs_sum_b * pot_buff_ab;
+                    sys.force(j) += ep_coefa_pots_sum_b2 * derivs_sum_b * pot_buff_ab;
                 }
             }
-            else // 1.0 < pots_sum_a_case
+            else // 1.0 < pots_sum_a / coefb case
             {
                 // force from depends on valence part
-                if(pots_sum_b <= pots_sum_a)
+                if(coefb_pots_sum_a <= coefa_pots_sum_b) // pots_sum_b / coefa <= pots_sum_a / coefb
                 {
                     // force from distance part derivation
-                    sys.force(i) -= ep_pots_sum_a * deriv_buff_ab;
-                    sys.force(j) += ep_pots_sum_a * deriv_buff_ab;
+                    sys.force(i) -= ep_coefb_pots_sum_a * deriv_buff_ab;
+                    sys.force(j) += ep_coefb_pots_sum_a * deriv_buff_ab;
 
                     // force from valence part derivation
-                    sys.force(i) += ep_pots_sum_a2 * derivs_sum_a * pot_buff_ab;
+                    sys.force(i) += ep_coefb_pots_sum_a2 * derivs_sum_a * pot_buff_ab;
                 }
-                else // pots_sum_a < pots_sum_b
+                else // pots_sum_a / coefb < pots_sum_b / coefa
                 {
-                    const real_type inv_pots_sum_b = 1.0 / pots_sum_b;
-                    const real_type ep_pots_sum_b  = epsilon_ * inv_pots_sum_b;
-                    const real_type ep_pots_sum_b2 = ep_pots_sum_b * inv_pots_sum_b;
+                    const real_type ep_coefa_pots_sum_b  = epsilon_ * coefa_pots_sum_b;
+                    const real_type ep_coefa_pots_sum_b2 = ep_coefa_pots_sum_b * inv_pots_sum_b;
 
                     // force from distance part derivation
-                    sys.force(i) -= ep_pots_sum_b * deriv_buff_ab;
-                    sys.force(j) += ep_pots_sum_b * deriv_buff_ab;
+                    sys.force(i) -= ep_coefa_pots_sum_b * deriv_buff_ab;
+                    sys.force(j) += ep_coefa_pots_sum_b * deriv_buff_ab;
                     // force from valence part derivation
-                    sys.force(j) += ep_pots_sum_b2 * derivs_sum_b * pot_buff_ab;
+                    sys.force(j) += ep_coefa_pots_sum_b2 * derivs_sum_b * pot_buff_ab;
                 }
                 // force from depends on valence part
-                sys.force(j) -= ep_pots_sum_a2 * deriv_buff_ab * pots_partial_sum_a;
+                sys.force(j) -= ep_coefb_pots_sum_a2 * deriv_buff_ab * pots_partial_sum_a;
             }
         }
 
         // force from depends on valence part
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
-            const index_type k          = partner[ptnr_idx].index;
-            const index_type idx_d      = idx_buffer_map_[k];
-            const real_type  pots_sum_d = pots_sum_b_[idx_d];
-            if(1.0 < pots_sum_d)
+            const index_type k              = partner[ptnr_idx].index;
+            const index_type idx_d          = idx_buffer_map_[k];
+            const real_type  pots_sum_d     = pots_sum_b_[idx_d];
+            const real_type  inv_pots_sum_d = 1.0 / pots_sum_d;
+            const real_type  coefa_pots_sum_d = coefa_ * inv_pots_sum_d;
+            if(coefa_pots_sum_d < 1.0) // 1.0 < pots_sum_d / coefa
             {
-                const real_type        inv_pots_sum_d = 1.0 / pots_sum_d;
-                const real_type        ep_pots_sum_d  = epsilon_ * inv_pots_sum_d;
-                const real_type        ep_pots_sum_d2 = ep_pots_sum_d * inv_pots_sum_d;
-                const coordinate_type& deriv_buff_ad  = derivative_buff_range[ptnr_idx];
+                const real_type        ep_coefa_pots_sum_d  = epsilon_ * coefa_pots_sum_d;
+                const real_type        ep_coefa_pots_sum_d2 = ep_coefa_pots_sum_d * inv_pots_sum_d;
+                const coordinate_type& deriv_buff_ad        = derivative_buff_range[ptnr_idx];
 
-                sys.force(i) += ep_pots_sum_d2 * deriv_buff_ad * pots_partial_sum_b_[idx_d];
+                sys.force(i) += ep_coefa_pots_sum_d2 * deriv_buff_ad * pots_partial_sum_b_[idx_d];
             }
         }
     }
@@ -626,14 +638,15 @@ GlobalStoichiometricInteraction<traitsT>::calc_force_and_energy(system_type& sys
             const index_type j            = partner[ptnr_idx].index;
             const index_type idx_b        = idx_buffer_map_[j];
             const real_type  pots_buff_ab = pots_buff_a[ptnr_idx];
-            const real_type  max_pots_sum = std::max(pots_sum_a_[idx_a], pots_sum_b_[idx_b]);
-            if(max_pots_sum <= 1.0)
+            const real_type  max_normalized_contact_order =
+                std::max(pots_sum_a_[idx_a]*inv_coefb_, pots_sum_b_[idx_b]*inv_coefa_);
+            if(max_normalized_contact_order <= 1.0)
             {
                 retval += pots_buff_ab;
             }
             else
             {
-                retval += pots_buff_ab / max_pots_sum;
+                retval += pots_buff_ab / max_normalized_contact_order;
             }
         }
     }
