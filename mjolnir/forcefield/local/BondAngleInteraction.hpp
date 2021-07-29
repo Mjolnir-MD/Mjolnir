@@ -49,58 +49,25 @@ class BondAngleInteraction final : public LocalInteractionBase<traitsT>
     BondAngleInteraction& operator=(BondAngleInteraction&&)      = default;
     ~BondAngleInteraction() override {}
 
-    void      calc_force (system_type&)           const noexcept override;
-    real_type calc_energy(const system_type&)     const noexcept override;
+    real_type calc_energy(const system_type&) const noexcept override;
 
+    void calc_force(system_type& sys) const noexcept override
+    {
+        this->template calc_force_energy_virial_impl<false, false>(sys);
+        return ;
+    }
+    void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        this->template calc_force_energy_virial_impl<false, true>(sys);
+        return ;
+    }
     real_type calc_force_and_energy(system_type& sys) const noexcept override
     {
-        constexpr auto abs_tol = math::abs_tolerance<real_type>();
-
-        real_type energy = 0;
-        for(const auto& idxp : this->potentials_)
-        {
-            const auto& idxs = idxp.first;
-            const auto& pot  = idxp.second;
-
-            const auto& p0 = sys.position(idxs[0]);
-            const auto& p1 = sys.position(idxs[1]);
-            const auto& p2 = sys.position(idxs[2]);
-
-            const auto r_ij         = sys.adjust_direction(p1, p0);
-            const auto inv_len_r_ij = math::rlength(r_ij);
-            const auto r_ij_reg     = r_ij * inv_len_r_ij;
-
-            const auto r_kj         = sys.adjust_direction(p1, p2);
-            const auto inv_len_r_kj = math::rlength(r_kj);
-            const auto r_kj_reg     = r_kj * inv_len_r_kj;
-
-            const auto dot_ijk   = math::dot_product(r_ij_reg, r_kj_reg);
-            const auto cos_theta = math::clamp<real_type>(dot_ijk, -1, 1);
-
-            // acos returns a value in [0, pi]
-            const auto theta = std::acos(cos_theta);
-            const auto coef  = -pot.derivative(theta);
-            energy += pot.potential(theta);
-
-            // sin(x) >= 0 if x is in [0, pi].
-            const auto sin_theta    = std::sin(theta);
-            const auto coef_inv_sin = coef / std::max(sin_theta, abs_tol);
-
-            const auto Fi = (coef_inv_sin * inv_len_r_ij) *
-                            (cos_theta * r_ij_reg - r_kj_reg);
-            const auto Fk = (coef_inv_sin * inv_len_r_kj) *
-                            (cos_theta * r_kj_reg - r_ij_reg);
-            const auto Fj = -Fi - Fk;
-
-            sys.force(idxs[0]) += Fi;
-            sys.force(idxs[1]) += Fj;
-            sys.force(idxs[2]) += Fk;
-
-            sys.virial() += math::tensor_product(p1 + r_ij, Fi) +
-                            math::tensor_product(p1,        Fj) +
-                            math::tensor_product(p1 + r_kj, Fk);
-        }
-        return energy;
+        return this->template calc_force_energy_virial_impl<true, false>(sys);
+    }
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
+    {
+        return this->template calc_force_energy_virial_impl<true, true>(sys);
     }
 
     void initialize(const system_type& sys) override
@@ -143,6 +110,11 @@ class BondAngleInteraction final : public LocalInteractionBase<traitsT>
     }
 
   private:
+
+    template<bool NeedEnergy, bool NeedVirial>
+    real_type calc_force_energy_virial_impl(system_type& sys) const noexcept;
+
+  private:
     connection_kind_type kind_;
     container_type potentials_;
 
@@ -155,25 +127,28 @@ class BondAngleInteraction final : public LocalInteractionBase<traitsT>
 };
 
 template<typename traitsT, typename potentialT>
-void BondAngleInteraction<traitsT, potentialT>::calc_force(
+template<bool NeedEnergy, bool NeedVirial>
+typename BondAngleInteraction<traitsT, potentialT>::real_type
+BondAngleInteraction<traitsT, potentialT>::calc_force_energy_virial_impl(
         system_type& sys) const noexcept
 {
     constexpr auto abs_tol = math::abs_tolerance<real_type>();
 
+    real_type energy = 0;
     for(const auto& idxp : this->potentials_)
     {
         const auto& idxs = idxp.first;
         const auto& pot  = idxp.second;
 
-        const auto& p0 = sys.position(idxp.first[0]);
-        const auto& p1 = sys.position(idxp.first[1]);
-        const auto& p2 = sys.position(idxp.first[2]);
+        const auto& p0 = sys.position(idxs[0]);
+        const auto& p1 = sys.position(idxs[1]);
+        const auto& p2 = sys.position(idxs[2]);
 
-        const auto r_ij         = sys.adjust_direction(p1, p0); // p1 -> p0
+        const auto r_ij         = sys.adjust_direction(p1, p0);
         const auto inv_len_r_ij = math::rlength(r_ij);
         const auto r_ij_reg     = r_ij * inv_len_r_ij;
 
-        const auto r_kj         = sys.adjust_direction(p1, p2); // p1 -> p2
+        const auto r_kj         = sys.adjust_direction(p1, p2);
         const auto inv_len_r_kj = math::rlength(r_kj);
         const auto r_kj_reg     = r_kj * inv_len_r_kj;
 
@@ -183,6 +158,11 @@ void BondAngleInteraction<traitsT, potentialT>::calc_force(
         // acos returns a value in [0, pi]
         const auto theta = std::acos(cos_theta);
         const auto coef  = -pot.derivative(theta);
+
+        if(NeedEnergy)
+        {
+            energy += pot.potential(theta);
+        }
 
         // sin(x) >= 0 if x is in [0, pi].
         const auto sin_theta    = std::sin(theta);
@@ -198,11 +178,14 @@ void BondAngleInteraction<traitsT, potentialT>::calc_force(
         sys.force(idxs[1]) += Fj;
         sys.force(idxs[2]) += Fk;
 
-        sys.virial() += math::tensor_product(p1 + r_ij, Fi) +
-                        math::tensor_product(p1,        Fj) +
-                        math::tensor_product(p1 + r_kj, Fk);
+        if(NeedVirial)
+        {
+            sys.virial() += math::tensor_product(p1 + r_ij, Fi) +
+                            math::tensor_product(p1,        Fj) +
+                            math::tensor_product(p1 + r_kj, Fk);
+        }
     }
-    return;
+    return energy;
 }
 
 template<typename traitsT, typename potentialT>

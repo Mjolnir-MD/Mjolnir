@@ -44,8 +44,9 @@ class MultipleBasinUnitBase
     virtual void write_topology(const system_type&, topology_type&) const = 0;
     virtual void initialize    (const system_type&, const topology_type&) = 0;
 
-    virtual void      calc_force (      system_type&) const noexcept = 0;
-    virtual real_type calc_energy(const system_type&) const noexcept = 0;
+    virtual void      calc_force(system_type&)            const noexcept = 0;
+    virtual void      calc_force_and_virial(system_type&) const noexcept = 0;
+    virtual real_type calc_energy(const system_type&)     const noexcept = 0;
 
     // update system parameters (e.g. temperature, ionic_strength, etc.)
     virtual void update(const system_type&, const topology_type&) = 0;

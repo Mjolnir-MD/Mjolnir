@@ -82,17 +82,25 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
         return;
     }
 
-    void      calc_force (system_type& sys)           const noexcept override
+    void calc_force(system_type& sys)           const noexcept override
     {
-        this->template calc_force_and_energy_impl<false>(sys);
+        this->template calc_force_energy_virial_impl<false, false>(sys);
         return ;
+    }
+    void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        this->template calc_force_energy_virial_impl<false, true>(sys);
+        return;
     }
     real_type calc_energy(const system_type& sys)     const noexcept override;
     real_type calc_force_and_energy(system_type& sys) const noexcept override
     {
-        return this->template calc_force_and_energy_impl<true>(sys);
+        return this->template calc_force_energy_virial_impl<true, false>(sys);
     }
-
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
+    {
+        return this->template calc_force_energy_virial_impl<true, true>(sys);
+    }
     std::string name() const override {return "3SPN2BaseBase";}
 
     parameter_list_type const& parameters() const noexcept {return parameters_;}
@@ -105,8 +113,8 @@ class ThreeSPN2BaseBaseInteraction final : public GlobalInteractionBase<traitsT>
 
   private:
 
-    template<bool NeedEnergy>
-    real_type calc_force_and_energy_impl(system_type& sys) const noexcept;
+    template<bool NeedEnergy, bool NeedVirial>
+    real_type calc_force_energy_virial_impl(system_type& sys) const noexcept;
 
   private:
 
@@ -393,9 +401,9 @@ ThreeSPN2BaseBaseInteraction<traitsT>::calc_energy(
 }
 
 template<typename traitsT>
-template<bool NeedEnergy>
+template<bool NeedEnergy, bool NeedVirial>
 typename ThreeSPN2BaseBaseInteraction<traitsT>::real_type
-ThreeSPN2BaseBaseInteraction<traitsT>::calc_force_and_energy_impl(system_type& sys) const noexcept
+ThreeSPN2BaseBaseInteraction<traitsT>::calc_force_energy_virial_impl(system_type& sys) const noexcept
 {
     constexpr auto pi        = math::constants<real_type>::pi();
     constexpr auto two_pi    = math::constants<real_type>::two_pi();
@@ -460,7 +468,10 @@ ThreeSPN2BaseBaseInteraction<traitsT>::calc_force_and_energy_impl(system_type& s
                     sys.force(Bi) += F;
                     sys.force(Bj) -= F;
 
-                    sys.virial() += math::tensor_product(Bij, -F); // (Bj - Bi) * Fj
+                    if(NeedVirial)
+                    {
+                        sys.virial() += math::tensor_product(Bij, -F); // (Bj - Bi) * Fj
+                    }
                 }
             }
 
@@ -642,10 +653,13 @@ ThreeSPN2BaseBaseInteraction<traitsT>::calc_force_and_energy_impl(system_type& s
                     sys.force(Bj) += f_Bj;
                     sys.force(Sj) += f_Sj;
 
-                    sys.virial()  += math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
-                                     math::tensor_product(                   rBi , f_Bi) +
-                                     math::tensor_product(              rBi + Bij, f_Bj) +
-                                     math::tensor_product(sys.transpose(rSj, rBi), f_Sj) ;
+                    if /*constexpr*/ (NeedVirial)
+                    {
+                        sys.virial()  += math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
+                                         math::tensor_product(                   rBi , f_Bi) +
+                                         math::tensor_product(              rBi + Bij, f_Bj) +
+                                         math::tensor_product(sys.transpose(rSj, rBi), f_Sj) ;
+                    }
                 }
             }
 
@@ -890,12 +904,15 @@ ThreeSPN2BaseBaseInteraction<traitsT>::calc_force_and_energy_impl(system_type& s
             sys.force(Bi_next) += f_Bi_next;
             sys.force(Bj_next) += f_Bj_next;
 
-            sys.virial()  += math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
-                             math::tensor_product(                   rBi , f_Bi) +
-                             math::tensor_product(              rBi + Bij, f_Bj) +
-                             math::tensor_product(sys.transpose(rSj, rBi), f_Sj) +
-                             math::tensor_product(sys.transpose(sys.position(Bi_next), rBi), f_Bi_next) +
-                             math::tensor_product(sys.transpose(sys.position(Bj_next), rBi), f_Bj_next) ;
+            if /*constexpr*/ (NeedVirial)
+            {
+                sys.virial()  += math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
+                                 math::tensor_product(                   rBi , f_Bi) +
+                                 math::tensor_product(              rBi + Bij, f_Bj) +
+                                 math::tensor_product(sys.transpose(rSj, rBi), f_Sj) +
+                                 math::tensor_product(sys.transpose(sys.position(Bi_next), rBi), f_Bi_next) +
+                                 math::tensor_product(sys.transpose(sys.position(Bj_next), rBi), f_Bj_next) ;
+            }
         }
     }
     return energy;

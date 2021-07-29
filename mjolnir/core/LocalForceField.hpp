@@ -116,6 +116,14 @@ class LocalForceField
         }
         return;
     }
+    void calc_force_and_virial(system_type& sys) const noexcept
+    {
+        for(const auto& item : this->interactions_)
+        {
+            item->calc_force_and_virial(sys);
+        }
+        return;
+    }
     real_type calc_energy(const system_type& sys) const noexcept
     {
         real_type energy = 0.0;
@@ -131,6 +139,15 @@ class LocalForceField
         for(const auto& item : this->interactions_)
         {
             energy += item->calc_force_and_energy(sys);
+        }
+        return energy;
+    }
+    real_type calc_force_virial_energy(system_type& sys) const noexcept
+    {
+        real_type energy = 0.0;
+        for(const auto& item : this->interactions_)
+        {
+            energy += item->calc_force_virial_energy(sys);
         }
         return energy;
     }

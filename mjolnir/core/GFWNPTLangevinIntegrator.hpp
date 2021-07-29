@@ -92,13 +92,18 @@ class GFWNPTLangevinIntegrator
             sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
         sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
-        ff->calc_force(sys);
+        ff->calc_force_and_virial(sys);
 
         // calculate the current pressure using the force calculated here
         const auto h_cell = sys.boundary().width();
         this->P_ins_ = this->calc_pressure(sys, h_cell);
 
+        MJOLNIR_LOG_NOTICE("pressure = ", this->P_ins_);
+
         sys.attribute("volume") = X(h_cell) * Y(h_cell) * Z(h_cell);
+        sys.attribute("pres_xx") = X(this->P_ins_);
+        sys.attribute("pres_yy") = Y(this->P_ins_);
+        sys.attribute("pres_zz") = Z(this->P_ins_);
 
         return;
     }
@@ -264,7 +269,7 @@ class GFWNPTLangevinIntegrator
                                       std::sqrt(max_displacement_sq_2);
         ff->reduce_margin(2 * max_displacement, sys);
 
-        ff->calc_force(sys);
+        ff->calc_force_and_virial(sys);
 
         // --------------------------------------------------------------------
         // update particle velocities
@@ -289,6 +294,10 @@ class GFWNPTLangevinIntegrator
         // using just updated velocities and virial from `calc_force`
 
         this->P_ins_ = this->calc_pressure(sys, h_cell);
+
+        sys.attribute("pres_xx") = X(this->P_ins_);
+        sys.attribute("pres_yy") = Y(this->P_ins_);
+        sys.attribute("pres_zz") = Z(this->P_ins_);
 
         P_diff = P_ins_ - P_ref_;
 
