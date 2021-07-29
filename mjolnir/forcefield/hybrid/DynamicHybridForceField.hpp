@@ -25,6 +25,7 @@ class DynamicHybridForceField : public ForceFieldBase<traitsT>
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using coordinate_container_type = typename system_type::coordinate_container_type;
     using topology_type   = Topology;
     using forcefield_type = std::unique_ptr<base_type>;
@@ -100,6 +101,50 @@ class DynamicHybridForceField : public ForceFieldBase<traitsT>
             sys.force(i) += lambda * force_buffer_[i];
             force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
+
+        auto& var = sys.variable("lambda");
+
+        real_type force_on_lambda = V2 - V1; // -dV / dlambda
+        force_on_lambda += -2 * klambda_ * (lambda - lambda0_); // -d/dx [k(x-x0)^2];
+
+        var.update(var.x(), var.v(), var.f() + force_on_lambda);
+
+        return lambda * V1 + one_minus_lambda * V2;
+    }
+
+    void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        this->calc_force_virial_energy(sys);
+        return ;
+    }
+
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
+    {
+        using std::swap;
+
+        sys.preprocess_forces();
+        const auto V1 = this->ff_1_->calc_force_virial_energy(sys);
+        sys.postprocess_forces();
+
+        swap(this->force_buffer_, sys.forces());
+        swap(this->virial_buffer_, sys.virial());
+
+        sys.preprocess_forces();
+        const auto V2 = this->ff_2_->calc_force_virial_energy(sys);
+        sys.postprocess_forces();
+
+        const real_type lambda = sys.variable("lambda").x();
+        const real_type one_minus_lambda = real_type(1) - lambda;
+
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            sys.force(i) *= one_minus_lambda;
+            sys.force(i) += lambda * force_buffer_[i];
+            force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+        }
+        sys.virial() *= one_minus_lambda;
+        sys.virial() += lambda * virial_buffer_;
+        this->virial_buffer_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
         auto& var = sys.variable("lambda");
 
@@ -199,6 +244,7 @@ class DynamicHybridForceField : public ForceFieldBase<traitsT>
     real_type klambda_;  // for umbrella sampling k(x - x0)^2
     real_type lambda0_; // for umbrella sampling
     mutable coordinate_container_type force_buffer_; // this will be used in calc_force
+    mutable matrix33_type virial_buffer_; // this will be used in calc_force
     forcefield_type ff_1_;
     forcefield_type ff_2_;
 };

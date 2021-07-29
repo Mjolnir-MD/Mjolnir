@@ -28,6 +28,7 @@ class HybridForceField : public ForceFieldBase<traitsT>
     using topology_type   = Topology;
     using forcefield_type = std::unique_ptr<base_type>;
     using constraint_forcefield_type  = ConstraintForceField<traits_type>;
+    using matrix33_type   = typename traits_type::matrix33_type;
 
   public:
 
@@ -52,6 +53,7 @@ class HybridForceField : public ForceFieldBase<traitsT>
 
         this->force_buffer_.resize(sys.size(),
                 math::make_coordinate<coordinate_type>(0, 0, 0));
+        this->virial_buffer_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
         if( ! ff_1_->constraint().empty() || ! ff_2_->constraint().empty())
         {
@@ -68,7 +70,7 @@ class HybridForceField : public ForceFieldBase<traitsT>
         this->ff_1_->calc_force(sys);
         sys.postprocess_forces();
 
-        swap(this->force_buffer_, sys.forces());
+        swap(this->force_buffer_, sys.forces()); // zero-cleared
 
         sys.preprocess_forces();
         this->ff_2_->calc_force(sys);
@@ -83,7 +85,35 @@ class HybridForceField : public ForceFieldBase<traitsT>
         }
         return ;
     }
+    void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        using std::swap;
 
+        sys.preprocess_forces();
+        this->ff_1_->calc_force(sys);
+        sys.postprocess_forces();
+
+        swap(this->virial_buffer_, sys.virial());
+        swap(this->force_buffer_, sys.forces());
+
+        sys.preprocess_forces();
+        this->ff_2_->calc_force(sys);
+        sys.postprocess_forces();
+
+        const real_type one_minus_lambda = real_type(1) - this->lambda_;
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            sys.force(i) *= one_minus_lambda;
+            sys.force(i) += lambda_ * force_buffer_[i];
+            force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+        }
+
+        sys.virial() *= one_minus_lambda;
+        sys.virial() += lambda_ * (this->virial_buffer_);
+        this->virial_buffer_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+
+        return ;
+    }
     real_type calc_energy(const system_type& sys) const noexcept override
     {
         return lambda_ * ff_1_->calc_energy(sys) +
@@ -111,6 +141,36 @@ class HybridForceField : public ForceFieldBase<traitsT>
             sys.force(i) += lambda_ * force_buffer_[i];
             force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
+        return lambda_ * V1 + one_minus_lambda * V2;
+    }
+
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
+    {
+        using std::swap;
+
+        sys.preprocess_forces();
+        const auto V1 = this->ff_1_->calc_force_virial_energy(sys);
+        sys.postprocess_forces();
+
+        swap(this->virial_buffer_, sys.virial());
+        swap(this->force_buffer_, sys.forces());
+
+        sys.preprocess_forces();
+        const auto V2 = this->ff_2_->calc_force_virial_energy(sys);
+        sys.postprocess_forces();
+
+        const real_type one_minus_lambda = real_type(1) - this->lambda_;
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            sys.force(i) *= one_minus_lambda;
+            sys.force(i) += lambda_ * force_buffer_[i];
+            force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+        }
+
+        sys.virial() *= one_minus_lambda;
+        sys.virial() += lambda_ * (this->virial_buffer_);
+        this->virial_buffer_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+
         return lambda_ * V1 + one_minus_lambda * V2;
     }
 
@@ -188,6 +248,7 @@ class HybridForceField : public ForceFieldBase<traitsT>
 
     real_type lambda_;
     mutable coordinate_container_type force_buffer_; // this will be used in calc_force
+    mutable matrix33_type            virial_buffer_; // this will be used in calc_force
     forcefield_type ff_1_;
     forcefield_type ff_2_;
 };
