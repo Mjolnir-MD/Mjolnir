@@ -37,12 +37,11 @@ class GJFNVTLangevinIntegrator
           betas_(alphas_.size()),
           bs_(alphas_.size()),
           vel_coefs_(alphas_.size()),
-          noise_(alphas_.size()),
           remover_(std::move(remover))
     {}
     ~GJFNVTLangevinIntegrator() = default;
 
-    void initialize(system_type& sys, forcefield_type& ff, rng_type& rng)
+    void initialize(system_type& sys, forcefield_type& ff, rng_type&)
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -72,24 +71,11 @@ class GJFNVTLangevinIntegrator
             sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
             ff->calc_force(sys);
         }
-
-        // generate the first noise terms
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            this->noise_[i] = this->gen_R(rng) * betas_[i] * sys.rmass(i);
-        }
-        for(const auto& kv : sys.variables())
-        {
-            const auto& key = kv.first;
-            const auto& var = kv.second;
-            auto& param = params_for_dynvar_.at(key);
-            param.noise = rng.gaussian() * param.beta / var.m();
-        }
         return;
     }
 
     real_type step(const real_type time, system_type& sys, forcefield_type& ff,
-                   rng_type& rng);
+                   rng_type&);
 
     void update(const system_type& sys)
     {
@@ -114,7 +100,6 @@ class GJFNVTLangevinIntegrator
         betas_    .resize(sys.size());
         bs_       .resize(sys.size());
         vel_coefs_.resize(sys.size());
-        noise_    .resize(sys.size());
         const auto kBT = physics::constants<real_type>::kB() * this->temperature_;
         for(std::size_t i=0; i<sys.size(); ++i)
         {
@@ -135,7 +120,6 @@ class GJFNVTLangevinIntegrator
             param.beta     = std::sqrt(2 * param.alpha * kBT * dt_);
             param.b        = real_type(1) / (real_type(1) + param.alpha * dt_ / (2 * var.m()));
             param.vel_coef = real_type(1) - param.alpha * param.b * dt_ / var.m();
-            param.noise    = real_type(0); // initialized later
             params_for_dynvar_[key] = param;
         }
         return;
@@ -158,7 +142,6 @@ class GJFNVTLangevinIntegrator
     std::vector<real_type> betas_;
     std::vector<real_type> bs_;
     std::vector<real_type> vel_coefs_;
-    std::vector<coordinate_type> noise_;
 
     remover_type remover_;
 
@@ -168,7 +151,6 @@ class GJFNVTLangevinIntegrator
         real_type beta;
         real_type b;
         real_type vel_coef;
-        real_type noise;
     };
     std::map<variable_key_type, dynvar_params_type> params_for_dynvar_;
 };
@@ -187,14 +169,13 @@ GJFNVTLangevinIntegrator<traitsT>::step(const real_type time,
         auto&       p = sys.position(i);
         auto&       v = sys.velocity(i);
         auto&       f = sys.force(i);
-        auto&    beta = this->noise_[i]; // TODO: refactor
         const auto& b = this->bs_[i];
         const auto& a = this->vel_coefs_[i];
 
         // r_n+1 =  r_n + bdtv_n + bdt^2/2m f_n + bdt/2m beta_n+1
         // v_n+1 = av_n + dt/2m (af_n + f_n+1) + b/m beta_n+1
 
-        beta = this->gen_R(rng) * betas_[i]; // beta_n+1
+        const auto beta = this->gen_R(rng) * betas_[i]; // beta_n+1
 
         const auto dp = (b * dt_) * (v + r2m * (dt_ * f + beta));
 
@@ -212,14 +193,14 @@ GJFNVTLangevinIntegrator<traitsT>::step(const real_type time,
         auto& param = params_for_dynvar_.at(key);
         auto& var = kv.second;
 
-        param.noise = rng.gaussian() * param.beta;
+        const auto beta = rng.gaussian() * param.beta;
 
         const auto next_x = var.x() + (param.b * dt_) * (var.v() +
-            (real_type(0.5) / var.m()) * (dt_ * var.f() + param.noise));
+            (real_type(0.5) / var.m()) * (dt_ * var.f() + beta));
 
         const auto next_v = param.vel_coef * (var.v() +
                 (real_type(0.5) * dt_ / var.m()) * var.f()) +
-                (param.b / var.m()) * param.noise;
+                (param.b / var.m()) * beta;
 
         var.update(next_x, next_v, real_type(0));
     }
