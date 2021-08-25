@@ -52,7 +52,8 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_2Basin_numerical_difference)
         mjolnir::make_unique<mjolnir::MultipleBasin2BasinUnit<traits_type>>(
             -10.0, "short", "long", 0.0, 0.0,
             std::make_tuple(std::move(loc1), std::move(glo1), std::move(ext1)),
-            std::make_tuple(std::move(loc2), std::move(glo2), std::move(ext2)));
+            std::make_tuple(std::move(loc2), std::move(glo2), std::move(ext2)),
+            0.0, 0.0);
 
     std::vector<std::unique_ptr<mjolnir::MultipleBasinUnitBase<traits_type>>> units;
     units.push_back(std::move(unit1));
@@ -125,7 +126,8 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_2Basin_consistency)
             mjolnir::make_unique<mjolnir::MultipleBasin2BasinUnit<traits_type>>(
                 -10.0, "short", "long", 0.0, 0.0,
                 std::make_tuple(std::move(loc1), std::move(glo1), std::move(ext1)),
-                std::make_tuple(std::move(loc2), std::move(glo2), std::move(ext2)));
+                std::make_tuple(std::move(loc2), std::move(glo2), std::move(ext2)),
+                0.0, 0.0);
 
         std::vector<std::unique_ptr<mjolnir::MultipleBasinUnitBase<traits_type>>> units;
         units.push_back(std::move(unit1));
@@ -154,7 +156,8 @@ BOOST_AUTO_TEST_CASE(omp_MultipleBasin_2Basin_consistency)
             mjolnir::make_unique<mjolnir::MultipleBasin2BasinUnit<default_traits_type>>(
                 -10.0, "short", "long", 0.0, 0.0,
                 std::make_tuple(std::move(loc1), std::move(glo1), std::move(ext1)),
-                std::make_tuple(std::move(loc2), std::move(glo2), std::move(ext2)));
+                std::make_tuple(std::move(loc2), std::move(glo2), std::move(ext2)),
+                0.0, 0.0);
 
         std::vector<std::unique_ptr<mjolnir::MultipleBasinUnitBase<default_traits_type>>> units;
         units.push_back(std::move(unit1));
