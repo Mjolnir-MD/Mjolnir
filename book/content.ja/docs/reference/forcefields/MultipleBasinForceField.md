@@ -39,6 +39,17 @@ c_1 \\ c_2
 {{<katex>}} 0 < \Delta {{</katex>}}の場合、この値が非数になることに注意してください。これを避けるため、Mjolnirでは{{<katex>}}\Delta{{</katex>}}が常に負の値として読み込まれます。
 {{<katex>}} V_{MB} {{</katex>}} は {{<katex>}} \Delta^2 {{</katex>}} にしか依存しないため、{{<katex>}} \Delta {{</katex>}}の符号は結果に影響しません。
 
+力場が2つの場合に限って、{{<katex>}} \chi {{</katex>}}の値にHarmonic potentialで拘束をかけることができます。
+
+{{< katex display >}}
+V_{Bias} = k (\chi - \chi_0)^2
+{{< /katex >}}
+
+例えば、反応座標である{{<katex>}} \chi {{</katex>}}に沿ってアンブレラサンプリングをすることができるでしょう。
+これによって、{{<katex>}} \Delta {{</katex>}}や{{<katex>}} \Delta V {{</katex>}}の値を決定するのが容易になります。
+
+----
+
 3つの異なる力場をつなげる際には、以下の形になります。
 
 {{< katex display >}}
@@ -87,8 +98,17 @@ integrator.gammas = [
 forcefields.type = "MultipleBasin"
 forcefields.units = [
 {basins = ["open", "close"], dVs = [0.0, -12.0], delta = 150.0},
-]
 # ...
+]
+#
+# Or, the following has the same meaning.
+# 
+# [simulator.forcefields]
+# type = "MultipleBasin"
+# [[simulator.forcefields.units]]
+# basins = ["open", "close"],
+# dVs    = [0.0, -12.0],
+# delta  = 150.0,
 
 [[forcefields]]
 name = "open"
@@ -105,6 +125,30 @@ name = "common"
 [[forcefields.local]]
 # ...
 ```
+
+{{<katex>}} \chi {{<katex>}} に拘束力をかけるには、`k_chi`と`chi_0`を設定してください。
+
+```toml
+forcefields.type = "MultipleBasin"
+forcefields.units = [
+{basins = ["open", "close"], dVs = [0.0, -12.0], delta = 150.0, k_chi = 100.0, chi_0 = 0.0},
+]
+```
+
+3つの力場を繋げる場合には、以下のようにしてください。
+
+```toml
+[simulator.forcefields]
+type = "MultipleBasin"
+[[simulator.forcefields.units]]
+basins = ["open", "mid", "close"]
+dVs    = [   0.0,  15.0,   -10.0]
+delta.open-mid   =  60.0 # basinの名前をハイフンで繋げてください。
+delta.mid-close  =  50.0 # 混乱を避けるため、basinの名前にはハイフンを入れないでください。
+delta.close-open = 100.0
+```
+
+
 
 ## AICG2+力場で用いる時の注意
 

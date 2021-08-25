@@ -41,6 +41,17 @@ Note that this value will becomes NaN in the case of {{<katex>}} 0 < \Delta {{</
 To avoid this, Mjolnir makes {{<katex>}}\Delta{{</katex>}} always negative.
 {{<katex>}} V_{MB} {{</katex>}} depends on {{<katex>}} \Delta^2 {{</katex>}}, so only the absolute value of {{<katex>}} \Delta {{</katex>}} matters.
 
+In case of 2-basin unit, you can restrain {{<katex>}} \chi {{</katex>}} by using harmonic potential.
+
+{{< katex display >}}
+V_{Bias} = k (\chi - \chi_0)^2
+{{< /katex >}}
+
+You can perform umbrella sampling along the reaction coordinate, {{<katex>}} \chi {{</katex>}}.
+This will help you when you need to determine the value of {{<katex>}} \Delta {{</katex>}} and {{<katex>}} \Delta V {{</katex>}}.
+
+----
+
 The 3-basin case is also defined in a similar way.
 
 {{< katex display >}}
@@ -91,7 +102,15 @@ forcefields.type = "MultipleBasin"
 forcefields.units = [
 {basins = ["open", "close"], dVs = [0.0, -12.0], delta = 150.0},
 ]
-# ...
+#
+# Or, the following has the same meaning.
+# 
+# [simulator.forcefields]
+# type = "MultipleBasin"
+# [[simulator.forcefields.units]]
+# basins = ["open", "close"],
+# dVs    = [0.0, -12.0],
+# delta  = 150.0,
 
 [[forcefields]]
 name = "open"
@@ -107,6 +126,28 @@ name = "close"
 name = "common"
 [[forcefields.local]]
 # ...
+```
+
+To restrain {{<katex>}} \chi {{<katex>}}, define `k_chi` and `chi_0`.
+
+```toml
+forcefields.type = "MultipleBasin"
+forcefields.units = [
+{basins = ["open", "close"], dVs = [0.0, -12.0], delta = 150.0, k_chi = 100.0, chi_0 = 0.0},
+]
+```
+
+To use 3-basin model, do the following.
+
+```toml
+[simulator.forcefields]
+type = "MultipleBasin"
+[[simulator.forcefields.units]]
+basins = ["open", "mid", "close"]
+dVs    = [   0.0,  15.0,   -10.0]
+delta.open-mid   =  60.0 # concatenate basin name by `-`.
+delta.mid-close  =  50.0 # do not include `-` in basin names to avoid confusion.
+delta.close-open = 100.0
 ```
 
 ## Note for AICG2+ forcefields
