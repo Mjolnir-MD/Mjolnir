@@ -40,10 +40,12 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
             const real_type    delta,
             const std::string& name1, const std::string& name2,
             const real_type    dV1,   const real_type    dV2,
-            forcefield_type&&  ff1,   forcefield_type&&  ff2)
+            forcefield_type&&  ff1,   forcefield_type&&  ff2,
+            const real_type k_chi, const real_type chi0)
         : dV1_(dV1), dV2_(dV2), delta_(delta),
           rdelta_(real_type(1.0) / delta), delta_sq_(delta * delta),
-          c2_over_c1_(0.0), name1_(name1), name2_(name2),
+          k_chi_(k_chi), chi0_(chi0), c2_over_c1_(0.0),
+          name1_(name1),                      name2_(name2),
           loc1_(std::move(std::get<0>(ff1))), loc2_(std::move(std::get<0>(ff2))),
           glo1_(std::move(std::get<1>(ff1))), glo2_(std::move(std::get<1>(ff2))),
           ext1_(std::move(std::get<2>(ff1))), ext2_(std::move(std::get<2>(ff2)))
@@ -159,16 +161,44 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         const auto coef1 = real_type(0.5) * (real_type(1) - coef);
         const auto coef2 = real_type(0.5) * (real_type(1) + coef);
 
-        // here, sys.forces has forces of basin2. force_buffer has forces of V1.
-        for(std::size_t i=0; i<sys.size(); ++i)
+        // Now we know forces both from V1 and V2. We can now calculate the
+        // biasing force on chi.
+
+        const auto V_MB = (V_1 + V_2 - sqrtD) / 2;
+        if(k_chi_ != real_type(0.0)) // if we have biasing force...
         {
-            sys.force(i) *= coef2;                     // scale MB V2
-            sys.force(i) += coef1 * force_buffer1_[i]; // add scaled MB V1
-            sys.force(i) += force_buffer0_[i];         // restore other force
-            force_buffer0_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
-            force_buffer1_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+            const real_type chi       = std::log((V_MB - V_1) * rdelta_);
+            const real_type chi_diff  = chi - chi0_;
+            const real_type coef_bias = 2 * k_chi_ * chi_diff / (V_MB - V_1);
+            sys.attribute("chi_bias") = k_chi_ * chi_diff * chi_diff;
+
+            for(std::size_t i=0; i<sys.size(); ++i)
+            {
+                sys.force(i) *= coef2;                     // scale MB V2
+                sys.force(i) += coef1 * force_buffer1_[i]; // add scaled MB V1
+
+                // calc biasing force
+                sys.force(i) *= (real_type(1) + coef_bias);
+                sys.force(i) -= coef_bias * force_buffer1_[i];
+
+                sys.force(i) += force_buffer0_[i];         // restore other force
+                force_buffer0_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+                force_buffer1_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+            }
         }
-        return (V_1 + V_2 - sqrtD) / 2;
+        else // no biasing force. **Normal Case**.
+        {
+            // here, sys.forces has forces of basin2. force_buffer has forces of V1.
+            for(std::size_t i=0; i<sys.size(); ++i)
+            {
+                sys.force(i) *= coef2;                     // scale MB V2
+                sys.force(i) += coef1 * force_buffer1_[i]; // add scaled MB V1
+                sys.force(i) += force_buffer0_[i];         // restore other force
+                force_buffer0_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+                force_buffer1_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+            }
+        }
+        return V_MB;
     }
     void calc_force_and_virial(system_type& sys) const noexcept override
     {
@@ -215,23 +245,58 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
         const auto coef1 = real_type(0.5) * (real_type(1) - coef);
         const auto coef2 = real_type(0.5) * (real_type(1) + coef);
 
-        // here, sys.forces has forces of basin2. force_buffer has forces of V1.
-        for(std::size_t i=0; i<sys.size(); ++i)
+        const auto V_MB = (V_1 + V_2 - sqrtD) / 2;
+        if(k_chi_ != real_type(0.0)) // if we have biasing force...
         {
-            sys.force(i) *= coef2;                     // scale MB V2
-            sys.force(i) += coef1 * force_buffer1_[i]; // add scaled MB V1
-            sys.force(i) += force_buffer0_[i];         // restore other force
-            force_buffer0_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
-            force_buffer1_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
-        }
-        sys.virial() *= coef2;                   // scale force from MB V2
-        sys.virial() += coef1 * virial_buffer1_; // add MB V1 contribution
-        sys.virial() += virial_buffer0_;         // restore other virial
+            const real_type chi       = std::log((V_MB - V_1) * rdelta_);
+            const real_type chi_diff  = chi - chi0_;
+            const real_type coef_bias = 2 * k_chi_ * chi_diff / (V_MB - V_1);
+            sys.attribute("chi_bias") = k_chi_ * chi_diff * chi_diff;
 
+            for(std::size_t i=0; i<sys.size(); ++i)
+            {
+                sys.force(i) *= coef2;                     // scale MB V2
+                sys.force(i) += coef1 * force_buffer1_[i]; // add scaled MB V1
+
+                // calc biasing force
+                sys.force(i) *= (real_type(1) + coef_bias); // scale dV_MB /dr
+                sys.force(i) -= coef_bias * force_buffer1_[i];
+
+                sys.force(i) += force_buffer0_[i];         // restore other force
+                force_buffer0_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+                force_buffer1_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+            }
+
+            sys.virial() *= coef2;                   // scale force from MB V2
+            sys.virial() += coef1 * virial_buffer1_; // add MB V1 contribution
+
+            // calc contribution from biasing force
+            sys.virial() *= (real_type(1) + coef_bias); // add bias contribution
+            sys.virial() -= coef_bias * virial_buffer1_;
+
+            sys.virial() += virial_buffer0_;         // restore other virial
+        }
+        else // no biasing force. **Normal Case**.
+        {
+            // here, sys.forces has forces of basin2. force_buffer has forces of V1.
+            for(std::size_t i=0; i<sys.size(); ++i)
+            {
+                sys.force(i) *= coef2;                     // scale MB V2
+                sys.force(i) += coef1 * force_buffer1_[i]; // add scaled MB V1
+                sys.force(i) += force_buffer0_[i];         // restore other force
+                force_buffer0_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+                force_buffer1_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
+            }
+            sys.virial() *= coef2;                   // scale force from MB V2
+            sys.virial() += coef1 * virial_buffer1_; // add MB V1 contribution
+            sys.virial() += virial_buffer0_;         // restore other virial
+        }
+
+        // reset virial buffer
         virial_buffer0_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         virial_buffer1_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
-        return (V_1 + V_2 - sqrtD) / 2;
+        return V_MB;
     }
 
     real_type calc_energy(const system_type& sys) const noexcept override
@@ -422,6 +487,10 @@ class MultipleBasin2BasinUnit final: public MultipleBasinUnitBase<traitsT>
     real_type delta_;
     real_type rdelta_;
     real_type delta_sq_;
+
+    // chi bias (optional. to disable it, set k_chi == 0.)
+    real_type k_chi_;
+    real_type chi0_;
 
     // this will be calculated in calc_energy(), that is marked as const.
     mutable real_type c2_over_c1_;
