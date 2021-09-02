@@ -128,7 +128,7 @@ name = "common"
 # ...
 ```
 
-To restrain {{<katex>}} \chi {{<katex>}}, define `k_chi` and `chi_0`.
+To restrain {{<katex>}} \chi {{</katex>}}, define `k_chi` and `chi_0`.
 
 ```toml
 forcefields.type = "MultipleBasin"
