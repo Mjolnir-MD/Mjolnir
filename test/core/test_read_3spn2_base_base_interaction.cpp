@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "test_read_3spn2_base_base_interaction"
+#define BOOST_TEST_MODULE "test_read_3spn2_base_pair_interaction"
 
 #ifdef BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -18,7 +18,6 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_base_interaction)
 
     using real_type   = double;
     using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using potential_type = mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
@@ -37,7 +36,7 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_base_interaction)
         BOOST_TEST(static_cast<bool>(base));
 
         const auto derv = dynamic_cast<
-            mjolnir::ThreeSPN2BaseBaseInteraction<traits_type>*
+            mjolnir::ThreeSPN2BasePairInteraction<traits_type>*
             >(base.get()); // check the expected type is contained
         BOOST_TEST(static_cast<bool>(derv));
 
@@ -48,25 +47,10 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_base_interaction)
         BOOST_TEST_REQUIRE(derv->parameters().participants().at(2) ==  7u);
         BOOST_TEST_REQUIRE(derv->parameters().participants().at(3) == 10u);
 
-        BOOST_TEST(derv->parameters().parameters().at( 1).nucleotide_index == 0u);
-        BOOST_TEST(derv->parameters().parameters().at( 4).nucleotide_index == 1u);
-        BOOST_TEST(derv->parameters().parameters().at( 7).nucleotide_index == 2u);
-        BOOST_TEST(derv->parameters().parameters().at(10).nucleotide_index == 3u);
-
         BOOST_TEST(derv->parameters().parameters().at( 1).S_idx == 0u);
         BOOST_TEST(derv->parameters().parameters().at( 4).S_idx == 3u);
         BOOST_TEST(derv->parameters().parameters().at( 7).S_idx == 6u);
         BOOST_TEST(derv->parameters().parameters().at(10).S_idx == 9u);
-
-        BOOST_TEST(derv->parameters().parameters().at( 1).B3_idx ==  4u);
-        BOOST_TEST(derv->parameters().parameters().at( 4).B3_idx ==  7u);
-        BOOST_TEST(derv->parameters().parameters().at( 7).B3_idx == 10u);
-        BOOST_TEST(derv->parameters().parameters().at(10).B3_idx == potential_type::invalid());
-
-        BOOST_TEST(derv->parameters().parameters().at( 1).B5_idx == potential_type::invalid());
-        BOOST_TEST(derv->parameters().parameters().at( 4).B5_idx == 1u);
-        BOOST_TEST(derv->parameters().parameters().at( 7).B5_idx == 4u);
-        BOOST_TEST(derv->parameters().parameters().at(10).B5_idx == 7u);
 
         BOOST_TEST(derv->parameters().parameters().at( 1).base == base_kind::A);
         BOOST_TEST(derv->parameters().parameters().at( 4).base == base_kind::T);
