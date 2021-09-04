@@ -4,7 +4,7 @@
 #include <mjolnir/forcefield/global/GlobalPairInteraction.hpp>
 #include <mjolnir/forcefield/global/GlobalPairLennardJonesInteraction.hpp>
 #include <mjolnir/forcefield/global/GlobalPairExcludedVolumeInteraction.hpp>
-#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseBaseInteraction.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BasePairInteraction.hpp>
 #include <mjolnir/forcefield/PDNS/ProteinDNANonSpecificInteraction.hpp>
 #include <mjolnir/forcefield/PWMcos/PWMcosInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
@@ -182,24 +182,29 @@ read_global_pair_interaction(const toml::value& global)
 
 template<typename traitsT>
 std::unique_ptr<GlobalInteractionBase<traitsT>>
-read_global_3spn2_base_base_interaction(const toml::value& global)
+read_global_3spn2_base_pair_interaction(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
     using real_type      = typename traitsT::real_type;
     using base_kind      = parameter_3SPN2::base_kind;
-    using parameter_list = ThreeSPN2BaseBaseInteractionParameterList<traitsT>;
-    using potential_type = ThreeSPN2BaseBaseInteractionPotential<real_type>;
+    using parameter_list = ThreeSPN2BasePairParameterList<traitsT>;
+    using potential_type = ThreeSPN2BasePairPotential<real_type>;
     using parameter_type = typename parameter_list::parameter_type;
 
     // [[forcefields.global]]
-    // interaction = "3SPN2BaseBase"
+    // interaction = "3SPN2BasePair"
     // potential   = "3SPN2"
     // spatial_partition = {type = "CellList", margin = 1.0}
     // parameters = [
     // {strand = 0, nucleotide =  0,          S =   0, B =   1, Base = "A"},
     // {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
     // # ...
+    // {strand = 0, nucleotide = 31, P =  92, S =  93, B =  94, Base = "C"},
+    // {strand = 1, nucleotide = 32,          S =  95, B =  96, Base = "G"},
+    // # ...
+    // {strand = 1, nucleotide = 62, P = 184, S = 185, B = 186, Base = "A"},
+    // {strand = 1, nucleotide = 63, P = 187, S = 188, B = 189, Base = "T"},
     // ]
 
     // ------------------------------------------------------------------------
@@ -261,22 +266,10 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
         const auto  B = base.B;
 
         parameter_type p;
-        p.nucleotide_index = base.nucleotide;
         p.base   = base.base;
         p.S_idx  = base.S;
-        p.B5_idx = potential_type::invalid();
-        p.B3_idx = potential_type::invalid();
 
-        if(i != 0 && nuc_idxs.at(i-1).strand == base.strand)
-        {
-            p.B5_idx = nuc_idxs.at(i-1).B;
-        }
-        if(i+1 < nuc_idxs.size() && nuc_idxs.at(i+1).strand == base.strand)
-        {
-            p.B3_idx = nuc_idxs.at(i+1).B;
-        }
-        MJOLNIR_LOG_INFO("Base idx = ", B, ", base = ", p.base, ", Sugar idx = ",
-            p.S_idx, ", 5' adjacent = ", p.B5_idx, ", 3' adjacent", p.B3_idx);
+        MJOLNIR_LOG_INFO("Base idx = ", B, ", base = ", p.base, ", Sugar idx = ", p.S_idx);
 
         params.emplace_back(B, p);
     }
@@ -284,18 +277,18 @@ read_global_3spn2_base_base_interaction(const toml::value& global)
     const auto pot = toml::find<std::string>(global, "potential");
     if(pot == "3SPN2")
     {
-        return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(
+        return make_unique<ThreeSPN2BasePairInteraction<traitsT>>(
             potential_type{},
-            parameter_list(ThreeSPN2BaseBaseGlobalPotentialParameter<real_type>{},
+            parameter_list(ThreeSPN2BasePairGlobalPotentialParameter<real_type>{},
                 std::move(params), read_ignore_particles_within(global),
                 read_ignored_molecule(global), read_ignored_group(global)),
             read_spatial_partition<traitsT, potential_type>(global));
     }
     else if(pot == "3SPN2C")
     {
-        return make_unique<ThreeSPN2BaseBaseInteraction<traitsT>>(
+        return make_unique<ThreeSPN2BasePairInteraction<traitsT>>(
             potential_type{},
-            parameter_list(ThreeSPN2CBaseBaseGlobalPotentialParameter<real_type>{},
+            parameter_list(ThreeSPN2CBasePairGlobalPotentialParameter<real_type>{},
                 std::move(params), read_ignore_particles_within(global),
                 read_ignored_molecule(global), read_ignored_group(global)),
             read_spatial_partition<traitsT, potential_type>(global));
@@ -572,7 +565,7 @@ read_global_interaction(const toml::value& global)
     else if(interaction == "3SPN2BaseBase")
     {
         MJOLNIR_LOG_NOTICE("3SPN2BaseBaseInteraction found.");
-        return read_global_3spn2_base_base_interaction<traitsT>(global);
+        return read_global_3spn2_base_pair_interaction<traitsT>(global);
     }
     else if(interaction == "PDNS")
     {
@@ -604,10 +597,10 @@ extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  Un
 extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_interaction(const toml::value&);
 extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_global_interaction(const toml::value&);
 
-// extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_global_3spn2_base_base_interaction(const toml::value&);
-// extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_global_3spn2_base_base_interaction(const toml::value&);
-// extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_3spn2_base_base_interaction(const toml::value&);
-// extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_global_3spn2_base_base_interaction(const toml::value&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_global_3spn2_base_pair_interaction(const toml::value&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_global_3spn2_base_pair_interaction(const toml::value&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_3spn2_base_pair_interaction(const toml::value&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_global_3spn2_base_pair_interaction(const toml::value&);
 
 extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_global_pair_interaction(const toml::value&);
 extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_global_pair_interaction(const toml::value&);
