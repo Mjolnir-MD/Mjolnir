@@ -5,6 +5,7 @@
 #include <mjolnir/forcefield/global/GlobalPairLennardJonesInteraction.hpp>
 #include <mjolnir/forcefield/global/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2BasePairInteraction.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2CrossStackingInteraction.hpp>
 #include <mjolnir/forcefield/PDNS/ProteinDNANonSpecificInteraction.hpp>
 #include <mjolnir/forcefield/PWMcos/PWMcosInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
@@ -305,6 +306,144 @@ read_global_3spn2_base_pair_interaction(const toml::value& global)
     }
 }
 
+template<typename traitsT>
+std::unique_ptr<GlobalInteractionBase<traitsT>>
+read_global_3spn2_cross_stacking_interaction(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type      = typename traitsT::real_type;
+    using base_kind      = parameter_3SPN2::base_kind;
+    using parameter_list = ThreeSPN2CrossStackingParameterList<traitsT>;
+    using potential_type = ThreeSPN2CrossStackingPotential<real_type>;
+    using parameter_type = typename parameter_list::parameter_type;
+
+    // [[forcefields.global]]
+    // interaction = "3SPN2CrossStacking"
+    // potential   = "3SPN2"
+    // spatial_partition = {type = "CellList", margin = 1.0}
+    // parameters = [
+    // {strand = 0, nucleotide =  0,          S =   0, B =   1, Base = "A"},
+    // {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
+    // # ...
+    // {strand = 0, nucleotide = 31, P =  92, S =  93, B =  94, Base = "C"},
+    // {strand = 1, nucleotide = 32,          S =  95, B =  96, Base = "G"},
+    // # ...
+    // {strand = 1, nucleotide = 62, P = 184, S = 185, B = 186, Base = "A"},
+    // {strand = 1, nucleotide = 63, P = 187, S = 188, B = 189, Base = "T"},
+    // ]
+
+    // ------------------------------------------------------------------------
+    // read parameters
+
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+
+    const auto& ps = toml::find<toml::array>(global, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    using nucleotide_index_type = parameter_3SPN2::NucleotideIndex;
+    std::vector<nucleotide_index_type> nuc_idxs;
+
+    nuc_idxs.reserve(ps.size());
+    for(const auto& item : ps)
+    {
+        nucleotide_index_type nuc_idx;
+        const auto ofs = find_parameter_or<std::int64_t>(item, env, "offset", 0);
+
+        // at the edge of the DNA, Phosphate may not exist.
+        if(item.as_table().count("P") != 0)
+        {
+            nuc_idx.P = find_parameter<std::size_t>(item, env, "P") + ofs;
+        }
+        nuc_idx.S          = find_parameter<std::size_t>(item, env, "S") + ofs;
+        nuc_idx.B          = find_parameter<std::size_t>(item, env, "B") + ofs;
+        nuc_idx.strand     = find_parameter<std::size_t>(item, env, "strand");
+        nuc_idx.nucleotide = find_parameter<std::size_t>(item, env, "nucleotide");
+
+        const auto bk      = toml::find<std::string>(item, "Base");
+        if     (bk == "A") {nuc_idx.base = base_kind::A;}
+        else if(bk == "T") {nuc_idx.base = base_kind::T;}
+        else if(bk == "G") {nuc_idx.base = base_kind::G;}
+        else if(bk == "C") {nuc_idx.base = base_kind::C;}
+        else
+        {
+            throw_exception<std::runtime_error>(toml::format_error("[error] "
+                "mjolnir::read_local_3spn2_base_base_interaction: "
+                "invalid Base", item, "here", {
+                "expected value is one of the \"A\", \"T\", \"C\", \"G\"."
+                }));
+        }
+
+        MJOLNIR_LOG_INFO("ThreeSPN2CrossStacking: nucleotide = ", nuc_idx);
+        nuc_idxs.push_back(nuc_idx);
+    }
+
+    std::sort(nuc_idxs.begin(), nuc_idxs.end(),
+        [](const nucleotide_index_type& lhs, const nucleotide_index_type& rhs) {
+            return std::make_pair(lhs.strand, lhs.nucleotide) <
+                   std::make_pair(rhs.strand, rhs.nucleotide);
+        });
+
+    std::vector<std::pair<std::size_t, parameter_type>> params;
+    params.reserve(nuc_idxs.size());
+    for(std::size_t i=0; i<nuc_idxs.size(); ++i)
+    {
+        const auto& base = nuc_idxs.at(i);
+        const auto  B = base.B;
+
+        parameter_type p;
+        p.base = base.base;
+        p.S    = base.S;
+        p.B3   = potential_type::invalid();
+        p.B5   = potential_type::invalid();
+
+        if (i+1 < nuc_idxs.size() &&
+            nuc_idxs.at(i+1).strand == base.strand)
+        {
+            p.B3 = nuc_idxs.at(i+1).B;
+        }
+        if (0 < i && nuc_idxs.at(i-1).strand == base.strand)
+        {
+            p.B5 = nuc_idxs.at(i-1).B;
+        }
+        MJOLNIR_LOG_INFO("Base idx = ", B, ", base = ", p.base,
+                ", Sugar idx = ", p.S, ", B5_idx = ", p.B5, ", B3_idx = ", p.B3);
+
+        params.emplace_back(B, p);
+    }
+
+    const auto pot = toml::find<std::string>(global, "potential");
+    if(pot == "3SPN2")
+    {
+        return make_unique<ThreeSPN2CrossStackingInteraction<traitsT>>(
+            potential_type{},
+            parameter_list(ThreeSPN2CrossStackingGlobalPotentialParameter<real_type>{},
+                std::move(params), read_ignore_particles_within(global),
+                read_ignored_molecule(global), read_ignored_group(global)),
+            read_spatial_partition<traitsT, potential_type>(global));
+    }
+    else if(pot == "3SPN2C")
+    {
+        return make_unique<ThreeSPN2CrossStackingInteraction<traitsT>>(
+            potential_type{},
+            parameter_list(ThreeSPN2CCrossStackingGlobalPotentialParameter<real_type>{},
+                std::move(params), read_ignore_particles_within(global),
+                read_ignored_molecule(global), read_ignored_group(global)),
+            read_spatial_partition<traitsT, potential_type>(global));
+    }
+    else
+    {
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_local_3spn2_cross_stacking_interaction: "
+            "invalid potential", toml::find(global, "potential"), "here", {
+            "expected value is one of the following.",
+            "- \"3SPN2\" : The general 3SPN2 parameter set.",
+            "- \"3SPN2C\": The parameter set optimized to reproduce curveture of dsDNA."
+            }));
+    }
+}
+
+
 // ----------------------------------------------------------------------------
 // PDNS Interaction
 
@@ -562,10 +701,15 @@ read_global_interaction(const toml::value& global)
         MJOLNIR_LOG_NOTICE("Pair interaction found.");
         return read_global_pair_interaction<traitsT>(global);
     }
-    else if(interaction == "3SPN2BaseBase")
+    else if(interaction == "3SPN2BasePair")
     {
-        MJOLNIR_LOG_NOTICE("3SPN2BaseBaseInteraction found.");
+        MJOLNIR_LOG_NOTICE("3SPN2BasePairInteraction found.");
         return read_global_3spn2_base_pair_interaction<traitsT>(global);
+    }
+    else if(interaction == "3SPN2CrossStacking")
+    {
+        MJOLNIR_LOG_NOTICE("3SPN2CrossStackingBasePairInteraction found.");
+        return read_global_3spn2_cross_stacking_interaction<traitsT>(global);
     }
     else if(interaction == "PDNS")
     {
