@@ -53,6 +53,7 @@ set(TEST_NAMES
     test_dihedral_angle_interaction
     test_3spn2_base_stacking_interaction
     test_3spn2_base_pair_interaction
+    test_3spn2_cross_stacking_interaction
     test_global_pair_interaction
     test_global_pair_excluded_volume_interaction
     test_global_pair_lennard_jones_interaction
