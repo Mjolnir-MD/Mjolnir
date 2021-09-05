@@ -223,7 +223,6 @@ class ThreeSPN2CrossStackingParameterList
           K_BP_        (para_set.K_BP),
           pi_over_K_CS_(para_set.pi_over_K_CS),
           pi_over_K_BP_(para_set.pi_over_K_BP),
-          pi_over_K_BP_(para_set.pi_over_K_BP),
           // --------------------------------
           theta3_0_AT_(para_set.theta3_0_AT),
           theta3_0_TA_(para_set.theta3_0_TA),
@@ -519,7 +518,7 @@ class ThreeSPN2CrossStackingParameterList
 
 // parameter set for 3SPN2.
 template<typename realT>
-struct ThreeSPN2BaseBaseGlobalPotentialParameter
+struct ThreeSPN2CrossStackingGlobalPotentialParameter
 {
     using real_type = realT;
 
@@ -575,7 +574,7 @@ struct ThreeSPN2BaseBaseGlobalPotentialParameter
 
 // parameter for 3SPN2.C
 template<typename realT>
-struct ThreeSPN2CBaseBaseGlobalPotentialParameter
+struct ThreeSPN2CCrossStackingGlobalPotentialParameter
 {
     using real_type = realT;
 
