@@ -657,11 +657,23 @@ ThreeSPN2CrossStackingInteraction<traitsT>::calc_force_energy_virial_impl(system
                 sys.virial()  += math::tensor_product(sys.transpose(rSi, rBi), f_Si) +
                                  math::tensor_product(                   rBi , f_Bi) +
                                  math::tensor_product(              rBi + Bij, f_Bj) +
-                                 math::tensor_product(sys.transpose(rSj, rBi), f_Sj) +
-                                 math::tensor_product(sys.transpose(sys.position(Bi5), rBi), f_Bi3) +
-                                 math::tensor_product(sys.transpose(sys.position(Bi3), rBi), f_Bi3) +
-                                 math::tensor_product(sys.transpose(sys.position(Bj5), rBi), f_Bj3) +
-                                 math::tensor_product(sys.transpose(sys.position(Bj3), rBi), f_Bj3) ;
+                                 math::tensor_product(sys.transpose(rSj, rBi), f_Sj);
+                if(Bi5_exists)
+                {
+                    sys.virial() += math::tensor_product(sys.transpose(sys.position(Bi5), rBi), f_Bi5);
+                }
+                if(Bi3_exists)
+                {
+                    sys.virial() += math::tensor_product(sys.transpose(sys.position(Bi3), rBi), f_Bi3);
+                }
+                if(Bj5_exists)
+                {
+                    sys.virial() += math::tensor_product(sys.transpose(sys.position(Bj5), rBi), f_Bj5);
+                }
+                if(Bj3_exists)
+                {
+                    sys.virial() += math::tensor_product(sys.transpose(sys.position(Bj3), rBi), f_Bj3);
+                }
             }
         }
     }
