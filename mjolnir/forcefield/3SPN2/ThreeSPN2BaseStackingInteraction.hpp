@@ -123,11 +123,33 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
             return;
         }
 
-        for(std::size_t i=1; i<nucleotide_index_.size(); ++i)
+        for(const auto& param : this->parameters_)
         {
+            //       0      1
+            //     Si --> Bi
+            //    /     `-^
+            //   Pj    th |
+            //    \       | 2
+            //     Sj --- Bj
+
             constexpr auto nil = nucleotide_index_type::nil();
-            const auto& Base5 = nucleotide_index_.at(i-1);
-            const auto& Base3 = nucleotide_index_.at(i);
+
+            const auto B5_idx = param.first[1];
+            const auto B3_idx = param.first[2];
+
+            const auto found_B5 = std::find_if(
+                nucleotide_index_.begin(), nucleotide_index_.end(),
+                [B5_idx](const nucleotide_index_type& nuc) noexcept -> bool {
+                    return nuc.B == B5_idx;
+                });
+            const auto found_B3 = std::find_if(
+                nucleotide_index_.begin(), nucleotide_index_.end(),
+                [B3_idx](const nucleotide_index_type& nuc) noexcept -> bool {
+                    return nuc.B == B3_idx;
+                });
+
+            const auto& Base5 = *found_B5;
+            const auto& Base3 = *found_B3;
 
             if(Base5.strand != Base3.strand) {continue;}
 
