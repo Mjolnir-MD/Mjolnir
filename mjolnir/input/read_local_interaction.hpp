@@ -446,12 +446,12 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
     //     {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
     //     # ...
     // ]
-    using nucleotide_index_type = parameter_3SPN2::NucleotideIndex;
-    std::vector<nucleotide_index_type> nuc_idxs;
+    using nucleotide_info_type = parameter_3SPN2::NucleotideInfo;
+    std::vector<nucleotide_info_type> nuc_idxs;
     nuc_idxs.reserve(params.size());
     for(const auto& item : params)
     {
-        nucleotide_index_type nuc_idx;
+        nucleotide_info_type nuc_idx;
 
         const auto ofs = find_parameter_or<std::int64_t>(item, env, "offset", 0);
 
@@ -463,7 +463,6 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
         nuc_idx.S          = find_parameter<std::size_t>(item, env, "S") + ofs;
         nuc_idx.B          = find_parameter<std::size_t>(item, env, "B") + ofs;
         nuc_idx.strand     = find_parameter<std::size_t>(item, env, "strand");
-        nuc_idx.nucleotide = find_parameter<std::size_t>(item, env, "nucleotide");
 
         const auto bk      = toml::find<std::string>(item, "Base");
         if     (bk == "A") {nuc_idx.base = base_kind::A;}
@@ -482,12 +481,6 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
         MJOLNIR_LOG_INFO("ThreeSPN2BaseStackingPotential: nucleotide = ", nuc_idx);
         nuc_idxs.push_back(nuc_idx);
     }
-
-    std::sort(nuc_idxs.begin(), nuc_idxs.end(),
-        [](const nucleotide_index_type& lhs, const nucleotide_index_type& rhs) {
-            return std::make_pair(lhs.strand, lhs.nucleotide) <
-                   std::make_pair(rhs.strand, rhs.nucleotide);
-        });
 
     std::vector<std::pair<indices_type, parameter_type>> parameters;
     parameters.reserve(params.size());
