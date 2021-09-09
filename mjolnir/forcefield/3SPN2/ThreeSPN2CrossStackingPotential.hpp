@@ -300,8 +300,6 @@ class ThreeSPN2CrossStackingParameterList
         return static_cast<cross_stack_kind>((lhs_u8 << 2 | rhs_u8) + 16u);
     }
 
-    // ------------------------------------------------
-    // TODO vvv
     pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
     {
         const auto& para_i_base = this->parameters_[i].base;

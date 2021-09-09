@@ -47,25 +47,24 @@ enum class cross_stack_kind: std::uint8_t
     INVALID = 255
 };
 
-struct NucleotideIndex
+struct NucleotideInfo
 {
     static constexpr std::size_t nil() noexcept
     {
         return std::numeric_limits<std::size_t>::max();
     }
 
-    NucleotideIndex() noexcept
-        : strand(nil()), nucleotide(nil()), P(nil()), S(nil()), B(nil()),
+    NucleotideInfo() noexcept
+        : strand(nil()), P(nil()), S(nil()), B(nil()),
           base(base_kind::X)
     {}
-    ~NucleotideIndex() noexcept = default;
-    NucleotideIndex(NucleotideIndex const&) = default;
-    NucleotideIndex(NucleotideIndex &&)     = default;
-    NucleotideIndex& operator=(NucleotideIndex const&) = default;
-    NucleotideIndex& operator=(NucleotideIndex &&)     = default;
+    ~NucleotideInfo() noexcept = default;
+    NucleotideInfo(NucleotideInfo const&) = default;
+    NucleotideInfo(NucleotideInfo &&)     = default;
+    NucleotideInfo& operator=(NucleotideInfo const&) = default;
+    NucleotideInfo& operator=(NucleotideInfo &&)     = default;
 
     std::size_t strand;
-    std::size_t nucleotide;
     std::size_t P, S, B;
     base_kind   base;
 };
@@ -194,9 +193,9 @@ operator<<(std::basic_ostream<charT, traitsT>& os, const cross_stack_kind cs)
 
 template<typename charT, typename traitsT>
 std::basic_ostream<charT, traitsT>&
-operator<<(std::basic_ostream<charT, traitsT>& os, const NucleotideIndex& ni)
+operator<<(std::basic_ostream<charT, traitsT>& os, const NucleotideInfo& ni)
 {
-    os << "{strand = " << ni.strand << ", nucleotide = " << ni.nucleotide
+    os << "{strand = " << ni.strand
        << ", P = " << ni.P << ", S = " << ni.S << ", B = " << ni.B << "}";
     return os;
 }

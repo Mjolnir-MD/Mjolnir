@@ -216,13 +216,13 @@ read_global_3spn2_base_pair_interaction(const toml::value& global)
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
-    using nucleotide_index_type = parameter_3SPN2::NucleotideIndex;
-    std::vector<nucleotide_index_type> nuc_idxs;
+    using nucleotide_info_type = parameter_3SPN2::NucleotideInfo;
+    std::vector<nucleotide_info_type> nuc_idxs;
 
     nuc_idxs.reserve(ps.size());
     for(const auto& item : ps)
     {
-        nucleotide_index_type nuc_idx;
+        nucleotide_info_type nuc_idx;
         const auto ofs = find_parameter_or<std::int64_t>(item, env, "offset", 0);
 
         // at the edge of the DNA, Phosphate may not exist.
@@ -233,7 +233,6 @@ read_global_3spn2_base_pair_interaction(const toml::value& global)
         nuc_idx.S          = find_parameter<std::size_t>(item, env, "S") + ofs;
         nuc_idx.B          = find_parameter<std::size_t>(item, env, "B") + ofs;
         nuc_idx.strand     = find_parameter<std::size_t>(item, env, "strand");
-        nuc_idx.nucleotide = find_parameter<std::size_t>(item, env, "nucleotide");
 
         const auto bk      = toml::find<std::string>(item, "Base");
         if     (bk == "A") {nuc_idx.base = base_kind::A;}
@@ -252,12 +251,6 @@ read_global_3spn2_base_pair_interaction(const toml::value& global)
         MJOLNIR_LOG_INFO("ThreeSPN2BaseBaseInteraction: nucleotide = ", nuc_idx);
         nuc_idxs.push_back(nuc_idx);
     }
-
-    std::sort(nuc_idxs.begin(), nuc_idxs.end(),
-        [](const nucleotide_index_type& lhs, const nucleotide_index_type& rhs) {
-            return std::make_pair(lhs.strand, lhs.nucleotide) <
-                   std::make_pair(rhs.strand, rhs.nucleotide);
-        });
 
     std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(nuc_idxs.size());
@@ -341,13 +334,13 @@ read_global_3spn2_cross_stacking_interaction(const toml::value& global)
     const auto& ps = toml::find<toml::array>(global, "parameters");
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
-    using nucleotide_index_type = parameter_3SPN2::NucleotideIndex;
-    std::vector<nucleotide_index_type> nuc_idxs;
+    using nucleotide_info_type = parameter_3SPN2::NucleotideInfo;
+    std::vector<nucleotide_info_type> nuc_idxs;
 
     nuc_idxs.reserve(ps.size());
     for(const auto& item : ps)
     {
-        nucleotide_index_type nuc_idx;
+        nucleotide_info_type nuc_idx;
         const auto ofs = find_parameter_or<std::int64_t>(item, env, "offset", 0);
 
         // at the edge of the DNA, Phosphate may not exist.
@@ -358,7 +351,6 @@ read_global_3spn2_cross_stacking_interaction(const toml::value& global)
         nuc_idx.S          = find_parameter<std::size_t>(item, env, "S") + ofs;
         nuc_idx.B          = find_parameter<std::size_t>(item, env, "B") + ofs;
         nuc_idx.strand     = find_parameter<std::size_t>(item, env, "strand");
-        nuc_idx.nucleotide = find_parameter<std::size_t>(item, env, "nucleotide");
 
         const auto bk      = toml::find<std::string>(item, "Base");
         if     (bk == "A") {nuc_idx.base = base_kind::A;}
@@ -377,12 +369,6 @@ read_global_3spn2_cross_stacking_interaction(const toml::value& global)
         MJOLNIR_LOG_INFO("ThreeSPN2CrossStacking: nucleotide = ", nuc_idx);
         nuc_idxs.push_back(nuc_idx);
     }
-
-    std::sort(nuc_idxs.begin(), nuc_idxs.end(),
-        [](const nucleotide_index_type& lhs, const nucleotide_index_type& rhs) {
-            return std::make_pair(lhs.strand, lhs.nucleotide) <
-                   std::make_pair(rhs.strand, rhs.nucleotide);
-        });
 
     std::vector<std::pair<std::size_t, parameter_type>> params;
     params.reserve(nuc_idxs.size());

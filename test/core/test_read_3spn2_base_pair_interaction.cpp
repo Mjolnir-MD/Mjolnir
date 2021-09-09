@@ -24,10 +24,10 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_base_interaction)
             potential   = "3SPN2"
             spatial_partition = {type = "VerletList", margin = 1.0}
             parameters = [
-            {strand = 0, nucleotide =  0,          S =   0, B =   1, Base = "A"},
-            {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
-            {strand = 0, nucleotide =  2, P =   5, S =   6, B =   7, Base = "G"},
-            {strand = 0, nucleotide =  3, P =   8, S =   9, B =  10, Base = "C"},
+            {strand = 0,          S =   0, B =   1, Base = "A"},
+            {strand = 0, P =   2, S =   3, B =   4, Base = "T"},
+            {strand = 0, P =   5, S =   6, B =   7, Base = "G"},
+            {strand = 0, P =   8, S =   9, B =  10, Base = "C"},
             ]
         )"_toml;
 
