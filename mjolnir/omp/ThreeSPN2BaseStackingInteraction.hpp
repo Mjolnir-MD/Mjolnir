@@ -42,15 +42,15 @@ class ThreeSPN2BaseStackingInteraction<
     using container_type       = std::vector<parameter_index_pair>;
 
     // to register adjacent nucleotides to Topology...
-    using nucleotide_index_type = parameter_3SPN2::NucleotideIndex;
+    using nucleotide_info_type = parameter_3SPN2::NucleotideInfo;
 
   public:
 
     ThreeSPN2BaseStackingInteraction(const connection_kind_type kind,
             container_type&& para, potential_type&& pot,
-            std::vector<nucleotide_index_type>&& nuc_idx)
+            std::vector<nucleotide_info_type>&& nuc_idx)
         : kind_(kind), parameters_(std::move(para)), potential_(std::move(pot)),
-          nucleotide_index_(std::move(nuc_idx))
+          nucleotide_info_(std::move(nuc_idx))
     {}
     ~ThreeSPN2BaseStackingInteraction() override {};
     ThreeSPN2BaseStackingInteraction(const ThreeSPN2BaseStackingInteraction&) = default;
@@ -181,11 +181,11 @@ class ThreeSPN2BaseStackingInteraction<
             return;
         }
 
-        for(std::size_t i=1; i<nucleotide_index_.size(); ++i)
+        for(std::size_t i=1; i<nucleotide_info_.size(); ++i)
         {
-            constexpr auto nil = nucleotide_index_type::nil();
-            const auto& Base5 = nucleotide_index_.at(i-1);
-            const auto& Base3 = nucleotide_index_.at(i);
+            constexpr auto nil = nucleotide_info_type::nil();
+            const auto& Base5 = nucleotide_info_.at(i-1);
+            const auto& Base3 = nucleotide_info_.at(i);
 
             if(Base5.strand != Base3.strand) {continue;}
 
@@ -224,7 +224,7 @@ class ThreeSPN2BaseStackingInteraction<
     {
         return new ThreeSPN2BaseStackingInteraction(kind_,
                 container_type(parameters_), potential_type(potential_),
-                std::vector<nucleotide_index_type>(nucleotide_index_));
+                std::vector<nucleotide_info_type>(nucleotide_info_));
     }
 
   private:
@@ -384,7 +384,7 @@ class ThreeSPN2BaseStackingInteraction<
     connection_kind_type kind_;
     container_type parameters_;
     potential_type potential_;
-    std::vector<nucleotide_index_type> nucleotide_index_;
+    std::vector<nucleotide_info_type> nucleotide_info_;
 };
 
 } // mjolnir
