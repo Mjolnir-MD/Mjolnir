@@ -50,10 +50,6 @@ class UnderdampedLangevinIntegrator
                    rng_type& rng);
 
     real_type delta_t() const noexcept {return dt_;}
-    void  set_delta_t(const real_type dt) noexcept
-    {
-        dt_ = dt; halfdt_ = dt / 2; halfdt2_ = dt * dt / 2;
-    }
 
     void update(const system_type& sys)
     {
@@ -85,6 +81,15 @@ class UnderdampedLangevinIntegrator
             param.sqrt_gamma_over_mass = std::sqrt(var.gamma() / var.m());
             params_for_dynvar_[key] = param;
         }
+    }
+
+    void update(const system_type& sys, const real_type dt) noexcept
+    {
+        this->dt_ = dt;
+        this->halfdt_ = dt / 2;
+        this->halfdt2_ = dt * dt / 2;
+        this->update(sys);
+        return;
     }
 
     std::vector<real_type> const& parameters() const noexcept {return gammas_;}

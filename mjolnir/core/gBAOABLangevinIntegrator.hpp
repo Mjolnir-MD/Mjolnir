@@ -56,6 +56,21 @@ class gBAOABLangevinIntegrator
         this->reset_parameter(sys);
         return;
     }
+    void update(const system_type& sys, const real_type dt)
+    {
+        this->dt_ = dt;
+        this->halfdt_ = dt / 2;
+
+        const auto  tolerance     = constraint_ff.tolerance();
+        this->correction_tolerance_        = tolerance;
+        this->correction_tolerance_dt_     = tolerance / dt_;
+        this->correction_tolerance_dt_itr_ = tolerance * 2. * correction_iter_num_ / dt_;
+        this->dt_in_correction_            = dt_ * 0.5 / correction_iter_num_;
+        this->r_dt_in_correction_          = 1. / dt_in_correction_;
+
+        this->update(sys);
+        return;
+    }
 
     real_type delta_t() const noexcept {return dt_;}
     std::vector<real_type> const& parameters() const noexcept {return gammas_;}
