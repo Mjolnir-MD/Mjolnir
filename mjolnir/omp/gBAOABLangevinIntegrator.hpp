@@ -245,7 +245,7 @@ class gBAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         this->dt_ = dt;
         this->halfdt_ = dt / 2;
 
-        const auto tolerance = constraint_ff.tolerance();
+        const auto tolerance = this->correction_tolerance_;
         this->correction_tolerance_dt_     = tolerance / dt_;
         this->correction_tolerance_dt_itr_ = tolerance * 2.0 * correction_iter_num_ / dt_;
         this->dt_in_correction_            = dt_ * 0.5 / correction_iter_num_;

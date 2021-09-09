@@ -61,7 +61,7 @@ class gBAOABLangevinIntegrator
         this->dt_ = dt;
         this->halfdt_ = dt / 2;
 
-        const auto  tolerance     = constraint_ff.tolerance();
+        const auto tolerance = this->correction_tolerance_;
         this->correction_tolerance_        = tolerance;
         this->correction_tolerance_dt_     = tolerance / dt_;
         this->correction_tolerance_dt_itr_ = tolerance * 2. * correction_iter_num_ / dt_;
