@@ -16,12 +16,11 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_base_interaction)
 
     using base_kind = mjolnir::parameter_3SPN2::base_kind;
 
-    using real_type   = double;
     using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
-            interaction = "3SPN2BaseBase"
+            interaction = "3SPN2BasePair"
             potential   = "3SPN2"
             spatial_partition = {type = "VerletList", margin = 1.0}
             parameters = [
