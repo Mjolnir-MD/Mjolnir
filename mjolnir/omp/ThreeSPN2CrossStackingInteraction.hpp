@@ -101,7 +101,7 @@ class ThreeSPN2CrossStackingInteraction<
         const auto pi_over_K_BP    = parameters_.pi_over_K_BP();
 
         real_type E_CS = 0.0;
-        const auto& leading_participants = this->parameters_.leading_participants()
+        const auto& leading_participants = this->parameters_.leading_participants();
 #pragma omp parallel for reduction(+:E_CS)
         for(std::size_t i=0; i<leading_participants.size(); ++i)
         {
