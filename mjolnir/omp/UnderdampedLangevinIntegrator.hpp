@@ -211,6 +211,14 @@ class UnderdampedLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             params_for_dynvar_[key] = param;
         }
     }
+    void update(const system_type& sys, const real_type dt) noexcept
+    {
+        this->dt_ = dt;
+        this->halfdt_ = dt / 2;
+        this->halfdt2_ = dt * dt / 2;
+        this->update(sys);
+        return;
+    }
 
     std::vector<real_type> const& parameters() const noexcept {return gammas_;}
 
