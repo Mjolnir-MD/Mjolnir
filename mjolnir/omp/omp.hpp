@@ -29,7 +29,6 @@
 #include <mjolnir/omp/GlobalPairInteraction.hpp>
 #include <mjolnir/omp/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/omp/GlobalPairLennardJonesInteraction.hpp>
-#include <mjolnir/omp/GlobalPairUniformLennardJonesInteraction.hpp>
 #include <mjolnir/omp/ThreeSPN2BaseBaseInteraction.hpp>
 #include <mjolnir/omp/PWMcosInteraction.hpp>
 #include <mjolnir/omp/PositionRestraintInteraction.hpp>
@@ -37,7 +36,7 @@
 #include <mjolnir/omp/UnlimitedGridCellList.hpp>
 #include <mjolnir/omp/PeriodicGridCellList.hpp>
 #include <mjolnir/omp/UnderdampedLangevinIntegrator.hpp>
-#include <mjolnir/omp/GFWNpTLangevinIntegrator.hpp>
+#include <mjolnir/omp/GFWNPTLangevinIntegrator.hpp>
 #include <mjolnir/omp/BAOABLangevinIntegrator.hpp>
 #include <mjolnir/omp/gBAOABLangevinIntegrator.hpp>
 #include <mjolnir/omp/GJFNVTLangevinIntegrator.hpp>

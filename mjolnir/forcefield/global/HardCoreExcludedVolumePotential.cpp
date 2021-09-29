@@ -6,8 +6,8 @@
 
 namespace mjolnir
 {
-template class HardCoreExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       >;
-template class HardCoreExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
-template class HardCoreExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-template class HardCoreExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+template class HardCoreExcludedVolumeParameterList<SimulatorTraits<double, UnlimitedBoundary>       >;
+template class HardCoreExcludedVolumeParameterList<SimulatorTraits<float,  UnlimitedBoundary>       >;
+template class HardCoreExcludedVolumeParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+template class HardCoreExcludedVolumeParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir

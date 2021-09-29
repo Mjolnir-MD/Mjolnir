@@ -8,7 +8,6 @@ jobs:
     strategy:
       matrix:
         compiler: ['g++-10', 'g++-9']
-        separate: ['ON', 'OFF']
 
     steps:
       - name: Checkout
@@ -16,13 +15,13 @@ jobs:
         with:
           submodules: true
       - name: Install
-        run: sudo apt-get install libboost-all-dev
+        run: sudo apt-get install libboost-test-dev
 
       - name: Configure
         run: |
             mkdir build
             cd build
-            cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DSEPARATE_BUILD=${{ matrix.separate }} -DUSE_OPENMP=ON -DBUILD_INTEGRATION_TEST=OFF -DFIND_BOOST=ON
+            cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DSEPARATE_BUILD=ON -DUSE_OPENMP=ON -DBUILD_INTEGRATION_TEST=OFF -DFIND_BOOST=ON
       - name: Build
         run: |
             cd build && cmake --build .

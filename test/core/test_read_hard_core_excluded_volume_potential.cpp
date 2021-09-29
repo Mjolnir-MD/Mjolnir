@@ -39,9 +39,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_hard_core_excluded_volume_noenv, T, test_type
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_hard_core_excluded_volume_potential<traits_type>(v);
+        const auto pot_para = mjolnir::read_hard_core_excluded_volume_potential<traits_type>(v);
+        const auto& pot  = pot_para.first;
+        const auto& para = dynamic_cast<mjolnir::HardCoreExcludedVolumeParameterList<traits_type> const&>(pot_para.second.cref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -49,18 +51,20 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_hard_core_excluded_volume_noenv, T, test_type
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST(pot.participants().size() == 3u);
-        BOOST_TEST(pot.participants().at(0)  == 0u);
-        BOOST_TEST(pot.participants().at(1)  == 1u);
-        BOOST_TEST(pot.participants().at(2)  == 3u);
+        BOOST_TEST(para.participants().size() == 3u);
+        BOOST_TEST(para.participants().at(0)  == 0u);
+        BOOST_TEST(para.participants().at(1)  == 1u);
+        BOOST_TEST(para.participants().at(2)  == 3u);
 
-        BOOST_TEST(pot.parameters().at(0).first == real_type(  3.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(1).first == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(3).first == real_type(100.0), tolerance<real_type>());
+        // soft_shell_thickness (sigma)
+        BOOST_TEST(para.parameters().at(0).sigma == real_type(  3.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(1).sigma == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(3).sigma == real_type(100.0), tolerance<real_type>());
 
-        BOOST_TEST(pot.parameters().at(0).second == real_type(2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(1).second == real_type(2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(3).second == real_type(3.0), tolerance<real_type>());
+        // core_radius (r0)
+        BOOST_TEST(para.parameters().at(0).radius == real_type(2.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(1).radius == real_type(2.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(3).radius == real_type(3.0), tolerance<real_type>());
 
         BOOST_TEST(pot.epsilon()      == real_type(3.14), tolerance<real_type>());
         BOOST_TEST(pot.cutoff_ratio() == real_type(2.71), tolerance<real_type>());
@@ -85,14 +89,16 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_hard_core_excluded_volume_env, T, test_types)
             env.toolarge = 100.0
             parameters  = [
                 {index =   0, core_radius =   "two", soft_shell_thickness = 3.0},
-                {index =   1, core_radius =   2.0, soft_shell_thickness = "two"},
-                {index =   3, core_radius =   "three", soft_shell_thickness = "toolarge"},
+                {index =   1, core_radius =     2.0, soft_shell_thickness = "two"},
+                {index =   3, core_radius = "three", soft_shell_thickness = "toolarge"},
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_hard_core_excluded_volume_potential<traits_type>(v);
+        const auto pot_para = mjolnir::read_hard_core_excluded_volume_potential<traits_type>(v);
+        const auto& pot  = pot_para.first;
+        const auto& para = dynamic_cast<mjolnir::HardCoreExcludedVolumeParameterList<traits_type> const&>(pot_para.second.cref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -100,20 +106,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_hard_core_excluded_volume_env, T, test_types)
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST(pot.participants().size() == 3u);
-        BOOST_TEST(pot.participants().at(0)  == 0u);
-        BOOST_TEST(pot.participants().at(1)  == 1u);
-        BOOST_TEST(pot.participants().at(2)  == 3u);
+        BOOST_TEST(para.participants().size() == 3u);
+        BOOST_TEST(para.participants().at(0)  == 0u);
+        BOOST_TEST(para.participants().at(1)  == 1u);
+        BOOST_TEST(para.participants().at(2)  == 3u);
 
-        BOOST_TEST(pot.parameters().at(0).first == real_type(  3.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(1).first == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(3).first == real_type(100.0), tolerance<real_type>());
+        // soft_shell_thickness (sigma)
+        BOOST_TEST(para.parameters().at(0).sigma == real_type(  3.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(1).sigma == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(3).sigma == real_type(100.0), tolerance<real_type>());
 
-        BOOST_TEST(pot.parameters().at(0).second == real_type(2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(1).second == real_type(2.0), tolerance<real_type>());
-        BOOST_TEST(pot.parameters().at(3).second == real_type(3.0), tolerance<real_type>());
+        // core radius (r0)
+        BOOST_TEST(para.parameters().at(0).radius == real_type(2.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(1).radius == real_type(2.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(3).radius == real_type(3.0), tolerance<real_type>());
 
         BOOST_TEST(pot.epsilon()      == real_type(3.14), tolerance<real_type>());
-        BOOST_TEST(pot.cutoff_ratio() == decltype(pot)::default_cutoff(), tolerance<real_type>());
     }
 }

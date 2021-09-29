@@ -27,12 +27,11 @@ set(TEST_NAMES
     test_3spn2_bond_potential
     test_3spn2_base_stacking_potential
     test_3spn2_base_base_interaction_potential
+    test_3spn2_excluded_volume_potential
     test_lennard_jones_potential
     test_uniform_lennard_jones_potential
     test_lennard_jones_attractive_potential
-    test_tabulated_lennard_jones_attractive_potential
     test_wca_potential
-    test_tabulated_wca_potential
     test_isolf_potential
     test_excluded_volume_potential
     test_inverse_power_potential
@@ -57,7 +56,6 @@ set(TEST_NAMES
     test_global_pair_interaction
     test_global_pair_excluded_volume_interaction
     test_global_pair_lennard_jones_interaction
-    test_global_pair_uniform_lennard_jones_interaction
     test_pdns_interaction
     test_pwmcos_interaction
     test_external_distance_interaction
@@ -67,6 +65,7 @@ set(TEST_NAMES
     test_pulling_force_interaction
 
     test_multiple_basin_forcefield
+    test_hybrid_forcefield
 
     test_neighbor_list
     test_unlimited_verlet_list
@@ -97,12 +96,12 @@ set(TEST_NAMES
     test_read_debye_huckel_potential
     test_read_lennard_jones_potential
     test_read_uniform_lennard_jones_potential
-    test_read_excluded_volume_wall_potential
     test_read_lennard_jones_attractive_potential
     test_read_tabulated_lennard_jones_attractive_potential
     test_read_wca_potential
     test_read_tabulated_wca_potential
     test_read_isolf_potential
+    test_read_excluded_volume_wall_potential
     test_read_lennard_jones_wall_potential
     test_read_implicit_membrane_potential
     test_read_uniform_potential
@@ -132,6 +131,7 @@ set(TEST_NAMES
     test_read_external_forcefield
     test_read_forcefield
     test_read_multiple_basin_forcefield
+    test_read_hybrid_forcefield
 
     test_read_molecular_dynamics_simulator
     test_read_simulated_annealing_simulator
