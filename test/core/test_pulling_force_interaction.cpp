@@ -33,15 +33,15 @@ BOOST_AUTO_TEST_CASE(PullingForce)
 
     for(std::size_t i=0; i<sys.size(); ++i)
     {
-        sys.at(i).mass  = 1.0;
-        sys.at(i).rmass = 1.0;
+        sys.mass(i)  = 1.0;
+        sys.rmass(i) = 1.0;
 
-        sys.at(i).position = coordinate_type( 0.0,  0.0,  0.0);
-        sys.at(i).velocity = coordinate_type( 0.0,  0.0,  0.0);
-        sys.at(i).force    = coordinate_type( 0.0,  0.0,  0.0);
+        sys.position(i) = coordinate_type( 0.0,  0.0,  0.0);
+        sys.velocity(i) = coordinate_type( 0.0,  0.0,  0.0);
+        sys.force   (i) = coordinate_type( 0.0,  0.0,  0.0);
 
-        sys.at(i).name  = "X";
-        sys.at(i).group = "NONE";
+        sys.name (i) = "X";
+        sys.group(i) = "NONE";
     }
 
     interaction.calc_force(sys);
