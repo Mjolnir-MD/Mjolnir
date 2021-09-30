@@ -26,7 +26,7 @@ set(TEST_NAMES
     test_mbasin_repulsive_potential
     test_3spn2_bond_potential
     test_3spn2_base_stacking_potential
-    test_3spn2_base_base_interaction_potential
+    test_3spn2_base_pair_potential
     test_3spn2_excluded_volume_potential
     test_lennard_jones_potential
     test_uniform_lennard_jones_potential
@@ -52,7 +52,8 @@ set(TEST_NAMES
     test_bond_angle_interaction
     test_dihedral_angle_interaction
     test_3spn2_base_stacking_interaction
-    test_3spn2_base_base_interaction
+    test_3spn2_base_pair_interaction
+    test_3spn2_cross_stacking_interaction
     test_global_pair_interaction
     test_global_pair_excluded_volume_interaction
     test_global_pair_lennard_jones_interaction
@@ -115,7 +116,7 @@ set(TEST_NAMES
     test_read_directional_contact_interaction
     test_read_dummy_interaction
     test_read_3spn2_base_stacking_interaction
-    test_read_3spn2_base_base_interaction
+    test_read_3spn2_base_pair_interaction
     test_read_global_pair_interaction
     test_read_pdns_interaction
     test_read_pwmcos_interaction
