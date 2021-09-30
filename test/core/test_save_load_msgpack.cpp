@@ -21,6 +21,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_unlimited, realT, real_type
     LoggerManager::set_default_logger("test_save_load_msgpack.log");
     using traits_type     = SimulatorTraits<realT, UnlimitedBoundary>;
     using coordinate_type = typename traits_type::coordinate_type;
+    using real_type       = typename traits_type::real_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using system_type     = System<traits_type>;
     using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using msgsaver_type   = MsgPackSaver<traits_type>;
@@ -33,6 +35,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_unlimited, realT, real_type
 
     sys.attribute("pi") = 3.14;
     sys.attribute("e")  = 2.71;
+
+    sys.variable("lambda1") = DynamicVariable<real_type>(DefaultDynamicVariable<real_type>(1.0, 2.0, 3.0, 4.0, 5.0));
+    sys.variable("lambda2") = DynamicVariable<real_type>(PeriodicDynamicVariable<real_type>(1.0, 2.0, 3.0, 4.0, 5.0, 0.0, 10.0));
+    sys.variable("lambda3") = DynamicVariable<real_type>(RepulsiveDynamicVariable<real_type>(1.0, 2.0, 3.0, 4.0, 5.0, 0.0, 10.0));
+
+    sys.virial() = matrix33_type(1.0, 2.0, 3.0,
+                                 2.0, 4.0, 5.0,
+                                 3.0, 5.0, 6.0);
 
     for(std::size_t i=0; i<sys.size(); ++i)
     {
@@ -91,6 +101,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_periodic, realT, real_types
     LoggerManager::set_default_logger("test_save_load_msgpack.log");
     using traits_type     = SimulatorTraits<realT, CuboidalPeriodicBoundary>;
     using coordinate_type = typename traits_type::coordinate_type;
+    using real_type       = typename traits_type::real_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using system_type     = System<traits_type>;
     using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using msgsaver_type   = MsgPackSaver<traits_type>;
@@ -106,6 +118,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_save_load_msgpack_periodic, realT, real_types
 
     sys.attribute("pi") = 3.14;
     sys.attribute("e")  = 2.71;
+
+    sys.variable("lambda1") = DynamicVariable<real_type>(DefaultDynamicVariable<real_type>(1.0, 2.0, 3.0, 4.0, 5.0));
+    sys.variable("lambda2") = DynamicVariable<real_type>(PeriodicDynamicVariable<real_type>(1.0, 2.0, 3.0, 4.0, 5.0, 0.0, 10.0));
+    sys.variable("lambda3") = DynamicVariable<real_type>(RepulsiveDynamicVariable<real_type>(1.0, 2.0, 3.0, 4.0, 5.0, 0.0, 10.0));
+
+    sys.virial() = matrix33_type(1.0, 2.0, 3.0,
+                                 2.0, 4.0, 5.0,
+                                 3.0, 5.0, 6.0);
 
     for(std::size_t i=0; i<sys.size(); ++i)
     {

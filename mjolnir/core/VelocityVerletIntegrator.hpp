@@ -74,6 +74,11 @@ void VelocityVerletIntegrator<traitsT>::initialize(
         {
             system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
+        for(auto& kv : system.variables())
+        {
+            auto& var = kv.second;
+            var.update(var.x(), var.v(), real_type(0));
+        }
         system.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
         ff->calc_force(system);
     }
@@ -97,6 +102,16 @@ VelocityVerletIntegrator<traitsT>::step(
 
         largest_disp2 = std::max(largest_disp2, math::length_sq(disp));
     }
+    for(auto& kv : sys.variables())
+    {
+        auto& var = kv.second;
+        auto next_x = var.x();
+        auto next_v = var.v();
+
+        next_v += halfdt_ * var.f() / var.m();
+        next_x += dt_ * next_v;
+        var.update(next_x, next_v, real_type(0));
+    }
     sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
     // update neighbor list; reduce margin, reconstruct the list if needed
@@ -109,6 +124,11 @@ VelocityVerletIntegrator<traitsT>::step(
     for(std::size_t i=0; i<sys.size(); ++i)
     {
         sys.velocity(i) += (halfdt_ * sys.rmass(i)) * sys.force(i);
+    }
+    for(auto& kv : sys.variables())
+    {
+        auto& var = kv.second;
+        var.update(var.x(), var.v() + halfdt_ * var.f() / var.m(), var.f());
     }
 
     // remove net rotation/translation

@@ -65,6 +65,26 @@ $ make
 $ make test
 ```
 
+### Example CMake Options
+
+- To change the compiler to be used
+
+```console
+$ cmake .. -DCMAKE_CXX_COMPILER=clang++
+```
+
+- To use Boost library installed in your system
+
+```console
+$ cmake .. -DFIND_BOOST=ON -DBOOST_ROOT=/path/to/boost
+```
+
+- To speedup compilation by turning separated build on and also using pre-built boost library
+
+```console
+$ cmake .. -DSEPARATE_BUILD=ON -DFIND_BOOST=ON -DBOOST_ROOT=/path/to/boost
+```
+
 ### Options for CMake
 
 All those are optional variables.
@@ -98,4 +118,10 @@ All those are optional variables.
 - `-DPERIODIC_BOUNDARY_SUPPORT=(ON|OFF)`
   - `ON` by default.
   - If `OFF`, `CuboidalPeriodicBoundary` would not be able to be used, but the compilation finishes quickly.
+- `-DBUILD_UNIT_TEST=(ON|OFF)`
+  - `ON` by default.
+  - If `OFF`, unit tests would not be compiled. It will save your time.
+- `-DBUILD_INTEGRATION_TEST=(ON|OFF)`
+  - `OFF` by default.
+  - If `ON`, integration tests will be compiled.
 

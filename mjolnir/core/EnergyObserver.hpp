@@ -50,6 +50,12 @@ class EnergyObserver final : public ObserverBase<traitsT>
         {
             ofs << " attribute:" << attr.first;
         }
+        for(const auto& dynvar : sys.variables())
+        {
+            ofs << " dynamic_var:" << dynvar.first << ".pos";
+            ofs << " dynamic_var:" << dynvar.first << ".vel";
+            ofs << " dynamic_var:" << dynvar.first << ".force";
+        }
         ofs << '\n';
         return;
     }
@@ -69,6 +75,12 @@ class EnergyObserver final : public ObserverBase<traitsT>
         for(const auto& attr : sys.attributes())
         {
             ofs << " attribute:" << attr.first;
+        }
+        for(const auto& dynvar : sys.variables())
+        {
+            ofs << " dynamic_var:" << dynvar.first << ".pos";
+            ofs << " dynamic_var:" << dynvar.first << ".vel";
+            ofs << " dynamic_var:" << dynvar.first << ".force";
         }
         ofs << '\n';
         return;
@@ -114,6 +126,21 @@ class EnergyObserver final : public ObserverBase<traitsT>
             }
             ofs << ' ' << std::setw(10 + attr.first.size()) << std::right
                 << std::fixed << attr.second;
+        }
+        for(const auto& dynvar : sys.variables())
+        {
+            if(!is_finite(dynvar.second.x()))
+            {
+                MJOLNIR_GET_DEFAULT_LOGGER();
+                MJOLNIR_LOG_ERROR(dynvar.first, " becomes NaN.");
+                is_ok = false;
+            }
+            ofs << ' ' << std::setw(12 + 3 + dynvar.first.size()) << std::right
+                << std::fixed << dynvar.second.x();
+            ofs << ' ' << std::setw(12 + 3 + dynvar.first.size()) << std::right
+                << std::fixed << dynvar.second.v();
+            ofs << ' ' << std::setw(12 + 5 + dynvar.first.size()) << std::right
+                << std::fixed << dynvar.second.f();
         }
         ofs << std::endl; // flush before throwing an exception
 

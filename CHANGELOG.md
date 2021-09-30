@@ -1,5 +1,29 @@
 # Change Log
 
+## 1.29.0
+
+### Added
+
+- enable to restrain χ value in the multiple basin forcefield
+
+## 1.28.1
+
+### Fixed
+
+- Fix instability of the G-JF Integrator introduced in v1.28.0
+
+## 1.28.0
+
+### Added
+
+- add lambda-dynamics
+- add dynamic_variables to System. They have virtual mass, velocity and force and are integrated over time.
+
+### Changed
+
+- speedup by skipping virial calculation if virial is not needed
+- enable EnergyCalculation to output pressure
+
 ## 1.27.0
 
 ### Added

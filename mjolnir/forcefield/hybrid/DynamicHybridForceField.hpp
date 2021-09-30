@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_FORCEFIELD_HYBRID_FORCE_FIELD_HPP
-#define MJOLNIR_FORCEFIELD_HYBRID_FORCE_FIELD_HPP
+#ifndef MJOLNIR_FORCEFIELD_DYNAMIC_HYBRID_FORCE_FIELD_HPP
+#define MJOLNIR_FORCEFIELD_DYNAMIC_HYBRID_FORCE_FIELD_HPP
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/core/ForceField.hpp>
@@ -11,12 +11,13 @@
 namespace mjolnir
 {
 
-// HybridForceField
+// DynamicHybridForceField
 //
 // U = lambda U_1 + (1 - lambra) U_2
 //
+// It uses `lambda` dynamic variable
 template<typename traitsT>
-class HybridForceField : public ForceFieldBase<traitsT>
+class DynamicHybridForceField : public ForceFieldBase<traitsT>
 {
   public:
     using traits_type     = traitsT;
@@ -24,24 +25,24 @@ class HybridForceField : public ForceFieldBase<traitsT>
     using real_type       = typename base_type::real_type;
     using coordinate_type = typename base_type::coordinate_type;
     using system_type     = typename base_type::system_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using coordinate_container_type = typename system_type::coordinate_container_type;
     using topology_type   = Topology;
     using forcefield_type = std::unique_ptr<base_type>;
     using constraint_forcefield_type  = ConstraintForceField<traits_type>;
-    using matrix33_type   = typename traits_type::matrix33_type;
 
   public:
 
-    HybridForceField(const real_type lambda,
-                     forcefield_type ff_1, forcefield_type ff_2)
-        : lambda_(lambda), ff_1_(std::move(ff_1)), ff_2_(std::move(ff_2))
+    DynamicHybridForceField(const real_type k, const real_type v0,
+            forcefield_type ff_1, forcefield_type ff_2)
+        : klambda_(k), lambda0_(v0), ff_1_(std::move(ff_1)), ff_2_(std::move(ff_2))
     {}
 
-    ~HybridForceField() override = default;
-    HybridForceField(const HybridForceField&) = delete;
-    HybridForceField(HybridForceField&&)      = default;
-    HybridForceField& operator=(const HybridForceField&) = delete;
-    HybridForceField& operator=(HybridForceField&&)      = default;
+    ~DynamicHybridForceField() override = default;
+    DynamicHybridForceField(const DynamicHybridForceField&) = delete;
+    DynamicHybridForceField(DynamicHybridForceField&&)      = default;
+    DynamicHybridForceField& operator=(const DynamicHybridForceField&) = delete;
+    DynamicHybridForceField& operator=(DynamicHybridForceField&&)      = default;
 
     void initialize(const system_type& sys) override
     {
@@ -53,71 +54,28 @@ class HybridForceField : public ForceFieldBase<traitsT>
 
         this->force_buffer_.resize(sys.size(),
                 math::make_coordinate<coordinate_type>(0, 0, 0));
-        this->virial_buffer_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
         if( ! ff_1_->constraint().empty() || ! ff_2_->constraint().empty())
         {
             MJOLNIR_LOG_ERROR("hybrid constraint cannot mix 2 different constraints");
+            throw std::runtime_error("hybrid constraint cannot mix 2 different constraints");
+        }
+
+        if( ! sys.has_variable("lambda"))
+        {
+            MJOLNIR_LOG_ERROR("dynamic hybrid forcefield requires system to have a dynamic variable named `lambda`");
+            throw std::runtime_error("dynvar `lambda` not found");
         }
         return;
     }
 
+
     void calc_force(system_type& sys) const noexcept override
     {
-        using std::swap;
-
-        sys.preprocess_forces();
-        this->ff_1_->calc_force(sys);
-        sys.postprocess_forces();
-
-        swap(this->force_buffer_, sys.forces()); // zero-cleared
-
-        sys.preprocess_forces();
-        this->ff_2_->calc_force(sys);
-        sys.postprocess_forces();
-
-        const real_type one_minus_lambda = real_type(1) - this->lambda_;
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            sys.force(i) *= one_minus_lambda;
-            sys.force(i) += lambda_ * force_buffer_[i];
-            force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
-        }
-        return ;
-    }
-    void calc_force_and_virial(system_type& sys) const noexcept override
-    {
-        using std::swap;
-
-        sys.preprocess_forces();
-        this->ff_1_->calc_force(sys);
-        sys.postprocess_forces();
-
-        swap(this->virial_buffer_, sys.virial());
-        swap(this->force_buffer_, sys.forces());
-
-        sys.preprocess_forces();
-        this->ff_2_->calc_force(sys);
-        sys.postprocess_forces();
-
-        const real_type one_minus_lambda = real_type(1) - this->lambda_;
-        for(std::size_t i=0; i<sys.size(); ++i)
-        {
-            sys.force(i) *= one_minus_lambda;
-            sys.force(i) += lambda_ * force_buffer_[i];
-            force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
-        }
-
-        sys.virial() *= one_minus_lambda;
-        sys.virial() += lambda_ * (this->virial_buffer_);
-        this->virial_buffer_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
-
-        return ;
-    }
-    real_type calc_energy(const system_type& sys) const noexcept override
-    {
-        return lambda_ * ff_1_->calc_energy(sys) +
-               (real_type(1) - lambda_) * ff_2_->calc_energy(sys);
+        // force calculation itself requires energy. the cost of discarding energy
+        // value calculated in the following function is negligible.
+        this->calc_force_and_energy(sys);
+        return;
     }
 
     real_type calc_force_and_energy(system_type& sys) const noexcept override
@@ -134,14 +92,30 @@ class HybridForceField : public ForceFieldBase<traitsT>
         const auto V2 = this->ff_2_->calc_force_and_energy(sys);
         sys.postprocess_forces();
 
-        const real_type one_minus_lambda = real_type(1) - this->lambda_;
+        const real_type lambda = sys.variable("lambda").x();
+        const real_type one_minus_lambda = real_type(1) - lambda;
+
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             sys.force(i) *= one_minus_lambda;
-            sys.force(i) += lambda_ * force_buffer_[i];
+            sys.force(i) += lambda * force_buffer_[i];
             force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
-        return lambda_ * V1 + one_minus_lambda * V2;
+
+        auto& var = sys.variable("lambda");
+
+        real_type force_on_lambda = V2 - V1; // -dV / dlambda
+        force_on_lambda += -2 * klambda_ * (lambda - lambda0_); // -d/dx [k(x-x0)^2];
+
+        var.update(var.x(), var.v(), var.f() + force_on_lambda);
+
+        return lambda * V1 + one_minus_lambda * V2;
+    }
+
+    void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        this->calc_force_virial_energy(sys);
+        return ;
     }
 
     real_type calc_force_virial_energy(system_type& sys) const noexcept override
@@ -152,26 +126,41 @@ class HybridForceField : public ForceFieldBase<traitsT>
         const auto V1 = this->ff_1_->calc_force_virial_energy(sys);
         sys.postprocess_forces();
 
-        swap(this->virial_buffer_, sys.virial());
         swap(this->force_buffer_, sys.forces());
+        swap(this->virial_buffer_, sys.virial());
 
         sys.preprocess_forces();
         const auto V2 = this->ff_2_->calc_force_virial_energy(sys);
         sys.postprocess_forces();
 
-        const real_type one_minus_lambda = real_type(1) - this->lambda_;
+        const real_type lambda = sys.variable("lambda").x();
+        const real_type one_minus_lambda = real_type(1) - lambda;
+
         for(std::size_t i=0; i<sys.size(); ++i)
         {
             sys.force(i) *= one_minus_lambda;
-            sys.force(i) += lambda_ * force_buffer_[i];
+            sys.force(i) += lambda * force_buffer_[i];
             force_buffer_[i] = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
-
         sys.virial() *= one_minus_lambda;
-        sys.virial() += lambda_ * (this->virial_buffer_);
+        sys.virial() += lambda * virial_buffer_;
         this->virial_buffer_ = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
-        return lambda_ * V1 + one_minus_lambda * V2;
+        auto& var = sys.variable("lambda");
+
+        real_type force_on_lambda = V2 - V1; // -dV / dlambda
+        force_on_lambda += -2 * klambda_ * (lambda - lambda0_); // -d/dx [k(x-x0)^2];
+
+        var.update(var.x(), var.v(), var.f() + force_on_lambda);
+
+        return lambda * V1 + one_minus_lambda * V2;
+    }
+
+    real_type calc_energy(const system_type& sys) const noexcept override
+    {
+        const real_type lambda = sys.variable("lambda").x();
+        return lambda * ff_1_->calc_energy(sys) +
+               (real_type(1) - lambda) * ff_2_->calc_energy(sys);
     }
 
     void update(const system_type& sys) override
@@ -204,8 +193,6 @@ class HybridForceField : public ForceFieldBase<traitsT>
     // number of chains, so it should not be problematic (but need to be refactored)
     topology_type const& topology() const noexcept override {return ff_1_->topology();}
 
-    real_type lambda() const noexcept {return lambda_;}
-
     forcefield_type const& ff1() const noexcept {return ff_1_;}
     forcefield_type const& ff2() const noexcept {return ff_2_;}
 
@@ -216,15 +203,13 @@ class HybridForceField : public ForceFieldBase<traitsT>
     {
         using namespace mjolnir::literals::string_literals;
 
-        fmt += "FF 1{"_s;
+        fmt += "V1{"_s;
         ff_1_->format_energy_name(fmt);
-        if(!fmt.empty() && fmt.back() == ' ') {fmt.pop_back();}
-        fmt += "} "_s;
+        fmt += " coefficient(lambda)} "_s;
 
-        fmt += "FF 2{"_s;
+        fmt += "V2{"_s;
         ff_2_->format_energy_name(fmt);
-        if(!fmt.empty() && fmt.back() == ' ') {fmt.pop_back();}
-        fmt += "} "_s;
+        fmt += " coefficient(1 - lambda)} "_s;
         return;
     }
 
@@ -232,32 +217,43 @@ class HybridForceField : public ForceFieldBase<traitsT>
     {
         real_type total = 0.0;
 
+        const auto lambda = sys.variable("lambda").x();
+
         fmt += "     "_s; // FF 1{
-        total += ff_1_->format_energy(sys, fmt);
-        if(!fmt.empty() && fmt.back() == ' ') {fmt.pop_back();}
+        total += lambda * ff_1_->format_energy(sys, fmt);
+        {
+            std::ostringstream oss;
+            oss << std::setw(19) << std::scientific << lambda;
+            fmt += oss.str();
+        }
         fmt += "  "_s; // }
 
         fmt += "     "_s; // FF 2{
-        total += ff_2_->format_energy(sys, fmt);
-        if(!fmt.empty() && fmt.back() == ' ') {fmt.pop_back();}
+        total += (real_type(1) - lambda) * ff_2_->format_energy(sys, fmt);
+        {
+            std::ostringstream oss;
+            oss << std::setw(23) << std::scientific << (real_type(1) - lambda);
+            fmt += oss.str();
+        }
         fmt += "  "_s; // }
         return total;
     }
 
   private:
 
-    real_type lambda_;
+    real_type klambda_;  // for umbrella sampling k(x - x0)^2
+    real_type lambda0_; // for umbrella sampling
     mutable coordinate_container_type force_buffer_; // this will be used in calc_force
-    mutable matrix33_type            virial_buffer_; // this will be used in calc_force
+    mutable matrix33_type virial_buffer_; // this will be used in calc_force
     forcefield_type ff_1_;
     forcefield_type ff_2_;
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class HybridForceField<SimulatorTraits<double, UnlimitedBoundary       >>;
-extern template class HybridForceField<SimulatorTraits<float,  UnlimitedBoundary       >>;
-extern template class HybridForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-extern template class HybridForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+extern template class DynamicHybridForceField<SimulatorTraits<double, UnlimitedBoundary       >>;
+extern template class DynamicHybridForceField<SimulatorTraits<float,  UnlimitedBoundary       >>;
+extern template class DynamicHybridForceField<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class DynamicHybridForceField<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 #endif
 
 } // mjolnir
