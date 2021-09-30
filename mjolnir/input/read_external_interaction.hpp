@@ -5,6 +5,7 @@
 #include <mjolnir/forcefield/external/ExternalDistanceInteraction.hpp>
 #include <mjolnir/forcefield/external/PositionRestraintInteraction.hpp>
 #include <mjolnir/forcefield/external/RectangularBoxInteraction.hpp>
+#include <mjolnir/forcefield/external/PullingForceInteraction.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
@@ -325,6 +326,34 @@ read_afm_flexible_fitting_interaction(const toml::value& external)
             std::move(radii), std::move(image));
 }
 
+template<typename traitsT>
+std::unique_ptr<ExternalForceInteractionBase<traitsT>>
+read_pulling_force_interaction(const toml::value& external)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using coordinate_type = typename traitsT::coordinate_type;
+    using interaction_t   = PullingForceInteraction<traitsT>;
+
+    const auto& env = external.contains("env") ? external.at("env") : toml::value{};
+
+    // read radius and participants
+
+    const auto& parameters = toml::find<toml::array>(external, "parameters");
+
+    std::vector<std::pair<std::size_t, coordinate_type>> forces;
+    forces.reserve(parameters.size());
+    for(const auto& para : parameters)
+    {
+        const auto idx = find_parameter<std::size_t    >(para, env, "index");
+        const auto f   = find_parameter<coordinate_type>(para, env, "force");
+        forces.emplace_back(idx, f);
+    }
+
+    return make_unique<interaction_t>(std::move(forces));
+}
+
+
 // ----------------------------------------------------------------------------
 // general read_external_interaction function
 // ----------------------------------------------------------------------------
@@ -356,6 +385,11 @@ read_external_interaction(const toml::value& external)
     {
         MJOLNIR_LOG_NOTICE("AFMFlexibleFitting interaction found.");
         return read_afm_flexible_fitting_interaction<traitsT>(external);
+    }
+    else if(interaction == "PullingForce")
+    {
+        MJOLNIR_LOG_NOTICE("PullingForce interaction found.");
+        return read_pulling_force_interaction<traitsT>(external);
     }
     else
     {

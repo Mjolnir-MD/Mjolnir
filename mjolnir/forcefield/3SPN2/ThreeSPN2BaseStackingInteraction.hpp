@@ -48,15 +48,15 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
     using container_type       = std::vector<parameter_index_pair>;
 
     // to register adjacent nucleotides to Topology...
-    using nucleotide_index_type = parameter_3SPN2::NucleotideIndex;
+    using nucleotide_info_type = parameter_3SPN2::NucleotideInfo;
 
   public:
 
     ThreeSPN2BaseStackingInteraction(const connection_kind_type kind,
             container_type&& para, potential_type&& pot,
-            std::vector<nucleotide_index_type>&& nuc_idx)
+            std::vector<nucleotide_info_type>&& nuc_idx)
         : kind_(kind), parameters_(std::move(para)), potential_(std::move(pot)),
-          nucleotide_index_(std::move(nuc_idx))
+          nucleotide_info_(std::move(nuc_idx))
     {}
     ~ThreeSPN2BaseStackingInteraction() {}
     ThreeSPN2BaseStackingInteraction(const ThreeSPN2BaseStackingInteraction&) = default;
@@ -123,11 +123,33 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
             return;
         }
 
-        for(std::size_t i=1; i<nucleotide_index_.size(); ++i)
+        for(const auto& param : this->parameters_)
         {
-            constexpr auto nil = nucleotide_index_type::nil();
-            const auto& Base5 = nucleotide_index_.at(i-1);
-            const auto& Base3 = nucleotide_index_.at(i);
+            //       0      1
+            //     Si --> Bi
+            //    /     `-^
+            //   Pj    th |
+            //    \       | 2
+            //     Sj --- Bj
+
+            constexpr auto nil = nucleotide_info_type::nil();
+
+            const auto B5_idx = param.first[1];
+            const auto B3_idx = param.first[2];
+
+            const auto found_B5 = std::find_if(
+                nucleotide_info_.begin(), nucleotide_info_.end(),
+                [B5_idx](const nucleotide_info_type& nuc) noexcept -> bool {
+                    return nuc.B == B5_idx;
+                });
+            const auto found_B3 = std::find_if(
+                nucleotide_info_.begin(), nucleotide_info_.end(),
+                [B3_idx](const nucleotide_info_type& nuc) noexcept -> bool {
+                    return nuc.B == B3_idx;
+                });
+
+            const auto& Base5 = *found_B5;
+            const auto& Base3 = *found_B3;
 
             if(Base5.strand != Base3.strand) {continue;}
 
@@ -166,7 +188,7 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
     {
         return new ThreeSPN2BaseStackingInteraction(kind_,
                 container_type(parameters_), potential_type(potential_),
-                std::vector<nucleotide_index_type>(nucleotide_index_));
+                std::vector<nucleotide_info_type>(nucleotide_info_));
     }
 
   private:
@@ -179,7 +201,7 @@ class ThreeSPN2BaseStackingInteraction final : public LocalInteractionBase<trait
     connection_kind_type kind_;
     container_type parameters_;
     potential_type potential_;
-    std::vector<nucleotide_index_type> nucleotide_index_;
+    std::vector<nucleotide_info_type> nucleotide_info_;
 
 #ifdef MJOLNIR_WITH_OPENMP
     // OpenMP implementation uses its own implementation to run it in parallel.

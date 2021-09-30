@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "test_3SPN2BaseBaseInteraction_potential"
+#define BOOST_TEST_MODULE "test_3SPN2BasePairInteraction_potential"
 
 #ifdef BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -6,14 +6,14 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
-#include <mjolnir/forcefield/3SPN2/ThreeSPN2BaseBaseInteractionPotential.hpp>
+#include <mjolnir/forcefield/3SPN2/ThreeSPN2BasePairPotential.hpp>
 
 using parameters_to_test_double = std::tuple<
-    mjolnir::ThreeSPN2BaseBaseGlobalPotentialParameter<double>,
-    mjolnir::ThreeSPN2CBaseBaseGlobalPotentialParameter<double>
+    mjolnir::ThreeSPN2BasePairGlobalPotentialParameter<double>,
+    mjolnir::ThreeSPN2CBasePairGlobalPotentialParameter<double>
 >;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(f_3SPN2_BaseBaseInteraction_double,
+BOOST_AUTO_TEST_CASE_TEMPLATE(f_3SPN2_BasePairInteraction_double,
         ParameterSet, parameters_to_test_double)
 {
     mjolnir::LoggerManager::set_default_logger(
@@ -21,8 +21,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(f_3SPN2_BaseBaseInteraction_double,
 
     using traits_type    = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type      = traits_type::real_type;
-    using potential_type = mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>;
-    using parameter_list_type = mjolnir::ThreeSPN2BaseBaseInteractionParameterList<traits_type>;
+    using potential_type = mjolnir::ThreeSPN2BasePairPotential<real_type>;
+    using parameter_list_type = mjolnir::ThreeSPN2BasePairParameterList<traits_type>;
     using parameter_type = typename parameter_list_type::parameter_type;
     using base_kind      = mjolnir::parameter_3SPN2::base_kind  ;
 
@@ -52,10 +52,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(f_3SPN2_BaseBaseInteraction_double,
     constexpr real_type   h = 1e-6;
     constexpr real_type  pi = mjolnir::math::constants<real_type>::pi();
 
-    constexpr std::size_t invalid = std::numeric_limits<std::size_t>::max();
     parameter_list_type parameter_list(ParameterSet{}, {
-            {1, parameter_type{base_kind::A, 0, 0, invalid, invalid}},
-            {3, parameter_type{base_kind::T, 1, 2, invalid, invalid}}
+            {1, parameter_type{base_kind::A, 0}},
+            {3, parameter_type{base_kind::T, 2}}
         }, {},
         parameter_list_type::ignore_molecule_type("Nothing"),
         parameter_list_type::ignore_group_type({})
@@ -97,11 +96,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(U_rep_3SPN2_BaseBaseInteraction_double,
 
     using traits_type    = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type      = traits_type::real_type;
-    using potential_type = mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>;
-    using parameter_list_type = mjolnir::ThreeSPN2BaseBaseInteractionParameterList<traits_type>;
+    using potential_type = mjolnir::ThreeSPN2BasePairPotential<real_type>;
+    using parameter_list_type = mjolnir::ThreeSPN2BasePairParameterList<traits_type>;
     using parameter_type = typename parameter_list_type::parameter_type;
     using base_kind      = mjolnir::parameter_3SPN2::base_kind;
-    using base_pair_kind   = mjolnir::parameter_3SPN2::base_pair_kind;
+    using base_pair_kind = mjolnir::parameter_3SPN2::base_pair_kind;
     {
         using unit_type = mjolnir::unit::constants<real_type>;
         using phys_type = mjolnir::physics::constants<real_type>;
@@ -126,11 +125,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(U_rep_3SPN2_BaseBaseInteraction_double,
 
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
-    constexpr std::size_t invalid = std::numeric_limits<std::size_t>::max();
 
     parameter_list_type parameter_list(ParameterSet{}, {
-            {1, parameter_type{base_kind::A, 0, 0, invalid, invalid}},
-            {3, parameter_type{base_kind::T, 1, 2, invalid, invalid}}
+            {1, parameter_type{base_kind::A, 0}},
+            {3, parameter_type{base_kind::T, 2}}
         }, {},
         parameter_list_type::ignore_molecule_type("Nothing"),
         parameter_list_type::ignore_group_type({})
@@ -180,8 +178,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(U_attr_3SPN2_BaseBaseInteraction_double,
 
     using traits_type    = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type      = traits_type::real_type;
-    using potential_type = mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>;
-    using parameter_list_type = mjolnir::ThreeSPN2BaseBaseInteractionParameterList<traits_type>;
+    using potential_type = mjolnir::ThreeSPN2BasePairPotential<real_type>;
+    using parameter_list_type = mjolnir::ThreeSPN2BasePairParameterList<traits_type>;
     using parameter_type = typename parameter_list_type::parameter_type;
     using base_kind      = mjolnir::parameter_3SPN2::base_kind;
     using base_pair_kind   = mjolnir::parameter_3SPN2::base_pair_kind;
@@ -209,11 +207,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(U_attr_3SPN2_BaseBaseInteraction_double,
 
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-6;
-    constexpr std::size_t invalid = std::numeric_limits<std::size_t>::max();
 
     parameter_list_type parameter_list(ParameterSet{}, {
-            {1, parameter_type{base_kind::A, 0, 0, invalid, invalid}},
-            {3, parameter_type{base_kind::T, 1, 2, invalid, invalid}}
+            {1, parameter_type{base_kind::A, 0}},
+            {3, parameter_type{base_kind::T, 2}}
         }, {},
         parameter_list_type::ignore_molecule_type("Nothing"),
         parameter_list_type::ignore_group_type({})
@@ -262,12 +259,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(U_dU_attr_3SPN2_BaseBaseInteraction_double,
 
     using traits_type    = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using real_type      = traits_type::real_type;
-    using potential_type = mjolnir::ThreeSPN2BaseBaseInteractionPotential<real_type>;
-    using parameter_list_type = mjolnir::ThreeSPN2BaseBaseInteractionParameterList<traits_type>;
+    using potential_type = mjolnir::ThreeSPN2BasePairPotential<real_type>;
+    using parameter_list_type = mjolnir::ThreeSPN2BasePairParameterList<traits_type>;
     using parameter_type = typename parameter_list_type::parameter_type;
     using base_kind      = mjolnir::parameter_3SPN2::base_kind;
     using base_pair_kind   = mjolnir::parameter_3SPN2::base_pair_kind  ;
-    using cross_stack_kind = mjolnir::parameter_3SPN2::cross_stack_kind;
     {
         using unit_type = mjolnir::unit::constants<real_type>;
         using phys_type = mjolnir::physics::constants<real_type>;
@@ -292,11 +288,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(U_dU_attr_3SPN2_BaseBaseInteraction_double,
 
     constexpr std::size_t N = 1000;
     constexpr real_type   h = 1e-8;
-    constexpr std::size_t invalid = std::numeric_limits<std::size_t>::max();
 
     parameter_list_type parameter_list(ParameterSet{}, {
-            {1, parameter_type{base_kind::A, 0, 0, invalid, invalid}},
-            {3, parameter_type{base_kind::T, 1, 2, invalid, invalid}}
+            {1, parameter_type{base_kind::A, 0}},
+            {3, parameter_type{base_kind::T, 2}}
         }, {},
         parameter_list_type::ignore_molecule_type("Nothing"),
         parameter_list_type::ignore_group_type({})
@@ -326,42 +321,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(U_dU_attr_3SPN2_BaseBaseInteraction_double,
             BOOST_TEST(U_dU_attr.second == dU_attr, boost::test_tools::tolerance(h));
         }
     }
-    for(const auto cs : {cross_stack_kind::AA5, cross_stack_kind::AA3,
-                         cross_stack_kind::AT5, cross_stack_kind::AT3,
-                         cross_stack_kind::AG5, cross_stack_kind::AG3,
-                         cross_stack_kind::AC5, cross_stack_kind::AC3,
-                         cross_stack_kind::TA5, cross_stack_kind::TA3,
-                         cross_stack_kind::TT5, cross_stack_kind::TT3,
-                         cross_stack_kind::TG5, cross_stack_kind::TG3,
-                         cross_stack_kind::TC5, cross_stack_kind::TC3,
-                         cross_stack_kind::GA5, cross_stack_kind::GA3,
-                         cross_stack_kind::GT5, cross_stack_kind::GT3,
-                         cross_stack_kind::GG5, cross_stack_kind::GG3,
-                         cross_stack_kind::GC5, cross_stack_kind::GC3,
-                         cross_stack_kind::CA5, cross_stack_kind::CA3,
-                         cross_stack_kind::CT5, cross_stack_kind::CT3,
-                         cross_stack_kind::CG5, cross_stack_kind::CG3,
-                         cross_stack_kind::CC5, cross_stack_kind::CC3})
-    {
-        const real_type r_min =  3.0;
-        const real_type r_max = 18.0;
-        const real_type dr    = (r_max - r_min) / N;
-
-        const auto alpha   = parameter_list.alpha  (cs);
-        const auto epsilon = parameter_list.epsilon(cs);
-        const auto r0      = parameter_list.r0     (cs);
-
-        for(std::size_t i=0; i<N; ++i)
-        {
-            const auto r         = r_min + i * dr;
-            const auto U_attr    = potential.U_attr   (epsilon, alpha, r, r0);
-            const auto dU_attr   = potential.dU_attr  (epsilon, alpha, r, r0);
-            const auto U_dU_attr = potential.U_dU_attr(epsilon, alpha, r, r0);
-
-            BOOST_TEST(U_dU_attr.first  == U_attr,  boost::test_tools::tolerance(h));
-            BOOST_TEST(U_dU_attr.second == dU_attr, boost::test_tools::tolerance(h));
-        }
-    }
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(bp_kind_3SPN2_BaseBaseInteraction,
@@ -371,7 +330,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(bp_kind_3SPN2_BaseBaseInteraction,
             "test_3spn2_base_base_interaction_potential.log");
 
     using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using parameter_list_type = mjolnir::ThreeSPN2BaseBaseInteractionParameterList<traits_type>;
+    using parameter_list_type = mjolnir::ThreeSPN2BasePairParameterList<traits_type>;
     using base_kind        = mjolnir::parameter_3SPN2::base_kind;
     using base_pair_kind   = mjolnir::parameter_3SPN2::base_pair_kind;
 
@@ -385,55 +344,3 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(bp_kind_3SPN2_BaseBaseInteraction,
     BOOST_TEST(base_pair_kind::GC == parameter_list.bp_kind(base_kind::G, base_kind::C));
     BOOST_TEST(base_pair_kind::CG == parameter_list.bp_kind(base_kind::C, base_kind::G));
 }
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(cs_kind_3SPN2_BaseBaseInteraction,
-        ParameterSet, parameters_to_test_double)
-{
-    mjolnir::LoggerManager::set_default_logger(
-            "test_3spn2_base_base_interaction_potential.log");
-    using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using parameter_list_type = mjolnir::ThreeSPN2BaseBaseInteractionParameterList<traits_type>;
-    using base_kind = mjolnir::parameter_3SPN2::base_kind;
-    using cross_stack_kind = mjolnir::parameter_3SPN2::cross_stack_kind;
-
-    parameter_list_type parameter_list(ParameterSet{}, {}, {},
-        parameter_list_type::ignore_molecule_type("Nothing"),
-        parameter_list_type::ignore_group_type({})
-        );
-
-    BOOST_TEST(cross_stack_kind::AA5 == parameter_list.cs5_kind(base_kind::A, base_kind::A));
-    BOOST_TEST(cross_stack_kind::AT5 == parameter_list.cs5_kind(base_kind::A, base_kind::T));
-    BOOST_TEST(cross_stack_kind::AG5 == parameter_list.cs5_kind(base_kind::A, base_kind::G));
-    BOOST_TEST(cross_stack_kind::AC5 == parameter_list.cs5_kind(base_kind::A, base_kind::C));
-    BOOST_TEST(cross_stack_kind::TA5 == parameter_list.cs5_kind(base_kind::T, base_kind::A));
-    BOOST_TEST(cross_stack_kind::TT5 == parameter_list.cs5_kind(base_kind::T, base_kind::T));
-    BOOST_TEST(cross_stack_kind::TG5 == parameter_list.cs5_kind(base_kind::T, base_kind::G));
-    BOOST_TEST(cross_stack_kind::TC5 == parameter_list.cs5_kind(base_kind::T, base_kind::C));
-    BOOST_TEST(cross_stack_kind::GA5 == parameter_list.cs5_kind(base_kind::G, base_kind::A));
-    BOOST_TEST(cross_stack_kind::GT5 == parameter_list.cs5_kind(base_kind::G, base_kind::T));
-    BOOST_TEST(cross_stack_kind::GG5 == parameter_list.cs5_kind(base_kind::G, base_kind::G));
-    BOOST_TEST(cross_stack_kind::GC5 == parameter_list.cs5_kind(base_kind::G, base_kind::C));
-    BOOST_TEST(cross_stack_kind::CA5 == parameter_list.cs5_kind(base_kind::C, base_kind::A));
-    BOOST_TEST(cross_stack_kind::CT5 == parameter_list.cs5_kind(base_kind::C, base_kind::T));
-    BOOST_TEST(cross_stack_kind::CG5 == parameter_list.cs5_kind(base_kind::C, base_kind::G));
-    BOOST_TEST(cross_stack_kind::CC5 == parameter_list.cs5_kind(base_kind::C, base_kind::C));
-
-    BOOST_TEST(cross_stack_kind::AA3 == parameter_list.cs3_kind(base_kind::A, base_kind::A));
-    BOOST_TEST(cross_stack_kind::AT3 == parameter_list.cs3_kind(base_kind::A, base_kind::T));
-    BOOST_TEST(cross_stack_kind::AG3 == parameter_list.cs3_kind(base_kind::A, base_kind::G));
-    BOOST_TEST(cross_stack_kind::AC3 == parameter_list.cs3_kind(base_kind::A, base_kind::C));
-    BOOST_TEST(cross_stack_kind::TA3 == parameter_list.cs3_kind(base_kind::T, base_kind::A));
-    BOOST_TEST(cross_stack_kind::TT3 == parameter_list.cs3_kind(base_kind::T, base_kind::T));
-    BOOST_TEST(cross_stack_kind::TG3 == parameter_list.cs3_kind(base_kind::T, base_kind::G));
-    BOOST_TEST(cross_stack_kind::TC3 == parameter_list.cs3_kind(base_kind::T, base_kind::C));
-    BOOST_TEST(cross_stack_kind::GA3 == parameter_list.cs3_kind(base_kind::G, base_kind::A));
-    BOOST_TEST(cross_stack_kind::GT3 == parameter_list.cs3_kind(base_kind::G, base_kind::T));
-    BOOST_TEST(cross_stack_kind::GG3 == parameter_list.cs3_kind(base_kind::G, base_kind::G));
-    BOOST_TEST(cross_stack_kind::GC3 == parameter_list.cs3_kind(base_kind::G, base_kind::C));
-    BOOST_TEST(cross_stack_kind::CA3 == parameter_list.cs3_kind(base_kind::C, base_kind::A));
-    BOOST_TEST(cross_stack_kind::CT3 == parameter_list.cs3_kind(base_kind::C, base_kind::T));
-    BOOST_TEST(cross_stack_kind::CG3 == parameter_list.cs3_kind(base_kind::C, base_kind::G));
-    BOOST_TEST(cross_stack_kind::CC3 == parameter_list.cs3_kind(base_kind::C, base_kind::C));
-
-}
-

@@ -160,6 +160,13 @@ class GJFNVTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         this->reset_parameters(sys);
         return;
     }
+    void update(const system_type& sys, const real_type dt)
+    {
+        this->dt_ = dt;
+        this->halfdt_ = dt / 2;
+        this->update(sys);
+        return;
+    }
 
     real_type delta_t() const noexcept {return dt_;}
     std::vector<real_type> const& parameters() const noexcept {return alphas_;}
