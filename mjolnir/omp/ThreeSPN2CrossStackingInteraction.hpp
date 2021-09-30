@@ -620,11 +620,12 @@ class ThreeSPN2CrossStackingInteraction<
                 sys.force(Si)  += f_Si;
                 sys.force(Sj)  += f_Sj;
                 sys.force(Bi)  += f_Bi;
-                sys.force(Bi3) += f_Bi3;
-                sys.force(Bi5) += f_Bi5;
                 sys.force(Bj)  += f_Bj;
-                sys.force(Bj3) += f_Bj3;
-                sys.force(Bj5) += f_Bj5;
+
+                if(Bi3_exists) {sys.force(Bi3) += f_Bi3;}
+                if(Bi5_exists) {sys.force(Bi5) += f_Bi5;}
+                if(Bj3_exists) {sys.force(Bj3) += f_Bj3;}
+                if(Bj5_exists) {sys.force(Bj5) += f_Bj5;}
 
                 if /*constexpr*/ (NeedVirial)
                 {
