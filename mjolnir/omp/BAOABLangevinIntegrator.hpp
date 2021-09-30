@@ -158,6 +158,13 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         this->reset_parameters(sys);
         return;
     }
+    void update(const system_type& sys, const real_type newdt)
+    {
+        this->dt_     = newdt;
+        this->halfdt_ = 0.5 * newdt;
+        this->update(sys);
+        return;
+    }
 
     real_type delta_t() const noexcept {return dt_;}
     std::vector<real_type> const& parameters() const noexcept {return gammas_;}

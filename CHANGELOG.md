@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.29.0
+
+### Added
+
+- enable to restrain χ value in the multiple basin forcefield
+
+## 1.28.1
+
+### Fixed
+
+- Fix instability of the G-JF Integrator introduced in v1.28.0
+
 ## 1.28.0
 
 ### Added

@@ -126,7 +126,7 @@ name = "common"
 # ...
 ```
 
-{{<katex>}} \chi {{<katex>}} に拘束力をかけるには、`k_chi`と`chi_0`を設定してください。
+{{<katex>}} \chi {{</katex>}} に拘束力をかけるには、`k_chi`と`chi_0`を設定してください。
 
 ```toml
 forcefields.type = "MultipleBasin"

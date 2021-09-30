@@ -111,6 +111,16 @@ class GFWNPTLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         this->reset_parameters(sys);
         return ;
     }
+    void update(const system_type& sys, const real_type dt)
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        this->dt_ = dt;
+        this->halfdt_ = dt / 2;
+        this->update(sys);
+        return ;
+    }
 
     real_type step(const real_type t, system_type& sys,
                    forcefield_type& ff, rng_type& rng)
