@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.30.0
+
+### Added
+
+- external/PullingForce to apply constant force to specific particles
+- method that update `delta_t` to integrators
+
+### Changed
+
+- reorganize 3SPN2 interaction and simplify input file
+
 ## 1.29.0
 
 ### Added
