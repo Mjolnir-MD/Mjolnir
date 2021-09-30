@@ -62,6 +62,7 @@ set(TEST_NAMES
     test_position_restraint_interaction
     test_afm_fitting_interaction
     test_rectangular_box_interaction
+    test_pulling_force_interaction
 
     test_multiple_basin_forcefield
     test_hybrid_forcefield
@@ -121,6 +122,7 @@ set(TEST_NAMES
     test_read_position_restraint_interaction
     test_read_afm_fitting_interaction
     test_read_rectangular_box_interaction
+    test_read_pulling_force_interaction
 
     test_read_index_offset
 
