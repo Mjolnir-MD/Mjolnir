@@ -198,14 +198,14 @@ read_global_3spn2_base_pair_interaction(const toml::value& global)
     // potential   = "3SPN2"
     // spatial_partition = {type = "CellList", margin = 1.0}
     // parameters = [
-    // {strand = 0, nucleotide =  0,          S =   0, B =   1, Base = "A"},
-    // {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
+    // {strand = 0,          S =   0, B =   1, Base = "A"},
+    // {strand = 0, P =   2, S =   3, B =   4, Base = "T"},
     // # ...
-    // {strand = 0, nucleotide = 31, P =  92, S =  93, B =  94, Base = "C"},
-    // {strand = 1, nucleotide = 32,          S =  95, B =  96, Base = "G"},
+    // {strand = 0, P =  92, S =  93, B =  94, Base = "C"},
+    // {strand = 1,          S =  95, B =  96, Base = "G"},
     // # ...
-    // {strand = 1, nucleotide = 62, P = 184, S = 185, B = 186, Base = "A"},
-    // {strand = 1, nucleotide = 63, P = 187, S = 188, B = 189, Base = "T"},
+    // {strand = 1, P = 184, S = 185, B = 186, Base = "A"},
+    // {strand = 1, P = 187, S = 188, B = 189, Base = "T"},
     // ]
 
     // ------------------------------------------------------------------------
