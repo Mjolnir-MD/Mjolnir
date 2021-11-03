@@ -12,13 +12,13 @@
 
 BOOST_AUTO_TEST_CASE(read_com_pulling_force_interaction)
 {
-    mjolnir::LoggerManager::set_default_logger("test_read_pulling_force_interaction.log");
+    mjolnir::LoggerManager::set_default_logger("test_read_com_pulling_force_interaction.log");
 
     using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
-            interaction = "PullingForce"
+            interaction = "CoMPullingForce"
             parameters  = [
                 {indices = [0,1,2],    force = [ 1.0, 1.0, 1.0]},
                 {indices = " [0, 3) ", force = [ 2.0, 2.0, 2.0]},
@@ -29,14 +29,14 @@ BOOST_AUTO_TEST_CASE(read_com_pulling_force_interaction)
         const auto base = mjolnir::read_external_interaction<traits_type>(v);
         BOOST_TEST(static_cast<bool>(base));
 
-        const auto derv = dynamic_cast<mjolnir::PullingForceInteraction<traits_type>*>(base.get());
+        const auto derv = dynamic_cast<mjolnir::CoMPullingForceInteraction<traits_type>*>(base.get());
         BOOST_TEST(static_cast<bool>(derv));
 
         const auto& interaction = *derv;
 
-        const auto expected1 = std::vector<std::string>{0, 1, 2};
-        const auto expected2 = std::vector<std::string>{0, 1, 2};
-        const auto expected3 = std::vector<std::string>{0, 1, 2, 4, 5, 6};
+        const auto expected1 = std::vector<std::size_t>{0, 1, 2};
+        const auto expected2 = std::vector<std::size_t>{0, 1, 2};
+        const auto expected3 = std::vector<std::size_t>{0, 1, 2, 4, 5, 6};
 
         const auto& actual1 = interaction.parameters().at(0).first;
         const auto& actual2 = interaction.parameters().at(1).first;
