@@ -14,6 +14,14 @@ It restrains a particle at a fixed point.
 
 It also can restrain a particle at a fixed distance from a certain point.
 
+## [PullingForceInteraction]({{<relref "PullingForceInteraction.md">}})
+
+It applies a force to the specified particle.
+
+## [CoMPullingForceInteraction]({{<relref "CoMPullingForceInteraction.md">}})
+
+It applies a force to the center of mass of the specified particles.
+
 ## [RectangularBoxInteraction]({{<relref "rectangularbox">}})
 
 It wraps the system by a rectangular box. It does not work under the periodic boundary condition.
