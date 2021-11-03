@@ -316,6 +316,39 @@ inline void expand_include(toml::value& v)
     return;
 }
 
+inline std::vector<std::size_t> parse_range(const std::string s)
+{
+    std::size_t first = 0;
+    std::size_t last  = 0;
+    auto iter  = s.begin();
+    auto start_bracket = std::find_if(iter         , s.end(), [](char c) {return c == '[' || c == '(';});
+    auto start_first   = std::find_if(start_bracket, s.end(), [](char c) {return  std::isdigit(c);});
+    auto stop_first    = std::find_if(start_first  , s.end(), [](char c) {return !std::isdigit(c);});
+    auto start_last    = std::find_if(stop_first   , s.end(), [](char c) {return  std::isdigit(c);});
+    auto stop_last     = std::find_if(start_last   , s.end(), [](char c) {return !std::isdigit(c);});
+    auto stop_bracket  = std::find_if(stop_last    , s.end(), [](char c) {return c == ']' || c == ')';});
+    if(start_bracket == s.end() || stop_bracket == s.end() ||
+       start_first   == s.end() || stop_first   == s.end() ||
+       start_last    == s.end() || stop_last    == s.end())
+    {
+        throw_exception<std::runtime_error>("parse range error: `" + s +
+                "` is not a form of [i, j], [i, j), (i, j], nor (i, j).");
+    }
+
+    first = std::stoul(std::string(start_first, stop_first));
+    if (*start_bracket == '(') {first += 1;}
+
+    last  = std::stoul(std::string(start_last, stop_last));
+    if (*stop_bracket == ']') {last += 1;}
+
+    std::vector<std::size_t> idxs;
+    for(std::size_t i=first; i<last; ++i)
+    {
+        idxs.push_back(i);
+    }
+    return idxs;
+}
+
 } // mjolnir
 
 namespace toml
