@@ -30,7 +30,6 @@ BOOST_AUTO_TEST_CASE(omp_PositionRestraint)
     using real_type        = typename omp_traits_type::real_type;
     using coordinate_type  = typename omp_traits_type::coordinate_type;
     using boundary_type    = typename omp_traits_type::boundary_type;
-    using topology_type    = mjolnir::Topology;
 
     using potential_type   = mjolnir::HarmonicPotential<real_type>;
 

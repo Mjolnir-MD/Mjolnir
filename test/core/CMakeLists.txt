@@ -9,6 +9,7 @@ set(TEST_NAMES
     test_system_motion_remover
     test_file_inclusion
     test_fixed_vector
+    test_parse_range
 
     test_harmonic_potential
     test_gaussian_potential
@@ -124,6 +125,7 @@ set(TEST_NAMES
     test_read_afm_fitting_interaction
     test_read_rectangular_box_interaction
     test_read_pulling_force_interaction
+    test_read_com_pulling_force_interaction
 
     test_read_index_offset
 

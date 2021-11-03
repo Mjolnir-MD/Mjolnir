@@ -25,3 +25,11 @@ bookCollapseSection = true
 AFM画像への構造のフレキシブルフィッティングを行います。
 
 系の擬似AFM画像を生成し、参照AFM画像との相関係数に応じたポテンシャルをかけます。
+
+## [PullingForceInteraction]({{<relref "PullingForceInteraction.md">}})
+
+指定した粒子に、一定の力をかけ続けます。
+
+## [CoMPullingForceInteraction]({{<relref "CoMPullingForceInteraction.md">}})
+
+指定した粒子グループの重心に、一定の力をかけ続けます。力は重みづけられてそれぞれの粒子にかかります。
