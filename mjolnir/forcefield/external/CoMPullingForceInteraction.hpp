@@ -62,7 +62,7 @@ class CoMPullingForceInteraction final
         this->update(sys);
         return;
     }
-    void update(const system_type&) override
+    void update(const system_type& sys) override
     {
         total_masses_.clear();
         total_masses_.reserve(parameters_.size());
