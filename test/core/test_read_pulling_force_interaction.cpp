@@ -15,7 +15,6 @@ BOOST_AUTO_TEST_CASE(read_pulling_force_interaction)
     mjolnir::LoggerManager::set_default_logger("test_read_pulling_force_interaction.log");
 
     using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type   = traits_type::real_type;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(

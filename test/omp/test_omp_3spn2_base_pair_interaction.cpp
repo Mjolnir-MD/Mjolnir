@@ -121,7 +121,6 @@ BOOST_AUTO_TEST_CASE(omp_ThreeSPN2BasePairIntearction_basepair)
         //      o === o
         //     1       3
         //
-        constexpr auto invalid = potential_type::invalid();
 
         omp_parameter_list_type omp_parameter_list(
             mjolnir::ThreeSPN2BasePairGlobalPotentialParameter<real_type>{}, {
