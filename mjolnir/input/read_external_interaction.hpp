@@ -405,6 +405,8 @@ read_com_pulling_force_interaction(const toml::value& external)
             const auto rg = parse_range(str);
             idxs.insert(idxs.end(), rg.begin(), rg.end());
         }
+        const auto uniquened = std::unique(idxs.begin(), idxs.end());
+        idxs.erase(uniquened, idxs.end());
 
         if(para.contains("direction"))
         {
