@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "test_read_rectangular_box_interaction"
+#define BOOST_TEST_MODULE "test_read_pulling_force_interaction"
 
 #ifdef BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
