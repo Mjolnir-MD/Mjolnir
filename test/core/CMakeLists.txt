@@ -9,6 +9,7 @@ set(TEST_NAMES
     test_system_motion_remover
     test_file_inclusion
     test_fixed_vector
+    test_parse_range
 
     test_harmonic_potential
     test_gaussian_potential
