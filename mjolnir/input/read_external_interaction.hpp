@@ -352,7 +352,7 @@ read_pulling_force_interaction(const toml::value& external)
         {
             const auto dir = find_parameter<coordinate_type>(para, env, "direction");
             const auto k   = find_parameter<real_type>(para, env, "force");
-            forces.emplace_back(idx, k * dir);
+            forces.emplace_back(idx, k * math::rlength(dir) * dir);
         }
         else
         {
@@ -412,7 +412,7 @@ read_com_pulling_force_interaction(const toml::value& external)
         {
             const auto dir = find_parameter<coordinate_type>(para, env, "direction");
             const auto k   = find_parameter<real_type>(para, env, "force");
-            forces.emplace_back(std::move(idxs), k * dir);
+            forces.emplace_back(std::move(idxs), (k * math::rlength(dir)) * dir);
         }
         else
         {
