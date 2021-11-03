@@ -332,6 +332,7 @@ read_pulling_force_interaction(const toml::value& external)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
+    using real_type       = typename traitsT::real_type;
     using coordinate_type = typename traitsT::coordinate_type;
     using interaction_t   = PullingForceInteraction<traitsT>;
 
@@ -345,14 +346,57 @@ read_pulling_force_interaction(const toml::value& external)
     forces.reserve(parameters.size());
     for(const auto& para : parameters)
     {
-        const auto idx = find_parameter<std::size_t    >(para, env, "index");
-        const auto f   = find_parameter<coordinate_type>(para, env, "force");
-        forces.emplace_back(idx, f);
+        const auto idx = find_parameter<std::size_t>(para, env, "index");
+        if(para.contains("direction"))
+        {
+            const auto dir = find_parameter<coordinate_type>(para, env, "direction");
+            const auto k   = find_parameter<real_type>(para, env, "force");
+            forces.emplace_back(idx, k * dir);
+        }
+        else
+        {
+            const auto f = find_parameter<coordinate_type>(para, env, "force");
+            forces.emplace_back(idx, f);
+        }
     }
 
     return make_unique<interaction_t>(std::move(forces));
 }
 
+template<typename traitsT>
+std::unique_ptr<ExternalForceInteractionBase<traitsT>>
+read_com_pulling_force_interaction(const toml::value& external)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type       = typename traitsT::real_type;
+    using coordinate_type = typename traitsT::coordinate_type;
+    using interaction_t   = PullingForceInteraction<traitsT>;
+
+    const auto& env = external.contains("env") ? external.at("env") : toml::value{};
+
+    const auto& parameters = toml::find<toml::array>(external, "parameters");
+
+    std::vector<std::pair<std::size_t, coordinate_type>> forces;
+    forces.reserve(parameters.size());
+    for(const auto& para : parameters)
+    {
+        const auto idx = find_parameter<std::size_t>(para, env, "index");
+
+        if(para.contains("direction"))
+        {
+            const auto dir = find_parameter<coordinate_type>(para, env, "direction");
+            const auto k   = find_parameter<real_type>(para, env, "force");
+            forces.emplace_back(idx, k * dir);
+        }
+        else
+        {
+            const auto f = find_parameter<coordinate_type>(para, env, "force");
+            forces.emplace_back(idx, f);
+        }
+    }
+    return make_unique<interaction_t>(std::move(forces));
+}
 
 // ----------------------------------------------------------------------------
 // general read_external_interaction function
@@ -390,6 +434,11 @@ read_external_interaction(const toml::value& external)
     {
         MJOLNIR_LOG_NOTICE("PullingForce interaction found.");
         return read_pulling_force_interaction<traitsT>(external);
+    }
+    else if(interaction == "CoMPullingForce")
+    {
+        MJOLNIR_LOG_NOTICE("CoMPullingForce interaction found.");
+        return read_com_pulling_force_interaction<traitsT>(external);
     }
     else
     {
