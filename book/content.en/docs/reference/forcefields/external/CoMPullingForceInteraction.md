@@ -28,7 +28,7 @@ parameters  = [
   - `indices`: Array of Integers, String, or Array of Strings
     - The indices of the particles.
     - If it is an Array of Integers, then the integers will be the indices of the particles.
-    - You can indicate an interval of the indices by a standard form. A string "[0, 10)" means integers from 0 to 9 (half-open interval).
+    - If it is a String, the string will be interpreted as an interval of the indices by a standard form. A string `"[0, 10)"` means integers from 0 to 9 (half-open interval).
     - If it is an Array of Strings, then the intervals will be concatenated.
     - Note that the indices will be made unique.
   - `force`: Array of Floatings (length = 3) or Floating
