@@ -23,6 +23,7 @@ BOOST_AUTO_TEST_CASE(read_com_pulling_force_interaction)
                 {indices = [0,1,2],    force = [ 1.0, 1.0, 1.0]},
                 {indices = " [0, 3) ", force = [ 2.0, 2.0, 2.0]},
                 {indices = ["[0, 3) ", "[4, 6]"], force = [ 3.0, 3.0, 3.0]},
+                {indices = [0,1,2],    force = 0.0144, direction = [ 1.0, 2.0, 3.0]},
             ]
             )"_toml;
 
@@ -61,5 +62,9 @@ BOOST_AUTO_TEST_CASE(read_com_pulling_force_interaction)
         BOOST_TEST(mjolnir::math::X(interaction.parameters().at(2).second) == 3.0, boost::test_tools::tolerance(1e-8));
         BOOST_TEST(mjolnir::math::Y(interaction.parameters().at(2).second) == 3.0, boost::test_tools::tolerance(1e-8));
         BOOST_TEST(mjolnir::math::Z(interaction.parameters().at(2).second) == 3.0, boost::test_tools::tolerance(1e-8));
+
+        BOOST_TEST(mjolnir::math::X(interaction.parameters().at(3).second) == 1.0 * 0.0144 / std::sqrt(1.0 + 4.0 + 9.0), boost::test_tools::tolerance(1e-8));
+        BOOST_TEST(mjolnir::math::Y(interaction.parameters().at(3).second) == 2.0 * 0.0144 / std::sqrt(1.0 + 4.0 + 9.0), boost::test_tools::tolerance(1e-8));
+        BOOST_TEST(mjolnir::math::Z(interaction.parameters().at(3).second) == 3.0 * 0.0144 / std::sqrt(1.0 + 4.0 + 9.0), boost::test_tools::tolerance(1e-8));
     }
 }
