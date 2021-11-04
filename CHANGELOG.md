@@ -1,11 +1,21 @@
 # Change Log
 
+## 1.31.0
+
+### Added
+
+- add external/CoMPullingForce to apply constant force to the center of mass of the specific particles
+
+### Changed
+
+- enable to specify force strength and direction of PullingForce separately
+
 ## 1.30.0
 
 ### Added
 
-- external/PullingForce to apply constant force to specific particles
-- method that update `delta_t` to integrators
+- add external/PullingForce to apply constant force to a specific particle
+- add method to update `delta_t` to integrators
 
 ### Changed
 
