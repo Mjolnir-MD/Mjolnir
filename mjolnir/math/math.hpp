@@ -6,6 +6,7 @@
 #include <mjolnir/math/functions.hpp>
 #include <mjolnir/math/Matrix.hpp>
 #include <mjolnir/math/Vector.hpp>
+#include <limits>
 #include <cstdint>
 #include <cmath>
 
