@@ -1,5 +1,80 @@
 # Change Log
 
+## 1.31.0
+
+### Added
+
+- add external/CoMPullingForce to apply constant force to the center of mass of the specific particles
+
+### Changed
+
+- enable to specify force strength and direction of PullingForce separately
+
+## 1.30.0
+
+### Added
+
+- add external/PullingForce to apply constant force to a specific particle
+- add method to update `delta_t` to integrators
+
+### Changed
+
+- reorganize 3SPN2 interaction and simplify input file
+
+## 1.29.0
+
+### Added
+
+- enable to restrain χ value in the multiple basin forcefield
+
+## 1.28.1
+
+### Fixed
+
+- Fix instability of the G-JF Integrator introduced in v1.28.0
+
+## 1.28.0
+
+### Added
+
+- add lambda-dynamics
+- add dynamic_variables to System. They have virtual mass, velocity and force and are integrated over time.
+
+### Changed
+
+- speedup by skipping virial calculation if virial is not needed
+- enable EnergyCalculation to output pressure
+
+## 1.27.0
+
+### Added
+
+- Hybrid Forcefield
+
+### Changed
+
+- refactoring: separate combination rule from global potentials
+
+## 1.26.0
+
+### Added
+
+- NPT Langevin
+  - except external forcefield
+- Add an option to tabulate pair parameter (not using a combination rule) for WCA and L-J Attractive
+
+### Changed
+
+- update toml11 to v3.7.0
+
+### Fixed
+
+- fix dcd file format to correctly save the interval
+- fix force calculation in multi-unit multiple basin
+- add missing .gitignore in G-JF Integration test (@bondrewd )
+- update Boost URL (@bondrewd )
+- add missing tests for OpenMP 3SPN.2
+
 ## 1.25.0
 
 ### Added

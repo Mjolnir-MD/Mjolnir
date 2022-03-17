@@ -195,7 +195,7 @@ endif()
 
 option(BUILD_INTEGRATION_TEST "\
 build integration test that does not run automatically \
-because it takes relatively long time" ON)
+because it takes relatively long time" OFF)
 
 option(BUILD_UNIT_TEST "build unit tests" ON)
 
@@ -244,7 +244,7 @@ if(BUILD_UNIT_TEST)
             message(STATUS "Boost library not found. Donwloading...")
             message(STATUS "It can take minutes. hang tight!")
 
-            file(DOWNLOAD https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.bz2
+            file(DOWNLOAD https://boostorg.jfrog.io/artifactory/main/release/1.73.0/source/boost_1_73_0.tar.bz2
                 ${PROJECT_SOURCE_DIR}/extlib/boost_1_73_0.tar.bz2
                 EXPECTED_HASH SHA256=4eb3b8d442b426dc35346235c8733b5ae35ba431690e38c6a8263dce9fcbb402
                 STATUS MJOLNIR_DOWNLOAD_BOOST_STATUS)

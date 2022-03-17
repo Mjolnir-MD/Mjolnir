@@ -1,5 +1,6 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_DEBYE_HUCKEL_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_DEBYE_HUCKEL_POTENTIAL_HPP
+#include <mjolnir/forcefield/global/ParameterList.hpp>
 #include <mjolnir/core/Unit.hpp>
 #include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
@@ -13,112 +14,58 @@
 namespace mjolnir
 {
 
-// Debye-Huckel type electrostatic interaction.
-// This class contains charges and other parameters and calculates energy and
-// derivative of the potential function.
-// This class is an implementation of the electrostatic term used in the 3SPN
-// series of the coarse-grained DNA models (Knotts et al., (2007), Sambriski and
-// de Pablo, (2009), Hinckley et al., (2013), and Freeman et al., (2014))
-// It is same as the default electrostatic term in CafeMol (Kenzaki et al. 2011)
-template<typename traitsT>
+template<typename realT>
 class DebyeHuckelPotential
 {
   public:
-    using traits_type          = traitsT;
-    using real_type            = typename traits_type::real_type;
-    using system_type          = System<traits_type>;
-    using parameter_type       = real_type;
-    using container_type       = std::vector<parameter_type>;
 
-    // `pair_parameter_type` is a parameter for a interacting pair.
-    // Although it is the same type as `parameter_type` in this potential,
-    // it can be different from normal parameter for each particle.
-    // This enables NeighborList to cache a value to calculate forces between
-    // the particles, e.g. by having qi * qj for pair of particles i and j.
-    using pair_parameter_type  = parameter_type;
+    using real_type = realT;
 
-    // topology stuff
-    using topology_type        = Topology;
-    using molecule_id_type     = typename topology_type::molecule_id_type;
-    using group_id_type        = typename topology_type::group_id_type;
-    using connection_kind_type = typename topology_type::connection_kind_type;
-    using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
-    using ignore_group_type    = IgnoreGroup   <group_id_type>;
-    using exclusion_list_type  = ExclusionList<traits_type>;
+    struct parameter_type
+    {                        //     qi qj
+        real_type qiqj_4pie; // -------------
+    };                       //  4pi epsilon
 
     static constexpr real_type default_cutoff() noexcept
     {
         return real_type(5.5);
     }
-    static constexpr parameter_type default_parameter() noexcept
-    {
-        return real_type(0);
-    }
 
   public:
 
-    DebyeHuckelPotential(const real_type cutoff_ratio,
-        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-        const std::map<connection_kind_type, std::size_t>& exclusions,
-        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-    : cutoff_ratio_(cutoff_ratio),
-        // XXX should be updated in the `initialize(sys)` method
-      temperature_ (std::numeric_limits<real_type>::quiet_NaN()),
-      ion_strength_(std::numeric_limits<real_type>::quiet_NaN()),
-      exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
-    {
-        this->parameters_  .reserve(parameters.size());
-        this->participants_.reserve(parameters.size());
-        for(const auto& idxp : parameters)
-        {
-            const auto idx = idxp.first;
-            this->participants_.push_back(idx);
-            if(idx >= this->parameters_.size())
-            {
-                this->parameters_.resize(idx+1, default_parameter());
-            }
-            this->parameters_.at(idx) = idxp.second;
-        }
-    }
+    explicit DebyeHuckelPotential(const real_type cutoff_ratio) noexcept
+        : cutoff_ratio_(cutoff_ratio),
+          abs_cutoff_        (std::numeric_limits<real_type>::quiet_NaN()),
+          temperature_       (std::numeric_limits<real_type>::quiet_NaN()),
+          ion_strength_      (std::numeric_limits<real_type>::quiet_NaN()),
+          inv_4_pi_eps0_epsk_(std::numeric_limits<real_type>::quiet_NaN()),
+          debye_length_      (std::numeric_limits<real_type>::quiet_NaN()),
+          inv_debye_length_  (std::numeric_limits<real_type>::quiet_NaN())
+    {}
     ~DebyeHuckelPotential() = default;
 
-    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
+    real_type potential(const real_type r, const parameter_type& params) const noexcept
     {
-        return this->inv_4_pi_eps0_epsk_ * this->parameters_[i] * this->parameters_[j];
+        if(this->abs_cutoff_ <= r)
+        {
+            return 0.0;
+        }
+        return params.qiqj_4pie *
+            (std::exp(-r * this->inv_debye_length_) / r - this->coef_at_cutoff_);
+    }
+    real_type derivative(const real_type r, const parameter_type& params) const noexcept
+    {
+        if(this->abs_cutoff_ <= r)
+        {
+            return 0.0;
+        }
+        return -params.qiqj_4pie *
+            (this->debye_length_ + r) * this->inv_debye_length_ / (r * r) *
+            std::exp(-r * this->inv_debye_length_);
     }
 
-    real_type potential(const std::size_t i, const std::size_t j,
-                        const real_type   r) const noexcept
-    {
-        return this->potential(r, this->prepare_params(i, j));
-    }
-    real_type derivative(const std::size_t i, const std::size_t j,
-                         const real_type   r) const noexcept
-    {
-        return this->derivative(r, this->prepare_params(i, j));
-    }
-
-    real_type potential(const real_type r, const pair_parameter_type& p) const noexcept
-    {
-        if(this->max_cutoff_length() <= r) {return 0.0;}
-        return p * (std::exp(-r * this->inv_debye_length_) / r - coef_at_cutoff_);
-    }
-    real_type derivative(const real_type r, const pair_parameter_type& p) const noexcept
-    {
-        if(this->max_cutoff_length() <= r) {return 0.0;}
-        return -p * (debye_length_ + r) * this->inv_debye_length_ / (r * r) *
-               std::exp(-r * this->inv_debye_length_);
-    }
-
-    real_type cutoff_ratio()   const noexcept {return this->cutoff_ratio_;}
-    real_type coef_at_cutoff() const noexcept {return this->coef_at_cutoff_;}
-
-    real_type max_cutoff_length() const noexcept
-    {
-        return this->debye_length_ * this->cutoff_ratio_;
-    }
-
-    void initialize(const system_type& sys, const topology_type& topol) noexcept
+    template<typename T>
+    void initialize(const System<T>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -131,12 +78,12 @@ class DebyeHuckelPotential
         {
             MJOLNIR_LOG_ERROR("DebyeHuckel requires `ionic_strength` attribute");
         }
-        this->update(sys, topol); // calc parameters
-        return;
+        this->update(sys);
+        return ;
     }
 
-    // for temperature/ionic concentration changes...
-    void update(const system_type& sys, const topology_type& topol) noexcept
+    template<typename T>
+    void update(const System<T>& sys) noexcept
     {
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FUNCTION();
@@ -151,58 +98,28 @@ class DebyeHuckelPotential
         MJOLNIR_LOG_INFO("ionic strength = ", this->ion_strength_);
 
         this->calc_parameters();
-
-        // update exclusion list based on sys.topology()
-        exclusion_list_.make(sys, topol);
         return;
     }
 
-    // -----------------------------------------------------------------------
-    // for spatial partitions
-    //
-    // Here, the default implementation uses Newton's 3rd law to reduce
-    // calculation. For an interacting pair (i, j), forces applied to i and j
-    // are equal in magnitude and opposite in direction. So, if a pair (i, j) is
-    // listed, (j, i) is not needed.
-    //     See implementation of VerletList, CellList and GlobalPairInteraction
-    // for more details about the usage of these functions.
-
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
-
-    range<typename std::vector<std::size_t>::const_iterator>
-    leading_participants() const noexcept
+    // It takes per-particle parameters and return the maximum cutoff length.
+    // CombinationRule normally uses this.
+    template<typename InputIterator>
+    real_type max_cutoff(const InputIterator, const InputIterator) const noexcept
     {
-        return make_range(participants_.begin(), std::prev(participants_.end()));
+        return abs_cutoff_;
     }
-    range<typename std::vector<std::size_t>::const_iterator>
-    possible_partners_of(const std::size_t participant_idx,
-                         const std::size_t /*particle_idx*/) const noexcept
+    // It returns absolute cutoff length using pair-parameter.
+    // CombinationTable uses this.
+    real_type absolute_cutoff(const parameter_type&) const noexcept
     {
-        return make_range(participants_.begin() + participant_idx + 1,
-                          participants_.end());
-    }
-    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
-    {
-        return (i < j) && !exclusion_list_.is_excluded(i, j);
+        return abs_cutoff_;
     }
 
-    exclusion_list_type const& exclusion_list() const noexcept
-    {
-        return exclusion_list_; // for testing
-    }
-
-    // ------------------------------------------------------------------------
-    // used by Observer.
     static const char* name() noexcept {return "DebyeHuckel";}
 
-    // ------------------------------------------------------------------------
-    // the following accessers would be used in tests.
-
-    // access to the parameters.
-    std::vector<real_type>&       charges()       noexcept {return parameters_;}
-    std::vector<real_type> const& charges() const noexcept {return parameters_;}
-
-    real_type debye_length() const noexcept {return this->debye_length_;}
+    real_type cutoff_ratio()    const noexcept {return cutoff_ratio_;}
+    real_type debye_length()    const noexcept {return debye_length_;}
+    real_type inv_4pi_epsilon() const noexcept {return inv_4_pi_eps0_epsk_;}
 
   private:
 
@@ -235,13 +152,17 @@ class DebyeHuckelPotential
 
         this->debye_length_ = std::sqrt((eps0 * epsk * kB * T) / (2 * NA * I));
         this->inv_debye_length_ = 1. / this->debye_length_;
+        this->abs_cutoff_ = cutoff_ratio_ * debye_length_;
 
         MJOLNIR_LOG_INFO("debye length      = ", debye_length_);
         MJOLNIR_LOG_INFO("1 / debye length  = ", inv_debye_length_);
         MJOLNIR_LOG_INFO("1 / 4pi eps0 epsk = ", inv_4_pi_eps0_epsk_);
 
-        this->coef_at_cutoff_ = std::exp(-cutoff_ratio_) /
-                                (debye_length_ * cutoff_ratio_);
+        // set parameter of potential_type
+        this->debye_length_     = this->debye_length_;
+        this->inv_debye_length_ = this->inv_debye_length_;
+        this->coef_at_cutoff_   = std::exp(-this->cutoff_ratio_) /
+                                  (debye_length_ * cutoff_ratio_);
         return;
     }
 
@@ -254,13 +175,176 @@ class DebyeHuckelPotential
 
   private:
 
-    real_type cutoff_ratio_; // relative to the debye length
-    real_type coef_at_cutoff_;
-    real_type temperature_;  // [K]
-    real_type ion_strength_; // [M]
+    real_type cutoff_ratio_;       // relative to the debye length
+    real_type coef_at_cutoff_;     // to connect potential to zero at r_c
+    real_type abs_cutoff_;         // absolute length (debye_len * cutoff_ratio)
+    real_type temperature_;        // [K]
+    real_type ion_strength_;       // [M]
     real_type inv_4_pi_eps0_epsk_;
     real_type debye_length_;
     real_type inv_debye_length_;
+};
+
+// Debye-Huckel type electrostatic interaction.
+// This class contains charges and other parameters and calculates pair parameter
+// from those information.
+// This class is an implementation of the electrostatic term used in the 3SPN
+// series of the coarse-grained DNA models (Knotts et al., (2007), Sambriski and
+// de Pablo, (2009), Hinckley et al., (2013), and Freeman et al., (2014))
+// It is same as the default electrostatic term in CafeMol (Kenzaki et al. 2011)
+//
+template<typename traitsT>
+class DebyeHuckelParameterList final
+    : public ParameterListBase<traitsT, DebyeHuckelPotential<typename traitsT::real_type>>
+{
+  public:
+    using traits_type          = traitsT;
+    using real_type            = typename traits_type::real_type;
+    using potential_type       = DebyeHuckelPotential<real_type>;
+    using base_type            = ParameterListBase<traits_type, potential_type>;
+
+    // `pair_parameter_type` is a parameter for an interacting pair.
+    // Although it is the same type as `parameter_type` in this potential,
+    // it can be different from normal parameter for each particle.
+    // This enables NeighborList to cache a value to calculate forces between
+    // the particles, e.g. by having qi * qj for pair of particles i and j.
+
+    struct parameter_type {real_type charge;}; // q_i
+    using pair_parameter_type  = typename potential_type::parameter_type;
+    using container_type       = std::vector<parameter_type>;
+
+    // topology stuff
+    using system_type          = System<traits_type>;
+    using topology_type        = Topology;
+    using molecule_id_type     = typename topology_type::molecule_id_type;
+    using group_id_type        = typename topology_type::group_id_type;
+    using connection_kind_type = typename topology_type::connection_kind_type;
+    using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
+    using ignore_group_type    = IgnoreGroup   <group_id_type>;
+    using exclusion_list_type  = ExclusionList<traits_type>;
+
+  public:
+
+    DebyeHuckelParameterList(
+        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
+        const std::map<connection_kind_type, std::size_t>& exclusions,
+        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
+      : exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
+    {
+        this->parameters_  .reserve(parameters.size());
+        this->participants_.reserve(parameters.size());
+        for(const auto& idxp : parameters)
+        {
+            const auto idx = idxp.first;
+            this->participants_.push_back(idx);
+            if(idx >= this->parameters_.size())
+            {
+                this->parameters_.resize(idx+1, parameter_type{real_type(0)});
+            }
+            this->parameters_.at(idx) = idxp.second;
+        }
+    }
+    ~DebyeHuckelParameterList() = default;
+
+    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept override
+    {
+        return pair_parameter_type{this->inv_4_pi_eps0_epsk_ *
+            this->parameters_[i].charge * this->parameters_[j].charge
+        };
+    }
+
+    real_type max_cutoff_length() const noexcept override
+    {
+        return this->debye_length_ * this->cutoff_ratio_;
+    }
+
+    void initialize(const system_type& sys, const topology_type& topol,
+                    const potential_type& pot) noexcept override
+    {
+        this->update(sys, topol, pot);
+        return;
+    }
+
+    // for temperature/ionic concentration changes...
+    void update(const system_type& sys, const topology_type& topol,
+                const potential_type& pot) noexcept override
+    {
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FUNCTION();
+
+        // It does not use potential to find the maximum cutoff length, but
+        // it uses debye length calculated in the potential class.
+
+        this->debye_length_       = pot.debye_length();
+        this->cutoff_ratio_       = pot.cutoff_ratio();
+        this->inv_4_pi_eps0_epsk_ = pot.inv_4pi_epsilon();
+
+        MJOLNIR_LOG_INFO("debye_length       = ", this->debye_length_      );
+        MJOLNIR_LOG_INFO("cutoff_ratio       = ", this->cutoff_ratio_      );
+        MJOLNIR_LOG_INFO("inv_4_pi_eps0_epsk = ", this->inv_4_pi_eps0_epsk_);
+
+        // update exclusion list based on sys.topology()
+        exclusion_list_.make(sys, topol);
+        return;
+    }
+
+    // -----------------------------------------------------------------------
+    // for spatial partitions
+    //
+    // Here, the default implementation uses Newton's 3rd law to reduce
+    // calculation. For an interacting pair (i, j), forces applied to i and j
+    // are equal in magnitude and opposite in direction. So, if a pair (i, j) is
+    // listed, (j, i) is not needed.
+    //     See implementation of VerletList, CellList and GlobalPairInteraction
+    // for more details about the usage of these functions.
+
+    std::vector<std::size_t> const& participants() const noexcept override
+    {
+        return participants_;
+    }
+    range<typename std::vector<std::size_t>::const_iterator>
+    leading_participants() const noexcept override
+    {
+        return make_range(participants_.begin(), std::prev(participants_.end()));
+    }
+    range<typename std::vector<std::size_t>::const_iterator>
+    possible_partners_of(const std::size_t participant_idx,
+                         const std::size_t /*particle_idx*/) const noexcept override
+    {
+        return make_range(participants_.begin() + participant_idx + 1,
+                          participants_.end());
+    }
+    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept override
+    {
+        return (i < j) && !exclusion_list_.is_excluded(i, j);
+    }
+
+    exclusion_list_type const& exclusion_list() const noexcept override
+    {
+        return exclusion_list_; // for testing
+    }
+
+    // ------------------------------------------------------------------------
+    // used by Observer.
+    static const char* name() noexcept {return "DebyeHuckel";}
+
+    // ------------------------------------------------------------------------
+    // the following accessers would be used in tests.
+
+    // access to the parameters.
+    std::vector<parameter_type>&       parameters()       noexcept {return parameters_;}
+    std::vector<parameter_type> const& parameters() const noexcept {return parameters_;}
+
+    base_type* clone() const override
+    {
+        return new DebyeHuckelParameterList(*this);
+    }
+
+  private:
+
+    real_type debye_length_;
+    real_type cutoff_ratio_;
+    real_type inv_4_pi_eps0_epsk_;
 
     container_type parameters_;
     std::vector<std::size_t> participants_;
@@ -275,10 +359,10 @@ class DebyeHuckelPotential
 
 namespace mjolnir
 {
-extern template class DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
-extern template class DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
-extern template class DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-extern template class DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+extern template class DebyeHuckelParameterList<SimulatorTraits<double, UnlimitedBoundary>       >;
+extern template class DebyeHuckelParameterList<SimulatorTraits<float,  UnlimitedBoundary>       >;
+extern template class DebyeHuckelParameterList<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
+extern template class DebyeHuckelParameterList<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
 } // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 

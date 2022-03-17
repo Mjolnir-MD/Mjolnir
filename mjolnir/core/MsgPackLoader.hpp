@@ -10,7 +10,8 @@
 namespace mjolnir
 {
 
-// fixmap<3> {
+// system:
+// fixmap<5> {
 //     "boundary"     : fixmap<2>{"lower": [real, real, real],
 //                                "upper": [real, real, real]}
 //                   or nil,
@@ -24,8 +25,22 @@ namespace mjolnir
 //             "group"   : string,
 //         }, ...
 //     ]
+//     "virial"       : [real; 9]
 //     "attributres"  : map<N>{"temperature": real, ...},
+//     "dynamic_variables" : map<N>{"lambda": map<8>{
+//         "type": string,
+//         "x":real,
+//         "v":real,
+//         "f":real,
+//         "m":real,
+//         "gamma":real,
+//         "lower":real,
+//         "upper":real
+//     }, ...}
 // }
+//
+// rng:
+// fixmap<1>{"internal_state": string}
 template<typename traitsT>
 class MsgPackLoader
 {
@@ -90,12 +105,12 @@ class MsgPackLoader
         // -------------------------------------------------------------------
         // check the first type tag
         {
-            constexpr std::uint8_t fixmap3_code = 0x83;
+            constexpr std::uint8_t fixmap5_code = 0x85;
             const auto tag = detail::read_bytes_as<std::uint8_t>(file);
-            if(tag != fixmap3_code)
+            if(tag != fixmap5_code)
             {
                 MJOLNIR_LOG_ERROR("invalid format in system .msg file.");
-                MJOLNIR_LOG_ERROR("the root object should be a map with 3 elems.");
+                MJOLNIR_LOG_ERROR("the root object should be a map with 5 elems.");
                 throw_exception<std::runtime_error>("[error] mjolnir::MsgPackLoader:"
                         "failed to load ", filename, " file");
             }
@@ -223,6 +238,29 @@ class MsgPackLoader
         sys.force_initialized() = true;
 
         // -----------------------------------------------------------------------
+        // load virial
+
+        this->check_msgpack_key(file, filename, "virial");
+        {
+            const auto tag = detail::read_bytes_as<std::uint8_t>(file);
+            if(tag != 0x99)
+            {
+                throw_exception<std::runtime_error>("[error] mjolnir::MsgPackLoader:"
+                        "expected tag 0x99, but got ", std::hex, std::uint32_t(tag));
+            }
+            auto& vir = sys.virial();
+            vir(0, 0) = this->from_msgpack<real_type>(file, filename);
+            vir(0, 1) = this->from_msgpack<real_type>(file, filename);
+            vir(0, 2) = this->from_msgpack<real_type>(file, filename);
+            vir(1, 0) = this->from_msgpack<real_type>(file, filename);
+            vir(1, 1) = this->from_msgpack<real_type>(file, filename);
+            vir(1, 2) = this->from_msgpack<real_type>(file, filename);
+            vir(2, 0) = this->from_msgpack<real_type>(file, filename);
+            vir(2, 1) = this->from_msgpack<real_type>(file, filename);
+            vir(2, 2) = this->from_msgpack<real_type>(file, filename);
+        }
+
+        // -----------------------------------------------------------------------
         // load attributes
 
         this->check_msgpack_key(file, filename, "attributes");
@@ -265,6 +303,97 @@ class MsgPackLoader
             const auto val = this->from_msgpack<real_type>(file, filename);
             sys.attribute(key) = val;
         }
+
+        // -----------------------------------------------------------------------
+        // load dynamic_variables
+
+        this->check_msgpack_key(file, filename, "dynamic_variables");
+
+        std::size_t num_dynvars = 0;
+        {
+            constexpr std::uint8_t map16_code = 0xde;
+            constexpr std::uint8_t map32_code = 0xdf;
+            const auto tag = detail::read_bytes_as<std::uint8_t>(file);
+
+            // fixmap size tag: 1000xxxx.
+            // the possible values are ... [1000'0000 = 0x80, 1000'1111 = 0x8F]
+            if(0x80 <= tag && tag <= 0x8F)
+            {
+                // take the last 4 bits
+                num_dynvars = static_cast<std::size_t>(tag & 0x0F);
+            }
+            else if(tag == map16_code)
+            {
+                num_dynvars = static_cast<std::size_t>(
+                    this->from_big_endian<std::uint16_t>(file, filename));
+            }
+            else if(tag == map32_code)
+            {
+                num_dynvars = static_cast<std::size_t>(
+                    this->from_big_endian<std::uint32_t>(file, filename));
+            }
+            else
+            {
+                MJOLNIR_LOG_ERROR("invalid format in `dynamic_variables` part of the .msg file.");
+                MJOLNIR_LOG_ERROR("expected map-like type tag ", map32_code,
+                                  "(0xDF), but got ", std::uint32_t(tag));
+                throw_exception<std::runtime_error>("[error] mjolnir::MsgPackLoader:"
+                    "failed to load ", filename, " file");
+            }
+        }
+        for(std::size_t i=0; i<num_dynvars; ++i)
+        {
+            const auto key = this->from_msgpack<std::string>(file, filename);
+
+            // 8 or 6-element map
+            const auto tag = detail::read_bytes_as<std::uint8_t>(file);
+            if(tag != 0x88 && tag != 0x86)
+            {
+                MJOLNIR_LOG_ERROR("invalid format in `dynamic_variables` part of the .msg file.");
+                MJOLNIR_LOG_ERROR("expected map-like type tag (0x88 or 0x86), but got ", std::uint32_t(tag));
+            }
+
+            this->check_msgpack_key(file, filename, "type");
+            const auto type = this->from_msgpack<std::string>(file, filename);
+
+            this->check_msgpack_key(file, filename, "x");
+            const auto x = this->from_msgpack<real_type>(file, filename);
+            this->check_msgpack_key(file, filename, "v");
+            const auto v = this->from_msgpack<real_type>(file, filename);
+            this->check_msgpack_key(file, filename, "f");
+            const auto f = this->from_msgpack<real_type>(file, filename);
+            this->check_msgpack_key(file, filename, "m");
+            const auto m = this->from_msgpack<real_type>(file, filename);
+            this->check_msgpack_key(file, filename, "gamma");
+            const auto gamma = this->from_msgpack<real_type>(file, filename);
+
+            auto lower = -std::numeric_limits<real_type>::infinity();
+            auto upper =  std::numeric_limits<real_type>::infinity();
+            if(tag == 0x88)
+            {
+                this->check_msgpack_key(file, filename, "lower");
+                lower = this->from_msgpack<real_type>(file, filename);
+                this->check_msgpack_key(file, filename, "upper");
+                upper = this->from_msgpack<real_type>(file, filename);
+            }
+
+            if(type == "Default")
+            {
+                sys.variable(key) = DynamicVariable<real_type>(
+                    DefaultDynamicVariable<real_type>(x, v, f, m, gamma));
+            }
+            else if(type == "Periodic")
+            {
+                sys.variable(key) = DynamicVariable<real_type>(
+                    PeriodicDynamicVariable<real_type>(x, v, f, m, gamma, lower, upper));
+            }
+            else if(type == "Repulsive")
+            {
+                sys.variable(key) = DynamicVariable<real_type>(
+                    RepulsiveDynamicVariable<real_type>(x, v, f, m, gamma, lower, upper));
+            }
+        }
+
         return sys;
     }
 

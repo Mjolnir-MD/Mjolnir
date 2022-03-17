@@ -6,6 +6,8 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
+#include <test/util/utility.hpp>
+
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/NaivePairCalculation.hpp>
@@ -15,66 +17,56 @@
 
 BOOST_AUTO_TEST_CASE(GlobalPairLennardJonesInteraction_numeric_limits)
 {
+    namespace test = mjolnir::test;
     mjolnir::LoggerManager::set_default_logger("test_global_pair_lennard_jones_interaction.log");
-    using traits = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
 
-    using real_type        = traits::real_type;
-    using coordinate_type  = traits::coordinate_type;
-    using boundary_type    = traits::boundary_type;
-    using system_type      = mjolnir::System<traits>;
+    using real_type        = traits_type::real_type;
+    using coordinate_type  = traits_type::coordinate_type;
+    using boundary_type    = traits_type::boundary_type;
+    using system_type      = mjolnir::System<traits_type>;
     using topology_type    = mjolnir::Topology;
-    using potential_type   = mjolnir::LennardJonesPotential<traits>;
-    using parameter_type   = typename potential_type::parameter_type;
-    using partition_type   = mjolnir::NaivePairCalculation<traits, potential_type>;
-    using interaction_type = mjolnir::GlobalPairInteraction<traits, potential_type>;
+    using potential_type   = mjolnir::LennardJonesPotential<real_type>;
+    using parameter_list_type = mjolnir::LorentzBerthelotRule<traits_type, potential_type>;
+    using parameter_type   = typename parameter_list_type::parameter_type;
+    using partition_type   = mjolnir::NaivePairCalculation<traits_type, potential_type>;
+    using interaction_type = mjolnir::GlobalPairInteraction<traits_type, potential_type>;
 
-    auto normalize = [](const coordinate_type& v){return v / mjolnir::math::length(v);};
+    potential_type potential(2.5);
 
-    potential_type   potential(potential_type::default_cutoff(),
+    parameter_list_type parameter_list(
         std::vector<std::pair<std::size_t, parameter_type>>{
             {0, {/* sigma = */ 1.0, /* epsilon = */1.2}},
             {1, {/* sigma = */ 1.0, /* epsilon = */1.2}}
-        }, {}, typename potential_type::ignore_molecule_type("Nothing"),
-               typename potential_type::ignore_group_type   ({})
+        }, {}, typename parameter_list_type::ignore_molecule_type("Nothing"),
+               typename parameter_list_type::ignore_group_type   ({})
         );
 
-    interaction_type interaction(potential_type{potential},
-        mjolnir::SpatialPartition<traits, potential_type>(
+    interaction_type interaction(std::move(potential),
+        mjolnir::ParameterList<traits_type, potential_type>(
+            mjolnir::make_unique<parameter_list_type>(std::move(parameter_list))),
+        mjolnir::SpatialPartition<traits_type, potential_type>(
             mjolnir::make_unique<partition_type>()));
 
     system_type sys(2, boundary_type{});
-    topology_type topol(2);
-
-    sys.mass(0)  = 1.0;
-    sys.mass(1)  = 1.0;
-    sys.rmass(0) = 1.0;
-    sys.rmass(1) = 1.0;
+    test::clear_everything(sys);
 
     sys.position(0) = coordinate_type(0.0, 0.0, 0.0);
     sys.position(1) = coordinate_type(0.5, 0.0, 0.0);
-    sys.velocity(0) = coordinate_type(0.0, 0.0, 0.0);
-    sys.velocity(1) = coordinate_type(0.0, 0.0, 0.0);
-    sys.force(0)    = coordinate_type(0.0, 0.0, 0.0);
-    sys.force(1)    = coordinate_type(0.0, 0.0, 0.0);
 
+    topology_type topol(2);
     topol.construct_molecules();
 
-    sys.name(0)  = "X";
-    sys.name(1)  = "X";
-    sys.group(0) = "NONE";
-    sys.group(1) = "NONE";
-
     interaction.initialize(sys, topol);
+    // check if the pair of particles are within the cutoff range.
+    BOOST_REQUIRE(interaction.calc_energy(sys) != 0.0);
 
     std::mt19937 rng(123456789);
     std::normal_distribution<real_type> gauss(0.0, 1.0);
 
-    const real_type rc = potential.max_cutoff_length();
-
     const real_type r_min = 0.5;
-    const real_type r_max = rc;
-    const real_type dr = 1e-3;
-
+    const real_type r_max = 2.5; // sigma == 1
+    const real_type dr    = 1e-3;
     const int max_count = (r_max - r_min) / dr;
 
     for(int i = 0; i < max_count-1; ++i)
@@ -82,185 +74,21 @@ BOOST_AUTO_TEST_CASE(GlobalPairLennardJonesInteraction_numeric_limits)
         const real_type dist = r_min + i * dr;
 
         sys.position(0) = coordinate_type(0,0,0);
-        sys.position(1) = coordinate_type(0,0,0);
+        sys.position(1) = coordinate_type(dist,0,0);
         sys.force(0)    = coordinate_type(0,0,0);
         sys.force(1)    = coordinate_type(0,0,0);
 
-        sys.position(1) += dist *
-            normalize(coordinate_type(gauss(rng), gauss(rng), gauss(rng)));
-
-        const auto init = sys;
+        test::apply_random_perturbation(sys, rng, 0.1);
+        test::apply_random_rotation(sys, rng);
 
         constexpr real_type tol = 1e-4;
         constexpr real_type dr  = 1e-5;
-        for(std::size_t idx=0; idx<sys.size(); ++idx)
-        {
-            {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
 
-                // calc U(x-dx)
-                const auto E0 = interaction.calc_energy(sys);
 
-                mjolnir::math::X(sys.position(idx)) += dr;
-
-                // calc F(x)
-                interaction.calc_force(sys);
-
-                mjolnir::math::X(sys.position(idx)) += dr;
-
-                // calc U(x+dx)
-                const auto E1 = interaction.calc_energy(sys);
-
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
-
-                BOOST_TEST(-dE / dr == mjolnir::math::X(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
-            }
-            {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
-
-                // calc U(x-dx)
-                const auto E0 = interaction.calc_energy(sys);
-
-                mjolnir::math::Y(sys.position(idx)) += dr;
-
-                // calc F(x)
-                interaction.calc_force(sys);
-
-                mjolnir::math::Y(sys.position(idx)) += dr;
-
-                // calc U(x+dx)
-                const auto E1 = interaction.calc_energy(sys);
-
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
-
-                BOOST_TEST(-dE / dr == mjolnir::math::Y(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
-            }
-            {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
-
-                // calc U(x-dx)
-                const auto E0 = interaction.calc_energy(sys);
-
-                mjolnir::math::Z(sys.position(idx)) += dr;
-
-                // calc F(x)
-                interaction.calc_force(sys);
-
-                mjolnir::math::Z(sys.position(idx)) += dr;
-
-                // calc U(x+dx)
-                const auto E1 = interaction.calc_energy(sys);
-
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
-
-                BOOST_TEST(-dE / dr == mjolnir::math::Z(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
-            }
-        }
-    }
-}
-
-BOOST_AUTO_TEST_CASE(GlobalPairLennardJonesInteraction_numeric_force_and_energy)
-{
-    mjolnir::LoggerManager::set_default_logger("test_global_pair_lennard_jones_interaction.log");
-    using traits = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-
-    using real_type        = traits::real_type;
-    using coordinate_type  = traits::coordinate_type;
-    using boundary_type    = traits::boundary_type;
-    using system_type      = mjolnir::System<traits>;
-    using topology_type    = mjolnir::Topology;
-    using potential_type   = mjolnir::LennardJonesPotential<traits>;
-    using parameter_type   = typename potential_type::parameter_type;
-    using partition_type   = mjolnir::NaivePairCalculation<traits, potential_type>;
-    using interaction_type = mjolnir::GlobalPairInteraction<traits, potential_type>;
-
-    auto normalize = [](const coordinate_type& v){return v / mjolnir::math::length(v);};
-
-    potential_type   potential(potential_type::default_cutoff(),
-        std::vector<std::pair<std::size_t, parameter_type>>{
-            {0, {/* sigma = */ 1.0, /* epsilon = */1.2}},
-            {1, {/* sigma = */ 1.0, /* epsilon = */1.2}}
-        }, {}, typename potential_type::ignore_molecule_type("Nothing"),
-               typename potential_type::ignore_group_type   ({})
-        );
-
-    interaction_type interaction(potential_type{potential},
-        mjolnir::SpatialPartition<traits, potential_type>(
-            mjolnir::make_unique<partition_type>()));
-
-    system_type sys(2, boundary_type{});
-    topology_type topol(2);
-
-    sys.mass(0)  = 1.0;
-    sys.mass(1)  = 1.0;
-    sys.rmass(0) = 1.0;
-    sys.rmass(1) = 1.0;
-
-    sys.position(0) = coordinate_type(0.0, 0.0, 0.0);
-    sys.position(1) = coordinate_type(0.5, 0.0, 0.0);
-    sys.velocity(0) = coordinate_type(0.0, 0.0, 0.0);
-    sys.velocity(1) = coordinate_type(0.0, 0.0, 0.0);
-    sys.force(0)    = coordinate_type(0.0, 0.0, 0.0);
-    sys.force(1)    = coordinate_type(0.0, 0.0, 0.0);
-
-    topol.construct_molecules();
-
-    sys.name(0)  = "X";
-    sys.name(1)  = "X";
-    sys.group(0) = "NONE";
-    sys.group(1) = "NONE";
-
-    interaction.initialize(sys, topol);
-
-    std::mt19937 rng(123456789);
-    std::normal_distribution<real_type> gauss(0.0, 1.0);
-
-    const real_type rc = potential.max_cutoff_length();
-
-    const real_type r_min = 0.5;
-    const real_type r_max = rc;
-    const real_type dr = 1e-3;
-
-    const int max_count = (r_max - r_min) / dr;
-
-    for(int i = 0; i < max_count-1; ++i)
-    {
-        const real_type dist = r_min + i * dr;
-
-        sys.position(0) = coordinate_type(0,0,0);
-        sys.position(1) = coordinate_type(0,0,0);
-        sys.force(0)    = coordinate_type(0,0,0);
-        sys.force(1)    = coordinate_type(0,0,0);
-
-        sys.position(1) += dist *
-            normalize(coordinate_type(gauss(rng), gauss(rng), gauss(rng)));
-
-        system_type ref_sys = sys;
-
-        constexpr real_type tol = 1e-4;
-
-        const auto energy = interaction.calc_force_and_energy(sys);
-        const auto ref_energy = interaction.calc_energy(ref_sys);
-        interaction.calc_force(ref_sys);
-        BOOST_TEST(ref_energy == energy, boost::test_tools::tolerance(tol));
-
-        for(std::size_t idx=0; idx<sys.size(); ++idx)
-        {
-            BOOST_TEST(mjolnir::math::X(sys.force(idx)) == mjolnir::math::X(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Y(sys.force(idx)) == mjolnir::math::Y(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Z(sys.force(idx)) == mjolnir::math::Z(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
-        }
+        test::check_force(sys, interaction, tol, dr);
+        test::check_virial(sys, interaction, tol);
+        test::check_force_and_virial(sys, interaction, tol);
+        test::check_force_and_energy(sys, interaction, tol);
+        test::check_force_energy_virial(sys, interaction, tol);
     }
 }

@@ -67,6 +67,23 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
         return make_unique<BondLengthInteraction<traitsT, potentialT>>(
                 kind, read_local_potential<2, potentialT>(local));
     }
+    else if(potential == "RepulsiveMBasinContact")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Repulsive MBasin contact.");
+        using potentialT = MBasinRepulsivePotential<real_type>;
+
+        return make_unique<BondLengthInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<2, potentialT>(local));
+    }
+    else if(potential == "AttractiveMBasinContact")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Attractive MBasin contact.");
+        using potentialT = MBasinAttractivePotential<real_type>;
+
+        return make_unique<BondLengthInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<2, potentialT>(local));
+    }
+
     else if(potential == "Gaussian")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Gaussian.");
@@ -105,14 +122,16 @@ read_bond_length_interaction(const std::string& kind, const toml::value& local)
             "mjolnir::read_bond_length_interaction: invalid potential",
             toml::find<toml::value>(local, "potential"), "here", {
             "expected value is one of the following.",
-            "- \"Harmonic\"           : well-known harmonic potential",
-            "- \"GoContact\"          : r^12 - r^10 type native contact potential",
-            "- \"AttractiveGoContact\": attractive part of native contact potential",
-            "- \"RepulsiveGoContact\" : repulsive part of native contact potential",
-            "- \"Gaussian\"           : well-known gaussian potential",
-            "- \"WormLikeChain\" : potential based on worm-like chain model",
-            "- \"WormLikeChainOffset\" : potential based on worm-like chain model with distance offset",
-            "- \"3SPN2Bond\"          : bond length potential for 3SPN2"
+            "- \"Harmonic\"               : well-known harmonic potential",
+            "- \"GoContact\"              : r^12 - r^10 type native contact potential",
+            "- \"AttractiveGoContact\"    : attractive part of native contact potential",
+            "- \"RepulsiveGoContact\"     : repulsive part of native contact potential",
+            "- \"AttractiveMBasinContact\": attractive part of native contact potential used in MultipleBasin",
+            "- \"RepulsiveMBasinContact\" : repulsive part of native contact potential used in MultipleBasin",
+            "- \"Gaussian\"               : well-known gaussian potential",
+            "- \"WormLikeChain\"          : potential based on worm-like chain model",
+            "- \"WormLikeChainOffset\"    : potential based on worm-like chain model with distance offset",
+            "- \"3SPN2Bond\"              : bond length potential for 3SPN2"
             }));
     }
 }
@@ -156,6 +175,22 @@ read_contact_interaction(const std::string& kind, const toml::value& local)
         return make_unique<ContactInteraction<traitsT, potentialT>>(
                 kind, read_local_potential<2, potentialT>(local), margin);
     }
+    else if(potential == "RepulsiveMBasinContact")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Repulsive MBasin contact.");
+        using potentialT = MBasinRepulsivePotential<real_type>;
+
+        return make_unique<ContactInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<2, potentialT>(local), margin);
+    }
+    else if(potential == "AttractiveMBasinContact")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Attractive MBasin contact.");
+        using potentialT = MBasinAttractivePotential<real_type>;
+
+        return make_unique<ContactInteraction<traitsT, potentialT>>(
+                kind, read_local_potential<2, potentialT>(local), margin);
+    }
     else if(potential == "Gaussian")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is Gaussian.");
@@ -173,6 +208,8 @@ read_contact_interaction(const std::string& kind, const toml::value& local)
             "- \"GoContact\"          : r^12 - r^10 type native contact potential",
             "- \"AttractiveGoContact\": attractive part of native contact potential",
             "- \"RepulsiveGoContact\" : repulsive part of native contact potential",
+            "- \"AttractiveMBasinContact\": attractive part of native contact potential used in MultipleBasin",
+            "- \"RepulsiveMBasinContact\" : repulsive part of native contact potential used in MultipleBasin",
             "- \"Gaussian\"           : well-known gaussian potential"
             }));
     }
@@ -409,12 +446,12 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
     //     {strand = 0, nucleotide =  1, P =   2, S =   3, B =   4, Base = "T"},
     //     # ...
     // ]
-    using nucleotide_index_type = parameter_3SPN2::NucleotideIndex;
-    std::vector<nucleotide_index_type> nuc_idxs;
+    using nucleotide_info_type = parameter_3SPN2::NucleotideInfo;
+    std::vector<nucleotide_info_type> nuc_idxs;
     nuc_idxs.reserve(params.size());
     for(const auto& item : params)
     {
-        nucleotide_index_type nuc_idx;
+        nucleotide_info_type nuc_idx;
 
         const auto ofs = find_parameter_or<std::int64_t>(item, env, "offset", 0);
 
@@ -426,7 +463,6 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
         nuc_idx.S          = find_parameter<std::size_t>(item, env, "S") + ofs;
         nuc_idx.B          = find_parameter<std::size_t>(item, env, "B") + ofs;
         nuc_idx.strand     = find_parameter<std::size_t>(item, env, "strand");
-        nuc_idx.nucleotide = find_parameter<std::size_t>(item, env, "nucleotide");
 
         const auto bk      = toml::find<std::string>(item, "Base");
         if     (bk == "A") {nuc_idx.base = base_kind::A;}
@@ -445,12 +481,6 @@ read_3spn2_base_stacking_interaction(const std::string& kind, const toml::value&
         MJOLNIR_LOG_INFO("ThreeSPN2BaseStackingPotential: nucleotide = ", nuc_idx);
         nuc_idxs.push_back(nuc_idx);
     }
-
-    std::sort(nuc_idxs.begin(), nuc_idxs.end(),
-        [](const nucleotide_index_type& lhs, const nucleotide_index_type& rhs) {
-            return std::make_pair(lhs.strand, lhs.nucleotide) <
-                   std::make_pair(rhs.strand, rhs.nucleotide);
-        });
 
     std::vector<std::pair<indices_type, parameter_type>> parameters;
     parameters.reserve(params.size());
@@ -692,8 +722,7 @@ read_local_interaction(const toml::value& local)
             "- \"Contact\"       : 2-body bond interaction that might be broken",
             "- \"DihedralAngle\" : 4-body well-known dihedral angle interaction",
             "- \"DirectionalContact\" : 4-body contact interaction depends on the contact angle",
-            "- \"Dummy\"         : To represent a strange topology. It does nothing",
-            "- \"PDNS\"          : directional contact representing H-bond between protein and DNA"
+            "- \"Dummy\"         : To represent a strange topology. It does nothing"
             }));
     }
 }

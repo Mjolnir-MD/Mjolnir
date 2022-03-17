@@ -36,11 +36,12 @@ class DCDObserver final : public ObserverBase<traitsT>
     }
     ~DCDObserver() override {}
 
-    void initialize(const std::size_t total_step, const real_type dt,
+    void initialize(const std::size_t total_step,
+                    const std::size_t save_interval, const real_type dt,
                     const system_type& sys, const forcefield_type& ff) override
     {
-        this->write_header(this->pos_name_, total_step, dt, sys, ff);
-        this->write_header(this->vel_name_, total_step, dt, sys, ff);
+        this->write_header(this->pos_name_, total_step, save_interval, dt, sys, ff);
+        this->write_header(this->vel_name_, total_step, save_interval, dt, sys, ff);
 
         // buffer to convert sys and dcd format
         this->buffer_x_.resize(sys.size());
@@ -115,8 +116,8 @@ class DCDObserver final : public ObserverBase<traitsT>
         return;
     }
 
-    void write_header(const std::string& fname,
-                      const std::size_t  total_step_sz, const real_type dt,
+    void write_header(const std::string& fname, const std::size_t total_step,
+                      const std::size_t  save_interval, const real_type dt,
                       const system_type& sys, const forcefield_type& ff) const
     {
         std::ofstream ofs(fname, std::ios::binary | std::ios::app);
@@ -130,19 +131,21 @@ class DCDObserver final : public ObserverBase<traitsT>
         {
             const std::int32_t block_size(84);
             detail::write_as_bytes(ofs, block_size);
+
             ofs.write("CORD", 4);
 
+            // Later, in the finalize(), this value will be updated
             const std::int32_t number_of_frames(0);
             detail::write_as_bytes(ofs, number_of_frames);
 
             const std::int32_t index_of_first(0);
             detail::write_as_bytes(ofs, index_of_first);
 
-            const std::int32_t save_interval(0);
-            detail::write_as_bytes(ofs, save_interval);
+            const std::int32_t save_interval_i32(save_interval);
+            detail::write_as_bytes(ofs, save_interval_i32);
 
-            const std::int32_t total_step(total_step_sz);
-            detail::write_as_bytes(ofs, total_step);
+            const std::int32_t total_step_i32(total_step);
+            detail::write_as_bytes(ofs, total_step_i32);
 
             const std::int32_t total_chains(ff->topology().number_of_molecules());
             detail::write_as_bytes(ofs, total_chains);

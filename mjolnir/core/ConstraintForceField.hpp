@@ -3,6 +3,7 @@
 #include <mjolnir/core/System.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/util/logger.hpp>
+#include <limits>
 
 namespace mjolnir
 {
@@ -33,7 +34,10 @@ class ConstraintForceField
         : max_iteration_(max_iteration), tolerance_(tolerance), kind_(kind),
           constraints_(std::move(constraints))
     {}
-    ConstraintForceField()  = default;
+    ConstraintForceField()
+        : max_iteration_(0), tolerance_(std::numeric_limits<real_type>::infinity()),
+          kind_{"none"}, constraints_{}
+    {}
     ~ConstraintForceField() = default;
     ConstraintForceField(const ConstraintForceField&) = default;
     ConstraintForceField(ConstraintForceField&&)      = default;

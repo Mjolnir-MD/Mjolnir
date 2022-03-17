@@ -1,223 +1,118 @@
 #ifndef MJOLNIR_POTENTIAL_GLOBAL_LENNARD_JONES_ATTRACTIVE_POTENTIAL_HPP
 #define MJOLNIR_POTENTIAL_GLOBAL_LENNARD_JONES_ATTRACTIVE_POTENTIAL_HPP
-#include <mjolnir/core/ExclusionList.hpp>
-#include <mjolnir/core/System.hpp>
-#include <mjolnir/math/math.hpp>
-#include <vector>
 #include <algorithm>
-#include <numeric>
+#include <utility>
 #include <cmath>
 
 namespace mjolnir
 {
 
-template<typename traitsT>
+template<typename T> class System;
+
+template<typename realT>
 class LennardJonesAttractivePotential
 {
   public:
-    using traits_type          = traitsT;
-    using real_type            = typename traits_type::real_type;
-    using system_type          = System<traits_type>;
-    using parameter_type       = std::pair<real_type, real_type>; // {sigma, epsilon}
-    using container_type       = std::vector<parameter_type>;
+    using real_type = realT;
 
-    // `pair_parameter_type` is a parameter for a interacting pair.
-    // Although it is the same type as `parameter_type` in this potential,
-    // it can be different from normal parameter for each particle.
-    // This enables NeighborList to cache a value to calculate forces between
-    // the particles, e.g. by having (sigma_i + sigma_j)/2 for a pair of {i, j}.
-    using pair_parameter_type  = parameter_type;
-
-    // topology stuff
-    using topology_type        = Topology;
-    using molecule_id_type     = typename topology_type::molecule_id_type;
-    using group_id_type        = typename topology_type::group_id_type;
-    using connection_kind_type = typename topology_type::connection_kind_type;
-    using ignore_molecule_type = IgnoreMolecule<molecule_id_type>;
-    using ignore_group_type    = IgnoreGroup   <group_id_type>;
-    using exclusion_list_type  = ExclusionList <traits_type>;
+    struct parameter_type
+    {
+        real_type sigma;
+        real_type epsilon;
+    };
 
     static constexpr real_type default_cutoff() noexcept
     {
         return real_type(2.5);
     }
-    static constexpr parameter_type default_parameter() noexcept
-    {
-        return parameter_type{real_type(0), real_type(0)};
-    }
 
   public:
 
-    LennardJonesAttractivePotential(const real_type cutoff_ratio,
-        const std::vector<std::pair<std::size_t, parameter_type>>& parameters,
-        const std::map<connection_kind_type, std::size_t>&         exclusions,
-        ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
-    : cutoff_ratio_(cutoff_ratio),
-      coef_at_cutoff_(std::pow(1 / cutoff_ratio, 12) - std::pow(1 / cutoff_ratio, 6)),
-      exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
-    {
-        this->parameters_  .reserve(parameters.size());
-        this->participants_.reserve(parameters.size());
-        for(const auto& idxp : parameters)
-        {
-            const auto idx = idxp.first;
-            this->participants_.push_back(idx);
-            if(idx >= this->parameters_.size())
-            {
-                this->parameters_.resize(idx+1, default_parameter());
-            }
-            this->parameters_.at(idx) = idxp.second;
-        }
-    }
+    explicit LennardJonesAttractivePotential(const real_type cutoff_ratio) noexcept
+        : cutoff_ratio_(cutoff_ratio), coef_at_cutoff_(
+                std::pow(real_type(1) / cutoff_ratio, 12) -
+                std::pow(real_type(1) / cutoff_ratio,  6))
+    {}
     ~LennardJonesAttractivePotential() = default;
 
-    pair_parameter_type prepare_params(std::size_t i, std::size_t j) const noexcept
-    {
-        const auto sgm1 = parameters_[i].first;
-        const auto eps1 = parameters_[i].second;
-        const auto sgm2 = parameters_[j].first;
-        const auto eps2 = parameters_[j].second;
-
-        return std::make_pair((sgm1 + sgm2) / 2,
-                             ((eps1 == eps2) ? eps1 : std::sqrt(eps1 * eps2)));
-    }
-
-    // forwarding functions for clarity...
-    real_type potential(const std::size_t i, const std::size_t j,
-                        const real_type r) const noexcept
-    {
-        return this->potential(r, this->prepare_params(i, j));
-    }
-    real_type derivative(const std::size_t i, const std::size_t j,
-                         const real_type r) const noexcept
-    {
-        return this->derivative(r, this->prepare_params(i, j));
-    }
-
-    real_type potential(const real_type r, const pair_parameter_type& p) const noexcept
+    real_type potential(const real_type r, const parameter_type& params) const noexcept
     {
         constexpr real_type sixth_root_of_two(1.12246204831);
 
-        const real_type sigma   = p.first;
-        const real_type epsilon = p.second;
-        if(r < sigma * sixth_root_of_two)
+        if(r < params.sigma * sixth_root_of_two)
         {
-            return -epsilon;
+            return -params.epsilon;
         }
-        else if(sigma * this->cutoff_ratio_ < r)
+        else if(params.sigma * cutoff_ratio_ < r)
         {
             return 0;
         }
-
-        const real_type sr1 = sigma / r;
+        const real_type sr1 = params.sigma / r;
         const real_type sr3 = sr1 * sr1 * sr1;
         const real_type sr6 = sr3 * sr3;
-        return 4 * epsilon * (sr6 * (sr6 - 1) - coef_at_cutoff_);
+        return 4 * params.epsilon * (sr6 * (sr6 - 1) - coef_at_cutoff_);
     }
-    real_type derivative(const real_type r, const pair_parameter_type& p) const noexcept
+    real_type derivative(const real_type r, const parameter_type& params) const noexcept
     {
         constexpr real_type sixth_root_of_two(1.12246204831);
 
-        const real_type sigma   = p.first;
-        const real_type epsilon = p.second;
-        if(r < sigma * sixth_root_of_two ||
-               sigma * this->cutoff_ratio_ < r)
+        if(r < params.sigma * sixth_root_of_two ||
+               params.sigma * cutoff_ratio_ < r)
         {
             return 0;
         }
 
         const real_type rinv = 1 / r;
-        const real_type sr1 = sigma * rinv;
+        const real_type sr1 = params.sigma * rinv;
         const real_type sr3 = sr1 * sr1 * sr1;
         const real_type sr6 = sr3 * sr3;
-        return 24 * epsilon * (sr6 - 2 * sr6 * sr6) * rinv;
+        return 24 * params.epsilon * (sr6 - 2 * sr6 * sr6) * rinv;
     }
 
-    real_type cutoff_ratio()   const noexcept {return this->cutoff_ratio_;}
-    real_type coef_at_cutoff() const noexcept {return this->coef_at_cutoff_;}
+    template<typename T>
+    void initialize(const System<T>&) noexcept {return;}
 
-    real_type max_cutoff_length() const noexcept
+    template<typename T>
+    void update(const System<T>&) noexcept {return;}
+
+    static const char* name() noexcept {return "LennardJonesAttractive";}
+
+    // It takes per-particle parameters and return the maximum cutoff length.
+    // CombinationRule normally uses this.
+    // Note that, pair-parameter and per-particle parameter can differ from
+    // each other. Lorentz-Bertherot uses the same parameter_type because it is
+    // for L-J and L-J-like potentials that has {sigma, epsilon} for each
+    // particle and also for each pair of particles.
+    template<typename InputIterator>
+    real_type max_cutoff(const InputIterator first, const InputIterator last) const noexcept
     {
-        const real_type max_sigma = std::max_element(
-            this->parameters_.cbegin(), this->parameters_.cend(),
-            [](const parameter_type& lhs, const parameter_type& rhs) noexcept {
-                return lhs.first < rhs.first;
-            })->first;
-        return max_sigma * this->cutoff_ratio_;
-    }
+        static_assert(std::is_same<
+                typename std::iterator_traits<InputIterator>::value_type,
+                parameter_type>::value, "");
 
-    void initialize(const system_type& sys, const topology_type& topol) noexcept
+        if(first == last) {return 1;}
+
+        real_type max_sigma = 0;
+        for(auto iter = first; iter != last; ++iter)
+        {
+            const auto& parameter = *iter;
+            max_sigma = std::max(max_sigma, parameter.sigma);
+        }
+        return max_sigma * cutoff_ratio_;
+    }
+    // It returns absolute cutoff length using pair-parameter.
+    // `CombinationTable` uses this.
+    real_type absolute_cutoff(const parameter_type& params) const noexcept
     {
-        MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_LOG_FUNCTION();
-
-        this->update(sys, topol);
-        return;
+        return params.sigma * cutoff_ratio_;
     }
 
-    void update(const system_type& sys, const topology_type& topol) noexcept
-    {
-        MJOLNIR_GET_DEFAULT_LOGGER();
-        MJOLNIR_LOG_FUNCTION();
-
-        // update exclusion list based on sys.topology()
-        exclusion_list_.make(sys, topol);
-        return;
-    }
-
-    // -----------------------------------------------------------------------
-    // for spatial partitions
-    //
-    // Here, the default implementation uses Newton's 3rd law to reduce
-    // calculation. For an interacting pair (i, j), forces applied to i and j
-    // are equal in magnitude and opposite in direction. So, if a pair (i, j) is
-    // listed, (j, i) is not needed.
-    //     See implementation of VerletList, CellList and GlobalPairInteraction
-    // for more details about the usage of these functions.
-
-    std::vector<std::size_t> const& participants() const noexcept {return participants_;}
-
-    range<typename std::vector<std::size_t>::const_iterator>
-    leading_participants() const noexcept
-    {
-        return make_range(participants_.begin(), std::prev(participants_.end()));
-    }
-    range<typename std::vector<std::size_t>::const_iterator>
-    possible_partners_of(const std::size_t participant_idx,
-                         const std::size_t /*particle_idx*/) const noexcept
-    {
-        return make_range(participants_.begin() + participant_idx + 1, participants_.end());
-    }
-    bool has_interaction(const std::size_t i, const std::size_t j) const noexcept
-    {
-        // if not excluded, the pair has interaction.
-        return (i < j) && !exclusion_list_.is_excluded(i, j);
-    }
-    // for testing
-    exclusion_list_type const& exclusion_list() const noexcept
-    {
-        return exclusion_list_;
-    }
-
-    // ------------------------------------------------------------------------
-    // used by Observer.
-    static const char* name() noexcept {return "LennardJones";}
-
-    // ------------------------------------------------------------------------
-    // the following accessers would be used in tests.
-
-    // access to the parameters...
-    std::vector<parameter_type>&       parameters()       noexcept {return parameters_;}
-    std::vector<parameter_type> const& parameters() const noexcept {return parameters_;}
+    real_type cutoff_ratio() const noexcept {return cutoff_ratio_;}
 
   private:
 
     real_type cutoff_ratio_;
     real_type coef_at_cutoff_;
-    container_type parameters_;
-    std::vector<std::size_t> participants_;
-
-    exclusion_list_type  exclusion_list_;
 };
 
 } // mjolnir
@@ -228,10 +123,8 @@ class LennardJonesAttractivePotential
 
 namespace mjolnir
 {
-extern template class LennardJonesAttractivePotential<SimulatorTraits<double, UnlimitedBoundary>       >;
-extern template class LennardJonesAttractivePotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
-extern template class LennardJonesAttractivePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-extern template class LennardJonesAttractivePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+extern template class LennardJonesAttractivePotential<double>;
+extern template class LennardJonesAttractivePotential<float >;
 } // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 

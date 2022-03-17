@@ -5,6 +5,8 @@
 #include <mjolnir/forcefield/external/ExternalDistanceInteraction.hpp>
 #include <mjolnir/forcefield/external/PositionRestraintInteraction.hpp>
 #include <mjolnir/forcefield/external/RectangularBoxInteraction.hpp>
+#include <mjolnir/forcefield/external/PullingForceInteraction.hpp>
+#include <mjolnir/forcefield/external/CoMPullingForceInteraction.hpp>
 #include <mjolnir/core/AxisAlignedPlane.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
@@ -325,6 +327,102 @@ read_afm_flexible_fitting_interaction(const toml::value& external)
             std::move(radii), std::move(image));
 }
 
+template<typename traitsT>
+std::unique_ptr<ExternalForceInteractionBase<traitsT>>
+read_pulling_force_interaction(const toml::value& external)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type       = typename traitsT::real_type;
+    using coordinate_type = typename traitsT::coordinate_type;
+    using interaction_t   = PullingForceInteraction<traitsT>;
+
+    const auto& env = external.contains("env") ? external.at("env") : toml::value{};
+
+    // read radius and participants
+
+    const auto& parameters = toml::find<toml::array>(external, "parameters");
+
+    std::vector<std::pair<std::size_t, coordinate_type>> forces;
+    forces.reserve(parameters.size());
+    for(const auto& para : parameters)
+    {
+        const auto idx = find_parameter<std::size_t>(para, env, "index");
+        if(para.contains("direction"))
+        {
+            const auto dir = find_parameter<coordinate_type>(para, env, "direction");
+            const auto k   = find_parameter<real_type>(para, env, "force");
+            forces.emplace_back(idx, k * math::rlength(dir) * dir);
+        }
+        else
+        {
+            const auto f = find_parameter<coordinate_type>(para, env, "force");
+            forces.emplace_back(idx, f);
+        }
+    }
+
+    return make_unique<interaction_t>(std::move(forces));
+}
+
+template<typename traitsT>
+std::unique_ptr<ExternalForceInteractionBase<traitsT>>
+read_com_pulling_force_interaction(const toml::value& external)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type       = typename traitsT::real_type;
+    using coordinate_type = typename traitsT::coordinate_type;
+    using interaction_t   = CoMPullingForceInteraction<traitsT>;
+
+    const auto& env = external.contains("env") ? external.at("env") : toml::value{};
+
+    const auto& parameters = toml::find<toml::array>(external, "parameters");
+
+    std::vector<std::pair<std::vector<std::size_t>, coordinate_type>> forces;
+    forces.reserve(parameters.size());
+    for(const auto& para : parameters)
+    {
+        std::vector<std::size_t> idxs;
+        if(para.at("indices").is_array())
+        {
+            if (para.at("indices").as_array().at(0).is_integer())
+            {
+                idxs = toml::find<std::vector<std::size_t>>(para, "indices");
+            }
+            else
+            {
+                const auto strs = toml::find<std::vector<std::string>>(para, "indices");
+                for(const auto& str : strs)
+                {
+                    const auto rg = parse_range(str);
+                    idxs.insert(idxs.end(), rg.begin(), rg.end());
+                }
+            }
+        }
+        else // string
+        {
+            const auto str = toml::find<std::string>(para, "indices");
+            const auto rg = parse_range(str);
+            idxs.insert(idxs.end(), rg.begin(), rg.end());
+        }
+        const auto uniquened = std::unique(idxs.begin(), idxs.end());
+        idxs.erase(uniquened, idxs.end());
+
+        if(para.contains("direction"))
+        {
+            const auto dir = find_parameter<coordinate_type>(para, env, "direction");
+            const auto k   = find_parameter<real_type>(para, env, "force");
+            forces.emplace_back(std::move(idxs), (k * math::rlength(dir)) * dir);
+        }
+        else
+        {
+            const auto f = find_parameter<coordinate_type>(para, env, "force");
+            forces.emplace_back(std::move(idxs), f);
+        }
+    }
+    return make_unique<interaction_t>(std::move(forces));
+}
+
 // ----------------------------------------------------------------------------
 // general read_external_interaction function
 // ----------------------------------------------------------------------------
@@ -357,15 +455,28 @@ read_external_interaction(const toml::value& external)
         MJOLNIR_LOG_NOTICE("AFMFlexibleFitting interaction found.");
         return read_afm_flexible_fitting_interaction<traitsT>(external);
     }
+    else if(interaction == "PullingForce")
+    {
+        MJOLNIR_LOG_NOTICE("PullingForce interaction found.");
+        return read_pulling_force_interaction<traitsT>(external);
+    }
+    else if(interaction == "CoMPullingForce")
+    {
+        MJOLNIR_LOG_NOTICE("CoMPullingForce interaction found.");
+        return read_com_pulling_force_interaction<traitsT>(external);
+    }
     else
     {
         throw std::runtime_error(toml::format_error("[error] "
             "mjolnir::read_external_interaction: invalid interaction",
             toml::find(external, "interaction"), "here", {
             "expected value is one of the following.",
-            "- \"Distance\":           interaction depending on the distance between a particle and a structure",
+            "- \"Distance\":           interaction depending on the distance between a particle and a spatial structure",
             "- \"PositionRestraint\":  interaction depending on the distance between a particle and a fixed point",
-            "- \"AFMFlexibleFitting\": interaction that fits molecule to an AFM image"
+            "- \"AFMFlexibleFitting\": interaction that fits molecule to an AFM image",
+            "- \"RectangularBox\":     interaction to a recutangular box",
+            "- \"PullingForce\":       applies a force to the specified particle",
+            "- \"CoMPullingForce\":    applies a force to the center of mass of the specified particles"
             }));
     }
 }

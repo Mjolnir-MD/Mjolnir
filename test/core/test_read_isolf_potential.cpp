@@ -43,9 +43,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_isolf_noenv, T, test_types)
             ]
         )"_toml;
 
-        const auto pot = mjolnir::read_isolf_potential<traits_type>(v);
+        const auto pot_para = mjolnir::read_isolf_potential<traits_type>(v);
+        const auto& para = dynamic_cast<
+            mjolnir::iSoLFAttractiveParameterList<traits_type> const&
+            >(pot_para.second.cref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -53,33 +56,33 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_isolf_noenv, T, test_types)
         BOOST_TEST(within.at("bond")  == 1ul);
         BOOST_TEST(within.at("angle") == 1ul);
 
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 0));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 1));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(1, 1));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(0, 0));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(0, 1));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(1, 1));
 
-        BOOST_TEST(pot.participants().size() ==   5u);
-        BOOST_TEST(pot.participants().at(0)  ==   0u);
-        BOOST_TEST(pot.participants().at(1)  ==   1u);
-        BOOST_TEST(pot.participants().at(2)  ==   2u);
-        BOOST_TEST(pot.participants().at(3)  ==   7u);
-        BOOST_TEST(pot.participants().at(4)  == 100u);
+        BOOST_TEST(para.participants().size() ==   5u);
+        BOOST_TEST(para.participants().at(0)  ==   0u);
+        BOOST_TEST(para.participants().at(1)  ==   1u);
+        BOOST_TEST(para.participants().at(2)  ==   2u);
+        BOOST_TEST(para.participants().at(3)  ==   7u);
+        BOOST_TEST(para.participants().at(4)  == 100u);
 
-        BOOST_TEST(std::get<0>(pot.parameters().at(  0)) == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(std::get<0>(pot.parameters().at(  1)) == real_type(  2.0), tolerance<real_type>());
-        BOOST_TEST(std::get<0>(pot.parameters().at(  2)) == real_type(  5.0), tolerance<real_type>());
-        BOOST_TEST(std::get<0>(pot.parameters().at(  7)) == real_type(  7.0), tolerance<real_type>());
-        BOOST_TEST(std::get<0>(pot.parameters().at(100)) == real_type(100.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  0).sigma == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  1).sigma == real_type(  2.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  2).sigma == real_type(  5.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  7).sigma == real_type(  7.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(100).sigma == real_type(100.0), tolerance<real_type>());
 
-        BOOST_TEST(std::get<1>(pot.parameters().at(  0)) == real_type(1.5), tolerance<real_type>());
-        BOOST_TEST(std::get<1>(pot.parameters().at(  1)) == real_type(1.5), tolerance<real_type>());
-        BOOST_TEST(std::get<1>(pot.parameters().at(  2)) == real_type(0.5), tolerance<real_type>());
-        BOOST_TEST(std::get<1>(pot.parameters().at(  7)) == real_type(0.7), tolerance<real_type>());
-        BOOST_TEST(std::get<1>(pot.parameters().at(100)) == real_type(0.1), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  0).epsilon == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  1).epsilon == real_type(1.5), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  2).epsilon == real_type(0.5), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  7).epsilon == real_type(0.7), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(100).epsilon == real_type(0.1), tolerance<real_type>());
 
-        BOOST_TEST(std::get<2>(pot.parameters().at(  0)) == real_type(1.0), tolerance<real_type>());
-        BOOST_TEST(std::get<2>(pot.parameters().at(  1)) == real_type(1.0), tolerance<real_type>());
-        BOOST_TEST(std::get<2>(pot.parameters().at(  2)) == real_type(1.0), tolerance<real_type>());
-        BOOST_TEST(std::get<2>(pot.parameters().at(  7)) == real_type(1.0), tolerance<real_type>());
-        BOOST_TEST(std::get<2>(pot.parameters().at(100)) == real_type(1.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  0).omega == real_type(1.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  1).omega == real_type(1.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  2).omega == real_type(1.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(  7).omega == real_type(1.0), tolerance<real_type>());
+        BOOST_TEST(para.parameters().at(100).omega == real_type(1.0), tolerance<real_type>());
     }
 }

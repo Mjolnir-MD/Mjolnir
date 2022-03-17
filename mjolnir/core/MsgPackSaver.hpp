@@ -2,6 +2,7 @@
 #define MJOLNIR_CORE_MSGPACK_SAVER_HPP
 #include <mjolnir/util/macro.hpp>
 #include <mjolnir/util/binary_io.hpp>
+#include <mjolnir/util/string.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
 #include <mjolnir/core/System.hpp>
 #include <fstream>
@@ -14,7 +15,7 @@ namespace mjolnir
 // In the current implementation, the order should be preserved.
 //
 // system:
-// fixmap<3> {
+// fixmap<5> {
 //     "boundary"     : fixmap<2>{"lower": [real, real, real],
 //                                "upper": [real, real, real]}
 //                   or nil,
@@ -28,7 +29,18 @@ namespace mjolnir
 //             "group"   : string,
 //         }, ...
 //     ]
+//     "virial"       : [real; 9]
 //     "attributres"  : map<N>{"temperature": real, ...},
+//     "dynamic_variables" : map<N>{"lambda": map<8>{
+//         "type": string,
+//         "x":real,
+//         "v":real,
+//         "f":real,
+//         "m":real,
+//         "gamma":real,
+//         "lower":real,
+//         "upper":real
+//     }, ...}
 // }
 //
 // rng:
@@ -41,8 +53,10 @@ class MsgPackSaver
     using traits_type     = traitsT;
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using system_type     = System<traits_type>;
     using attribute_type  = typename system_type::attribute_type;
+    using variables_type  = typename system_type::variables_type;
     using rng_type        = RandomNumberGenerator<traits_type>;
 
   public:
@@ -85,12 +99,12 @@ class MsgPackSaver
     {
         // 0b'1000'0011
         // 0x    8    3
-        constexpr std::uint8_t fixmap3_code = 0x83;
+        constexpr std::uint8_t fixmap5_code = 0x85;
 
         // ---------------------------------------------------------------------
         // clear buffer before writing to it.
         this->buffer_.clear();
-        this->buffer_.push_back(fixmap3_code);
+        this->buffer_.push_back(fixmap5_code);
 
         // ---------------------------------------------------------------------
         // write boundary condition.
@@ -142,10 +156,22 @@ class MsgPackSaver
         }
 
         // ---------------------------------------------------------------------
+        // write virial of the current state
+
+        to_msgpack("virial");
+        to_msgpack(sys.virial());
+
+        // ---------------------------------------------------------------------
         // write attributes list
 
         to_msgpack("attributes");
         to_msgpack(sys.attributes());
+
+        // ---------------------------------------------------------------------
+        // write dynamic_variables list
+
+        to_msgpack("dynamic_variables");
+        to_msgpack(sys.variables());
 
         // -------------------------------------------------------------------
         // overwrite .msg file by the current status
@@ -224,7 +250,7 @@ class MsgPackSaver
     void to_msgpack(const coordinate_type& v)
     {
         // [float, float, float]
-        // fixmap (3)
+        // fixarray (3)
         // 0b'1001'0011
         // 0x    9    3
         constexpr std::uint8_t fixarray3_code = 0x93;
@@ -232,6 +258,26 @@ class MsgPackSaver
         to_msgpack(math::X(v));
         to_msgpack(math::Y(v));
         to_msgpack(math::Z(v));
+        return ;
+    }
+
+    void to_msgpack(const matrix33_type& m)
+    {
+        // [float; 9]
+        // fixarray (9)
+        // 0b'1001'1001
+        // 0x    9    3
+        constexpr std::uint8_t fixarray9_code = 0x99;
+        buffer_.push_back(fixarray9_code);
+        to_msgpack(m(0, 0));
+        to_msgpack(m(0, 1));
+        to_msgpack(m(0, 2));
+        to_msgpack(m(1, 0));
+        to_msgpack(m(1, 1));
+        to_msgpack(m(1, 2));
+        to_msgpack(m(2, 0));
+        to_msgpack(m(2, 1));
+        to_msgpack(m(2, 2));
         return ;
     }
 
@@ -281,6 +327,71 @@ class MsgPackSaver
             // string -> real
             to_msgpack(keyval.first);
             to_msgpack(keyval.second);
+        }
+        return ;
+    }
+
+    void to_msgpack(const variables_type& dynvars)
+    {
+        constexpr std::uint8_t map16_code = 0xde;
+        constexpr std::uint8_t map32_code = 0xdf;
+
+        if(dynvars.size() < 16)
+        {
+            buffer_.push_back(std::uint8_t(dynvars.size()) + std::uint8_t(0x80));
+        }
+        else if(dynvars.size() < 65536)
+        {
+            buffer_.push_back(map16_code);
+            const std::uint16_t size = dynvars.size();
+            to_big_endian(size);
+        }
+        else
+        {
+            buffer_.push_back(map32_code);
+            const std::uint32_t size = dynvars.size();
+            to_big_endian(size);
+        }
+
+        for(const auto& kv : dynvars)
+        {
+            using namespace mjolnir::literals::string_literals;
+
+            const auto& key = kv.first;
+            const auto& var = kv.second;
+
+            // string -> map<8>{type, x, v, f, m, gamma, lower, upper}
+            to_msgpack(key);
+            if(var.type() == "Default")
+            {
+                buffer_.push_back(std::uint8_t(0x86));
+            }
+            else
+            {
+                buffer_.push_back(std::uint8_t(0x88));
+            }
+
+            to_msgpack("type"_s);  to_msgpack(var.type());
+            to_msgpack("x"_s);     to_msgpack(var.x());
+            to_msgpack("v"_s);     to_msgpack(var.v());
+            to_msgpack("f"_s);     to_msgpack(var.f());
+            to_msgpack("m"_s);     to_msgpack(var.m());
+            to_msgpack("gamma"_s); to_msgpack(var.gamma());
+
+            // Since default dynvar does not have boundary, it returns [-inf, inf]
+            // as the lower and upper boundary. Msgpack can contain inf and nan
+            // values of floating point, because it contains float/double as the
+            // corresponding IEEE 754 format. All's right with the world.
+            //     However, JSON cannot handle inf. People normally do not edit
+            // msgpack itself, because it is a binary file, but might edit json
+            // converted from msgpack. In that case, saving [-inf, inf] becomes
+            // a problem. To avoid this, we omit lower/upper in the case of
+            // default dynamic variables.
+            if(var.type() != "Default")
+            {
+                to_msgpack("lower"_s); to_msgpack(var.lower());
+                to_msgpack("upper"_s); to_msgpack(var.upper());
+            }
         }
         return ;
     }

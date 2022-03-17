@@ -1,6 +1,6 @@
 +++
 title = "3SPN2Bond"
-weight = 700000
+weight = 1000000
 +++
 
 # 3SPN2BondPotential
