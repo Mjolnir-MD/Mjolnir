@@ -1,0 +1,67 @@
+<!doctype html><html lang=ja><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Reference #  Mjolnirにはコマンドラインオプションはありません。 設定には入力ファイルを使用し、実行は以下のような形になります。
+$ mjolnir sample.toml ここでは、入力ファイルの主なコンポーネントを紹介します。
+ファイルのフォーマットはTOML v1.0.0に準拠します。 TOMLファイルについては公式サイトを参照して下さい。 仕様の日本語への翻訳も提供されています。
+入力ファイルには大きく5つの項目があり、それぞれがテーブル、またはテーブルの配列になっています。
+[files] #  入力ファイルや出力ファイルのファイル名やパス、フォーマットなどの指定を行います。
+[units] #  単位系を設定します。
+[[forcefields]]のエネルギーのパラメータや[[systems]]での粒子の位置など、 ファイルから入力される数値は、ここで指定された単位系として解釈されます。
+[simulator] #  シミュレーションのプロトコルを決めるテーブルです。 時間刻みや、何ステップのシミュレーションを行うか、何ステップごとに出力するかなどを 設定します。また、計算精度や境界条件の設定も行います。
+メインの入力ファイルとは別のファイルとして設定可能です。
+[[systems]] #  系にある粒子や系に属するパラメータ、境界の具体的な形などを設定します。 距離などの単位は[units]での設定に準じます。
+複数のsystemを扱うシミュレーションのために、テーブルの配列として定義されています。 通常のシミュレーションでは、一つしか定義されません。
+メインの入力ファイルとは別のファイルとして設定可能です。
+[[forcefields]] #  用いる力場を設定します。 パラメータの単位は[units]での設定に準じます。
+複数の力場を扱うシミュレーションのために、テーブルの配列として定義されています。 通常のシミュレーションでは、一つしか定義されません。
+メインの入力ファイルとは別のファイルとして設定可能です。
+ファイルのインクルード #  入力ファイルの全ての箇所で、includeという変数は特別な意味を持ちます。
+includeは文字列型もしくは文字列の配列型を持つことができ、ファイルを指定することができます。 このファイルのパスは[files]テーブルで指定されるfiles.input.pathの影響を受けます。
+# main.toml [[forcefields]] include = [  &#34;bond-length.toml&#34;,  &#34;bond-angle.toml&#34;  &#34;lennard-jones.toml&#34;, ] このようにファイルを指定すると、そのファイル内に定義されている値がincludeを指定したテーブルの下にマージされます。
+以下のようなファイルを用意した場合、
+# bond-length.toml [[local]] interaction = &#34;BondLength&#34; potential = &#34;Harmonic&#34; parameters = [  # ."><meta name=theme-color content="#FFFFFF"><meta property="og:title" content="Reference"><meta property="og:description" content><meta property="og:type" content="website"><meta property="og:url" content="http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/"><title>Reference | Mjolnir documentation</title><link rel=manifest href=/Mjolnir/manifest.json><link rel=icon href=/Mjolnir/favicon.png type=image/x-icon><link rel=alternate hreflang=en href=http://mjolnir-md.github.io/Mjolnir/docs/reference/ title=Reference><link rel=stylesheet href=/Mjolnir/book.min.d08be657f4d0d61b509ac06e1059e92fd1c66f15535a6bd4cee27e19935f34ae.css integrity="sha256-0IvmV/TQ1htQmsBuEFnpL9HGbxVTWmvUzuJ+GZNfNK4="><script defer src=/Mjolnir/ja.search.min.3e3069284ff6b656162a6bc7f49492fd21b7466717ea0ab309e354365ad449f8.js integrity="sha256-PjBpKE/2tlYWKmvH9JSS/SG3RmcX6gqzCeNUNlrUSfg="></script>
+<link rel=alternate type=application/rss+xml href=http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/index.xml title="Mjolnir documentation"></head><body><input type=checkbox class="hidden toggle" id=menu-control>
+<input type=checkbox class="hidden toggle" id=toc-control><main class="container flex"><aside class=book-menu><nav><h2 class=book-brand><a href=/Mjolnir/ja><span>Mjolnir documentation</span></a></h2><div class=book-search><input type=text id=book-search-input placeholder=検索 aria-label=検索 maxlength=64 data-hotkeys=s/><div class="book-search-spinner hidden"></div><ul id=book-search-results></ul></div><ul><li><a href=/Mjolnir/ja/docs/installation/>Installation</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/ class=active>Reference</a><ul><li><a href=/Mjolnir/ja/docs/reference/files/>Files</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/units/>Units</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/simulators/ class=collapsed>Simulators</a></li><li><a href=/Mjolnir/ja/docs/reference/integrators/ class=collapsed>Integrators</a></li><li><a href=/Mjolnir/ja/docs/reference/system/>System</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/ class=collapsed>ForceFields</a></li></ul></li><li><a href=/Mjolnir/ja/docs/tutorial/ class=collapsed>Tutorial</a></li><li><a href=/Mjolnir/ja/docs/developersguide/>Developer's Guide</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/glossary/>Glossary</a><ul></ul></li></ul><ul><li><a href=https://github.com/Mjolnir-MD/Mjolnir target=_blank rel=noopener>GitHub</a></li></ul></nav><script>(function(){var e=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script></aside><div class=book-page><header class=book-header><div class="flex align-center justify-between"><label for=menu-control><img src=/Mjolnir/svg/menu.svg class=book-icon alt=Menu></label>
+<strong>Reference</strong>
+<label for=toc-control><img src=/Mjolnir/svg/toc.svg class=book-icon alt="Table of Contents"></label></div><aside class="hidden clearfix"><nav id=TableOfContents><ul><li><a href=#reference>Reference</a><ul><li><a href=#fileshahahugoshortcode-s0-hbhb><a href=HAHAHUGOSHORTCODE-s0-HBHB><code>[files]</code></a></a></li><li><a href=#unitshahahugoshortcode-s1-hbhb><a href=HAHAHUGOSHORTCODE-s1-HBHB><code>[units]</code></a></a></li><li><a href=#simulatorhahahugoshortcode-s2-hbhb><a href=HAHAHUGOSHORTCODE-s2-HBHB><code>[simulator]</code></a></a></li><li><a href=#systemshahahugoshortcode-s3-hbhb><a href=HAHAHUGOSHORTCODE-s3-HBHB><code>[[systems]]</code></a></a></li><li><a href=#forcefieldshahahugoshortcode-s4-hbhb><a href=HAHAHUGOSHORTCODE-s4-HBHB><code>[[forcefields]]</code></a></a></li><li><a href=#ファイルのインクルード>ファイルのインクルード</a></li></ul></li></ul></nav></aside></header><article class=markdown><h1 id=reference>Reference
+<a class=anchor href=#reference>#</a></h1><p>Mjolnirにはコマンドラインオプションはありません。
+設定には入力ファイルを使用し、実行は以下のような形になります。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>$ mjolnir sample.toml
+</span></span></code></pre></div><p>ここでは、入力ファイルの主なコンポーネントを紹介します。</p><p>ファイルのフォーマットはTOML v1.0.0に準拠します。
+TOMLファイルについては<a href=https://toml.io>公式サイト</a>を参照して下さい。
+<a href=https://toml.io/ja/v1.0.0-rc2>仕様の日本語への翻訳</a>も提供されています。</p><p>入力ファイルには大きく5つの項目があり、それぞれがテーブル、またはテーブルの配列になっています。</p><h2 id=fileshahahugoshortcode-s0-hbhb><a href=/Mjolnir/ja/docs/reference/files/><code>[files]</code></a>
+<a class=anchor href=#fileshahahugoshortcode-s0-hbhb>#</a></h2><p>入力ファイルや出力ファイルのファイル名やパス、フォーマットなどの指定を行います。</p><h2 id=unitshahahugoshortcode-s1-hbhb><a href=/Mjolnir/ja/docs/reference/units/><code>[units]</code></a>
+<a class=anchor href=#unitshahahugoshortcode-s1-hbhb>#</a></h2><p>単位系を設定します。</p><p><code>[[forcefields]]</code>のエネルギーのパラメータや<code>[[systems]]</code>での粒子の位置など、
+ファイルから入力される数値は、ここで指定された単位系として解釈されます。</p><h2 id=simulatorhahahugoshortcode-s2-hbhb><a href=/Mjolnir/ja/docs/reference/simulators/><code>[simulator]</code></a>
+<a class=anchor href=#simulatorhahahugoshortcode-s2-hbhb>#</a></h2><p>シミュレーションのプロトコルを決めるテーブルです。
+時間刻みや、何ステップのシミュレーションを行うか、何ステップごとに出力するかなどを
+設定します。また、計算精度や境界条件の設定も行います。</p><p>メインの入力ファイルとは別のファイルとして設定可能です。</p><h2 id=systemshahahugoshortcode-s3-hbhb><a href=/Mjolnir/ja/docs/reference/system/><code>[[systems]]</code></a>
+<a class=anchor href=#systemshahahugoshortcode-s3-hbhb>#</a></h2><p>系にある粒子や系に属するパラメータ、境界の具体的な形などを設定します。
+距離などの単位は<code>[units]</code>での設定に準じます。</p><p>複数の<code>system</code>を扱うシミュレーションのために、テーブルの配列として定義されています。
+通常のシミュレーションでは、一つしか定義されません。</p><p>メインの入力ファイルとは別のファイルとして設定可能です。</p><h2 id=forcefieldshahahugoshortcode-s4-hbhb><a href=/Mjolnir/ja/docs/reference/forcefields/><code>[[forcefields]]</code></a>
+<a class=anchor href=#forcefieldshahahugoshortcode-s4-hbhb>#</a></h2><p>用いる力場を設定します。
+パラメータの単位は<code>[units]</code>での設定に準じます。</p><p>複数の力場を扱うシミュレーションのために、テーブルの配列として定義されています。
+通常のシミュレーションでは、一つしか定義されません。</p><p>メインの入力ファイルとは別のファイルとして設定可能です。</p><h2 id=ファイルのインクルード>ファイルのインクルード
+<a class=anchor href=#%e3%83%95%e3%82%a1%e3%82%a4%e3%83%ab%e3%81%ae%e3%82%a4%e3%83%b3%e3%82%af%e3%83%ab%e3%83%bc%e3%83%89>#</a></h2><p>入力ファイルの全ての箇所で、<code>include</code>という変数は特別な意味を持ちます。</p><p><code>include</code>は文字列型もしくは文字列の配列型を持つことができ、ファイルを指定することができます。
+このファイルのパスは<code>[files]</code>テーブルで指定される<code>files.input.path</code>の影響を受けます。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span><span style=color:#6272a4># main.toml</span>
+</span></span><span style=display:flex><span>[[forcefields]]
+</span></span><span style=display:flex><span>include = [
+</span></span><span style=display:flex><span>    <span style=color:#f1fa8c>&#34;bond-length.toml&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f1fa8c>&#34;bond-angle.toml&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f1fa8c>&#34;lennard-jones.toml&#34;</span>,
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>このようにファイルを指定すると、そのファイル内に定義されている値が<code>include</code>を指定したテーブルの下にマージされます。</p><p>以下のようなファイルを用意した場合、</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span><span style=color:#6272a4># bond-length.toml</span>
+</span></span><span style=display:flex><span>[[local]]
+</span></span><span style=display:flex><span>interaction = <span style=color:#f1fa8c>&#34;BondLength&#34;</span>
+</span></span><span style=display:flex><span>potential   = <span style=color:#f1fa8c>&#34;Harmonic&#34;</span>
+</span></span><span style=display:flex><span>parameters  = [
+</span></span><span style=display:flex><span>    <span style=color:#6272a4># ...</span>
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>内部的なファイルの内容は以下の形になります。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span>[[forcefields]]
+</span></span><span style=display:flex><span>[[forcefields.local]]
+</span></span><span style=display:flex><span>interaction = <span style=color:#f1fa8c>&#34;BondLength&#34;</span>
+</span></span><span style=display:flex><span>potential   = <span style=color:#f1fa8c>&#34;Harmonic&#34;</span>
+</span></span><span style=display:flex><span>parameters  = [
+</span></span><span style=display:flex><span>    <span style=color:#6272a4># ...</span>
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>ここで、展開は最初の一回だけ行われ、再帰的な展開はなされないことに注意してください。</p></article><footer class=book-footer><div class="flex flex-wrap justify-between"><div class=book-languages tabindex=0 aria-haspopup=true><ul><li class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</li></ul><ul class=book-languages-list><li><a href=http://mjolnir-md.github.io/Mjolnir/docs/reference/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+English</a></li><li class=active><a href=http://mjolnir-md.github.io/Mjolnir/ja/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</a></li></ul></div></div></footer><div class=book-comments></div><label for=menu-control class="hidden book-menu-overlay"></label></div><aside class=book-toc><nav id=TableOfContents><ul><li><a href=#reference>Reference</a><ul><li><a href=#fileshahahugoshortcode-s0-hbhb><a href=HAHAHUGOSHORTCODE-s0-HBHB><code>[files]</code></a></a></li><li><a href=#unitshahahugoshortcode-s1-hbhb><a href=HAHAHUGOSHORTCODE-s1-HBHB><code>[units]</code></a></a></li><li><a href=#simulatorhahahugoshortcode-s2-hbhb><a href=HAHAHUGOSHORTCODE-s2-HBHB><code>[simulator]</code></a></a></li><li><a href=#systemshahahugoshortcode-s3-hbhb><a href=HAHAHUGOSHORTCODE-s3-HBHB><code>[[systems]]</code></a></a></li><li><a href=#forcefieldshahahugoshortcode-s4-hbhb><a href=HAHAHUGOSHORTCODE-s4-HBHB><code>[[forcefields]]</code></a></a></li><li><a href=#ファイルのインクルード>ファイルのインクルード</a></li></ul></li></ul></nav></aside></main></body></html>

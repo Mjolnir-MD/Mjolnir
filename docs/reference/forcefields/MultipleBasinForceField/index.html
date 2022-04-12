@@ -1,0 +1,116 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="MultipleBasinForceField #  MultipleBasinForceField connects different forcefields and makes it possible to change states between those two forcefields smoothly.
+It is developed in the following paper as a method that enables conformational changes with Coarse-Grained model by employing multiple off-lattice Go potentials.
+ Kei-ichi Okazaki, Nobuyasu Koga, Shoji Takada, Jose N. Onuchic, and Peter G. Wolynes PNAS (2006)  Mjolnir implements this as a generalized form, and we can use any forcefields as a &ldquo;Basin&rdquo; in a Multiple Basin forcefield."><meta name=theme-color content="#FFFFFF"><meta property="og:title" content="MultipleBasin"><meta property="og:description" content="MultipleBasinForceField #  MultipleBasinForceField connects different forcefields and makes it possible to change states between those two forcefields smoothly.
+It is developed in the following paper as a method that enables conformational changes with Coarse-Grained model by employing multiple off-lattice Go potentials.
+ Kei-ichi Okazaki, Nobuyasu Koga, Shoji Takada, Jose N. Onuchic, and Peter G. Wolynes PNAS (2006)  Mjolnir implements this as a generalized form, and we can use any forcefields as a &ldquo;Basin&rdquo; in a Multiple Basin forcefield."><meta property="og:type" content="article"><meta property="og:url" content="http://mjolnir-md.github.io/Mjolnir/docs/reference/forcefields/MultipleBasinForceField/"><meta property="article:section" content="docs"><title>MultipleBasin | Mjolnir documentation</title><link rel=manifest href=/Mjolnir/manifest.json><link rel=icon href=/Mjolnir/favicon.png type=image/x-icon><link rel=alternate hreflang=ja href=http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/forcefields/MultipleBasinForceField/ title=MultipleBasin><link rel=stylesheet href=/Mjolnir/book.min.d08be657f4d0d61b509ac06e1059e92fd1c66f15535a6bd4cee27e19935f34ae.css integrity="sha256-0IvmV/TQ1htQmsBuEFnpL9HGbxVTWmvUzuJ+GZNfNK4="><script defer src=/Mjolnir/en.search.min.1d89302bbdadea597cd19fe42e7fd26b339538b1278bff549e4c500144106559.js integrity="sha256-HYkwK72t6ll80Z/kLn/SazOVOLEni/9UnkxQAUQQZVk="></script></head><body><input type=checkbox class="hidden toggle" id=menu-control>
+<input type=checkbox class="hidden toggle" id=toc-control><main class="container flex"><aside class=book-menu><nav><h2 class=book-brand><a href=/Mjolnir><span>Mjolnir documentation</span></a></h2><div class=book-search><input type=text id=book-search-input placeholder=Search aria-label=Search maxlength=64 data-hotkeys=s/><div class="book-search-spinner hidden"></div><ul id=book-search-results></ul></div><ul><li><a href=/Mjolnir/docs/installation/>Installation</a><ul></ul></li><li><a href=/Mjolnir/docs/reference/>Reference</a><ul><li><a href=/Mjolnir/docs/reference/files/>Files</a><ul></ul></li><li><a href=/Mjolnir/docs/reference/units/>Units</a><ul></ul></li><li><a href=/Mjolnir/docs/reference/simulators/ class=collapsed>Simulators</a></li><li><a href=/Mjolnir/docs/reference/integrators/ class=collapsed>Integrators</a></li><li><a href=/Mjolnir/docs/reference/system/>System</a><ul></ul></li><li><a href=/Mjolnir/docs/reference/forcefields/ class=collapsed>ForceFields</a><ul><li><a href=/Mjolnir/docs/reference/forcefields/local/ class=collapsed>Local</a></li><li><a href=/Mjolnir/docs/reference/forcefields/global/ class=collapsed>Global</a></li><li><a href=/Mjolnir/docs/reference/forcefields/external/ class=collapsed>External</a></li><li><a href=/Mjolnir/docs/reference/forcefields/constraint/>Constraint</a><ul></ul></li><li><a href=/Mjolnir/docs/reference/forcefields/MultipleBasinForceField/ class=active>MultipleBasin</a></li><li><a href=/Mjolnir/docs/reference/forcefields/HybridForceField/>HybridForceField</a></li><li><a href=/Mjolnir/docs/reference/forcefields/Topology/>Topology</a></li></ul></li></ul></li><li><a href=/Mjolnir/docs/tutorial/ class=collapsed>Tutorial</a></li><li><a href=/Mjolnir/docs/developersguide/>Developer's Guide</a><ul></ul></li><li><a href=/Mjolnir/docs/glossary/>Glossary</a><ul></ul></li></ul><ul><li><a href=https://github.com/Mjolnir-MD/Mjolnir target=_blank rel=noopener>GitHub</a></li></ul></nav><script>(function(){var e=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script></aside><div class=book-page><header class=book-header><div class="flex align-center justify-between"><label for=menu-control><img src=/Mjolnir/svg/menu.svg class=book-icon alt=Menu></label>
+<strong>MultipleBasin</strong>
+<label for=toc-control><img src=/Mjolnir/svg/toc.svg class=book-icon alt="Table of Contents"></label></div><aside class="hidden clearfix"><nav id=TableOfContents><ul><li><a href=#multiplebasinforcefield>MultipleBasinForceField</a><ul><li><a href=#example-input>Example input</a></li><li><a href=#note-for-aicg2-forcefields>Note for AICG2+ forcefields</a><ul><li><a href=#bond-length-parameter>Bond length parameter</a></li><li><a href=#native-contact-parameter>Native contact parameter</a></li></ul></li></ul></li></ul></nav></aside></header><article class=markdown><h1 id=multiplebasinforcefield>MultipleBasinForceField
+<a class=anchor href=#multiplebasinforcefield>#</a></h1><p>MultipleBasinForceField connects different forcefields and makes it possible to change states between those two forcefields smoothly.</p><p>It is developed in the following paper as a method that enables conformational changes with Coarse-Grained model by employing multiple off-lattice Go potentials.</p><ul><li>Kei-ichi Okazaki, Nobuyasu Koga, Shoji Takada, Jose N. Onuchic, and Peter G. Wolynes PNAS (2006)</li></ul><p>Mjolnir implements this as a generalized form, and we can use any forcefields as a &ldquo;Basin&rdquo; in a Multiple Basin forcefield.</p><p>In this model, the potential function
+<link rel=stylesheet href=/Mjolnir/katex/katex.min.css><script defer src=/Mjolnir/katex/katex.min.js></script>
+<script defer src=/Mjolnir/katex/auto-render.min.js onload=renderMathInElement(document.body)></script><span>
+\( V_{MB} \)</span>
+is defined as a minimum eigenvalue of the matrix that appears at the left hand side of the following equation.</p><span>\[\begin{pmatrix}
+V_1 + \Delta V_1 & \Delta \\
+\Delta & V_2 + \Delta V_2
+\end{pmatrix}
+\begin{pmatrix}
+c_1 \\ c_2
+\end{pmatrix}
+= V_{MB}
+\begin{pmatrix}
+c_1 \\ c_2
+\end{pmatrix}\]</span><p>The elements of the eigenvalue, <span>\( c_1 \)</span>
+and <span>\( c_2 \)</span>
+, can be interpreted as a density of the corresponding states.</p><p>As a reaction coordinate, the following value will be printed along with the energy values.</p><span>\[\chi = \log\left(\frac{c_2}{c_1}\right)\]</span><p>Note that this value will becomes NaN in the case of <span>\( 0 &lt; \Delta \)</span>
+.
+To avoid this, Mjolnir makes <span>\(\Delta\)</span>
+always negative.
+<span>\( V_{MB} \)</span>
+depends on <span>\( \Delta^2 \)</span>
+, so only the absolute value of <span>\( \Delta \)</span>
+matters.</p><p>In case of 2-basin unit, you can restrain <span>\( \chi \)</span>
+by using harmonic potential.</p><span>\[V_{Bias} = k (\chi - \chi_0)^2\]</span><p>You can perform umbrella sampling along the reaction coordinate, <span>\( \chi \)</span>
+.
+This will help you when you need to determine the value of <span>\( \Delta \)</span>
+and <span>\( \Delta V \)</span>
+.</p><hr><p>The 3-basin case is also defined in a similar way.</p><span>\[\begin{pmatrix}
+V_1 + \Delta V_1 & \Delta_{12} & \Delta_{13} \\
+\Delta_{21} & V_2 + \Delta V_2 & \Delta_{23} \\
+\Delta_{31} & \Delta_{32} & V_3 + \Delta V_3 \\
+\end{pmatrix}
+\begin{pmatrix}
+c_1 \\ c_2 \\ c_3
+\end{pmatrix}
+= V_{MB}
+\begin{pmatrix}
+c_1 \\ c_2 \\ c_3
+\end{pmatrix}\]</span><p>Here, <span>\(\Delta_{ij} = \Delta_{ji}\)</span>
+.</p><p>Currently, Mjolnir only supports 2 or 3 forcefields in MultipleBasin.</p><p>Note that all the forcefields should have the same topology.</p><h2 id=example-input>Example input
+<a class=anchor href=#example-input>#</a></h2><p>First, you need to define and name several forcefields to be connected.
+Note that a forcefield named as <code>"common"</code> will always be applied independent from MultipleBasin forcefield.</p><p>Then, set <code>forcefields.type = "MultipleBasin"</code> in <code>[simulator]</code> table and provide parameters for MultipleBasin.</p><p>Mjolnir allows to define several MultipleBasin units.
+This feature would be helpful in a case when you have several proteins that undergoes conformational changed independently from each other.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span>[simulator]
+</span></span><span style=display:flex><span>type          = <span style=color:#f1fa8c>&#34;MolecularDynamics&#34;</span>
+</span></span><span style=display:flex><span>boundary_type = <span style=color:#f1fa8c>&#34;Unlimited&#34;</span>
+</span></span><span style=display:flex><span>precision     = <span style=color:#f1fa8c>&#34;double&#34;</span>
+</span></span><span style=display:flex><span>delta_t       = <span style=color:#bd93f9>0.1</span>
+</span></span><span style=display:flex><span>total_step    = <span style=color:#bd93f9>1000000</span>
+</span></span><span style=display:flex><span>save_step     =   <span style=color:#bd93f9>1_000</span>
+</span></span><span style=display:flex><span>seed          = <span style=color:#bd93f9>2859805901</span>
+</span></span><span style=display:flex><span>integrator.type = <span style=color:#f1fa8c>&#34;BAOABLangevin&#34;</span>
+</span></span><span style=display:flex><span>integrator.gammas = [
+</span></span><span style=display:flex><span>    <span style=color:#6272a4># ...</span>
+</span></span><span style=display:flex><span>]
+</span></span><span style=display:flex><span>forcefields.type = <span style=color:#f1fa8c>&#34;MultipleBasin&#34;</span>
+</span></span><span style=display:flex><span>forcefields.units = [
+</span></span><span style=display:flex><span>{basins = [<span style=color:#f1fa8c>&#34;open&#34;</span>, <span style=color:#f1fa8c>&#34;close&#34;</span>], dVs = [<span style=color:#bd93f9>0.0</span>, <span style=color:#bd93f9>-12.0</span>], delta = <span style=color:#bd93f9>150.0</span>},
+</span></span><span style=display:flex><span>]
+</span></span><span style=display:flex><span><span style=color:#6272a4>#</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4># Or, the following has the same meaning.</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4># </span>
+</span></span><span style=display:flex><span><span style=color:#6272a4># [simulator.forcefields]</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4># type = &#34;MultipleBasin&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4># [[simulator.forcefields.units]]</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4># basins = [&#34;open&#34;, &#34;close&#34;],</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4># dVs    = [0.0, -12.0],</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4># delta  = 150.0,</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>[[forcefields]]
+</span></span><span style=display:flex><span>name = <span style=color:#f1fa8c>&#34;open&#34;</span>
+</span></span><span style=display:flex><span>[[forcefields.local]]
+</span></span><span style=display:flex><span><span style=color:#6272a4># ...</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>[[forcefields]]
+</span></span><span style=display:flex><span>name = <span style=color:#f1fa8c>&#34;close&#34;</span>
+</span></span><span style=display:flex><span>[[forcefields.local]]
+</span></span><span style=display:flex><span><span style=color:#6272a4># ...</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>[[forcefields]]
+</span></span><span style=display:flex><span>name = <span style=color:#f1fa8c>&#34;common&#34;</span>
+</span></span><span style=display:flex><span>[[forcefields.local]]
+</span></span><span style=display:flex><span><span style=color:#6272a4># ...</span>
+</span></span></code></pre></div><p>To restrain <span>\( \chi \)</span>
+, define <code>k_chi</code> and <code>chi_0</code>.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span>forcefields.type = <span style=color:#f1fa8c>&#34;MultipleBasin&#34;</span>
+</span></span><span style=display:flex><span>forcefields.units = [
+</span></span><span style=display:flex><span>{basins = [<span style=color:#f1fa8c>&#34;open&#34;</span>, <span style=color:#f1fa8c>&#34;close&#34;</span>], dVs = [<span style=color:#bd93f9>0.0</span>, <span style=color:#bd93f9>-12.0</span>], delta = <span style=color:#bd93f9>150.0</span>, k_chi = <span style=color:#bd93f9>100.0</span>, chi_0 = <span style=color:#bd93f9>0.0</span>},
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>To use 3-basin model, do the following.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span>[simulator.forcefields]
+</span></span><span style=display:flex><span>type = <span style=color:#f1fa8c>&#34;MultipleBasin&#34;</span>
+</span></span><span style=display:flex><span>[[simulator.forcefields.units]]
+</span></span><span style=display:flex><span>basins = [<span style=color:#f1fa8c>&#34;open&#34;</span>, <span style=color:#f1fa8c>&#34;mid&#34;</span>, <span style=color:#f1fa8c>&#34;close&#34;</span>]
+</span></span><span style=display:flex><span>dVs    = [   <span style=color:#bd93f9>0.0</span>,  <span style=color:#bd93f9>15.0</span>,   <span style=color:#bd93f9>-10.0</span>]
+</span></span><span style=display:flex><span>delta.open-mid   =  <span style=color:#bd93f9>60.0</span> <span style=color:#6272a4># concatenate basin name by `-`.</span>
+</span></span><span style=display:flex><span>delta.mid-close  =  <span style=color:#bd93f9>50.0</span> <span style=color:#6272a4># do not include `-` in basin names to avoid confusion.</span>
+</span></span><span style=display:flex><span>delta.close-open = <span style=color:#bd93f9>100.0</span>
+</span></span></code></pre></div><h2 id=note-for-aicg2-forcefields>Note for AICG2+ forcefields
+<a class=anchor href=#note-for-aicg2-forcefields>#</a></h2><p>When AICG2+ is used with MultipleBasin, you may need to modify AICG2+ parameters slightly.
+In such a case, we will have several reference structures for the same protein.
+The native bond lengthes, bond angles, dihedral angles, and native contact distances could be different between reference structures and some of the native contacts could be defined only in one reference structure.</p><h3 id=bond-length-parameter>Bond length parameter
+<a class=anchor href=#bond-length-parameter>#</a></h3><p>When two native bond lengthes that correspond to the same pair of particles are too distant, the force coefficient will be moderated to decrease energy value at the transition state.</p><span>\[K'_{bond} = K_{bond} \times \mathrm{min}\left(1, \frac{E_{max}}{K_b(b_i^{(1)} - b_i^{(2)})^2}\right)\]</span><p>Normally, people use 100 kcal/mol as <span>\( E_{max} \)</span>
+.</p><h3 id=native-contact-parameter>Native contact parameter
+<a class=anchor href=#native-contact-parameter>#</a></h3><p>The modification on native contacts are complicated.</p><p>There are 3 different cases.</p><ol><li>The pair of particles has native contact in all the reference structures.</li><li>In one reference structure, the pair forms a native contact, but not in another.</li><li>No contact is defined in any of the reference structures.</li></ol><p>In the case of <code>1.</code>, the repulsive part of the native contacts will be modified.
+Always the minimum native distance is used as the native distance of the repulsive part, while the attractive part is unchanged.</p><p>In the case of <code>2.</code>, the forcefield that has the native contact is unchanged.
+But for the forcefield that does not have the native contact will have the repulsive part of the contact.</p><p>In the last case, <code>3.</code>, the same excluded volume interaction will be applied.</p></article><footer class=book-footer><div class="flex flex-wrap justify-between"><div class=book-languages tabindex=0 aria-haspopup=true><ul><li class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+English</li></ul><ul class=book-languages-list><li class=active><a href=http://mjolnir-md.github.io/Mjolnir/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+English</a></li><li><a href=http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/forcefields/MultipleBasinForceField/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</a></li></ul></div></div></footer><div class=book-comments></div><label for=menu-control class="hidden book-menu-overlay"></label></div><aside class=book-toc><nav id=TableOfContents><ul><li><a href=#multiplebasinforcefield>MultipleBasinForceField</a><ul><li><a href=#example-input>Example input</a></li><li><a href=#note-for-aicg2-forcefields>Note for AICG2+ forcefields</a><ul><li><a href=#bond-length-parameter>Bond length parameter</a></li><li><a href=#native-contact-parameter>Native contact parameter</a></li></ul></li></ul></li></ul></nav></aside></main></body></html>

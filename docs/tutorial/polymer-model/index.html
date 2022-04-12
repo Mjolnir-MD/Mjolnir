@@ -1,0 +1,141 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="A simple polymer model #  This time, we will run a molecular dynamics simulation of 100 particles connected by springs.
+[files] and [units] #  Same as the previous example, we first define the names and the format of output files.
+[files] output.prefix = &#34;polymer-model&#34; output.path = &#34;./&#34; output.format = &#34;xyz&#34; To see the complete list of available options, see files section in the reference.
+Also, we need to define unit system to be used."><meta name=theme-color content="#FFFFFF"><meta property="og:title" content="A simple polymer model"><meta property="og:description" content="A simple polymer model #  This time, we will run a molecular dynamics simulation of 100 particles connected by springs.
+[files] and [units] #  Same as the previous example, we first define the names and the format of output files.
+[files] output.prefix = &#34;polymer-model&#34; output.path = &#34;./&#34; output.format = &#34;xyz&#34; To see the complete list of available options, see files section in the reference.
+Also, we need to define unit system to be used."><meta property="og:type" content="article"><meta property="og:url" content="http://mjolnir-md.github.io/Mjolnir/docs/tutorial/polymer-model/"><meta property="article:section" content="docs"><title>A simple polymer model | Mjolnir documentation</title><link rel=manifest href=/Mjolnir/manifest.json><link rel=icon href=/Mjolnir/favicon.png type=image/x-icon><link rel=alternate hreflang=ja href=http://mjolnir-md.github.io/Mjolnir/ja/docs/tutorial/polymer-model/ title="A simple polymer model"><link rel=stylesheet href=/Mjolnir/book.min.d08be657f4d0d61b509ac06e1059e92fd1c66f15535a6bd4cee27e19935f34ae.css integrity="sha256-0IvmV/TQ1htQmsBuEFnpL9HGbxVTWmvUzuJ+GZNfNK4="><script defer src=/Mjolnir/en.search.min.1d89302bbdadea597cd19fe42e7fd26b339538b1278bff549e4c500144106559.js integrity="sha256-HYkwK72t6ll80Z/kLn/SazOVOLEni/9UnkxQAUQQZVk="></script></head><body><input type=checkbox class="hidden toggle" id=menu-control>
+<input type=checkbox class="hidden toggle" id=toc-control><main class="container flex"><aside class=book-menu><nav><h2 class=book-brand><a href=/Mjolnir><span>Mjolnir documentation</span></a></h2><div class=book-search><input type=text id=book-search-input placeholder=Search aria-label=Search maxlength=64 data-hotkeys=s/><div class="book-search-spinner hidden"></div><ul id=book-search-results></ul></div><ul><li><a href=/Mjolnir/docs/installation/>Installation</a><ul></ul></li><li><a href=/Mjolnir/docs/reference/>Reference</a><ul><li><a href=/Mjolnir/docs/reference/files/>Files</a><ul></ul></li><li><a href=/Mjolnir/docs/reference/units/>Units</a><ul></ul></li><li><a href=/Mjolnir/docs/reference/simulators/ class=collapsed>Simulators</a></li><li><a href=/Mjolnir/docs/reference/integrators/ class=collapsed>Integrators</a></li><li><a href=/Mjolnir/docs/reference/system/>System</a><ul></ul></li><li><a href=/Mjolnir/docs/reference/forcefields/ class=collapsed>ForceFields</a></li></ul></li><li><a href=/Mjolnir/docs/tutorial/ class=collapsed>Tutorial</a><ul><li><a href=/Mjolnir/docs/tutorial/lennard-jones/>The Lennard-Jones fluid</a></li><li><a href=/Mjolnir/docs/tutorial/polymer-model/ class=active>A simple polymer model</a></li></ul></li><li><a href=/Mjolnir/docs/developersguide/>Developer's Guide</a><ul></ul></li><li><a href=/Mjolnir/docs/glossary/>Glossary</a><ul></ul></li></ul><ul><li><a href=https://github.com/Mjolnir-MD/Mjolnir target=_blank rel=noopener>GitHub</a></li></ul></nav><script>(function(){var e=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script></aside><div class=book-page><header class=book-header><div class="flex align-center justify-between"><label for=menu-control><img src=/Mjolnir/svg/menu.svg class=book-icon alt=Menu></label>
+<strong>A simple polymer model</strong>
+<label for=toc-control><img src=/Mjolnir/svg/toc.svg class=book-icon alt="Table of Contents"></label></div><aside class="hidden clearfix"><nav id=TableOfContents><ul><li><a href=#a-simple-polymer-model>A simple polymer model</a><ul><li><a href=#files-and-units><code>[files]</code> and <code>[units]</code></a></li><li><a href=#simulator><code>[simulator]</code></a></li><li><a href=#systems><code>[[systems]]</code></a></li><li><a href=#forcefields><code>[[forcefields]]</code></a></li><li><a href=#simulation>Simulation</a></li><li><a href=#conclusion>Conclusion</a></li></ul></li></ul></nav></aside></header><article class=markdown><h1 id=a-simple-polymer-model>A simple polymer model
+<a class=anchor href=#a-simple-polymer-model>#</a></h1><p>This time, we will run a molecular dynamics simulation of 100 particles connected by springs.</p><h2 id=files-and-units><code>[files]</code> and <code>[units]</code>
+<a class=anchor href=#files-and-units>#</a></h2><p>Same as the previous example, we first define the names and the format of output files.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span>[files]
+</span></span><span style=display:flex><span>output.prefix = <span style=color:#f1fa8c>&#34;polymer-model&#34;</span>
+</span></span><span style=display:flex><span>output.path   = <span style=color:#f1fa8c>&#34;./&#34;</span>
+</span></span><span style=display:flex><span>output.format = <span style=color:#f1fa8c>&#34;xyz&#34;</span>
+</span></span></code></pre></div><p>To see the complete list of available options, see <a href=http://mjolnir-md.github.io/Mjolnir/docs/reference/files/>files section in the reference.</a></p><p>Also, we need to define unit system to be used.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span>[units]
+</span></span><span style=display:flex><span>length = <span style=color:#f1fa8c>&#34;angstrom&#34;</span>
+</span></span><span style=display:flex><span>energy = <span style=color:#f1fa8c>&#34;kcal/mol&#34;</span>
+</span></span></code></pre></div><p>To see the complete list of available options, see <a href=http://mjolnir-md.github.io/Mjolnir/docs/reference/units/>units section in the reference.</a></p><h2 id=simulator><code>[simulator]</code>
+<a class=anchor href=#simulator>#</a></h2><p>Unlike the previous example, here, all the particles are connected by springs, so we can omit periodic boundary without worrying that some of the particles will go far away.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span>[simulator]
+</span></span><span style=display:flex><span>type          = <span style=color:#f1fa8c>&#34;MolecularDynamics&#34;</span>
+</span></span><span style=display:flex><span>precision     = <span style=color:#f1fa8c>&#34;double&#34;</span>
+</span></span><span style=display:flex><span>boundary_type = <span style=color:#f1fa8c>&#34;Unlimited&#34;</span> <span style=color:#6272a4># No periodic boundary</span>
+</span></span><span style=display:flex><span>seed          = <span style=color:#bd93f9>123456789</span>
+</span></span><span style=display:flex><span>delta_t       = <span style=color:#bd93f9>0.01</span>
+</span></span><span style=display:flex><span>total_step    = <span style=color:#bd93f9>1_000_000</span>
+</span></span><span style=display:flex><span>save_step     =     <span style=color:#bd93f9>1_000</span>
+</span></span><span style=display:flex><span>integrator.type = <span style=color:#f1fa8c>&#34;BAOABLangevin&#34;</span>
+</span></span><span style=display:flex><span>integrator.gammas = [
+</span></span><span style=display:flex><span>    {index =  <span style=color:#bd93f9>0</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+</span></span><span style=display:flex><span>    {index =  <span style=color:#bd93f9>1</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+</span></span><span style=display:flex><span>    {index =  <span style=color:#bd93f9>2</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+</span></span><span style=display:flex><span>    <span style=color:#6272a4># ...</span>
+</span></span><span style=display:flex><span>    {index = <span style=color:#bd93f9>99</span>, gamma = <span style=color:#bd93f9>1.00</span>},
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>Most of the parts are the same as the previous example.</p><p>To see the complete list of available options, see <a href=http://mjolnir-md.github.io/Mjolnir/docs/reference/simulators/>Simulator section in the reference.</a></p><h2 id=systems><code>[[systems]]</code>
+<a class=anchor href=#systems>#</a></h2><p>This time, we don&rsquo;t need <code>boundary_shape</code> because we don&rsquo;t have a periodic boundary.</p><p>Let&rsquo;s place particles along a straight line.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span>[[systems]]
+</span></span><span style=display:flex><span>attributes.temperature = <span style=color:#bd93f9>300.0</span> <span style=color:#6272a4># K</span>
+</span></span><span style=display:flex><span>particles = [
+</span></span><span style=display:flex><span>    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+</span></span><span style=display:flex><span>    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>1.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+</span></span><span style=display:flex><span>    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>2.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+</span></span><span style=display:flex><span>    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>3.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+</span></span><span style=display:flex><span>    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>4.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+</span></span><span style=display:flex><span>    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>5.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+</span></span><span style=display:flex><span>    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>6.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+</span></span><span style=display:flex><span>    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>7.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+</span></span><span style=display:flex><span>    {mass = <span style=color:#bd93f9>1.0</span>, position = [ <span style=color:#bd93f9>8.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+</span></span><span style=display:flex><span>    <span style=color:#6272a4># 続く...</span>
+</span></span><span style=display:flex><span>    {mass = <span style=color:#bd93f9>1.0</span>, position = [<span style=color:#bd93f9>99.000</span>, <span style=color:#bd93f9>0.000</span>, <span style=color:#bd93f9>0.000</span>]},
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>To see the complete list of available options, see <a href=http://mjolnir-md.github.io/Mjolnir/docs/reference/system/>Systems section in the reference.</a></p><h2 id=forcefields><code>[[forcefields]]</code>
+<a class=anchor href=#forcefields>#</a></h2><p>Finally, we will define forcefield parameters.</p><p>In this example, we want to connect particles by springs. So we define a &ldquo;local&rdquo; forcefield.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span>[[forcefields]]
+</span></span><span style=display:flex><span>[[forcefields.local]]
+</span></span><span style=display:flex><span>interaction = <span style=color:#f1fa8c>&#34;BondLength&#34;</span>
+</span></span><span style=display:flex><span>potential   = <span style=color:#f1fa8c>&#34;Harmonic&#34;</span>
+</span></span><span style=display:flex><span>topology    = <span style=color:#f1fa8c>&#34;bond&#34;</span>
+</span></span></code></pre></div><p><code>topology</code>, later it will be explained in detail, is a label to handle relationships between local and global interactions.
+In this case, the name is not important.</p><p>Then, apply local potentials between particles.
+<code>BondLength</code> interaction takes two particles.
+<code>Harmonic</code> potential takes <code>v0</code> and <code>k</code>.
+<code>v0</code> is the value where the potential takes the minimum.
+<code>k</code> is the value which determines the strength of the potential.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span>[[forcefields]]
+</span></span><span style=display:flex><span>[[forcefields.local]]
+</span></span><span style=display:flex><span>interaction = <span style=color:#f1fa8c>&#34;BondLength&#34;</span>
+</span></span><span style=display:flex><span>potential   = <span style=color:#f1fa8c>&#34;Harmonic&#34;</span>
+</span></span><span style=display:flex><span>topology    = <span style=color:#f1fa8c>&#34;bond&#34;</span>
+</span></span><span style=display:flex><span>parameters  = [
+</span></span><span style=display:flex><span>    {indices = [ <span style=color:#bd93f9>0</span>, <span style=color:#bd93f9>1</span>], v0 = <span style=color:#bd93f9>1.0</span>, k = <span style=color:#bd93f9>10.0</span>},
+</span></span><span style=display:flex><span>    {indices = [ <span style=color:#bd93f9>1</span>, <span style=color:#bd93f9>2</span>], v0 = <span style=color:#bd93f9>1.0</span>, k = <span style=color:#bd93f9>10.0</span>},
+</span></span><span style=display:flex><span>    {indices = [ <span style=color:#bd93f9>2</span>, <span style=color:#bd93f9>3</span>], v0 = <span style=color:#bd93f9>1.0</span>, k = <span style=color:#bd93f9>10.0</span>},
+</span></span><span style=display:flex><span>    <span style=color:#6272a4># ...</span>
+</span></span><span style=display:flex><span>    {indices = [<span style=color:#bd93f9>98</span>,<span style=color:#bd93f9>99</span>], v0 = <span style=color:#bd93f9>1.0</span>, k = <span style=color:#bd93f9>10.0</span>},
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>To see the complete list of available options, see <a href=http://mjolnir-md.github.io/Mjolnir/docs/reference/forcefields/>ForceFields section in the reference.</a></p><h2 id=simulation>Simulation
+<a class=anchor href=#simulation>#</a></h2><p>Congratulations! All the required information is written in the input file.
+By passing the input file to mjolnir, it runs the simulation.</p><p>It takes relatively short time compared to the previous example because we have less particles.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console><span style=display:flex><span>$ ./bin/mjolnir polymer-model.toml
+</span></span><span style=display:flex><span><span style=color:#44475a>reading input file...
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- reading and parsing toml file `polymer-model.toml` ...  successfully parsed.
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- the log file is `./polymer-model.log`
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- mjolnir version v1.22.0-dev (06d5ede6)
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- compiled using /usr/bin/g++-10
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- input_path is ./
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- expanding include files ...
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- done.
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- precision is double
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- Boundary Condition is Unlimited
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- execute on single core
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- energy unit is [kcal/mol]
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- length unit is [angstrom]
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- Integrator is BAOABLangevin.
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- Simulator type is MolecularDynamics.
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- total step is 1000000
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- save step is 1000
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- checkpoint step is 1000
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- reading 0th system ...
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- 100 particles are found.
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- output file prefix is `./polymer-model`
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- output xyz format.
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- LocalForceField (x1) found
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- reading 0th [[forcefields.local]]
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- Bond Length interaction found.
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- -- potential function is Harmonic.
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- -- 99 interactions are found.
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- seed is 123456789
+</span></span></span><span style=display:flex><span><span style=color:#44475a>done.
+</span></span></span><span style=display:flex><span><span style=color:#44475a>initializing simulator...
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- generating velocity with T = 300...
+</span></span></span><span style=display:flex><span><span style=color:#44475a>-- done.
+</span></span></span><span style=display:flex><span><span style=color:#44475a>done.
+</span></span></span><span style=display:flex><span><span style=color:#44475a>start running simulation
+</span></span></span><span style=display:flex><span><span style=color:#44475a>  8.2%|████                                              | 10.5 seconds remaining
+</span></span></span></code></pre></div><p>You will find the following files after the simulation is complete.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console><span style=display:flex><span>$ ls polymer-model*
+</span></span><span style=display:flex><span><span style=color:#44475a>polymer-model.toml
+</span></span></span><span style=display:flex><span><span style=color:#44475a>polymer-model.ene
+</span></span></span><span style=display:flex><span><span style=color:#44475a>polymer-model.log
+</span></span></span><span style=display:flex><span><span style=color:#44475a>polymer-model_rng.msg
+</span></span></span><span style=display:flex><span><span style=color:#44475a>polymer-model_system.msg
+</span></span></span><span style=display:flex><span><span style=color:#44475a>polymer-model_position.xyz
+</span></span></span><span style=display:flex><span><span style=color:#44475a>polymer-model_velocity.xyz
+</span></span></span></code></pre></div><p>The <code>.msg</code> files are for restarting simulation. The format is <a href=https://msgpack.org>MsgPack</a>.</p><p>The <code>.ene</code> file has the value of energies and other physical quantities in a simple ASCII format, and you can easily visualize it by using gnuplot or other software or a library.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console><span style=display:flex><span>$ head polymer-model.ene
+</span></span><span style=display:flex><span># unit of length : angstrom, unit of energy : kcal/mol
+</span></span><span style=display:flex><span># timestep  BondLength:Harmonic  kinetic_energy attribute:temperature
+</span></span><span style=display:flex><span><span style=color:#44475a>0                      0.000000      96.956625            300.000000
+</span></span></span><span style=display:flex><span><span style=color:#44475a>1000                  56.910239      86.124451            300.000000
+</span></span></span><span style=display:flex><span><span style=color:#44475a>2000                  51.497857      85.960034            300.000000
+</span></span></span><span style=display:flex><span><span style=color:#44475a>3000                  44.394914      90.433666            300.000000
+</span></span></span><span style=display:flex><span><span style=color:#44475a>4000                  50.774066      89.091169            300.000000
+</span></span></span><span style=display:flex><span><span style=color:#44475a>5000                  46.749105     104.594276            300.000000
+</span></span></span><span style=display:flex><span><span style=color:#44475a>6000                  34.130104      86.045558            300.000000
+</span></span></span><span style=display:flex><span><span style=color:#44475a>7000                  39.505721      84.893861            300.000000
+</span></span></span></code></pre></div><p><code>polymer-model_position.xyz</code> contains the trajectory.
+You can visualize it by passing the file to a VMD or molecular viewer.</p><h2 id=conclusion>Conclusion
+<a class=anchor href=#conclusion>#</a></h2><p>This tutorial is over.</p><p>We passed two particles to each <code>BondLegnth</code> interaction.
+Those two are not necessarily be contiguous.
+You can apply potential on any pair of particles.</p><p><code>BondAngle</code> and <code>DihedralAngle</code> is also a <code>LocalInteraction</code>.
+Mjolnir supports those in the same way as <code>BondLength</code>.
+If you are interested, see <a href=http://mjolnir-md.github.io/Mjolnir/docs/reference/forcefields/local/>LocalForceField</a>.</p></article><footer class=book-footer><div class="flex flex-wrap justify-between"><div class=book-languages tabindex=0 aria-haspopup=true><ul><li class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+English</li></ul><ul class=book-languages-list><li class=active><a href=http://mjolnir-md.github.io/Mjolnir/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+English</a></li><li><a href=http://mjolnir-md.github.io/Mjolnir/ja/docs/tutorial/polymer-model/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</a></li></ul></div></div></footer><div class=book-comments></div><label for=menu-control class="hidden book-menu-overlay"></label></div><aside class=book-toc><nav id=TableOfContents><ul><li><a href=#a-simple-polymer-model>A simple polymer model</a><ul><li><a href=#files-and-units><code>[files]</code> and <code>[units]</code></a></li><li><a href=#simulator><code>[simulator]</code></a></li><li><a href=#systems><code>[[systems]]</code></a></li><li><a href=#forcefields><code>[[forcefields]]</code></a></li><li><a href=#simulation>Simulation</a></li><li><a href=#conclusion>Conclusion</a></li></ul></li></ul></nav></aside></main></body></html>

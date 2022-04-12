@@ -1,0 +1,88 @@
+<!doctype html><html lang=ja><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="HybridForceField #  HybridForceField は二つの異なる力場の線形結合です。
+  \[V = \lambda V_1 + (1 - \lambda) V_2\]   \(\lambda = 1\)  のとき、 \(V = V_1\)  になることに気を付けてください。
+トポロジーは異なっていても問題ありません。異なっている場合、dcdなどのchain数には一つ目のforcefieldが入ります。
+例 #  まず、二つのforcefieldsを定義します。
+その後、[simulator]テーブルでforcefields.type = &#34;Hybrid&#34;と、forcefields.lambdaの値を定義してください。 一番目の[[forcefields]]テーブルが上の式での \( V_1 \)  に、二番目が \( V_2 \)  になります。
+[simulator] type = &#34;MolecularDynamics&#34; boundary_type = &#34;Unlimited&#34; precision = &#34;double&#34; delta_t = 0.1 total_step = 1000000 save_step = 1_000 seed = 2859805901 integrator.type = &#34;BAOABLangevin&#34; integrator."><meta name=theme-color content="#FFFFFF"><meta property="og:title" content="HybridForceField"><meta property="og:description" content="HybridForceField #  HybridForceField は二つの異なる力場の線形結合です。
+  \[V = \lambda V_1 + (1 - \lambda) V_2\]   \(\lambda = 1\)  のとき、 \(V = V_1\)  になることに気を付けてください。
+トポロジーは異なっていても問題ありません。異なっている場合、dcdなどのchain数には一つ目のforcefieldが入ります。
+例 #  まず、二つのforcefieldsを定義します。
+その後、[simulator]テーブルでforcefields.type = &#34;Hybrid&#34;と、forcefields.lambdaの値を定義してください。 一番目の[[forcefields]]テーブルが上の式での \( V_1 \)  に、二番目が \( V_2 \)  になります。
+[simulator] type = &#34;MolecularDynamics&#34; boundary_type = &#34;Unlimited&#34; precision = &#34;double&#34; delta_t = 0.1 total_step = 1000000 save_step = 1_000 seed = 2859805901 integrator.type = &#34;BAOABLangevin&#34; integrator."><meta property="og:type" content="article"><meta property="og:url" content="http://mjolnir-md.github.io/Mjolnir/ja/docs/reference/forcefields/HybridForceField/"><meta property="article:section" content="docs"><title>HybridForceField | Mjolnir documentation</title><link rel=manifest href=/Mjolnir/manifest.json><link rel=icon href=/Mjolnir/favicon.png type=image/x-icon><link rel=alternate hreflang=en href=http://mjolnir-md.github.io/Mjolnir/docs/reference/forcefields/HybridForceField/ title=HybridForceField><link rel=stylesheet href=/Mjolnir/book.min.d08be657f4d0d61b509ac06e1059e92fd1c66f15535a6bd4cee27e19935f34ae.css integrity="sha256-0IvmV/TQ1htQmsBuEFnpL9HGbxVTWmvUzuJ+GZNfNK4="><script defer src=/Mjolnir/ja.search.min.3e3069284ff6b656162a6bc7f49492fd21b7466717ea0ab309e354365ad449f8.js integrity="sha256-PjBpKE/2tlYWKmvH9JSS/SG3RmcX6gqzCeNUNlrUSfg="></script></head><body><input type=checkbox class="hidden toggle" id=menu-control>
+<input type=checkbox class="hidden toggle" id=toc-control><main class="container flex"><aside class=book-menu><nav><h2 class=book-brand><a href=/Mjolnir/ja><span>Mjolnir documentation</span></a></h2><div class=book-search><input type=text id=book-search-input placeholder=検索 aria-label=検索 maxlength=64 data-hotkeys=s/><div class="book-search-spinner hidden"></div><ul id=book-search-results></ul></div><ul><li><a href=/Mjolnir/ja/docs/installation/>Installation</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/>Reference</a><ul><li><a href=/Mjolnir/ja/docs/reference/files/>Files</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/units/>Units</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/simulators/ class=collapsed>Simulators</a></li><li><a href=/Mjolnir/ja/docs/reference/integrators/ class=collapsed>Integrators</a></li><li><a href=/Mjolnir/ja/docs/reference/system/>System</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/ class=collapsed>ForceFields</a><ul><li><a href=/Mjolnir/ja/docs/reference/forcefields/local/ class=collapsed>Local</a></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/global/ class=collapsed>Global</a></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/external/ class=collapsed>External</a></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/constraint/>Constraint</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/MultipleBasinForceField/>MultipleBasin</a></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/HybridForceField/ class=active>HybridForceField</a></li><li><a href=/Mjolnir/ja/docs/reference/forcefields/Topology/>Topology</a></li></ul></li></ul></li><li><a href=/Mjolnir/ja/docs/tutorial/ class=collapsed>Tutorial</a></li><li><a href=/Mjolnir/ja/docs/developersguide/>Developer's Guide</a><ul></ul></li><li><a href=/Mjolnir/ja/docs/glossary/>Glossary</a><ul></ul></li></ul><ul><li><a href=https://github.com/Mjolnir-MD/Mjolnir target=_blank rel=noopener>GitHub</a></li></ul></nav><script>(function(){var e=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script></aside><div class=book-page><header class=book-header><div class="flex align-center justify-between"><label for=menu-control><img src=/Mjolnir/svg/menu.svg class=book-icon alt=Menu></label>
+<strong>HybridForceField</strong>
+<label for=toc-control><img src=/Mjolnir/svg/toc.svg class=book-icon alt="Table of Contents"></label></div><aside class="hidden clearfix"><nav id=TableOfContents><ul><li><a href=#hybridforcefield>HybridForceField</a><ul><li><a href=#例>例</a></li><li><a href=#λの値を動的に変化させる>λの値を動的に変化させる</a></li></ul></li></ul></nav></aside></header><article class=markdown><h1 id=hybridforcefield>HybridForceField
+<a class=anchor href=#hybridforcefield>#</a></h1><p>HybridForceField は二つの異なる力場の線形結合です。</p><link rel=stylesheet href=/Mjolnir/katex/katex.min.css><script defer src=/Mjolnir/katex/katex.min.js></script>
+<script defer src=/Mjolnir/katex/auto-render.min.js onload=renderMathInElement(document.body)></script><span>
+\[V = \lambda V_1 + (1 - \lambda) V_2\]</span><p><span>\(\lambda = 1\)</span>
+のとき、<span>
+\(V = V_1\)</span>
+になることに気を付けてください。</p><p>トポロジーは異なっていても問題ありません。異なっている場合、dcdなどのchain数には一つ目のforcefieldが入ります。</p><h2 id=例>例
+<a class=anchor href=#%e4%be%8b>#</a></h2><p>まず、二つの<code>forcefields</code>を定義します。</p><p>その後、<code>[simulator]</code>テーブルで<code>forcefields.type = "Hybrid"</code>と、<code>forcefields.lambda</code>の値を定義してください。
+一番目の<code>[[forcefields]]</code>テーブルが上の式での<span>
+\( V_1 \)</span>
+に、二番目が<span>
+\( V_2 \)</span>
+になります。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span>[simulator]
+</span></span><span style=display:flex><span>type          = <span style=color:#f1fa8c>&#34;MolecularDynamics&#34;</span>
+</span></span><span style=display:flex><span>boundary_type = <span style=color:#f1fa8c>&#34;Unlimited&#34;</span>
+</span></span><span style=display:flex><span>precision     = <span style=color:#f1fa8c>&#34;double&#34;</span>
+</span></span><span style=display:flex><span>delta_t       = <span style=color:#bd93f9>0.1</span>
+</span></span><span style=display:flex><span>total_step    = <span style=color:#bd93f9>1000000</span>
+</span></span><span style=display:flex><span>save_step     =   <span style=color:#bd93f9>1_000</span>
+</span></span><span style=display:flex><span>seed          = <span style=color:#bd93f9>2859805901</span>
+</span></span><span style=display:flex><span>integrator.type = <span style=color:#f1fa8c>&#34;BAOABLangevin&#34;</span>
+</span></span><span style=display:flex><span>integrator.gammas = [
+</span></span><span style=display:flex><span>    <span style=color:#6272a4># ...</span>
+</span></span><span style=display:flex><span>]
+</span></span><span style=display:flex><span>forcefields.type = <span style=color:#f1fa8c>&#34;Hybrid&#34;</span>
+</span></span><span style=display:flex><span>forcefields.lambda = <span style=color:#bd93f9>0.5</span>
+</span></span><span style=display:flex><span><span style=color:#6272a4># ...</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>[[forcefields]] <span style=color:#6272a4># V1</span>
+</span></span><span style=display:flex><span>[[forcefields.local]]
+</span></span><span style=display:flex><span><span style=color:#6272a4># ...</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>[[forcefields]] <span style=color:#6272a4># V2</span>
+</span></span><span style=display:flex><span>[[forcefields.local]]
+</span></span><span style=display:flex><span><span style=color:#6272a4># ...</span>
+</span></span></code></pre></div><h2 id=λの値を動的に変化させる>λの値を動的に変化させる
+<a class=anchor href=#%ce%bb%e3%81%ae%e5%80%a4%e3%82%92%e5%8b%95%e7%9a%84%e3%81%ab%e5%a4%89%e5%8c%96%e3%81%95%e3%81%9b%e3%82%8b>#</a></h2><p><span>\(\lambda\)</span>
+を仮想的な粒子の座標と解釈し、それにかかる力を考え、時間積分することによってサンプリングを行うことが可能です。
+<code>forcefields.lambda</code>には文字列で<code>"dynamic"</code>と入力し、<code>[[systems]]</code>で<code>dynamic_variables</code>に<code>lambda</code>を定義してください。
+この<code>lambda</code>の値、速度、力は<code>.ene</code>ファイルに保存されます。</p><p>また、その際に<span>
+\(k(\lambda - \lambda_0)^2\)</span>
+型のポテンシャルを追加でかけることが可能です。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-toml data-lang=toml><span style=display:flex><span>[simulator]
+</span></span><span style=display:flex><span>type          = <span style=color:#f1fa8c>&#34;MolecularDynamics&#34;</span>
+</span></span><span style=display:flex><span>boundary_type = <span style=color:#f1fa8c>&#34;Unlimited&#34;</span>
+</span></span><span style=display:flex><span>precision     = <span style=color:#f1fa8c>&#34;double&#34;</span>
+</span></span><span style=display:flex><span>delta_t       = <span style=color:#bd93f9>0.1</span>
+</span></span><span style=display:flex><span>total_step    = <span style=color:#bd93f9>1000000</span>
+</span></span><span style=display:flex><span>save_step     =   <span style=color:#bd93f9>1_000</span>
+</span></span><span style=display:flex><span>seed          = <span style=color:#bd93f9>2859805901</span>
+</span></span><span style=display:flex><span>integrator.type = <span style=color:#f1fa8c>&#34;BAOABLangevin&#34;</span>
+</span></span><span style=display:flex><span>integrator.gammas = [
+</span></span><span style=display:flex><span>    <span style=color:#6272a4># ...</span>
+</span></span><span style=display:flex><span>]
+</span></span><span style=display:flex><span>forcefields.type = <span style=color:#f1fa8c>&#34;Hybrid&#34;</span>
+</span></span><span style=display:flex><span>forcefields.lambda = <span style=color:#f1fa8c>&#34;dynamic&#34;</span> <span style=color:#6272a4># make lambda dynamic</span>
+</span></span><span style=display:flex><span>forcefields.v0_lambda = <span style=color:#bd93f9>1.0</span>    <span style=color:#6272a4># k(v - v0)^2</span>
+</span></span><span style=display:flex><span>forcefields.k_lambda  = <span style=color:#bd93f9>100.0</span>  <span style=color:#6272a4># k(v - v0)^2</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#6272a4># ...</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>[[systems]]
+</span></span><span style=display:flex><span>attributes.temperature = <span style=color:#bd93f9>300.0</span>
+</span></span><span style=display:flex><span>dynamic_variables.lambda = {x = <span style=color:#bd93f9>1.0</span>, m = <span style=color:#bd93f9>1000.0</span>, gamma = <span style=color:#bd93f9>1</span>e-5, boundary = <span style=color:#f1fa8c>&#34;Repulsive&#34;</span>, lower = <span style=color:#bd93f9>0.0</span>, upper = <span style=color:#bd93f9>1.0</span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>[[forcefields]] <span style=color:#6272a4># V1</span>
+</span></span><span style=display:flex><span>[[forcefields.local]]
+</span></span><span style=display:flex><span><span style=color:#6272a4># ...</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>[[forcefields]] <span style=color:#6272a4># V2</span>
+</span></span><span style=display:flex><span>[[forcefields.local]]
+</span></span><span style=display:flex><span><span style=color:#6272a4># ...</span>
+</span></span></code></pre></div></article><footer class=book-footer><div class="flex flex-wrap justify-between"><div class=book-languages tabindex=0 aria-haspopup=true><ul><li class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</li></ul><ul class=book-languages-list><li><a href=http://mjolnir-md.github.io/Mjolnir/docs/reference/forcefields/HybridForceField/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+English</a></li><li class=active><a href=http://mjolnir-md.github.io/Mjolnir/ja/ class="flex align-center"><img src=/Mjolnir/svg/translate.svg class=book-icon alt=Languages>
+日本語</a></li></ul></div></div></footer><div class=book-comments></div><label for=menu-control class="hidden book-menu-overlay"></label></div><aside class=book-toc><nav id=TableOfContents><ul><li><a href=#hybridforcefield>HybridForceField</a><ul><li><a href=#例>例</a></li><li><a href=#λの値を動的に変化させる>λの値を動的に変化させる</a></li></ul></li></ul></nav></aside></main></body></html>
