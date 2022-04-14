@@ -9,8 +9,8 @@ The simple cubic functional potential which represent pan shape.
 
 {{<katex display>}}
 U(r) = \begin{cases}
-1 & 0 < r \leq d \\
-1 - 3 \left(\frac{r - d}{\Delta r} \right)^2 + 2 \left( \frac{r - d}{\Delta r} \right)^3 & d < r \leq d + \Delta r\\
+-\varepsilon & 0 < r \leq d \\
+-\varepsilon \left(1 - 3 \left(\frac{r - d}{\Delta r} \right)^2 + 2 \left( \frac{r - d}{\Delta r} \right)^3 \right) & d < r \leq d + \Delta r\\
 0 & d + \Delta r < r
 \end{cases}
 {{</katex>}}
