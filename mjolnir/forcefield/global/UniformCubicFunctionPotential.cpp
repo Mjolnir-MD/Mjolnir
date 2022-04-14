@@ -6,8 +6,6 @@
 
 namespace mjolnir
 {
-template class UniformCubicFunctionPotential<SimulatorTraits<double, UnlimitedBoundary>>;
-template class UniformCubicFunctionPotential<SimulatorTraits<float,  UnlimitedBoundary>>;
-template class UniformCubicFunctionPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-template class UniformCubicFunctionPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+template class UniformCubicFunctionPotential<double>;
+template class UniformCubicFunctionPotential<float>;
 } // mjolnir

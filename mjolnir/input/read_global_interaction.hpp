@@ -164,11 +164,14 @@ read_global_pair_interaction(const toml::value& global)
     else if(potential == "UniformCubicFunction")
     {
         MJOLNIR_LOG_NOTICE("-- potential function is UniformCubicFunction");
-        using potential_t   = UniformCubicFunctionPotential<traitsT>;
+        using real_type     = typename traitsT::real_type;
+        using potential_t   = UniformCubicFunctionPotential<real_type>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
+        auto pot_para = read_uniform_cubic_function_potential<traitsT>(global);
+
         return make_unique<interaction_t>(
-            read_uniform_cubic_function_potential<traitsT>(global),
+            std::move(pot_para.first), std::move(pot_para.second),
             read_spatial_partition<traitsT, potential_t>(global));
     }
     else

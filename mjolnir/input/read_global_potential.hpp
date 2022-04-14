@@ -598,16 +598,16 @@ read_wca_potential(const toml::value& global)
 
 
 template<typename traitsT>
-UniformCubicFunctionPotential<traitsT>
+std::pair<UniformCubicFunctionPotential<typename traitsT::real_type>,
+    ParameterList<traitsT, UniformCubicFunctionPotential<typename traitsT::real_type>>
+    >
 read_uniform_cubic_function_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using potential_type = UniformCubicFunctionPotential<traitsT>;
-    using real_type      = typename potential_type::real_type;
-    using parameter_type = typename potential_type::parameter_type;
 
-    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+    using real_type      = typename traitsT::real_type;
+    using potential_type = UniformCubicFunctionPotential<real_type>;
 
     const real_type eps   = toml::expect<real_type>(global, u8"ε").or_other(
                             toml::expect<real_type>(global, "epsilon")).unwrap();
@@ -617,28 +617,47 @@ read_uniform_cubic_function_potential(const toml::value& global)
     MJOLNIR_LOG_INFO("v0      = ", v0);
     MJOLNIR_LOG_INFO("range   = ", range);
 
-    std::vector<std::pair<std::size_t, parameter_type>> params;
-    if(global.as_table().count("parameters") == 1)
-    {
-        const auto& parameters = toml::find<toml::array>(global, "parameters");
-        for(const auto& param : parameters)
-        {
-            const auto idx = find_parameter<std::size_t>(param, env, "index") +
-                             find_parameter_or<std::int64_t>(param, env, "offset", 0);
-            params.emplace_back(idx, parameter_type{});
-        }
-        check_parameter_overlap(env, parameters, params);
-    }
-    else
-    {
-        throw_exception<std::runtime_error>("[error] "
-            "mjolnir::read_uniform_cubic_function_potential: the number of "
-            "parameters field must be one.");
-    }
+    using parameter_list = EmptyCombinationRule<traitsT, potential_type>;
+    // [[forcefield.global]]
+    // interaction = "Pair"
+    // potential   = "UniformCubicFunction"
+    // epsilon     = 1.0
+    // v0          = 9.0
+    // range       = 10.0
+    // parameters = [
+    // {index = 0},
+    // # ...
+    // ]
 
-    return potential_type(eps, v0, range, params,
-            read_ignore_particles_within(global),
-            read_ignored_molecule(global), read_ignored_group(global));
+    if( ! global.contains("parameters"))
+    {
+        return std::make_pair(potential_type(eps, v0, range),
+            ParameterList<traitsT, potential_type>(
+                make_unique<parameter_list>(
+                    read_ignore_particles_within(global),
+                    read_ignored_molecule(global), read_ignored_group(global)
+                )));
+    }
+    const auto& ps = toml::find<toml::array>(global, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+
+    std::vector<std::size_t> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        const auto idx = find_parameter<std::size_t>(param, env, "index") +
+                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
+        MJOLNIR_LOG_INFO("idx = ", idx);
+        params.emplace_back(idx);
+    }
+    return std::make_pair(potential_type(eps, v0, range),
+        ParameterList<traitsT, potential_type>(
+            make_unique<parameter_list>(
+                std::move(params), read_ignore_particles_within(global),
+                read_ignored_molecule(global), read_ignored_group(global)
+            )));
 }
 
 template<typename traitsT>
