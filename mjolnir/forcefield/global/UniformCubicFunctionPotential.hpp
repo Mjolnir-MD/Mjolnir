@@ -29,10 +29,9 @@ class UniformCubicFunctionPotential
     {}
     ~UniformCubicFunctionPotential() = default;
 
-    // forwarding functions for clarity...
     real_type potential(const real_type r, const parameter_type&) const noexcept
     {
-        if(r < v0_){return -1.0;}
+        if(r < v0_){return -epsilon_;}
         else if(v0_range_ < r){return 0.0;}
 
         const real_type r_v0           = r - v0_;
