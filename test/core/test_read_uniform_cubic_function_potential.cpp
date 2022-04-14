@@ -43,7 +43,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
             epsilon = 1.5
             v0      = 5.0
             range   = 5.0
-            parameters = []
         )"_toml;
 
         auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
@@ -88,7 +87,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
             "ε"   = 1.5
             v0    = 5.0
             range = 5.0
-            parameters = []
         )"_toml;
 
         auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
@@ -146,7 +144,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
         const auto& pot = pot_para.first;
         auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
-        BOOST_TEST(para.participants().empty());
         para.initialize(sys, topol, pot);
 
         const auto ignore_within = para.exclusion_list().ignore_topology();
@@ -207,7 +204,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_env, T, test_types)
         const auto& pot = pot_para.first;
         auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
-        BOOST_TEST(para.participants().empty());
         para.initialize(sys, topol, pot);
 
         const auto ignore_within = para.exclusion_list().ignore_topology();
