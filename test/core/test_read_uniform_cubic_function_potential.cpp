@@ -27,6 +27,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
 
     // a dummy system for testing `initialize` method
     using traits_type   = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    using potential_type = mjolnir::UniformCubicFunctionPotential<real_type>;
     using boundary_type = typename traits_type::boundary_type;
     mjolnir::System<traits_type> sys(10, boundary_type{});
     mjolnir::Topology          topol(10);
@@ -45,9 +46,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
             parameters = []
         )"_toml;
 
-        auto pot = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        const auto& pot = pot_para.first;
+        auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        BOOST_TEST(para.participants().empty());
+        para.initialize(sys, topol, pot);
+
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -57,20 +63,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
         BOOST_TEST(pot.epsilon()           == real_type(1.5), tolerance<real_type>());
         BOOST_TEST(pot.v0()                == real_type(5.0), tolerance<real_type>());
         BOOST_TEST(pot.interaction_range() == real_type(5.0), tolerance<real_type>());
-        BOOST_TEST(pot.participants().empty());
 
-        pot.initialize(sys, topol);
-        BOOST_TEST(pot.participants().size() == 10u);
-        BOOST_TEST(pot.participants().at(0) == 0u);
-        BOOST_TEST(pot.participants().at(1) == 1u);
-        BOOST_TEST(pot.participants().at(2) == 2u);
-        BOOST_TEST(pot.participants().at(3) == 3u);
-        BOOST_TEST(pot.participants().at(4) == 4u);
-        BOOST_TEST(pot.participants().at(5) == 5u);
-        BOOST_TEST(pot.participants().at(6) == 6u);
-        BOOST_TEST(pot.participants().at(7) == 7u);
-        BOOST_TEST(pot.participants().at(8) == 8u);
-        BOOST_TEST(pot.participants().at(9) == 9u);
+        BOOST_TEST(para.participants().size() == 10u);
+        BOOST_TEST(para.participants().at(0) == 0u);
+        BOOST_TEST(para.participants().at(1) == 1u);
+        BOOST_TEST(para.participants().at(2) == 2u);
+        BOOST_TEST(para.participants().at(3) == 3u);
+        BOOST_TEST(para.participants().at(4) == 4u);
+        BOOST_TEST(para.participants().at(5) == 5u);
+        BOOST_TEST(para.participants().at(6) == 6u);
+        BOOST_TEST(para.participants().at(7) == 7u);
+        BOOST_TEST(para.participants().at(8) == 8u);
+        BOOST_TEST(para.participants().at(9) == 9u);
     }
     {
         using namespace toml::literals;
@@ -87,9 +91,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
             parameters = []
         )"_toml;
 
-        auto pot = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        const auto& pot = pot_para.first;
+        auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        BOOST_TEST(para.participants().empty());
+        para.initialize(sys, topol, pot);
+
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -99,20 +108,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
         BOOST_TEST(pot.epsilon()           == real_type(1.5), tolerance<real_type>());
         BOOST_TEST(pot.v0()                == real_type(5.0), tolerance<real_type>());
         BOOST_TEST(pot.interaction_range() == real_type(5.0), tolerance<real_type>());
-        BOOST_TEST(pot.participants().empty());
 
-        pot.initialize(sys, topol);
-        BOOST_TEST(pot.participants().size() == 10u);
-        BOOST_TEST(pot.participants().at(0) == 0u);
-        BOOST_TEST(pot.participants().at(1) == 1u);
-        BOOST_TEST(pot.participants().at(2) == 2u);
-        BOOST_TEST(pot.participants().at(3) == 3u);
-        BOOST_TEST(pot.participants().at(4) == 4u);
-        BOOST_TEST(pot.participants().at(5) == 5u);
-        BOOST_TEST(pot.participants().at(6) == 6u);
-        BOOST_TEST(pot.participants().at(7) == 7u);
-        BOOST_TEST(pot.participants().at(8) == 8u);
-        BOOST_TEST(pot.participants().at(9) == 9u);
+        BOOST_TEST(para.participants().size() == 10u);
+        BOOST_TEST(para.participants().at(0) == 0u);
+        BOOST_TEST(para.participants().at(1) == 1u);
+        BOOST_TEST(para.participants().at(2) == 2u);
+        BOOST_TEST(para.participants().at(3) == 3u);
+        BOOST_TEST(para.participants().at(4) == 4u);
+        BOOST_TEST(para.participants().at(5) == 5u);
+        BOOST_TEST(para.participants().at(6) == 6u);
+        BOOST_TEST(para.participants().at(7) == 7u);
+        BOOST_TEST(para.participants().at(8) == 8u);
+        BOOST_TEST(para.participants().at(9) == 9u);
     }
     {
         using namespace toml::literals;
@@ -135,9 +142,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
             ]
         )"_toml;
 
-        auto pot = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        const auto& pot = pot_para.first;
+        auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        BOOST_TEST(para.participants().empty());
+        para.initialize(sys, topol, pot);
+
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -147,15 +159,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
         BOOST_TEST(pot.epsilon()           == real_type(1.5), tolerance<real_type>());
         BOOST_TEST(pot.v0()                == real_type(5.0), tolerance<real_type>());
         BOOST_TEST(pot.interaction_range() == real_type(5.0), tolerance<real_type>());
-        BOOST_TEST(pot.participants().size() == 5u);
 
-        pot.initialize(sys, topol);
-        BOOST_TEST(pot.participants().size() == 5u);
-        BOOST_TEST(pot.participants().at(0)  == 1u);
-        BOOST_TEST(pot.participants().at(1)  == 2u);
-        BOOST_TEST(pot.participants().at(2)  == 3u);
-        BOOST_TEST(pot.participants().at(3)  == 4u);
-        BOOST_TEST(pot.participants().at(4)  == 5u);
+        BOOST_TEST(para.participants().size() == 5u);
+        BOOST_TEST(para.participants().at(0)  == 1u);
+        BOOST_TEST(para.participants().at(1)  == 2u);
+        BOOST_TEST(para.participants().at(2)  == 3u);
+        BOOST_TEST(para.participants().at(3)  == 4u);
+        BOOST_TEST(para.participants().at(4)  == 5u);
     }
 }
 
@@ -166,6 +176,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_env, T, test_types)
 
     // a dummy system for testing `initialize` method
     using traits_type   = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    using potential_type = mjolnir::UniformCubicFunctionPotential<real_type>;
     using boundary_type = typename traits_type::boundary_type;
     mjolnir::System<traits_type> sys(10, boundary_type{});
     mjolnir::Topology          topol(10);
@@ -192,9 +203,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_env, T, test_types)
             ]
         )"_toml;
 
-        auto pot = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        const auto& pot = pot_para.first;
+        auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        BOOST_TEST(para.participants().empty());
+        para.initialize(sys, topol, pot);
+
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -204,15 +220,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_env, T, test_types)
         BOOST_TEST(pot.epsilon()           == real_type(1.5), tolerance<real_type>());
         BOOST_TEST(pot.v0()                == real_type(5.0), tolerance<real_type>());
         BOOST_TEST(pot.interaction_range() == real_type(5.0), tolerance<real_type>());
-        BOOST_TEST(pot.participants().size() == 5u);
 
-        pot.initialize(sys, topol);
-        BOOST_TEST(pot.participants().size() == 5u);
-        BOOST_TEST(pot.participants().at(0)  == 1u);
-        BOOST_TEST(pot.participants().at(1)  == 2u);
-        BOOST_TEST(pot.participants().at(2)  == 3u);
-        BOOST_TEST(pot.participants().at(3)  == 4u);
-        BOOST_TEST(pot.participants().at(4)  == 5u);
+        BOOST_TEST(para.participants().size() == 5u);
+        BOOST_TEST(para.participants().at(0)  == 1u);
+        BOOST_TEST(para.participants().at(1)  == 2u);
+        BOOST_TEST(para.participants().at(2)  == 3u);
+        BOOST_TEST(para.participants().at(3)  == 4u);
+        BOOST_TEST(para.participants().at(4)  == 5u);
     }
 }
 
@@ -223,8 +237,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_self, T, test_t
 
     // a dummy system for testing `initialize` method
     using traits_type   = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    using potential_type = mjolnir::UniformCubicFunctionPotential<real_type>;
     using boundary_type = typename traits_type::boundary_type;
     mjolnir::System<traits_type> sys(10, boundary_type{});
+    mjolnir::Topology            topol(10);
 
     {
         using namespace toml::literals;
@@ -241,9 +257,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_self, T, test_t
             parameters = []
         )"_toml;
 
-        auto pot = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        const auto& pot = pot_para.first;
+        auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        BOOST_TEST(para.participants().empty());
+        para.initialize(sys, topol, pot);
+
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -251,9 +272,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_self, T, test_t
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST( pot.exclusion_list().is_ignored_molecule(0, 0));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 1));
-        BOOST_TEST( pot.exclusion_list().is_ignored_molecule(1, 1));
+        BOOST_TEST( para.exclusion_list().is_ignored_molecule(0, 0));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(0, 1));
+        BOOST_TEST( para.exclusion_list().is_ignored_molecule(1, 1));
     }
 }
 
@@ -264,8 +285,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_others, T, test
 
     // a dummy system for testing `initialize` method
     using traits_type   = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    using potential_type = mjolnir::UniformCubicFunctionPotential<real_type>;
     using boundary_type = typename traits_type::boundary_type;
     mjolnir::System<traits_type> sys(10, boundary_type{});
+    mjolnir::Topology            topol(10);
 
     {
         using namespace toml::literals;
@@ -282,9 +305,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_others, T, test
             parameters = []
         )"_toml;
 
-        auto pot = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        const auto& pot = pot_para.first;
+        auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        BOOST_TEST(para.participants().empty());
+        para.initialize(sys, topol, pot);
+
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -292,9 +320,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_others, T, test
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 0));
-        BOOST_TEST( pot.exclusion_list().is_ignored_molecule(0, 1));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(1, 1));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(0, 0));
+        BOOST_TEST( para.exclusion_list().is_ignored_molecule(0, 1));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(1, 1));
     }
 }
 
@@ -305,8 +333,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_group, T, test_
 
     // a dummy system for testing `initialize` method
     using traits_type   = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
+    using potential_type = mjolnir::UniformCubicFunctionPotential<real_type>;
     using boundary_type = typename traits_type::boundary_type;
     mjolnir::System<traits_type> sys(10, boundary_type{});
+    mjolnir::Topology            topol(10);
 
     {
         using namespace toml::literals;
@@ -327,9 +357,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_group, T, test_
             parameters = []
         )"_toml;
 
-        auto pot = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        const auto& pot = pot_para.first;
+        auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
-        const auto ignore_within = pot.exclusion_list().ignore_topology();
+        BOOST_TEST(para.participants().empty());
+        para.initialize(sys, topol, pot);
+
+        const auto ignore_within = para.exclusion_list().ignore_topology();
         const std::map<std::string, std::size_t> within(
                 ignore_within.begin(), ignore_within.end());
 
@@ -337,20 +372,20 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_group, T, test_
         BOOST_TEST(within.at("bond")    == 3ul);
         BOOST_TEST(within.at("contact") == 1ul);
 
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 0));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(0, 1));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_molecule(1, 1));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(0, 0));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(0, 1));
+        BOOST_TEST(!para.exclusion_list().is_ignored_molecule(1, 1));
 
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein1", "protein1"));
-        BOOST_TEST( pot.exclusion_list().is_ignored_group("protein1", "protein2"));
-        BOOST_TEST( pot.exclusion_list().is_ignored_group("protein1", "protein3"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein1", "protein1"));
+        BOOST_TEST( para.exclusion_list().is_ignored_group("protein1", "protein2"));
+        BOOST_TEST( para.exclusion_list().is_ignored_group("protein1", "protein3"));
 
-        BOOST_TEST( pot.exclusion_list().is_ignored_group("protein2", "protein1"));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein2", "protein2"));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein2", "protein3"));
+        BOOST_TEST( para.exclusion_list().is_ignored_group("protein2", "protein1"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein2", "protein2"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein2", "protein3"));
 
-        BOOST_TEST( pot.exclusion_list().is_ignored_group("protein3", "protein1"));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein3", "protein2"));
-        BOOST_TEST(!pot.exclusion_list().is_ignored_group("protein3", "protein3"));
+        BOOST_TEST( para.exclusion_list().is_ignored_group("protein3", "protein1"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein3", "protein2"));
+        BOOST_TEST(!para.exclusion_list().is_ignored_group("protein3", "protein3"));
     }
 }
