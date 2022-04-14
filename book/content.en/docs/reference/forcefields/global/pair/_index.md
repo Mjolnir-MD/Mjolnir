@@ -19,6 +19,7 @@ The following potentials are available.
 - [WCAPotential]({{<relref "WCAPotential.md">}})
 - [iSoLFAttractive]({{<relref "iSoLFAttractivePotential.md">}})
 - [3SPN2ExcludedVolume]({{<relref "3SPN2ExcludedVolumePotential.md">}})
+- [UniformCubicFunction]({{<relref "UniformCubicFunctionPotential.md">}})
 
 ## Example
 
