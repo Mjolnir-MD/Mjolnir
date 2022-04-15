@@ -9,6 +9,7 @@
 #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
 #include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/forcefield/global/LennardJonesAttractivePotential.hpp>
+#include <mjolnir/forcefield/global/UniformCubicPanPotential.hpp>
 #include <mjolnir/forcefield/global/WCAPotential.hpp>
 #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2ExcludedVolumePotential.hpp>
@@ -593,6 +594,70 @@ read_wca_potential(const toml::value& global)
                     read_ignore_particles_within(global),
                     read_ignored_molecule(global), read_ignored_group(global))));
     }
+}
+
+
+template<typename traitsT>
+std::pair<UniformCubicPanPotential<typename traitsT::real_type>,
+    ParameterList<traitsT, UniformCubicPanPotential<typename traitsT::real_type>>
+    >
+read_uniform_cubic_pan_potential(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+
+    using real_type      = typename traitsT::real_type;
+    using potential_type = UniformCubicPanPotential<real_type>;
+
+    const real_type eps   = toml::expect<real_type>(global, u8"ε").or_other(
+                            toml::expect<real_type>(global, "epsilon")).unwrap();
+    const real_type v0    = toml::find<real_type>(global, "v0");
+    const real_type range = toml::find<real_type>(global, "range");
+    MJOLNIR_LOG_INFO("epsilon = ", eps);
+    MJOLNIR_LOG_INFO("v0      = ", v0);
+    MJOLNIR_LOG_INFO("range   = ", range);
+
+    using parameter_list = EmptyCombinationRule<traitsT, potential_type>;
+    // [[forcefield.global]]
+    // interaction = "Pair"
+    // potential   = "UniformCubicPan"
+    // epsilon     = 1.0
+    // v0          = 9.0
+    // range       = 10.0
+    // parameters = [
+    // {index = 0},
+    // # ...
+    // ]
+
+    if( ! global.contains("parameters"))
+    {
+        return std::make_pair(potential_type(eps, v0, range),
+            ParameterList<traitsT, potential_type>(
+                make_unique<parameter_list>(
+                    read_ignore_particles_within(global),
+                    read_ignored_molecule(global), read_ignored_group(global)
+                )));
+    }
+    const auto& ps = toml::find<toml::array>(global, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    const auto& env = global.contains("env") ? global.at("env") : toml::value{};
+
+    std::vector<std::size_t> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        const auto idx = find_parameter<std::size_t>(param, env, "index") +
+                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
+        MJOLNIR_LOG_INFO("idx = ", idx);
+        params.emplace_back(idx);
+    }
+    return std::make_pair(potential_type(eps, v0, range),
+        ParameterList<traitsT, potential_type>(
+            make_unique<parameter_list>(
+                std::move(params), read_ignore_particles_within(global),
+                read_ignored_molecule(global), read_ignored_group(global)
+            )));
 }
 
 template<typename traitsT>
