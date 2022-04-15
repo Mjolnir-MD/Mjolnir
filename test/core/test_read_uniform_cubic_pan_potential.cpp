@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "test_read_uniform_cubic_function_potential"
+#define BOOST_TEST_MODULE "test_read_uniform_cubic_pan_potential"
 
 #ifdef BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -20,14 +20,14 @@ template<typename Real>
 decltype(boost::test_tools::tolerance(std::declval<Real>()))
 tolerance() {return boost::test_tools::tolerance(tolerance_value(Real()));}
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_pan_noenv, T, test_types)
 {
-    mjolnir::LoggerManager::set_default_logger("test_read_uniform_cubic_function.log");
+    mjolnir::LoggerManager::set_default_logger("test_read_uniform_cubic_pan.log");
     using real_type = T;
 
     // a dummy system for testing `initialize` method
     using traits_type   = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using potential_type = mjolnir::UniformCubicFunctionPotential<real_type>;
+    using potential_type = mjolnir::UniformCubicPanPotential<real_type>;
     using boundary_type = typename traits_type::boundary_type;
     mjolnir::System<traits_type> sys(10, boundary_type{});
     mjolnir::Topology          topol(10);
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
         using namespace toml::literals;
         const auto v = u8R"(
             interaction = "Pair"
-            potential   = "UniformCubicFunction"
+            potential   = "UniformCubicPan"
             spatial_partition.type  = "CellList"
             ignore.molecule         = "Nothing"
             ignore.particles_within.bond    = 3
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
             range   = 5.0
         )"_toml;
 
-        auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        auto pot_para = mjolnir::read_uniform_cubic_pan_potential<traits_type>(v);
         const auto& pot = pot_para.first;
         auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
         using namespace toml::literals;
         const auto v = u8R"(
             interaction = "Pair"
-            potential   = "UniformCubicFunction"
+            potential   = "UniformCubicPan"
             spatial_partition.type  = "CellList"
             ignore.molecule         = "Nothing"
             ignore.particles_within.bond    = 3
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
             range = 5.0
         )"_toml;
 
-        auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        auto pot_para = mjolnir::read_uniform_cubic_pan_potential<traits_type>(v);
         const auto& pot = pot_para.first;
         auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
         using namespace toml::literals;
         const auto v = u8R"(
             interaction = "Pair"
-            potential   = "UniformCubicFunction"
+            potential   = "UniformCubicPan"
             spatial_partition.type  = "CellList"
             ignore.molecule         = "Nothing"
             ignore.particles_within.bond    = 3
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
             ]
         )"_toml;
 
-        auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        auto pot_para = mjolnir::read_uniform_cubic_pan_potential<traits_type>(v);
         const auto& pot = pot_para.first;
         auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
@@ -166,14 +166,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_noenv, T, test_types)
     }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_env, T, test_types)
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_pan_env, T, test_types)
 {
-    mjolnir::LoggerManager::set_default_logger("test_read_uniform_cubic_function.log");
+    mjolnir::LoggerManager::set_default_logger("test_read_uniform_cubic_pan.log");
     using real_type = T;
 
     // a dummy system for testing `initialize` method
     using traits_type   = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using potential_type = mjolnir::UniformCubicFunctionPotential<real_type>;
+    using potential_type = mjolnir::UniformCubicPanPotential<real_type>;
     using boundary_type = typename traits_type::boundary_type;
     mjolnir::System<traits_type> sys(10, boundary_type{});
     mjolnir::Topology          topol(10);
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_env, T, test_types)
         using namespace toml::literals;
         const auto v = u8R"(
             interaction = "Pair"
-            potential   = "UniformCubicFunction"
+            potential   = "UniformCubicPan"
             spatial_partition.type  = "CellList"
             ignore.molecule         = "Nothing"
             ignore.particles_within.bond    = 3
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_env, T, test_types)
             ]
         )"_toml;
 
-        auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        auto pot_para = mjolnir::read_uniform_cubic_pan_potential<traits_type>(v);
         const auto& pot = pot_para.first;
         auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
@@ -226,14 +226,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_env, T, test_types)
     }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_self, T, test_types)
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_pan_ignore_self, T, test_types)
 {
-    mjolnir::LoggerManager::set_default_logger("test_read_uniform_cubic_function.log");
+    mjolnir::LoggerManager::set_default_logger("test_read_uniform_cubic_pan.log");
     using real_type = T;
 
     // a dummy system for testing `initialize` method
     using traits_type   = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using potential_type = mjolnir::UniformCubicFunctionPotential<real_type>;
+    using potential_type = mjolnir::UniformCubicPanPotential<real_type>;
     using boundary_type = typename traits_type::boundary_type;
     mjolnir::System<traits_type> sys(10, boundary_type{});
     mjolnir::Topology            topol(10);
@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_self, T, test_t
         using namespace toml::literals;
         const auto v = u8R"(
             interaction = "Pair"
-            potential   = "UniformCubicFunction"
+            potential   = "UniformCubicPan"
             spatial_partition.type  = "CellList"
             ignore.molecule         = "Self"
             ignore.particles_within.bond    = 3
@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_self, T, test_t
             parameters = []
         )"_toml;
 
-        auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        auto pot_para = mjolnir::read_uniform_cubic_pan_potential<traits_type>(v);
         const auto& pot = pot_para.first;
         auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
@@ -274,14 +274,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_self, T, test_t
     }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_others, T, test_types)
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_pan_ignore_others, T, test_types)
 {
-    mjolnir::LoggerManager::set_default_logger("test_read_uniform_cubic_function.log");
+    mjolnir::LoggerManager::set_default_logger("test_read_uniform_cubic_pan.log");
     using real_type = T;
 
     // a dummy system for testing `initialize` method
     using traits_type   = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using potential_type = mjolnir::UniformCubicFunctionPotential<real_type>;
+    using potential_type = mjolnir::UniformCubicPanPotential<real_type>;
     using boundary_type = typename traits_type::boundary_type;
     mjolnir::System<traits_type> sys(10, boundary_type{});
     mjolnir::Topology            topol(10);
@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_others, T, test
         using namespace toml::literals;
         const auto v = u8R"(
             interaction = "Pair"
-            potential   = "UniformCubicFunction"
+            potential   = "UniformCubicPan"
             spatial_partition.type  = "CellList"
             ignore.molecule         = "Others"
             ignore.particles_within.bond    = 3
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_others, T, test
             parameters = []
         )"_toml;
 
-        auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        auto pot_para = mjolnir::read_uniform_cubic_pan_potential<traits_type>(v);
         const auto& pot = pot_para.first;
         auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 
@@ -322,14 +322,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_others, T, test
     }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_group, T, test_types)
+BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_pan_ignore_group, T, test_types)
 {
-    mjolnir::LoggerManager::set_default_logger("test_read_uniform_cubic_function.log");
+    mjolnir::LoggerManager::set_default_logger("test_read_uniform_cubic_pan.log");
     using real_type = T;
 
     // a dummy system for testing `initialize` method
     using traits_type   = mjolnir::SimulatorTraits<real_type, mjolnir::UnlimitedBoundary>;
-    using potential_type = mjolnir::UniformCubicFunctionPotential<real_type>;
+    using potential_type = mjolnir::UniformCubicPanPotential<real_type>;
     using boundary_type = typename traits_type::boundary_type;
     mjolnir::System<traits_type> sys(10, boundary_type{});
     mjolnir::Topology            topol(10);
@@ -338,7 +338,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_group, T, test_
         using namespace toml::literals;
         const auto v = u8R"(
             interaction = "Pair"
-            potential   = "UniformCubicFunction"
+            potential   = "UniformCubicPan"
             spatial_partition.type  = "CellList"
             ignore.molecule         = "Nothing"
             ignore.particles_within.bond    = 3
@@ -353,7 +353,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(read_uniform_cubic_function_ignore_group, T, test_
             parameters = []
         )"_toml;
 
-        auto pot_para = mjolnir::read_uniform_cubic_function_potential<traits_type>(v);
+        auto pot_para = mjolnir::read_uniform_cubic_pan_potential<traits_type>(v);
         const auto& pot = pot_para.first;
         auto& para = dynamic_cast<mjolnir::EmptyCombinationRule<traits_type, potential_type>&>(pot_para.second.ref());
 

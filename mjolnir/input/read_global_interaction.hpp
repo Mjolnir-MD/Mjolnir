@@ -161,14 +161,14 @@ read_global_pair_interaction(const toml::value& global)
                 std::move(pot_para.first), std::move(pot_para.second),
                 read_spatial_partition<traitsT, potential_t>(global));
     }
-    else if(potential == "UniformCubicFunction")
+    else if(potential == "UniformCubicPan")
     {
-        MJOLNIR_LOG_NOTICE("-- potential function is UniformCubicFunction");
+        MJOLNIR_LOG_NOTICE("-- potential function is UniformCubicPan");
         using real_type     = typename traitsT::real_type;
-        using potential_t   = UniformCubicFunctionPotential<real_type>;
+        using potential_t   = UniformCubicPanPotential<real_type>;
         using interaction_t = GlobalPairInteraction<traitsT, potential_t>;
 
-        auto pot_para = read_uniform_cubic_function_potential<traitsT>(global);
+        auto pot_para = read_uniform_cubic_pan_potential<traitsT>(global);
 
         return make_unique<interaction_t>(
             std::move(pot_para.first), std::move(pot_para.second),
@@ -187,7 +187,7 @@ read_global_pair_interaction(const toml::value& global)
             "- \"UniformLennardJones\"  : famous r^12 - r^6 potential with uniform parameters",
             "- \"3SPN2ExcludedVolume\"  : excluded volume for 3SPN2 DNA model",
             "- \"iSoLFAttractive\"      : attractive potential for iSoLF lipid model",
-            "- \"UniformCubicFunction\" : cubic function potential with uniform paramters"
+            "- \"UniformCubicPan\" : cubic function potential with uniform paramters"
             }));
     }
 }

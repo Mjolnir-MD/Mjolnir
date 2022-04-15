@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "test_uniform_cubic_function_potential"
+#define BOOST_TEST_MODULE "test_uniform_cubic_pan_potential"
 
 #ifdef BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -7,12 +7,12 @@
 #endif
 
 #include <test/util/check_potential.hpp>
-#include <mjolnir/forcefield/global/UniformCubicFunctionPotential.hpp>
+#include <mjolnir/forcefield/global/UniformCubicPanPotential.hpp>
 
-BOOST_AUTO_TEST_CASE(UniformCubicFunction_double)
+BOOST_AUTO_TEST_CASE(UniformCubicPan_double)
 {
     using real_type   = double;
-    using potential_type = mjolnir::UniformCubicFunctionPotential<real_type>;
+    using potential_type = mjolnir::UniformCubicPanPotential<real_type>;
     using parameter_type = potential_type::parameter_type;
 
     constexpr std::size_t N = 10000;
@@ -32,10 +32,10 @@ BOOST_AUTO_TEST_CASE(UniformCubicFunction_double)
                                    x_min, x_max, tol, h, N);
 }
 
-BOOST_AUTO_TEST_CASE(UniformCubicFunction_float)
+BOOST_AUTO_TEST_CASE(UniformCubicPan_float)
 {
     using real_type   = float;
-    using potential_type = mjolnir::UniformCubicFunctionPotential<real_type>;
+    using potential_type = mjolnir::UniformCubicPanPotential<real_type>;
     using parameter_type = potential_type::parameter_type;
 
     constexpr std::size_t N = 1000;

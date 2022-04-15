@@ -9,7 +9,7 @@
 #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
 #include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
 #include <mjolnir/forcefield/global/LennardJonesAttractivePotential.hpp>
-#include <mjolnir/forcefield/global/UniformCubicFunctionPotential.hpp>
+#include <mjolnir/forcefield/global/UniformCubicPanPotential.hpp>
 #include <mjolnir/forcefield/global/WCAPotential.hpp>
 #include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2ExcludedVolumePotential.hpp>
@@ -598,16 +598,16 @@ read_wca_potential(const toml::value& global)
 
 
 template<typename traitsT>
-std::pair<UniformCubicFunctionPotential<typename traitsT::real_type>,
-    ParameterList<traitsT, UniformCubicFunctionPotential<typename traitsT::real_type>>
+std::pair<UniformCubicPanPotential<typename traitsT::real_type>,
+    ParameterList<traitsT, UniformCubicPanPotential<typename traitsT::real_type>>
     >
-read_uniform_cubic_function_potential(const toml::value& global)
+read_uniform_cubic_pan_potential(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
 
     using real_type      = typename traitsT::real_type;
-    using potential_type = UniformCubicFunctionPotential<real_type>;
+    using potential_type = UniformCubicPanPotential<real_type>;
 
     const real_type eps   = toml::expect<real_type>(global, u8"ε").or_other(
                             toml::expect<real_type>(global, "epsilon")).unwrap();
@@ -620,7 +620,7 @@ read_uniform_cubic_function_potential(const toml::value& global)
     using parameter_list = EmptyCombinationRule<traitsT, potential_type>;
     // [[forcefield.global]]
     // interaction = "Pair"
-    // potential   = "UniformCubicFunction"
+    // potential   = "UniformCubicPan"
     // epsilon     = 1.0
     // v0          = 9.0
     // range       = 10.0

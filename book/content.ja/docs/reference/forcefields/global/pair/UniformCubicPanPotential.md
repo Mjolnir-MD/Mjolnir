@@ -1,9 +1,9 @@
 +++
-title  = "UniformCubicFunction"
+title  = "UniformCubicPan"
 weight = 200000
 +++
 
-# UniformCubicFunctionPotential
+# UniformCubicPanPotential
 
 鍋型のポテンシャルを表現するためのシンプルな3次関数型ポテンシャルです。
 
@@ -22,7 +22,7 @@ U(r) = \begin{cases}
 ```
 [[forcefields.global]]
 interaction = "Pair"
-potential   = "CubicFunctionPotential"
+potential   = "CubicPanPotential"
 ignore.molecule = "Nothing"
 ignore.partcles_within.bond     = 3
 ignore.particles_within.contact = 1

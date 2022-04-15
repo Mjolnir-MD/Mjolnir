@@ -14,7 +14,7 @@ template<typename T> class System;
 // This potential is same to GlobalStoichiometricInteractionPotential
 // and exist to use that in non-stoichiometric interaction.
 template<typename realT>
-class UniformCubicFunctionPotential
+class UniformCubicPanPotential
 {
   public:
     using real_type           = realT;
@@ -22,12 +22,12 @@ class UniformCubicFunctionPotential
 
   public:
 
-    explicit UniformCubicFunctionPotential(const real_type epsilon,
+    explicit UniformCubicPanPotential(const real_type epsilon,
             const real_type v0, const real_type range) noexcept
         : epsilon_(epsilon), v0_(v0), range_(range), v0_range_(v0 + range),
           inv_range_(1.0 / range), inv_range_6_(6.0 / range)
     {}
-    ~UniformCubicFunctionPotential() = default;
+    ~UniformCubicPanPotential() = default;
 
     real_type potential(const real_type r, const parameter_type&) const noexcept
     {
@@ -63,7 +63,7 @@ class UniformCubicFunctionPotential
     real_type v0()                const noexcept {return v0_;}
     real_type interaction_range() const noexcept {return range_;}
 
-    static const char* name() noexcept {return "UniformCubicFunction";}
+    static const char* name() noexcept {return "UniformCubicPan";}
 
     // It takes per-particle parameters and return the maximum cutoff length.
     template<typename InputIterator>
@@ -87,8 +87,8 @@ class UniformCubicFunctionPotential
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD
-extern template class UniformCubicFunctionPotential<double>;
-extern template class UniformCubicFunctionPotential<float >;
+extern template class UniformCubicPanPotential<double>;
+extern template class UniformCubicPanPotential<float >;
 #endif// MJOLNIR_SEPARATE_BUILD
 
 } // mjolnir

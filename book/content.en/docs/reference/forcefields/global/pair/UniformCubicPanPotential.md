@@ -1,9 +1,9 @@
 +++
-title = "UniformCubicFunction"
+title = "UniformCubicPan"
 weight = 200000
 +++
 
-# UniformCubicFunctionPotential
+# UniformCubicPanPotential
 
 The simple cubic functional potential which represent pan shape.
 
@@ -22,7 +22,7 @@ This is for the case where all particles has the same parameter.
 ```toml
 [[forcefields.global]]
 interaction = "Pair"
-potential   = "CubicFunctionPotential"
+potential   = "CubicPanPotential"
 ignore.molecule = "Nothing"
 ignore.partcles_within.bond     = 3
 ignore.particles_within.contact = 1

@@ -19,7 +19,7 @@ bookCollapseSection = true
 - [WCA]({{<relref "WCAPotential.md">}})
 - [iSoLFAttractive]({{<relref "iSoLFAttractivePotential.md">}})
 - [3SPN2ExcludedVolume]({{<relref "3SPN2ExcludedVolumePotential.md">}})
-- [UniformCubicFunction]({{<relref "UniformCubicFunctionPotential.md">}})
+- [UniformCubicPan]({{<relref "UniformCubicPanPotential.md">}})
 
 ## 例
 
