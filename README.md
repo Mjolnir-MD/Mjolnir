@@ -20,21 +20,25 @@ The detailed information can be found at https://mjolnir-md.github.io/Mjolnir/ .
 
 ### Capability
 
-- [x] Modern Langevin integrators, such as BAOAB and G-JF.
+- [x] Modern NVT/NPT Langevin integrators, such as BAOAB and G-JF.
 - [x] Langevin integrators with bond-length constraints based on g-BAOAB.
-- [x] Several simulation algorithms, such as simulated annealing.
+- [x] Several simulation algorithms, such as simulated annealing, switching forcefield, etc.
 - [x] Support for all the well-known interactions (pair, bond, angle, dihedral) with many potential functions. (L-J, Debye-Hückel, harmonic, gaussian, worm-like chain, and more!)
-- [x] Support for well-established Protein (AICG2+) and DNA (3SPN2/C) coarse-grained model
-- [x] Generalized multiple basin forcefield that enables conformational change in a coarse-grained model
-- [x] Parallel execution based on OpenMP
+- [x] Support for well-established Protein (AICG2+) and DNA (3SPN2/C) coarse-grained models.
+- [x] Generalized multiple basin forcefield that enables conformational change in a coarse-grained model.
+- [x] Parallel execution based on OpenMP.
 
 ... [and many more!](https://mjolnir-md.github.io/Mjolnir/docs/reference/)
 
 ## Build
 
+Since Mjolnir manages depending library via git submodule, clone this repo using git and **do not** download zip or release-tarball. It will cause compilation error.
+
 All the depending libraries are automatically downloaded in the CMake script.
 
 ```console
+$ git clone https://github.com/Mjolnir-MD/Mjolnir.git
+$ cd Mjolnir
 $ mkdir build
 $ cd build
 $ cmake ..
@@ -56,7 +60,7 @@ These libraries are automatically downloaded in the CMake script.
 You don't need to install anything manually.
 
 If you have already installed recent version of Boost Library (1.67.0 or later), you can use it by passing `-DBOOST_ROOT=/path/to/boost` option to `cmake`.
-It will save your time.
+It will save your time and system memory.
 
 ## Example
 

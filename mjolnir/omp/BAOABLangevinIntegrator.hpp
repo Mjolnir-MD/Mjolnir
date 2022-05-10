@@ -18,10 +18,12 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     using boundary_type   = typename traits_type::boundary_type;
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using system_type     = System<traits_type>;
     using forcefield_type = std::unique_ptr<ForceFieldBase<traits_type>>;
     using rng_type        = RandomNumberGenerator<traits_type>;
     using remover_type    = SystemMotionRemover<traits_type>;
+    using variable_key_type = typename system_type::variable_key_type;
 
   public:
 
@@ -56,6 +58,13 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             {
                 sys.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
             }
+            for(auto& kv : sys.variables())
+            {
+                auto& var = kv.second;
+                var.update(var.x(), var.v(), real_type(0));
+            }
+            sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
+
             ff->calc_force(sys);
         }
         return;
@@ -93,6 +102,21 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             largest_disp2 = std::max(largest_disp2, math::length_sq(dp));
         }
 
+        for(auto& kv : sys.variables()) // assume there are only a few dynvars
+        {
+            const auto& key = kv.first;
+            auto&       var = kv.second;
+
+            const auto& param = params_for_dynvar_.at(key);
+
+            var.update(var.x(), var.v() + halfdt_ * var.f() / var.m(), real_type(0)); // B
+            var.update(var.x() + halfdt_ * var.v(), var.v(), var.f());        // A
+            var.update(var.x(), var.v() * param.exp_gamma_dt +
+                                param.noise_coeff * rng.gaussian(), var.f()); // O
+            var.update(var.x() + halfdt_ * var.v(), var.v(), var.f());        // A
+        }
+
+
         // ------------------------------------------------------------------
         // update neighbor list; reduce margin, reconstruct the list if needed
         ff->reduce_margin(2 * std::sqrt(largest_disp2), sys);
@@ -109,6 +133,12 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             const auto& f = sys.force(i);
             auto&       v = sys.velocity(i);
             v += this->halfdt_ * rm * f;
+        }
+
+        for(auto& kv : sys.variables())
+        {
+            auto& var = kv.second;
+            var.update(var.x(), var.v() + this->halfdt_ * var.f() / var.m(), var.f());
         }
 
         remover_.remove(sys);
@@ -128,6 +158,13 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
         this->reset_parameters(sys);
         return;
     }
+    void update(const system_type& sys, const real_type newdt)
+    {
+        this->dt_     = newdt;
+        this->halfdt_ = 0.5 * newdt;
+        this->update(sys);
+        return;
+    }
 
     real_type delta_t() const noexcept {return dt_;}
     std::vector<real_type> const& parameters() const noexcept {return gammas_;}
@@ -145,6 +182,20 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
             this->exp_gamma_dt_.at(i) = std::exp(gamma_dt);
             this->noise_coeff_ .at(i) = std::sqrt(
                     kBT * (1 - std::exp(2 * gamma_dt)) * sys.rmass(i));
+        }
+
+        for(const auto& kv : sys.variables())
+        {
+            const auto& key = kv.first;
+            const auto& var = kv.second;
+
+            // force is not initialized yet
+            dynvar_params param;
+            param.exp_gamma_dt = std::exp(-var.gamma() * this->dt_);
+            param.noise_coeff  = std::sqrt(kBT *
+                    (real_type(1) - std::exp(-2 * var.gamma() * this->dt_)) /
+                    var.m());
+            params_for_dynvar_[key] = param;
         }
         return;
     }
@@ -167,6 +218,13 @@ class BAOABLangevinIntegrator<OpenMPSimulatorTraits<realT, boundaryT>>
     std::vector<real_type> noise_coeff_;
 
     remover_type remover_;
+
+    struct dynvar_params
+    {
+        real_type exp_gamma_dt;
+        real_type noise_coeff;
+    };
+    std::map<variable_key_type, dynvar_params> params_for_dynvar_;
 };
 
 #ifdef MJOLNIR_SEPARATE_BUILD

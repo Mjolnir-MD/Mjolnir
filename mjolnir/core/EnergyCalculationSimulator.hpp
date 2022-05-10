@@ -73,13 +73,48 @@ inline void EnergyCalculationSimulator<traitsT>::initialize()
 
     this->ff_->initialize(this->sys_);
 
-    this->obs_.initialize(this->total_step_, 0.0, this->sys_, this->ff_);
+    this->ff_->calc_force_and_virial(this->sys_);
+
+    auto Pins = this->sys_.virial();
+    for(std::size_t i=0; i<sys_.size(); ++i)
+    {
+        const auto m = sys_.mass(i);
+        const auto v = sys_.velocity(i);
+        Pins += m * math::tensor_product(v, v);
+    }
+
+    sys_.attribute("pressure_xx") = Pins(0, 0);
+    sys_.attribute("pressure_yy") = Pins(1, 1);
+    sys_.attribute("pressure_zz") = Pins(2, 2);
+    sys_.attribute("pressure_xy") = Pins(0, 1);
+    sys_.attribute("pressure_yz") = Pins(1, 2);
+    sys_.attribute("pressure_zx") = Pins(2, 0);
+
+    // Since neither save_step nor delta_t are not saved, we add some dummy value.
+    this->obs_.initialize(this->total_step_, 1, 1.0, this->sys_, this->ff_);
     return;
 }
 
 template<typename traitsT>
 inline bool EnergyCalculationSimulator<traitsT>::step()
 {
+    this->ff_->calc_force_and_virial(this->sys_);
+
+    auto Pins = this->sys_.virial();
+    for(std::size_t i=0; i<sys_.size(); ++i)
+    {
+        const auto m = sys_.mass(i);
+        const auto v = sys_.velocity(i);
+        Pins += m * math::tensor_product(v, v);
+    }
+
+    sys_.attribute("pressure_xx") = Pins(0, 0);
+    sys_.attribute("pressure_yy") = Pins(1, 1);
+    sys_.attribute("pressure_zz") = Pins(2, 2);
+    sys_.attribute("pressure_xy") = Pins(0, 1);
+    sys_.attribute("pressure_yz") = Pins(1, 2);
+    sys_.attribute("pressure_zx") = Pins(2, 0);
+
     // this calculates the energy.
     obs_.output(this->step_count_, 0.0, this->sys_, this->ff_);
 

@@ -1168,7 +1168,7 @@ parameters = [ # {{{
 
 [[forcefields.local]]
 interaction = "Contact"
-potential = "AttractiveGoContact"
+potential = "AttractiveMBasinContact"
 topology = "none"
 parameters = [ # {{{
 # AICG2+ Contact Potential for chain A
@@ -2911,7 +2911,7 @@ parameters = [ # {{{
 
 [[forcefields.local]]
 interaction = "Contact"
-potential = "AttractiveGoContact"
+potential = "AttractiveMBasinContact"
 topology = "none"
 parameters = [ # {{{
 # AICG2+ Contact Potential for chain A
@@ -4846,7 +4846,7 @@ parameters = [ # {{{
 
 [[forcefields.local]]
 interaction = "Contact"
-potential = "RepulsiveGoContact"
+potential = "RepulsiveMBasinContact"
 topology = "contact"
 parameters = [ # {{{
 # AICG2+ Contact Potential for chain A

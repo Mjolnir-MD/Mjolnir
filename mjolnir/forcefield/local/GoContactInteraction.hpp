@@ -45,39 +45,6 @@ class ContactInteraction<
     {}
     ~ContactInteraction() override {}
 
-    void calc_force(system_type& sys) const noexcept override
-    {
-        for(const std::size_t active_contact : active_contacts_)
-        {
-            const auto& idxp = this->potentials_[active_contact];
-
-            const std::size_t idx0 = idxp.first[0];
-            const std::size_t idx1 = idxp.first[1];
-            const auto&       pot  = idxp.second;
-
-            const auto dpos =
-                sys.adjust_direction(sys.position(idx0), sys.position(idx1));
-
-            const real_type len2  = math::length_sq(dpos);
-            if(pot.cutoff() * pot.cutoff() <= len2)
-            {
-                continue;
-            }
-
-            const real_type r2     = real_type(1) / len2;
-            const real_type v0r_2  = pot.v0() * pot.v0() * r2;
-            const real_type v0r_6  = v0r_2 * v0r_2 * v0r_2;
-            const real_type v0r_10 = v0r_6 * v0r_2 * v0r_2;
-            const real_type v0r_12 = v0r_10 * v0r_2;
-
-            const auto coef = -60 * pot.k() * r2 * (v0r_10 - v0r_12);
-            const auto f    = coef * dpos;
-            sys.force(idx0) -= f;
-            sys.force(idx1) += f;
-        }
-        return;
-    }
-
     real_type calc_energy(const system_type& sys) const noexcept override
     {
         real_type E = 0.0;
@@ -89,41 +56,23 @@ class ContactInteraction<
         }
         return E;
     }
-
+    void calc_force(system_type& sys) const noexcept override
+    {
+        this->template calc_force_energy_virial_impl<false, false>(sys);
+        return;
+    }
+    void calc_force_and_virial(system_type& sys) const noexcept override
+    {
+        this->template calc_force_energy_virial_impl<false, true>(sys);
+        return;
+    }
     real_type calc_force_and_energy(system_type& sys) const noexcept override
     {
-        real_type energy = 0;
-        for(const std::size_t active_contact : active_contacts_)
-        {
-            const auto& idxp = this->potentials_[active_contact];
-
-            const std::size_t idx0 = idxp.first[0];
-            const std::size_t idx1 = idxp.first[1];
-            const auto&       pot  = idxp.second;
-
-            const auto dpos =
-                sys.adjust_direction(sys.position(idx0), sys.position(idx1));
-
-            const real_type len2  = math::length_sq(dpos);
-            if(pot.cutoff() * pot.cutoff() <= len2)
-            {
-                continue;
-            }
-
-            const real_type r2     = real_type(1) / len2;
-            const real_type v0r_2  = pot.v0() * pot.v0() * r2;
-            const real_type v0r_6  = v0r_2 * v0r_2 * v0r_2;
-            const real_type v0r_10 = v0r_6 * v0r_2 * v0r_2;
-            const real_type v0r_12 = v0r_10 * v0r_2;
-
-            energy += pot.k() * (5 * v0r_12 - 6 * v0r_10);
-
-            const auto coef = -60 * pot.k() * r2 * (v0r_10 - v0r_12);
-            const auto f    = coef * dpos;
-            sys.force(idx0) -= f;
-            sys.force(idx1) += f;
-        }
-        return energy;
+        return this->template calc_force_energy_virial_impl<true, false>(sys);
+    }
+    real_type calc_force_virial_energy(system_type& sys) const noexcept override
+    {
+        return this->template calc_force_energy_virial_impl<true, true>(sys);
     }
 
     void initialize(const system_type& sys) override
@@ -232,6 +181,52 @@ class ContactInteraction<
         this->current_margin_ = this->cutoff_ * this->margin_;
         return;
     }
+
+    template<bool NeedEnergy, bool NeedVirial>
+    real_type calc_force_energy_virial_impl(system_type& sys) const noexcept
+    {
+        real_type energy = 0;
+        for(const std::size_t active_contact : active_contacts_)
+        {
+            const auto& idxp = this->potentials_[active_contact];
+
+            const std::size_t idx0 = idxp.first[0];
+            const std::size_t idx1 = idxp.first[1];
+            const auto&       pot  = idxp.second;
+
+            const auto dpos =
+                sys.adjust_direction(sys.position(idx0), sys.position(idx1));
+
+            const real_type len2  = math::length_sq(dpos);
+            if(pot.cutoff() * pot.cutoff() <= len2)
+            {
+                continue;
+            }
+
+            const real_type r2     = real_type(1) / len2;
+            const real_type v0r_2  = pot.v0() * pot.v0() * r2;
+            const real_type v0r_6  = v0r_2 * v0r_2 * v0r_2;
+            const real_type v0r_10 = v0r_6 * v0r_2 * v0r_2;
+            const real_type v0r_12 = v0r_10 * v0r_2;
+
+            if(NeedEnergy)
+            {
+                energy += pot.k() * (5 * v0r_12 - 6 * v0r_10);
+            }
+
+            const auto coef = -60 * pot.k() * r2 * (v0r_10 - v0r_12);
+            const auto f    = coef * dpos;
+            sys.force(idx0) -= f;
+            sys.force(idx1) += f;
+
+            if(NeedVirial)
+            {
+                sys.virial() += math::tensor_product(dpos, f);
+            }
+        }
+        return energy;
+    }
+
 
   private:
     connection_kind_type kind_;

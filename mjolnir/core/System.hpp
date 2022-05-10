@@ -1,11 +1,11 @@
 #ifndef MJOLNIR_CORE_SYSTEM_HPP
 #define MJOLNIR_CORE_SYSTEM_HPP
 #include <mjolnir/core/Unit.hpp>
-#include <mjolnir/core/Particle.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/RandomNumberGenerator.hpp>
+#include <mjolnir/core/DynamicVariable.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <vector>
 #include <map>
@@ -13,6 +13,7 @@
 
 namespace mjolnir
 {
+
 
 template<typename traitsT>
 class System
@@ -22,24 +23,27 @@ class System
     using string_type     = std::string;
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using boundary_type   = typename traits_type::boundary_type;
     using topology_type   = Topology;
     using attribute_type  = std::map<std::string, real_type>;
     using rng_type        = RandomNumberGenerator<traits_type>;
 
-    using particle_type            = Particle<real_type, coordinate_type>;
-    using particle_view_type       = ParticleView<real_type, coordinate_type>;
-    using particle_const_view_type = ParticleConstView<real_type, coordinate_type>;
-
     using real_container_type          = std::vector<real_type>;
     using coordinate_container_type    = std::vector<coordinate_type>;
     using string_container_type        = std::vector<std::string>;
+
+    // ------------------------------------------------------------------------
+    using dynamic_variable_type = DynamicVariable<real_type>;
+    using variable_key_type = std::string;
+    using variables_type = std::map<variable_key_type, dynamic_variable_type>;
 
   public:
 
     System(const std::size_t num_particles, const boundary_type& bound)
         : velocity_initialized_(false), force_initialized_(false),
-          boundary_(bound), attributes_(),
+          boundary_(bound), attributes_{}, variables_{},
+          virial_(0,0,0, 0,0,0, 0,0,0),
           num_particles_(num_particles), masses_   (num_particles),
           rmasses_      (num_particles), positions_(num_particles),
           velocities_   (num_particles), forces_   (num_particles),
@@ -88,6 +92,16 @@ class System
             math::Y(this->velocity(i)) = rng.gaussian(0, vel_coef);
             math::Z(this->velocity(i)) = rng.gaussian(0, vel_coef);
         }
+
+        // generate random force for dynamic variables
+        for(auto& kv : this->variables_)
+        {
+            auto& var = kv.second;
+            if( ! is_finite(var.v())) // not initialized
+            {
+                var.update(var.x(), rng.gaussian(0, std::sqrt(kBT / var.m())), var.f());
+            }
+        }
         MJOLNIR_LOG_NOTICE("done.");
         return;
     }
@@ -100,41 +114,12 @@ class System
     {
         return boundary_.adjust_position(dr);
     }
+    coordinate_type transpose(coordinate_type tgt, const coordinate_type& ref) const noexcept
+    {
+        return boundary_.transpose(tgt, ref);
+    }
 
     std::size_t size() const noexcept {return num_particles_;}
-
-    particle_view_type operator[](std::size_t i) noexcept
-    {
-        return particle_view_type{
-            masses_[i],    rmasses_[i],
-            positions_[i], velocities_[i], forces_[i],
-            names_[i],     groups_[i]
-        };
-    }
-    particle_const_view_type operator[](std::size_t i) const noexcept
-    {
-        return particle_const_view_type{
-            masses_[i],    rmasses_[i],
-            positions_[i], velocities_[i], forces_[i],
-            names_[i],     groups_[i]
-        };
-    }
-    particle_view_type at(std::size_t i)
-    {
-        return particle_view_type{
-            masses_.at(i),    rmasses_.at(i),
-            positions_.at(i), velocities_.at(i), forces_.at(i),
-            names_.at(i),     groups_.at(i)
-        };
-    }
-    particle_const_view_type at(std::size_t i) const
-    {
-        return particle_const_view_type{
-            masses_.at(i),    rmasses_.at(i),
-            positions_.at(i), velocities_.at(i), forces_.at(i),
-            names_.at(i),     groups_.at(i)
-        };
-    }
 
     // When parallelizing a code, forces are often calculated separately in
     // several computational units, like cores, nodes, gpu devices, etc. To
@@ -168,6 +153,9 @@ class System
     string_type const& group(std::size_t i) const noexcept {return groups_[i];}
     string_type&       group(std::size_t i)       noexcept {return groups_[i];}
 
+    matrix33_type&       virial()       noexcept {return virial_;}
+    matrix33_type const& virial() const noexcept {return virial_;}
+
     boundary_type&       boundary()       noexcept {return boundary_;}
     boundary_type const& boundary() const noexcept {return boundary_;}
 
@@ -177,6 +165,13 @@ class System
     real_type& attribute(const std::string& key)       {return attributes_[key];}
     bool   has_attribute(const std::string& key) const {return attributes_.count(key) == 1;}
     attribute_type const& attributes() const noexcept {return attributes_;}
+
+    // dynamic variables in a system.
+    dynamic_variable_type const& variable(const variable_key_type& key) const {return variables_.at(key);}
+    dynamic_variable_type&       variable(const variable_key_type& key)       {return variables_[key];}
+    bool                     has_variable(const variable_key_type& key) const {return variables_.count(key) == 1;}
+    variables_type const& variables() const noexcept {return variables_;}
+    variables_type&       variables()       noexcept {return variables_;}
 
     bool  velocity_initialized() const noexcept {return velocity_initialized_;}
     bool& velocity_initialized()       noexcept {return velocity_initialized_;}
@@ -191,6 +186,8 @@ class System
     bool           velocity_initialized_, force_initialized_;
     boundary_type  boundary_;
     attribute_type attributes_;
+    variables_type variables_;
+    matrix33_type  virial_;
 
     std::size_t                  num_particles_;
     real_container_type          masses_;

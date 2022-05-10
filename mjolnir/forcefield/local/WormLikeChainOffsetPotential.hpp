@@ -31,7 +31,7 @@ class WormLikeChainOffsetPotential
     {
         if(dist <= l0_) {return kBT_4p_ * lc_;}
         const real_type l = dist - l0_;
-        return kBT_4p_ * (lc_* (lc_ / (lc_ - l) - 1.0) - l + 2.0 * l * l * inv_lc_);
+        return kBT_4p_ * (lc_ * (lc_ / (lc_ - l) - real_type(1)) - l + real_type(2) * l * l * inv_lc_);
     }
 
     real_type derivative(const real_type dist) const noexcept
@@ -40,8 +40,8 @@ class WormLikeChainOffsetPotential
         const real_type l      = dist - l0_;
         const real_type l_lc   = l * inv_lc_;
 
-        const real_type diff_one_l_lc = 1 - l_lc;
-        return kBT_4p_ * (1.0 / (diff_one_l_lc * diff_one_l_lc) - 1.0 + 4.0 * l_lc);
+        const real_type diff_one_l_lc = real_type(1) - l_lc;
+        return kBT_4p_ * (real_type(1) / (diff_one_l_lc * diff_one_l_lc) - real_type(1) + real_type(4) * l_lc);
     }
 
     template<typename T>

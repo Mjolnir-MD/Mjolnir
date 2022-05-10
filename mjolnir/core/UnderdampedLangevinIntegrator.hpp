@@ -24,10 +24,12 @@ class UnderdampedLangevinIntegrator
     using boundary_type   = typename traits_type::boundary_type;
     using real_type       = typename traits_type::real_type;
     using coordinate_type = typename traits_type::coordinate_type;
+    using matrix33_type   = typename traits_type::matrix33_type;
     using system_type     = System<traitsT>;
     using forcefield_type = std::unique_ptr<ForceFieldBase<traitsT>>;
     using rng_type        = RandomNumberGenerator<traits_type>;
     using remover_type    = SystemMotionRemover<traits_type>;
+    using variable_key_type = typename system_type::variable_key_type;
 
   public:
 
@@ -48,10 +50,6 @@ class UnderdampedLangevinIntegrator
                    rng_type& rng);
 
     real_type delta_t() const noexcept {return dt_;}
-    void  set_delta_t(const real_type dt) noexcept
-    {
-        dt_ = dt; halfdt_ = dt / 2; halfdt2_ = dt * dt / 2;
-    }
 
     void update(const system_type& sys)
     {
@@ -65,6 +63,33 @@ class UnderdampedLangevinIntegrator
         this->temperature_ = sys.attribute("temperature");
         this->noise_coef_  = std::sqrt(2 * physics::constants<real_type>::kB() *
                                        this->temperature_ / dt_);
+
+        for(std::size_t i=0; i<sys.size(); ++i)
+        {
+            sqrt_gamma_over_mass_[i] = std::sqrt(gammas_[i] * sys.rmass(i));
+        }
+
+        for(const auto& kv : sys.variables())
+        {
+            const auto& key = kv.first;
+            const auto& var = kv.second;
+
+            // force is not initialized yet
+            dynvar_params param;
+            param.accel                = real_type(0);
+            param.gamma_dt_over_2      = var.gamma() * halfdt_;
+            param.sqrt_gamma_over_mass = std::sqrt(var.gamma() / var.m());
+            params_for_dynvar_[key] = param;
+        }
+    }
+
+    void update(const system_type& sys, const real_type dt) noexcept
+    {
+        this->dt_ = dt;
+        this->halfdt_ = dt / 2;
+        this->halfdt2_ = dt * dt / 2;
+        this->update(sys);
+        return;
     }
 
     std::vector<real_type> const& parameters() const noexcept {return gammas_;}
@@ -89,6 +114,15 @@ class UnderdampedLangevinIntegrator
     std::vector<real_type>       gammas_;
     std::vector<real_type>       sqrt_gamma_over_mass_;
     std::vector<coordinate_type> acceleration_;
+
+    // {acceleration, gamma dt / 2, 1 - gamma dt / 2, sqrt(gamma / m)}
+    struct dynvar_params
+    {
+        real_type accel;
+        real_type gamma_dt_over_2;
+        real_type sqrt_gamma_over_mass;
+    };
+    std::map<variable_key_type, dynvar_params> params_for_dynvar_;
 
     remover_type remover_;
 
@@ -116,26 +150,42 @@ void UnderdampedLangevinIntegrator<traitsT>::initialize(
     // initialize temperature and noise intensity
     this->update(system);
 
-    // if loaded from MsgPack, we can skip it.
+    // if force is not initialized, we need first to initialize it.
     if( ! system.force_initialized())
     {
         for(std::size_t i=0; i<system.size(); ++i)
         {
             system.force(i) = math::make_coordinate<coordinate_type>(0, 0, 0);
         }
+        for(auto& kv : system.variables())
+        {
+            auto& var = kv.second;
+            var.update(var.x(), var.v(), real_type(0));
+        }
+        system.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
         // calculate force
         ff->calc_force(system);
+    }
 
-        for(std::size_t i=0; i<system.size(); ++i)
-        {
-            const auto  rmass = system.rmass(i);
-            const auto& force = system.force(i);
+    // here we can assume that forces are initialized.
 
-            sqrt_gamma_over_mass_[i] = std::sqrt(gammas_[i] * rmass);
-            acceleration_[i] = force * rmass +
-                this->gen_gaussian_vec(rng, this->noise_coef_ * sqrt_gamma_over_mass_[i]);
-        }
+    for(std::size_t i=0; i<system.size(); ++i)
+    {
+        const auto  rmass = system.rmass(i);
+        const auto& force = system.force(i);
+
+        acceleration_[i] = force * rmass +
+            this->gen_gaussian_vec(rng, this->noise_coef_ * sqrt_gamma_over_mass_[i]);
+    }
+    for(const auto& kv : system.variables())
+    {
+        const auto& key = kv.first;
+        const auto& var = kv.second;
+        auto& param = params_for_dynvar_.at(key);
+
+        param.accel = var.f() / var.m() +
+            this->noise_coef_ * param.sqrt_gamma_over_mass * rng.gaussian();
     }
     return;
 }
@@ -170,6 +220,23 @@ UnderdampedLangevinIntegrator<traitsT>::step(
 
         largest_disp2 = std::max(largest_disp2, math::length_sq(displacement));
     }
+    for(auto& kv : sys.variables())
+    {
+        const auto& key = kv.first;
+        auto&       var = kv.second;
+
+        const auto& param = params_for_dynvar_.at(key);
+
+        const real_type one_minus_gamma_dt_over_2 = real_type(1) - param.gamma_dt_over_2;
+
+        const auto next_x = var.x() + dt_ * one_minus_gamma_dt_over_2 * var.v() + halfdt2_ * param.accel;
+        const auto next_v = var.v() * one_minus_gamma_dt_over_2 * (one_minus_gamma_dt_over_2 *
+                                      one_minus_gamma_dt_over_2 + param.gamma_dt_over_2) +
+                           (halfdt_ * one_minus_gamma_dt_over_2) * param.accel;
+
+        var.update(next_x, next_v, real_type(0));
+    }
+    sys.virial() = matrix33_type(0,0,0, 0,0,0, 0,0,0);
 
     // update neighbor list; reduce margin, reconstruct the list if needed
     ff->reduce_margin(2 * std::sqrt(largest_disp2), sys);
@@ -187,6 +254,19 @@ UnderdampedLangevinIntegrator<traitsT>::step(
 
         a  = f * rm + gen_gaussian_vec(rng, noise_coef_ * sqrt_gamma_over_mass_[i]);
         v += halfdt_ * (1 - gammas_[i] * halfdt_) * a;
+    }
+
+    for(auto& kv : sys.variables())
+    {
+        const auto& key = kv.first;
+        auto&       var = kv.second;
+
+        auto& param = params_for_dynvar_.at(key);
+        param.accel = var.f() / var.m() +
+            noise_coef_ * param.sqrt_gamma_over_mass * rng.gaussian();
+
+        const auto next_v = var.v() + halfdt_ * (1 - var.gamma() * halfdt_) * param.accel;
+        var.update(var.x(), next_v, var.f());
     }
 
     // remove net rotation/translation

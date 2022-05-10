@@ -38,9 +38,11 @@ class DummyInteraction final : public LocalInteractionBase<traitsT>
     {}
     ~DummyInteraction() override {}
 
-    void      calc_force (system_type&)           const noexcept override {return;}
-    real_type calc_energy(const system_type&)     const noexcept override {return 0;}
-    real_type calc_force_and_energy(system_type&) const noexcept override {return 0;}
+    void      calc_force (system_type&)              const noexcept override {return;}
+    void      calc_force_and_virial(system_type&)    const noexcept override {return;}
+    real_type calc_energy(const system_type&)        const noexcept override {return 0;}
+    real_type calc_force_and_energy(system_type&)    const noexcept override {return 0;}
+    real_type calc_force_virial_energy(system_type&) const noexcept override {return 0;}
 
     void initialize(const system_type&) override
     {

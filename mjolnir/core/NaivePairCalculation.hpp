@@ -6,21 +6,23 @@
 namespace mjolnir
 {
 
-template<typename traitsT, typename PotentialT>
-class NaivePairCalculation final : public SpatialPartitionBase<traitsT, PotentialT>
+template<typename traitsT, typename potentialT>
+class NaivePairCalculation final
+    : public SpatialPartitionBase<traitsT, potentialT>
 {
   public:
-    using traits_type        = traitsT;
-    using potential_type     = PotentialT;
-    using base_type          = SpatialPartitionBase<traits_type, potential_type>;
+    using traits_type         = traitsT;
+    using potential_type      = potentialT;
+    using base_type           = SpatialPartitionBase<traits_type, potential_type>;
 
-    using system_type        = typename base_type::system_type;
-    using boundary_type      = typename base_type::boundary_type;
-    using real_type          = typename base_type::real_type;
-    using coordinate_type    = typename base_type::coordinate_type;
-    using neighbor_list_type = typename base_type::neighbor_list_type;
-    using neighbor_type      = typename base_type::neighbor_type;
-    using range_type         = typename base_type::range_type;
+    using system_type         = typename base_type::system_type;
+    using boundary_type       = typename base_type::boundary_type;
+    using real_type           = typename base_type::real_type;
+    using coordinate_type     = typename base_type::coordinate_type;
+    using neighbor_list_type  = typename base_type::neighbor_list_type;
+    using neighbor_type       = typename base_type::neighbor_type;
+    using range_type          = typename base_type::range_type;
+    using parameter_list_type = typename base_type::parameter_list_type;
 
   public:
 
@@ -33,23 +35,23 @@ class NaivePairCalculation final : public SpatialPartitionBase<traitsT, Potentia
 
     bool valid() const noexcept override {return true;}
 
-    void initialize(neighbor_list_type& neighbor,
-            const system_type& sys, const potential_type& pot) override
+    void initialize(neighbor_list_type& neighbor, const system_type& sys,
+                    const parameter_list_type& params) override
     {
-        this->make(neighbor, sys, pot);
+        this->make(neighbor, sys, params);
         return;
     }
 
-    void make  (neighbor_list_type& neighbor,
-                const system_type& sys, const potential_type& pot) override;
+    void make(neighbor_list_type& neighbor, const system_type& sys,
+              const parameter_list_type& params) override;
 
-    bool reduce_margin(neighbor_list_type&, const real_type,
-                       const system_type&, const potential_type&) override
+    bool reduce_margin(neighbor_list_type&, const real_type /*dmargin*/,
+                       const system_type&, const parameter_list_type&) override
     {
         return false;
     }
-    bool scale_margin(neighbor_list_type&, const real_type,
-                      const system_type&, const potential_type&) override
+    bool scale_margin(neighbor_list_type&, const real_type /*scale*/,
+                      const system_type&, const parameter_list_type&) override
     {
         return false;
     }
@@ -61,23 +63,24 @@ class NaivePairCalculation final : public SpatialPartitionBase<traitsT, Potentia
 };
 
 template<typename traitsT, typename potentialT>
-void NaivePairCalculation<traitsT, potentialT>::make(neighbor_list_type& neighbors,
-        const system_type&, const potential_type& pot)
+void NaivePairCalculation<traitsT, potentialT>::make(
+        neighbor_list_type& neighbors, const system_type&,
+        const parameter_list_type& params)
 {
     neighbors.clear();
 
-    const auto leading_participants = pot.leading_participants();
+    const auto leading_participants = params.leading_participants();
 
     std::vector<neighbor_type> partners;
     for(std::size_t idx=0; idx<leading_participants.size(); ++idx)
     {
         partners.clear();
         const auto i = leading_participants[idx];
-        for(const auto j : pot.possible_partners_of(idx, i))
+        for(const auto j : params.possible_partners_of(idx, i))
         {
-            if(pot.has_interaction(i, j)) // likely
+            if(params.has_interaction(i, j)) // likely
             {
-                partners.emplace_back(j, pot.prepare_params(i, j));
+                partners.emplace_back(j, params.prepare_params(i, j));
             }
         }
         neighbors.add_list_for(i, partners.begin(), partners.end());
@@ -86,35 +89,4 @@ void NaivePairCalculation<traitsT, potentialT>::make(neighbor_list_type& neighbo
 }
 
 } // mjolnir
-
-#ifdef MJOLNIR_SEPARATE_BUILD
-#include <mjolnir/forcefield/global/DebyeHuckelPotential.hpp>
-#include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
-#include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
-#include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
-
-namespace mjolnir
-{
-extern template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>       , DebyeHuckelPotential<SimulatorTraits<double, UnlimitedBoundary>       >>;
-extern template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>       , DebyeHuckelPotential<SimulatorTraits<float,  UnlimitedBoundary>       >>;
-extern template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-extern template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, DebyeHuckelPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-
-extern template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>       , ExcludedVolumePotential<SimulatorTraits<double, UnlimitedBoundary>       >>;
-extern template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>       , ExcludedVolumePotential<SimulatorTraits<float,  UnlimitedBoundary>       >>;
-extern template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-extern template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, ExcludedVolumePotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-
-extern template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>       , LennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       >>;
-extern template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>       , LennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       >>;
-extern template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-extern template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, LennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-
-extern template class NaivePairCalculation<SimulatorTraits<double, UnlimitedBoundary>       , UniformLennardJonesPotential<SimulatorTraits<double, UnlimitedBoundary>       >>;
-extern template class NaivePairCalculation<SimulatorTraits<float,  UnlimitedBoundary>       , UniformLennardJonesPotential<SimulatorTraits<float,  UnlimitedBoundary>       >>;
-extern template class NaivePairCalculation<SimulatorTraits<double, CuboidalPeriodicBoundary>, UniformLennardJonesPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>>;
-extern template class NaivePairCalculation<SimulatorTraits<float,  CuboidalPeriodicBoundary>, UniformLennardJonesPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>>;
-}
-#endif // SEPARATE_BUILD
-
 #endif /*MJOLNIR_CORE_NAIVE_PAIR_CALCULATION*/

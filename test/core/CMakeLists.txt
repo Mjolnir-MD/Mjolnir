@@ -9,6 +9,7 @@ set(TEST_NAMES
     test_system_motion_remover
     test_file_inclusion
     test_fixed_vector
+    test_parse_range
 
     test_harmonic_potential
     test_gaussian_potential
@@ -22,12 +23,16 @@ set(TEST_NAMES
     test_go_contact_potential
     test_go_attractive_potential
     test_go_repulsive_potential
+    test_mbasin_attractive_potential
+    test_mbasin_repulsive_potential
     test_3spn2_bond_potential
     test_3spn2_base_stacking_potential
-    test_3spn2_base_base_interaction_potential
+    test_3spn2_base_pair_potential
+    test_3spn2_excluded_volume_potential
     test_lennard_jones_potential
     test_uniform_lennard_jones_potential
     test_lennard_jones_attractive_potential
+    test_uniform_cubic_pan_potential
     test_wca_potential
     test_isolf_potential
     test_excluded_volume_potential
@@ -49,11 +54,11 @@ set(TEST_NAMES
     test_bond_angle_interaction
     test_dihedral_angle_interaction
     test_3spn2_base_stacking_interaction
-    test_3spn2_base_base_interaction
+    test_3spn2_base_pair_interaction
+    test_3spn2_cross_stacking_interaction
     test_global_pair_interaction
     test_global_pair_excluded_volume_interaction
     test_global_pair_lennard_jones_interaction
-    test_global_pair_uniform_lennard_jones_interaction
     test_global_stoichiometric_interaction
     test_pdns_interaction
     test_pwmcos_interaction
@@ -61,8 +66,10 @@ set(TEST_NAMES
     test_position_restraint_interaction
     test_afm_fitting_interaction
     test_rectangular_box_interaction
+    test_pulling_force_interaction
 
     test_multiple_basin_forcefield
+    test_hybrid_forcefield
 
     test_neighbor_list
     test_unlimited_verlet_list
@@ -75,6 +82,8 @@ set(TEST_NAMES
     test_read_go_contact_potential
     test_read_go_attractive_potential
     test_read_go_repulsive_potential
+    test_read_mbasin_attractive_potential
+    test_read_mbasin_repulsive_potential
     test_read_clementi_dihedral_potential
     test_read_gaussian_potential
     test_read_worm_like_chain_potential
@@ -91,10 +100,13 @@ set(TEST_NAMES
     test_read_debye_huckel_potential
     test_read_lennard_jones_potential
     test_read_uniform_lennard_jones_potential
-    test_read_excluded_volume_wall_potential
     test_read_lennard_jones_attractive_potential
+    test_read_tabulated_lennard_jones_attractive_potential
+    test_read_uniform_cubic_pan_potential
     test_read_wca_potential
+    test_read_tabulated_wca_potential
     test_read_isolf_potential
+    test_read_excluded_volume_wall_potential
     test_read_lennard_jones_wall_potential
     test_read_implicit_membrane_potential
     test_read_uniform_potential
@@ -108,13 +120,15 @@ set(TEST_NAMES
     test_read_directional_contact_interaction
     test_read_dummy_interaction
     test_read_3spn2_base_stacking_interaction
-    test_read_3spn2_base_base_interaction
+    test_read_3spn2_base_pair_interaction
     test_read_global_pair_interaction
     test_read_pdns_interaction
     test_read_pwmcos_interaction
     test_read_position_restraint_interaction
     test_read_afm_fitting_interaction
     test_read_rectangular_box_interaction
+    test_read_pulling_force_interaction
+    test_read_com_pulling_force_interaction
 
     test_read_index_offset
 
@@ -123,6 +137,7 @@ set(TEST_NAMES
     test_read_external_forcefield
     test_read_forcefield
     test_read_multiple_basin_forcefield
+    test_read_hybrid_forcefield
 
     test_read_molecular_dynamics_simulator
     test_read_simulated_annealing_simulator

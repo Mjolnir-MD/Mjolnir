@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(read_pwmcos_interaction)
             >(base.get()); // check the expected type is contained
         BOOST_TEST_REQUIRE(static_cast<bool>(derv));
 
-        const auto& pot = derv->potential();
+        const auto& pot = derv->parameters();
 
         BOOST_TEST(pot.cutoff_ratio() == 5.0);
         BOOST_TEST(pot.energy_unit()  == 0.593);
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(read_pwmcos_interaction)
         BOOST_TEST(pot.sigma()        == 1.0);
         BOOST_TEST(pot.phi()          == 0.17453);
 
-        const auto nil = mjolnir::PWMcosPotential<traits_type>::invalid();
+        const auto nil = mjolnir::PWMcosParameterList<traits_type>::invalid();
 
         const auto A = mjolnir::PWMcosPotential<traits_type>::base_kind::A;
         const auto T = mjolnir::PWMcosPotential<traits_type>::base_kind::T;

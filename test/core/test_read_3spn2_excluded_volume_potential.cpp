@@ -8,21 +8,17 @@
 
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/core/BoundaryCondition.hpp>
-#include <mjolnir/input/read_global_interaction.hpp>
+#include <mjolnir/input/read_global_potential.hpp>
 
 BOOST_AUTO_TEST_CASE(read_3spn2_base_base_interaction)
 {
     mjolnir::LoggerManager::set_default_logger("test_read_3spn2_base_base_interaction.log");
 
     using bead_kind = mjolnir::parameter_3SPN2::bead_kind;
-
     using traits_type = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using potential_type = mjolnir::ThreeSPN2ExcludedVolumePotential<traits_type>;
     {
         using namespace toml::literals;
         const toml::value v = u8R"(
-            interaction = "Pair"
-            potential = "3SPN2ExcludedVolume"
             ignore.particles_within.bond            = 1
             ignore.particles_within.3SPN2_angle     = 1
             ignore.particles_within.3SPN2_dihedral  = 1
@@ -38,21 +34,18 @@ BOOST_AUTO_TEST_CASE(read_3spn2_base_base_interaction)
             ]
         )"_toml;
 
-        const auto base = mjolnir::read_global_interaction<traits_type>(v);
-        BOOST_TEST(static_cast<bool>(base));
+        const auto pot_para = mjolnir::read_3spn2_excluded_volume_potential<traits_type>(v);
+        const auto& para = dynamic_cast<
+            mjolnir::ThreeSPN2ExcludedVolumeParameterList<traits_type> const&
+            >(pot_para.second.cref());
 
-        const auto derv = dynamic_cast<
-            mjolnir::GlobalPairInteraction<traits_type, potential_type>*
-            >(base.get()); // check the expected type is contained
-        BOOST_TEST(static_cast<bool>(derv));
+        BOOST_TEST_REQUIRE(para.participants().size() == 6u);
 
-        BOOST_TEST_REQUIRE(derv->potential().participants().size() == 6u);
-
-        BOOST_TEST(derv->potential().parameters().at(0) == bead_kind::Phosphate);
-        BOOST_TEST(derv->potential().parameters().at(1) == bead_kind::Sugar    );
-        BOOST_TEST(derv->potential().parameters().at(2) == bead_kind::BaseA    );
-        BOOST_TEST(derv->potential().parameters().at(3) == bead_kind::BaseT    );
-        BOOST_TEST(derv->potential().parameters().at(4) == bead_kind::BaseG    );
-        BOOST_TEST(derv->potential().parameters().at(5) == bead_kind::BaseC    );
+        BOOST_TEST(para.parameters().at(0) == bead_kind::Phosphate);
+        BOOST_TEST(para.parameters().at(1) == bead_kind::Sugar    );
+        BOOST_TEST(para.parameters().at(2) == bead_kind::BaseA    );
+        BOOST_TEST(para.parameters().at(3) == bead_kind::BaseT    );
+        BOOST_TEST(para.parameters().at(4) == bead_kind::BaseG    );
+        BOOST_TEST(para.parameters().at(5) == bead_kind::BaseC    );
     }
 }

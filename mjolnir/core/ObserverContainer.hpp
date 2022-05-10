@@ -38,12 +38,13 @@ class ObserverContainer
     ObserverContainer& operator=(ObserverContainer&&)      = default;
 
     // open files, write header and so on.
-    void initialize(const std::size_t total_step, const real_type dt,
+    void initialize(const std::size_t total_step,
+                    const std::size_t save_interval, const real_type dt,
                     const system_type& sys, const forcefield_type& ff)
     {
         for(const auto& obs : observers_)
         {
-            obs->initialize(total_step, dt, sys, ff);
+            obs->initialize(total_step, save_interval, dt, sys, ff);
         }
 
         this->progress_bar_.reset(total_step); // set total_step as 100%.

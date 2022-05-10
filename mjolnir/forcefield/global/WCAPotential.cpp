@@ -6,8 +6,6 @@
 
 namespace mjolnir
 {
-template class WCAPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
-template class WCAPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
-template class WCAPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-template class WCAPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+template class WCAPotential<double>;
+template class WCAPotential<float >;
 } // mjolnir

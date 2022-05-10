@@ -6,12 +6,56 @@
 #include <boost/test/included/unit_test.hpp>
 #endif
 
+#include <test/util/utility.hpp>
+
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/forcefield/local/BondLengthGoContactInteraction.hpp>
 #include <mjolnir/math/constants.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <random>
+
+BOOST_AUTO_TEST_CASE(BondLengthGoContact_numerical_difference)
+{
+    namespace test = mjolnir::test;
+
+    using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type        = traits_type::real_type;
+    using coord_type       = traits_type::coordinate_type;
+    using boundary_type    = traits_type::boundary_type;
+    using system_type      = mjolnir::System<traits_type>;
+    using potential_type   = mjolnir::GoContactPotential<real_type>;
+    using interaction_type = mjolnir::BondLengthInteraction<traits_type, potential_type>;
+
+    const real_type k(1.0);
+    const real_type native(std::sqrt(3.0));
+
+    potential_type   potential(k, native);
+    interaction_type interaction("none", {{ {{0,1}}, potential}});
+
+    std::mt19937 mt(123456789);
+
+    for(std::size_t i = 0; i < 1000; ++i)
+    {
+        system_type sys(2, boundary_type{});
+        test::clear_everything(sys);
+
+        sys.position(0) = coord_type( 0.0, 0.0, 0.0);
+        sys.position(1) = coord_type( 1.0, 1.0, 1.0);
+
+        test::apply_random_rotation(sys, mt);
+        test::apply_random_perturbation(sys, mt, 0.01);
+
+        constexpr real_type tol = 2e-4;
+        constexpr real_type dr  = 1e-5;
+
+        test::check_force(sys, interaction, tol, dr);
+        test::check_virial(sys, interaction, tol);
+        test::check_force_and_virial(sys, interaction, tol);
+        test::check_force_and_energy(sys, interaction, tol);
+        test::check_force_energy_virial(sys, interaction, tol);
+    }
+}
 
 BOOST_AUTO_TEST_CASE(BondLengthGoContactInteraction)
 {
@@ -29,20 +73,20 @@ BOOST_AUTO_TEST_CASE(BondLengthGoContactInteraction)
     const coord_type pos2(0.0, 0.0, 0.0);
     system_type sys(2, boundary_type{});
 
-    sys.at(0).mass     = 1.0;
-    sys.at(1).mass     = 1.0;
-    sys.at(0).rmass    = 1.0;
-    sys.at(1).rmass    = 1.0;
-    sys.at(0).position = pos1;
-    sys.at(1).position = pos2;
-    sys.at(0).velocity = coord_type(0,0,0);
-    sys.at(1).velocity = coord_type(0,0,0);
-    sys.at(0).force    = coord_type(0,0,0);
-    sys.at(1).force    = coord_type(0,0,0);
-    sys.at(0).name     = "X";
-    sys.at(1).name     = "X";
-    sys.at(0).group    = "NONE";
-    sys.at(1).group    = "NONE";
+    sys.mass(0)     = 1.0;
+    sys.mass(1)     = 1.0;
+    sys.rmass(0)    = 1.0;
+    sys.rmass(1)    = 1.0;
+    sys.position(0) = pos1;
+    sys.position(1) = pos2;
+    sys.velocity(0) = coord_type(0,0,0);
+    sys.velocity(1) = coord_type(0,0,0);
+    sys.force(0)    = coord_type(0,0,0);
+    sys.force(1)    = coord_type(0,0,0);
+    sys.name(0)     = "X";
+    sys.name(1)     = "X";
+    sys.group(0)    = "NONE";
+    sys.group(1)    = "NONE";
 
     const real_type k(1.0);
     const real_type native(1.0);
@@ -77,181 +121,4 @@ BOOST_AUTO_TEST_CASE(BondLengthGoContactInteraction)
     }
 }
 
-BOOST_AUTO_TEST_CASE(BondLengthGoContact_numerical_difference)
-{
-    using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type        = traits_type::real_type;
-    using coord_type       = traits_type::coordinate_type;
-    using boundary_type    = traits_type::boundary_type;
-    using system_type      = mjolnir::System<traits_type>;
-    using potential_type   = mjolnir::GoContactPotential<real_type>;
-    using interaction_type = mjolnir::BondLengthInteraction<traits_type, potential_type>;
 
-    const real_type k(1.0);
-    const real_type native(std::sqrt(3.0));
-
-    potential_type   potential(k, native);
-    interaction_type interaction("none", {{ {{0,1}}, potential}});
-
-    std::mt19937 mt(123456789);
-    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
-
-    for(std::size_t i = 0; i < 1000; ++i)
-    {
-        system_type sys(2, boundary_type{});
-
-        sys.at(0).mass  = 1.0;
-        sys.at(1).mass  = 1.0;
-        sys.at(0).rmass = 1.0;
-        sys.at(1).rmass = 1.0;
-
-        sys.at(0).position = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
-        sys.at(1).position = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
-        sys.at(0).velocity = coord_type( 0.0, 0.0, 0.0);
-        sys.at(1).velocity = coord_type( 0.0, 0.0, 0.0);
-        sys.at(0).force    = coord_type( 0.0, 0.0, 0.0);
-        sys.at(1).force    = coord_type( 0.0, 0.0, 0.0);
-
-        sys.at(0).name  = "X";
-        sys.at(1).name  = "X";
-        sys.at(0).group = "TEST";
-        sys.at(1).group = "TEST";
-
-        const auto init = sys;
-
-        constexpr real_type tol = 2e-4;
-        constexpr real_type dr  = 1e-5;
-        for(std::size_t idx=0; idx<2; ++idx)
-        {
-            {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
-
-                // calc U(x-dx)
-                const auto E0 = interaction.calc_energy(sys);
-
-                mjolnir::math::X(sys.position(idx)) += dr;
-
-                // calc F(x)
-                interaction.calc_force(sys);
-
-                mjolnir::math::X(sys.position(idx)) += dr;
-
-                // calc U(x+dx)
-                const auto E1 = interaction.calc_energy(sys);
-
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
-
-                BOOST_TEST(-dE == dr * mjolnir::math::X(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
-            }
-            {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
-
-                // calc U(x-dx)
-                const auto E0 = interaction.calc_energy(sys);
-
-                mjolnir::math::Y(sys.position(idx)) += dr;
-
-                // calc F(x)
-                interaction.calc_force(sys);
-
-                mjolnir::math::Y(sys.position(idx)) += dr;
-
-                // calc U(x+dx)
-                const auto E1 = interaction.calc_energy(sys);
-
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
-
-                BOOST_TEST(-dE == dr * mjolnir::math::Y(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
-            }
-            {
-                // ----------------------------------------------------------------
-                // reset positions
-                sys = init;
-
-                // calc U(x-dx)
-                const auto E0 = interaction.calc_energy(sys);
-
-                mjolnir::math::Z(sys.position(idx)) += dr;
-
-                // calc F(x)
-                interaction.calc_force(sys);
-
-                mjolnir::math::Z(sys.position(idx)) += dr;
-
-                // calc U(x+dx)
-                const auto E1 = interaction.calc_energy(sys);
-
-                // central difference
-                const auto dE = (E1 - E0) * 0.5;
-
-                BOOST_TEST(-dE == dr * mjolnir::math::Z(sys.force(idx)),
-                           boost::test_tools::tolerance(tol));
-            }
-        }
-    }
-}
-
-BOOST_AUTO_TEST_CASE(BondLengthGoContact_calc_force_and_energy)
-{
-    using traits_type      = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type        = traits_type::real_type;
-    using coord_type       = traits_type::coordinate_type;
-    using boundary_type    = traits_type::boundary_type;
-    using system_type      = mjolnir::System<traits_type>;
-    using potential_type   = mjolnir::GoContactPotential<real_type>;
-    using interaction_type = mjolnir::BondLengthInteraction<traits_type, potential_type>;
-
-    const real_type k(1.0);
-    const real_type native(std::sqrt(3.0));
-
-    potential_type   potential(k, native);
-    interaction_type interaction("none", {{ {{0,1}}, potential}});
-
-    std::mt19937 mt(123456789);
-    std::uniform_real_distribution<real_type> uni(-1.0, 1.0);
-
-    for(std::size_t i = 0; i < 1000; ++i)
-    {
-        system_type sys(2, boundary_type{});
-
-        sys.at(0).mass  = 1.0;
-        sys.at(1).mass  = 1.0;
-        sys.at(0).rmass = 1.0;
-        sys.at(1).rmass = 1.0;
-
-        sys.at(0).position = coord_type( 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt), 0.0 + 0.01 * uni(mt));
-        sys.at(1).position = coord_type( 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt), 1.0 + 0.01 * uni(mt));
-        sys.at(0).velocity = coord_type( 0.0, 0.0, 0.0);
-        sys.at(1).velocity = coord_type( 0.0, 0.0, 0.0);
-        sys.at(0).force    = coord_type( 0.0, 0.0, 0.0);
-        sys.at(1).force    = coord_type( 0.0, 0.0, 0.0);
-
-        sys.at(0).name  = "X";
-        sys.at(1).name  = "X";
-        sys.at(0).group = "TEST";
-        sys.at(1).group = "TEST";
-
-        auto ref_sys = sys;
-        constexpr real_type tol = 2e-4;
-
-        const auto energy = interaction.calc_force_and_energy(sys);
-        const auto ref_energy = interaction.calc_energy(ref_sys);
-        interaction.calc_force(ref_sys);
-        BOOST_TEST(ref_energy == energy, boost::test_tools::tolerance(tol));
-
-        for(std::size_t idx=0; idx<sys.size(); ++idx)
-        {
-            BOOST_TEST(mjolnir::math::X(sys.force(idx)) == mjolnir::math::X(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Y(sys.force(idx)) == mjolnir::math::Y(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
-            BOOST_TEST(mjolnir::math::Z(sys.force(idx)) == mjolnir::math::Z(ref_sys.force(idx)), boost::test_tools::tolerance(tol));
-        }
-    }
-}
