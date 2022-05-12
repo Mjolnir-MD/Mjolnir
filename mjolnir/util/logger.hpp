@@ -25,6 +25,7 @@ namespace mjolnir
  * - MJOLNIR_LOG_NOTICE -- write current progress and status to console.     *
  * - MJOLNIR_LOG_WARN   -- may not be wrong, but undesirable stuff happens.  *
  * - MJOLNIR_LOG_ERROR  -- something wrong.                                  *
+ * - MJOLNIR_LOG_FATAL  -- terminate execution immediately.                  *
  *                                                                           *
  * - MJOLNIR_LOG_SCOPE    -- helps logging by indentation.                   *
  * - MJOLNIR_LOG_FUNCTION -- helps logging by indentation.                   *
@@ -157,7 +158,8 @@ class basic_logger
         Info   = 2,
         Notice = 3,
         Warn   = 4,
-        Error  = 5
+        Error  = 5,
+        Fatal  = 6
     };
 
   public:
@@ -192,31 +194,42 @@ class basic_logger
             ofs << string_type(indent_size * indent_, ' ');
         }
 
-        if(level == Level::Notice || level == Level::Warn || level == Level::Error)
+        // message is also printed to stderr. use endl to flush buffer in order
+        // to show message immediately (according to spec, cerr should not have
+        // buffer. but, depending on implementation, sometimes the output is
+        // buffered...)
+        if(level == Level::Notice)
         {
-            // message is also printed to stderr
             std::cerr << "-- ";
-            if(level == Level::Warn)
-            {
-                std::cerr << '[' << io::bold << io::yellow << "warning"
-                          << io::nocolor << "] " << io::bold;
-                output_message(std::cerr, std::forward<Ts>(args)...);
-                std::cerr << io::nocolor;
-            }
-            else if(level == Level::Error)
-            {
-                std::cerr << '[' << io::bold << io::red << "error"
-                          << io::nocolor << "] " << io::bold;
-                output_message(std::cerr, std::forward<Ts>(args)...);
-                std::cerr << io::nocolor;
-            }
-            else
-            {
-                output_message(std::cerr, std::forward<Ts>(args)...);
-            }
+            output_message(std::cerr, std::forward<Ts>(args)...);
             std::cerr << std::endl;
         }
+        else if (level == Level::Warn)
+        {
+            std::cerr << "-- [" << io::bold << io::yellow << "warning"
+                      << io::nocolor << "] " << io::bold;
+            output_message(std::cerr, std::forward<Ts>(args)...);
+            std::cerr << io::nocolor << std::endl;
+        }
+        else if (level == Level::Error)
+        {
+            std::cerr << "-- [" << io::bold << io::red << "error"
+                      << io::nocolor << "] " << io::bold;
+            output_message(std::cerr, std::forward<Ts>(args)...);
+            std::cerr << io::nocolor << std::endl;
+        }
+        else if (level == Level::Fatal)
+        {
+            std::cerr << "-- [" << io::bold << io::red << "fatal"
+                      << io::nocolor << "] " << io::bold;
+            output_message(std::cerr, std::forward<Ts>(args)...);
+            std::cerr << io::nocolor << std::endl;
 
+            output_message(ofs, this->stringize(level), std::forward<Ts>(args)...);
+            ofs << std::endl;
+
+            std::terminate(); // fatal! stop execution immediately.
+        }
         output_message(ofs, this->stringize(level), std::forward<Ts>(args)...);
         ofs << std::endl;
 
@@ -445,6 +458,7 @@ using Scope         = basic_scope<char>;
 #define MJOLNIR_LOG_NOTICE(...) l_o_g_g_e_r_.log(Logger::Level::Notice, __VA_ARGS__)
 #define MJOLNIR_LOG_WARN(...)   l_o_g_g_e_r_.log(Logger::Level::Warn,   __VA_ARGS__)
 #define MJOLNIR_LOG_ERROR(...)  l_o_g_g_e_r_.log(Logger::Level::Error,  __VA_ARGS__)
+#define MJOLNIR_LOG_FATAL(...)  l_o_g_g_e_r_.log(Logger::Level::Fatal,  __VA_ARGS__)
 
 // no linefeed at the end of line.
 #define MJOLNIR_LOG_INFO_NO_LF(...)   l_o_g_g_e_r_.log_no_lf(Logger::Level::Info,   __VA_ARGS__)
