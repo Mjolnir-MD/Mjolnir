@@ -694,8 +694,10 @@ read_global_stoichiometric_interaction(const toml::value& global)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using potential_type = GlobalStoichiometricInteractionPotential<traitsT>;
-    using real_type      = typename potential_type::real_type;
+
+    using real_type           = typename traitsT::real_type;
+    using potential_type      = GlobalStoichiometricInteractionPotential<real_type>;
+    using parameter_list_type = StoichiometricInteractionRule<traitsT, potential_type>;
 
     // ```toml
     // [[forcefields.global]]
@@ -725,8 +727,8 @@ read_global_stoichiometric_interaction(const toml::value& global)
 
     for(const auto& item : ps)
     {
-        const auto idx  = toml::find<std::size_t>(item, "index");
-        const auto kind = toml::find<std::string>(item, "kind");
+        const std::size_t idx  = toml::find<std::size_t>(item, "index");
+        const std::string kind = toml::find<std::string>(item, "kind");
 
         if(kind == "A")
         {
@@ -746,14 +748,13 @@ read_global_stoichiometric_interaction(const toml::value& global)
         }
     }
 
-    potential_type potential(v0, range,
-            std::move(a_indices),
-            std::move(b_indices),
+    parameter_list_type parameter_list(
+            std::move(a_indices), std::move(b_indices),
             read_ignore_particles_within(global),
             read_ignored_molecule(global), read_ignored_group(global));
 
-    return make_unique<GlobalStoichiometricInteraction<traitsT>>(
-            std::move(potential),
+    return make_unique<GlobalStoichiometricInteraction<traitsT, potential_type>>(
+            potential_type{v0, range}, std::move(parameter_list),
             read_spatial_partition<traitsT, potential_type>(global),
             epsilon, coefa, coefb);
 }
