@@ -125,16 +125,18 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
     }
 
     void      calc_force (system_type&)           const noexcept override;
-    void      calc_force_and_virial(system_type&) const override
+    void      calc_force_and_virial(system_type&) const noexcept override
     {
-        throw_exception<std::runtime_error>("GlobalStoichiometricInteraction:"
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FATAL("GlobalStoichiometricInteraction:"
                 " virial calculation is not supported");
         return;
     }
     real_type calc_force_and_energy(system_type&) const noexcept override;
-    real_type calc_force_virial_energy(system_type&) const override
+    real_type calc_force_virial_energy(system_type&) const noexcept override
     {
-        throw_exception<std::runtime_error>("GlobalStoichiometricInteraction:"
+        MJOLNIR_GET_DEFAULT_LOGGER();
+        MJOLNIR_LOG_FATAL("GlobalStoichiometricInteraction:"
                 " virial calculation is not supported");
     }
     real_type calc_energy(const system_type&)     const noexcept override;
