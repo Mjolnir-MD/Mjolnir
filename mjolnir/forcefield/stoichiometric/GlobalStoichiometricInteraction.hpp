@@ -193,11 +193,11 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
     parameter_list_type parameters_;
     partition_type      partition_;
 
-    real_type      epsilon_;
-    std::size_t    coefa_;
-    std::size_t    coefb_;
-    real_type      inv_coefa_;
-    real_type      inv_coefb_;
+    real_type   epsilon_;
+    std::size_t coefa_;
+    std::size_t coefb_;
+    real_type   inv_coefa_;
+    real_type   inv_coefb_;
 
     // -----------------------------------------------------------------------
     // Variable for mapping system index to buffering index
