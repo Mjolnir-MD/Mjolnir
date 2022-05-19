@@ -19,16 +19,16 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
 {
   public:
 
-    using traits_type            = traitsT;
-    using potential_type         = potentialT;
-    using base_type              = GlobalInteractionBase<traitsT>;
-    using index_type             = std::size_t;
-    using real_type              = typename base_type::real_type;
-    using coordinate_type        = typename base_type::coordinate_type;
-    using system_type            = typename base_type::system_type;
-    using topology_type          = typename base_type::topology_type;
-    using partition_type         = SpatialPartition<traitsT, potential_type>;
-    using parameter_list_type    = ParameterList<traits_type, potential_type>;
+    using traits_type         = traitsT;
+    using potential_type      = potentialT;
+    using base_type           = GlobalInteractionBase<traitsT>;
+    using index_type          = std::size_t;
+    using real_type           = typename base_type::real_type;
+    using coordinate_type     = typename base_type::coordinate_type;
+    using system_type         = typename base_type::system_type;
+    using topology_type       = typename base_type::topology_type;
+    using partition_type      = SpatialPartition<traitsT, potential_type>;
+    using parameter_list_type = StoichiometricInteractionRule<traits_type, potential_type>;
     using potential_buffer_type  = std::vector<real_type>;
     using derivative_buffer_type = std::vector<coordinate_type>;
 
@@ -44,13 +44,13 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
   public:
     GlobalStoichiometricInteraction(potential_type&& pot, parameter_list_type&& para,
         partition_type&& part,
-        real_type epsilon, std::size_t coefa, std::size_t coefb)
+        const real_type epsilon, const std::size_t coefa, const std::size_t coefb)
         : potential_(std::move(pot)), parameters_(std::move(para)),
           partition_(std::move(part)),
           epsilon_(epsilon), coefa_(coefa), coefb_(coefb), inv_coefa_(1./coefa), inv_coefb_(1./coefb)
     {
-        const std::size_t participants_a_num = parameters_.participants_a_num();
-        const std::size_t participants_b_num = parameters_.participants_b_num();
+        const std::size_t participants_a_num = parameters_.participants_a().size();
+        const std::size_t participants_b_num = parameters_.participants_b().size();
         const std::size_t participants_ab    = participants_a_num * participants_b_num;
         derivs_buff_    .resize(participants_ab);
         potentials_buff_.resize(participants_ab);
@@ -77,7 +77,7 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
 
         this->potential_ .initialize(sys);
         this->parameters_.initialize(sys, topol, potential_);
-        this->partition_ .initialize(sys, parameters_.cref());
+        this->partition_ .initialize(sys, this->parameters_);
 
         this->update_buffer_range();
 
@@ -105,14 +105,14 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
         MJOLNIR_LOG_INFO("potential is ", this->name());
         this->potential_ .update(sys);
         this->parameters_.update(sys, topol, potential_);
-        this->partition_ .initialize(sys, this->parameters_cref());
+        this->partition_ .initialize(sys, this->parameters_);
 
         this->update_buffer_range();
     }
 
     void reduce_margin(const real_type dmargin, const system_type& sys) override
     {
-        if(partition_.reduce_margin(dmargin, sys, this->parametes_.cref()))
+        if(partition_.reduce_margin(dmargin, sys, this->parameters_))
         {
             this->update_buffer_range();
         }
@@ -120,7 +120,7 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
     }
     void scale_margin(const real_type scale, const system_type& sys) override
     {
-        partition_.scale_margin(scale, sys, this->parameters_.cref());
+        partition_.scale_margin(scale, sys, this->parameters_);
         return;
     }
 
@@ -137,6 +137,8 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
         MJOLNIR_GET_DEFAULT_LOGGER();
         MJOLNIR_LOG_FATAL("GlobalStoichiometricInteraction:"
                 " virial calculation is not supported");
+
+        return 0.0;
     }
     real_type calc_energy(const system_type&)     const noexcept override;
 
@@ -149,6 +151,7 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
     {
         return new GlobalStoichiometricInteraction(
                 potential_type(potential_), parameter_list_type(parameters_),
+                partition_type(partition_),
                 epsilon_, coefa_, coefb_);
     }
 
@@ -158,7 +161,7 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
         MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
         const std::vector<index_type> participants_a
             = parameters_.participants_a();
-        const std::size_t participants_a_num = parameters_.participants_a_num();
+        const std::size_t participants_a_num = participants_a.size();
         auto pot_buff_iter   = potentials_buff_.begin();
         auto deriv_buff_iter = derivs_buff_    .begin();
 
@@ -240,7 +243,7 @@ void GlobalStoichiometricInteraction<traitsT, potT>::calc_force(system_type& sys
     // make index pair list to specify the range of buffer for specific a and
     // pre calculation for pots_sum and derivs_sum for each particle.
     const auto&       participants_a     = parameters_.participants_a();
-    const std::size_t participants_a_num = parameters_.participants_a_num();
+    const std::size_t participants_a_num = participants_a.size();
 
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
@@ -254,16 +257,14 @@ void GlobalStoichiometricInteraction<traitsT, potT>::calc_force(system_type& sys
         coordinate_type& derivs_sum_a = derivs_sum_a_[idx_a];
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
-            const auto&           ptnr  = partner[ptnr_idx];
-            const index_type      j     = ptnr.index;
-            const auto&           para  = ptnr.parameter();
+            const index_type      j = partner[ptnr_idx].index;
 
             const coordinate_type rij   = sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type       l2    = math::length_sq(rij); // |rij|^2
             const real_type       rl    = math::rsqrt(l2);      // 1 / |rij|
             const real_type       l     = l2 * rl;
-            const coordinate_type deriv = potential_.derivative(l, para) * rl * rij;
-            const real_type       pot   = potential_.potential(l, para);
+            const coordinate_type deriv = potential_.derivative(l) * rl * rij;
+            const real_type       pot   = potential_.potential(l);
 
             pot_range  [ptnr_idx] =  pot;
             deriv_range[ptnr_idx] =  deriv;
@@ -423,7 +424,7 @@ GlobalStoichiometricInteraction<traitsT, potT>::calc_energy(const system_type& s
     // make index pair list to specify the range of buffer for specific a and
     // pre calculation for pots_sum and derivs_sum for each particle.
     const auto        participants_a     = parameters_.participants_a();
-    const std::size_t participants_a_num = parameters_.participants_a_num();
+    const std::size_t participants_a_num = participants_a.size();
 
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
@@ -436,9 +437,7 @@ GlobalStoichiometricInteraction<traitsT, potT>::calc_energy(const system_type& s
 
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
-            const auto&      ptnr  = partner[ptnr_idx].index;
-            const index_type j     = ptnr.index;
-            const auto&      para  = ptnr.parameter();
+            const index_type j = partner[ptnr_idx].index;
 
             const index_type idx_b = idx_buffer_map_[j];
             const coordinate_type rij =
@@ -446,7 +445,7 @@ GlobalStoichiometricInteraction<traitsT, potT>::calc_energy(const system_type& s
             const real_type l2  = math::length_sq(rij); // |rij|^2
             const real_type rl  = math::rsqrt(l2);      // 1 / |rij|
             const real_type l   = l2 * rl;              // |rij|
-            const real_type pot = potential_.potential(l, para);
+            const real_type pot = potential_.potential(l);
 
             pot_range [ptnr_idx] =  pot;
             pots_sum_a           += pot;
@@ -502,7 +501,7 @@ GlobalStoichiometricInteraction<traitsT, potT>::calc_force_and_energy(system_typ
     // make index pair list to specify the range of buffer for specific a and
     // pre calculation for pots_sum and derivs_sumb for each particle.
     const auto        participants_a     = parameters_.participants_a();
-    const std::size_t participants_a_num = parameters_.participants_a_num();
+    const std::size_t participants_a_num = participants_a.size();
 
     for(std::size_t idx_a=0; idx_a<participants_a_num; ++idx_a)
     {
@@ -518,14 +517,13 @@ GlobalStoichiometricInteraction<traitsT, potT>::calc_force_and_energy(system_typ
         {
             const auto&           ptnr  = partner[ptnr_idx];
             const index_type      j     = ptnr.index;
-            const auto&           para  = ptnr.parameter();;;;
 
             const coordinate_type rij   = sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type       l2    = math::length_sq(rij); // |rij|^2
             const real_type       rl    = math::rsqrt(l2);      // 1 / |rij|
             const real_type       l     = l2 * rl;
-            const coordinate_type deriv = potential_.derivative(l, para) * rl * rij;
-            const real_type       pot   = potential_.potential(l, para);
+            const coordinate_type deriv = potential_.derivative(l) * rl * rij;
+            const real_type       pot   = potential_.potential(l);
 
             pot_range    [ptnr_idx] =  pot;
             deriv_range  [ptnr_idx] =  deriv;

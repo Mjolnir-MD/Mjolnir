@@ -51,7 +51,7 @@ class GlobalStoichiometricInteractionPotential
         return inv_range_6_ * (r_v0_inv_range_2 - r_v0_inv_range);
     }
 
-    real_type max_cutoff_length() const noexcept
+    real_type max_cutoff() const noexcept
     {
         return v0_range_;
     }

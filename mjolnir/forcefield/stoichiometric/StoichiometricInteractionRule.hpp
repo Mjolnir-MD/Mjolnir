@@ -110,6 +110,16 @@ class StoichiometricInteractionRule final
         return make_range(participants_b_.begin(), participants_b_.end());
     }
 
+    // used in GlobalStoichiometricInteraction
+    std::vector<std::size_t> const& participants_a() const noexcept
+    {
+        return this->participants_a_;
+    }
+    std::vector<std::size_t> const& participants_b() const noexcept
+    {
+        return this->participants_b_;
+    }
+
     base_type* clone() const override
     {
         return new StoichiometricInteractionRule(*this);
