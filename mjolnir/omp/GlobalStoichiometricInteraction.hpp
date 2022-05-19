@@ -9,21 +9,25 @@ namespace mjolnir
 
 // The interaction which conserve stoichiometry.
 
-template<typename realT, template<typename, typename> class boundaryT>
-class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
-    final : public GlobalInteractionBase<OpenMPSimulatorTraits<realT, boundaryT>>
+template<typename realT, template<typename, typename> class boundaryT,
+         typename potentialT>
+class GlobalStoichiometricInteraction<
+    OpenMPSimulatorTraits<realT, boundaryT>, potentialT
+    > final : public GlobalInteractionBase<OpenMPSimulatorTraits<realT, boundaryT>>
 {
   public:
 
-    using traits_type            = OpenMPSimulatorTraits<realT, boundaryT>;
-    using base_type              = GlobalInteractionBase<traits_type>;
-    using index_type             = std::size_t;
-    using real_type              = typename base_type::real_type;
-    using coordinate_type        = typename base_type::coordinate_type;
-    using system_type            = typename base_type::system_type;
-    using topology_type          = typename base_type::topology_type;
+    using traits_type         = OpenMPSimulatorTraits<realT, boundaryT>;
+    using potential_type      = potentialT;
+    using base_type           = GlobalInteractionBase<traits_type>;
+    using index_type          = std::size_t;
+    using real_type           = typename base_type::real_type;
+    using coordinate_type     = typename base_type::coordinate_type;
+    using system_type         = typename base_type::system_type;
+    using topology_type       = typename base_type::topology_type;
+    using partition_type      = SpatialPartition<traits_type, potential_type>;
+    using parameter_list_type = StoichiometricInteractionRule<traits_type, potential_type>;
     using potential_type         = GlobalStoichiometricInteractionPotential<traits_type>;
-    using partition_type         = SpatialPartition<traits_type, potential_type>;
     using potential_buffer_type  = std::vector<real_type>;
     using derivative_buffer_type = std::vector<coordinate_type>;
 
@@ -37,10 +41,11 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
     using derivative_range_buffer_type = std::vector<derivative_range_type>;
 
   public:
-    GlobalStoichiometricInteraction(potential_type&& pot, partition_type&& part,
-        real_type epsilon,
-        std::size_t coefa, std::size_t coefb)
-        : potential_(std::move(pot)), partition_(std::move(part)),
+    GlobalStoichiometricInteraction(potential_type&& pot, parameter_list_type&& para,
+        partition_type&& part,
+        real_type epsilon, std::size_t coefa, std::size_t coefb)
+        : potential_(std::move(pot)), parameters_(std::move(para)),
+          partition_(std::move(part)),
           epsilon_(epsilon), coefa_(coefa), coefb_(coefb), inv_coefa_(1./coefa), inv_coefb_(1./coefb)
     {
         num_threads_ = omp_get_max_threads();
@@ -166,16 +171,17 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 
   private:
 
-    potential_type potential_;
-    partition_type partition_;
+    potential_type      potential_;
+    parameter_list_type parameters_;
+    partition_type      partition_;
 
-    real_type      epsilon_;
-    std::size_t    coefa_;
-    std::size_t    coefb_;
-    real_type      inv_coefa_;
-    real_type      inv_coefb_;
+    real_type   epsilon_;
+    std::size_t coefa_;
+    std::size_t coefb_;
+    real_type   inv_coefa_;
+    real_type   inv_coefb_;
 
-    std::size_t    num_threads_;
+    std::size_t num_threads_;
 
     // -----------------------------------------------------------------------
     // Variable for mapping system index to buffering index
@@ -788,13 +794,14 @@ class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>>
 #ifdef MJOLNIR_SEPARATE_BUILD
 // explicitly specialize major use-cases
 #include <mjolnir/core/BoundaryCondition.hpp>
+#include <mjolnir/forcefield/stoichiometric/GlobalStoichiometricInteractionPotential.hpp>
 
 namespace mjolnir
 {
-extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>       >;
-extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       >;
-extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>>;
-extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>       , GlobalStoichiometricInteractionPotential<double>>;
+extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       , GlobalStoichiometricInteractionPotential<float >>;
+extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, GlobalStoichiometricInteractionPotential<double>>;
+extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, GlobalStoichiometricInteractionPotential<float >>;
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
 

@@ -29,7 +29,6 @@
 #include <mjolnir/omp/GlobalPairInteraction.hpp>
 #include <mjolnir/omp/GlobalPairExcludedVolumeInteraction.hpp>
 #include <mjolnir/omp/GlobalPairLennardJonesInteraction.hpp>
-#include <mjolnir/omp/GlobalPairUniformLennardJonesInteraction.hpp>
 #include <mjolnir/omp/GlobalStoichiometricInteraction.hpp>
 #include <mjolnir/omp/ThreeSPN2BasePairInteraction.hpp>
 #include <mjolnir/omp/ThreeSPN2CrossStackingInteraction.hpp>
