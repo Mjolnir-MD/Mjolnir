@@ -21,17 +21,18 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_one_on_one_double)
     mjolnir::LoggerManager::set_default_logger(
         "test_global_stoichiometric_interaction_one_on_one_double.log");
 
-    using traits_type   = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
-    using real_type     = traits_type::real_type;
-    using coord_type    = traits_type::coordinate_type;
-    using boundary_type = traits_type::boundary_type;
-    using system_type   = mjolnir::System<traits_type>;
-    using topology_type = mjolnir::Topology;
-
-    using potential_type = mjolnir::GlobalStoichiometricInteractionPotential<traits_type>;
-    using partition_type = mjolnir::NaivePairCalculation<traits_type, potential_type>;
-
-    using interaction_type = mjolnir::GlobalStoichiometricInteraction<traits_type>;
+    using traits_type    = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type      = traits_type::real_type;
+    using coord_type     = traits_type::coordinate_type;
+    using boundary_type  = traits_type::boundary_type;
+    using system_type    = mjolnir::System<traits_type>;
+    using topology_type  = mjolnir::Topology;
+    using potential_type = mjolnir::GlobalStoichiometricInteractionPotential<real_type>;
+    using parameter_list_type =
+        mjolnir::StoichiometricInteractionRule<traits_type, potential_type>;
+    using partition_type      = mjolnir::NaivePairCalculation<traits_type, potential_type>;
+    using interaction_type    =
+        mjolnir::GlobalStoichiometricInteraction<traits_type, potential_type>;
 
     // set parameters for test
     constexpr real_type tol = 1e-4;
@@ -78,13 +79,15 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_one_on_one_double)
     system.force(2)    = coord_type( 0.0, 0.0, 0.0);
     system.force(3)    = coord_type( 0.0, 0.0, 0.0);
 
-    potential_type potential = potential_type(particle_radius, interaction_range,
+    parameter_list_type parameter_list(
         std::vector<std::size_t>{0, 2}, std::vector<std::size_t>{1, 3},
-        {}, typename potential_type::ignore_molecule_type("Nothing"),
-            typename potential_type::ignore_group_type   ({})
+        {}, typename parameter_list_type::ignore_molecule_type("Nothing"),
+            typename parameter_list_type::ignore_group_type   ({})
         );
 
-    interaction_type interaction = interaction_type(potential_type{potential},
+    interaction_type interaction = interaction_type(
+        potential_type{particle_radius, interaction_range},
+        std::move(parameter_list),
         mjolnir::SpatialPartition<traits_type, potential_type>(
             mjolnir::make_unique<partition_type>()),
         epsilon, first_coef, second_coef);
@@ -203,11 +206,12 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_random_configuration_double
     using boundary_type = traits_type::boundary_type;
     using system_type   = mjolnir::System<traits_type>;
     using topology_type = mjolnir::Topology;
-
-    using potential_type = mjolnir::GlobalStoichiometricInteractionPotential<traits_type>;
+    using potential_type = mjolnir::GlobalStoichiometricInteractionPotential<real_type>;
+    using parameter_list_type =
+        mjolnir::StoichiometricInteractionRule<traits_type, potential_type>;
     using partition_type = mjolnir::NaivePairCalculation<traits_type, potential_type>;
-
-    using interaction_type = mjolnir::GlobalStoichiometricInteraction<traits_type>;
+    using interaction_type =
+        mjolnir::GlobalStoichiometricInteraction<traits_type, potential_type>;
 
     // set parameters for test
     constexpr real_type tol = 1e-4;
@@ -261,13 +265,16 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_random_configuration_double
         std::iota(particle_a_arr.begin(), particle_a_arr.end(), 0);
         std::vector<std::size_t> particle_b_arr(particle_b_num);
         std::iota(particle_b_arr.begin(), particle_b_arr.end(), particle_a_num);
-        potential_type potential = potential_type(particle_radius, interaction_range,
+
+        parameter_list_type parameter_list(
             std::move(particle_a_arr), std::move(particle_b_arr),
-            {}, typename potential_type::ignore_molecule_type("Nothing"),
-                typename potential_type::ignore_group_type   ({})
+            {}, typename parameter_list_type::ignore_molecule_type("Nothing"),
+                typename parameter_list_type::ignore_group_type   ({})
             );
 
-        interaction_type interaction = interaction_type(potential_type{potential},
+        interaction_type interaction = interaction_type(
+            potential_type{particle_radius, interaction_range},
+            std::move(parameter_list),
             mjolnir::SpatialPartition<traits_type, potential_type>(
                 mjolnir::make_unique<partition_type>()),
             epsilon, first_coef, second_coef);
@@ -387,11 +394,12 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_one_on_two_double)
     using boundary_type = traits_type::boundary_type;
     using system_type   = mjolnir::System<traits_type>;
     using topology_type = mjolnir::Topology;
-
-    using potential_type = mjolnir::GlobalStoichiometricInteractionPotential<traits_type>;
+    using potential_type = mjolnir::GlobalStoichiometricInteractionPotential<real_type>;
+    using parameter_list_type =
+        mjolnir::StoichiometricInteractionRule<traits_type, potential_type>;
     using partition_type = mjolnir::NaivePairCalculation<traits_type, potential_type>;
-
-    using interaction_type = mjolnir::GlobalStoichiometricInteraction<traits_type>;
+    using interaction_type =
+        mjolnir::GlobalStoichiometricInteraction<traits_type, potential_type>;
 
     // set parameters for test
     constexpr real_type tol = 1e-4;
@@ -446,13 +454,15 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_one_on_two_double)
     system.force(3)    = coord_type( 0.0,  0.0, 0.0);
     system.force(4)    = coord_type( 0.0,  0.0, 0.0);
 
-    potential_type potential = potential_type(particle_radius, interaction_range,
+    parameter_list_type parameter_list(
         std::vector<std::size_t>{0, 3}, std::vector<std::size_t>{1, 2, 4},
-        {}, typename potential_type::ignore_molecule_type("Nothing"),
-            typename potential_type::ignore_group_type   ({})
+        {}, typename parameter_list_type::ignore_molecule_type("Nothing"),
+            typename parameter_list_type::ignore_group_type   ({})
         );
 
-    interaction_type interaction = interaction_type(potential_type{potential},
+    interaction_type interaction = interaction_type(
+        potential_type{particle_radius, interaction_range},
+        std::move(parameter_list),
         mjolnir::SpatialPartition<traits_type, potential_type>(
             mjolnir::make_unique<partition_type>()),
         epsilon, first_coef, second_coef);
