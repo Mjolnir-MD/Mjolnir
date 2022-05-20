@@ -21,6 +21,7 @@ class StoichiometricInteractionRule final
     using base_type           = ParameterListBase<traitsT, potentialT>;
     using pair_parameter_type = typename potentialT::parameter_type;
     using real_type           = typename base_type::real_type;
+    using parameter_type      = typename potentialT::parameter_type;
 
     // topology stuff
     using system_type          = System<traitsT>;
