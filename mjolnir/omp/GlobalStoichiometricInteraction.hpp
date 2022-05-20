@@ -169,6 +169,8 @@ class GlobalStoichiometricInteraction<
   private:
     void update_buffer_range()
     {
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+
         const auto        participants_a     = parameters_.participants_a();
         const std::size_t participants_a_num = participants_a.size();
         auto pot_buff_iter   = potentials_buff_.begin();

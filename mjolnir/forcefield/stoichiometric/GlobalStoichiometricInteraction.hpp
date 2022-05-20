@@ -159,6 +159,8 @@ class GlobalStoichiometricInteraction final : public GlobalInteractionBase<trait
     void update_buffer_range()
     {
         MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+        MJOLNIR_LOG_FUNCTION_DEBUG();
+
         const std::vector<index_type> participants_a
             = parameters_.participants_a();
         const std::size_t participants_a_num = participants_a.size();

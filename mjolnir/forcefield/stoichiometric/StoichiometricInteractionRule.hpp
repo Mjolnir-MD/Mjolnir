@@ -43,8 +43,14 @@ class StoichiometricInteractionRule final
         participants_a_(participants_a), participants_b_(participants_b),
         exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+
         this->participants_.insert(participants_.end(),
                 participants_b.begin(), participants_b.end());
+
+        MJOLNIR_LOG_DEBUG("participants size is ", participants_.size());
+        MJOLNIR_LOG_DEBUG("participants a size is ", participants_a_.size());
+        MJOLNIR_LOG_DEBUG("participants b size is ", participants_b_.size());
     }
 
     StoichiometricInteractionRule(const StoichiometricInteractionRule&) = default;
