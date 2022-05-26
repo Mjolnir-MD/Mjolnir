@@ -502,22 +502,20 @@ read_uniform_lennard_jones_potential(const toml::value& global)
     //     # ...
     // ]
 
-    if( ! global.contains("parameters"))
+    const auto& ps = toml::find_or<toml::array>(global, "parameters", {});
+    if(ps.size() == 0)
     {
+        MJOLNIR_LOG_WARN("UniformLennardJonesPotential does not have any participants.");
+        MJOLNIR_LOG_WARN("All the particles are considered to be participants.");
+        MJOLNIR_LOG_WARN("To disable this potential, "
+                             "simply remove the part from the input file.");
+
         return std::make_pair(potential_type(cutoff, sigma, epsilon),
             ParameterList<traitsT, potential_type>(
                 make_unique<parameter_list>(
                     read_ignore_particles_within(global),
                     read_ignored_molecule(global), read_ignored_group(global)
                 )));
-    }
-    const auto& ps = toml::find<toml::array>(global, "parameters");
-    if(ps.size() == 0)
-    {
-        throw_exception<std::runtime_error>("[error]"
-            "mjolnir::read_uniform_lennard_jones_potential: "
-            "0 size parameters table found. When you set parameters table, "
-            "you need to set at least one parameter.");
     }
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
@@ -636,22 +634,20 @@ read_uniform_cubic_pan_potential(const toml::value& global)
     // # ...
     // ]
 
-    if( ! global.contains("parameters"))
+    const auto& ps = toml::find_or<toml::array>(global, "parameters", {});
+    if(ps.size() == 0)
     {
+        MJOLNIR_LOG_WARN("UniformCubicPanPotential does not have any participants.");
+        MJOLNIR_LOG_WARN("All the particles are considered to be participants.");
+        MJOLNIR_LOG_WARN("To disable this potential, "
+                             "simply remove the part from the input file.");
+
         return std::make_pair(potential_type(eps, v0, range),
             ParameterList<traitsT, potential_type>(
                 make_unique<parameter_list>(
                     read_ignore_particles_within(global),
                     read_ignored_molecule(global), read_ignored_group(global)
                 )));
-    }
-    const auto& ps = toml::find<toml::array>(global, "parameters");
-    if(ps.size() == 0)
-    {
-        throw_exception<std::runtime_error>("[error]"
-            "mjolnir::read_uniform_cubic_pan_potential: "
-            "0 size parameters table found. When you set parameters table, "
-            "you need to set at least one parameter.");
     }
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
