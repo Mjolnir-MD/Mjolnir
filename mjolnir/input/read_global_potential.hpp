@@ -512,6 +512,13 @@ read_uniform_lennard_jones_potential(const toml::value& global)
                 )));
     }
     const auto& ps = toml::find<toml::array>(global, "parameters");
+    if(ps.size() == 0)
+    {
+        throw_exception<std::runtime_error>("[error]"
+            "mjolnir::read_uniform_lennard_jones_potential: "
+            "0 size parameters table found. When you set parameters table, "
+            "you need to set at least one parameter.");
+    }
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
@@ -639,6 +646,13 @@ read_uniform_cubic_pan_potential(const toml::value& global)
                 )));
     }
     const auto& ps = toml::find<toml::array>(global, "parameters");
+    if(ps.size() == 0)
+    {
+        throw_exception<std::runtime_error>("[error]"
+            "mjolnir::read_uniform_cubic_pan_potential: "
+            "0 size parameters table found. When you set parameters table, "
+            "you need to set at least one parameter.");
+    }
     MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
 
     const auto& env = global.contains("env") ? global.at("env") : toml::value{};
