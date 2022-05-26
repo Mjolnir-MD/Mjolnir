@@ -38,7 +38,7 @@ parameters = [
   - The cutoff distance relative to the maximum {{<katex>}}\sigma_{ij}{{</katex>}}.
 - `index`: Integer
   - The index of the particle.
-- `offset`: Integer (ptional. By default, 0.)
+- `offset`: Integer (optional. By default, 0.)
   - Offset of the index.
 - `sigma`: Floating
   - It determines the effective particle size.
