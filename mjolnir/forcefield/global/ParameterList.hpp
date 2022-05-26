@@ -218,6 +218,8 @@ class LorentzBerthelotRule final
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
       : exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
+        assert(parameters.size() != 0);
+
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
         for(const auto& idxp : parameters)
@@ -369,6 +371,8 @@ struct CombinationTable final
       : table_(std::move(table)),
         exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
+        assert(parameters.size() != 0);
+
         this->parameters_  .reserve(parameters.size());
         this->participants_.reserve(parameters.size());
         for(const auto& idxp : parameters)
@@ -527,7 +531,9 @@ class EmptyCombinationRule final
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
       : participants_should_be_updated_(false), participants_(participants),
         exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
-    {}
+    {
+        assert(partisipants.size() != 0);
+    }
     EmptyCombinationRule(
         const std::map<connection_kind_type, std::size_t>& exclusions,
         ignore_molecule_type ignore_mol, ignore_group_type ignore_grp)
