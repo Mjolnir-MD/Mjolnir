@@ -508,7 +508,7 @@ read_uniform_lennard_jones_potential(const toml::value& global)
         MJOLNIR_LOG_WARN("UniformLennardJonesPotential does not have any participants.");
         MJOLNIR_LOG_WARN("All the particles are considered to be participants.");
         MJOLNIR_LOG_WARN("To disable this potential, "
-                             "simply remove the part from the input file.");
+                             "simply remove or comment the part out from the input file.");
 
         return std::make_pair(potential_type(cutoff, sigma, epsilon),
             ParameterList<traitsT, potential_type>(
