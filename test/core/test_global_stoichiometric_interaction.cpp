@@ -98,6 +98,7 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_one_on_one_double)
     interaction.initialize(system, topology);
 
     const system_type init = system;
+
     interaction.calc_force(system);
     // check the force between same kind particle is 0
     BOOST_TEST(mjolnir::math::X(system.force(3)) == 0.0, boost::test_tools::tolerance(tol));

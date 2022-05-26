@@ -109,7 +109,7 @@ class StoichiometricInteractionRule final
     range<typename std::vector<std::size_t>::const_iterator>
     leading_participants() const noexcept override
     {
-        return make_range(participants_a_.begin(), participants_b_.end());
+        return make_range(participants_a_.begin(), participants_a_.end());
     }
     range<typename std::vector<std::size_t>::const_iterator>
     possible_partners_of(const std::size_t, const std::size_t) const noexcept override
