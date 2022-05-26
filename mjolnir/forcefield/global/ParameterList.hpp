@@ -531,7 +531,7 @@ class EmptyCombinationRule final
       : participants_should_be_updated_(false), participants_(participants),
         exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
-        assert(partisipants.size() != 0);
+        assert(participants.size() != 0);
     }
     EmptyCombinationRule(
         const std::map<connection_kind_type, std::size_t>& exclusions,
