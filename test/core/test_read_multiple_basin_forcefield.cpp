@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield_2basin)
             interaction = "Pair"
             potential   = "ExcludedVolume"
             epsilon     = 3.14
-            parameters  = []
+            parameters  = [{index = 0, radius = 2.0}]
             ignore.molecule = "Nothing"
             ignore.particles_within = {bond = 3, contact = 1}
             spatial_partition.type = "Naive"
@@ -185,14 +185,14 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield_2basin)
             interaction = "Pair"
             potential   = "ExcludedVolume"
             epsilon     = 3.14
-            parameters  = []
+            parameters  = [{index = 0, radius = 2.0}]
             ignore.molecule = "Nothing"
             ignore.particles_within = {bond = 3, contact = 1}
             spatial_partition.type = "Naive"
           [[forcefields.global]]
             interaction = "Pair"
             potential   = "LennardJones"
-            parameters  = []
+            parameters  = [{index = 0, sigma = 2.0, epsilon = 10.0}]
             ignore.molecule = "Nothing"
             ignore.particles_within = {bond = 3, contact = 1}
             spatial_partition.type = "Naive"
@@ -218,14 +218,14 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield_2basin)
             interaction = "Pair"
             potential   = "ExcludedVolume"
             epsilon     = 3.14
-            parameters  = []
+            parameters  = [{index = 0, radius = 2.0}]
             ignore.molecule = "Nothing"
             ignore.particles_within = {bond = 3, contact = 1}
             spatial_partition.type = "Naive"
           [[forcefields.global]]
             interaction = "Pair"
             potential   = "LennardJones"
-            parameters  = []
+            parameters  = [{index = 0, sigma = 2.0, epsilon = 10.0}]
             ignore.molecule = "Nothing"
             ignore.particles_within = {bond = 3, contact = 1}
             spatial_partition.type = "Naive"
@@ -317,7 +317,7 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield_3basin)
             interaction = "Pair"
             potential   = "ExcludedVolume"
             epsilon     = 3.14
-            parameters  = []
+            parameters  = [{index = 0, radius = 2.0}]
             ignore.molecule = "Nothing"
             ignore.particles_within = {bond = 3, contact = 1}
             spatial_partition.type = "Naive"
@@ -344,14 +344,14 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield_3basin)
             interaction = "Pair"
             potential   = "ExcludedVolume"
             epsilon     = 3.14
-            parameters  = []
+            parameters  = [{index = 0, radius = 2.0}]
             ignore.molecule = "Nothing"
             ignore.particles_within = {bond = 3, contact = 1}
             spatial_partition.type = "Naive"
           [[forcefields.global]]
             interaction = "Pair"
             potential   = "LennardJones"
-            parameters  = []
+            parameters  = [{index = 0, sigma = 2.0, epsilon = 10.0}]
             ignore.molecule = "Nothing"
             ignore.particles_within = {bond = 3, contact = 1}
             spatial_partition.type = "Naive"
@@ -390,14 +390,14 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield_3basin)
             interaction = "Pair"
             potential   = "ExcludedVolume"
             epsilon     = 3.14
-            parameters  = []
+            parameters  = [{index = 0, radius = 2.0}]
             ignore.molecule = "Nothing"
             ignore.particles_within = {bond = 3, contact = 1}
             spatial_partition.type = "Naive"
           [[forcefields.global]]
             interaction = "Pair"
             potential   = "LennardJones"
-            parameters  = []
+            parameters  = [{index = 0, sigma = 2.0, epsilon = 10.0}]
             ignore.molecule = "Nothing"
             ignore.particles_within = {bond = 3, contact = 1}
             spatial_partition.type = "Naive"
@@ -405,7 +405,7 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield_3basin)
             interaction = "Pair"
             potential   = "ExcludedVolume"
             epsilon     = 3.14
-            parameters  = []
+            parameters  = [{index = 0, radius = 2.0}]
             ignore.molecule = "Nothing"
             ignore.particles_within = {bond = 3, contact = 1}
             spatial_partition.type = "Naive"
@@ -456,14 +456,14 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield_3basin)
             interaction = "Pair"
             potential   = "ExcludedVolume"
             epsilon     = 3.14
-            parameters  = []
+            parameters  = [{index = 0, radius = 2.0}]
             ignore.molecule = "Nothing"
             ignore.particles_within = {bond = 3, contact = 1}
             spatial_partition.type = "Naive"
           [[forcefields.global]]
             interaction = "Pair"
             potential   = "LennardJones"
-            parameters  = []
+            parameters  = [{index = 0, sigma = 2.0, epsilon = 10.0}]
             ignore.molecule = "Nothing"
             ignore.particles_within = {bond = 3, contact = 1}
             spatial_partition.type = "Naive"
