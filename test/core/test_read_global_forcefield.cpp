@@ -56,7 +56,9 @@ BOOST_AUTO_TEST_CASE(read_global_forcefield)
             ignore.molecule                 = "Nothing"
             ignore.particles_within.bond    = 3
             ignore.particles_within.contact = 1
-            parameters = []
+            parameters = [
+                {index = 0, radius = 2.0}
+            ]
         )"_toml;
 
         const auto ffb = mjolnir::read_forcefield<traits_type>(v, toml::table{});
@@ -99,7 +101,9 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield)
             ignore.molecule                 = "Nothing"
             ignore.particles_within.bond    = 3
             ignore.particles_within.contact = 1
-            parameters = []
+            parameters = [
+                {index = 0, radius = 2.0}
+            ]
             [[forcefields.global]]
             interaction                     = "Pair"
             potential                       = "LennardJones"
@@ -107,7 +111,9 @@ BOOST_AUTO_TEST_CASE(read_several_forcefield)
             ignore.molecule                 = "Nothing"
             ignore.particles_within.bond    = 3
             ignore.particles_within.contact = 1
-            parameters = []
+            parameters = [
+                {index = 0, sigma = 2.0, epsilon = 10.0}
+            ]
         )"_toml;
 
         const auto ffb = mjolnir::read_forcefield<traits_type>(v, toml::table{});
