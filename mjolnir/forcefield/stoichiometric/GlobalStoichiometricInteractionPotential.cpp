@@ -6,8 +6,6 @@
 
 namespace mjolnir
 {
-template class GlobalStoichiometricInteractionPotential<SimulatorTraits<double, UnlimitedBoundary>       >;
-template class GlobalStoichiometricInteractionPotential<SimulatorTraits<float,  UnlimitedBoundary>       >;
-template class GlobalStoichiometricInteractionPotential<SimulatorTraits<double, CuboidalPeriodicBoundary>>;
-template class GlobalStoichiometricInteractionPotential<SimulatorTraits<float,  CuboidalPeriodicBoundary>>;
+template class GlobalStoichiometricInteractionPotential<double>;
+template class GlobalStoichiometricInteractionPotential<float >;
 } // mjolnir

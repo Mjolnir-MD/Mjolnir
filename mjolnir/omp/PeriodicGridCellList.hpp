@@ -120,6 +120,8 @@ class PeriodicGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
                math::Y(system_size_) != math::Y(current_system_size) ||
                math::Z(system_size_) != math::Z(current_system_size) )
             {
+                MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+
                 this->lower_bound_ = current_lower_bound;
                 this->system_size_ = current_system_size;
 

@@ -22,22 +22,26 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
             "test_omp_global_stoichiometric_interaction_calc_force.log");
 
     using traits_type      = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type        = traits_type::real_type;
     using coordinate_type  = typename traits_type::coordinate_type;
     using boundary_type    = typename traits_type::boundary_type;
     using system_type      = mjolnir::System<traits_type>;
     using topology_type    = mjolnir::Topology;
 
-    using potential_type   = mjolnir::GlobalStoichiometricInteractionPotential<traits_type>;
+    using potential_type   = mjolnir::GlobalStoichiometricInteractionPotential<real_type>;
+    using parameter_list_type =
+        mjolnir::StoichiometricInteractionRule<traits_type, potential_type>;
     using partition_type   = mjolnir::UnlimitedGridCellList<traits_type, potential_type>;
 
-    using interaction_type = mjolnir::GlobalStoichiometricInteraction<traits_type>;
+    using interaction_type = mjolnir::GlobalStoichiometricInteraction<traits_type, potential_type>;
     using rng_type         = mjolnir::RandomNumberGenerator<traits_type>;
 
     using sequencial_traits_type    = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using sequencial_system_type    = mjolnir::System<sequencial_traits_type>;
-    using sequencial_potential_type = mjolnir::GlobalStoichiometricInteractionPotential<sequencial_traits_type>;
-    using sequencial_partition_type = mjolnir::UnlimitedGridCellList<sequencial_traits_type, sequencial_potential_type>;
-    using sequencial_interaction_type = mjolnir::GlobalStoichiometricInteraction<sequencial_traits_type>;
+    using sequencial_parameter_list_type =
+        mjolnir::StoichiometricInteractionRule<sequencial_traits_type, potential_type>;
+    using sequencial_partition_type = mjolnir::UnlimitedGridCellList<sequencial_traits_type, potential_type>;
+    using sequencial_interaction_type = mjolnir::GlobalStoichiometricInteraction<sequencial_traits_type, potential_type>;
 
     const int max_number_of_threads = omp_get_max_threads();
     BOOST_TEST_WARN(max_number_of_threads > 2);
@@ -63,15 +67,18 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
         std::vector<std::size_t> seq_a_particle_indices = a_particle_indices;
         std::vector<std::size_t> seq_b_particle_indices = b_particle_indices;
 
-        potential_type potential(
-            v0, range, std::move(a_particle_indices), std::move(b_particle_indices), {},
-            typename potential_type::ignore_molecule_type("Nothing"),
-            typename potential_type::ignore_group_type({}));
+        parameter_list_type parameter_list(
+            std::move(a_particle_indices), std::move(b_particle_indices),
+            {}, typename parameter_list_type::ignore_molecule_type("Nothing"),
+                typename parameter_list_type::ignore_group_type({}));
 
-        sequencial_potential_type seq_potential(
-            v0, range, std::move(seq_a_particle_indices), std::move(seq_b_particle_indices), {},
-            typename potential_type::ignore_molecule_type("Nothing"),
-            typename potential_type::ignore_group_type({}));
+        sequencial_parameter_list_type seq_parameter_list(
+            std::move(seq_a_particle_indices), std::move(seq_b_particle_indices),
+            {}, typename parameter_list_type::ignore_molecule_type("Nothing"),
+                typename parameter_list_type::ignore_group_type({}));
+
+        potential_type potential(v0, range);
+        potential_type seq_potential(v0, range);
 
         rng_type    rng(123456789);
         system_type sys(N_partice, boundary_type{});
@@ -100,7 +107,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
             mjolnir::math::Y(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
             mjolnir::math::Z(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
         }
-        potential.update(sys, topol);
+        parameter_list.update(sys, topol, potential);
 
         // init sequential one with the same coordinates
         sequencial_system_type seq_sys(N_partice, boundary_type{});
@@ -115,7 +122,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
             seq_sys.name(i)     = sys.name(i);
             seq_sys.group(i)    = sys.group(i);
         }
-        seq_potential.update(seq_sys, topol);
+        seq_parameter_list.update(seq_sys, topol, seq_potential);
 
         partition_type            celllist;
         sequencial_partition_type seq_celllist;
@@ -128,12 +135,14 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
         const std::size_t stoichiometric_coef_b = 1;
 
         interaction_type interaction(std::move(potential),
+            std::move(parameter_list),
             mjolnir::SpatialPartition<traits_type, potential_type>(
                 mjolnir::make_unique<partition_type>()),
             epsilon, stoichiometric_coef_a, stoichiometric_coef_b);
 
         sequencial_interaction_type seq_interaction(std::move(seq_potential),
-            mjolnir::SpatialPartition<sequencial_traits_type, sequencial_potential_type>(
+            std::move(seq_parameter_list),
+            mjolnir::SpatialPartition<sequencial_traits_type, potential_type>(
                 mjolnir::make_unique<sequencial_partition_type>()),
             epsilon, stoichiometric_coef_a, stoichiometric_coef_b);
 
@@ -168,15 +177,19 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force_and_energy)
             "test_omp_global_stoichiometric_interaction_calc_force_and_energy.log");
 
     using traits_type      = mjolnir::OpenMPSimulatorTraits<double, mjolnir::UnlimitedBoundary>;
+    using real_type        = traits_type::real_type;
     using coordinate_type  = typename traits_type::coordinate_type;
     using boundary_type    = typename traits_type::boundary_type;
     using system_type      = mjolnir::System<traits_type>;
     using topology_type    = mjolnir::Topology;
 
-    using potential_type   = mjolnir::GlobalStoichiometricInteractionPotential<traits_type>;
+    using potential_type   = mjolnir::GlobalStoichiometricInteractionPotential<real_type>;
+    using parameter_list_type =
+        mjolnir::StoichiometricInteractionRule<traits_type, potential_type>;
     using partition_type   = mjolnir::UnlimitedGridCellList<traits_type, potential_type>;
 
-    using interaction_type = mjolnir::GlobalStoichiometricInteraction<traits_type>;
+    using interaction_type =
+        mjolnir::GlobalStoichiometricInteraction<traits_type, potential_type>;
     using rng_type         = mjolnir::RandomNumberGenerator<traits_type>;
 
     const int max_number_of_threads = omp_get_max_threads();
@@ -199,10 +212,11 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force_and_energy)
         std::vector<std::size_t> b_particle_indices(Nb_particle);
         std::iota(b_particle_indices.begin(), b_particle_indices.end(), Na_particle);
 
-        potential_type potential(
-            v0, range, std::move(a_particle_indices), std::move(b_particle_indices), {},
-            typename potential_type::ignore_molecule_type("Nothing"),
-            typename potential_type::ignore_group_type({}));
+        parameter_list_type parameter_list(
+            std::move(a_particle_indices), std::move(b_particle_indices), {},
+            typename parameter_list_type::ignore_molecule_type("Nothing"),
+            typename parameter_list_type::ignore_group_type({}));
+        potential_type potential(v0, range);
 
         rng_type      rng(123456789);
         system_type   sys(N_partice, boundary_type{});
@@ -231,7 +245,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force_and_energy)
             mjolnir::math::Y(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
             mjolnir::math::Z(sys.position(i)) += rng.uniform_real(-0.1, 0.1);
         }
-        potential.update(sys, topol);
+        parameter_list.update(sys, topol, potential);
 
         topol.construct_molecules();
 
@@ -241,6 +255,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force_and_energy)
         const std::size_t stoichiometric_coef_b = 1;
 
         interaction_type interaction(std::move(potential),
+            std::move(parameter_list),
             mjolnir::SpatialPartition<traits_type, potential_type>(
                 mjolnir::make_unique<partition_type>()),
             epsilon, stoichiometric_coef_a, stoichiometric_coef_b);

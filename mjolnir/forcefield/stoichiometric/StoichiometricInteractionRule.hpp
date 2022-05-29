@@ -21,6 +21,7 @@ class StoichiometricInteractionRule final
     using base_type           = ParameterListBase<traitsT, potentialT>;
     using pair_parameter_type = typename potentialT::parameter_type;
     using real_type           = typename base_type::real_type;
+    using parameter_type      = typename potentialT::parameter_type;
 
     // topology stuff
     using system_type          = System<traitsT>;
@@ -42,8 +43,14 @@ class StoichiometricInteractionRule final
         participants_a_(participants_a), participants_b_(participants_b),
         exclusion_list_(exclusions, std::move(ignore_mol), std::move(ignore_grp))
     {
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+
         this->participants_.insert(participants_.end(),
                 participants_b.begin(), participants_b.end());
+
+        MJOLNIR_LOG_DEBUG("participants size is ", participants_.size());
+        MJOLNIR_LOG_DEBUG("participants a size is ", participants_a_.size());
+        MJOLNIR_LOG_DEBUG("participants b size is ", participants_b_.size());
     }
 
     StoichiometricInteractionRule(const StoichiometricInteractionRule&) = default;
@@ -102,12 +109,22 @@ class StoichiometricInteractionRule final
     range<typename std::vector<std::size_t>::const_iterator>
     leading_participants() const noexcept override
     {
-        return make_range(participants_a_.begin(), participants_b_.end());
+        return make_range(participants_a_.begin(), participants_a_.end());
     }
     range<typename std::vector<std::size_t>::const_iterator>
     possible_partners_of(const std::size_t, const std::size_t) const noexcept override
     {
         return make_range(participants_b_.begin(), participants_b_.end());
+    }
+
+    // used in GlobalStoichiometricInteraction
+    std::vector<std::size_t> const& participants_a() const noexcept
+    {
+        return this->participants_a_;
+    }
+    std::vector<std::size_t> const& participants_b() const noexcept
+    {
+        return this->participants_b_;
     }
 
     base_type* clone() const override
