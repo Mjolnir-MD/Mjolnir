@@ -28,9 +28,9 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
     using system_type      = mjolnir::System<traits_type>;
     using topology_type    = mjolnir::Topology;
 
-    using potential_type   = mjolnir::GlobalStoichiometricInteractionPotential<real_type>;
+    using potential_type   = mjolnir::StoichiometricUniformCubicPanPotential<real_type>;
     using parameter_list_type =
-        mjolnir::StoichiometricInteractionRule<traits_type, potential_type>;
+        mjolnir::StoichiometricEmptyCombinationRule<traits_type, potential_type>;
     using partition_type   = mjolnir::UnlimitedGridCellList<traits_type, potential_type>;
 
     using interaction_type = mjolnir::GlobalStoichiometricInteraction<traits_type, potential_type>;
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force)
     using sequencial_traits_type    = mjolnir::SimulatorTraits<double, mjolnir::UnlimitedBoundary>;
     using sequencial_system_type    = mjolnir::System<sequencial_traits_type>;
     using sequencial_parameter_list_type =
-        mjolnir::StoichiometricInteractionRule<sequencial_traits_type, potential_type>;
+        mjolnir::StoichiometricEmptyCombinationRule<sequencial_traits_type, potential_type>;
     using sequencial_partition_type = mjolnir::UnlimitedGridCellList<sequencial_traits_type, potential_type>;
     using sequencial_interaction_type = mjolnir::GlobalStoichiometricInteraction<sequencial_traits_type, potential_type>;
 
@@ -183,9 +183,9 @@ BOOST_AUTO_TEST_CASE(omp_GlobalStoichiometric_calc_force_and_energy)
     using system_type      = mjolnir::System<traits_type>;
     using topology_type    = mjolnir::Topology;
 
-    using potential_type   = mjolnir::GlobalStoichiometricInteractionPotential<real_type>;
+    using potential_type   = mjolnir::StoichiometricUniformCubicPanPotential<real_type>;
     using parameter_list_type =
-        mjolnir::StoichiometricInteractionRule<traits_type, potential_type>;
+        mjolnir::StoichiometricEmptyCombinationRule<traits_type, potential_type>;
     using partition_type   = mjolnir::UnlimitedGridCellList<traits_type, potential_type>;
 
     using interaction_type =

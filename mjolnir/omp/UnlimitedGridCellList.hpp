@@ -401,7 +401,7 @@ class UnlimitedGridCellList<OpenMPSimulatorTraits<realT, boundaryT>, potentialT>
 #include <mjolnir/forcefield/global/ExcludedVolumePotential.hpp>
 #include <mjolnir/forcefield/global/LennardJonesPotential.hpp>
 #include <mjolnir/forcefield/global/UniformLennardJonesPotential.hpp>
-#include <mjolnir/forcefield/stoichiometric/GlobalStoichiometricInteractionPotential.hpp>
+#include <mjolnir/forcefield/stoichiometric/StoichiometricUniformCubicPanPotential.hpp>
 
 namespace mjolnir
 {
@@ -417,8 +417,8 @@ extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  Unlimi
 extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, UniformLennardJonesPotential<double>>;
 extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, UniformLennardJonesPotential<float >>;
 
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, GlobalStoichiometricInteractionPotential<double>>;
-extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, GlobalStoichiometricInteractionPotential<float >>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<double, UnlimitedBoundary>, StoichiometricUniformCubicPanPotential<double>>;
+extern template class UnlimitedGridCellList<OpenMPSimulatorTraits<float,  UnlimitedBoundary>, StoichiometricUniformCubicPanPotential<float >>;
 }
 #endif // MJOLNIR_SEPARATE_BUILD
 #endif/* MJOLNIR_UNLIMITED_GRID_CELL_LIST */

@@ -7,9 +7,9 @@
 namespace mjolnir
 {
 
-template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>, GlobalStoichiometricInteractionPotential<double>>;
-template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<float , UnlimitedBoundary>, GlobalStoichiometricInteractionPotential<float >>;
-template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, GlobalStoichiometricInteractionPotential<double>>;
-template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<float , CuboidalPeriodicBoundary>, GlobalStoichiometricInteractionPotential<float >>;
+template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>, StoichiometricUniformCubicPanPotential<double>>;
+template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<float , UnlimitedBoundary>, StoichiometricUniformCubicPanPotential<float >>;
+template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, StoichiometricUniformCubicPanPotential<double>>;
+template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<float , CuboidalPeriodicBoundary>, StoichiometricUniformCubicPanPotential<float >>;
 
 } // mjolnir

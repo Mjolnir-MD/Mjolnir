@@ -26,7 +26,7 @@ class GlobalStoichiometricInteraction<
     using system_type         = typename base_type::system_type;
     using topology_type       = typename base_type::topology_type;
     using partition_type      = SpatialPartition<traits_type, potential_type>;
-    using parameter_list_type = StoichiometricInteractionRule<traits_type, potential_type>;
+    using parameter_list_type = StoichiometricEmptyCombinationRule<traits_type, potential_type>;
     using potential_buffer_type  = std::vector<real_type>;
     using derivative_buffer_type = std::vector<coordinate_type>;
 
@@ -293,13 +293,16 @@ void GlobalStoichiometricInteraction< OpenMPSimulatorTraits<realT, boundaryT>, p
 
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
-            const index_type      j     = partner[ptnr_idx].index;
+            const auto&           ptnr  = partner[ptnr_idx];
+            const index_type      j     = ptnr.index;
+            const auto&           para  = ptnr.parameter();
+
             const coordinate_type rij   = sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type       l2    = math::length_sq(rij); // |rij|^2
             const real_type       rl    = math::rsqrt(l2);      // 1 / |rij|
             const real_type       l     = l2 * rl;
-            const coordinate_type deriv = potential_.derivative(l) * rl * rij;
-            const real_type       pot   = potential_.potential(l);
+            const coordinate_type deriv = potential_.derivative(l, para) * rl * rij;
+            const real_type       pot   = potential_.potential(l, para);
 
             pot_range  [ptnr_idx] =  pot;
             deriv_range[ptnr_idx] =  deriv;
@@ -512,14 +515,17 @@ typename GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>
 
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
-            const index_type j     = partner[ptnr_idx].index;
+            const auto&      ptnr = partner[ptnr_idx];
+            const index_type j    = ptnr.index;
+            const auto&      para = ptnr.parameter();
+
             const index_type idx_b = idx_buffer_map_[j];
             const coordinate_type rij =
                 sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type l2  = math::length_sq(rij); // |rij|^2
             const real_type rl  = math::rsqrt(l2);      // 1 / |rij|
             const real_type l   = l2 * rl;              // |rij|
-            const real_type pot = potential_.potential(l);
+            const real_type pot = potential_.potential(l, para);
 
             pot_range   [ptnr_idx] =  pot;
             pots_sum_a             += pot;
@@ -617,13 +623,16 @@ typename GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>
 
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
-            const index_type      j     = partner[ptnr_idx].index;
+            const auto&      ptnr = partner[ptnr_idx];
+            const index_type j    = ptnr.index;
+            const auto&      para = ptnr.parameter();
+
             const coordinate_type rij   = sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type       l2    = math::length_sq(rij); // |rij|^2
             const real_type       rl    = math::rsqrt(l2);      // 1 / |rij|
             const real_type       l     = l2 * rl;
-            const coordinate_type deriv = potential_.derivative(l) * rl * rij;
-            const real_type       pot   = potential_.potential(l);
+            const coordinate_type deriv = potential_.derivative(l, para) * rl * rij;
+            const real_type       pot   = potential_.potential(l, para);
 
             pot_range   [ptnr_idx] =  pot;
             deriv_range [ptnr_idx] =  deriv;
@@ -830,14 +839,14 @@ typename GlobalStoichiometricInteraction<OpenMPSimulatorTraits<realT, boundaryT>
 #ifdef MJOLNIR_SEPARATE_BUILD
 // explicitly specialize major use-cases
 #include <mjolnir/core/BoundaryCondition.hpp>
-#include <mjolnir/forcefield/stoichiometric/GlobalStoichiometricInteractionPotential.hpp>
+#include <mjolnir/forcefield/stoichiometric/StoichiometricUniformCubicPanPotential.hpp>
 
 namespace mjolnir
 {
-extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>       , GlobalStoichiometricInteractionPotential<double>>;
-extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       , GlobalStoichiometricInteractionPotential<float >>;
-extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, GlobalStoichiometricInteractionPotential<double>>;
-extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, GlobalStoichiometricInteractionPotential<float >>;
+extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<double, UnlimitedBoundary>       , StoichiometricUniformCubicPanPotential<double>>;
+extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<float,  UnlimitedBoundary>       , StoichiometricUniformCubicPanPotential<float >>;
+extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<double, CuboidalPeriodicBoundary>, StoichiometricUniformCubicPanPotential<double>>;
+extern template class GlobalStoichiometricInteraction<OpenMPSimulatorTraits<float,  CuboidalPeriodicBoundary>, StoichiometricUniformCubicPanPotential<float >>;
 } // mjolnir
 #endif // MJOLNIR_SEPARATE_BUILD
 

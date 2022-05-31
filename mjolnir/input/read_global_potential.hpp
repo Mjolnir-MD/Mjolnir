@@ -498,7 +498,7 @@ read_uniform_lennard_jones_potential(const toml::value& global)
     // sigma = 3.0
     // epsilon = 1.0
     // parameters = [
-    //     {index = 0, sigma = 1.0, epsilon = 0.2},
+    //     {index = 0, sigma = 1.0},
     //     # ...
     // ]
 

@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_STOICHIOMETRIC_STOICHIOMETRIC_INTERACTION_RULE_HPP
-#define MJOLNIR_STOICHIOMETRIC_STOICHIOMETRIC_INTERACTION_RULE_HPP
+#ifndef MJOLNIR_STOICHIOMETRIC_PARAMETER_LIST_HPP
+#define MJOLNIR_STOICHIOMETRIC_PARAMETER_LIST_HPP
 #include <mjolnir/util/empty.hpp>
 #include <mjolnir/core/ExclusionList.hpp>
 #include <mjolnir/core/System.hpp>
@@ -14,7 +14,7 @@ namespace mjolnir
 // so potentialT::parameter_type is empty_t.
 //
 template<typename traitsT, typename potentialT>
-class StoichiometricInteractionRule final
+class StoichiometricEmptyCombinationRule final
     : public ParameterListBase<traitsT, potentialT>
 {
   public:
@@ -34,7 +34,7 @@ class StoichiometricInteractionRule final
     using exclusion_list_type  = ExclusionList <traitsT>;
 
   public:
-    StoichiometricInteractionRule(
+    StoichiometricEmptyCombinationRule(
         const std::vector<std::size_t>&& participants_a,
         const std::vector<std::size_t>&& participants_b,
         const std::map<connection_kind_type, std::size_t>& exclusions,
@@ -53,11 +53,13 @@ class StoichiometricInteractionRule final
         MJOLNIR_LOG_DEBUG("participants b size is ", participants_b_.size());
     }
 
-    StoichiometricInteractionRule(const StoichiometricInteractionRule&) = default;
-    StoichiometricInteractionRule(StoichiometricInteractionRule&&) = default;
-    StoichiometricInteractionRule& operator=(const StoichiometricInteractionRule&) = default;
-    StoichiometricInteractionRule& operator=(StoichiometricInteractionRule&&) = default;
-    ~StoichiometricInteractionRule() override {}
+    StoichiometricEmptyCombinationRule(const StoichiometricEmptyCombinationRule&) = default;
+    StoichiometricEmptyCombinationRule(StoichiometricEmptyCombinationRule&&) = default;
+    StoichiometricEmptyCombinationRule& operator=(
+            const StoichiometricEmptyCombinationRule&) = default;
+    StoichiometricEmptyCombinationRule& operator=(
+            StoichiometricEmptyCombinationRule&&) = default;
+    ~StoichiometricEmptyCombinationRule() override {}
 
     pair_parameter_type prepare_params(std::size_t, std::size_t) const noexcept override
     {
@@ -129,7 +131,7 @@ class StoichiometricInteractionRule final
 
     base_type* clone() const override
     {
-        return new StoichiometricInteractionRule(*this);
+        return new StoichiometricEmptyCombinationRule(*this);
     }
 
     // ------------------------------------------------------------------------
@@ -151,4 +153,4 @@ class StoichiometricInteractionRule final
 };
 
 } // mjolnir
-#endif // MJOLNIR_STOICHIOMETRIC_STOICHIOMETRIC_INTERACTION_RULE_HPP
+#endif // MJOLNIR_STOICHIOMETRIC_PARAMETER_LIST_HPP

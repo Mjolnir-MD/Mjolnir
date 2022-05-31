@@ -10,7 +10,7 @@
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/NaivePairCalculation.hpp>
 #include <mjolnir/forcefield/stoichiometric/GlobalStoichiometricInteraction.hpp>
-#include <mjolnir/forcefield/stoichiometric/GlobalStoichiometricInteractionPotential.hpp>
+#include <mjolnir/forcefield/stoichiometric/StoichiometricUniformCubicPanPotential.hpp>
 #include <mjolnir/util/make_unique.hpp>
 
 #include <random>
@@ -27,9 +27,9 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_one_on_one_double)
     using boundary_type  = traits_type::boundary_type;
     using system_type    = mjolnir::System<traits_type>;
     using topology_type  = mjolnir::Topology;
-    using potential_type = mjolnir::GlobalStoichiometricInteractionPotential<real_type>;
+    using potential_type = mjolnir::StoichiometricUniformCubicPanPotential<real_type>;
     using parameter_list_type =
-        mjolnir::StoichiometricInteractionRule<traits_type, potential_type>;
+        mjolnir::StoichiometricEmptyCombinationRule<traits_type, potential_type>;
     using partition_type      = mjolnir::NaivePairCalculation<traits_type, potential_type>;
     using interaction_type    =
         mjolnir::GlobalStoichiometricInteraction<traits_type, potential_type>;
@@ -207,9 +207,9 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_random_configuration_double
     using boundary_type = traits_type::boundary_type;
     using system_type   = mjolnir::System<traits_type>;
     using topology_type = mjolnir::Topology;
-    using potential_type = mjolnir::GlobalStoichiometricInteractionPotential<real_type>;
+    using potential_type = mjolnir::StoichiometricUniformCubicPanPotential<real_type>;
     using parameter_list_type =
-        mjolnir::StoichiometricInteractionRule<traits_type, potential_type>;
+        mjolnir::StoichiometricEmptyCombinationRule<traits_type, potential_type>;
     using partition_type = mjolnir::NaivePairCalculation<traits_type, potential_type>;
     using interaction_type =
         mjolnir::GlobalStoichiometricInteraction<traits_type, potential_type>;
@@ -395,9 +395,9 @@ BOOST_AUTO_TEST_CASE(GlobalStoichiometricInteraction_one_on_two_double)
     using boundary_type = traits_type::boundary_type;
     using system_type   = mjolnir::System<traits_type>;
     using topology_type = mjolnir::Topology;
-    using potential_type = mjolnir::GlobalStoichiometricInteractionPotential<real_type>;
+    using potential_type = mjolnir::StoichiometricUniformCubicPanPotential<real_type>;
     using parameter_list_type =
-        mjolnir::StoichiometricInteractionRule<traits_type, potential_type>;
+        mjolnir::StoichiometricEmptyCombinationRule<traits_type, potential_type>;
     using partition_type = mjolnir::NaivePairCalculation<traits_type, potential_type>;
     using interaction_type =
         mjolnir::GlobalStoichiometricInteraction<traits_type, potential_type>;

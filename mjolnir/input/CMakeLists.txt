@@ -13,6 +13,7 @@ set(mjolnir_input_cpp_files
     "${CMAKE_CURRENT_SOURCE_DIR}/read_random_number_generator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_simulator.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_spatial_partition.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/read_stoichiometric_potential.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_system.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_units.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/read_path.cpp"

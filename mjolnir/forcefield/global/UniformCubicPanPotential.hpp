@@ -11,7 +11,7 @@ namespace mjolnir
 
 template<typename T> class System;
 
-// This potential is same to GlobalStoichiometricInteractionPotential
+// This potential is same to StoichiometricCubicPanPotential
 // and exist to use that in non-stoichiometric interaction.
 template<typename realT>
 class UniformCubicPanPotential
