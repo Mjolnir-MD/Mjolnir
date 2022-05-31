@@ -259,14 +259,16 @@ void GlobalStoichiometricInteraction<traitsT, potT>::calc_force(system_type& sys
         coordinate_type& derivs_sum_a = derivs_sum_a_[idx_a];
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
-            const index_type      j = partner[ptnr_idx].index;
+            const auto&      ptnr = partner[ptnr_idx];
+            const index_type j    = ptnr.index;
+            const auto&      para = ptnr.parameter();
 
             const coordinate_type rij   = sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type       l2    = math::length_sq(rij); // |rij|^2
             const real_type       rl    = math::rsqrt(l2);      // 1 / |rij|
             const real_type       l     = l2 * rl;
-            const coordinate_type deriv = potential_.derivative(l) * rl * rij;
-            const real_type       pot   = potential_.potential(l);
+            const coordinate_type deriv = potential_.derivative(l, para) * rl * rij;
+            const real_type       pot   = potential_.potential(l, para);
 
             pot_range  [ptnr_idx] =  pot;
             deriv_range[ptnr_idx] =  deriv;
@@ -439,7 +441,9 @@ GlobalStoichiometricInteraction<traitsT, potT>::calc_energy(const system_type& s
 
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
-            const index_type j = partner[ptnr_idx].index;
+            const auto&      ptnr = partner[ptnr_idx];
+            const index_type j    = ptnr.index;
+            const auto&      para = ptnr.parameter();
 
             const index_type idx_b = idx_buffer_map_[j];
             const coordinate_type rij =
@@ -447,7 +451,7 @@ GlobalStoichiometricInteraction<traitsT, potT>::calc_energy(const system_type& s
             const real_type l2  = math::length_sq(rij); // |rij|^2
             const real_type rl  = math::rsqrt(l2);      // 1 / |rij|
             const real_type l   = l2 * rl;              // |rij|
-            const real_type pot = potential_.potential(l);
+            const real_type pot = potential_.potential(l, para);
 
             pot_range [ptnr_idx] =  pot;
             pots_sum_a           += pot;
@@ -517,15 +521,16 @@ GlobalStoichiometricInteraction<traitsT, potT>::calc_force_and_energy(system_typ
         coordinate_type& derivs_sum_a = derivs_sum_a_[idx_a];
         for(std::size_t ptnr_idx=0; ptnr_idx<partner.size(); ++ptnr_idx)
         {
-            const auto&           ptnr  = partner[ptnr_idx];
-            const index_type      j     = ptnr.index;
+            const auto&      ptnr  = partner[ptnr_idx];
+            const index_type j     = ptnr.index;
+            const auto&      para  = ptnr.parameter();
 
             const coordinate_type rij   = sys.adjust_direction(sys.position(i), sys.position(j));
             const real_type       l2    = math::length_sq(rij); // |rij|^2
             const real_type       rl    = math::rsqrt(l2);      // 1 / |rij|
             const real_type       l     = l2 * rl;
-            const coordinate_type deriv = potential_.derivative(l) * rl * rij;
-            const real_type       pot   = potential_.potential(l);
+            const coordinate_type deriv = potential_.derivative(l, para) * rl * rij;
+            const real_type       pot   = potential_.potential(l, para);
 
             pot_range    [ptnr_idx] =  pot;
             deriv_range  [ptnr_idx] =  deriv;

@@ -1,5 +1,5 @@
-#ifndef MJOLNIR_FORCEFIELD_GLOBAL_STOICHIOMETRIC_INTERACTION_POTENTIAL_HPP
-#define MJOLNIR_FORCEFIELD_GLOBAL_STOICHIOMETRIC_INTERACTION_POTENTIAL_HPP
+#ifndef MJOLNIR_FORCEFIELD_STOICHIOMETRIC_CUBIC_PAN_POTENTIAL_HPP
+#define MJOLNIR_FORCEFIELD_STOICHIOMETRIC_CUBIC_PAN_POTENTIAL_HPP
 #include <mjolnir/util/empty.hpp>
 #include <algorithm>
 
@@ -9,27 +9,26 @@ namespace mjolnir
 template<typename T> class System;
 
 template<typename realT>
-class GlobalStoichiometricInteractionPotential
+class StoichiometricCubicPanPotential
 {
   public:
-
     using real_type      = realT;
     using parameter_type = empty_t;
 
   public:
 
-    explicit GlobalStoichiometricInteractionPotential(
+    explicit StoichiometricCubicPanPotential(
             const real_type v0, const real_type range) noexcept
         : v0_(v0), v0_range_(v0 + range),
           inv_range_(1.0 / range), inv_range_6_(6.0 / range)
     {}
-    ~GlobalStoichiometricInteractionPotential() = default;
-    GlobalStoichiometricInteractionPotential(const GlobalStoichiometricInteractionPotential&) = default;
-    GlobalStoichiometricInteractionPotential(GlobalStoichiometricInteractionPotential&&) = default;
-    GlobalStoichiometricInteractionPotential& operator=(const GlobalStoichiometricInteractionPotential&) = default;
-    GlobalStoichiometricInteractionPotential& operator=(GlobalStoichiometricInteractionPotential&&) = default;
+    ~StoichiometricCubicPanPotential() = default;
+    StoichiometricCubicPanPotential(const StoichiometricCubicPanPotential&) = default;
+    StoichiometricCubicPanPotential(StoichiometricCubicPanPotential&&) = default;
+    StoichiometricCubicPanPotential& operator=(const StoichiometricCubicPanPotential&) = default;
+    StoichiometricCubicPanPotential& operator=(StoichiometricCubicPanPotential&&) = default;
 
-    real_type potential(const real_type r) const noexcept
+    real_type potential(const real_type r, const parameter_type&) const noexcept
     {
         if(r < v0_){return 1.0;}
         else if(v0_range_ < r){return 0.0;}
@@ -41,7 +40,7 @@ class GlobalStoichiometricInteractionPotential
         return 1.0 - 3.0 * r_v0_inv_range_2 + 2.0 * r_v0_inv_range_3;
     }
 
-    real_type derivative(const real_type r) const noexcept
+    real_type derivative(const real_type r, const parameter_type&) const noexcept
     {
         if(r < v0_ || v0_range_ < r){return 0.0;}
 
@@ -64,7 +63,7 @@ class GlobalStoichiometricInteractionPotential
 
     // -----------------------------------------------------------------------
     // used by Observer.
-    static const char* name() noexcept {return "GlobalStoichiometricInteraction";}
+    static const char* name() noexcept {return "StoichiometricCubicPan";}
 
   private:
 
@@ -83,9 +82,9 @@ class GlobalStoichiometricInteractionPotential
 
 namespace mjolnir
 {
-extern template class GlobalStoichiometricInteractionPotential<double>;
-extern template class GlobalStoichiometricInteractionPotential<float >;
+extern template class StoichiometricCubicPanPotential<double>;
+extern template class StoichiometricCubicPanPotential<float >;
 } // mjolnir
 #endif// MJOLNIR_SEPARATE_BUILD
 
-#endif // MJOLNIR_POTENTIAL_GLOBAL_STOICHIOMETRIC_INTERACTION_POTENTIAL_HPP
+#endif // MJOLNIR_POTENTIAL_STOICHIOMETRIC_CUBIC_PAN_POTENTIAL_HPP
