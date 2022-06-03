@@ -44,14 +44,16 @@ parameters = [
 - `spatial_partition`: Table
   - It specifies the algorithm to construct a neighbor list.
   - For detail, see [the ignore section of GlobalForceField]({{<relref "/docs/reference/forcefields/global#ignore">}}).
-- `parameter_kinds`: Array of Tables
+- `particle_kinds`: Array of Tables
   - It describes the names and stoichiometric coefficients of particles in this interaction. This interaction only allow two kind case, so *the length of this array must be two*.
   - `name`: String
     - It determin the particle name for the parameters section.
   - `coef`: Integer
     - It determin the stoichiometric coefficients of the particle kinds.
 - `parameters`: Array of Tables
-  - `strand`: Integer
+  - `index`: Integer
     - Index of the particle.
+  - `offset`: Integer (Optional. By default, 0.)
+    - The offset value for the index.
   - `name`: String
-    - The name of particle determined in `parameter_kinds` section.
+    - The name of particle determined in `particle_kinds` section.
