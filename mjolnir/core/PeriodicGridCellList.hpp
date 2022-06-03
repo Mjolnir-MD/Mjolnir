@@ -311,9 +311,9 @@ void PeriodicGridCellList<traitsT, potentialT>::make(
         MJOLNIR_LOG_DEBUG("making verlet list for index", i);
         MJOLNIR_LOG_DEBUG("except list for ", i, "-th value");
 
-        for(std::size_t cidx : cell.second) // for all adjacent cells...
+        for(const std::size_t cidx : cell.second) // for all adjacent cells...
         {
-            for(auto pici : cell_list_[cidx].first)
+            for(const auto& pici : cell_list_[cidx].first)
             {
                 const auto j = pici.first;
                 MJOLNIR_LOG_DEBUG("looking particle", j);
