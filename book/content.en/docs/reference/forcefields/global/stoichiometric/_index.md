@@ -5,7 +5,19 @@ weight = 20000
 
 # StoichiometricInteraction
 
-`StoichiometricInteraction` is the interaction for represent the strict valency of binding between particles. You can specify stoichiometric coefficient  of the interaction by `parameter_kinds` table.
+`StoichiometricInteraction` is the interaction for representing the strict valency of binding between particles. This interaction applies heterotypic pairs defined in `parameter_kinds`. You can specify stoichiometric coefficient of the interaction.
+
+{{<katex display>}}
+V(r_{ij}) = - \epsilon \sum_{i \in a, j \in b} \frac{U(r_{ij})}{\max({\rm CO}_i, {\rm CO}_j, 1)}
+{{</katex>}}
+
+where {{<katex>}}{\rm CO}_i{{</katex>}} and {{<katex>}}{\rm CO}_j{{</katex>}} are
+
+{{<katex display>}}
+{\rm CO}_i = \frac{\sum_{j \in b} u(r_{ij})}{m}, {\rm CO}_j = \frac{\sum_{i \in a} u(r_{ij})}{n}
+{{</katex>}}
+
+.  {{<katex>}}m{{</katex>}} means the stoichiometric coefficient of b particle and {{<katex>}}n{{</katex>}} means the stoichiometric coefficient of a particle.
 
 
 ## Example
@@ -37,7 +49,7 @@ parameters = [
   - Name of the interaction. Here, it is "Stoichiometric"
 - `potential` : String
   - The fllowing potential is available.
-    - `StoichiometricUniformCubicPan`
+    - [`"StoichiometricUniformCubicPan"`]({{<relref "StoichiometricUniformCubicPanPotential.md">}})
 - `ignore`: Table
   - It describes the condition when the pair of particles does not interact to each other.
   - For detail, see [the ignore section of GlobalForceField]({{<relref "/docs/reference/forcefields/global#ignore">}}).

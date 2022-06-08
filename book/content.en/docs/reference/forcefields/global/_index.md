@@ -20,7 +20,7 @@ It is specific to 3SPN2 Coarse-Grained DNA model.
 
 It is a Coarse-Grained hydrogen bond model.
 
-## [Stoichiometric]({{<relref "StoichiometricInteraction.md">}})
+## [Stoichiometric]({{<relref "stoichiometric">}})
 
 It is a interaction restricted by stoichiometric coefficient.
 

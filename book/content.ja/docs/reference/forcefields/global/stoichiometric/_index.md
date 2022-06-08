@@ -1,11 +1,23 @@
-# GlobalStoichiometricInteraction
++++
+title = "Stoichiometric"
+weight = 20000
++++
 
-`GlobalStoichiometricInteraction`相互作用は、結合を形成する粒子同士が化学量論を保存するようにかかる相互作用です。`parameter_kinds`で指定することで相互作用の化学両論係数を指定することができます。
+# StoichiometricInteraction
 
-{% math %}
-U(r_{ab}) = - \sum_{(a,b)} \epsilon \sigma(2 (coefB + \frac{1}{2} - \sum_{b'} u(r_{ab'})) \
-                                    \sigma(2 (coefA + \frac{1}{2} - \sum_{a'} u(r_{a'b})))) u(r_{ab})
-{% endmath %}
+`StoichiometricInteraction`相互作用は、結合を形成する粒子同士が化学量論を保存するようにかかる相互作用です。`parameter_kinds`で指定された粒子タイプのヘテロな組み合わせのみについて適用されます。また、相互作用の化学量論係数を指定することができます。
+
+{{<katex display>}}
+V(r_{ij}) = - \epsilon \sum_{i \in a, j \in b} \frac{U(r_{ij})}{\max({\rm CO}_i, {\rm CO}_j, 1)}
+{{</katex>}}
+
+上記の式の{{<katex>}}{\rm CO}_i{{</katex>}}と{{<katex>}}{\rm CO}_j{{</katex>}}はそれぞれ
+
+{{<katex display>}}
+{\rm CO}_i = \frac{\sum_{j \in b} u(r_{ij})}{m}, {\rm CO}_j = \frac{\sum_{i \in a} u(r_{ij})}{n}
+{{</katex>}}
+
+で定義されます。ここで{{<katex>}}m{{</katex>}}は粒子bの化学量論係数、{{<katex>}}n{{</katex>}}は粒子aの化学量論係数を表します。
 
 ## 例
 
@@ -20,9 +32,9 @@ particle_kinds = [
     {name = "A", coef = 1},
     {name = "B", coef = 1}
 ]
-epsilon = 5.0
-v0    = 10.0 # parameter for StoichiometricUniformCubicPanPotential
-range = 10.0 # parameter for StoichiometricUniformCubicPanPotential
+epsilon = 5.0  # parameter for StoichiometricInteraction
+v0      = 10.0 # parameter for StoichiometricUniformCubicPanPotential
+range   = 10.0 # parameter for StoichiometricUniformCubicPanPotential
 paramters = [
     {index = 0, kind = "A"},
     {index = 1, kind = "A"},
@@ -37,8 +49,8 @@ paramters = [
 - `interaction`: 文字列型
   - `"Stoichiometric"`を指定します。
 - `potential`: 文字列型
-  - 下記のポテンシャルが使用できます。
-    - `StoichiometricUniformCubicPan`
+  - `U(r)`に入るポテンシャルを指定します。下記のポテンシャルが使用できます。
+    - [`"StoichiometricUniformCubicPan"`]({{<relref "StoichiometricUniformCubicPanPotential.md">}})
 - `ignore`: テーブルの配列型
   - この相互作用で無視する粒子ペアの条件を決めます。
   - 詳細は[GlobalForceFieldのspatial_partitionセクション]({{<relref "/docs/reference/forcefields/global#ignore">}})を参照してください。
