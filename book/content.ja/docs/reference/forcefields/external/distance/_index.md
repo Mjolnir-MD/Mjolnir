@@ -31,6 +31,7 @@ parameters     = [
   - The following potentials are available.
   - [`"LennardJonesWall"`]({{<relref "LennardJonesWallPotential.md">}})
   - [`"ExcludedVolumeWall"`]({{<relref "ExcludedVolumeWallPotential.md">}})
+  - [`"HarmonicGroove"`]({{<relref "HarmonicGroovePotential.md">}})
   - [`"ImplicitMembrane"`]({{<relref "ImplicitMembranePotential.md">}})
 - `shape`: Table
   - The shape and the position of a structure that interacts with particles.
