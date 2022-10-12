@@ -5,6 +5,7 @@
 #include <mjolnir/forcefield/external/ImplicitMembranePotential.hpp>
 #include <mjolnir/forcefield/external/LennardJonesWallPotential.hpp>
 #include <mjolnir/forcefield/external/ExcludedVolumeWallPotential.hpp>
+#include <mjolnir/forcefield/external/HarmonicGroovePotential.hpp>
 #include <mjolnir/core/Topology.hpp>
 #include <mjolnir/util/string.hpp>
 #include <mjolnir/util/make_unique.hpp>
@@ -88,6 +89,34 @@ read_excluded_volume_wall_potential(const toml::value& external)
         MJOLNIR_LOG_INFO("idx = ", idx, ", radius = ", rad);
     }
     return potential_type(eps, cutoff, params);
+}
+
+template<typename realT>
+HarmonicGroovePotential<realT>
+read_harmonic_groove_potential(const toml::value& external)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type = realT;
+    using potential_type = HarmonicGroovePotential<real_type>;
+
+    const auto& env = external.contains("env") ? external.at("env") : toml::value{};
+
+    const auto& ps = toml::find<toml::array>(external, "parameters");
+    MJOLNIR_LOG_INFO(ps.size(), " parameters are found");
+
+    std::vector<std::pair<std::size_t, std::pair<real_type, real_type>>> params;
+    params.reserve(ps.size());
+    for(const auto& param : ps)
+    {
+        const auto idx = find_parameter<std::size_t>(param, env, "index") +
+                         find_parameter_or<std::int64_t>(param, env, "offset", 0);
+        const auto k   = find_parameter<real_type>(param, env, "k");
+        const auto v0  = find_parameter<real_type>(param, env, "v0");
+        params.emplace_back(idx, std::make_pair(k, v0));
+        MJOLNIR_LOG_INFO("idx = ", idx, ", sigma = ", k, ", epsilon = ", v0);
+    }
+    return potential_type(params);
 }
 
 template<typename realT>
