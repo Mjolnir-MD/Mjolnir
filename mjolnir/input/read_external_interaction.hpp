@@ -59,12 +59,22 @@ read_external_distance_interaction(const toml::value& external, shapeT&& shape)
         return make_unique<interaction_t>(std::move(shape),
              read_excluded_volume_wall_potential<real_type>(external));
     }
+    else if(potential == "HarmonicGroove")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Harmonic.");
+        using potential_t   = HarmonicGroovePotential<real_type>;
+        using interaction_t = ExternalDistanceInteraction<
+                                    traitsT, potential_t, shapeT>;
+        return make_unique<interaction_t>(std::move(shape),
+             read_harmonic_groove_potential<real_type>(external));
+    }
     else
     {
         throw_exception<std::runtime_error>(toml::format_error("[error] "
             "mjolnir::read_external_distance_interaction: invalid potential",
             toml::find(external, "potential"), "here", {
             "expected value is one of the following.",
+            "- \"HarmonicGroove\"    : attractive r^2 potential",
             "- \"ExcludedVolumeWall\": repulsive r^12 potential",
             "- \"LennardJonesWall\"  : famous r^12 - r^6 potential",
             "- \"ImplicitMembrane\"  : single-well interaction that models a membrane"
