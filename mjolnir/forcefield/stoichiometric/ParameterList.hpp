@@ -98,7 +98,7 @@ class StoichiometricEmptyCombinationRule final
     {
         // i is leading_participant and j is a member of possible_partners_of
         // from implementation of SpatialPartition
-        if(is_following_participants_[j])
+        if(is_following_participants_[j] && i != j)
         {
             return !exclusion_list_.is_excluded(i, j);
         }
