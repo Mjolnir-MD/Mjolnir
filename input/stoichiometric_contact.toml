@@ -1,0 +1,143 @@
+[files]
+output.prefix = "stoichiometric"
+output.path   = "./"
+output.format = "xyz"
+
+[units]
+length        = "angstrom"
+energy        = "kcal/mol"
+
+[simulator]
+type          = "MolecularDynamics"
+boundary_type = "Periodic"
+precision     = "double"
+delta_t       = 0.3
+seed          = 12345
+total_step    = 50000
+save_step     =    10
+integrator.type = "BAOABLangevin"
+integrator.gammas = [
+{index = 0, gamma = 0.1},
+{index = 1, gamma = 0.1},
+{index = 2, gamma = 0.1},
+{index = 3, gamma = 0.1},
+{index = 4, gamma = 0.1},
+{index = 5, gamma = 0.1},
+{index = 6, gamma = 0.1},
+{index = 7, gamma = 0.1},
+{index = 8, gamma = 0.1},
+{index = 9, gamma = 0.1},
+{index =10, gamma = 0.1},
+{index =11, gamma = 0.1},
+{index =12, gamma = 0.1},
+{index =13, gamma = 0.1},
+{index =14, gamma = 0.1},
+{index =15, gamma = 0.1},
+{index =16, gamma = 0.1},
+{index =17, gamma = 0.1},
+{index =18, gamma = 0.1},
+{index =19, gamma = 0.1},
+]
+
+[[systems]]
+attributes.temperature = 300.0
+boundary_shape.upper = [100.0, 100.0, 100.0]
+boundary_shape.lower = [  0.0,   0.0,   0.0]
+particles = [
+{m =  100.00, pos = [ 10.000,  10.000,  10.000], name="A"},
+{m =  100.00, pos = [ 10.000,  10.000,  20.000], name="A"},
+{m =  100.00, pos = [ 10.000,  10.000,  30.000], name="A"},
+
+{m =  100.00, pos = [ 10.000,  20.000,  10.000], name="A"},
+{m =  100.00, pos = [ 10.000,  20.000,  20.000], name="A"},
+{m =  100.00, pos = [ 10.000,  20.000,  30.000], name="A"},
+
+{m =  100.00, pos = [ 10.000,  30.000,  10.000], name="B"},
+{m =  100.00, pos = [ 10.000,  30.000,  20.000], name="B"},
+{m =  100.00, pos = [ 10.000,  30.000,  30.000], name="B"},
+
+{m =  100.00, pos = [ 20.000,  10.000,  10.000], name="B"},
+{m =  100.00, pos = [ 20.000,  10.000,  20.000], name="B"},
+{m =  100.00, pos = [ 20.000,  10.000,  30.000], name="B"},
+
+{m =  100.00, pos = [ 20.000,  20.000,  10.000], name="B"},
+{m =  100.00, pos = [ 20.000,  20.000,  20.000], name="B"},
+{m =  100.00, pos = [ 20.000,  20.000,  30.000], name="B"},
+
+{m =  100.00, pos = [ 20.000,  30.000,  10.000], name="B"},
+{m =  100.00, pos = [ 20.000,  30.000,  20.000], name="B"},
+{m =  100.00, pos = [ 20.000,  30.000,  30.000], name="B"},
+
+{m =  100.00, pos = [ 30.000,  10.000,  10.000], name="B"},
+{m =  100.00, pos = [ 30.000,  10.000,  20.000], name="B"},
+]
+
+[[forcefields]]
+[[forcefields.global]]
+interaction                   = "Pair"
+potential                     = "ExcludedVolume"
+ignore.molecule               = "Nothing"
+ignore.particles_within.bond  = 1
+spatial_partition.type        = "Naive"
+spatial_partition.margin      = 1.0
+epsilon                       = 0.6
+parameters = [
+{index = 0, radius = 2.0},
+{index = 1, radius = 2.0},
+{index = 2, radius = 2.0},
+{index = 3, radius = 2.0},
+{index = 4, radius = 2.0},
+{index = 5, radius = 2.0},
+{index = 6, radius = 2.0},
+{index = 7, radius = 2.0},
+{index = 8, radius = 2.0},
+{index = 9, radius = 2.0},
+{index =10, radius = 2.0},
+{index =11, radius = 2.0},
+{index =12, radius = 2.0},
+{index =13, radius = 2.0},
+{index =14, radius = 2.0},
+{index =15, radius = 2.0},
+{index =16, radius = 2.0},
+{index =17, radius = 2.0},
+{index =18, radius = 2.0},
+{index =19, radius = 2.0},
+]
+
+[[forcefields.global]]
+interaction              = "Stoichiometric"
+potential                = "StoichiometricCubicPan"
+ignore.molecule          = "Nothing"
+spatial_partition.type   = "Naive"
+spatial_partition.margin = 1.0
+epsilon = 5.0
+v0      = 4.0
+range   = 2.0
+
+particle_kinds = [
+{name = "A", coef = 3},
+{name = "B", coef = 2}
+]
+
+parameters = [
+{index = 0, name = "A"},
+{index = 1, name = "A"},
+{index = 2, name = "A"},
+{index = 3, name = "A"},
+{index = 4, name = "A"},
+{index = 5, name = "A"},
+{index = 6, name = "B"},
+{index = 7, name = "B"},
+{index = 8, name = "B"},
+{index = 9, name = "B"},
+{index =10, name = "B"},
+{index =11, name = "B"},
+{index =12, name = "B"},
+{index =13, name = "B"},
+{index =14, name = "B"},
+{index =15, name = "B"},
+{index =16, name = "B"},
+{index =17, name = "B"},
+{index =18, name = "B"},
+{index =19, name = "B"},
+]

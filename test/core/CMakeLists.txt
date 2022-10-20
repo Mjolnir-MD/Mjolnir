@@ -59,6 +59,7 @@ set(TEST_NAMES
     test_global_pair_interaction
     test_global_pair_excluded_volume_interaction
     test_global_pair_lennard_jones_interaction
+    test_global_stoichiometric_interaction
     test_pdns_interaction
     test_pwmcos_interaction
     test_external_distance_interaction
@@ -121,6 +122,7 @@ set(TEST_NAMES
     test_read_3spn2_base_stacking_interaction
     test_read_3spn2_base_pair_interaction
     test_read_global_pair_interaction
+    test_read_global_stoichiometric_interaction
     test_read_pdns_interaction
     test_read_pwmcos_interaction
     test_read_position_restraint_interaction

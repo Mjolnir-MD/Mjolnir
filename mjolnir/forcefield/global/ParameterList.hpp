@@ -5,6 +5,7 @@
 #include <mjolnir/core/System.hpp>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 namespace mjolnir
 {

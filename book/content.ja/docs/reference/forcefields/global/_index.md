@@ -20,6 +20,10 @@ bookCollapseSection = true
 
 水素結合の粗視化モデルです。
 
+## [Stoichiometric]({{<relref "stoichiometric">}})
+
+化学量論を保存する相互作用のモデルです。
+
 ## 相互作用間で共通した部分
 
 全ての`[[forcefields.global]]`テーブルは、相互作用ペアから除外する条件を記述する`ignore`と、近接リストを作るアルゴリズムを記述する`spatial_partition`を共通して持ちます。

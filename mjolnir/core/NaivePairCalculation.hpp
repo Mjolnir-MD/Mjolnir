@@ -38,6 +38,8 @@ class NaivePairCalculation final
     void initialize(neighbor_list_type& neighbor, const system_type& sys,
                     const parameter_list_type& params) override
     {
+        MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+        MJOLNIR_LOG_FUNCTION_DEBUG();
         this->make(neighbor, sys, params);
         return;
     }
@@ -67,9 +69,13 @@ void NaivePairCalculation<traitsT, potentialT>::make(
         neighbor_list_type& neighbors, const system_type&,
         const parameter_list_type& params)
 {
+    MJOLNIR_GET_DEFAULT_LOGGER_DEBUG();
+    MJOLNIR_LOG_FUNCTION_DEBUG();
+
     neighbors.clear();
 
     const auto leading_participants = params.leading_participants();
+    MJOLNIR_LOG_DEBUG("leading participants size is ", leading_participants.size());
 
     std::vector<neighbor_type> partners;
     for(std::size_t idx=0; idx<leading_participants.size(); ++idx)

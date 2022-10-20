@@ -12,6 +12,7 @@
 #include <mjolnir/core/BoundaryCondition.hpp>
 #include <mjolnir/core/SimulatorTraits.hpp>
 #include <mjolnir/forcefield/local/HarmonicPotential.hpp>
+#include <mjolnir/forcefield/local/GaussianPotential.hpp>
 #include <mjolnir/omp/System.hpp>
 #include <mjolnir/omp/RandomNumberGenerator.hpp>
 #include <mjolnir/omp/ContactInteraction.hpp>

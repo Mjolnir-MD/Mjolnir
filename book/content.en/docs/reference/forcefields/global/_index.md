@@ -12,13 +12,17 @@ bookCollapseSection = true
 
 It depends on the distances between two particles.
 
-## [3SPN2BaseBase](3SPN2BaseBaseInteraction.md)
+## [3SPN2BaseBase]({{<relref "3SPN2BaseBaseInteraction.md">}})
 
 It is specific to 3SPN2 Coarse-Grained DNA model.
 
-## [ProteinDNANonSpecific](ProteinDNANonSpecificInteraction.md)
+## [ProteinDNANonSpecific]({{<relref "ProteinDNANonSpecificInteraction.md">}})
 
 It is a Coarse-Grained hydrogen bond model.
+
+## [Stoichiometric]({{<relref "stoichiometric">}})
+
+It is a interaction restricted by stoichiometric coefficient.
 
 ## Common parts
 

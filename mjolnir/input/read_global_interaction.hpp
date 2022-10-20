@@ -8,10 +8,12 @@
 #include <mjolnir/forcefield/3SPN2/ThreeSPN2CrossStackingInteraction.hpp>
 #include <mjolnir/forcefield/PDNS/ProteinDNANonSpecificInteraction.hpp>
 #include <mjolnir/forcefield/PWMcos/PWMcosInteraction.hpp>
+#include <mjolnir/forcefield/stoichiometric/GlobalStoichiometricInteraction.hpp>
 #include <mjolnir/util/make_unique.hpp>
 #include <mjolnir/util/throw_exception.hpp>
 #include <mjolnir/util/logger.hpp>
 #include <mjolnir/input/read_global_potential.hpp>
+#include <mjolnir/input/read_stoichiometric_potential.hpp>
 #include <mjolnir/input/read_spatial_partition.hpp>
 #include <memory>
 
@@ -685,6 +687,80 @@ read_pwmcos_interaction(const toml::value& global)
 }
 
 // ----------------------------------------------------------------------------
+// Stoichiometric Interaction
+
+template<typename traitsT>
+std::unique_ptr<GlobalInteractionBase<traitsT>>
+read_stoichiometric_interaction(const toml::value& global)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+
+    // ```toml
+    // [[forcefields.global]]
+    // interaction = "Stoichiometric"
+    // potential   = "StoichiometricUniformCubicPan"
+    // epsilon     = 1.0 # the depth of potential valley
+    //
+    // v0          = 4.0 # parameter for StoichiometricUniformCubicPan
+    // range       = 2.0 # parameter for StoichiometricUniformCubicPan
+    //
+    // particle_kinds = [
+    // {name = "A", coef = 3},
+    // {name = "B", coef = 2}
+    // ]
+    //
+    // parameters = [
+    // {index = 0, name = "A"},
+    // {index = 1, name = "B"},
+    // # ...
+    // ]
+    // ```
+
+    using real_type = typename traitsT::real_type;
+    const real_type epsilon = toml::find<real_type>  (global, "epsilon");
+
+    const auto& potential = toml::find<std::string>(global, "potential");
+    if(potential == "StoichiometricUniformCubicPan")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is StoichiometricUniformCubicPan");
+        using potential_t   = StoichiometricUniformCubicPanPotential<real_type>;
+        using interaction_t = GlobalStoichiometricInteraction<traitsT, potential_t>;
+
+        const auto& pa = toml::find<toml::array>(global, "particle_kinds");
+        if(pa.size() != 2)
+        {
+            throw_exception<std::runtime_error>("[error] "
+                "mjolnir::read_stoichiometric_interaction: ", pa.size(),
+                " particle definition in particle table expected 2.");
+        }
+
+        const std::string particle_a_name = toml::find<std::string>(pa[0], "name");
+        const std::size_t particle_a_coef = toml::find<std::size_t>(pa[0], "coef");
+        const std::string particle_b_name = toml::find<std::string>(pa[1], "name");
+        const std::size_t particle_b_coef = toml::find<std::size_t>(pa[1], "coef");
+
+        auto pot_para =
+            read_stoichiometric_uniform_cubic_pan_potential<traitsT>(
+                    global, particle_a_name, particle_b_name);
+
+        return make_unique<interaction_t>(
+            std::move(pot_para.first), std::move(pot_para.second),
+            read_spatial_partition<traitsT, potential_t>(global),
+            epsilon, particle_a_coef, particle_b_coef);
+    }
+    else
+    {
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_stoichiometric_interaction: invalid potential",
+            toml::find<toml::value>(global, "potential"), "here", {
+            "expected value is one of the following.",
+            "- \"StoichiometricUniformCubicPan\" : cubic function potential with uniform paramters"
+            }));
+    }
+}
+
+// ----------------------------------------------------------------------------
 // general read_global_interaction function
 // ----------------------------------------------------------------------------
 
@@ -721,6 +797,11 @@ read_global_interaction(const toml::value& global)
         MJOLNIR_LOG_NOTICE("PWMcos Interaction found.");
         return read_pwmcos_interaction<traitsT>(global);
     }
+    else if(interaction == "Stoichiometric")
+    {
+        MJOLNIR_LOG_NOTICE("Stoichiometric Interaction found.");
+        return read_stoichiometric_interaction<traitsT>(global);
+    }
     else
     {
         throw std::runtime_error(toml::format_error("[error] "
@@ -755,6 +836,11 @@ extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, Un
 extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_global_pair_interaction(const toml::value&);
 extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_global_pair_interaction(const toml::value&);
 extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_global_pair_interaction(const toml::value&);
+
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_stoichiometric_interaction(const toml::value&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float , UnlimitedBoundary>       >> read_stoichiometric_interaction(const toml::value&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_stoichiometric_interaction(const toml::value&);
+extern template std::unique_ptr<GlobalInteractionBase<SimulatorTraits<float , CuboidalPeriodicBoundary>>> read_stoichiometric_interaction(const toml::value&);
 #endif
 
 } // mjolnir
