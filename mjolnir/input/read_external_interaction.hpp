@@ -22,71 +22,28 @@ namespace mjolnir
 // external interaction
 // ----------------------------------------------------------------------------
 
-template<typename traitsT, typename shapeT>
+template<typename traitsT, typename potentialT>
 std::unique_ptr<ExternalForceInteractionBase<traitsT>>
-read_external_distance_interaction(const toml::value& external, shapeT&& shape)
+read_external_distance_interaction_shape(
+        const toml::value& external, potentialT&& pot, const bool read_margin = true)
 {
     MJOLNIR_GET_DEFAULT_LOGGER();
     MJOLNIR_LOG_FUNCTION();
-    using real_type = typename traitsT::real_type;
-
-    const auto potential = toml::find<std::string>(external, "potential");
-    if(potential == "ImplicitMembrane")
-    {
-        MJOLNIR_LOG_NOTICE("-- potential function is Implicit Membrane.");
-        using potential_t   = ImplicitMembranePotential<real_type>;
-        using interaction_t = ExternalDistanceInteraction<
-                                    traitsT, potential_t, shapeT>;
-
-        return make_unique<interaction_t>(std::move(shape),
-             read_implicit_membrane_potential<real_type>(external));
-    }
-    else if(potential == "LennardJonesWall")
-    {
-        MJOLNIR_LOG_NOTICE("-- potential function is Lennard-Jones.");
-        using potential_t   = LennardJonesWallPotential<real_type>;
-        using interaction_t = ExternalDistanceInteraction<
-                                    traitsT, potential_t, shapeT>;
-        return make_unique<interaction_t>(std::move(shape),
-             read_lennard_jones_wall_potential<real_type>(external));
-    }
-    else if(potential == "ExcludedVolumeWall")
-    {
-        MJOLNIR_LOG_NOTICE("-- potential function is Excluded-Volume.");
-        using potential_t   = ExcludedVolumeWallPotential<real_type>;
-        using interaction_t = ExternalDistanceInteraction<
-                                    traitsT, potential_t, shapeT>;
-        return make_unique<interaction_t>(std::move(shape),
-             read_excluded_volume_wall_potential<real_type>(external));
-    }
-    else
-    {
-        throw_exception<std::runtime_error>(toml::format_error("[error] "
-            "mjolnir::read_external_distance_interaction: invalid potential",
-            toml::find(external, "potential"), "here", {
-            "expected value is one of the following.",
-            "- \"ExcludedVolumeWall\": repulsive r^12 potential",
-            "- \"LennardJonesWall\"  : famous r^12 - r^6 potential",
-            "- \"ImplicitMembrane\"  : single-well interaction that models a membrane"
-            }));
-    }
-}
-
-template<typename traitsT>
-std::unique_ptr<ExternalForceInteractionBase<traitsT>>
-read_external_distance_interaction_shape(const toml::value& external)
-{
-    MJOLNIR_GET_DEFAULT_LOGGER();
-    MJOLNIR_LOG_FUNCTION();
-    using real_type = typename traitsT::real_type;
 
     const auto shape = toml::find<toml::value>(external, "shape");
     const auto name  = toml::find<std::string>(shape, "name");
 
+    using real_type = typename traitsT::real_type;
+
     if(name == "AxisAlignedPlane")
     {
         const auto pos    = toml::find<real_type>(shape, "position");
-        const auto margin = toml::find<real_type>(shape, "margin");
+        real_type  margin = std::numeric_limits<real_type>::infinity();
+        if(read_margin)
+        {
+            margin = toml::find<real_type>(shape, "margin");
+        }
+
         MJOLNIR_LOG_INFO("pos    = ", pos);
         MJOLNIR_LOG_INFO("margin = ", margin);
 
@@ -97,44 +54,49 @@ read_external_distance_interaction_shape(const toml::value& external)
         {
             MJOLNIR_LOG_NOTICE("-- interaction shape is YZ-Plane (+).");
             using shape_t = AxisAlignedPlane<traitsT, PositiveXDirection<traitsT>>;
-
-            return read_external_distance_interaction<traitsT, shape_t>(
-                    external, shape_t(pos, margin));
+            using interaction_t = ExternalDistanceInteraction<
+                                    traitsT, potentialT, shape_t>;
+            return make_unique<interaction_t>(shape_t(pos, margin), std::move(pot));
         }
         else if(axis == "-X")
         {
             MJOLNIR_LOG_NOTICE("-- interaction shape is YZ-Plane (-).");
             using shape_t = AxisAlignedPlane<traitsT, NegativeXDirection<traitsT>>;
-            return read_external_distance_interaction<traitsT, shape_t>(
-                    external, shape_t(pos, margin));
+            using interaction_t = ExternalDistanceInteraction<
+                                    traitsT, potentialT, shape_t>;
+            return make_unique<interaction_t>(shape_t(pos, margin), std::move(pot));
         }
         else if(axis == "Y" || axis == "+Y")
         {
             MJOLNIR_LOG_NOTICE("-- interaction shape is ZX-Plane (+).");
             using shape_t = AxisAlignedPlane<traitsT, PositiveYDirection<traitsT>>;
-            return read_external_distance_interaction<traitsT, shape_t>(
-                    external, shape_t(pos, margin));
+            using interaction_t = ExternalDistanceInteraction<
+                                    traitsT, potentialT, shape_t>;
+            return make_unique<interaction_t>(shape_t(pos, margin), std::move(pot));
         }
         else if(axis == "-Y")
         {
             MJOLNIR_LOG_NOTICE("-- interaction shape is ZX-Plane (-).");
             using shape_t = AxisAlignedPlane<traitsT, NegativeYDirection<traitsT>>;
-            return read_external_distance_interaction<traitsT, shape_t>(
-                    external, shape_t(pos, margin));
+            using interaction_t = ExternalDistanceInteraction<
+                                    traitsT, potentialT, shape_t>;
+            return make_unique<interaction_t>(shape_t(pos, margin), std::move(pot));
         }
         else if(axis == "Z" || axis == "+Z")
         {
             MJOLNIR_LOG_NOTICE("-- interaction shape is XY-Plane (+).");
             using shape_t = AxisAlignedPlane<traitsT, PositiveZDirection<traitsT>>;
-            return read_external_distance_interaction<traitsT, shape_t>(
-                    external, shape_t(pos, margin));
+            using interaction_t = ExternalDistanceInteraction<
+                                    traitsT, potentialT, shape_t>;
+            return make_unique<interaction_t>(shape_t(pos, margin), std::move(pot));
         }
         else if(axis == "-Z")
         {
             MJOLNIR_LOG_NOTICE("-- interaction shape is XY-Plane (-).");
             using shape_t = AxisAlignedPlane<traitsT, NegativeZDirection<traitsT>>;
-            return read_external_distance_interaction<traitsT, shape_t>(
-                    external, shape_t(pos, margin));
+            using interaction_t = ExternalDistanceInteraction<
+                                    traitsT, potentialT, shape_t>;
+            return make_unique<interaction_t>(shape_t(pos, margin), std::move(pot));
         }
         else
         {
@@ -147,7 +109,60 @@ read_external_distance_interaction_shape(const toml::value& external)
     {
         throw std::runtime_error("invalid external forcefield shape: " + name);
     }
+
 }
+
+template<typename traitsT>
+std::unique_ptr<ExternalForceInteractionBase<traitsT>>
+read_external_distance_interaction(const toml::value& external)
+{
+    MJOLNIR_GET_DEFAULT_LOGGER();
+    MJOLNIR_LOG_FUNCTION();
+    using real_type = typename traitsT::real_type;
+
+    const auto potential = toml::find<std::string>(external, "potential");
+    if(potential == "ImplicitMembrane")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Implicit Membrane.");
+        using potential_t   = ImplicitMembranePotential<real_type>;
+        return read_external_distance_interaction_shape<traitsT, potential_t>(
+             external, read_implicit_membrane_potential<real_type>(external));
+    }
+    else if(potential == "LennardJonesWall")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Lennard-Jones.");
+        using potential_t   = LennardJonesWallPotential<real_type>;
+        return read_external_distance_interaction_shape<traitsT, potential_t>(
+             external, read_lennard_jones_wall_potential<real_type>(external));
+    }
+    else if(potential == "ExcludedVolumeWall")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Excluded-Volume.");
+        using potential_t   = ExcludedVolumeWallPotential<real_type>;
+        return read_external_distance_interaction_shape<traitsT, potential_t>(
+                external, read_excluded_volume_wall_potential<real_type>(external));
+    }
+    else if(potential == "HarmonicGroove")
+    {
+        MJOLNIR_LOG_NOTICE("-- potential function is Harmonic.");
+        using potential_t   = HarmonicGroovePotential<real_type>;
+        return read_external_distance_interaction_shape<traitsT, potential_t>(
+                external, read_harmonic_groove_potential<real_type>(external), false);
+    }
+    else
+    {
+        throw_exception<std::runtime_error>(toml::format_error("[error] "
+            "mjolnir::read_external_distance_interaction: invalid potential",
+            toml::find(external, "potential"), "here", {
+            "expected value is one of the following.",
+            "- \"HarmonicGroove\"    : attractive r^2 potential",
+            "- \"ExcludedVolumeWall\": repulsive r^12 potential",
+            "- \"LennardJonesWall\"  : famous r^12 - r^6 potential",
+            "- \"ImplicitMembrane\"  : single-well interaction that models a membrane"
+            }));
+    }
+}
+
 
 template<typename traitsT>
 std::unique_ptr<ExternalForceInteractionBase<traitsT>>
@@ -438,7 +453,7 @@ read_external_interaction(const toml::value& external)
     if(interaction == "Distance")
     {
         MJOLNIR_LOG_NOTICE("Distance interaction found.");
-        return read_external_distance_interaction_shape<traitsT>(external);
+        return read_external_distance_interaction<traitsT>(external);
     }
     else if(interaction == "PositionRestraint")
     {
@@ -502,10 +517,10 @@ extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<flo
 extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_afm_flexible_fitting_interaction(const toml::value&);
 extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_afm_flexible_fitting_interaction(const toml::value&);
 
-extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_external_distance_interaction_shape(const toml::value& external);
-extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_external_distance_interaction_shape(const toml::value& external);
-extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_external_distance_interaction_shape(const toml::value& external);
-extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_external_distance_interaction_shape(const toml::value& external);
+extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<double, UnlimitedBoundary>       >> read_external_distance_interaction(const toml::value& external);
+extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<float,  UnlimitedBoundary>       >> read_external_distance_interaction(const toml::value& external);
+extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<double, CuboidalPeriodicBoundary>>> read_external_distance_interaction(const toml::value& external);
+extern template std::unique_ptr<ExternalForceInteractionBase<SimulatorTraits<float,  CuboidalPeriodicBoundary>>> read_external_distance_interaction(const toml::value& external);
 #endif
 
 } // mjolnir
