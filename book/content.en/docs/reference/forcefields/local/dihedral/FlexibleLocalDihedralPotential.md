@@ -32,7 +32,7 @@ parameters = [
 - `k`: Floating
   - It determines the strength of the potential.
 - `coef`: Array of Floatings (length = 7)
-  - {{<katex>}} C, k_1^{\sin}, k_1^{\cos}, k_2^{\sin}, k_2^{\cos}, k_3^{\sin}, k_3^{\cos} {{</katex>}}, respectively.
+  - {{<katex>}} C, k_1^{\cos}, k_1^{\sin}, k_2^{\cos}, k_2^{\sin}, k_3^{\cos}, k_3^{\sin} {{</katex>}}, respectively.
 - `indices`: Array of Integers (length = 4)
   - Indices of particles that interact with each other. The index is 0-based.
 - `offset`: Integer(Optional. By default, 0.)
